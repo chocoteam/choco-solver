@@ -4,13 +4,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>galak</artifactId>
+        <artifactId>choco</artifactId>
         <groupId>choco</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <version>rocs-1.0-SNAPSHOT</version>
     </parent>
     <groupId>choco</groupId>
     <artifactId>contrib</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <name>Contributions</name>
     <url>http://maven.apache.org</url>
     <properties>

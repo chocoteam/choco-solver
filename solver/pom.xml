@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <groupId>choco</groupId>
-        <artifactId>galak</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>choco</artifactId>
+        <version>rocs-1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>solver</artifactId>
     <packaging>jar</packaging>
-    <name>GALAK solver</name>
+    <name>CHOCO solver</name>
     <url>http://maven.apache.org</url>
     <dependencies>
 <!--        <dependency>
