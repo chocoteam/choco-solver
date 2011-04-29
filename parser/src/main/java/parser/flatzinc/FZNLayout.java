@@ -1,4 +1,4 @@
-package parser.flatzinc; /**
+/**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
@@ -24,6 +24,8 @@ package parser.flatzinc; /**
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+package parser.flatzinc;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

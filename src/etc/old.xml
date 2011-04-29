@@ -2,7 +2,7 @@
 <additionalHeaders>
     <javadoc_style>
         <firstLine>/**</firstLine>
-        <beforeEachLine>* </beforeEachLine>
+        <beforeEachLine> * </beforeEachLine>
         <endLine> */</endLine>
         <!--skipLine></skipLine-->
         <firstLineDetectionPattern>(\s|\t)*/\*.*$</firstLineDetectionPattern>
