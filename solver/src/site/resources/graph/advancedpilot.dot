@@ -1,0 +1,54 @@
+digraph G{
+
+	in [shape=point];
+	emptyfine1[color=gold,style=filled,label="is there \nat least one \nfine event \nin P1 ?"];
+	fine1[color=gold,style=filled,shape=box,label="propagate all \nfine events of P1"];
+	emptynormal1[color=gold,style=filled,label="is there \nat least one \nnormal event \nin P1 ?"];
+	normal1[color=gold,style=filled,shape=box,label="propagate one \nnormal event of P1"];
+	emptyfine2[color=orange,style=filled,label="is there \nat least one \nfine event \nin P2 ?"];
+	fine2[color=orange,style=filled,shape=box,label="propagate one \nfine event of P2"];
+	emptynormal2[color=orange,style=filled,label="is there \nat least one \nnormal event \nin P2 ?"];
+        normal2[color=orange,style=filled,shape=box,label="propagate one \nnormal event of P2"];
+	emptyfine3[color=crimson,style=filled,label="is there \nat least one \nfine event \nin P3 ?"];
+	fine3[color=crimson,style=filled,shape=box,label="propagate one \nfine event of P3"];
+	emptynormal3[color=crimson,style=filled,label="is there \nat least one \nnormal event \nin P3 ?"];
+        normal3[color=crimson,style=filled,shape=box,label="propagate one \nnormal event of P3"];
+	out [shape=point];
+	
+	in ->emptyfine1;
+	emptyfine1 -> fine1 [label="yes"];
+	emptyfine1 -> emptynormal1 [label="no"];
+	fine1 -> emptynormal1;
+	emptynormal1 -> normal1 [label="yes"];
+	normal1 -> emptyfine1;
+	
+	emptynormal1 -> emptyfine2 [label="no"];
+	emptyfine2 -> fine2 [label="yes"];
+	fine2 -> emptyfine1;
+        emptyfine2 -> emptynormal2 [label="no"];
+
+	emptynormal2 -> normal2 [label="yes"];
+	normal2 -> emptyfine1;
+	emptynormal2 -> emptyfine3 [label="no"];	
+	
+	emptyfine3 -> fine3 [label="yes"];
+	fine3 -> emptyfine1;
+	emptyfine3 -> emptynormal3 [label="no"];
+
+	emptynormal3 -> normal3 [label="yes"];
+	normal3 -> emptyfine1;
+	emptynormal3 -> out [label="no"];
+
+	
+
+	{rank = same; in; emptyfine1; fine1;}
+	{rank = same; emptynormal1; normal1;}
+	{rank = same; fine2; emptyfine2;}
+	{rank = same; emptynormal2; normal2;}
+        {rank = same; fine3; emptyfine3;}
+	{rank = same; emptynormal3; normal3;}
+	{rank = same; out;}	
+}
+
+
+

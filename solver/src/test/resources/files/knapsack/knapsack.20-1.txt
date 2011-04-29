@@ -1,0 +1,65 @@
+knapsack 20 items n1
+=
+knapsack 1: 
+cmax: +1100
+cmin: +1000
+item 61:
+  calorie: +54
+  poids: +38
+ item 62:
+  calorie: +12
+  poids: +57
+ item 63:
+  calorie: +47
+  poids: +69
+ item 64:
+  calorie: +33
+  poids: +90
+ item 65:
+  calorie: +30
+  poids: +79
+ item 66:
+  calorie: +65
+  poids: +89
+ item 67:
+  calorie: +56
+  poids: +28
+ item 68:
+  calorie: +57
+  poids: +70
+ item 69:
+  calorie: +91
+  poids: +38
+ item 70:
+  calorie: +88
+  poids: +71
+ item 71:
+  calorie: +77
+  poids: +46
+ item 72:
+  calorie: +99
+  poids: +41
+ item 73:
+  calorie: +29
+  poids: +49
+ item 74:
+  calorie: +23
+  poids: +43
+ item 75:
+  calorie: +39
+  poids: +36
+ item 76:
+  calorie: +86
+  poids: +68
+ item 77:
+  calorie: +12
+  poids: +92
+ item 78:
+  calorie: +85
+  poids: +33
+ item 79:
+  calorie: +22
+  poids: +84
+ item 80:
+  calorie: +64
+  poids: +90

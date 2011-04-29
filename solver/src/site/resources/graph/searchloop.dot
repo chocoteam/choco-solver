@@ -1,0 +1,35 @@
+digraph G {
+	out1[shape=point];
+	prop_init[shape=box,label="Initial \nPropagation",color=oldlace,style=filled];
+	solution[label="is a solution?",color=gold,style=filled];	
+	backup[shape=box,label="Back up \ncurrent state",color=darkorange,style=filled];
+	decision[shape=box,label="Apply a \nDecision and \nPropagate",color=darkorange,style=filled];
+	rollback[shape=box,label="Roll back \nprevious state",color=crimson,style=filled];
+	no_decision[shape=box,label="Apply \nNon Decision and \nPropagate",color=crimson,style=filled];
+	root[label="is root node ?",color=crimson,style=filled];
+	fail1[label="contradiction ?",color=darkorange,style=filled];
+	fail2[label="contradiction ?",color=crimson,style=filled];
+	stop[shape=box,label="STOP",color=tan,style=filled,style=filled];	
+
+	out1 -> prop_init;
+	prop_init -> solution;
+	solution -> stop [label="yes"];
+	solution -> backup [label="no"];
+	backup -> decision -> fail1;
+	fail1 -> solution [label="no"];
+	fail1 -> rollback [label="yes"];
+	rollback -> root;
+	root -> stop [label="yes"];
+	root -> no_decision [label="no"];
+	no_decision -> fail2;
+	fail2 -> decision [label="no"];
+	fail2 -> rollback [label="yes"];
+
+	{rank = same; out1;prop_init;}
+	{rank = same; solution;stop;}
+
+	//subgraph "cluster_open" {label="open node"; prop_init;solution;} 
+	//subgraph "cluster_down" {label="down branch"; backup; decision;fail1;}
+	//subgraph "cluster_up" {label="up branch"; rollback;root;no_decision;fail2;}
+	
+}

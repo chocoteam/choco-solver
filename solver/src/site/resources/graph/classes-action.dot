@@ -1,0 +1,24 @@
+digraph G{
+	edge [dir=both]
+
+	solver [shape=box,label="Solver"];
+	searchloop [shape=box,label="Search loop"];
+	pilot [shape=box, label="Propagation pilot"];
+	engine [shape=box,label="Propagation engine"];
+	constraint [shape=box,label="Constraint"];
+	propagator [shape=box,label="Propagator"];
+	variable [shape=box,label="Variable"];
+
+	{edge [arrowtail=none,arrowhead=normal]
+                solver -> searchloop [label="run"]; 
+                searchloop -> pilot [label="propagate"];
+                pilot -> engine [label="propagate"];
+		constraint -> engine [label="notify"];
+		engine -> constraint [label="filter or \nfilterOnEvent"];
+		constraint -> propagator [label="filter or \nfilterOnEvent"];
+		propagator -> variable [label="instantiate \nor remove value"];
+		variable -> constraint [label="notify"];
+        }
+
+
+}

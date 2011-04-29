@@ -1,0 +1,61 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{url}
+\urlstyle{sf}
+%%%% Fonts, Figures, Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\algofont}{\fontencoding{U}\fontfamily{eur}\fontseries{b}\fontshape{n}\selectfont}
+\usepackage[pdftex]{graphicx,xcolor} %\pdfcompresslevel=9  %\pdfimageresolution=600
+%\def\insertLogo#1{\includegraphics{#1}}
+\newcommand{\newrgbcolor}[2]{\definecolor{#1}{rgb}{#2}}
+\definecolor{darkred}{rgb}{0.5372549, 0.27843137, 0.27058824}
+\definecolor{darkblue}{rgb}{0.27843137, 0.27058824, 0.5372549}
+\newcommand{\gr}[1]{{\color{lightgray} #1}}
+\newcommand{\dr}[1]{{\color{darkblue} #1}}
+%%%% listings, env  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{listings}
+\definecolor{Brown}{cmyk}{0,0.81,1,0.60}
+\definecolor{OliveGreen}{cmyk}{0.64,0,0.95,0.40}
+\definecolor{CadetBlue}{cmyk}{0.62,0.57,0.23,0}
+\lstset{language=java,frame=ltrb,framesep=5pt,
+    numbers=none,
+    tabsize=3,
+    breaklines=true,
+    aboveskip=1ex,
+    belowskip=1ex,
+    basicstyle=\small\ttfamily,
+    backgroundcolor=\color{gray!25},
+    columns=fullflexible,
+    keywordstyle=\ttfamily\color{OliveGreen},
+    identifierstyle=\ttfamily\color{CadetBlue}\bfseries, 
+    commentstyle=\color{Brown},
+    stringstyle=\ttfamily,
+    showstringspaces=true}
+
+\newcommand{\mylst}[1]{\lstinline|#1|}
+%%%% listings, env  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Good habits}
+\author{Charles Prud'homme}
+%\date{}                                           % Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\section{Logger}
+%\subsection{}
+The logging system is VERY sensitive and had a DEEP impact on performances. So, loggers should only be used where it is mandatory and debugging traces must be removed.
+More over, the logging level of a logger must be checked before tracing, in order to avoid useless calls. Then, once the level is considered correct, the log message must be build using the rules define within Logback documentation. \\(see \url{http://logback.qos.ch/documentation.html})
+
+Example of good use:
+\begin{lstlisting}
+if (LOGGER.isTraceEnabled()) {
+	LOGGER.trace("this is a {} message", "well-formed");
+}
+\end{lstlisting}
+As an example, a clique neq problem of size 9 solved using default Java logger (level set to $silent$) takes 3200 ms. The same example using LogBack takes 800ms.
+
+\end{document}  

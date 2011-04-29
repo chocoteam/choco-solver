@@ -1,0 +1,312 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+## GOLOM RULER
+samples.GolombRuler -o 8 -policy shuffle
+samples.GolombRuler -o 8 -policy var-oriented
+samples.GolombRuler -o 8 -policy cstr-oriented
+samples.GolombRuler -o 8 -policy oldest
+samples.GolombRuler -o 8 -policy priorityC
+samples.GolombRuler -o 8 -policy specific
+samples.GolombRuler -o 9 -policy shuffle
+samples.GolombRuler -o 9 -policy var-oriented
+samples.GolombRuler -o 9 -policy cstr-oriented
+samples.GolombRuler -o 9 -policy oldest
+samples.GolombRuler -o 9 -policy priorityC
+samples.GolombRuler -o 9 -policy specific
+samples.GolombRuler -o 10 -policy shuffle
+samples.GolombRuler -o 10 -policy var-oriented
+samples.GolombRuler -o 10 -policy cstr-oriented
+samples.GolombRuler -o 10 -policy oldest
+samples.GolombRuler -o 10 -policy priorityC
+samples.GolombRuler -o 10 -policy specific
+samples.GolombRuler -o 11 -policy shuffle
+samples.GolombRuler -o 11 -policy var-oriented
+samples.GolombRuler -o 11 -policy cstr-oriented
+samples.GolombRuler -o 11 -policy oldest
+samples.GolombRuler -o 11 -policy priorityC
+samples.GolombRuler -o 11 -policy specific
+
+## PARTITION
+samples.Partition -s 24 -policy shuffle
+samples.Partition -s 24 -policy var-oriented
+samples.Partition -s 24 -policy cstr-oriented
+samples.Partition -s 24 -policy oldest
+samples.Partition -s 24 -policy priorityC
+samples.Partition -s 24 -policy specific
+samples.Partition -s 26 -policy shuffle
+samples.Partition -s 26 -policy var-oriented
+samples.Partition -s 26 -policy cstr-oriented
+samples.Partition -s 26 -policy oldest
+samples.Partition -s 26 -policy priorityC
+samples.Partition -s 26 -policy specific
+samples.Partition -s 28 -policy shuffle
+samples.Partition -s 28 -policy var-oriented
+samples.Partition -s 28 -policy cstr-oriented
+samples.Partition -s 28 -policy oldest
+samples.Partition -s 28 -policy priorityC
+samples.Partition -s 28 -policy specific
+samples.Partition -s 30 -policy shuffle
+samples.Partition -s 30 -policy var-oriented
+samples.Partition -s 30 -policy cstr-oriented
+samples.Partition -s 30 -policy oldest
+samples.Partition -s 30 -policy priorityC
+samples.Partition -s 30 -policy specific
+samples.Partition -s 32 -policy shuffle
+samples.Partition -s 32 -policy var-oriented
+samples.Partition -s 32 -policy cstr-oriented
+samples.Partition -s 32 -policy oldest
+samples.Partition -s 32 -policy priorityC
+samples.Partition -s 32 -policy specific
+
+## NQUEEN BINARY
+samples.nqueen.NQueenBinary -q 10 -policy shuffle
+samples.nqueen.NQueenBinary -q 10 -policy var-oriented
+samples.nqueen.NQueenBinary -q 10 -policy cstr-oriented
+samples.nqueen.NQueenBinary -q 10 -policy oldest
+samples.nqueen.NQueenBinary -q 10 -policy priorityC
+samples.nqueen.NQueenBinary -q 10 -policy specific
+samples.nqueen.NQueenBinary -q 50 -policy shuffle
+samples.nqueen.NQueenBinary -q 50 -policy var-oriented
+samples.nqueen.NQueenBinary -q 50 -policy cstr-oriented
+samples.nqueen.NQueenBinary -q 50 -policy oldest
+samples.nqueen.NQueenBinary -q 50 -policy priorityC
+samples.nqueen.NQueenBinary -q 50 -policy specific
+samples.nqueen.NQueenBinary -q 100 -policy shuffle
+samples.nqueen.NQueenBinary -q 100 -policy var-oriented
+samples.nqueen.NQueenBinary -q 100 -policy cstr-oriented
+samples.nqueen.NQueenBinary -q 100 -policy oldest
+samples.nqueen.NQueenBinary -q 100 -policy priorityC
+samples.nqueen.NQueenBinary -q 100 -policy specific
+samples.nqueen.NQueenBinary -q 200 -policy shuffle
+samples.nqueen.NQueenBinary -q 200 -policy var-oriented
+samples.nqueen.NQueenBinary -q 200 -policy cstr-oriented
+samples.nqueen.NQueenBinary -q 200 -policy oldest
+samples.nqueen.NQueenBinary -q 200 -policy priorityC
+samples.nqueen.NQueenBinary -q 200 -policy specific
+
+## PERT
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 3 -d 0  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 3 -d 1  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 2500 -d 0  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 2500 -d 832  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 2500 -d 1665  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 2500 -d 2498  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 5000 -d 0  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 5000 -d 1666  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 5000 -d 3332  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 5000 -d 4998  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 7500 -d 0  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 7500 -d 2499  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 7500 -d 4998  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 7500 -d 7498  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 10000 -d 0  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 10000 -d 3332  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 10000 -d 6665  -s 29091981 -policy specific
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy shuffle
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy var-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy cstr-oriented
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy oldest
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy priorityC
+samples.pert.Pert -n 10000 -l 10000 -d 9998  -s 29091981 -policy specific
+
+## REIFIED PERT
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 3 -d 0  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 3 -d 1  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 2500 -d 0  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 2500 -d 832  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 2500 -d 1665  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 2500 -d 2498  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 5000 -d 0  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 5000 -d 1666  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 5000 -d 3332  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 5000 -d 4998  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 7500 -d 0  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 7500 -d 2499  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 7500 -d 4998  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 7500 -d 7498  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 10000 -d 0  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 10000 -d 3332  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 10000 -d 6665  -s 29091981 -policy specific
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy shuffle
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy var-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy cstr-oriented
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy oldest
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy priorityC
+samples.pert.PertReified -n 10000 -l 10000 -d 9998  -s 29091981 -policy specific
