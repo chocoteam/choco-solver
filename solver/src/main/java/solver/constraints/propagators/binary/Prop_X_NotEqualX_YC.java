@@ -34,8 +34,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
-import solver.views.PropView;
+import solver.requests.IRequest;
+import solver.requests.PropRequest;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -70,10 +70,10 @@ public class Prop_X_NotEqualX_YC extends Propagator<IntVar> {
     @Override
     @SuppressWarnings({"unchecked"})
     protected void linkToVariables() {
-        views = new IView[1];
+        requests = new IRequest[1];
         vars[0].addObserver(this);
-        views[0] = new PropView<IntVar, Propagator<IntVar>>(this, vars[0], 0);
-        vars[0].addView(views[0]);
+        requests[0] = new PropRequest<IntVar, Propagator<IntVar>>(this, vars[0], 0);
+        vars[0].addRequest(requests[0]);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class Prop_X_NotEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> xView, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> xRequest, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             removeValOnY();
         } else {
@@ -116,8 +116,8 @@ public class Prop_X_NotEqualX_YC extends Propagator<IntVar> {
     public void setPassive() {
         isActive.set(false);
         // then notify the linked variables
-        for (int i = 0; i < views.length; i++) {
-            views[i].getVariable().updateEntailment(views[i]);
+        for (int i = 0; i < requests.length; i++) {
+            requests[i].getVariable().updateEntailment(requests[i]);
         }
     }
 }

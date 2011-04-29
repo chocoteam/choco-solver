@@ -18,8 +18,8 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.Variable;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-import solver.views.GraphView;
-import solver.views.IView;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 
 /**
  * @author Jean-Guillaume Fages
@@ -96,9 +96,9 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagateOnView(IView<V> view, int idxVarInProp, int mask) throws ContradictionException {
-		if (view instanceof GraphView) {
-			GraphView gv = (GraphView) view;
+	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		if (request instanceof GraphRequest) {
+			GraphRequest gv = (GraphRequest) request;
 			if ((mask & EventType.REMOVEARC.mask) != 0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(removeProc, gv.fromArcRemoval(), gv.toArcRemoval());

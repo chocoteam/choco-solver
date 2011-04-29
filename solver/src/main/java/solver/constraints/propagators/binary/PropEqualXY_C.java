@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * X + Y = C
@@ -120,8 +120,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> view, int varIdx, int mask) throws ContradictionException {
-        IntDelta delta = view.getVariable().getDelta();
+    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+        IntDelta delta = request.getVariable().getDelta();
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {
@@ -135,8 +135,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
                 }
             } else if (EventType.isRemove(mask)) {
-                int f = view.fromDelta();
-                int l = view.toDelta();
+                int f = request.fromDelta();
+                int l = request.toDelta();
 
                 delta.forEach(rem_proc.set(varIdx), f, l);
 

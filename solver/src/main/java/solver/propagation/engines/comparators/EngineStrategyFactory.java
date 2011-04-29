@@ -34,7 +34,7 @@ import solver.propagation.engines.comparators.predicate.EqualC;
 import solver.propagation.engines.comparators.predicate.EqualV;
 import solver.propagation.engines.group.Group;
 import solver.variables.Variable;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Comparator;
 
@@ -62,7 +62,7 @@ public class EngineStrategyFactory {
     private EngineStrategyFactory() {
     }
 
-    public static Comparator<IView> comparator(Solver solver, int type) {
+    public static Comparator<IRequest> comparator(Solver solver, int type) {
         switch (type) {
             case QUEUE:
                 return Queue.get();

@@ -25,7 +25,7 @@
 *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.views;
+package solver.requests;
 
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -37,9 +37,9 @@ import solver.variables.Variable;
 import java.io.Serializable;
 
 /**
- * Required services a view must provides.
+ * Required services a request must provides.
  * <br/>
- * A view is the interface between a propagator (and its related constraint) and a variable.
+ * A request is the interface between a propagator (and its related constraint) and a variable.
  * It stores events occuring on a variable and feeds the propagation engine,
  * calls filtering algorithm of the propagator when necessary, etc.
  * <br/>
@@ -47,7 +47,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 5 oct. 2010
  */
-public interface IView<V extends Variable> extends Serializable, IQueable {
+public interface IRequest<V extends Variable> extends Serializable, IQueable {
 
     /**
      * Return the propagator declared in <code>this</code>
@@ -71,13 +71,13 @@ public interface IView<V extends Variable> extends Serializable, IQueable {
     void setGroup(int gidx);
 
     /**
-     * Return the index of <code>this</code> in the views list of the variable
-     * @return index of <code>this</code> in the list of views of the variable
+     * Return the index of <code>this</code> in the requests list of the variable
+     * @return index of <code>this</code> in the list of requests of the variable
      */
     int getIdxInVar();
 
     /**
-     * Update the index of <code>this</code> in the list of views of the variable to <code>idx</code>
+     * Update the index of <code>this</code> in the list of requests of the variable to <code>idx</code>
      * @param idx new index
      */
     void setIdxInVar(int idx);

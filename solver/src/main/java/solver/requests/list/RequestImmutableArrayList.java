@@ -24,14 +24,14 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.list;
+package solver.requests.list;
 
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -39,52 +39,52 @@ import solver.views.IView;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class ViewImmutableArrayList<V extends IView> implements IViewList<V> {
+public final class RequestImmutableArrayList<R extends IRequest> implements IRequestList<R> {
 
-    protected V[] views;
+    protected R[] requests;
 
-    protected ViewImmutableArrayList() {
-        views = (V[]) new IView[0];
+    protected RequestImmutableArrayList() {
+        requests = (R[]) new IRequest[0];
     }
 
     @Override
-    public void setPassive(V view) {
+    public void setPassive(R request) {
     }
 
     @Override
-    public void addView(V view) {
-        V[] tmp = views;
-        views = (V[]) new IView[tmp.length + 1];
-        System.arraycopy(tmp, 0, views, 0, tmp.length);
-        views[tmp.length] = view;
-        view.setIdxInVar(tmp.length);
+    public void addRequest(R request) {
+        R[] tmp = requests;
+        requests = (R[]) new IRequest[tmp.length + 1];
+        System.arraycopy(tmp, 0, requests, 0, tmp.length);
+        requests[tmp.length] = request;
+        request.setIdxInVar(tmp.length);
     }
 
     @Override
-    public void deleteView(IView view) {
+    public void deleteRequest(IRequest request) {
         int i = 0;
-        for (; i < views.length && views[i] != view; i++) {
+        for (; i < requests.length && requests[i] != request; i++) {
         }
-        if (i == views.length) return;
-        V[] tmp = views;
-        views = (V[]) new IView[tmp.length - 1];
-        System.arraycopy(tmp, 0, views, 0, i);
-        System.arraycopy(tmp, i + 1, views, i, tmp.length - i - 1);
-        for (int j = i; j < views.length; j++) {
-            views[j].setIdxInVar(j);
+        if (i == requests.length) return;
+        R[] tmp = requests;
+        requests = (R[]) new IRequest[tmp.length - 1];
+        System.arraycopy(tmp, 0, requests, 0, i);
+        System.arraycopy(tmp, i + 1, requests, i, tmp.length - i - 1);
+        for (int j = i; j < requests.length; j++) {
+            requests[j].setIdxInVar(j);
         }
     }
 
     @Override
     public int size() {
-        return views.length;
+        return requests.length;
     }
 
     @Override
     public int cardinality() {
         int cpt = 0;
-        for (int i = 0; i < views.length; i++) {
-            if (views[i].getPropagator().isActive()) {
+        for (int i = 0; i < requests.length; i++) {
+            if (requests[i].getPropagator().isActive()) {
                 cpt++;
             }
         }
@@ -93,15 +93,15 @@ public final class ViewImmutableArrayList<V extends IView> implements IViewList<
 
     @Override
     public void notifyButCause(ICause cause, EventType event, IDelta delta) {
-        IView view;
+        IRequest request;
         int mask = event.mask;
-        for (int a = 0; a < views.length; a++) {
-            view = views[a];
-            Propagator<IntVar> o = view.getPropagator();
-            if (view.getPropagator().isActive()) {
+        for (int a = 0; a < requests.length; a++) {
+            request = requests[a];
+            Propagator<IntVar> o = request.getPropagator();
+            if (request.getPropagator().isActive()) {
                 if (o != cause) {
-                    if ((mask & view.getMask()) != 0) {
-                        view.update(event);
+                    if ((mask & request.getMask()) != 0) {
+                        request.update(event);
                     }
                 }
             }

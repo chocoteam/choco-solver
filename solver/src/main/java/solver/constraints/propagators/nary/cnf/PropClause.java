@@ -35,7 +35,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -120,7 +120,7 @@ public class PropClause extends Propagator<BoolVar> {
 
 
     @Override
-    public void propagateOnView(IView<BoolVar> boolVarIFineView, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<BoolVar> boolVarIFineRequest, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         }

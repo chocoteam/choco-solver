@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.probabilities.IProbabilisticComputation;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * Created by IntelliJ IDEA.
@@ -43,7 +43,7 @@ public class ProbabilisticAllDiffMonitoring implements IProbabilisticComputation
     private final static Logger LOGGER = LoggerFactory.getLogger(ProbabilisticAllDiffMonitoring.class);
 
 
-    public ProbabilisticAllDiffMonitoring(AllDifferent constraint, IView[] views, IEnvironment environment) {
+    public ProbabilisticAllDiffMonitoring(AllDifferent constraint, IRequest[] requests, IEnvironment environment) {
 
     }
 

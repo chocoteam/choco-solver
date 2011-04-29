@@ -28,7 +28,7 @@ package solver.propagation.engines;
 
 import solver.exception.ContradictionException;
 import solver.propagation.engines.group.Group;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.BitSet;
 
@@ -64,17 +64,17 @@ public class WhileEngine implements IEngine{
     }
 
     @Override
-    public void update(IView view) {
-        int gidx = view.getGroup();
-        groups[gidx].getReacher().update(view);
+    public void update(IRequest request) {
+        int gidx = request.getGroup();
+        groups[gidx].getReacher().update(request);
         notEmpty.set(gidx, true);
 
     }
 
     @Override
-    public void remove(IView view) {
-        int gidx = view.getGroup();
-        if (groups[gidx].getReacher().remove(view)) {
+    public void remove(IRequest request) {
+        int gidx = request.getGroup();
+        if (groups[gidx].getReacher().remove(request)) {
             notEmpty.set(gidx, false);
         }
     }

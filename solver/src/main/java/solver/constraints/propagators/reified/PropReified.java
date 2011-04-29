@@ -35,7 +35,7 @@ import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -90,7 +90,7 @@ public class PropReified extends Propagator<Variable> {
     }
 
     @Override
-    public void propagateOnView(IView<Variable> variableIFineView, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<Variable> variableIFineRequest, int varIdx, int mask) throws ContradictionException {
 //        throw new UnsupportedOperationException();
         filter();
     }

@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators.predicate;
 
 import solver.constraints.propagators.Propagator;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Set;
 
@@ -37,8 +37,8 @@ public class MemberP implements Predicate {
 	public MemberP(Set<Propagator> props) {
 		this.props = props;
 	}
-	public boolean eval(IView view) {
-		return this.props.contains(view.getPropagator());
+	public boolean eval(IRequest request) {
+		return this.props.contains(request.getPropagator());
 	}
 	public String toString() {
 		return "MemberP";

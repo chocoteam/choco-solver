@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views;
+package solver.requests;
 
 import choco.kernel.common.util.tools.MathUtils;
 import choco.kernel.memory.IEnvironment;
@@ -38,8 +38,8 @@ import solver.constraints.propagators.Propagator;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.views.conditions.AbstractCondition;
-import solver.views.conditions.CompletlyInstantiated;
+import solver.requests.conditions.AbstractCondition;
+import solver.requests.conditions.CompletlyInstantiated;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -54,16 +54,16 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class ConditionnalViewTest {
+public class ConditionnalRequestTest {
 
-    private static void castViews(Constraint[] constraints, IEnvironment environment, int threshold) {
+    private static void castRequests(Constraint[] constraints, IEnvironment environment, int threshold) {
         try {
             Method m_unlink = Propagator.class.getDeclaredMethod("unlinkVariables");
-            Field f_views = Propagator.class.getDeclaredField("views");
+            Field f_requests = Propagator.class.getDeclaredField("requests");
             Field f_vars = Propagator.class.getDeclaredField("vars");
 
             m_unlink.setAccessible(true);
-            f_views.setAccessible(true);
+            f_requests.setAccessible(true);
             f_vars.setAccessible(true);
 
             for (Constraint cstr : constraints) {
@@ -72,19 +72,19 @@ public class ConditionnalViewTest {
                     m_unlink.invoke(prop);
                     IntVar[] ivars = (IntVar[]) f_vars.get(prop);
                     AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
-                    ConditionnalView[] views = new ConditionnalView[ivars.length];
+                    ConditionnalRequest[] requests = new ConditionnalRequest[ivars.length];
                     for (int i = 0; i < ivars.length; i++) {
                         ivars[i].addObserver(prop);
-                        views[i] = new ConditionnalView(prop, ivars[i], i, cond, environment);
-                        ivars[i].addView(views[i]);
-                        cond.linkView(views[i]);
+                        requests[i] = new ConditionnalRequest(prop, ivars[i], i, cond, environment);
+                        ivars[i].addRequest(requests[i]);
+                        cond.linkRequest(requests[i]);
                     }
-                    f_views.set(prop, views);
+                    f_requests.set(prop, requests);
                 }
             }
 
             m_unlink.setAccessible(false);
-            f_views.setAccessible(false);
+            f_requests.setAccessible(false);
             f_vars.setAccessible(false);
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
@@ -113,7 +113,7 @@ public class ConditionnalViewTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
         IntVar[] vars = new IntVar[]{x, y, z};
 
-        castViews(cstrs, solver.getEnvironment(), 2);
+        castRequests(cstrs, solver.getEnvironment(), 2);
 
         solver.post(cstrs);
         solver.set(StrategyFactory.inputOrderInDomainMin(vars, solver.getEnvironment()));
@@ -134,7 +134,7 @@ public class ConditionnalViewTest {
 
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.AC)};
 
-            castViews(cstrs, solver.getEnvironment(), n / 2);
+            castRequests(cstrs, solver.getEnvironment(), n / 2);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));

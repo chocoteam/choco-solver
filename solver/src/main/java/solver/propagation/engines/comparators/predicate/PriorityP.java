@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -43,7 +43,7 @@ public class PriorityP implements Predicate {
     }
 
     @Override
-    public boolean eval(IView view) {
-        return view.getPropagator().getPriority().priority > threshold;
+    public boolean eval(IRequest request) {
+        return request.getPropagator().getPriority().priority > threshold;
     }
 }

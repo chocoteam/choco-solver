@@ -34,7 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * A propagator for SUM(x_i) <= b
@@ -209,7 +209,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> intVarIView, int i, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int i, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             filter(true, 2);
         }else if (EventType.isInclow(mask)) {

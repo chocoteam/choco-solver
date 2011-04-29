@@ -26,20 +26,20 @@
  */
 package solver.propagation.engines.comparators;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class Decr implements Comparator<IView>, Serializable {
+public class Decr implements Comparator<IRequest>, Serializable {
 
-    final Comparator<IView> comparator;
+    final Comparator<IRequest> comparator;
 
-    public Decr(Comparator<IView> comparator) {
+    public Decr(Comparator<IRequest> comparator) {
         this.comparator =comparator;
     }
 
-    public int compare(IView v1, IView v2) {
+    public int compare(IRequest v1, IRequest v2) {
         return this.comparator.compare(v2, v1);
     }
 

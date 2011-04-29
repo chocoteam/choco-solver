@@ -62,7 +62,7 @@ public interface ISearchMeasures {
     long getRestartCount();
 
     /**
-     * Get the number of call to IView.propagate()
+     * Get the number of call to IRequest.propagate()
      * @return propagations count
      */
     long getPropagationsCount();

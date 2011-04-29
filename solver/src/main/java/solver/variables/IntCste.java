@@ -35,7 +35,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -173,7 +173,7 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public void updateEntailment(IView view) {
+    public void updateEntailment(IRequest request) {
         //useless
     }
 
@@ -188,12 +188,12 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public void addView(IView view) {
+    public void addRequest(IRequest request) {
         //useless
     }
 
     @Override
-    public void deleteView(IView view) {
+    public void deleteRequest(IRequest request) {
         //useless
     }
 
@@ -209,7 +209,7 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public int nbViews() {
+    public int nbRequests() {
         return 0;
     }
 

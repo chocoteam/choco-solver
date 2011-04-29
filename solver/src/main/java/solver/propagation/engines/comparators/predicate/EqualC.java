@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators.predicate;
 
 import solver.constraints.Constraint;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 
 public class EqualC implements Predicate {
@@ -35,8 +35,8 @@ public class EqualC implements Predicate {
 	public EqualC(Constraint cstr) {
 		this.cstr = cstr;
 	}
-	public boolean eval(IView view) {
-		return this.cstr == view.getPropagator().getConstraint();
+	public boolean eval(IRequest request) {
+		return this.cstr == request.getPropagator().getConstraint();
 	}
 	public String toString() {
 		return "EqualC";

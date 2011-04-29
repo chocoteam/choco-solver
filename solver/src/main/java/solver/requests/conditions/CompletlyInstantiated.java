@@ -24,16 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.conditions;
+package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.variables.EventType;
-import solver.views.ConditionnalView;
+import solver.requests.ConditionnalRequest;
 
 /**
  * A simple condition based on number of instantiated variables.
- * Views are posted when each variable is instantiated.
+ * Requests are posted when each variable is instantiated.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -61,16 +61,16 @@ public class CompletlyInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalView view, int evtMask) {
+    void update(ConditionnalRequest request, int evtMask) {
         if(EventType.isInstantiate(evtMask)){
             nbVarInstantiated.add(1);
         }
     }
 
     @Override
-    public void linkView(ConditionnalView view) {
-        super.linkView(view);
-        if(view.getVariable().instantiated()){
+    public void linkRequest(ConditionnalRequest request) {
+        super.linkRequest(request);
+        if(request.getVariable().instantiated()){
             nbVarInstantiated.add(1);
         }
     }

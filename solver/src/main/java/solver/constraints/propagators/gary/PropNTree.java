@@ -22,8 +22,8 @@ import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-import solver.views.GraphView;
-import solver.views.IView;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 
 public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
@@ -123,8 +123,8 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagateOnView(IView<V> view, int idxVarInProp, int mask) throws ContradictionException {
-		if (view instanceof GraphView) {
+	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		if (request instanceof GraphRequest) {
 			filtering();
 		}
 	}

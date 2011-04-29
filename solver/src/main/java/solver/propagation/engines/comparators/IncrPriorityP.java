@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -37,7 +37,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrPriorityP implements Comparator<IView>, Serializable {
+public class IncrPriorityP implements Comparator<IRequest>, Serializable {
 
     private static final IncrPriorityP singleton = new IncrPriorityP();
 
@@ -48,7 +48,7 @@ public class IncrPriorityP implements Comparator<IView>, Serializable {
     private IncrPriorityP() {
     }
 
-    public int compare(IView v1, IView v2) {
+    public int compare(IRequest v1, IRequest v2) {
         return v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
     }
 

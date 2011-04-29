@@ -26,17 +26,17 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 
 public interface Predicate extends Serializable {
-    public boolean eval(IView view);
+    public boolean eval(IRequest request);
 
     public static Predicate TRUE = new Predicate() {
 
         @Override
-        public boolean eval(IView view) {
+        public boolean eval(IRequest request) {
             return true;
         }
     };

@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators.predicate;
 
 import solver.variables.Variable;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Set;
 
@@ -37,8 +37,8 @@ public class MemberV<V extends Variable> implements Predicate {
 	public MemberV(Set<V> vars) {
 		this.vars = vars;
 	}
-	public boolean eval(IView view) {
-		return this.vars.contains(view.getVariable());
+	public boolean eval(IRequest request) {
+		return this.vars.contains(request.getVariable());
 	}
 	public String toString() {
 		return "MemberV" + vars;

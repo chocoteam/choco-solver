@@ -25,101 +25,60 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.views;
+package solver.requests;
 
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
- * A propagation view storing events occuring on a variable to inform a propagator.
+ * A propagation request storing events occuring on a variable to inform a propagator.
  * It stores mask event (type of event) and pointers to removed values to propagate (if any).
  * <br/>
- * These paramaters are lazy cleared when necessary: usually before updating the view and before treating events.
+ * These paramaters are lazy cleared when necessary: usually before updating the request and before treating events.
  * </br>
  *
  * @author Charles Prud'homme
  * @since 23 sept. 2010
  */
-public class PropView<V extends Variable, P extends Propagator<V>> extends AbstractView<V, P> {
+public class InitializeRequest<V extends Variable, P extends Propagator<V>> extends AbstractRequest<V, P> {
 
-    int timestamp; // timestamp of the last clear call -- for lazy clear
-
-    int first, last; // references, in variable delta value to propagate, to un propagated values
-    int frozenFirst, frozenLast; // same as previous while the view is frozen, to allow "concurrent modifications"
-
-    int evtmask; // reference to events occuring
-
-    public PropView(P propagator, V variable, int idxInProp) {
-        super(propagator, variable, idxInProp);
-
-        this.evtmask = 0;
-        this.first = 0;
-        this.last = 0;
-        this.frozenFirst = 0;
-        this.frozenLast = 0;
-        this.timestamp = -1;
+    public InitializeRequest(P propagator, int idxInProp) {
+        super(propagator, null, idxInProp);
     }
 
     @Override
     public int fromDelta() {
-        return frozenFirst;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public int toDelta() {
-        return frozenLast;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void filter() throws ContradictionException {
-        if (evtmask>0) {
-            int evtmask_ = evtmask;
-            // for concurrent modification..
-            this.frozenFirst = first; // freeze indices
-            this.first = this.frozenLast = last;
-            this.evtmask = 0; // and clean up mask
-            propagator.filterCall++;
-            assert (propagator.isActive());
-            propagator.propagateOnView(this, idxVarInProp, evtmask_);
+        assert (propagator.isActive());
+        propagator.filterCall++;
+        // events on that propagator should be removed first
+        // to avoid conflict and useless call
+        for (int i = 0; i < propagator.nbRequests(); i++) {
+            if (propagator.getRequest(i).enqueued()) {
+                engine.remove(propagator.getRequest(i));
+            }
         }
-    }
-
-
-    private void addAll(EventType e) {
-        if ((e.mask & evtmask) == 0) {
-            evtmask += e.mask;
-        }
-        last = variable.getDelta().size();
-    }
-
-    protected void lazyClear() {
-        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-            this.evtmask = this.first = this.last = 0;
-            timestamp = AbstractSearchLoop.timeStamp;
-        }
+        propagator.propagate();
     }
 
     @Override
     public void update(EventType e) {
-        lazyClear();
-        if (EventType.anInstantiationEvent(e.mask)) {
-            propagator.decArity();
-        }
-        addAll(e);
-        engine.update(this);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String toString() {
-        return "(" + variable.getName() + " - " + propagator.getConstraint().toString() + ")";
-    }
-
-    @Override
-    public void desactivate() {
-        super.desactivate();
-        evtmask = 0;
+        return "(" + propagator.getConstraint().toString() + ")";
     }
 }

@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * X = MAX(Y,Z)
@@ -72,7 +72,7 @@ public class PropMax extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> view, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else if (EventType.isInclow(mask)) {
@@ -80,10 +80,10 @@ public class PropMax extends Propagator<IntVar> {
         } else if (EventType.isDecupp(mask)) {
             this.awakeOnUpp(varIdx);
         } else if (EventType.isRemove(mask)) {
-            IntVar var = view.getVariable();
+            IntVar var = request.getVariable();
             IntDelta delta = var.getDelta();
-            int f = view.fromDelta();
-            int l = view.toDelta();
+            int f = request.fromDelta();
+            int l = request.toDelta();
             delta.forEach(rem_proc.set(varIdx), f, l);
         }
     }

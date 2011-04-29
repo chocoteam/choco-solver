@@ -300,7 +300,7 @@ public final class MeasuresRecorder implements IMeasures {
                 solutionCount, hasObjective()?"Objective: "+ objectiveIntValue+", \n\t":"", readingTimeCount,
                 initialPropagationTimeCount, timeCount, nodeCount, backtrackCount, failCount, 0, propagationCount,
                 usedMemory,
-                solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbViews()));
+                solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();
     }
 	

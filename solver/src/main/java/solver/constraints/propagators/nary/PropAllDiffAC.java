@@ -11,7 +11,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * Created by IntelliJ IDEA.
@@ -64,19 +64,19 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> view, int varIdx, int mask) throws ContradictionException {
-        IntVar var = view.getVariable();
+    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+        IntVar var = request.getVariable();
         IntDelta delta = var.getDelta();
 
         if (EventType.isInstantiate(mask)) {
             struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
         } else {
-            int f = view.fromDelta();
-            int l = view.toDelta();
+            int f = request.fromDelta();
+            int l = request.toDelta();
             effect = false;
             delta.forEach(rem_proc.set(varIdx), f, l);
         }
-        if (getNbViewEnqued() == 0) {
+        if (getNbRequestEnqued() == 0) {
             struct.removeUselessEdges(this);
         }
     }

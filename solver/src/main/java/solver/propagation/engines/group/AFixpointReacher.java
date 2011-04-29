@@ -27,7 +27,7 @@
 package solver.propagation.engines.group;
 
 import solver.exception.ContradictionException;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Comparator;
 
@@ -41,9 +41,9 @@ public abstract class AFixpointReacher {
 
     public long update, pushed, popped;
 
-    Comparator<IView> comparator;
+    Comparator<IRequest> comparator;
 
-    protected AFixpointReacher(Comparator<IView> comparator) {
+    protected AFixpointReacher(Comparator<IRequest> comparator) {
         this.comparator = comparator;
     }
 
@@ -62,9 +62,9 @@ public abstract class AFixpointReacher {
      */
     public abstract boolean fixpoint() throws ContradictionException;
 
-    public abstract void update(IView view);
+    public abstract void update(IRequest request);
 
-    public abstract boolean remove(IView view);
+    public abstract boolean remove(IRequest request);
 
     public abstract void flushAll();
 

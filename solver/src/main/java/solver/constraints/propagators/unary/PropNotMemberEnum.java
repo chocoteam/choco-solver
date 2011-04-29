@@ -37,7 +37,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -80,7 +80,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> intVarIFineView, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

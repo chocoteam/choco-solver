@@ -24,44 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.list;
+package solver.requests.list;
 
 import solver.ICause;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 
 /**
  *
- * A IViewList is a container of IView objects.
- * A view can change of state (from active to passive) during a propagation step, this container must consider
- * this information. Restoring the previous state of views must be done upon backtracking.
+ * A IRequestList is a container of IRequest objects.
+ * A request can change of state (from active to passive) during a propagation step, this container must consider
+ * this information. Restoring the previous state of requests must be done upon backtracking.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public interface IViewList<V extends IView> extends Serializable{
+public interface IRequestList<R extends IRequest> extends Serializable{
 
     /**
-     * Informs the structure of the status modification of <code>view</code>
-     * @param view the modified element
+     * Informs the structure of the status modification of <code>request</code>
+     * @param request the modified element
      */
-    void setPassive(V view);
+    void setPassive(R request);
 
     /**
-     * Add a new <code>view</code>
-     * @param view to add
+     * Add a new <code>request</code>
+     * @param request to add
      */
-    void addView(V view);
+    void addRequest(R request);
 
     /**
-     * Permanently delete <code>view</code>
-     * @param view to delete
+     * Permanently delete <code>request</code>
+     * @param request to delete
      */
-    void deleteView(IView view);
+    void deleteRequest(IRequest request);
 
     /**
      * Returns the total number of element contained.
@@ -76,8 +76,8 @@ public interface IViewList<V extends IView> extends Serializable{
     int cardinality();
 
     /**
-     * Notifies the active views of an event occuring on the variable declaring <code>this</code>.
-     * This method loops over active views matching the event to update it, avoiding the causing view, if exists.
+     * Notifies the active requests of an event occuring on the variable declaring <code>this</code>.
+     * This method loops over active requests matching the event to update it, avoiding the causing request, if exists.
      * @param cause cause of the notification
      * @param event event implication of the cause
      * @param delta removed values implied by the event

@@ -40,9 +40,9 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.views.IView;
-import solver.views.InitializeView;
-import solver.views.PropView;
+import solver.requests.IRequest;
+import solver.requests.InitializeRequest;
+import solver.requests.PropRequest;
 
 import java.io.Serializable;
 
@@ -91,11 +91,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected V[] vars;
 
     /**
-     * List of views of <code>this</code>
+     * List of requests of <code>this</code>
      */
-    protected IView<V>[] views;
+    protected IRequest<V>[] requests;
 
-    protected InitializeView initializeView;
+    protected InitializeRequest initializeRequest;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -108,7 +108,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected IStateBool isActive;
 
-    protected int nbViewEnqued = 0; // counter of enqued views -- usable as trigger for complex algorithm
+    protected int nbRequestEnqued = 0; // counter of enqued requests -- usable as trigger for complex algorithm
 
     public long filterCall;  // statistics of calls to filter
 
@@ -131,7 +131,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        initializeView = new InitializeView(this, -1);
+        initializeRequest = new InitializeRequest(this, -1);
         int nbNi = 0;
         for (int  v = 0; v < vars.length; v++){
             if(!vars[v].instantiated()){
@@ -153,13 +153,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param view         view to propagate
+     * @param request         request to propagate
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
-    public abstract void propagateOnView(IView<V> view, int idxVarInProp, int mask) throws ContradictionException;
+    public abstract void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException;
 
     /**
      * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
@@ -176,8 +176,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         isActive.set(false);
         this.constraint.updateActivity(this);
         // then notify the linked variables
-        for (int i = 0; i < views.length; i++) {
-            views[i].desactivate();
+        for (int i = 0; i < requests.length; i++) {
+            requests[i].desactivate();
         }
     }
 
@@ -203,26 +203,26 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars[i];
     }
 
-    public int nbViews() {
-        return views.length;
+    public int nbRequests() {
+        return requests.length;
     }
 
-    public IView getView(int i) {
-        if (i >= 0 && i < views.length) {
-            return views[i];
+    public IRequest getRequest(int i) {
+        if (i >= 0 && i < requests.length) {
+            return requests[i];
         } else if (i == -1) {
-            return initializeView;
+            return initializeRequest;
         }
         throw new IndexOutOfBoundsException();
     }
 
     @SuppressWarnings({"unchecked"})
     protected void linkToVariables() {
-        views = new IView[vars.length];
+        requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
             vars[i].addObserver(this);
-            views[i] = new PropView<V, Propagator<V>>(this, vars[i], i);
-            vars[i].addView(views[i]);
+            requests[i] = new PropRequest<V, Propagator<V>>(this, vars[i], i);
+            vars[i].addRequest(requests[i]);
         }
     }
 
@@ -232,12 +232,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     protected void unlinkVariables() {
-        for (int v = 0; v < views.length; v++) {
-            IView view = views[v];
-            view.getVariable().deleteView(view);
-            views[v] = null;
+        for (int v = 0; v < requests.length; v++) {
+            IRequest request = requests[v];
+            request.getVariable().deleteRequest(request);
+            requests[v] = null;
         }
-        views = new IView[0];
+        requests = new IRequest[0];
     }
 
     /**
@@ -286,18 +286,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    protected int getNbViewEnqued(){
-        return nbViewEnqued;
+    protected int getNbRequestEnqued(){
+        return nbRequestEnqued;
     }
 
-    public void incNbViewEnqued(){
-        assert(nbViewEnqued>=0):"number of enqued views is < 0";
-        nbViewEnqued++;
+    public void incNbRequestEnqued(){
+        assert(nbRequestEnqued >=0):"number of enqued requests is < 0";
+        nbRequestEnqued++;
     }
 
-    public void decNbViewEnqued(){
-        assert(nbViewEnqued>0):"number of enqued views is < 0";
-        nbViewEnqued--;
+    public void decNbRequestEnqued(){
+        assert(nbRequestEnqued >0):"number of enqued requests is < 0";
+        nbRequestEnqued--;
     }
 
     public int arity(){

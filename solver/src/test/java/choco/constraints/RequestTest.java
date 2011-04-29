@@ -33,15 +33,15 @@ package choco.constraints;
  * @author Charles Prud'homme
  * @since 23 sept. 2010
  */
-public class ViewTest {
+public class RequestTest {
 
-//    private static class Check implements Delta.Procedure2<PropView, int[]> {
+//    private static class Check implements Delta.Procedure2<PropRequest, int[]> {
 //        int[] value;
-//        PropView ad;
+//        PropRequest ad;
 //
 //
 //        @Override
-//        public Delta.Procedure2 set(PropView advisor, int[] ints) {
+//        public Delta.Procedure2 set(PropRequest advisor, int[] ints) {
 //            this.value = ints;
 //            this.ad = advisor;
 //            return this;
@@ -57,7 +57,7 @@ public class ViewTest {
 //
 //    @Test
 //    public void testAddAll() throws ContradictionException {
-//        PropView ad = new PropView();
+//        PropRequest ad = new PropRequest();
 //        Delta d = new Delta();
 //        EventType e = EventType.REMOVE;
 //        int expectecmask = EventType.REMOVE.mask;
@@ -116,7 +116,7 @@ public class ViewTest {
 //
 //    @Test
 //    public void testFreeze() throws ContradictionException {
-//        PropView ad = new PropView();
+//        PropRequest ad = new PropRequest();
 //        Delta d = new Delta();
 //        EventType e = EventType.REMOVE;
 //
@@ -130,7 +130,7 @@ public class ViewTest {
 //        check.set(ad, new int[]{1,2,3});
 //        ad.getCurrent().forEach(check);
 //
-//        PropView copy = ad.freeze();
+//        PropRequest copy = ad.freeze();
 //
 //        Assert.assertEquals(copy.getEvtmask(), EventType.REMOVE.mask);
 //        Assert.assertEquals(copy.getCurrent().size(), 3);

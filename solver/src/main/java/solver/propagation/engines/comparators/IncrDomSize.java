@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators;
 
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrDomSize<V extends IntVar> implements Comparator<IView<V>>, Serializable {
+public class IncrDomSize<V extends IntVar> implements Comparator<IRequest<V>>, Serializable {
 
     private static final IncrDomSize singleton = new IncrDomSize();
 
@@ -50,7 +50,7 @@ public class IncrDomSize<V extends IntVar> implements Comparator<IView<V>>, Seri
     }
 
     @Override
-    public int compare(IView<V> o1, IView<V> o2) {
+    public int compare(IRequest<V> o1, IRequest<V> o2) {
         return o1.getVariable().getDomainSize() - o2.getVariable().getDomainSize();
     }
 

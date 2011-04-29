@@ -34,7 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -86,7 +86,7 @@ public class PropNotEqualXY_C extends Propagator<IntVar>{
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> intVarIFineView, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         }else if(EventType.isBound(mask)){

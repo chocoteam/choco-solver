@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Comparator;
 
@@ -36,7 +36,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 14/04/11
  */
-public class Queue implements Comparator<IView> {
+public class Queue implements Comparator<IRequest> {
 
     public static final Queue singleton = new Queue();
 
@@ -48,7 +48,7 @@ public class Queue implements Comparator<IView> {
     }
 
     @Override
-    public int compare(IView o1, IView o2) {
+    public int compare(IRequest o1, IRequest o2) {
         return 0;
     }
 

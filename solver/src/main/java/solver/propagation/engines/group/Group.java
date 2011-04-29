@@ -29,13 +29,13 @@ package solver.propagation.engines.group;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * A class to group views and define a policy to propagate.
+ * A class to group requests and define a policy to propagate.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -43,7 +43,7 @@ import java.util.Comparator;
  */
 public class Group {
 
-    protected Comparator<IView> comparator;
+    protected Comparator<IRequest> comparator;
 
     protected Predicate predicate;
 
@@ -53,18 +53,18 @@ public class Group {
 
     protected int index;
 
-    protected IView[] views;
-    protected int nbViews;
+    protected IRequest[] requests;
+    protected int nbRequests;
 
-    public Group(Predicate predicate, Comparator<IView> comparator, Policy policy) {
+    public Group(Predicate predicate, Comparator<IRequest> comparator, Policy policy) {
         this.comparator = comparator;
         this.predicate = predicate;
         this.policy = policy;
-        views = new IView[8];
-        nbViews = 0;
+        requests = new IRequest[8];
+        nbRequests = 0;
     }
 
-    public Comparator<IView> getComparator() {
+    public Comparator<IRequest> getComparator() {
         return comparator;
     }
 
@@ -77,39 +77,39 @@ public class Group {
     }
 
     public void make() {
-        views = Arrays.copyOf(views, nbViews);
-        Arrays.sort(views, comparator);
-        for (int i = 0; i < nbViews; i++) {
-            views[i].setIndex(i);
+        requests = Arrays.copyOf(requests, nbRequests);
+        Arrays.sort(requests, comparator);
+        for (int i = 0; i < nbRequests; i++) {
+            requests[i].setIndex(i);
         }
         if (comparator == Queue.get()) {
-            reacher = new Oldest(nbViews);
+            reacher = new Oldest(nbRequests);
         } else {
             switch (policy) {
                 case ONE:
-                    reacher = new One(views, comparator);
+                    reacher = new One(requests, comparator);
                     break;
                 case ITERATE:
-                    reacher = new Iterate(views, comparator);
+                    reacher = new Iterate(requests, comparator);
                     break;
                 case FIXPOINT:
                 default:
-                    reacher = new Fixpoint(views, comparator);
+                    reacher = new Fixpoint(requests, comparator);
                     break;
             }
         }
     }
 
-    public void addView(IView aView) {
+    public void addRequest(IRequest aRequest) {
         //ensure capacity
-        if (nbViews + 1 > views.length) {
-            IView[] tmp = views;
-            int size = views.length * 2;
-            views = new IView[size];
-            System.arraycopy(tmp, 0, views, 0, nbViews);
+        if (nbRequests + 1 > requests.length) {
+            IRequest[] tmp = requests;
+            int size = requests.length * 2;
+            requests = new IRequest[size];
+            System.arraycopy(tmp, 0, requests, 0, nbRequests);
         }
-        views[nbViews++] = aView;
-        aView.setGroup(index);
+        requests[nbRequests++] = aRequest;
+        aRequest.setGroup(index);
     }
 
     @Override

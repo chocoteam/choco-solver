@@ -32,10 +32,10 @@ import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDifferent;
 import solver.variables.IntVar;
-import solver.views.ConditionnalView;
-import solver.views.IView;
-import solver.views.conditions.AbstractCondition;
-import solver.views.conditions.CompletlyInstantiated;
+import solver.requests.ConditionnalRequest;
+import solver.requests.IRequest;
+import solver.requests.conditions.AbstractCondition;
+import solver.requests.conditions.CompletlyInstantiated;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -60,14 +60,14 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     protected void linkToVariables() {
         //noinspection unchecked
         AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length/2);
-        views = new IView[vars.length];
+        requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
             vars[i].addObserver(this);
-            ConditionnalView cview =
-                    new ConditionnalView<PropProbaAllDifferent>(this, vars[i], i, condition, this.environment);
-            views[i] = cview;
-            vars[i].addView(views[i]);
-            condition.linkView(cview);
+            ConditionnalRequest crequest =
+                    new ConditionnalRequest<PropProbaAllDifferent>(this, vars[i], i, condition, this.environment);
+            requests[i] = crequest;
+            vars[i].addRequest(requests[i]);
+            condition.linkRequest(crequest);
         }
     }
 

@@ -37,7 +37,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * VALUE = TABLE[INDEX]
@@ -135,7 +135,7 @@ public class PropElement extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> view, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
         }

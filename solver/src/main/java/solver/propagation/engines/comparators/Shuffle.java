@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 29/03/11
  */
-public class Shuffle implements Comparator<IView>, Serializable {
+public class Shuffle implements Comparator<IRequest>, Serializable {
 
     private final Random random;
 
@@ -51,7 +51,7 @@ public class Shuffle implements Comparator<IView>, Serializable {
     }
 
     @Override
-    public int compare(IView o1, IView o2) {
+    public int compare(IRequest o1, IRequest o2) {
         return -1 + random.nextInt(3);
     }
 

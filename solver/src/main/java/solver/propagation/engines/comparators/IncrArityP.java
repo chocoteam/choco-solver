@@ -26,12 +26,12 @@
  */
 package solver.propagation.engines.comparators;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class IncrArityP implements Comparator<IView>, Serializable {
+public class IncrArityP implements Comparator<IRequest>, Serializable {
 
     private static final IncrArityP singleton = new IncrArityP();
 
@@ -42,7 +42,7 @@ public class IncrArityP implements Comparator<IView>, Serializable {
     private IncrArityP() {
     }
 
-    public int compare(IView v1, IView v2) {
+    public int compare(IRequest v1, IRequest v2) {
         return v1.getPropagator().arity() - v2.getPropagator().arity();
     }
 

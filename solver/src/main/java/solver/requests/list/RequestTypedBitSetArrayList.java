@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.list;
+package solver.requests.list;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
@@ -33,7 +33,7 @@ import solver.constraints.propagators.Propagator;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Arrays;
 
@@ -43,7 +43,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class ViewTypedBitSetArrayList<V extends IView> implements IViewList<V> {
+public final class RequestTypedBitSetArrayList<R extends IRequest> implements IRequestList<R> {
 
     protected static int[] INDEX;
 
@@ -55,11 +55,11 @@ public final class ViewTypedBitSetArrayList<V extends IView> implements IViewLis
         }
     }
 
-    protected V[] views;
+    protected R[] requests;
     protected IStateBitSet[] typedIdx;
 
-    protected ViewTypedBitSetArrayList(IEnvironment env) {
-        views = (V[]) new IView[0];
+    protected RequestTypedBitSetArrayList(IEnvironment env) {
+        requests = (R[]) new IRequest[0];
         typedIdx = new IStateBitSet[4];
         for (int i = 0; i < 4; i++) {
             typedIdx[i] = env.makeBitSet(64);
@@ -67,23 +67,23 @@ public final class ViewTypedBitSetArrayList<V extends IView> implements IViewLis
     }
 
     @Override
-    public void setPassive(V view) {
-        int idx = view.getIdxInVar();
+    public void setPassive(R request) {
+        int idx = request.getIdxInVar();
         for (int j = 0; j < 4; j++) {
             typedIdx[j].set(idx, false);
         }
     }
 
     @Override
-    public void addView(V view) {
-        V[] tmp = views;
+    public void addRequest(R request) {
+        R[] tmp = requests;
         int size = tmp.length;
-        views = (V[]) new IView[size + 1];
-        System.arraycopy(tmp, 0, views, 0, size);
-        views[size] = view;
-        view.setIdxInVar(size);
+        requests = (R[]) new IRequest[size + 1];
+        System.arraycopy(tmp, 0, requests, 0, size);
+        requests[size] = request;
+        request.setIdxInVar(size);
 
-        int mask = view.getMask();
+        int mask = request.getMask();
         for (int j = 0; j < 4; j++) {
             if ((mask & (1 << (j + 1))) != 0) {
                 typedIdx[j].set(size, true);
@@ -92,18 +92,18 @@ public final class ViewTypedBitSetArrayList<V extends IView> implements IViewLis
     }
 
     @Override
-    public void deleteView(IView view) {
+    public void deleteRequest(IRequest request) {
         int i = 0;
-        for (; i < views.length && views[i] != view; i++) {
+        for (; i < requests.length && requests[i] != request; i++) {
         }
-        if (i == views.length) return;
-        //remove views
-        V[] tmp = views;
-        views = (V[]) new IView[tmp.length - 1];
-        System.arraycopy(tmp, 0, views, 0, i);
-        System.arraycopy(tmp, i + 1, views, i, tmp.length - i - 1);
-        for (int j = i; j < views.length; j++) {
-            views[j].setIdxInVar(j);
+        if (i == requests.length) return;
+        //remove requests
+        R[] tmp = requests;
+        requests = (R[]) new IRequest[tmp.length - 1];
+        System.arraycopy(tmp, 0, requests, 0, i);
+        System.arraycopy(tmp, i + 1, requests, i, tmp.length - i - 1);
+        for (int j = i; j < requests.length; j++) {
+            requests[j].setIdxInVar(j);
         }
         // remove indexes:
         for (int j = 0; j < 4; j++) {
@@ -113,14 +113,14 @@ public final class ViewTypedBitSetArrayList<V extends IView> implements IViewLis
 
     @Override
     public int size() {
-        return views.length;
+        return requests.length;
     }
 
     @Override
     public int cardinality() {
         int cpt = 0;
-        for (int i = 0; i < views.length; i++) {
-            if (views[i].getPropagator().isActive()) {
+        for (int i = 0; i < requests.length; i++) {
+            if (requests[i].getPropagator().isActive()) {
                 cpt++;
             }
         }
@@ -129,14 +129,14 @@ public final class ViewTypedBitSetArrayList<V extends IView> implements IViewLis
 
     @Override
     public void notifyButCause(ICause cause, EventType event, IDelta delta) {
-        IView view;
+        IRequest request;
         int mask = INDEX[event.mask];
         IStateBitSet _indices = typedIdx[mask];
         for (int i = _indices.nextSetBit(0); i >= 0; i = _indices.nextSetBit(i + 1)) {
-            view = views[i];
-            Propagator<IntVar> o = view.getPropagator();
+            request = requests[i];
+            Propagator<IntVar> o = request.getPropagator();
             if (o != cause) {
-                view.update(event);
+                request.update(event);
             }
         }
 

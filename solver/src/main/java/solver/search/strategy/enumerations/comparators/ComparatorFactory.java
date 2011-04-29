@@ -38,7 +38,7 @@ import solver.variables.IntVar;
 /**
  *
  * TODO: efficient random: does not use the sorting algorithm
- * TODO: MostConstrained: count views instead of constraints
+ * TODO: MostConstrained: count requests instead of constraints
  * TODO: MostConstrained: what about entailed constraints?
  *
  * <br/>

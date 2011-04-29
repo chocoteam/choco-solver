@@ -34,7 +34,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 
@@ -122,7 +122,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnView(IView<IntVar> view, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
 
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
@@ -131,7 +131,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         } else if (EventType.isDecupp(mask)) {
             awakeOnSup(varIdx);
         }
-        if(getNbViewEnqued() == 0){
+        if(getNbRequestEnqued() == 0){
             filter();
         }
     }

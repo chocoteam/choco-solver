@@ -24,46 +24,43 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.list;
+package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
-import solver.views.IView;
+import choco.kernel.memory.IStateInt;
+import solver.variables.IntVar;
+import solver.requests.ConditionnalRequest;
 
 /**
- * A class declaring builder for IViewList.
+ * A simple condition based on number of instantiated variables.
+ * Requests are posted when each variable is instantiated.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24/02/11
+ * @since 22/03/11
  */
-public class ViewListBuilder {
+public class IsInstantiated extends AbstractCondition {
 
-    public static int _DEFAULT = 0; // 0: ViewArrayList, 1: ViewImmutableArrayList, 2: ViewTypedImmutableArrayList, ...
+    final IStateInt nbVarInstantiated;
+    final IntVar variable;
 
-    protected ViewListBuilder() {
+    public IsInstantiated(IEnvironment environment, IntVar variable) {
+        super(environment);
+        nbVarInstantiated = environment.makeInt();
+        this.variable = variable;
     }
 
-    /**
-     * Builds and returns the preset IViewList object.
-     *
-     * @param environment bracktrackable environment
-     * @param <V>         type of view
-     * @return a implementation of IViewList
-     */
-    public static <V extends IView> IViewList<V> preset(IEnvironment environment) {
-        switch (_DEFAULT) {
-            case 1:
-                return new ViewImmutableArrayList();
-            case 2:
-                return new ViewTypedImmutableArrayList();
-            case 3:
-                return new ViewTypedBitSetArrayList<V>(environment);
-            default:
-                return arraylist(environment);
-        }
+    @Override
+    boolean isValid() {
+        return variable.instantiated();
     }
 
-    public static <V extends IView> IViewList<V> arraylist(IEnvironment environment) {
-        return new ViewArrayList<V>(environment);
+    @Override
+    boolean alwaysValid() {
+        return true;
+    }
+
+    @Override
+    void update(ConditionnalRequest request, int evtMask) {
     }
 }

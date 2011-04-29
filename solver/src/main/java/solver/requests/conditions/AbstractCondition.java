@@ -24,52 +24,52 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.conditions;
+package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import solver.views.ConditionnalView;
+import solver.requests.ConditionnalRequest;
 
 /**
- * An abstract class to declare a specific conditions to be satisfied for a conditionnal view.
+ * An abstract class to declare a specific conditions to be satisfied for a conditionnal request.
  * <br/>
- * It provides 2 services: one to check validity, another to keep informed of event occuring on related view(s).
+ * It provides 2 services: one to check validity, another to keep informed of event occuring on related request(s).
  * </br>
- * In basic behaviour (no condition views), events are propagated automatically after popping.
- * In conditionnal views, previously popped (but not propagated) events should be propagated.
- * That's why on a newly validation, modified variable view must be "added" to the propagation engine,
- * view should act like "no condition one".
+ * In basic behaviour (no condition requests), events are propagated automatically after popping.
+ * In conditionnal requests, previously popped (but not propagated) events should be propagated.
+ * That's why on a newly validation, modified variable request must be "added" to the propagation engine,
+ * request should act like "no condition one".
  *
  * @author Charles Prud'homme
  * @since 22/03/11
  */
 public abstract class AbstractCondition {
 
-    ConditionnalView[] relatedViews; // array of conditionnal views declaring this -- size >= number of elements!
-    int idxLastView; // index of the last not null view in relatedViews
+    ConditionnalRequest[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
+    int idxLastRequest; // index of the last not null request in relatedRequests
     final IStateBool wasValid;
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedViews = new ConditionnalView[8];
+        relatedRequests = new ConditionnalRequest[8];
     }
 
     /**
-     * Keep informed the condition of the modification of one of its related views.
-     * If the condition is newly validate, push all related views in the propagation engine.
+     * Keep informed the condition of the modification of one of its related requests.
+     * If the condition is newly validate, push all related requests in the propagation engine.
      *
-     * @param view    recently modified view
+     * @param request    recently modified request
      * @param evtmask variable modification event
      */
-    public final void updateAndValid(ConditionnalView view, int evtmask) {
-        update(view, evtmask);
+    public final void updateAndValid(ConditionnalRequest request, int evtmask) {
+        update(request, evtmask);
         if (wasValid.get()) {
-            view.getPropagationEngine().update(view);
+            request.getPropagationEngine().update(request);
         } else if (isValid()) {
-            for (int i = 0; i < idxLastView; i++) {
-                ConditionnalView cview = relatedViews[i];
-                if (cview.hasChanged()) {
-                    cview.getPropagationEngine().update(cview);
+            for (int i = 0; i < idxLastRequest; i++) {
+                ConditionnalRequest crequest = relatedRequests[i];
+                if (crequest.hasChanged()) {
+                    crequest.getPropagationEngine().update(crequest);
                 }
             }
             wasValid.set(alwaysValid());
@@ -86,32 +86,32 @@ public abstract class AbstractCondition {
     /**
      * Return true if the condition, once validate, won't change anymore in the current branch,
      * avoiding validation computation each time.
-     * This simulates "no condition" view behaviour.
+     * This simulates "no condition" request behaviour.
      *
      * @return true if the condition, once validate, won't change anymore in the current branch
      */
     abstract boolean alwaysValid();
 
     /**
-     * Updates the current condition on the modification of one its related views.
+     * Updates the current condition on the modification of one its related requests.
      *
-     * @param view    recently modified view
+     * @param request    recently modified request
      * @param evtMask
      */
-    abstract void update(ConditionnalView view, int evtMask);
+    abstract void update(ConditionnalRequest request, int evtMask);
 
     /**
-     * Link the <code>view</code> to the condition
+     * Link the <code>request</code> to the condition
      *
-     * @param view condition view
+     * @param request condition request
      */
-    public void linkView(ConditionnalView view) {
-        if (idxLastView >= relatedViews.length) {
-            ConditionnalView[] tmp = relatedViews;
-            relatedViews = new ConditionnalView[tmp.length * 2];
-            System.arraycopy(tmp, 0, relatedViews, 0, tmp.length);
+    public void linkRequest(ConditionnalRequest request) {
+        if (idxLastRequest >= relatedRequests.length) {
+            ConditionnalRequest[] tmp = relatedRequests;
+            relatedRequests = new ConditionnalRequest[tmp.length * 2];
+            System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
         }
-        relatedViews[idxLastView++] = view;
+        relatedRequests[idxLastRequest++] = request;
     }
 
 

@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -44,7 +44,7 @@ public class And implements Predicate {
     }
 
     @Override
-    public boolean eval(IView view) {
-        return p1.eval(view) && p2.eval(view);
+    public boolean eval(IRequest request) {
+        return p1.eval(request) && p2.eval(request);
     }
 }

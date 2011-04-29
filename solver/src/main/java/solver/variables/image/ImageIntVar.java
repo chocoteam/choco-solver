@@ -35,7 +35,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -88,8 +88,8 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void updateEntailment(IView view) {
-        var.updateEntailment(view);
+    public void updateEntailment(IRequest request) {
+        var.updateEntailment(request);
     }
 
     @Override
@@ -98,13 +98,13 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void addView(IView view) {
-        var.addView(view);
+    public void addRequest(IRequest request) {
+        var.addRequest(request);
     }
 
     @Override
-    public void deleteView(IView view) {
-        var.deleteView(view);
+    public void deleteRequest(IRequest request) {
+        var.deleteRequest(request);
     }
 
     @Override
@@ -118,8 +118,8 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public int nbViews() {
-        return var.nbViews();
+    public int nbRequests() {
+        return var.nbRequests();
     }
 
     @Override

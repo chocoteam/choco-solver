@@ -30,7 +30,7 @@ package solver.propagation.engines;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.group.Group;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -53,9 +53,9 @@ public interface IPropagationEngine extends Serializable {
 
     void setDeal(Deal deal);
 
-    void setDefaultComparator(Comparator<IView> comparator);
+    void setDefaultComparator(Comparator<IRequest> comparator);
 
-    Comparator<IView> getDefaultComparator();
+    Comparator<IRequest> getDefaultComparator();
 
     void setDefaultPolicy(Policy policy);
 
@@ -75,13 +75,13 @@ public interface IPropagationEngine extends Serializable {
 
     /**
      * Define the action to apply on a state changes of observable objects.
-     * @param view
+     * @param request
      */
-    void update(IView view);
+    void update(IRequest request);
 
-    void remove(IView view);
+    void remove(IRequest request);
 
-    int getNbViews();
+    int getNbRequests();
 
     long pushed();
 

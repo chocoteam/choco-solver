@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.views;
+package solver.requests;
 
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -33,7 +33,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 
-public class GraphView<V extends GraphVar, P extends Propagator<V>> extends AbstractView<V, P> {
+public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends AbstractRequest<V, P> {
 
 	//NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
 	final static int NR = 0;
@@ -43,11 +43,11 @@ public class GraphView<V extends GraphVar, P extends Propagator<V>> extends Abst
 	
     int timestamp; // timestamp of the last clear call -- for lazy clear
     int[] first, last; // references, in variable delta value to propagate, to un propagated values
-    int[] frozenFirst, frozenLast; // same as previous while the view is frozen, to allow "concurrent modifications"
+    int[] frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
 
     int evtmask; // reference to events occuring
 
-    public GraphView(P propagator, V variable, int idxInProp) {
+    public GraphRequest(P propagator, V variable, int idxInProp) {
         super(propagator, variable, idxInProp);
 
         this.evtmask = 0;
@@ -111,7 +111,7 @@ public class GraphView<V extends GraphVar, P extends Propagator<V>> extends Abst
         this.evtmask = 0; // and clean up mask
         filter++;
         assert (propagator.isActive());
-        propagator.propagateOnView(this, idxVarInProp, evtmask_);
+        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
     }
 
 

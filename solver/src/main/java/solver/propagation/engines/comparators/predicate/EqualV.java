@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators.predicate;
 
 import solver.variables.Variable;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 
 public class EqualV implements Predicate {
@@ -35,8 +35,8 @@ public class EqualV implements Predicate {
 	public EqualV(Variable var) {
 		this.var = var;
 	}
-	public boolean eval(IView view) {
-		return this.var == view.getVariable();
+	public boolean eval(IRequest request) {
+		return this.var == request.getVariable();
 	}
 	public String toString() {
 		return "EqualV";

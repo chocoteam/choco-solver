@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.group;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.BitSet;
 import java.util.Comparator;
@@ -39,55 +39,44 @@ import java.util.Comparator;
  */
 public abstract class SortedOne extends AFixpointReacher {
 
-    protected final IView[] views;
+    protected final IRequest[] requests;
 
     protected final int size;
 
     protected final BitSet toPropagate;
 
-    protected IView lastPoppedView;
+    protected IRequest lastPoppedRequest;
 
 
-    public SortedOne(IView[] views, Comparator<IView> comparator) {
+    public SortedOne(IRequest[] requests, Comparator<IRequest> comparator) {
         super(comparator);
-        this.views = views;
-        size = views.length;
+        this.requests = requests;
+        size = requests.length;
         this.toPropagate = new BitSet(size);
     }
 
-    /*@Override
-    public void reinit() {
-        assert (!toPropagate.isEmpty()) : "SortedOne.reinit(): toPropagate is not empty";
-        Arrays.sort(views, comparator); // then sort "common" views
-        // routine to set indices to views
-        IView view;
-        for (int i = 0; i < size; i++) {
-            view = views[i];
-            view.setIndex(i);
-        }
-    }*/
 
     @Override
-    public void update(IView view) {
+    public void update(IRequest request) {
         update++;
-        if (!view.enqueued()) {
-            toPropagate.set(view.getIndex(), true);
-            view.enqueue();
+        if (!request.enqueued()) {
+            toPropagate.set(request.getIndex(), true);
+            request.enqueue();
             pushed++;
         }
     }
 
     @Override
-    public boolean remove(IView view) {
-        view.deque();
-        toPropagate.set(view.getIndex(), false);
+    public boolean remove(IRequest request) {
+        request.deque();
+        toPropagate.set(request.getIndex(), false);
         return toPropagate.isEmpty();
     }
 
     @Override
     public void flushAll() {
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i + 1)) {
-            views[i].deque();
+            requests[i].deque();
             toPropagate.set(i, false);
         }
     }

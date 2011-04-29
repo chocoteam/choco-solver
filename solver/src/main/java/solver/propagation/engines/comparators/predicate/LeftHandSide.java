@@ -26,7 +26,7 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -36,8 +36,8 @@ import solver.views.IView;
  */
 public class LeftHandSide implements Predicate {
     @Override
-    public boolean eval(IView view) {
-        return view.getIdxVarInProp() == 0;
+    public boolean eval(IRequest request) {
+        return request.getIdxVarInProp() == 0;
     }
 
     @Override

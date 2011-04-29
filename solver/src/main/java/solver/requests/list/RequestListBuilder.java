@@ -24,43 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views.conditions;
+package solver.requests.list;
 
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import solver.variables.IntVar;
-import solver.views.ConditionnalView;
+import solver.requests.IRequest;
 
 /**
- * A simple condition based on number of instantiated variables.
- * Views are posted when each variable is instantiated.
+ * A class declaring builder for IRequestList.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/03/11
+ * @since 24/02/11
  */
-public class IsInstantiated extends AbstractCondition {
+public class RequestListBuilder {
 
-    final IStateInt nbVarInstantiated;
-    final IntVar variable;
+    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: RequestImmutableArrayList, 2: RequestTypedImmutableArrayList, ...
 
-    public IsInstantiated(IEnvironment environment, IntVar variable) {
-        super(environment);
-        nbVarInstantiated = environment.makeInt();
-        this.variable = variable;
+    protected RequestListBuilder() {
     }
 
-    @Override
-    boolean isValid() {
-        return variable.instantiated();
+    /**
+     * Builds and returns the preset IRequestList object.
+     *
+     * @param environment bracktrackable environment
+     * @param <R>         type of request
+     * @return a implementation of IRequestList
+     */
+    public static <R extends IRequest> IRequestList<R> preset(IEnvironment environment) {
+        switch (_DEFAULT) {
+            case 1:
+                return new RequestImmutableArrayList();
+            case 2:
+                return new RequestTypedImmutableArrayList();
+            case 3:
+                return new RequestTypedBitSetArrayList<R>(environment);
+            default:
+                return arraylist(environment);
+        }
     }
 
-    @Override
-    boolean alwaysValid() {
-        return true;
-    }
-
-    @Override
-    void update(ConditionnalView view, int evtMask) {
+    public static <R extends IRequest> IRequestList<R> arraylist(IEnvironment environment) {
+        return new RequestArrayList<R>(environment);
     }
 }

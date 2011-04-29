@@ -1,21 +1,18 @@
 package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.IRequest;
+import solver.requests.list.IRequestList;
+import solver.requests.list.RequestListBuilder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.domain.delta.GraphDelta;
 import solver.variables.domain.delta.IGraphDelta;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.IVariableGraph;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.views.IView;
-import solver.views.list.IViewList;
-import solver.views.list.ViewListBuilder;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,7 +36,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
 	public GraphVar(IEnvironment env) {
     	environment = env;
-    	views = ViewListBuilder.preset(env);
+    	requests = RequestListBuilder.preset(env);
     }
 
 	//***********************************************************************************
@@ -123,9 +120,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     ///////////// Attributes related to Variable ////////////
 	protected String name;
     protected Solver solver;
-    protected boolean enqueued;
-    protected IViewList<IView> views;
-    protected IStateInt firstEntailedView;
+    protected IRequestList<IRequest> requests;
     protected int modificationEvents;
     protected boolean reactOnModification;
 	/////////////////////////////////////////////////////////
@@ -138,7 +133,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     }
     @Override
     public int nbConstraints() {
-        return views.size();
+        return requests.size();
     }
     ///////////////////////////////////////////////////////////////////////
 
@@ -146,16 +141,16 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
     ////////////////////// Method related to Variable /////////////////////
     @Override
-    public void updateEntailment(IView view) {
-    	views.setPassive(view);
+    public void updateEntailment(IRequest request) {
+    	requests.setPassive(request);
     }
     @Override
-    public void addView(IView view) {
-    	views.addView(view);
+    public void addRequest(IRequest request) {
+    	requests.addRequest(request);
     }
     @Override
-    public void deleteView(IView view) {
-    	views.deleteView(view);
+    public void deleteRequest(IRequest request) {
+    	requests.deleteRequest(request);
     }
 
     @Override
@@ -183,11 +178,11 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     @Override
     public void notifyObservers(EventType e, ICause cause) throws ContradictionException {
     	if ((modificationEvents & e.mask) != 0) {
-            views.notifyButCause(cause, e, getDelta());
+            requests.notifyButCause(cause, e, getDelta());
         }
     }
     @Override
-	public int nbViews() {
-		return views.cardinality();
+	public int nbRequests() {
+		return requests.cardinality();
 	}
 }

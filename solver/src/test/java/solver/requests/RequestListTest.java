@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views;
+package solver.requests;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
@@ -36,8 +36,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.views.list.IViewList;
-import solver.views.list.ViewListBuilder;
+import solver.requests.list.IRequestList;
+import solver.requests.list.RequestListBuilder;
 
 /**
  * <br/>
@@ -45,15 +45,15 @@ import solver.views.list.ViewListBuilder;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public class ViewListTest {
+public class RequestListTest {
 
-    private static class MockView extends AbstractView {
+    private static class MockRequest extends AbstractRequest {
 
         Propagator p;
         int vidx;
         int mask;
 
-        private MockView(Propagator p, int vidx) {
+        private MockRequest(Propagator p, int vidx) {
             super(p, null, vidx);
             this.p = p;
             this.vidx = vidx;
@@ -94,7 +94,7 @@ public class ViewListTest {
         }
 
         @Override
-        public void propagateOnView(IView iView, int idxVarInProp, int mask) throws ContradictionException {
+        public void propagateOnRequest(IRequest iRequest, int idxVarInProp, int mask) throws ContradictionException {
         }
 
         @Override
@@ -111,48 +111,48 @@ public class ViewListTest {
     @Test(groups = "1s")
     public void testArrayList() {
         IEnvironment env = new EnvironmentTrailing();
-        ViewListBuilder._DEFAULT = 0;
-        IViewList<MockView> list = ViewListBuilder.preset(env);
+        RequestListBuilder._DEFAULT = 0;
+        IRequestList<MockRequest> list = RequestListBuilder.preset(env);
 
-        MockView[] views = new MockView[3];
-        for (int i = 0; i < views.length; i++) {
-            views[i] = new MockView(new MockPropagator(env, 2), i);
-            list.addView(views[i]);
+        MockRequest[] requests = new MockRequest[3];
+        for (int i = 0; i < requests.length; i++) {
+            requests[i] = new MockRequest(new MockPropagator(env, 2), i);
+            list.addRequest(requests[i]);
         }
 
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
 
         env.worldPush();
-        list.setPassive(views[0]);
-        Assert.assertEquals(views[0].getIdxInVar(), 2);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 0);
+        list.setPassive(requests[0]);
+        Assert.assertEquals(requests[0].getIdxInVar(), 2);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 0);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPush();
-        list.setPassive(views[2]);
-        Assert.assertEquals(views[0].getIdxInVar(), 2);
-        Assert.assertEquals(views[1].getIdxInVar(), 0);
-        Assert.assertEquals(views[2].getIdxInVar(), 1);
+        list.setPassive(requests[2]);
+        Assert.assertEquals(requests[0].getIdxInVar(), 2);
+        Assert.assertEquals(requests[1].getIdxInVar(), 0);
+        Assert.assertEquals(requests[2].getIdxInVar(), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 1);
 
         env.worldPop();
-        Assert.assertEquals(views[0].getIdxInVar(), 2);
-        Assert.assertEquals(views[1].getIdxInVar(), 0);
-        Assert.assertEquals(views[2].getIdxInVar(), 1);
+        Assert.assertEquals(requests[0].getIdxInVar(), 2);
+        Assert.assertEquals(requests[1].getIdxInVar(), 0);
+        Assert.assertEquals(requests[2].getIdxInVar(), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPop();
-        Assert.assertEquals(views[0].getIdxInVar(), 2);
-        Assert.assertEquals(views[1].getIdxInVar(), 0);
-        Assert.assertEquals(views[2].getIdxInVar(), 1);
+        Assert.assertEquals(requests[0].getIdxInVar(), 2);
+        Assert.assertEquals(requests[1].getIdxInVar(), 0);
+        Assert.assertEquals(requests[2].getIdxInVar(), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
     }
@@ -160,44 +160,44 @@ public class ViewListTest {
     @Test(groups = "1s")
     public void testLinkedList() {
         IEnvironment env = new EnvironmentTrailing();
-        ViewListBuilder._DEFAULT = 1;
-        IViewList<MockView> list = ViewListBuilder.preset(env);
+        RequestListBuilder._DEFAULT = 1;
+        IRequestList<MockRequest> list = RequestListBuilder.preset(env);
 
-        MockView[] views = new MockView[3];
-        for (int i = 0; i < views.length; i++) {
-            views[i] = new MockView(new MockPropagator(env, 2), i);
-            list.addView(views[i]);
+        MockRequest[] requests = new MockRequest[3];
+        for (int i = 0; i < requests.length; i++) {
+            requests[i] = new MockRequest(new MockPropagator(env, 2), i);
+            list.addRequest(requests[i]);
         }
 
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
 
         env.worldPush();
-        list.setPassive(views[0]);
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        list.setPassive(requests[0]);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
 
         env.worldPush();
-        list.setPassive(views[2]);
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        list.setPassive(requests[2]);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
 
         env.worldPop();
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
 
         env.worldPop();
-        Assert.assertEquals(views[0].getIdxInVar(), 0);
-        Assert.assertEquals(views[1].getIdxInVar(), 1);
-        Assert.assertEquals(views[2].getIdxInVar(), 2);
+        Assert.assertEquals(requests[0].getIdxInVar(), 0);
+        Assert.assertEquals(requests[1].getIdxInVar(), 1);
+        Assert.assertEquals(requests[2].getIdxInVar(), 2);
         Assert.assertEquals(list.size(), 3);
     }
 

@@ -28,7 +28,7 @@ package solver.propagation.engines.comparators;
 
 import gnu.trove.TObjectIntHashMap;
 import solver.constraints.Constraint;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -39,7 +39,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrOrderC implements Comparator<IView>, Serializable {
+public class IncrOrderC implements Comparator<IRequest>, Serializable {
 
     final TObjectIntHashMap<Constraint> criteria;
 
@@ -51,7 +51,7 @@ public class IncrOrderC implements Comparator<IView>, Serializable {
     }
 
     @Override
-    public int compare(IView o1, IView o2) {
+    public int compare(IRequest o1, IRequest o2) {
         return criteria.get(o1.getPropagator().getConstraint()) - criteria.get(o2.getPropagator().getConstraint());
     }
 

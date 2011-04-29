@@ -24,36 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views;
+package solver.requests;
 
 import solver.constraints.propagators.Propagator;
 import solver.propagation.engines.IPropagationEngine;
 import solver.variables.Variable;
 
 /**
- * An abstract view, for basic service implementation of a IView.
+ * An abstract request, for basic service implementation of a IRequest.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-abstract class AbstractView<V extends Variable, P extends Propagator<V>> implements IView<V> {
+abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
 
-    protected final V variable; // Variable of the view
-    protected final P propagator; // Propagator of the view
+    protected final V variable; // Variable of the request
+    protected final P propagator; // Propagator of the request
     protected IPropagationEngine engine;
 
-    protected int index = -1; // index of the view in the engine
+    protected int index = -1; // index of the request in the engine
 
     protected int gIndex = -1; // index of the group in the engine
 
     protected final int idxVarInProp; // index of the variable within the propagatro
 
-    protected int idxInVar; // current index of the view within variable view list
+    protected int idxInVar; // current index of the request within variable request list
 
     protected boolean enqueued;
 
-    AbstractView(P propagator, V variable, int idxInProp) {
+    AbstractRequest(P propagator, V variable, int idxInProp) {
         this.propagator = propagator;
         this.variable = variable;
         this.idxVarInProp = idxInProp;
@@ -127,13 +127,13 @@ abstract class AbstractView<V extends Variable, P extends Propagator<V>> impleme
     @Override
     public void enqueue() {
         enqueued = true;
-        propagator.incNbViewEnqued();
+        propagator.incNbRequestEnqued();
     }
 
     @Override
     public void deque() {
         enqueued = false;
-        propagator.decNbViewEnqued();
+        propagator.decNbRequestEnqued();
     }
 
     @Override

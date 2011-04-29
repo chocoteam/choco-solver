@@ -27,7 +27,7 @@
 package solver.propagation.engines.comparators;
 
 import solver.variables.IntVar;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrDomDeg<V extends IntVar> implements Comparator<IView<V>>, Serializable {
+public class IncrDomDeg<V extends IntVar> implements Comparator<IRequest<V>>, Serializable {
 
     private static final IncrDomDeg singleton = new IncrDomDeg();
 
@@ -50,14 +50,14 @@ public class IncrDomDeg<V extends IntVar> implements Comparator<IView<V>>, Seria
     }
 
     @Override
-    public int compare(IView<V> o1, IView<V> o2) {
-        if (o1.getVariable().nbViews() == 0) {
+    public int compare(IRequest<V> o1, IRequest<V> o2) {
+        if (o1.getVariable().nbRequests() == 0) {
             return 1;
-        } else if (o2.getVariable().nbViews() == 0) {
+        } else if (o2.getVariable().nbRequests() == 0) {
             return -1;
         } else {
-            return o1.getVariable().getDomainSize() / o1.getVariable().nbViews()
-                    - o2.getVariable().getDomainSize() / o2.getVariable().nbViews();
+            return o1.getVariable().getDomainSize() / o1.getVariable().nbRequests()
+                    - o2.getVariable().getDomainSize() / o2.getVariable().nbRequests();
         }
     }
 

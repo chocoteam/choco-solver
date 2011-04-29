@@ -32,12 +32,12 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.IView;
-import solver.views.list.IViewList;
-import solver.views.list.ViewListBuilder;
+import solver.requests.IRequest;
+import solver.requests.list.RequestListBuilder;
 
 import java.util.BitSet;
 
@@ -63,9 +63,9 @@ public final class BoolVarImpl implements BoolVar {
     public IIntDomain domain;
 
     /**
-     * List of views
+     * List of requests
      */
-    protected final IViewList views;
+    protected final IRequestList requests;
 
     protected int modificationEvents;
 
@@ -78,7 +78,7 @@ public final class BoolVarImpl implements BoolVar {
     public BoolVarImpl(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = ViewListBuilder.preset(solver.getEnvironment());
+        requests = RequestListBuilder.preset(solver.getEnvironment());
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -94,8 +94,8 @@ public final class BoolVarImpl implements BoolVar {
         return heuristicVal;
     }
 
-    public void updateEntailment(IView view) {
-        views.setPassive(view);
+    public void updateEntailment(IRequest request) {
+        requests.setPassive(request);
     }
 
     /**
@@ -356,32 +356,32 @@ public final class BoolVarImpl implements BoolVar {
     @Override
     public void notifyObservers(EventType e, ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
-            views.notifyButCause(cause, e, domain.getDelta());
+            requests.notifyButCause(cause, e, domain.getDelta());
         }
     }
 
     @Override
-    public void addView(IView view) {
-        views.addView(view);
+    public void addRequest(IRequest request) {
+        requests.addRequest(request);
     }
 
     @Override
-    public void deleteView(IView view) {
-        views.deleteView(view);
+    public void deleteRequest(IRequest request) {
+        requests.deleteRequest(request);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public int nbConstraints() {
-        return views.size();
+        return requests.size();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     @Override
-    public int nbViews() {
-        return views.cardinality();
+    public int nbRequests() {
+        return requests.cardinality();
     }
 
     /**

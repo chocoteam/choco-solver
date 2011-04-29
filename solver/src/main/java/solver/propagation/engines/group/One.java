@@ -27,7 +27,7 @@
 package solver.propagation.engines.group;
 
 import solver.exception.ContradictionException;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Comparator;
 
@@ -39,19 +39,19 @@ import java.util.Comparator;
  */
 final class One extends SortedOne {
 
-    public One(IView[] views, Comparator<IView> comparator) {
-        super(views, comparator);
+    public One(IRequest[] requests, Comparator<IRequest> comparator) {
+        super(requests, comparator);
     }
 
     @Override
     public boolean fixpoint() throws ContradictionException {
         int index = toPropagate.nextSetBit(0);
         if (index > -1) {
-            lastPoppedView = views[index];
+            lastPoppedRequest = requests[index];
             toPropagate.set(index, false);
-            lastPoppedView.deque();
+            lastPoppedRequest.deque();
             popped++;
-            lastPoppedView.filter();
+            lastPoppedRequest.filter();
             return toPropagate.isEmpty();
         }
         return true;

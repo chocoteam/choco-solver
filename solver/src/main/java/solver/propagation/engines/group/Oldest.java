@@ -30,11 +30,11 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * An implementation of <code>IPropagationEngine</code>.
- * It deals with 2 main types of <code>IView</code>s.
+ * It deals with 2 main types of <code>IRequest</code>s.
  * Ones are intialized once (at the end of the list).
  * <p/>
  * Created by IntelliJ IDEA.
@@ -43,49 +43,49 @@ import solver.views.IView;
  */
 public final class Oldest extends AFixpointReacher {
 
-    protected IView lastPoppedView;
+    protected IRequest lastPoppedRequest;
 
-    protected FixSizeCircularQueue<IView> toPropagate;
+    protected FixSizeCircularQueue<IRequest> toPropagate;
 
     public Oldest(int nbElement) {
         super(Queue.get());
-        toPropagate = new FixSizeCircularQueue<IView>(nbElement);
+        toPropagate = new FixSizeCircularQueue<IRequest>(nbElement);
     }
 
     @Override
     public boolean fixpoint() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            lastPoppedView = toPropagate.pop();
-            lastPoppedView.deque();
+            lastPoppedRequest = toPropagate.pop();
+            lastPoppedRequest.deque();
             popped++;
-            lastPoppedView.filter();
+            lastPoppedRequest.filter();
         }
         return true;
     }
 
     @Override
-    public void update(IView view) {
+    public void update(IRequest request) {
         update++;
-        if (!view.enqueued()) {
-            toPropagate.add(view);
-            view.enqueue();
+        if (!request.enqueued()) {
+            toPropagate.add(request);
+            request.enqueue();
             pushed++;
         }
 
     }
 
     @Override
-    public boolean remove(IView view) {
-        view.deque();
-        toPropagate.remove(view);
+    public boolean remove(IRequest request) {
+        request.deque();
+        toPropagate.remove(request);
         return toPropagate.isEmpty();
     }
 
     @Override
     public void flushAll() {
         while (!toPropagate.isEmpty()) {
-            lastPoppedView = toPropagate.pop();
-            lastPoppedView.deque();
+            lastPoppedRequest = toPropagate.pop();
+            lastPoppedRequest.deque();
         }
     }
 

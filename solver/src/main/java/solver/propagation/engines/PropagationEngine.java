@@ -34,14 +34,14 @@ import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.util.Arrays;
 import java.util.Comparator;
 
 /**
  * An implementation of <code>IPropagationEngine</code>.
- * It deals with 2 main types of <code>IView</code>s.
+ * It deals with 2 main types of <code>IRequest</code>s.
  * Ones are intialized one (at the end of the list).
  * <p/>
  * Created by IntelliJ IDEA.
@@ -51,15 +51,15 @@ import java.util.Comparator;
 public final class PropagationEngine implements IPropagationEngine {
 
 
-    protected IView[] views = new IView[16];
+    protected IRequest[] requests = new IRequest[16];
 
-    protected int offset = 0; // index of the last "common" view -- after that index, one can find initialization views
+    protected int offset = 0; // index of the last "common" request -- after that index, one can find initialization requests
 
     protected int size = 0;
 
-    protected IView lastPoppedView;
+    protected IRequest lastPoppedRequest;
 
-    protected Comparator<IView> comparator = IncrArityP.get();
+    protected Comparator<IRequest> comparator = IncrArityP.get();
 
     protected Policy policy = Policy.FIXPOINT;
 
@@ -76,30 +76,30 @@ public final class PropagationEngine implements IPropagationEngine {
      * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
      */
     public void init() {
-        IView[] tmp = views;
-        views = new IView[size];
-        System.arraycopy(tmp, 0, views, 0, size);
+        IRequest[] tmp = requests;
+        requests = new IRequest[size];
+        System.arraycopy(tmp, 0, requests, 0, size);
 
-        Arrays.sort(views, offset, size, IncrPriorityP.get()); // first, sort initialization views
-        IView view;
+        Arrays.sort(requests, offset, size, IncrPriorityP.get()); // first, sort initialization requests
+        IRequest request;
         int i;
-        // initialization views are also enqued to be treated at initial propagation
+        // initialization requests are also enqued to be treated at initial propagation
         for (i = offset; i < size; i++) {
-            view = views[i];
-            view.setIndex(i);
-            view.enqueue();
+            request = requests[i];
+            request.setIndex(i);
+            request.enqueue();
         }
         addGroup(new Group(Predicate.TRUE, comparator, policy));
-        // first we set view to one group
+        // first we set request to one group
         int j;
         for (i = 0; i < offset; i++) {
-            lastPoppedView = views[i];
+            lastPoppedRequest = requests[i];
             j = 0;
             // look for the first right group
-            while (!groups[j].getPredicate().eval(lastPoppedView)) {
+            while (!groups[j].getPredicate().eval(lastPoppedRequest)) {
                 j++;
             }
-            groups[j].addView(lastPoppedView);
+            groups[j].addRequest(lastPoppedRequest);
         }
         // then intialize groups
         for (j = 0; j < nbGroup; j++) {
@@ -108,28 +108,28 @@ public final class PropagationEngine implements IPropagationEngine {
 
 
 //        addGroup(new Group(Predicate.TRUE, comparator, policy));
-//        Comparator<IView> _comp = comparator;
+//        Comparator<IRequest> _comp = comparator;
 //        for (i = nbGroup - 2; i >= 0; i--) {
 //            _comp = new Cond(groups[i].getPredicate(), groups[i].getComparator(), _comp);
 //        }
-//        Arrays.sort(views, 0, offset, _comp);
+//        Arrays.sort(requests, 0, offset, _comp);
 //        int from = 0;
 //        int to = 0;
 //        int idxInG = 0;
 //        int g = 0;
 //        while (to < offset) {
-//            lastPoppedView = views[to];
-//            if (!groups[g].getPredicate().eval(lastPoppedView)) {
-//                groups[g].make(Arrays.copyOfRange(views, from, to), g);
+//            lastPoppedRequest = requests[to];
+//            if (!groups[g].getPredicate().eval(lastPoppedRequest)) {
+//                groups[g].make(Arrays.copyOfRange(requests, from, to), g);
 //                g++;
 //                from = to;
 //                idxInG = 0;
 //            }
-//            lastPoppedView.setGroup(g);
-//            lastPoppedView.setIndex(idxInG++);
+//            lastPoppedRequest.setGroup(g);
+//            lastPoppedRequest.setIndex(idxInG++);
 //            to++;
 //        }
-//        groups[g].make(Arrays.copyOfRange(views, from, to), g);
+//        groups[g].make(Arrays.copyOfRange(requests, from, to), g);
 //        nbGroup = ++g;
 
         switch (deal) {
@@ -151,28 +151,28 @@ public final class PropagationEngine implements IPropagationEngine {
         Propagator[] props = constraint.propagators;
         nbI += props.length;
         for (int p = 0; p < nbI; p++) {
-            nbV += props[p].nbViews();
+            nbV += props[p].nbRequests();
         }
-        IView[] tmp = views;
+        IRequest[] tmp = requests;
         // ensure capacity
-        while (views.length < size + (nbV + nbI)) {
-            views = new IView[tmp.length * 2];
-            System.arraycopy(tmp, 0, views, 0, size);
-            tmp = views;
+        while (requests.length < size + (nbV + nbI)) {
+            requests = new IRequest[tmp.length * 2];
+            System.arraycopy(tmp, 0, requests, 0, size);
+            tmp = requests;
         }
-        System.arraycopy(tmp, offset, views, offset + nbV, size - offset);
+        System.arraycopy(tmp, offset, requests, offset + nbV, size - offset);
 
         int k = size + nbV;
         for (int p = 0; p < props.length; p++, k++) {
             Propagator prop = props[p];
-            // "common" views
-            for (int i = 0; i < prop.nbViews(); i++, offset++) {
-                views[offset] = prop.getView(i);
-                views[offset].setPropagationEngine(this);
+            // "common" requests
+            for (int i = 0; i < prop.nbRequests(); i++, offset++) {
+                requests[offset] = prop.getRequest(i);
+                requests[offset].setPropagationEngine(this);
             }
-            // intitialization view
-            views[k] = prop.getView(-1);
-            views[k].setPropagationEngine(this);
+            // intitialization request
+            requests[k] = prop.getRequest(-1);
+            requests[k].setPropagationEngine(this);
         }
         size = k;
     }
@@ -200,12 +200,12 @@ public final class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void setDefaultComparator(Comparator<IView> comparator) {
+    public void setDefaultComparator(Comparator<IRequest> comparator) {
         this.comparator = comparator;
     }
 
     @Override
-    public Comparator<IView> getDefaultComparator() {
+    public Comparator<IRequest> getDefaultComparator() {
         return comparator;
     }
 
@@ -217,9 +217,9 @@ public final class PropagationEngine implements IPropagationEngine {
     @Override
     public void initialPropagation() throws ContradictionException {
         for (int i = offset; i < size; i++) {
-            lastPoppedView = views[i];
-            lastPoppedView.deque();
-            lastPoppedView.filter();
+            lastPoppedRequest = requests[i];
+            lastPoppedRequest.deque();
+            lastPoppedRequest.filter();
         }
         engine.fixPoint();
     }
@@ -231,14 +231,14 @@ public final class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void update(IView view) {
-        engine.update(view);
+    public void update(IRequest request) {
+        engine.update(request);
 
     }
 
     @Override
-    public void remove(IView view) {
-        engine.remove(view);
+    public void remove(IRequest request) {
+        engine.remove(request);
     }
 
     @Override
@@ -257,7 +257,7 @@ public final class PropagationEngine implements IPropagationEngine {
 
 
     @Override
-    public int getNbViews() {
+    public int getNbRequests() {
         return size;
     }
 

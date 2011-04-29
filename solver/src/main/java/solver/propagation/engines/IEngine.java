@@ -27,7 +27,7 @@
 package solver.propagation.engines;
 
 import solver.exception.ContradictionException;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -38,7 +38,7 @@ import solver.views.IView;
 public interface IEngine {
 
     void fixPoint() throws ContradictionException;
-    void update(IView view);
-    void remove(IView view);
+    void update(IRequest request);
+    void remove(IRequest request);
     void flushAll();
 }

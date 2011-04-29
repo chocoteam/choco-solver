@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.views;
+package solver.requests;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
@@ -34,10 +34,10 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.views.conditions.AbstractCondition;
+import solver.requests.conditions.AbstractCondition;
 
 /**
- * A conditionnal view that call run filter under conditions.
+ * A conditionnal request that call run filter under conditions.
  * It stores every events occuring on the declared variable, all branch long, until a valid call to filter
  * is done.
  * <p/>
@@ -46,7 +46,7 @@ import solver.views.conditions.AbstractCondition;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class ConditionnalView<P extends Propagator<IntVar>> extends AbstractView<IntVar, P> {
+public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractRequest<IntVar, P> {
 
     int timestamp; // timestamp of the last clear call -- for lazy clear
 
@@ -58,11 +58,11 @@ public class ConditionnalView<P extends Propagator<IntVar>> extends AbstractView
 
     final IStateInt first, last; // regarding "removedValues", point out the interval not propagated
 
-    int frozenFirst, frozenLast; // same as previous while the view is frozen, to allow "concurrent modifications"
+    int frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
 
     int dLast; // regarding variable delta domain, point out last already recorded value
 
-    public ConditionnalView(P propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
+    public ConditionnalRequest(P propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
         super(propagator, variable, idxInProp);
         this.condition = condition;
         evtmask = environment.makeInt();
@@ -89,7 +89,7 @@ public class ConditionnalView<P extends Propagator<IntVar>> extends AbstractView
         int evtmask_ = evtmask.get();
         evtmask.set(0); // and clean up current mask
         propagator.filterCall++;
-        propagator.propagateOnView(this, idxVarInProp, evtmask_);
+        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
     }
 
     @Override

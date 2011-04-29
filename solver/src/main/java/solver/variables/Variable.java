@@ -30,7 +30,7 @@ package solver.variables;
 import solver.ICause;
 import solver.explanations.Explanation;
 import solver.variables.domain.delta.IDelta;
-import solver.views.IView;
+import solver.requests.IRequest;
 
 import java.io.Serializable;
 
@@ -41,7 +41,7 @@ import java.io.Serializable;
 public interface Variable<D extends IDelta> extends solver.Observable<ICause, EventType>, Serializable {
 
     //todo: to complete
-    void updateEntailment(IView view);
+    void updateEntailment(IRequest request);
 
     /**
      * Indicates wether <code>this</code> is instantiated (see implemetations to know what instantiation means).
@@ -62,17 +62,17 @@ public interface Variable<D extends IDelta> extends solver.Observable<ICause, Ev
 
     //todo : to complete
 
-    void addView(IView view);
+    void addRequest(IRequest request);
 
     //todo : to complete
 
-    void deleteView(IView view);
+    void deleteRequest(IRequest request);
 
-    int nbViews();
+    int nbRequests();
 
     /**
      * Returns the number of constraints involving <code>this</code>
-     * TODO: MostConstrained: count views instead of constraints
+     * TODO: MostConstrained: count requests instead of constraints
      *
      * @return the number of constraints of <code>this</code>
      */
