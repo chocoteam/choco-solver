@@ -448,6 +448,11 @@ public final class IntVarImpl implements IntVar {
         requests.deleteRequest(request);
     }
 
+    @Override
+    public IRequest[] getRequests() {
+        return requests.toArray();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public int nbConstraints() {

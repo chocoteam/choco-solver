@@ -48,6 +48,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
 
     AbstractPropIntLinComb prop, negprop;
 
+    long fails;
 
     public IntLinCombDecision(Solver solver) {
         super(new IntVar[0], new int[0], 0, Operator.EQ, 0, solver, null);
@@ -143,5 +144,13 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     @Override
     public String toString() {
         return String.format("%s (%d)", prop.toString(), branch);
+    }
+
+    public void incFail() {
+        fails++;
+    }
+
+    public long getFails() {
+        return fails;
     }
 }

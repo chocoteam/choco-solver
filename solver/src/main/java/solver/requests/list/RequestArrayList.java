@@ -31,10 +31,12 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IDelta;
-import solver.requests.IRequest;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -119,5 +121,10 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
                 }
             }
         }
+    }
+
+    @Override
+    public IRequest[] toArray() {
+        return Arrays.copyOfRange(requests,0,firstPassive.get());
     }
 }

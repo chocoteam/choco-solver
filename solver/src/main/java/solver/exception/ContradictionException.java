@@ -72,6 +72,9 @@ public final class ContradictionException extends Exception {
 
     private ContradictionException set(ICause c, Variable v, String s) {
         this.c = c;
+        if(c != null){
+            c.incFail();
+        }
         this.v = v;
         this.s = s;
         return this;

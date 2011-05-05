@@ -29,6 +29,7 @@ package solver.variables;
 
 import solver.ICause;
 import solver.explanations.Explanation;
+import solver.requests.list.IRequestList;
 import solver.variables.domain.delta.IDelta;
 import solver.requests.IRequest;
 
@@ -67,6 +68,8 @@ public interface Variable<D extends IDelta> extends solver.Observable<ICause, Ev
     //todo : to complete
 
     void deleteRequest(IRequest request);
+
+    IRequest[] getRequests();
 
     int nbRequests();
 

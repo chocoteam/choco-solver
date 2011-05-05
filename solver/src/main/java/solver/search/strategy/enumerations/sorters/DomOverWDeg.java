@@ -24,46 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters;
 
-package solver.search.strategy.decision;
-
-import solver.constraints.Constraint;
-import solver.search.strategy.decision.fast.IFastDecision;
-import solver.variables.Variable;
+import solver.constraints.propagators.Propagator;
+import solver.requests.IRequest;
+import solver.variables.IntVar;
 
 /**
- * A part implementation of <code>Deduction</code>. It implements the #setPrevious(Deduction)
- * and #getPrevious() methods
+ * Naive implementation of
+ * "Boosting systematic search by weighting constraints"
+ * F.Boussemart, F.Hemery, C.Lecoutre and L.Sais
+ *
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19 aožt 2010
+ * @since 04/05/11
  */
-public abstract class AbstractDecision<V extends Variable> implements IFastDecision<V> {
+public class DomOverWDeg extends AbstractSorter<IntVar> {
 
-    long fails;
-
-    protected Decision previous;
-
-    public final void setPrevious(Decision decision) {
-        this.previous = decision;
+    public long weight(IntVar v) {
+        IRequest[] requests = v.getRequests();
+        long w = 0;
+        for (int i = 0; i < v.nbRequests(); i++) {
+            Propagator prop = requests[i].getPropagator();
+            if (prop.arity() > 1) {
+                w += prop.getFails();
+            }
+        }
+        return w;
     }
 
-    public final Decision getPrevious() {
-        return previous;
-    }
 
     @Override
-    public Constraint getConstraint() {
-        return null;
+    public int compare(IntVar o1, IntVar o2) {
+        long w1 = weight(o1);
+        long w2 = weight(o2);
+        long s1 = o1.getDomainSize();
+        long s2 = o2.getDomainSize();
+        long d1 = o1.nbRequests();
+        long d2 = o2.nbRequests();
+        return (int) ((s1 * w2 * d2) - (s2 * w1 * d1));
     }
-
-    public void incFail(){
-        fails++;
-    }
-
-    public long getFails(){
-        return fails;
-    }
-
 }

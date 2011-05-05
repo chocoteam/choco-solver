@@ -371,6 +371,11 @@ public final class BoolVarImpl implements BoolVar {
         requests.deleteRequest(request);
     }
 
+    @Override
+    public IRequest[] getRequests() {
+        return requests.toArray();
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public int nbConstraints() {

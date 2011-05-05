@@ -181,6 +181,11 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     }
 
     @Override
+    public IRequest[] getRequests() {
+        return requests.toArray();
+    }
+
+    @Override
     public Explanation explain() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }

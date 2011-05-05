@@ -31,6 +31,7 @@ import choco.kernel.memory.IEnvironment;
 import solver.search.strategy.enumerations.MyCollection;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
 import solver.search.strategy.selectors.AdapterValueIIterator;
 import solver.search.strategy.selectors.VariableSelector;
@@ -324,7 +325,21 @@ public final class StrategyFactory {
                 MyCollection.Type.DYN);
     }
 
-	public static AbstractStrategy randomArcs(DirectedGraphVar vars, IEnvironment env) {
-		return new DigraphStrategy(vars);
-	}
+    public static StrategyVarValAssign domwdegMindom(IntVar[] vars, IEnvironment environment) {
+        for (IntVar var : vars) {
+            var.setHeuristicVal(HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB()));
+        }
+        LinkedList<AbstractSorter<IntVar>> sorters = new LinkedList<AbstractSorter<IntVar>>();
+        sorters.add(new solver.search.strategy.enumerations.sorters.DomOverWDeg());
+        return new StrategyVarValAssign(vars,
+                sorters,
+                ValidatorFactory.instanciated,
+                environment,
+                MyCollection.Type.DYN);
+    }
+
+
+    public static AbstractStrategy randomArcs(DirectedGraphVar vars, IEnvironment env) {
+        return new DigraphStrategy(vars);
+    }
 }

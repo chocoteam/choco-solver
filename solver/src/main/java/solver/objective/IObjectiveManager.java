@@ -45,12 +45,14 @@ import solver.variables.EventType;
  * In satisfaction, no objective variable is defined, the methods are empty.
  *
  * @author Charles Prud'homme
- * @since 27 juil. 2010
  * @see solver.objective.NoObjectiveManager
  * @see solver.objective.MaxObjectiveManager
  * @see solver.objective.MinObjectiveManager
+ * @since 27 juil. 2010
  */
 public abstract class IObjectiveManager implements ICause {
+
+    long fails;
 
     public abstract int getBestValue();
 
@@ -61,10 +63,11 @@ public abstract class IObjectiveManager implements ICause {
 
     /**
      * Updates the lower (or upper) bound of the objective variable, considering its best know value.
+     *
      * @param decision
      * @throws ContradictionException if this application leads to a contradiction  @param decision
      */
-    public void apply(Decision decision) throws ContradictionException{
+    public void apply(Decision decision) throws ContradictionException {
         decision.apply();
     }
 
@@ -82,5 +85,13 @@ public abstract class IObjectiveManager implements ICause {
     @Override
     public int getPropagationConditions() {
         return EventType.VOID.mask;
+    }
+
+    public void incFail() {
+        fails++;
+    }
+
+    public long getFails() {
+        return fails;
     }
 }

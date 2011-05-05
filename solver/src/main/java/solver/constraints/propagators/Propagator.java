@@ -114,6 +114,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final IStateInt arity; // arity of this -- number of uninstantiated variables
 
+    protected int fails;
+
     /**
      * Declaring constraint
      */
@@ -140,6 +142,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         arity = environment.makeInt(nbNi);
         linkToVariables();
+        fails = 0;
     }
 
     /**
@@ -307,5 +310,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void decArity(){
         assert(arity.get()>=0):"arity < 0";
         arity.add(-1);
+    }
+
+    public void incFail(){
+        fails++;
+    }
+
+    public long getFails(){
+        return fails;
     }
 }

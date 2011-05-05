@@ -109,6 +109,11 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
+    public IRequest[] getRequests() {
+        return var.getRequests();
+    }
+
+    @Override
     public int nbConstraints() {
         return var.nbConstraints();
     }

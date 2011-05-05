@@ -172,7 +172,8 @@ public class AirPlaneLanding extends AbstractProblem {
         });
 //        solver.set(StrategyFactory.inputOrderInDomainMin(planes, solver.getEnvironment()));
 
-        solver.set(StrategyFactory.firstFailInDomainMin(planes, solver.getEnvironment()));
+//        solver.set(StrategyFactory.firstFailInDomainMin(planes, solver.getEnvironment()));
+        solver.set(StrategyFactory.domwdegMindom(planes, solver.getEnvironment()));
 
 //        solver.getSearchLoop().getLimitsFactory().setTimeLimit(3000);
         solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);

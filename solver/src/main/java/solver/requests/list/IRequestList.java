@@ -84,4 +84,6 @@ public interface IRequestList<R extends IRequest> extends Serializable{
      * @param delta removed values implied by the event
      */
     void notifyButCause(ICause cause, EventType event, IDelta delta);
+
+    IRequest[] toArray();
 }

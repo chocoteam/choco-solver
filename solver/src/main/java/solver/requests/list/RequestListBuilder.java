@@ -53,12 +53,6 @@ public class RequestListBuilder {
      */
     public static <R extends IRequest> IRequestList<R> preset(IEnvironment environment) {
         switch (_DEFAULT) {
-            case 1:
-                return new RequestImmutableArrayList();
-            case 2:
-                return new RequestTypedImmutableArrayList();
-            case 3:
-                return new RequestTypedBitSetArrayList<R>(environment);
             default:
                 return arraylist(environment);
         }

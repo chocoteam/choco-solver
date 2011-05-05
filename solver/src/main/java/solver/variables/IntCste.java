@@ -32,11 +32,11 @@ import choco.kernel.common.util.iterators.OneValueIterator;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
-import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -196,6 +196,11 @@ public class IntCste implements IntVar {
     @Override
     public void deleteRequest(IRequest request) {
         //useless
+    }
+
+    @Override
+    public IRequest[] getRequests() {
+        return new IRequest[0];
     }
 
     @Override

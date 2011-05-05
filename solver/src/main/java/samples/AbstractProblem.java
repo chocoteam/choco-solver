@@ -83,6 +83,7 @@ public abstract class AbstractProblem {
             System.err.println("java " + this.getClass() + " [options...]");
             parser.printUsage(System.err);
             System.err.println();
+            System.exit(-1);
         }
     }
 
