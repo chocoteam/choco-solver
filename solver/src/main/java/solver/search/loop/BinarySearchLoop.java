@@ -28,15 +28,11 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.StringUtils;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.engines.IPropagationEngine;
-import solver.search.limits.TimeCacheThread;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.strategy.AbstractStrategy;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -54,11 +50,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     static final int stateAfterSolution = UP_BRANCH;
 
     @SuppressWarnings({"unchecked"})
-    BinarySearchLoop(Solver solver, IPropagationEngine pilotPropag, AbstractStrategy strategy) {
-        super(solver, pilotPropag, strategy);
-        if (LoggerFactory.getLogger(SearchLayout.class).isInfoEnabled()) {
-            this.searchLayout = new BSDefaultLayout(this);
-        }
+    BinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
+        super(solver,propEngine);
     }
 
     /**
@@ -67,15 +60,13 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            pilotPropag.initialPropagation();
+            propEngine.initialPropagation();
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);
-            pilotPropag.flushAll();
+            propEngine.flushAll();
             interrupt();
         }
-        measures.setInitialPropagationTimeCount(TimeCacheThread.currentTimeMillis - startingTime);
-        updateTimeCount();
         // call to HeuristicVal.update(Action.initial_propagation)
         strategy.init();
         moveTo(OPEN_NODE);
@@ -91,7 +82,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void openNode() {
         Decision tmp = decision;
-        updateTimeCount();
         decision = strategy.getDecision();
         if (decision != null) {
             decision.setPrevious(tmp);
@@ -104,11 +94,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
     protected void recordSolution() {
         //todo: checker d'Žtat
-        measures.incSolutionCount(1);
         solver.setFeasible(Boolean.TRUE);
         solutionpool.recordSolution(solver);
         objectivemanager.update();
-        searchLayout.onSolution();
         assert (ESat.TRUE.equals(solver.isSatisfied()));
         if (stopAtFirstSolution) {
             moveTo(RESUME);
@@ -116,6 +104,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         } else {
             moveTo(stateAfterSolution);
         }
+        smList.onSolution();
     }
 
     /**
@@ -144,7 +133,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      */
     @Override
     protected void downLeftBranch() {
-        searchLayout.onLeftBranch();
         downBranch();
     }
 
@@ -156,7 +144,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      */
     @Override
     protected void downRightBranch() {
-        searchLayout.onRightBranch();
         downBranch();
     }
 
@@ -166,12 +153,12 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             decision.buildNext();
             objectivemanager.apply(decision);
 
-            pilotPropag.fixPoint();
+            propEngine.fixPoint();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            measures.incFailCount(1);
-            pilotPropag.flushAll();
+            propEngine.flushAll();
             moveTo(UP_BRANCH);
+            smList.onContradiction();
         }
     }
 
@@ -194,7 +181,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             } else {
                 decision.free();
                 decision = decision.getPrevious();
-                measures.incFailCount(1);
             }
         }
     }
@@ -222,53 +208,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         }
     }
 
-    protected static final class BSDefaultLayout extends SearchLayout<BinarySearchLoop> {
-
-        public BSDefaultLayout(BinarySearchLoop searchLoop) {
-            super(searchLoop);
-        }
-
-        @Override
-        protected void onOpenNode() {
-        }
-
-        @Override
-        protected void onLeftBranch() {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("{}[L]{} //{}", new Object[]{
-                        StringUtils.pad("", searchLoop.env.getWorldIndex(), "."),
-                        searchLoop.decision.toString(), print(searchLoop.strategy.vars)});
-            }
-        }
-
-        @Override
-        protected void onRightBranch() {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("{}[R]{} //{}", new Object[]{
-                        StringUtils.pad("", searchLoop.env.getWorldIndex(), "."),
-                        searchLoop.decision.toString(), print(searchLoop.strategy.vars)});
-            }
-        }
-
-        @Override
-        protected void onSolution() {
-            if (LOGGER.isDebugEnabled()) {
-                searchLoop.updateTimeCount();
-                searchLoop.updatePropagationCount();
-                LOGGER.debug("- Solution #{} found. {} \n\t{}.",
-                        new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                                searchLoop.getMeasures().toOneLineString(),
-                                print(searchLoop.strategy.vars)}
-                );
-            }
-        }
-
-        @Override
-        protected void onClose() {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(searchLoop.measures.toString());
-            }
-        }
+    @Override
+    public String decisionToString() {
+        return decision.toString();
     }
-
 }

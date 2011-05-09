@@ -24,72 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.enumerations.sorters;
+package solver.search.loop.monitors;
 
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.requests.list.IRequestList;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.variables.IntVar;
+import solver.Constant;
+import solver.Solver;
 
 /**
- * Naive implementation of
- * "Boosting systematic search by weighting constraints"
- * F.Boussemart, F.Hemery, C.Lecoutre and L.Sais
- * <p/>
+ * Basic search monitor logger, which prints welcome message at the beginning od the search and
+ * search statistics at the end of the search.
+ *
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/05/11
+ * @since 09/05/11
  */
-public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
+public class LogBasic implements ISearchMonitor {
 
-    private int weight(IntVar v) {
-        IRequestList requests = v.getRequests();
-        int w = 0;
-        int card = requests.cardinality();
-        for (int i = 0; i < card; i++) {
-            Propagator prop = requests.get(i).getPropagator();
-            if (prop.arity() > 1) {
-                w += prop.getFails();
-            }
-        }
-        return w;
-    }
+    final Solver solver;
 
-
-    @Override
-    public int compare(IntVar o1, IntVar o2) {
-        int w1 = weight(o1);
-        int w2 = weight(o2);
-        int s1 = o1.getDomainSize();
-        int s2 = o2.getDomainSize();
-        int d1 = o1.nbRequests();
-        int d2 = o2.nbRequests();
-        return (s1 * w2 * d2) - (s2 * w1 * d1);
+    public LogBasic(Solver solver) {
+        this.solver = solver;
     }
 
     @Override
-    public void onContradiction() {
-        if (ContradictionException.EXCEPTION.c != null) {
-            ContradictionException.EXCEPTION.c.incFail();
+    public void beforeInitialize() {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(Constant.WELCOME_TITLE);
+            LOGGER.info(Constant.WELCOME_VERSION);
+            LOGGER.info(Constant.CALLER, solver.getName());
         }
     }
 
     @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
+    public void beforeClose() {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(solver.getSearchLoop().getMeasures().toString());
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-    @Override
-    public void beforeInitialize() {
-    }
 
     @Override
     public void afterInitialize() {
@@ -116,7 +90,15 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     }
 
     @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
     public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
     }
 
     @Override
@@ -132,15 +114,15 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     }
 
     @Override
+    public void onContradiction() {
+    }
+
+    @Override
     public void beforeRestart() {
     }
 
     @Override
     public void afterRestart() {
-    }
-
-    @Override
-    public void beforeClose() {
     }
 
     @Override

@@ -349,7 +349,7 @@ public final class FZNParser {
         );
         TerminalParser.parse(parser, instance);
         if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
-            solver.getSearchLoop().setSearchLayout(layout);
+            layout.setSearchLoop(solver.getSearchLoop());
         }
         return solver;
     }

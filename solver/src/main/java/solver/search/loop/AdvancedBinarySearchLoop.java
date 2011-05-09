@@ -27,14 +27,11 @@
 
 package solver.search.loop;
 
-import choco.kernel.common.util.tools.StringUtils;
 import choco.kernel.memory.IStateInt;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.strategy.AbstractStrategy;
 
 /**
  * <br/>
@@ -46,14 +43,9 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
 
     private IStateInt nbPrevisouDecisions;
 
-    private Decision previous;
-
-    AdvancedBinarySearchLoop(Solver solver, choco.kernel.memory.IEnvironment env, IPropagationEngine pilotPropag, AbstractStrategy strategy) {
-        super(solver, pilotPropag, strategy);
+    AdvancedBinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
+        super(solver, propEngine);
         nbPrevisouDecisions = env.makeInt();
-        if (LoggerFactory.getLogger(SearchLayout.class).isInfoEnabled()) {
-            this.searchLayout = new ABSDefaultLayout(this);
-        }
     }
 
     /**
@@ -77,19 +69,18 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                 int nbPrevDec = nbPrevisouDecisions.get();
                 if (nbPrevDec > 0) {
                     objectivemanager.apply(decision);
-                    previous = decision.getPrevious();
+                    Decision previous = decision.getPrevious();
                     for (int i = 0; i < nbPrevDec; i++) {
-                        searchLayout.onOpenNode();
                         previous.apply();
                         previous = previous.getPrevious();
                     }
-                    pilotPropag.fixPoint();
+                    propEngine.fixPoint();
                 }
                 recordSolution();
             } catch (ContradictionException e) {
-                measures.incFailCount(1);
-                pilotPropag.flushAll();
+                propEngine.flushAll();
                 moveTo(UP_BRANCH);
+                smList.onContradiction();
             }
         }
     }
@@ -104,24 +95,22 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
     protected void downLeftBranch() {
         env.worldPush();
         try {
-            searchLayout.onLeftBranch();
             decision.buildNext();
             objectivemanager.apply(decision);
             Decision prev = decision.getPrevious();
             int nbPrevDec = nbPrevisouDecisions.get();
             for (int i = 0; i < nbPrevDec; i++) {
-                searchLayout.onOpenNode();
                 prev.apply();
                 prev = prev.getPrevious();
             }
-            pilotPropag.fixPoint();
+            propEngine.fixPoint();
             nbPrevisouDecisions.set(0);
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            measures.incFailCount(1);
-            pilotPropag.flushAll();
+            propEngine.flushAll();
             nbPrevisouDecisions.add(1);
             moveTo(UP_BRANCH);
+            smList.onContradiction();
         }
 
     }
@@ -135,63 +124,8 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
     @Override
     protected void downRightBranch() {
         env.worldPush();
-        searchLayout.onRightBranch();
         decision.buildNext();
         nbPrevisouDecisions.add(1);
         moveTo(OPEN_NODE);
-    }
-
-    protected static final class ABSDefaultLayout extends SearchLayout<AdvancedBinarySearchLoop> {
-
-        public ABSDefaultLayout(AdvancedBinarySearchLoop searchLoop) {
-            super(searchLoop);
-        }
-
-        @Override
-        protected void onOpenNode() {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("{}[P]{} //{}", new Object[]{
-                        StringUtils.pad("", searchLoop.env.getWorldIndex(), "."),
-                        searchLoop.previous.toString(), print(searchLoop.strategy.vars)});
-            }
-        }
-
-        @Override
-        protected void onLeftBranch() {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("{}[L]{} //{}", new Object[]{
-                        StringUtils.pad("", searchLoop.env.getWorldIndex(), "."),
-                        searchLoop.decision.toString(), print(searchLoop.strategy.vars)});
-            }
-        }
-
-        @Override
-        protected void onRightBranch() {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("{}[R]{} //{}", new Object[]{
-                        StringUtils.pad("", searchLoop.env.getWorldIndex(), "."),
-                        searchLoop.decision.toString(), print(searchLoop.strategy.vars)});
-            }
-        }
-
-        @Override
-        protected  void onSolution() {
-            if (LOGGER.isDebugEnabled()) {
-                searchLoop.updateTimeCount();
-                searchLoop.updatePropagationCount();
-                LOGGER.debug("- Solution #{} found. {} \n\t{}.",
-                        new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                                searchLoop.getMeasures().toOneLineString(),
-                                print(searchLoop.strategy.vars)}
-                );
-            }
-        }
-
-        @Override
-        protected void onClose() {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(searchLoop.measures.toString());
-            }
-        }
     }
 }

@@ -24,24 +24,76 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.loop.monitors;
 
-package solver.search.measure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public interface ISolutionMeasures {
-	
-	/**
-	 * indicates if the search find at least one solution.
-	 */
-	boolean existsSolution();
-				
-	/**
-     * Get the solution count of the measure
-     * @return solution count
-     */
-    long getSolutionCount();
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 06/05/11
+ */
+public interface ISearchMonitor {
 
-	public void setSolutionCount(long solutionCount);
+    static Logger LOGGER = LoggerFactory.getLogger(ISearchMonitor.class);
 
-    public void incSolutionCount(long delta);
-    
+//    static int
+//            beforeInitialize = 1 << 1,
+//            afterInitialize = 1 << 2,
+//            beforeInitialPropagation = 1 << 3,
+//            afterInitialPropagation = 1 << 4,
+//            beforeOpenNode = 1 << 5,
+//            afterOpenNode = 1 << 6,
+//            onSolution = 1 << 7,
+//            beforeDownLeftBranch = 1 << 8,
+//            afterDownLeftBranch = 1 << 9,
+//            beforeDownRightBranch = 1 << 10,
+//            afterDownRightBranch = 1 << 11,
+//            beforeUpBranch = 1 << 12,
+//            afterUpBranch = 1 << 13,
+//            onContradiction = 1 << 14,
+//            beforeRestart = 1 << 15,
+//            afterRestart = 1 << 16,
+//            beforeClose = 1 << 17,
+//            afterClose = 1 << 18;
+
+//    int getMonitorMask();
+
+    void beforeInitialize();
+
+    void afterInitialize();
+
+    void beforeInitialPropagation();
+
+    void afterInitialPropagation();
+
+    void beforeOpenNode();
+
+    void afterOpenNode();
+
+    void onSolution();
+
+    void beforeDownLeftBranch();
+
+    void afterDownLeftBranch();
+
+    void beforeDownRightBranch();
+
+    void afterDownRightBranch();
+
+    void beforeUpBranch();
+
+    void afterUpBranch();
+
+    void onContradiction();
+
+    void beforeRestart();
+
+    void afterRestart();
+
+    void beforeClose();
+
+    void afterClose();
 }

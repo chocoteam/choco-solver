@@ -113,15 +113,15 @@ public class NotEqualX_YCTest {
         s.set(StrategyFactory.preset(vars, s.getEnvironment()));
 
         try {
-            s.getSearchLoop().pilotPropag.init();
-            s.getSearchLoop().pilotPropag.initialPropagation();
-            s.getSearchLoop().pilotPropag.fixPoint();
+            s.getSearchLoop().propEngine.init();
+            s.getSearchLoop().propEngine.initialPropagation();
+            s.getSearchLoop().propEngine.fixPoint();
             vars[0].instantiateTo(1, null);
-            s.getSearchLoop().pilotPropag.fixPoint();
+            s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 2);
             vars[1].removeValue(2, null);
-            s.getSearchLoop().pilotPropag.fixPoint();
+            s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 0);
         } catch (ContradictionException e) {

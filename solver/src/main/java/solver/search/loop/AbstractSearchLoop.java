@@ -31,16 +31,14 @@ import choco.kernel.memory.IEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Configuration;
-import solver.Constant;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
 import solver.objective.NoObjectiveManager;
 import solver.propagation.engines.IPropagationEngine;
 import solver.search.limits.LimitFactory;
-import solver.search.limits.TimeCacheThread;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
 import solver.search.solution.ISolutionPool;
 import solver.search.solution.SolutionPoolFactory;
@@ -104,7 +102,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IEnvironment env;
 
     /* Reference to the propagation pilot */
-    public IPropagationEngine pilotPropag;
+    public IPropagationEngine propEngine;
 
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
@@ -123,11 +121,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     final protected IMeasures measures;
 
-    /* Current time at the very beginning of the search  */
-    long startingTime;
-
-    /* Current memory uses at the very beginning of the search  */
-    long startingMemory;
 
     /* Previous solution count, to inform on state*/
     long previousSolutionCount = 0;
@@ -140,10 +133,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     ISolutionPool solutionpool;
 
-    /**
-     * Search monitor : print statistics every X ms -- can be null.
-     */
-    SearchMonitor searchmonitor;
+    SearchMonitorList smList;
 
     /**
      * Objective manager. Default object is no objective.
@@ -152,19 +142,20 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     private boolean alive;
 
-    protected SearchLayout searchLayout = SearchLayout.nolayout;
-
-
     @SuppressWarnings({"unchecked"})
-    public AbstractSearchLoop(Solver solver, IPropagationEngine pilotPropag, AbstractStrategy strategy
-    ) {
+    public AbstractSearchLoop(Solver solver, IPropagationEngine propEngine) {
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
-        this.pilotPropag = pilotPropag;
+        smList = new SearchMonitorList();
+        smList.add(this.measures);
         this.nextState = INIT;
-        this.strategy = strategy;
         this.limitsfactory = new LimitFactory(this);
+        this.propEngine = propEngine;
+    }
+
+    public void set(AbstractStrategy strategy) {
+        this.strategy = strategy;
     }
 
     /**
@@ -194,68 +185,69 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             switch (nextState) {
                 // INITIALIZE THE SEARCH LOOP
                 case INIT:
+                    smList.beforeInitialize();
                     initialize();
+                    smList.afterInitialize();
                     break;
                 // INITIAL PROPAGATION -- ROOT NODE FEASABILITY
                 case INITIAL_PROPAGATION:
+                    smList.beforeInitialPropagation();
                     initialPropagation();
+                    smList.afterInitialPropagation();
                     break;
                 // OPENING A NEW NODE IN THE TREE SEARCH
                 case OPEN_NODE:
-                    measures.incNodeCount(1);
+                    smList.beforeOpenNode();
                     openNode();
                     limitsfactory.hasEncounteredLimit();
+                    smList.afterOpenNode();
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_LEFT_BRANCH:
                     timeStamp++;
+                    smList.beforeDownLeftBranch();
                     downLeftBranch();
+                    smList.afterDownLeftBranch();
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
                 case DOWN_RIGHT_BRANCH:
                     timeStamp++;
+                    smList.beforeDownRightBranch();
                     downRightBranch();
+                    smList.afterDownRightBranch();
                     break;
                 // GOING UP IN THE TREE SEARCH TO RECONSIDER THE CURRENT DECISION
                 case UP_BRANCH:
-                    measures.incBacktrackCount(1);
+                    smList.beforeUpBranch();
                     upBranch();
                     limitsfactory.hasEncounteredLimit();
+                    smList.afterUpBranch();
                     break;
                 // RESTARTING THE SEARCH FROM A PREVIOUS NODE -- COMMONLY, THE ROOT NODE
                 case RESTART:
-                    measures.incRestartCount(1);
+                    smList.beforeRestart();
                     restartSearch();
+                    smList.afterRestart();
                     break;
             }
         }
-        return close();
+        smList.beforeClose();
+        boolean close = close();
+        smList.afterClose();
+        return close;
     }
 
     /**
      * Initializes the measures, just before the beginning of the search
      */
     public void initialize() {
-        LOGGER.info(Constant.WELCOME_TITLE);
-        LOGGER.info(Constant.WELCOME_VERSION);
-        LOGGER.info(Constant.CALLER, solver.getName());
 
         this.baseWorld = env.getWorldIndex();
-        measures.reset();
         previousSolutionCount = 0;
-        startingMemory = memoryUsedInMB();
-        startingTime = System.currentTimeMillis();
-        TimeCacheThread.currentTimeMillis = startingTime;
 
-        if (searchmonitor != null) {
-            searchmonitor.start();
-        }
-        pilotPropag.init();
+        propEngine.init();
         limitsfactory.init();
         this.nextState = INITIAL_PROPAGATION;
-        updateTimeCount();
-
-        measures.setInitialisation(TimeCacheThread.currentTimeMillis - startingTime);
     }
 
     /**
@@ -289,10 +281,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Close the search
      */
     public Boolean close() {
-        updateTimeCount();
-        updateMemoryUsed();
-        updatePropagationCount();
-        searchLayout.onClose();
         if (solutionpool.size() > 0 && (!stopAtFirstSolution)) {
             env.worldPopUntil(baseWorld);
             solutionpool.getBest().restore();
@@ -359,44 +347,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         return limitsfactory;
     }
 
-    static long memoryUsedInMB() {
-        return Runtime.getRuntime().freeMemory() / 1024 / 1024;
-    }
 
-    /**
-     * Updates the used memory
-     */
-    void updateMemoryUsed() {
-        measures.setMemoryUsed(memoryUsedInMB() - startingMemory);
-    }
-
-    void updatePropagationCount() {
-        Constraint[] cstrs = solver.getCstrs();
-        long c = 0;
-        for(int i = 0 ; i < cstrs.length; i++){
-            Propagator[] propagators = cstrs[i].propagators;
-            for(int j = 0; j < propagators.length; j++){
-                c +=propagators[j].filterCall;
-            }
-        }
-        measures.setPropagationsCount(c);
-
-    }
-
-    /**
-     * Updates the time recorder
-     */
-    void updateTimeCount() {
-        measures.setTimeCount(TimeCacheThread.currentTimeMillis - startingTime);
-    }
-
-    /**
-     * Print statistics of the searhc every "everyXms" ms
-     *
-     * @param everyXms delay between two prints
-     */
-    public void monitorSearch(int everyXms) {
-        searchmonitor = new SearchMonitor(this, everyXms);
+    @Override
+    public void branchSearchMonitor(ISearchMonitor sm) {
+        smList.add(sm);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -424,12 +378,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         return objectivemanager;
     }
 
-    public void setSearchLayout(SearchLayout searchLayout) {
-        this.searchLayout = searchLayout;
-        searchLayout.searchLoop = this;
-    }
-
     public Solver getSolver() {
         return solver;
     }
+
+    public AbstractStrategy<Variable> getStrategy() {
+        return strategy;
+    }
+
+    public abstract String decisionToString();
 }

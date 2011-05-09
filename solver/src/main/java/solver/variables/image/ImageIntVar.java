@@ -31,6 +31,7 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -109,7 +110,7 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public IRequest[] getRequests() {
+    public IRequestList getRequests() {
         return var.getRequests();
     }
 

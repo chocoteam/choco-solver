@@ -36,8 +36,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IDelta;
 
-import java.util.Arrays;
-
 /**
  * <br/>
  *
@@ -107,6 +105,11 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     }
 
     @Override
+    public R get(int i) {
+        return requests[i];
+    }
+
+    @Override
     public void notifyButCause(ICause cause, EventType event, IDelta delta) {
         IRequest request;
         int last = firstPassive.get();
@@ -123,8 +126,5 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         }
     }
 
-    @Override
-    public IRequest[] toArray() {
-        return Arrays.copyOfRange(requests,0,firstPassive.get());
-    }
+
 }

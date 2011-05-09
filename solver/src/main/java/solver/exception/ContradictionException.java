@@ -49,11 +49,11 @@ public final class ContradictionException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
-    private static final ContradictionException EXCEPTION = new ContradictionException();
+    public static final ContradictionException EXCEPTION = new ContradictionException();
 
-    ICause c = null;
-    Variable v = null;
-    String s;
+    public ICause c = null;
+    public Variable v = null;
+    public String s;
 
     private ContradictionException() {
         super();
@@ -72,9 +72,6 @@ public final class ContradictionException extends Exception {
 
     private ContradictionException set(ICause c, Variable v, String s) {
         this.c = c;
-        if(c != null){
-            c.incFail();
-        }
         this.v = v;
         this.s = s;
         return this;

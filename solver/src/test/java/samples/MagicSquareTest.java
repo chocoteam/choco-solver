@@ -83,8 +83,8 @@ public class MagicSquareTest {
         //== >square0,2  ==  12 (0)
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
-        solver.getSearchLoop().pilotPropag.init();
-        solver.getSearchLoop().pilotPropag.initialPropagation();
+        solver.getSearchLoop().propEngine.init();
+        solver.getSearchLoop().propEngine.initialPropagation();
         ((IntVar) vars[0]).instantiateTo(3, null);
         ((IntVar) vars[15]).instantiateTo(4, null);
         ((IntVar) vars[5]).removeInterval(11, 15, null);
@@ -92,11 +92,11 @@ public class MagicSquareTest {
         ((IntVar) vars[9]).removeInterval(1, 2, null);
         ((IntVar) vars[13]).removeInterval(1, 2, null);
         ((IntVar) vars[1]).instantiateTo(6, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         LoggerFactory.getLogger("test").error("************************");
         ((IntVar) vars[2]).instantiateTo(12, null);
         try {
-            solver.getSearchLoop().pilotPropag.fixPoint();
+            solver.getSearchLoop().propEngine.fixPoint();
             LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
         } catch (ContradictionException e) {
@@ -112,22 +112,22 @@ public class MagicSquareTest {
         // square3,0={14,15} square3,1={1,4,5,6,7,8...,8} square3,2={4,5,6,7,8,9...,10} square3,3={8,9,10,11,12,14...,15}
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
-        solver.getSearchLoop().pilotPropag.init();
-        solver.getSearchLoop().pilotPropag.initialPropagation();
+        solver.getSearchLoop().propEngine.init();
+        solver.getSearchLoop().propEngine.initialPropagation();
         Variable[] vars = solver.getVars();
         ((IntVar) vars[0]).instantiateTo(2, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         ((IntVar) vars[3]).instantiateTo(3, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         ((IntVar) vars[1]).instantiateTo(13, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
 
         ((IntVar) vars[6]).removeValue(1, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         ((IntVar) vars[14]).removeValue(1, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         ((IntVar) vars[12]).removeInterval(9, 14, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         Assert.assertTrue(((IntVar) vars[13]).instantiatedTo(1));
 
     }

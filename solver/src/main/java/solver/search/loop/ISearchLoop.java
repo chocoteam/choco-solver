@@ -27,6 +27,8 @@
 
 package solver.search.loop;
 
+import solver.search.loop.monitors.ISearchMonitor;
+
 import java.io.Serializable;
 
 /**
@@ -45,4 +47,10 @@ public interface ISearchLoop extends Serializable {
     Boolean launch();
 
     Boolean resume();
+
+    /**
+     * Branch a search monitor
+     * @param sm
+     */
+    void branchSearchMonitor(ISearchMonitor sm);
 }

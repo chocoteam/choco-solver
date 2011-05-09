@@ -24,126 +24,152 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.enumerations.sorters;
-
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.requests.list.IRequestList;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.variables.IntVar;
+package solver.search.loop.monitors;
 
 /**
- * Naive implementation of
- * "Boosting systematic search by weighting constraints"
- * F.Boussemart, F.Hemery, C.Lecoutre and L.Sais
- * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/05/11
+ * @since 09/05/11
  */
-public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
+public final class SearchMonitorList implements ISearchMonitor {
 
-    private int weight(IntVar v) {
-        IRequestList requests = v.getRequests();
-        int w = 0;
-        int card = requests.cardinality();
-        for (int i = 0; i < card; i++) {
-            Propagator prop = requests.get(i).getPropagator();
-            if (prop.arity() > 1) {
-                w += prop.getFails();
-            }
+    ISearchMonitor[] searchMonitors = new ISearchMonitor[4];
+    int size = 0;
+
+    @Override
+    public void beforeInitialize() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeInitialize();
         }
-        return w;
-    }
-
-
-    @Override
-    public int compare(IntVar o1, IntVar o2) {
-        int w1 = weight(o1);
-        int w2 = weight(o2);
-        int s1 = o1.getDomainSize();
-        int s2 = o2.getDomainSize();
-        int d1 = o1.nbRequests();
-        int d2 = o2.nbRequests();
-        return (s1 * w2 * d2) - (s2 * w1 * d1);
     }
 
     @Override
-    public void onContradiction() {
-        if (ContradictionException.EXCEPTION.c != null) {
-            ContradictionException.EXCEPTION.c.incFail();
+    public void afterInitialize() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterInitialize();
+        }
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeInitialPropagation();
+        }
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterInitialPropagation();
+        }
+    }
+
+    @Override
+    public void beforeOpenNode() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeOpenNode();
+        }
+    }
+
+    @Override
+    public void afterOpenNode() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterOpenNode();
+        }
+    }
+
+    @Override
+    public void onSolution() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].onSolution();
         }
     }
 
     @Override
     public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeDownLeftBranch();
+        }
     }
 
     @Override
     public void afterDownLeftBranch() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterDownLeftBranch();
+        }
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeDownRightBranch();
+        }
     }
 
     @Override
     public void afterDownRightBranch() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterDownRightBranch();
+        }
     }
 
     @Override
     public void beforeUpBranch() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeUpBranch();
+        }
     }
 
     @Override
     public void afterUpBranch() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterUpBranch();
+        }
+    }
+
+    @Override
+    public void onContradiction() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].onContradiction();
+        }
     }
 
     @Override
     public void beforeRestart() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeRestart();
+        }
     }
 
     @Override
     public void afterRestart() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterRestart();
+        }
     }
 
     @Override
     public void beforeClose() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].beforeClose();
+        }
     }
 
     @Override
     public void afterClose() {
+        for (int i = 0; i < size; i++) {
+            searchMonitors[i].afterClose();
+        }
     }
+
+    public void add(ISearchMonitor sm) {
+        if (size >= searchMonitors.length) {
+            ISearchMonitor[] tmp = searchMonitors;
+            searchMonitors = new ISearchMonitor[tmp.length * 2];
+            System.arraycopy(tmp, 0, searchMonitors, 0, tmp.length);
+        }
+        searchMonitors[size++] = sm;
+    }
+
 }

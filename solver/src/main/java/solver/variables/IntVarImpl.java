@@ -449,8 +449,8 @@ public final class IntVarImpl implements IntVar {
     }
 
     @Override
-    public IRequest[] getRequests() {
-        return requests.toArray();
+    public IRequestList getRequests() {
+        return requests;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

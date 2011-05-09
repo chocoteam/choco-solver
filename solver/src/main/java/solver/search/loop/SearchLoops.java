@@ -27,10 +27,8 @@
 
 package solver.search.loop;
 
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.propagation.engines.IPropagationEngine;
-import solver.search.strategy.strategy.AbstractStrategy;
 
 /**
  * <br/>
@@ -44,25 +42,22 @@ public class SearchLoops {
 
     protected SearchLoops() {}
 
-    public static AbstractSearchLoop preset(Solver solver, IEnvironment env,
-                                            IPropagationEngine pilotPropag, AbstractStrategy strategy) {
+    public static AbstractSearchLoop preset(Solver solver, IPropagationEngine propEngine) {
         switch (_DEFAULT) {
             case 1:
-                return advancedBinarySearchLoop(solver, env, pilotPropag, strategy);
+                return advancedBinarySearchLoop(solver, propEngine);
             default:
-                return binarySearchLoop(solver, pilotPropag, strategy);
+                return binarySearchLoop(solver, propEngine);
         }
     }
 
 
-    public static AbstractSearchLoop binarySearchLoop(Solver solver,
-                                                      IPropagationEngine pilotPropag, AbstractStrategy strategy) {
-        return new BinarySearchLoop(solver, pilotPropag, strategy);
+    public static AbstractSearchLoop binarySearchLoop(Solver solver, IPropagationEngine propEngine) {
+        return new BinarySearchLoop(solver, propEngine);
     }
 
-    public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver, IEnvironment env,
-                                                              IPropagationEngine pilotPropag, AbstractStrategy strategy) {
-        return new AdvancedBinarySearchLoop(solver, env, pilotPropag, strategy);
+    public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
+        return new AdvancedBinarySearchLoop(solver, propEngine);
     }
 
 }

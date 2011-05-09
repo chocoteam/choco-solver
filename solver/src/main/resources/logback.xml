@@ -21,12 +21,9 @@
 
     <logger name="bench" level="info"/>
 
-    <logger name="solver" level="error"/>
-    <logger name="solver.probabilities" level="WARN"/>
-    <logger name="solver.search" level="error"/>
-    <logger name="solver.search.strategy" level="WARN"/>
+    <logger name="solver" level="info"/>
 
-    <logger name="fzn" level="error"/>
+    <logger name="fzn" level="info"/>
 
     <root level="error">
         <appender-ref ref="STDOUT"/>

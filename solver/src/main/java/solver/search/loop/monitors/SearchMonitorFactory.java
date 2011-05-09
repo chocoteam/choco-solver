@@ -24,27 +24,48 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.loop.monitors;
 
-package solver.search.measure;
+import solver.Solver;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 21/01/11
+ * @since 09/05/11
  */
-public interface IPreSolveMeasures {
+public class SearchMonitorFactory {
 
-    long getReadingTimeCount();
+    /**
+     * Print statistics
+     *
+     * @param solver   solver to observe
+     * @param solution print solutions
+     * @param choices  print choices
+     */
+    public static void log(Solver solver, boolean solution, boolean choices) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.branchSearchMonitor(new LogBasic(solver));
+        if (solution) {
+            sl.branchSearchMonitor(new LogSolutions(sl));
+        }
+        if (choices) {
+            sl.branchSearchMonitor(new LogChoices(solver));
+        }
+    }
 
-    long getInitialPropagationTimeCount();
-
-    long getInitialisationTimeCount();
-
-    void setReadingTimeCount(long readingTimeCount);
-
-    void setInitialPropagationTimeCount(long initialPropagationTimeCount);
-
-    void setInitialisation(long initialisationTime);
+    /**
+     * Print one-line statistics every XX ms
+     *
+     * @param solver
+     * @param everyXXmms print one-line statistics every XX ms
+     */
+    public static void statEveryXXms(Solver solver, long everyXXmms) {
+        if (everyXXmms > 0) {
+            AbstractSearchLoop sl = solver.getSearchLoop();
+            sl.branchSearchMonitor(new LogStatEveryXXms(solver.getSearchLoop(), everyXXmms));
+        }
+    }
 
 }

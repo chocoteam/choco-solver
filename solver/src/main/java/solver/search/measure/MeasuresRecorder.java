@@ -29,78 +29,78 @@ package solver.search.measure;
 
 
 import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.search.limits.TimeCacheThread;
 
-public final class MeasuresRecorder implements IMeasures {
+public final class MeasuresRecorder implements IMeasures{
 
-	public long solutionCount;
-	
-	public int objectiveIntValue = Integer.MAX_VALUE;
-	
-	public boolean objectiveOptimal;
+    public long solutionCount;
+
+    public int objectiveIntValue = Integer.MAX_VALUE;
+
+    public boolean objectiveOptimal;
 
     public boolean hasObjective;
-	
-	public long timeCount;
+
+    public long timeCount;
 
     public long readingTimeCount;
 
     public long initialisationTimeCount;
 
     public long initialPropagationTimeCount;
-	
-	public long nodeCount ;
-	
-	public long backtrackCount;
-	
-	public long restartCount;
-	
-	public long failCount;
+
+    public long nodeCount;
+
+    public long backtrackCount;
+
+    public long restartCount;
+
+    public long failCount;
 
     public long propagationCount;
 
     public long usedMemory;
 
     protected Solver solver;
-	
-	public MeasuresRecorder(Solver solver) {
-		super();
+
+    protected long startingTime, startingMemory;
+
+    public MeasuresRecorder(Solver solver) {
+        super();
         this.solver = solver;
-	}
-	
-	public final void reset() {
-		timeCount = 0;
-		nodeCount = 0;
-		backtrackCount = 0; 
-		restartCount = 0;
-		failCount = 0;
-	}
-	
-	public void setSearchMeasures(ISearchMeasures toCopy) {
-		timeCount = toCopy.getTimeCount();
-		nodeCount = toCopy.getNodeCount();
-		backtrackCount = toCopy.getBackTrackCount();
-		restartCount = toCopy.getRestartCount();
-		failCount = toCopy.getFailCount();
-	}
-	
+    }
+
+    public final void reset() {
+        timeCount = 0;
+        nodeCount = 0;
+        backtrackCount = 0;
+        restartCount = 0;
+        failCount = 0;
+    }
+
+//	public void setSearchMeasures(ISearchMeasures toCopy) {
+//		timeCount = toCopy.getTimeCount();
+//		nodeCount = toCopy.getNodeCount();
+//		backtrackCount = toCopy.getBackTrackCount();
+//		restartCount = toCopy.getRestartCount();
+//		failCount = toCopy.getFailCount();
+//	}
+
     //****************************************************************************************************************//
     //**************************************** SETTERS ***************************************************************//
     //****************************************************************************************************************//
 
     @Override
-	public boolean existsSolution() {
-		return solutionCount > 0;
-	}
+    public long getSolutionCount() {
+        return solutionCount;
+    }
 
-	@Override
-	public long getSolutionCount() {
-		return solutionCount;
-	}
-
-	@Override
-	public int getObjectiveValue() {
-		return objectiveIntValue;
-	}
+    @Override
+    public int getObjectiveValue() {
+        return objectiveIntValue;
+    }
 
     @Override
     public void setObjectiveValue(int value) {
@@ -113,63 +113,8 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-	public void setSolutionCount(long solutionCount) {
-		this.solutionCount = solutionCount;
-	}
-
-    @Override
-	public void setObjectiveOptimal(boolean objectiveOptimal) {
-		this.objectiveOptimal = objectiveOptimal;
-	}
-
-    @Override
-	public void setRestartCount(long restartCount) {
-		this.restartCount = restartCount;
-	}
-
-    @Override
-	public void setTimeCount(long timeCount) {
-		this.timeCount = timeCount;
-	}
-
-    @Override
-    public void setReadingTimeCount(long readingTimeCount) {
-        this.readingTimeCount = readingTimeCount;
-    }
-
-    @Override
-    public void setInitialisation(long initialisationTime) {
-        this.initialisationTimeCount = initialisationTime;
-    }
-
-    @Override
-    public void setInitialPropagationTimeCount(long initialPropagationTimeCount) {
-        this.initialPropagationTimeCount = initialPropagationTimeCount;
-    }
-
-    @Override
-	public void setNodeCount(long nodeCount) {
-		this.nodeCount = nodeCount;
-	}
-
-    @Override
-	public void setBacktrackCount(long backtrackCount) {
-		this.backtrackCount = backtrackCount;
-	}
-
-    @Override
-	public void setFailCount(long failCount) {
-		this.failCount = failCount;
-	}
-
-    @Override
-    public void setPropagationsCount(long propagationCount) {
-        this.propagationCount = propagationCount;
-    }
-
-    @Override
-    public void setMemoryUsed(long usedMemory) {
-        this.usedMemory = usedMemory;
+    public void setObjectiveOptimal(boolean objectiveOptimal) {
+        this.objectiveOptimal = objectiveOptimal;
     }
 
 
@@ -178,28 +123,33 @@ public final class MeasuresRecorder implements IMeasures {
     //****************************************************************************************************************//
 
     @Override
-	public long getBackTrackCount() {
-		return backtrackCount;
-	}
+    public long getBackTrackCount() {
+        return backtrackCount;
+    }
 
-	@Override
-	public long getFailCount() {
-		return failCount;
-	}
+    @Override
+    public long getFailCount() {
+        return failCount;
+    }
 
-	@Override
-	public long getNodeCount() {
-		return nodeCount;
-	}
+    @Override
+    public long getNodeCount() {
+        return nodeCount;
+    }
 
-	@Override
-	public long getTimeCount() {
-		return timeCount;
-	}
+    @Override
+    public long getTimeCount() {
+        return timeCount;
+    }
 
     @Override
     public long getReadingTimeCount() {
         return readingTimeCount;
+    }
+
+    @Override
+    public void setReadingTimeCount(long time) {
+        this.readingTimeCount = time;
     }
 
     @Override
@@ -212,10 +162,10 @@ public final class MeasuresRecorder implements IMeasures {
         return initialPropagationTimeCount;
     }
 
-	@Override
-	public long getRestartCount() {
-		return restartCount;
-	}
+    @Override
+    public long getRestartCount() {
+        return restartCount;
+    }
 
     @Override
     public long getPropagationsCount() {
@@ -223,9 +173,9 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-	public boolean isObjectiveOptimal() {
-		return objectiveOptimal;
-	}
+    public boolean isObjectiveOptimal() {
+        return objectiveOptimal;
+    }
 
     @Override
     public boolean hasObjective() {
@@ -237,44 +187,133 @@ public final class MeasuresRecorder implements IMeasures {
         return usedMemory;
     }
 
+
+    static long memoryUsedInMB() {
+        return Runtime.getRuntime().freeMemory() / 1024 / 1024;
+    }
+
+    /**
+     * Updates the used memory
+     */
+    void updateMemoryUsed() {
+        usedMemory = memoryUsedInMB() - startingMemory;
+    }
+
+    public void updatePropagationCount() {
+        Constraint[] cstrs = solver.getCstrs();
+        for (int i = 0; i < cstrs.length; i++) {
+            Propagator[] propagators = cstrs[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                propagationCount += propagators[j].filterCall;
+            }
+        }
+
+    }
+
+    /**
+     * Updates the time recorder
+     */
+    public void updateTimeCount() {
+        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
+    }
+
     //****************************************************************************************************************//
     //**************************************** INCREMENTERS **********************************************************//
     //****************************************************************************************************************//
 
     @Override
-    public void incSolutionCount(long delta) {
-        solutionCount += delta;
+    public void beforeInitialize() {
+        reset();
+        startingMemory = memoryUsedInMB();
+        startingTime = System.currentTimeMillis();
+        TimeCacheThread.currentTimeMillis = startingTime;
     }
 
     @Override
-    public void incRestartCount(long delta) {
-        restartCount += delta;
+    public void afterInitialize() {
+        updateTimeCount();
+        initialisationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
     }
 
     @Override
-    public void incTimeCount(long delta) {
-        timeCount += delta;
+    public void beforeInitialPropagation() {
     }
 
     @Override
-    public void incNodeCount(long delta) {
-        nodeCount += delta;
+    public void afterInitialPropagation() {
+        initialPropagationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
+        updateTimeCount();
     }
 
     @Override
-    public void incBacktrackCount(long delta) {
-        backtrackCount += delta;
+    public void beforeOpenNode() {
+        nodeCount++;
+        updateTimeCount();
     }
 
     @Override
-    public void incFailCount(long delta) {
-        failCount  += delta;
+    public void afterOpenNode() {
     }
 
     @Override
-    public void incMemoryUsed(long delta) {
-        usedMemory  += delta;
+    public void onSolution() {
+        solutionCount++;
+        updateTimeCount();
+        updatePropagationCount();
     }
+
+    @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+    }
+
+    @Override
+    public void beforeUpBranch() {
+        backtrackCount++;
+    }
+
+    @Override
+    public void afterUpBranch() {
+
+    }
+
+    @Override
+    public void onContradiction() {
+        failCount++;
+    }
+
+    @Override
+    public void beforeRestart() {
+        restartCount++;
+    }
+
+    @Override
+    public void afterRestart() {
+    }
+
+    @Override
+    public void beforeClose() {
+        updateTimeCount();
+        updateMemoryUsed();
+        updatePropagationCount();
+    }
+
+    @Override
+    public void afterClose() {
+    }
+
 
     //****************************************************************************************************************//
     //**************************************** PRINTERS **************************************************************//
@@ -285,7 +324,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneLineString() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, %sResolution %dms, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
-                solutionCount, hasObjective()?"Objective: "+ objectiveIntValue+", ":"", timeCount, nodeCount, backtrackCount, failCount, 0,
+                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", " : "", timeCount, nodeCount, backtrackCount, failCount, 0,
                 propagationCount));
         return st.toString();
     }
@@ -297,12 +336,12 @@ public final class MeasuresRecorder implements IMeasures {
         st.append(String.format("\tSolutions: %d\n\t%sBuilding time : %dms\n\tInitial propagation : %dms" +
                 "\n\tResolution : %dms\n\tNodes: %d\n\tBacktracks: %d\n\tFails: %d\n\t" +
                 "Restarts: %d\n\tPropagations: %d\n\tMemory: %dmb\n\tVariables: %d\n\tConstraints: %d\n\tRequests: %d",
-                solutionCount, hasObjective()?"Objective: "+ objectiveIntValue+", \n\t":"", readingTimeCount,
+                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", \n\t" : "", readingTimeCount,
                 initialPropagationTimeCount, timeCount, nodeCount, backtrackCount, failCount, 0, propagationCount,
                 usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();
     }
-	
+
 
 }

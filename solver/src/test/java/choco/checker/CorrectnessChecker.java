@@ -111,10 +111,10 @@ public class CorrectnessChecker {
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map) {
         Solver ref = modeler.model(nbVar, domains, map);
-        ref.getSearchLoop().pilotPropag.init();
+        ref.getSearchLoop().propEngine.init();
         try {
-            ref.getSearchLoop().pilotPropag.initialPropagation();
-            ref.getSearchLoop().pilotPropag.fixPoint();
+            ref.getSearchLoop().propEngine.initialPropagation();
+            ref.getSearchLoop().propEngine.fixPoint();
         } catch (ContradictionException e) {
             LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
             return null;

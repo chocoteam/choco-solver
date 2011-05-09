@@ -99,11 +99,11 @@ public class CycleLtTest {
                 times[i] = rand.getMeasures().getInitialPropagationTimeCount();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().pilotPropag.updated()), -15, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().pilotPropag.pushed()), -15, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().pilotPropag.popped()), -15, " "));
+                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.updated()), -15, " "));
+                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.pushed()), -15, " "));
+                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.popped()), -15, " "));
                 st.append(StringUtils.pad(String.format("(%d)",
-                        rand.getSearchLoop().pilotPropag.pushed() - rand.getSearchLoop().pilotPropag.popped()), -15, " "));
+                        rand.getSearchLoop().propEngine.pushed() - rand.getSearchLoop().propEngine.popped()), -15, " "));
                 log.info(st.toString());
                 st.setLength(0);
             }

@@ -24,64 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.enumerations.sorters;
+package solver.search.loop.monitors;
 
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.requests.list.IRequestList;
-import solver.search.loop.monitors.ISearchMonitor;
-import solver.variables.IntVar;
+import solver.search.loop.AbstractSearchLoop;
+import solver.variables.Variable;
 
 /**
- * Naive implementation of
- * "Boosting systematic search by weighting constraints"
- * F.Boussemart, F.Hemery, C.Lecoutre and L.Sais
- * <p/>
+ * A search monitor logger which prints solution during the search.
+ *
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/05/11
+ * @since 09/05/11
  */
-public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
+public class LogSolutions implements ISearchMonitor {
 
-    private int weight(IntVar v) {
-        IRequestList requests = v.getRequests();
-        int w = 0;
-        int card = requests.cardinality();
-        for (int i = 0; i < card; i++) {
-            Propagator prop = requests.get(i).getPropagator();
-            if (prop.arity() > 1) {
-                w += prop.getFails();
-            }
-        }
-        return w;
-    }
+    final AbstractSearchLoop searchLoop;
 
-
-    @Override
-    public int compare(IntVar o1, IntVar o2) {
-        int w1 = weight(o1);
-        int w2 = weight(o2);
-        int s1 = o1.getDomainSize();
-        int s2 = o2.getDomainSize();
-        int d1 = o1.nbRequests();
-        int d2 = o2.nbRequests();
-        return (s1 * w2 * d2) - (s2 * w1 * d1);
+    public LogSolutions(AbstractSearchLoop searchLoop) {
+        this.searchLoop = searchLoop;
     }
 
     @Override
-    public void onContradiction() {
-        if (ContradictionException.EXCEPTION.c != null) {
-            ContradictionException.EXCEPTION.c.incFail();
+    public void onSolution() {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("- Solution #{} found. {} \n\t{}.",
+                    new Object[]{searchLoop.getMeasures().getSolutionCount(),
+                            searchLoop.getMeasures().toOneLineString(),
+                            print(searchLoop.getStrategy().vars)}
+            );
         }
     }
 
-    @Override
-    public void beforeDownLeftBranch() {
-    }
+    static String print(Variable[] vars) {
+        StringBuilder s = new StringBuilder(32);
+        for (Variable v : vars) {
+            s.append(v).append(' ');
+        }
+        return s.toString();
 
-    @Override
-    public void beforeDownRightBranch() {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,11 +93,15 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     }
 
     @Override
-    public void onSolution() {
+    public void beforeDownLeftBranch() {
     }
 
     @Override
     public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
     }
 
     @Override
@@ -129,6 +114,10 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
 
     @Override
     public void afterUpBranch() {
+    }
+
+    @Override
+    public void onContradiction() {
     }
 
     @Override

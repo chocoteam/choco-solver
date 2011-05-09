@@ -154,11 +154,12 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this);
         this.creationTime -= System.currentTimeMillis();
         this.engine = new PropagationEngine();
+        this.search = SearchLoops.preset(this, engine);
         /*new RecorderExplanationEngine(); // TODO faire un builder*/
     }
 
     public void set(AbstractStrategy strategies) {
-        this.search = SearchLoops.preset(this, env, engine, strategies);
+        this.search.set(strategies);
         this.configuration = new Configuration();
     }
 
@@ -170,7 +171,7 @@ public class Solver implements Serializable {
      * @param variable a newly created variable, not already added
      */
     public void associates(Variable variable) {
-        if(vIdx == vars.length){
+        if (vIdx == vars.length) {
             Variable[] tmp = vars;
             vars = new Variable[tmp.length * 2];
             System.arraycopy(tmp, 0, vars, 0, vIdx);
@@ -187,7 +188,7 @@ public class Solver implements Serializable {
      * @param c a Constraint
      */
     public void post(Constraint c) {
-        if(cIdx == cstrs.length){
+        if (cIdx == cstrs.length) {
             Constraint[] tmp = cstrs;
             cstrs = new Constraint[tmp.length * 2];
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
@@ -205,13 +206,13 @@ public class Solver implements Serializable {
      * @param cs Constraints
      */
     public void post(Constraint[] cs) {
-        while(cIdx + cs.length >= cstrs.length){
+        while (cIdx + cs.length >= cstrs.length) {
             Constraint[] tmp = cstrs;
             cstrs = new Constraint[tmp.length * 2];
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
-        cIdx+=cs.length;
+        cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
             engine.addConstraint(cs[i]);
         }
@@ -276,7 +277,7 @@ public class Solver implements Serializable {
 
     public Boolean findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         search.stopAtFirstSolution(false);
-        configuration.putInt(Configuration.SOLUTION_POOL_CAPACITY,1);
+        configuration.putInt(Configuration.SOLUTION_POOL_CAPACITY, 1);
         switch (policy) {
             case MAXIMIZE:
                 MaxObjectiveManager maom = new MaxObjectiveManager(objective);
@@ -362,7 +363,7 @@ public class Solver implements Serializable {
 
     public ESat isSatisfied() {
         ESat check = ESat.TRUE;
-        for (int c  = 0;  c < cIdx; c++) {
+        for (int c = 0; c < cIdx; c++) {
             ESat satC = cstrs[c].isSatisfied();
             if (!ESat.TRUE.equals(satC)) {
                 if (LoggerFactory.getLogger("solver").isErrorEnabled()) {

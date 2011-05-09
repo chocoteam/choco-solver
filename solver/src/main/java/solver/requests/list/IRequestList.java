@@ -85,5 +85,5 @@ public interface IRequestList<R extends IRequest> extends Serializable{
      */
     void notifyButCause(ICause cause, EventType event, IDelta delta);
 
-    IRequest[] toArray();
+    R get(int i);
 }

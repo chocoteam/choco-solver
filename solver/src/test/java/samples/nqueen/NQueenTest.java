@@ -202,9 +202,9 @@ public class NQueenTest {
 //        solver.getEngine().setDefaultComparator(new IncrArityP());
         solver.getEngine().setDefaultComparator(Queue.get());
         solver.getEngine().init();
-        solver.getSearchLoop().pilotPropag.init();
-        solver.getSearchLoop().pilotPropag.initialPropagation();
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.init();
+        solver.getSearchLoop().propEngine.initialPropagation();
+        solver.getSearchLoop().propEngine.fixPoint();
         Variable[] vars = solver.getVars();
         ((IntVar) vars[0]).instantiateTo(1, null);
         ((IntVar) vars[1]).instantiateTo(3, null);
@@ -213,12 +213,12 @@ public class NQueenTest {
         ((IntVar) vars[4]).instantiateTo(12, null);
         ((IntVar) vars[5]).instantiateTo(16, null);
         ((IntVar) vars[6]).instantiateTo(4, null);
-        solver.getSearchLoop().pilotPropag.fixPoint();
+        solver.getSearchLoop().propEngine.fixPoint();
         LoggerFactory.getLogger("test").error("*******************************************");
         System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7]).instantiateTo(7, null);
         try {
-            solver.getSearchLoop().pilotPropag.fixPoint();
+            solver.getSearchLoop().propEngine.fixPoint();
             Assert.fail();
         } catch (ContradictionException ex) {
             System.out.printf("%s\n", ex.getMessage());

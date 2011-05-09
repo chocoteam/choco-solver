@@ -268,7 +268,7 @@ public class InverseChannelingTest {
         s.post(cstrs);
         s.set(strategy);
 
-//        s.getSearchLoop().pilotPropag.propagate();
+//        s.getSearchLoop().propEngine.propagate();
 //        System.out.printf("%s\n", s);
         s.findSolution();
         do {
@@ -306,9 +306,9 @@ public class InverseChannelingTest {
         s.set(strategy);
 
         try {
-            s.getSearchLoop().pilotPropag.init();
-            s.getSearchLoop().pilotPropag.initialPropagation();
-            s.getSearchLoop().pilotPropag.fixPoint();
+            s.getSearchLoop().propEngine.init();
+            s.getSearchLoop().propEngine.initialPropagation();
+            s.getSearchLoop().propEngine.fixPoint();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -340,7 +340,7 @@ public class InverseChannelingTest {
     }
 
     private String testNode(Solver solver) throws ContradictionException {
-        IPropagationEngine propagator = solver.getSearchLoop().pilotPropag;
+        IPropagationEngine propagator = solver.getSearchLoop().propEngine;
         Variable[] vars = solver.getVars();
         List<IntVar> Q = new ArrayList<IntVar>(22);
         for (int i = 0; i < vars.length; i++) {
@@ -378,7 +378,7 @@ public class InverseChannelingTest {
     }
 
     private String testNode2(Solver solver) throws ContradictionException {
-        IPropagationEngine propagator = solver.getSearchLoop().pilotPropag;
+        IPropagationEngine propagator = solver.getSearchLoop().propEngine;
         Variable[] vars = solver.getVars();
         List<IntVar> Q = new ArrayList<IntVar>(22);
         for (int i = 0; i < vars.length; i++) {

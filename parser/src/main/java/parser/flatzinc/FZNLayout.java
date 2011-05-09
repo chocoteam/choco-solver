@@ -35,7 +35,7 @@ import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.objective.NoObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.SearchLayout;
+import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
+public final class FZNLayout implements ISearchMonitor {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -58,6 +58,8 @@ public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
 
     StringBuilder stringBuilder = new StringBuilder();
 
+    AbstractSearchLoop searchLoop;
+
     public FZNLayout() {
         super();
         output_vars = new ArrayList<IntVar>();
@@ -66,19 +68,7 @@ public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
     }
 
     @Override
-    protected void onOpenNode() {
-    }
-
-    @Override
-    protected void onLeftBranch() {
-    }
-
-    @Override
-    protected void onRightBranch() {
-    }
-
-    @Override
-    protected void onSolution() {
+    public void onSolution() {
         if (LOGGER.isInfoEnabled()) {
             for (int i = 0; i < output_vars.size(); i++) {
                 IntVar variable = output_vars.get(i);
@@ -99,7 +89,7 @@ public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
     }
 
     @Override
-    protected void onClose() {
+    public void beforeClose () {
         if (LOGGER.isInfoEnabled()) {
             if (searchLoop.getMeasures().getSolutionCount() == 0) {
                 if (searchLoop.getLimitsFactory().isReached()) {
@@ -115,19 +105,19 @@ public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
                     LOGGER.info("==========");
                 }
             }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("% - Search statistics");
-                LOGGER.debug("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
-                LOGGER.debug("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
-                LOGGER.debug("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
-                LOGGER.debug("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
-                LOGGER.debug("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
-                LOGGER.debug("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
-                LOGGER.debug("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
-                LOGGER.debug("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
-                LOGGER.debug("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
-                LOGGER.debug("% \t Variables : {}", searchLoop.getSolver().getVars().length);
-                LOGGER.debug("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("% - Search statistics");
+                LOGGER.info("% \t Solutions : {}", searchLoop.getMeasures().getSolutionCount());
+                LOGGER.info("% \t Building time : {}ms", searchLoop.getMeasures().getReadingTimeCount());
+                LOGGER.info("% \t Initial propagation : {}ms", searchLoop.getMeasures().getInitialPropagationTimeCount());
+                LOGGER.info("% \t Resolution : {}ms", searchLoop.getMeasures().getTimeCount());
+                LOGGER.info("% \t Nodes : {}", searchLoop.getMeasures().getNodeCount());
+                LOGGER.info("% \t Backtracks : {}", searchLoop.getMeasures().getBackTrackCount());
+                LOGGER.info("% \t Fails : {}", searchLoop.getMeasures().getFailCount());
+                LOGGER.info("% \t Restarts : {}", searchLoop.getMeasures().getRestartCount());
+                LOGGER.info("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
+                LOGGER.info("% \t Variables : {}", searchLoop.getSolver().getVars().length);
+                LOGGER.info("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
             }
         }
     }
@@ -174,6 +164,74 @@ public final class FZNLayout extends SearchLayout<AbstractSearchLoop> {
 
 
     public void setSearchLoop(AbstractSearchLoop searchLoop) {
+        searchLoop.branchSearchMonitor(this);
         this.searchLoop = searchLoop;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
+    public void afterInitialize() {
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+    }
+
+    @Override
+    public void beforeOpenNode() {
+    }
+
+    @Override
+    public void afterOpenNode() {
+    }
+
+    @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+    }
+
+    @Override
+    public void beforeUpBranch() {
+    }
+
+    @Override
+    public void afterUpBranch() {
+    }
+
+    @Override
+    public void onContradiction() {
+    }
+
+    @Override
+    public void beforeRestart() {
+    }
+
+    @Override
+    public void afterRestart() {
+    }
+
+    @Override
+    public void afterClose() {
     }
 }

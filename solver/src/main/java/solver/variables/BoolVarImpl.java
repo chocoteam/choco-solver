@@ -372,8 +372,8 @@ public final class BoolVarImpl implements BoolVar {
     }
 
     @Override
-    public IRequest[] getRequests() {
-        return requests.toArray();
+    public IRequestList getRequests() {
+        return requests;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

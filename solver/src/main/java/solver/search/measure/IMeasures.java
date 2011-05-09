@@ -28,14 +28,101 @@
 package solver.search.measure;
 
 
+import solver.search.loop.monitors.ISearchMonitor;
+
 import java.io.Serializable;
 
-public interface IMeasures extends IPreSolveMeasures, ISolutionMeasures, IOptimizationMeasures, ISearchMeasures, Serializable {
+public interface IMeasures extends ISearchMonitor, Serializable {
 
     void reset();
 
     String toOneLineString();
 
     String toString();
-		
+
+    /**
+     * Get the time count in milliseconds of the measure
+     *
+     * @return time count
+     */
+    long getTimeCount();
+
+    /**
+     * Get the node count of the measure
+     *
+     * @return node count
+     */
+    long getNodeCount();
+
+    /**
+     * Get the backtrack count of the measure
+     *
+     * @return backtrack count
+     */
+    long getBackTrackCount();
+
+    /**
+     * Get the fail count of the measure
+     *
+     * @return fail count
+     */
+    long getFailCount();
+
+    /**
+     * Get the restart count of the measure
+     *
+     * @return restart count
+     */
+    long getRestartCount();
+
+    /**
+     * Get the number of call to IRequest.propagate()
+     *
+     * @return propagations count
+     */
+    long getPropagationsCount();
+
+    /**
+     * Get the used memory
+     *
+     * @return used memory
+     */
+    long getUsedMemory();
+
+    /**
+     * Get the solution count of the measure
+     *
+     * @return solution count
+     */
+    long getSolutionCount();
+
+    /**
+     * Get the best objective value of a solution.
+     */
+    int getObjectiveValue();
+
+    boolean isObjectiveOptimal();
+
+    boolean hasObjective();
+
+    void setObjectiveValue(int value);
+
+    void setObjectiveOptimal(boolean objectiveOptimal);
+
+    void declareObjective();
+
+    long getReadingTimeCount();
+
+    void setReadingTimeCount(long time);
+
+    long getInitialPropagationTimeCount();
+
+    long getInitialisationTimeCount();
+
+    void updatePropagationCount();
+
+    /**
+     * Updates the time recorder
+     */
+    void updateTimeCount();
 }

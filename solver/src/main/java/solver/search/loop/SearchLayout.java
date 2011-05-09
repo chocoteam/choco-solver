@@ -29,6 +29,7 @@ package solver.search.loop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -39,7 +40,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public abstract class SearchLayout<S extends ISearchLoop> implements Serializable {
+public abstract class SearchLayout<S extends AbstractSearchLoop> implements ISearchMonitor, Serializable {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(SearchLayout.class);
 
@@ -52,16 +53,6 @@ public abstract class SearchLayout<S extends ISearchLoop> implements Serializabl
         this.searchLoop = searchLoop;
     }
 
-    protected abstract void onOpenNode();
-
-    protected abstract void onLeftBranch();
-
-    protected abstract void onRightBranch();
-
-    protected abstract void onSolution();
-
-    protected abstract void onClose();
-
     static String print(Variable[] vars) {
         StringBuilder s = new StringBuilder(32);
         for (Variable v : vars) {
@@ -70,27 +61,87 @@ public abstract class SearchLayout<S extends ISearchLoop> implements Serializabl
         return s.toString();
     }
 
+    @Override
+    public void beforeInitialize() {
+    }
 
-    public static final SearchLayout nolayout = new SearchLayout() {
-        @Override
-        protected void onOpenNode() {
+    @Override
+    public void afterInitialize() {
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+    }
+
+    @Override
+    public void beforeOpenNode() {
+    }
+
+    @Override
+    public void afterOpenNode() {
+    }
+
+    @Override
+        public void onSolution() {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("- Solution #{} found. {} \n\t{}.",
+                        new Object[]{searchLoop.getMeasures().getSolutionCount(),
+                                searchLoop.getMeasures().toOneLineString(),
+                                print(searchLoop.strategy.vars)}
+                );
+            }
         }
 
-        @Override
-        protected void onLeftBranch() {
+    @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+    }
+
+    @Override
+    public void beforeUpBranch() {
+    }
+
+    @Override
+    public void afterUpBranch() {
+    }
+
+    @Override
+    public void onContradiction() {
+    }
+
+    @Override
+    public void beforeRestart() {
+    }
+
+    @Override
+    public void afterRestart() {
+    }
+
+    @Override
+        public void beforeClose() {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(searchLoop.getMeasures().toString());
+            }
         }
 
-        @Override
-        protected void onRightBranch() {
-        }
+    @Override
+    public void afterClose() {
+    }
 
-        @Override
-        protected void onSolution() {
-        }
-
-        @Override
-        protected void onClose() {
-        }
-    };
 
 }

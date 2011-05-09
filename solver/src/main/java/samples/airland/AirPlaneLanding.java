@@ -136,7 +136,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         bVars = booleans.toArray(new BoolVar[booleans.size()]);
 
-        objective = VariableFactory.bounded("obj", 600, 800, solver);
+        objective = VariableFactory.bounded("obj", 0, obj_ub, solver);
 
         // build cost array
         costLAT = new int[2 * n];
@@ -172,8 +172,8 @@ public class AirPlaneLanding extends AbstractProblem {
         });
 //        solver.set(StrategyFactory.inputOrderInDomainMin(planes, solver.getEnvironment()));
 
-//        solver.set(StrategyFactory.firstFailInDomainMin(planes, solver.getEnvironment()));
-        solver.set(StrategyFactory.domwdegMindom(planes, solver.getEnvironment()));
+        solver.set(StrategyFactory.firstFailInDomainMin(planes, solver.getEnvironment()));
+//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
 
 //        solver.getSearchLoop().getLimitsFactory().setTimeLimit(3000);
         solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);
@@ -189,6 +189,8 @@ public class AirPlaneLanding extends AbstractProblem {
                 )
         );
         engine.setDefaultPolicy(Policy.FIXPOINT);
+//        SearchMonitorFactory.log(solver, false, true);
+//        SearchMonitorFactory.statEveryXXms(solver, 200);
 
     }
 

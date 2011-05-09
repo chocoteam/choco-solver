@@ -28,8 +28,9 @@
 package solver.search.strategy;
 
 import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.search.strategy.enumerations.MyCollection;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
+import solver.search.strategy.enumerations.sorters.*;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
@@ -38,6 +39,13 @@ import solver.search.strategy.selectors.VariableSelector;
 import solver.search.strategy.selectors.values.InDomainMax;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.*;
+import solver.search.strategy.selectors.variables.AntiFirstFail;
+import solver.search.strategy.selectors.variables.FirstFail;
+import solver.search.strategy.selectors.variables.InputOrder;
+import solver.search.strategy.selectors.variables.Largest;
+import solver.search.strategy.selectors.variables.MaxRegret;
+import solver.search.strategy.selectors.variables.MostConstrained;
+import solver.search.strategy.selectors.variables.Smallest;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.DigraphStrategy;
 import solver.search.strategy.strategy.Assignment;
@@ -325,16 +333,20 @@ public final class StrategyFactory {
                 MyCollection.Type.DYN);
     }
 
-    public static StrategyVarValAssign domwdegMindom(IntVar[] vars, IEnvironment environment) {
+    public static StrategyVarValAssign domwdegMindom(IntVar[] vars, Solver solver) {
         for (IntVar var : vars) {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB()));
         }
+
+        solver.search.strategy.enumerations.sorters.DomOverWDeg dd =
+                new solver.search.strategy.enumerations.sorters.DomOverWDeg();
+        solver.getSearchLoop().branchSearchMonitor(dd);
         LinkedList<AbstractSorter<IntVar>> sorters = new LinkedList<AbstractSorter<IntVar>>();
-        sorters.add(new solver.search.strategy.enumerations.sorters.DomOverWDeg());
+        sorters.add(dd);
         return new StrategyVarValAssign(vars,
                 sorters,
                 ValidatorFactory.instanciated,
-                environment,
+                solver.getEnvironment(),
                 MyCollection.Type.DYN);
     }
 

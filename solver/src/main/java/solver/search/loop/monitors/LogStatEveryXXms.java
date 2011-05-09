@@ -25,23 +25,24 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.loop;
+package solver.search.loop.monitors;
 
-import org.slf4j.LoggerFactory;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
+ * A search monitor logger which prints statistics every XX ms.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 18 aožt 2010
  */
-public class SearchMonitor extends Thread{
+class LogStatEveryXXms extends Thread implements ISearchMonitor {
 
     private final long duration;
 
     private final AbstractSearchLoop searchloop;
 
-    public SearchMonitor(AbstractSearchLoop searchloop, long duration) {
+    public LogStatEveryXXms(AbstractSearchLoop searchloop, long duration) {
         this.searchloop = searchloop;
         this.duration = duration;
         this.setDaemon(true);
@@ -55,13 +56,87 @@ public class SearchMonitor extends Thread{
             long sleep = duration;
             Thread.sleep(sleep);
             do {
-                searchloop.updateTimeCount();
-                searchloop.updatePropagationCount();
-                LoggerFactory.getLogger("solver").error("{}\n", searchloop.measures.toOneLineString());
+                searchloop.getMeasures().updateTimeCount();
+                searchloop.getMeasures().updatePropagationCount();
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(">> {}", searchloop.getMeasures().toOneLineString());
+                }
                 Thread.sleep(sleep);
             } while (true);
         } catch (InterruptedException ignored) {
         }
     }
 
+    @Override
+    public void beforeInitialize() {
+    }
+
+    @Override
+    public void afterInitialize() {
+        this.start();
+    }
+
+    @Override
+    public void beforeInitialPropagation() {
+    }
+
+    @Override
+    public void afterInitialPropagation() {
+    }
+
+    @Override
+    public void beforeOpenNode() {
+    }
+
+    @Override
+    public void afterOpenNode() {
+    }
+
+    @Override
+    public void onSolution() {
+    }
+
+    @Override
+    public void beforeDownLeftBranch() {
+    }
+
+    @Override
+    public void afterDownLeftBranch() {
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+    }
+
+    @Override
+    public void afterDownRightBranch() {
+    }
+
+    @Override
+    public void beforeUpBranch() {
+    }
+
+    @Override
+    public void afterUpBranch() {
+    }
+
+    @Override
+    public void onContradiction() {
+    }
+
+    @Override
+    public void beforeRestart() {
+    }
+
+    @Override
+    public void afterRestart() {
+    }
+
+    @Override
+    public void beforeClose() {
+    }
+
+    @Override
+    public void afterClose() {
+    }
 }

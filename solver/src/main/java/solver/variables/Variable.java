@@ -69,7 +69,7 @@ public interface Variable<D extends IDelta> extends solver.Observable<ICause, Ev
 
     void deleteRequest(IRequest request);
 
-    IRequest[] getRequests();
+    IRequestList getRequests();
 
     int nbRequests();
 
