@@ -72,7 +72,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         		delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
         	}
         	EventType e = EventType.REMOVEARC;
-        	notifyObservers(e, cause);
+        	notifyPropagators(e, cause);
         	return true;
         }return false;
     }
@@ -85,7 +85,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
             		delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
             	}
             	EventType e = EventType.ENFORCEARC;
-            	notifyObservers(e, cause);
+            	notifyPropagators(e, cause);
             	return true;
         	}
     	}

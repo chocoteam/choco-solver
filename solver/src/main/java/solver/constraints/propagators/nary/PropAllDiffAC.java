@@ -35,10 +35,10 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.matching.MatchingStructure;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.IRequest;
 
 /**
  * Created by IntelliJ IDEA.
@@ -79,7 +79,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.ALL_MASK();
     }
 

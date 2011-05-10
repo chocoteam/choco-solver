@@ -27,10 +27,6 @@
 
 package solver.variables.graph.directedGraph;
 
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.Random;
-
 import choco.kernel.memory.IEnvironment;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -39,6 +35,10 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
+
+import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.Random;
 
 /**
  * Created by IntelliJ IDEA.
@@ -119,7 +119,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 			}
 			EventType e = EventType.REMOVEARC;
-			notifyObservers(e, cause);
+			notifyPropagators(e, cause);
 			return true;
 		}return false;
 	}
@@ -133,7 +133,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 					delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 				}
 				EventType e = EventType.ENFORCEARC;
-				notifyObservers(e, cause);
+				notifyPropagators(e, cause);
 				return true;
 			}return false;
 		}

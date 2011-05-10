@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.gary;
 
-import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.Constraint;
@@ -36,6 +35,8 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -49,8 +50,8 @@ import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+
+import java.util.LinkedList;
 
 public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
@@ -292,7 +293,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public int getPropagationConditions() {
+	public int getPropagationConditions(int vIdx) {
 		return EventType.REMOVEARC.mask;
 	}
 

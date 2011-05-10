@@ -51,7 +51,7 @@ public class PropFalse extends PropClause {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.VOID.mask;
     }
 

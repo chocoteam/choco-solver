@@ -53,7 +53,7 @@ public class AdapterValueIIterator extends HeuristicVal {
 
     @Override
     protected void doUpdate(Action action) {
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
     }
 
     @Override

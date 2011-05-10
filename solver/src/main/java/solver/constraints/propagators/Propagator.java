@@ -38,11 +38,11 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.requests.IRequest;
 import solver.requests.InitializeRequest;
 import solver.requests.PropRequest;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -168,10 +168,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
      *
+     * @param vIdx index of the variable within the propagator
      * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
      *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
-    public abstract int getPropagationConditions();
+    public abstract int getPropagationConditions(int vIdx);
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
@@ -223,7 +224,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected void linkToVariables() {
         requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            vars[i].addObserver(this);
+            vars[i].addPropagator(this, i);
             requests[i] = new PropRequest<V, Propagator<V>>(this, vars[i], i);
             vars[i].addRequest(requests[i]);
         }

@@ -35,9 +35,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.intlincomb.policy.AbstractCoeffPolicy;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 /**
  * User : cprudhom<br/>
@@ -91,6 +91,12 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         this.vars = vars;
         coeffPolicy = AbstractCoeffPolicy.build(vars, coeffs, nbPosVars, cste);
     }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+    }
+
 
     /**
      * Checks a new lower bound.

@@ -32,9 +32,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -54,7 +54,7 @@ import solver.requests.IRequest;
  * @version 0.01, june 2010
  * @since 0.01
  */
-public class PropNotEqualXY_C extends Propagator<IntVar>{
+public class PropNotEqualXY_C extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
@@ -69,10 +69,10 @@ public class PropNotEqualXY_C extends Propagator<IntVar>{
     }
 
     @Override
-    public int getPropagationConditions() {
-//        if(x.hasEnumeratedDomain() || y.hasEnumeratedDomain()){
-//            return EventType.INSTANTIATE.mask;
-//        }
+    public int getPropagationConditions(int vIdx) {
+        if (vars[vIdx].hasEnumeratedDomain()) {
+            return EventType.INSTANTIATE.mask;
+        }
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
@@ -89,7 +89,7 @@ public class PropNotEqualXY_C extends Propagator<IntVar>{
     public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
-        }else if(EventType.isBound(mask)){
+        } else if (EventType.isBound(mask)) {
             propagate();
         }
     }
@@ -121,13 +121,13 @@ public class PropNotEqualXY_C extends Propagator<IntVar>{
     @Override
     public ESat isEntailed() {
         if ((x.getUB() + y.getUB() < cste) ||
-				(y.getLB() + x.getLB() > cste))
-			return ESat.TRUE;
-		else if ( x.instantiated()
-				&& y.instantiated()
-				&& x.getValue() + y.getValue() == this.cste)
-			return ESat.FALSE;
-		else
-			return ESat.UNDEFINED;
+                (y.getLB() + x.getLB() > cste))
+            return ESat.TRUE;
+        else if (x.instantiated()
+                && y.instantiated()
+                && x.getValue() + y.getValue() == this.cste)
+            return ESat.FALSE;
+        else
+            return ESat.UNDEFINED;
     }
 }

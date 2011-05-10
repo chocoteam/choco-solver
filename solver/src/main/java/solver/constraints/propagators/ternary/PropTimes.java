@@ -35,9 +35,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -60,7 +60,7 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 

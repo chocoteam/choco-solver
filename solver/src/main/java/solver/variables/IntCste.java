@@ -30,6 +30,7 @@ package solver.variables;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.iterators.OneValueIterator;
 import solver.ICause;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.requests.IRequest;
@@ -221,15 +222,15 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public void addObserver(ICause observer) {
+    public void addPropagator(Propagator observer, int idxInProp) {
     }
 
     @Override
-    public void deleteObserver(ICause observer) {
+    public void deletePropagator(Propagator observer) {
     }
 
     @Override
-    public void notifyObservers(EventType eventType, ICause o) throws ContradictionException {
+    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
     }
 
     @Override

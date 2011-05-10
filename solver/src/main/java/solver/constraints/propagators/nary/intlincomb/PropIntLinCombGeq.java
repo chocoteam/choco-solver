@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
@@ -62,11 +61,6 @@ public final class PropIntLinCombGeq extends AbstractPropIntLinComb {
             return null;
         }
     }*/
-
-    @Override
-    public int getPropagationConditions() {
-        return EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
-    }
 
     /**
      * Checks a new lower bound.

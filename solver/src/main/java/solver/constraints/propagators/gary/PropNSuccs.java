@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.gary;
 
-import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
@@ -36,13 +35,15 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+
+import java.util.LinkedList;
 
 /**
  * @author Jean-Guillaume Fages
@@ -100,7 +101,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public int getPropagationConditions() {
+	public int getPropagationConditions(int vIdx) {
 		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
 	}
 

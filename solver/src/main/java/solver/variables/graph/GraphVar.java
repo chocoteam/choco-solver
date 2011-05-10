@@ -30,6 +30,7 @@ package solver.variables.graph;
 import choco.kernel.memory.IEnvironment;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.requests.IRequest;
@@ -96,7 +97,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
         		delta.getNodeRemovalDelta().add(x);
         	}
         	EventType e = EventType.REMOVENODE;
-        	notifyObservers(e, cause);
+        	notifyPropagators(e, cause);
         	return true;
         }return false;
     }
@@ -108,7 +109,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
             		delta.getNodeEnforcingDelta().add(x);
             	}
     			EventType e = EventType.ENFORCENODE;
-            	notifyObservers(e, cause);
+            	notifyPropagators(e, cause);
             	return true;
     		}return false;
     	}
@@ -196,19 +197,19 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     }
 
     @Override
-    public void addObserver(ICause observer) {
-    	modificationEvents |= observer.getPropagationConditions();
+    public void addPropagator(Propagator observer, int idxInProp) {
+    	modificationEvents |= observer.getPropagationConditions(idxInProp);
         if(!reactOnModification){
         	reactOnModification = true;
         	delta = new GraphDelta();
         }
     }
     @Override
-    public void deleteObserver(ICause observer) {
+    public void deletePropagator(Propagator observer) {
     	throw new UnsupportedOperationException();
     }
     @Override
-    public void notifyObservers(EventType e, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
     	if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, getDelta());
         }

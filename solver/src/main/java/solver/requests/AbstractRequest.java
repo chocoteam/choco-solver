@@ -98,7 +98,7 @@ abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public final int getMask() {
-        return propagator.getPropagationConditions();
+        return propagator.getPropagationConditions(idxVarInProp);
     }
 
     @Override

@@ -35,7 +35,6 @@ import solver.constraints.propagators.nary.cnf.PropClause;
 import solver.constraints.propagators.nary.cnf.PropFalse;
 import solver.constraints.propagators.nary.cnf.PropTrue;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,7 +106,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
             setPropagators(propClauses);
             // the propagator does not react on bound events, but the constraint has to simulate them.
             // (convertion from bound events to remaval events).
-            setPropagationConditions(EventType.ALL_MASK());
+            //setPropagationConditions(EventType.ALL_MASK());
         }
     }
 

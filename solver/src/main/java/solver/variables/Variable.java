@@ -28,10 +28,12 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.variables.domain.delta.IDelta;
-import solver.requests.IRequest;
 
 import java.io.Serializable;
 
@@ -39,7 +41,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends solver.Observable<ICause, EventType>, Serializable {
+public interface Variable<D extends IDelta> extends Serializable {
 
     //todo: to complete
     void updateEntailment(IRequest request);
@@ -84,5 +86,30 @@ public interface Variable<D extends IDelta> extends solver.Observable<ICause, Ev
     Explanation explain();
 
     D getDelta();
+
+    /**
+     * Adds an observers to the set of observers for this object,
+     * provided that it is not the same as some observer already in the set.
+     * @param observer an observer to add
+     * @param idxInProp
+     */
+    public void addPropagator(Propagator observer, int idxInProp);
+
+    /**
+     * Deletes an observers from the set of observers for this object.
+     * @param observer the observer to delete
+     */
+    public void deletePropagator(Propagator observer);
+
+    /**
+     * If this <code>Observable</code> object has changed, then notify all of its observers.<br/>
+     * Each observer has its update method.
+     *
+     *
+     * @param e event on this object
+     * @param o object which leads to the modification of this object
+     * @throws solver.exception.ContradictionException
+     */
+    public void notifyPropagators(EventType e, ICause o) throws ContradictionException;
 
 }

@@ -32,11 +32,11 @@ import choco.kernel.memory.IEnvironment;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDifferent;
-import solver.variables.IntVar;
 import solver.requests.ConditionnalRequest;
 import solver.requests.IRequest;
 import solver.requests.conditions.AbstractCondition;
 import solver.requests.conditions.CompletlyInstantiated;
+import solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,7 +63,7 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
         AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length/2);
         requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            vars[i].addObserver(this);
+            vars[i].addPropagator(this, i);
             ConditionnalRequest crequest =
                     new ConditionnalRequest<PropProbaAllDifferent>(this, vars[i], i, condition, this.environment);
             requests[i] = crequest;

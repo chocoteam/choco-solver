@@ -87,7 +87,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public P[] propagators;
     protected final IStateInt lastPropagatorActive;
 
-    protected int propagationConditions;
     protected int staticPropagationPriority;
 
     protected final PropagatorPriority storeThreshold; // exclusive
@@ -102,28 +101,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         this.storeThreshold = storeThreshold;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
         initialize = false;
-    }
-
-
-    /**
-     * Return the specific mask indicating the event on which this <code>Constraint</code> object can react.<br/>
-     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
-     *
-     * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
-     *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
-     */
-    public final int getPropagationConditions() {
-        return propagationConditions;
-    }
-
-    /**
-     * Set the specific mask indicating the event on which this <code>Constraint</code> object can react.<br/>
-     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
-     *
-     * @param propagationConditions todo
-     */
-    protected final void setPropagationConditions(int propagationConditions) {
-        this.propagationConditions = propagationConditions;
     }
 
     public V[] getVariables() {
@@ -215,7 +192,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         this.lastPropagatorActive.set(propagators.length);
         for (int p = 0; p < propagators.length; p++) {
             Propagator prop = propagators[p];
-            propagationConditions |= prop.getPropagationConditions();
             staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
         }
 

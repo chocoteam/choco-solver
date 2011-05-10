@@ -34,9 +34,9 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -128,7 +128,7 @@ public class PropClause extends Propagator<BoolVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask;
     }
 

@@ -53,7 +53,7 @@ public final class PropIntLinCombNeq extends AbstractPropIntLinComb {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask;
     }
 

@@ -33,10 +33,10 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.requests.IRequest;
 import solver.requests.PropRequest;
+import solver.variables.EventType;
+import solver.variables.IntVar;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -64,15 +64,18 @@ public class Prop_X_NotEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.INSTANTIATE.mask;
+    public int getPropagationConditions(int vIdx) {
+        if (vars[vIdx].hasEnumeratedDomain()) {
+            return EventType.INSTANTIATE.mask;
+        }
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
     @SuppressWarnings({"unchecked"})
     protected void linkToVariables() {
         requests = new IRequest[1];
-        vars[0].addObserver(this);
+        vars[0].addPropagator(this, 0);
         requests[0] = new PropRequest<IntVar, Propagator<IntVar>>(this, vars[0], 0);
         vars[0].addRequest(requests[0]);
     }
@@ -88,8 +91,8 @@ public class Prop_X_NotEqualX_YC extends Propagator<IntVar> {
     public void propagateOnRequest(IRequest<IntVar> xRequest, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             removeValOnY();
-        } else {
-            throw new UnsupportedOperationException();
+        } else if (EventType.isBound(mask)){
+            propagate();
         }
     }
 

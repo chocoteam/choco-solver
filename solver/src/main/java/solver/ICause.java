@@ -47,7 +47,7 @@ public interface ICause extends Serializable {
 
     boolean reactOnPromotion();
 
-    int getPropagationConditions();
+    int getPropagationConditions(int vIdx);
 
     public void incFail();
 

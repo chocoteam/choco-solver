@@ -33,10 +33,10 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.requests.IRequest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -139,7 +139,7 @@ public class PropReified extends Propagator<Variable> {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.ALL_MASK();
     }
 

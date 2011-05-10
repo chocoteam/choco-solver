@@ -98,7 +98,7 @@ public class DigraphArcDecision extends AbstractDecision<DirectedGraphVar> {
 	}
 
 	@Override
-	public int getPropagationConditions() {
+	public int getPropagationConditions(int vIdx) {
 		return EventType.VOID.mask;
 	}
 

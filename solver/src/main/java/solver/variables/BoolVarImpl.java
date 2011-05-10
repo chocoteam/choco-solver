@@ -31,14 +31,15 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
+import solver.requests.list.RequestListBuilder;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.IRequest;
-import solver.requests.list.RequestListBuilder;
 
 import java.util.BitSet;
 
@@ -176,7 +177,7 @@ public final class BoolVarImpl implements BoolVar {
                 } else {
                     this.domain.restrict(value);
                 }
-                this.notifyObservers(e, cause);
+                this.notifyPropagators(e, cause);
                 solver.explainer.instantiateTo(this, value, cause);
                 return true;
             } else {
@@ -339,8 +340,8 @@ public final class BoolVarImpl implements BoolVar {
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void addObserver(ICause observer) {
-        modificationEvents |= observer.getPropagationConditions();
+    public void addPropagator(Propagator observer, int idxInProp) {
+        modificationEvents |= observer.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             domain.recordRemoveValues();
             reactOnRemoval = true;
@@ -349,13 +350,13 @@ public final class BoolVarImpl implements BoolVar {
     }
 
     @Override
-    public void deleteObserver(ICause observer) {
+    public void deletePropagator(Propagator observer) {
         throw new UnsupportedOperationException();
     }
 
     @SuppressWarnings({"unchecked"})
     @Override
-    public void notifyObservers(EventType e, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, domain.getDelta());
         }

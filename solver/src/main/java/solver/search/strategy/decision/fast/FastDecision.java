@@ -96,7 +96,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.VOID.mask;
     }
 

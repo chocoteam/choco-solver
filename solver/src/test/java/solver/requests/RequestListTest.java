@@ -35,10 +35,10 @@ import org.testng.annotations.Test;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
+import solver.variables.EventType;
+import solver.variables.IntVar;
 
 /**
  * <br/>
@@ -99,7 +99,7 @@ public class RequestListTest {
         }
 
         @Override
-        public int getPropagationConditions() {
+        public int getPropagationConditions(int vIdx) {
             return propCond;
         }
 

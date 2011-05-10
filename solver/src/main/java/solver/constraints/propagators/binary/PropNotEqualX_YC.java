@@ -33,9 +33,9 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -70,8 +70,8 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        if(vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()){
+    public int getPropagationConditions(int vIdx) {
+        if (vars[vIdx].hasEnumeratedDomain()) {
             return EventType.INSTANTIATE.mask;
         }
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
@@ -83,7 +83,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
             removeValV1();
         } else if (y.instantiated()) {
             removeValV0();
-        }else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
+        } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
             setPassive();
         }
     }

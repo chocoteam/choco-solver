@@ -35,9 +35,9 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 /**
  * VALUE = TABLE[INDEX]
@@ -60,10 +60,12 @@ public class PropElement extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-//        if (idx == 0)
-        return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
-//        else return IntVarEvent.REMVAL_MASK;
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) {
+            return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
+        } else {
+            return EventType.REMOVE.mask;
+        }
     }
 
 

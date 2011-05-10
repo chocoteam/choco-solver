@@ -119,7 +119,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
             Propagator<IntVar> o = request.getPropagator();
             if (o != cause) {
                 // Only notify constraints that filter on the specific event received
-                if ((mask & o.getPropagationConditions()) != 0) {
+                if ((mask & o.getPropagationConditions(request.getIdxVarInProp())) != 0) {
                     request.update(event);
                 }
             }

@@ -36,10 +36,10 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.IRequest;
 
 /**
  * (X[i] = j' + Ox && j = j' + Ox) <=> (Y[j] = i' + Oy[j]  && i = i' + Oy[j])
@@ -75,10 +75,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
     }
 
     @Override
-    public int getPropagationConditions() {
-        // the propagator does not react on bound events, but the constraint has to simulate them.
-        // (convertion from bound events to remaval events).
-        return EventType.ALL_MASK();
+    public int getPropagationConditions(int vIdx) {
+       if (vars[vIdx].hasEnumeratedDomain()) {
+            return EventType.ALL_MASK();
+        } else {
+            return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        }
     }
 
 

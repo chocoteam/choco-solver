@@ -29,15 +29,16 @@ package solver.variables.image;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.IRequest;
 
 /**
  * <br/>
@@ -130,18 +131,18 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void addObserver(ICause observer) {
-        var.addObserver(observer);
+    public void addPropagator(Propagator observer, int idxInProp) {
+        var.addPropagator(observer, idxInProp);
     }
 
     @Override
-    public void deleteObserver(ICause observer) {
-        var.deleteObserver(observer);
+    public void deletePropagator(Propagator observer) {
+        var.deletePropagator(observer);
     }
 
     @Override
-    public void notifyObservers(EventType eventType, ICause o) throws ContradictionException {
-        var.notifyObservers(eventType, o);
+    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
+        var.notifyPropagators(eventType, o);
     }
 
     @Override

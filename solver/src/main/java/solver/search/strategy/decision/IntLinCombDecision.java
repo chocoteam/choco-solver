@@ -123,6 +123,11 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     }
 
     @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
     public boolean reactOnPromotion() {
         return false;
     }

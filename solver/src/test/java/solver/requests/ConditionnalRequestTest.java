@@ -36,11 +36,11 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.Propagator;
+import solver.requests.conditions.AbstractCondition;
+import solver.requests.conditions.CompletlyInstantiated;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.requests.conditions.AbstractCondition;
-import solver.requests.conditions.CompletlyInstantiated;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -75,7 +75,7 @@ public class ConditionnalRequestTest {
                     AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
                     ConditionnalRequest[] requests = new ConditionnalRequest[ivars.length];
                     for (int i = 0; i < ivars.length; i++) {
-                        ivars[i].addObserver(prop);
+                        ivars[i].addPropagator(prop, i);
                         requests[i] = new ConditionnalRequest(prop, ivars[i], i, cond, environment);
                         ivars[i].addRequest(requests[i]);
                         cond.linkRequest(requests[i]);

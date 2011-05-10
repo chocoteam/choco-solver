@@ -27,8 +27,6 @@
 
 package solver.constraints.propagators.gary;
 
-import java.util.LinkedList;
-
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
@@ -38,15 +36,17 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.Variable;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
+import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
+
+import java.util.LinkedList;
 
 /**
  * @author Jean-Guillaume Fages
@@ -177,7 +177,7 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public int getPropagationConditions() {
+	public int getPropagationConditions(int vIdx) {
 		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask+EventType.REMOVENODE.mask;
 	}
 

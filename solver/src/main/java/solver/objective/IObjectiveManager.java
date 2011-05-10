@@ -83,7 +83,7 @@ public abstract class IObjectiveManager implements ICause {
     }
 
     @Override
-    public int getPropagationConditions() {
+    public int getPropagationConditions(int vIdx) {
         return EventType.VOID.mask;
     }
 
