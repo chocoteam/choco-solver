@@ -30,6 +30,7 @@ package solver.search.strategy.strategy;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.DigraphArcDecision;
 import solver.search.strategy.assignments.Assignment;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -38,11 +39,11 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * @author Jean-Guillaume Fages
  * @since 1 April 2011
  */
-public class DigraphStrategy extends AbstractStrategy<DirectedGraphVar> {
+public class DigraphStrategy extends AbstractStrategy<GraphVar> {
 
 
-	public DigraphStrategy(DirectedGraphVar g) {
-		super(new DirectedGraphVar[]{g});
+	public DigraphStrategy(GraphVar g) {
+		super(new GraphVar[]{g});
 	}
 
 	@Override
@@ -50,7 +51,7 @@ public class DigraphStrategy extends AbstractStrategy<DirectedGraphVar> {
 
 	@Override
 	public Decision getDecision() {
-		DirectedGraphVar g = vars[0];
+		GraphVar g = vars[0];
 		int fromTo = g.nextArc();
 		if(fromTo == -1)return null;
 		return new DigraphArcDecision(g, fromTo, Assignment.graph_enforcer);

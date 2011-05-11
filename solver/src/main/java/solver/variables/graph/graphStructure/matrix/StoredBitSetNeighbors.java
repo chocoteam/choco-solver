@@ -30,6 +30,8 @@ package solver.variables.graph.graphStructure.matrix;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.S64BitSet;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.graphStructure.adjacencyList.IntCell;
+import solver.variables.graph.graphStructure.adjacencyList.storedStructures.RemOperation;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**
@@ -80,7 +82,7 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 	public int getFirstElement() {
 		return nextSetBit(0);
 	}
-    
+
     private class SBIterator extends AbstractNeighborsIterator<StoredBitSetNeighbors>{
 
     	private int index;

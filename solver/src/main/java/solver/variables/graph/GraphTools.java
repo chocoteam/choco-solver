@@ -33,6 +33,7 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 /**Class containing some static methods to manipulate graphs
  * @author Jean-Guillaume Fages */

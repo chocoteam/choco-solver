@@ -73,5 +73,15 @@ public class StoredIntLinkedList extends IntLinkedList {
     protected boolean _remove(int element) {
         return super.remove(element);
     }
+    
 
+    @Override
+    public void clear() {
+        IntCell e = getFirst();
+        while (e!=null){
+        	new AddOperation(environment, this, e.getElement());
+        	e = e.getNext();
+        }
+        super.clear();
+    }
 }

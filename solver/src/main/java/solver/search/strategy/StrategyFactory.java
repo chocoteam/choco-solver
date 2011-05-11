@@ -52,6 +52,7 @@ import solver.search.strategy.strategy.Assignment;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.util.LinkedList;
@@ -351,7 +352,7 @@ public final class StrategyFactory {
     }
 
 
-    public static AbstractStrategy randomArcs(DirectedGraphVar vars, IEnvironment env) {
+    public static AbstractStrategy randomArcs(GraphVar vars, IEnvironment env) {
         return new DigraphStrategy(vars);
     }
 }

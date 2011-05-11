@@ -56,8 +56,8 @@ public class DirectedGraphTest {
         System.out.println("-----------------");
         
 //        System.out.println(ConnectivityFinder.findAllCCandAP(g2));
-        System.out.println(StrongConnectivityFinder.findAll(g1));
-        System.out.println(BipartiteMaxCardMatching.maxCardBipartiteMatching(g1).size());
+//        System.out.println(StrongConnectivityFinder.findAll(g1));
+//        System.out.println(BipartiteMaxCardMatching.maxCardBipartiteMatching(g1).size());
 
 //        System.out.println("enforecNode");
 //        g1.enforceNode(0,null);

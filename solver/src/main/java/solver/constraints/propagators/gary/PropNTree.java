@@ -27,6 +27,9 @@
 
 package solver.constraints.propagators.gary;
 
+import gnu.trove.TIntArrayList;
+
+import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.Constraint;
@@ -35,8 +38,6 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -50,8 +51,8 @@ import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-
-import java.util.LinkedList;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 
 public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
@@ -62,8 +63,8 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	DirectedGraphVar g;
 	IntVar nTree;
 	int minTree = 0;
-	private LinkedList<INeighbors> sinks;
-	private LinkedList<INeighbors> nonSinks;
+	private LinkedList<TIntArrayList> sinks;
+	private LinkedList<TIntArrayList> nonSinks;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -236,12 +237,10 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	private void minTreePruning() throws ContradictionException {
 		nTree.updateLowerBound(minTree, this);
 		if (nTree.getUB()==minTree){
-			AbstractNeighborsIterator<INeighbors> iter;
 			int node;
-			for (INeighbors scc:nonSinks){
-				iter = scc.iterator();
-				while(iter.hasNext()){
-					node = iter.next();
+			for (TIntArrayList scc:nonSinks){
+				for(int x=0;x<scc.size();x++){
+					node = scc.get(x);
 					if(g.getEnvelopGraph().arcExists(node, node)){
 						g.removeArc(node, node, this);
 					}
@@ -252,35 +251,34 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	private void computeSinks() {
 		int n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<INeighbors> allSCC = StrongConnectivityFinder.findAllSCC(g.getEnvelopGraph());
+		LinkedList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
 		int[] sccOf = new int[n];
 		int sccNum = 0;
-		AbstractNeighborsIterator<INeighbors> iter;
 		int node;
-		for (INeighbors scc:allSCC){
-			iter = scc.iterator();
-			while(iter.hasNext()){
-				node = iter.next();
-				sccOf[node] = sccNum;
+		for (TIntArrayList scc:allSCC){
+			for(int x=0;x<scc.size();x++){
+				sccOf[scc.get(x)] = sccNum;
 			}
 			sccNum++;
 		}
-		sinks = new LinkedList<INeighbors>();
-		nonSinks = new LinkedList<INeighbors>();
+		sinks = new LinkedList<TIntArrayList>();
+		nonSinks = new LinkedList<TIntArrayList>();
 		boolean looksSink = true;
 		int suc;
 		AbstractNeighborsIterator<INeighbors> succIter;
-		for (INeighbors scc:allSCC){
-			iter = scc.iterator();
+		for (TIntArrayList scc:allSCC){
 			looksSink = true;
-			while(looksSink && iter.hasNext()){
-				node = iter.next();
+			for(int x=0;x<scc.size();x++){
+				node = scc.get(x);
 				succIter = g.getEnvelopGraph().successorsIteratorOf(node);
 				while(looksSink && succIter.hasNext()){
 					suc = succIter.next();
 					if (sccOf[suc]!=sccOf[node]){
 						looksSink = false;
 					}
+				}
+				if(!looksSink){
+					x = scc.size();
 				}
 			}
 			if(looksSink){

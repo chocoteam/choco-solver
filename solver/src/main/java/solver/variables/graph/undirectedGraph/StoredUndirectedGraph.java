@@ -27,6 +27,8 @@
 
 package solver.variables.graph.undirectedGraph;
 
+import java.util.BitSet;
+
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
@@ -73,6 +75,15 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
             this.activeIdx.activate(i);
         }
     }
+	
+	public StoredUndirectedGraph(IEnvironment env, BitSet[] data, GraphType type) {
+		this(env,data.length,type);
+		for (int i = 0; i < data.length; i++) {
+			for(int j=data[i].nextSetBit(0);j>=0;j=data[i].nextSetBit(j+1)){
+				addEdge(i, j);
+			}
+		}
+	}
 
 
 	@Override

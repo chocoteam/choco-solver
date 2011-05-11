@@ -218,4 +218,6 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 	public int nbRequests() {
 		return requests.cardinality();
 	}
+
+	public abstract int nextArc();
 }

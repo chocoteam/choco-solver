@@ -34,6 +34,7 @@ import solver.variables.domain.BooleanDomain;
 import solver.variables.domain.IntervalIntDomain;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.image.IntVarAddCste;
 import solver.variables.image.IntVarTimesPosCste;
 import solver.variables.image.OppIntVar;
@@ -191,5 +192,9 @@ public class VariableFactory {
 
 	public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType type, Solver solver) {
 		return digraph(string, data, type, type, solver);
+	}
+
+	public static UndirectedGraphVar undirectedGraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
+		return new UndirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
 	}
 }

@@ -28,6 +28,9 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.LinkedList;
+
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
@@ -158,6 +161,7 @@ public class ConnectivityFinder {
 		}
 		return co;
 	}
+	
 	
 	/**
 	 * @param co the object which encapsulates CC and AP but here AP will be empty

@@ -25,85 +25,74 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.decision.graph;
+package solver.constraints.gary;
 
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.AbstractDecision;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.graph.GraphVar;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.PropAllDiff;
+import solver.constraints.propagators.gary.PropAtMostNNeighbors;
+import solver.variables.Variable;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import java.util.BitSet;
 
-public class DigraphArcDecision extends AbstractDecision<GraphVar> {
+public class AllDiff<V extends Variable> extends Constraint<V, Propagator<V>>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	int branch;
-	Assignment<GraphVar> assignment;
-	int fromTo;
-	GraphVar g;
-
+	private UndirectedGraphVar g;
+	private int sizeFirstSet;
+	
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
-	
-    public DigraphArcDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
-		g = variable;
-		this.fromTo = fromTo;
-		assignment = graph_ass;
-		branch = 0;
+
+	public AllDiff(UndirectedGraphVar graph, int sizeFirstSet, Solver solver, PropagatorPriority storeThreshold) {
+		super((V[]) new Variable[]{graph}, solver, storeThreshold);
+		setPropagators(new PropAllDiff(graph, sizeFirstSet, solver, this, PropagatorPriority.VERY_SLOW, true), 
+				new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, storeThreshold, true, 1));
+		this.g = graph;
+		this.sizeFirstSet = sizeFirstSet;
 	}
+
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	@Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-	@Override
-	public void apply() throws ContradictionException {
-		 if (branch == 1) {
-			 assignment.apply(g, fromTo, this);
-	     } else if (branch == 2) {
-	    	 assignment.unapply(g, fromTo, this);
-	     }
-	}
-
-	@Override
-	public void free() {
-		// TODO
-	}
-
-	@Override
-	public Explanation explain(IntVar v, Deduction d) {
-		return null;
-	}
-
-	@Override
-	public boolean reactOnPromotion() {
-		return false;
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.VOID.mask;
-	}
-
-	@Override
-	@Deprecated
-	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
-		throw new UnsupportedOperationException();		
+	public ESat isSatisfied() {
+		IActiveNodes nodes = g.getEnvelopGraph().getActiveNodes();
+		ActiveNodesIterator<IActiveNodes> niter = nodes.iterator();
+		int node,val;
+		BitSet values = new BitSet(g.getEnvelopGraph().getNbNodes());
+		while(niter.hasNext()){
+			node = niter.next();
+			if(node>=sizeFirstSet){
+				return ESat.TRUE;
+			}
+			if(g.getEnvelopGraph().getNeighborhoodSize(node)<1){
+				return ESat.FALSE;
+			}
+			if(g.getEnvelopGraph().getNeighborhoodSize(node)>1){
+				return ESat.UNDEFINED;
+			}
+			val = g.getEnvelopGraph().getNeighborsOf(node).getFirstElement();
+			if(values.get(node) || values.get(val)){
+				return ESat.FALSE;
+			}
+			if(g.getKernelGraph().getNeighborhoodSize(node)!=1 || g.getEnvelopGraph().getNeighborhoodSize(node)!=1){
+				return ESat.UNDEFINED;
+			}
+			values.set(val);
+			values.set(node);
+		}
+		return ESat.TRUE;
 	}
 }

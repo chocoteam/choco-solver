@@ -46,6 +46,8 @@ import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFin
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
+import gnu.trove.TIntArrayList;
+
 import java.util.LinkedList;
 
 public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
@@ -141,34 +143,33 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	
 	private int calcMinTree() {
 		int n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<INeighbors> allSCC = StrongConnectivityFinder.findAllSCC(g.getEnvelopGraph());
+		LinkedList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
 		int[] sccOf = new int[n];
 		int sccNum = 0;
-		AbstractNeighborsIterator<INeighbors> iter;
 		int node;
-		for (INeighbors scc:allSCC){
-			iter = scc.iterator();
-			while(iter.hasNext()){
-				node = iter.next();
-				sccOf[node] = sccNum;
+		for (TIntArrayList scc:allSCC){
+			for(int x=0;x<scc.size();x++){
+				sccOf[scc.get(x)] = sccNum;
 			}
 			sccNum++;
 		}
-		LinkedList<INeighbors> sinks = new LinkedList<INeighbors>();
+		LinkedList<TIntArrayList> sinks = new LinkedList<TIntArrayList>();
 		boolean looksSink = true;
 		int suc;
 		AbstractNeighborsIterator<INeighbors> succIter;
-		for (INeighbors scc:allSCC){
-			iter = scc.iterator();
+		for (TIntArrayList scc:allSCC){
 			looksSink = true;
-			while(looksSink && iter.hasNext()){
-				node = iter.next();
+			for(int x=0;x<scc.size();x++){
+				node = scc.get(x);
 				succIter = g.getEnvelopGraph().successorsIteratorOf(node);
 				while(looksSink && succIter.hasNext()){
 					suc = succIter.next();
 					if (sccOf[suc]!=sccOf[node]){
 						looksSink = false;
 					}
+				}
+				if(!looksSink){
+					x = scc.size();
 				}
 			}
 			if(looksSink){

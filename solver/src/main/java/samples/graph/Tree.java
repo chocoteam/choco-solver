@@ -28,7 +28,6 @@
 package samples.graph;
 
 import java.util.BitSet;
-import benchmarks.graph.DataWriter;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -48,7 +47,7 @@ public class Tree extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 1000;
+	private static final long TIMELIMIT = 60000;
 	private static String file = "results_tree.csv";
 	private BitSet[] data;
 	private DirectedGraphVar g;
@@ -100,7 +99,7 @@ public class Tree extends AbstractProblem{
 			public void init() {iniTime = System.currentTimeMillis();}
 		});
 		sat = solver.findSolution();
-		DataWriter.writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
+		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
 				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+NTree.filteringCounter+";"+sat+";\n", file);
 		if(solver.getMeasures().getBackTrackCount()>0){
 			throw new UnsupportedOperationException("error bksCount>0");
@@ -123,21 +122,21 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		gtype = GraphType.SPARSE;
-		testN();
 		gtype = GraphType.DENSE;
 		testN();
+//		gtype = GraphType.DENSE;
+//		testN();
 	}
 	private static void testN(){
 		file = "tree_"+(TIMELIMIT/1000)+"sec_d5_"+gtype+".csv";
-		DataWriter.clearFile(file);
-		DataWriter.writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
+		clearFile(file);
+		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
 		int i = 0;
-		int[] ds = new int[]{5};
+		int[] ds = new int[]{5000};
 //		int[] ds = new int[]{5,20,50,30000};
 		int dMax = 50000;
 		int nMax = 50000;
-		for(int n=20;n<=100;n+=10){
+		for(int n=400;n<=10000;n+=100){
 			if (n<nMax){
 				for(int d:ds){
 					if(d<dMax){
@@ -174,10 +173,20 @@ public class Tree extends AbstractProblem{
 			}
 		}
 	}
+	private static void writeTextInto(String string, String file2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private static void clearFile(String file2) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	private static void testD(){
 		file = "results_JGF_Tree_BENCH_D_bigValues.csv";
-		DataWriter.clearFile(file);
-		DataWriter.writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
+		clearFile(file);
+		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
 		int[] ns = new int[]{50,100,300,500};
 		int[] ds = new int[]{2,4,6,8,10,20,40,60,80,100,200,400,600,800,1000};
 		for(int n:ns){
