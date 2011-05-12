@@ -58,9 +58,8 @@ public class ThreadSolverTest {
         int n = 12;
 
         Solver sref = modeler(n);
-        long tref = -System.currentTimeMillis();
         sref.findAllSolutions();
-        tref += System.currentTimeMillis();
+        long tref = sref.getMeasures().getTimeCount();
 
         int n1 = n / 2;
 
@@ -73,19 +72,17 @@ public class ThreadSolverTest {
         ThreadSolver ts1 = new ThreadSolver(sm1);
         ThreadSolver ts2 = new ThreadSolver(sm2);
 //
-        long tsms = -System.currentTimeMillis();
+
         ts1.findAllSolutions();
         ts2.findAllSolutions();
+        long tsms = ts1.getSolver().getMeasures().getTimeCount() + ts2.getSolver().getMeasures().getTimeCount();
 
         ts1.join();
         ts2.join();
-        tsms += System.currentTimeMillis();
 
         int nbSol = (int) sref.getMeasures().getSolutionCount();
         Assert.assertEquals(ts1.solver.getMeasures().getSolutionCount()
                 + ts2.solver.getMeasures().getSolutionCount(), nbSol);
-
-        System.out.printf("%dms vs %dms", tref, tsms);
     }
 
     @Test(groups = "1m")

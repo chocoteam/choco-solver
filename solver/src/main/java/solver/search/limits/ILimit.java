@@ -27,6 +27,8 @@
 
 package solver.search.limits;
 
+import java.io.Serializable;
+
 /**
  * <code>LimitChecker</code> is an abstract class extending <code>Thread</code>.
  * When it has been started, it sleeps during <code>sleeptime</code> and awake, check the particular limit
@@ -46,7 +48,7 @@ package solver.search.limits;
  * @see solver.search.limits.SolutionLimit
  * @since 15 juil. 2010
  */
-public interface ILimit {
+public interface ILimit extends Serializable{
 
     void init();
 

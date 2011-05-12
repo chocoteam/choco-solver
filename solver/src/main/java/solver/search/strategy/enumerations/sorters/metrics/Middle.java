@@ -25,20 +25,37 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.enumerations.sorters;
+package solver.search.strategy.enumerations.sorters.metrics;
 
-import solver.variables.IntVar;
+import gnu.trove.TObjectIntHashMap;
+import solver.variables.Variable;
 
 /**
+ * A metric to evaluate the distance between the middle of the array and the position of a IntVar within this array
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 04/01/11
  */
-public class Largest extends AbstractSorter<IntVar> {
+public class Middle<V extends Variable> implements IMetric<V> {
+
+    final TObjectIntHashMap<V> map;
+
+    private Middle(V[] variables) {
+        map = new TObjectIntHashMap<V>(variables.length);
+        int n = variables.length / 2;
+        for (int i = 0; i < variables.length; i++) {
+            map.put(variables[i], Math.abs(i - n));
+        }
+    }
+
+    public static <V extends Variable> Middle build(V[] variables) {
+        return new Middle<V>(variables);
+    }
 
     @Override
-    public int compare(IntVar o1, IntVar o2) {
-        return o1.getUB() - o2.getUB();
+    public int eval(V var) {
+        return map.get(var);
     }
+
 }

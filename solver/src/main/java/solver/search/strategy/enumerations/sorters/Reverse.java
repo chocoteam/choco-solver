@@ -24,27 +24,27 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.strategy.enumerations.sorters;
 
-import gnu.trove.TObjectIntHashMap;
+import solver.variables.Variable;
 
 /**
+ * An AbstractSorter which reverts sorter
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 02/02/11
+ * @since 10/05/11
  */
-public abstract class AbstractCriteriaBasedSorter<E> extends AbstractSorter<E> {
+public class Reverse<V extends Variable> extends AbstractSorter<V> {
 
-    final TObjectIntHashMap<E> criteria;
+    final AbstractSorter<V> sorter;
 
-    protected AbstractCriteriaBasedSorter(int size) {
-        this.criteria = new TObjectIntHashMap<E>(size);
+    public Reverse(AbstractSorter<V> sorter) {
+        this.sorter = sorter;
     }
 
     @Override
-    public int compare(E o1, E o2) {
-        return criteria.get(o1) - criteria.get(o2);
+    public int compare(V o1, V o2) {
+        return sorter.compare(o2, o1);
     }
 }

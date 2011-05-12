@@ -47,27 +47,30 @@ import java.util.Arrays;
  */
 public class ConstraintFactory {
 
-    protected ConstraintFactory() {}
+    protected ConstraintFactory() {
+    }
 
     /**
      * Create a <b>X = c</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param c a constant
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param c      a constant
      * @param solver
      */
-    public static Constraint eq(IntVar x, int c, Solver solver){
-        return new IntLinComb(new IntVar[]{x}, new int[]{1},1, IntLinComb.Operator.EQ, c, solver);
+    public static Constraint eq(IntVar x, int c, Solver solver) {
+        return new IntLinComb(new IntVar[]{x}, new int[]{1}, 1, IntLinComb.Operator.EQ, c, solver);
     }
 
     /**
      * Create a <b>X = Y</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint eq(IntVar x, IntVar y, Solver solver){
+    public static Constraint eq(IntVar x, IntVar y, Solver solver) {
 //        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.EQ, 0, solver, engine);
         return new EqualX_YC(x, y, 0, solver);
     }
@@ -75,12 +78,13 @@ public class ConstraintFactory {
     /**
      * Create a <b>X = Y + C</b> constraint.
      * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
-     * @param c a constant
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
+     * @param c      a constant
      * @param solver
      */
-    public static Constraint eq(IntVar x, IntVar y, int c, Solver solver){
+    public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
 //        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.EQ, -c, solver, engine);
         return new EqualX_YC(x, y, c, solver);
     }
@@ -88,236 +92,172 @@ public class ConstraintFactory {
     /**
      * Create a <b>X =/= c</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param c a constant
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param c      a constant
      * @param solver
      */
-    public static Constraint neq(IntVar x, int c, Solver solver){
-        return new IntLinComb(new IntVar[]{x}, new int[]{1},1, IntLinComb.Operator.NEQ, c, solver);
+    public static Constraint neq(IntVar x, int c, Solver solver) {
+        return new IntLinComb(new IntVar[]{x}, new int[]{1}, 1, IntLinComb.Operator.NEQ, c, solver);
     }
 
     /**
      * Create a <b>X =/= Y</b> constraint.
      * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint neq(IntVar x, IntVar y, Solver solver){
+    public static Constraint neq(IntVar x, IntVar y, Solver solver) {
 //        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.NEQ, 0, engine);
-        return new NotEqualX_YC(x,y, 0, solver);
+        return new NotEqualX_YC(x, y, 0, solver);
     }
 
     /**
      * Create a <b>X =/= Y + C</b> constraint.
      * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
-     * @param c a constant
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
+     * @param c      a constant
      * @param solver
      */
-    public static Constraint neq(IntVar x, IntVar y, int c, Solver solver){
+    public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
 //        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.NEQ, c, engine);
-        return new NotEqualX_YC(x,y, c, solver);
+        return new NotEqualX_YC(x, y, c, solver);
     }
 
     /**
      * Create a <b>X <= Y</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint leq(IntVar x, IntVar y, Solver solver){
-        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.LEQ, 0, solver);
+    public static Constraint leq(IntVar x, IntVar y, Solver solver) {
+        return new IntLinComb(new IntVar[]{x, y}, new int[]{1, -1}, 1, IntLinComb.Operator.LEQ, 0, solver);
     }
 
     /**
      * Create a <b>X <= c</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param c a constant
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param c      a constant
      * @param solver
      */
-    public static Constraint leq(IntVar x, int c, Solver solver){
-        return new IntLinComb(new IntVar[]{x}, new int[]{1},1, IntLinComb.Operator.LEQ, -c, solver);
+    public static Constraint leq(IntVar x, int c, Solver solver) {
+        return new IntLinComb(new IntVar[]{x}, new int[]{1}, 1, IntLinComb.Operator.LEQ, -c, solver);
     }
 
     /**
      * Create a <b>X < Y</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint lt(IntVar x, IntVar y, Solver solver){
-        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.LEQ, 1, solver);
+    public static Constraint lt(IntVar x, IntVar y, Solver solver) {
+        return new IntLinComb(new IntVar[]{x, y}, new int[]{1, -1}, 1, IntLinComb.Operator.LEQ, 1, solver);
     }
 
     /**
      * Create a <b>X >= Y</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint geq(IntVar x, IntVar y, Solver solver){
-        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.GEQ, 0, solver);
+    public static Constraint geq(IntVar x, IntVar y, Solver solver) {
+        return new IntLinComb(new IntVar[]{x, y}, new int[]{1, -1}, 1, IntLinComb.Operator.GEQ, 0, solver);
     }
 
     /**
      * Create a <b>X >= c</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param c a constant object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param c      a constant object
      * @param solver
      */
-    public static Constraint geq(IntVar x, int c, Solver solver){
-        return new IntLinComb(new IntVar[]{x}, new int[]{1},1, IntLinComb.Operator.GEQ, -c, solver);
+    public static Constraint geq(IntVar x, int c, Solver solver) {
+        return new IntLinComb(new IntVar[]{x}, new int[]{1}, 1, IntLinComb.Operator.GEQ, -c, solver);
     }
 
     /**
      * Create a <b>X > Y</b> constraint.
      * <br/>Based on <code>IntLinComb</code> constraint.
-     * @param x a <code>IntVar</code> object
-     * @param y a <code>IntVar</code> object
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param y      a <code>IntVar</code> object
      * @param solver
      */
-    public static Constraint gt(IntVar x, IntVar y, Solver solver){
-        return new IntLinComb(new IntVar[]{x,y}, new int[]{1,-1},1, IntLinComb.Operator.GEQ, 1, solver);
+    public static Constraint gt(IntVar x, IntVar y, Solver solver) {
+        return new IntLinComb(new IntVar[]{x, y}, new int[]{1, -1}, 1, IntLinComb.Operator.GEQ, 1, solver);
     }
 
     public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
-                                    IntVar v, int c, Solver solver){
+                                    int c, Solver solver) {
         TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        int k  =0;
-        for(int i = 0 ; i < vars.length; i++){
-            if(!map.containsKey(vars[i])){
-                map.put(vars[i], k++);
+        for (int i = 0; i < vars.length; i++) {
+            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
+            if (map.get(vars[i]) == 0) {
+                map.remove(vars[i]);
             }
         }
-        if(!map.containsKey(v)){
-            map.put(v, k++);
-        }
 
-        IntVar[] nvars = new IntVar[k];
-        int[] ncoeffs = new int[k];
-        for(int i = 0; i < coeffs.length; i++){
-            int j  = map.get(vars[i]);
-            ncoeffs[j] += coeffs[i];
-            nvars[j] = vars[i];
-        }
-        
-        int j  = map.get(v);
-        ncoeffs[j] -= c;
-        nvars[j] = v;
-
+        IntVar[] nvars = map.keys(new IntVar[map.size()]);
         int b = 0, e = map.size();
         IntVar[] tmpV = new IntVar[e];
         int[] tmpC = new int[e];
-        for(int i = 0; i < k; i++){
-            IntVar var = nvars[i];
-            int coeff = ncoeffs[i];
-            if(coeff > 0){
-                tmpV[b] = var;
-                tmpC[b++] = coeff;
-            }else if(coeff < 0){
-                tmpV[--e] = var;
-                tmpC[e] = coeff;
+        // iteration over the paramater array to avoid non-deterministic behavior introduced by the map
+        for (int i = 0; i < vars.length; i++) {
+            IntVar var = vars[i];
+            if (map.contains(vars[i])) {
+                int coeff = map.get(var);
+                if (coeff > 0) {
+                    tmpV[b] = var;
+                    tmpC[b++] = coeff;
+                } else if (coeff < 0) {
+                    tmpV[--e] = var;
+                    tmpC[e] = coeff;
+                }
             }
         }
-
-        return new IntLinComb(tmpV, tmpC, b, op, 0, solver);
-    }
-
-
-    //TODO: scalar when 2 vars should be replaced by a specific constraint
-    public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
-                                    int c, Solver solver){
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        int k  =0;
-        for(int i = 0 ; i < vars.length; i++){
-            if(!map.containsKey(vars[i])){
-                map.put(vars[i], k++);
-            }
-        }
-
-        IntVar[] nvars = new IntVar[k];
-        int[] ncoeffs = new int[k];
-        for(int i = 0; i < coeffs.length; i++){
-            int j  = map.get(vars[i]);
-            ncoeffs[j] += coeffs[i];
-            nvars[j] = vars[i];
-        }
-
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-
-        for(int i = 0; i < k; i++){
-            IntVar var = nvars[i];
-            int coeff = ncoeffs[i];
-            if(coeff > 0){
-                tmpV[b] = var;
-                tmpC[b++] = coeff;
-            }else if(coeff < 0){
-                tmpV[--e] = var;
-                tmpC[e] = coeff;
-            }
-        }
-
         return new IntLinComb(tmpV, tmpC, b, op, -c, solver);
     }
 
-    public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
-                                 IntVar v, int c, Solver solver){
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        int k  =0;
-        for(int i = 0 ; i < vars.length; i++){
-            if(!map.containsKey(vars[i])){
-                map.put(vars[i], k++);
-            }
-        }
-        if(!map.containsKey(v)){
-            map.put(v, k++);
-        }
 
-        IntVar[] nvars = new IntVar[k];
-        int[] ncoeffs = new int[k];
-        for(int i = 0; i < vars.length; i++){
-            int j  = map.get(vars[i]);
-            ncoeffs[j] += 1;
-            nvars[j] = vars[i];
-        }
-        int j  = map.get(v);
-        ncoeffs[j] -= c;
-        nvars[j] = v;
+    public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
+                                    IntVar v, int c, Solver solver) {
+        int size = vars.length;
+        IntVar[] vtmp = new IntVar[size + 1];
+        System.arraycopy(vars, 0, vtmp, 0, size);
+        vtmp[size] = v;
+        int[] ctmp = new int[size + 1];
+        System.arraycopy(coeffs, 0, ctmp, 0, size);
+        ctmp[size] = -c;
+        return scalar(vtmp, ctmp, op, 0, solver);
 
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-
-        for(int i = 0; i < k; i++){
-            IntVar var = nvars[i];
-            int coeff = ncoeffs[i];
-            if(coeff > 0){
-                tmpV[b] = var;
-                tmpC[b++] = coeff;
-            }else if(coeff < 0){
-                tmpV[--e] = var;
-                tmpC[e] = coeff;
-            }
-        }
-
-        return new IntLinComb(tmpV, tmpC, b, op, 0, solver);
     }
 
     public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
-                                 int c, Solver solver){
+                                 IntVar v, int c, Solver solver) {
+        int[] coeffs = new int[vars.length];
+        Arrays.fill(coeffs, 1);
+        return scalar(vars, coeffs, op, v, c, solver);
+    }
+
+    public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
+                                 int c, Solver solver) {
 
         int[] coeffs = new int[vars.length];
         Arrays.fill(coeffs, 1);
-        return new IntLinComb(vars, coeffs, vars.length, op, -c, solver);
+        return scalar(vars, coeffs, op, c, solver);
     }
 
 }

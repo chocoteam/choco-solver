@@ -74,6 +74,8 @@ public final class IntVarImpl implements IntVar {
 
     protected HeuristicVal heuristicVal;
 
+    protected long uniqueID;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected IntVarImpl(String name, Solver solver) {
@@ -81,6 +83,15 @@ public final class IntVarImpl implements IntVar {
         this.solver = solver;
         requests = RequestListBuilder.preset(solver.getEnvironment());;
     }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

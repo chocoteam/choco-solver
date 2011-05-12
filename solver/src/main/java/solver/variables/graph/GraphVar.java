@@ -56,15 +56,24 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
 	protected E envelop, kernel;
 	protected IEnvironment environment;
-	protected IGraphDelta delta;
-	
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    protected long uniqueID;
 
-	public GraphVar(IEnvironment env) {
+	protected IGraphDelta delta;
+
+    //***********************************************************************************
+    // CONSTRUCTORS
+	//***********************************************************************************
+    public GraphVar(IEnvironment env) {
     	environment = env;
     	requests = RequestListBuilder.preset(env);
+    }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
     }
 
 	//***********************************************************************************

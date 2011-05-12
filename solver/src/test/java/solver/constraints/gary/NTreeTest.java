@@ -27,6 +27,7 @@
 
 package solver.constraints.gary;
 
+import choco.kernel.memory.IEnvironment;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -37,7 +38,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import choco.kernel.memory.IEnvironment;
 
 public class NTreeTest {
 
@@ -51,7 +51,7 @@ public class NTreeTest {
 		
 		Constraint[] cstrs = new Constraint[]{new NTree(g,nTree, s, PropagatorPriority.LINEAR)};
 
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g, env);
+		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
 
 		
 		s.post(cstrs);

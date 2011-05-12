@@ -59,8 +59,8 @@ public class ParseurKS {
 
         String line;
 
-        Pattern wPattern = Pattern.compile(" *calorie.*\\+(\\d+)");
-        Pattern pPattern = Pattern.compile(" *poids.*\\+(\\d+)");
+        Pattern wPattern = Pattern.compile(" *poids.*\\+(\\d+)");
+        Pattern pPattern = Pattern.compile(" *calorie.*\\+(\\d+)");
         Pattern cmaxPattern = Pattern.compile(" *cmax.*\\+(\\d+)");
         Pattern cminPattern = Pattern.compile(" *cmin.*\\+(\\d+)");
 

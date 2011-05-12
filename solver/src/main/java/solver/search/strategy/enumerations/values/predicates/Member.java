@@ -30,19 +30,19 @@ package solver.search.strategy.enumerations.values.predicates;
 import solver.search.strategy.enumerations.values.domains.HeuristicValDomain;
 import solver.search.strategy.enumerations.values.domains.HeuristicValDomainImpl;
 import solver.search.strategy.enumerations.values.heuristics.Action;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 public class Member extends Predicate {
     HeuristicValDomain domain;
 
-    public Member(IIntDomain d) {
+    public Member(IntVar ivar) {
         super();
-        domain = new HeuristicValDomainImpl(d);
+        domain = new HeuristicValDomainImpl(ivar);
     }
 
-    public Member(IIntDomain d, Action action) {
+    public Member(IntVar ivar, Action action) {
         super(action);
-        domain = new HeuristicValDomainImpl(d);
+        domain = new HeuristicValDomainImpl(ivar);
     }
 
     @Override

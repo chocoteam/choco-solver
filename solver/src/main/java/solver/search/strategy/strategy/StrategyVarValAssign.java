@@ -30,19 +30,15 @@ package solver.search.strategy.strategy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import gnu.trove.THashMap;
+import gnu.trove.TLongObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.enumerations.MyCollection;
-import solver.search.strategy.enumerations.MyCollectionDynamic;
-import solver.search.strategy.enumerations.MyCollectionStatic;
+import solver.search.strategy.enumerations.SortConductor;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.validators.IValid;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.variables.IntVar;
-
-import java.util.LinkedList;
 
 /**
  * A specific class to build a decision based on :
@@ -59,28 +55,39 @@ import java.util.LinkedList;
  */
 public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
 
-    final MyCollection<IntVar> varColl;
+    final SortConductor<IntVar> varColl;
 
-    THashMap<IntVar, IStateBool> firstSelection;
+    TLongObjectHashMap<IStateBool> firstSelection;
 
     final PoolManager<FastDecision> decisionPool;
 
-    public StrategyVarValAssign(IntVar[] vars, LinkedList<AbstractSorter<IntVar>> varComp, IValid<IntVar> varV, IEnvironment env, MyCollection.Type type) {
+    public static StrategyVarValAssign dyn(IntVar[] vars, AbstractSorter<IntVar> varComp,
+                                           IValid<IntVar> varV, IEnvironment env) {
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.DYN);
+    }
+
+    public static StrategyVarValAssign sta(IntVar[] vars, AbstractSorter<IntVar> varComp,
+                                           IValid<IntVar> varV, IEnvironment env) {
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.STA);
+    }
+
+    private StrategyVarValAssign(IntVar[] vars, AbstractSorter<IntVar> varComp,
+                                 IValid<IntVar> varV, IEnvironment env, SortConductor.Type type) {
         super(vars);
         switch (type) {
             case STA:
-                this.varColl = new MyCollectionStatic<IntVar>(vars, varComp, varV, env);
+                this.varColl = SortConductor.sta(vars, varComp, varV, env);
                 break;
 
             case DYN:
             default:
-                this.varColl = new MyCollectionDynamic<IntVar>(vars, varComp, varV, env);
+                this.varColl = SortConductor.dyn(vars, varComp, varV, env);
                 break;
 
         }
-        this.firstSelection = new THashMap<IntVar, IStateBool>(vars.length);
+        this.firstSelection = new TLongObjectHashMap<IStateBool>(vars.length);
         for (int i = 0; i < vars.length; i++) {
-            firstSelection.put(vars[i], env.makeBool(false));
+            firstSelection.put(vars[i].getUniqueID(), env.makeBool(false));
         }
         decisionPool = new PoolManager<FastDecision>();
     }
@@ -98,9 +105,9 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         if (varColl.hasNext()) {
             IntVar var = varColl.next();
             // test on first selection of the variable
-            if (!firstSelection.get(var).get()) {
+            if (!firstSelection.get(var.getUniqueID()).get()) {
                 var.getHeuristicVal().update(Action.first_selection);
-                firstSelection.get(var).set(true);
+                firstSelection.get(var.getUniqueID()).set(true);
             }
             var.getHeuristicVal().update(Action.open_node);
             if (var.getHeuristicVal().hasNext()) {

@@ -30,6 +30,7 @@ package solver.propagation.engines;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicate;
@@ -76,6 +77,9 @@ public final class PropagationEngine implements IPropagationEngine {
      * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
      */
     public void init() {
+        if(engine != null){
+            throw new SolverException("PropagationEngine.init() has already been called once");
+        }
         IRequest[] tmp = requests;
         requests = new IRequest[size];
         System.arraycopy(tmp, 0, requests, 0, size);
@@ -105,32 +109,6 @@ public final class PropagationEngine implements IPropagationEngine {
         for (j = 0; j < nbGroup; j++) {
             groups[j].make();
         }
-
-
-//        addGroup(new Group(Predicate.TRUE, comparator, policy));
-//        Comparator<IRequest> _comp = comparator;
-//        for (i = nbGroup - 2; i >= 0; i--) {
-//            _comp = new Cond(groups[i].getPredicate(), groups[i].getComparator(), _comp);
-//        }
-//        Arrays.sort(requests, 0, offset, _comp);
-//        int from = 0;
-//        int to = 0;
-//        int idxInG = 0;
-//        int g = 0;
-//        while (to < offset) {
-//            lastPoppedRequest = requests[to];
-//            if (!groups[g].getPredicate().eval(lastPoppedRequest)) {
-//                groups[g].make(Arrays.copyOfRange(requests, from, to), g);
-//                g++;
-//                from = to;
-//                idxInG = 0;
-//            }
-//            lastPoppedRequest.setGroup(g);
-//            lastPoppedRequest.setIndex(idxInG++);
-//            to++;
-//        }
-//        groups[g].make(Arrays.copyOfRange(requests, from, to), g);
-//        nbGroup = ++g;
 
         switch (deal) {
             case SEQUENCE:

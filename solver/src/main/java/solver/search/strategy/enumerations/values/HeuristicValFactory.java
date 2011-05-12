@@ -25,17 +25,21 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.enumerations.values.heuristics;
+package solver.search.strategy.enumerations.values;
 
 import gnu.trove.THashMap;
+import solver.search.strategy.enumerations.values.heuristics.Action;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.nary.SeqN;
 import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
 import solver.search.strategy.enumerations.values.heuristics.unary.Filter;
 import solver.search.strategy.enumerations.values.heuristics.unary.FirstN;
+import solver.search.strategy.enumerations.values.heuristics.zeroary.FastEnumVal;
+import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.UnsafeEnum;
 import solver.search.strategy.enumerations.values.metrics.Metric;
 import solver.search.strategy.enumerations.values.predicates.Member;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 /**
  * <br/>
@@ -46,6 +50,78 @@ import solver.variables.domain.IIntDomain;
 public class HeuristicValFactory {
 
     HeuristicValFactory() {
+    }
+
+
+    /**
+     * Sets the <b>inDomainMin</b> value iterator to the list of variable in parameter.
+     * This iterator chooses the smallest value in the variable's domain
+     *
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void indomainMin(IntVar... vars) {
+        for (IntVar var : vars) {
+            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
+        }
+    }
+
+    /**
+     * Sets the <b>inDomainMax</b> value iterator to the list of variable in parameter.
+     * This iterator chooses the largest value in the variable's domain
+     *
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void indomainMax(IntVar... vars) {
+        for (IntVar var : vars) {
+            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB()));
+        }
+    }
+
+    /**
+     * Sets the <b>inDomainMiddle</b> value iterator to the list of variable in parameter.
+     * This iterator chooses the closest value to the mean between the variable's domain current bounds
+     *
+     * @param var list of variables declaring this value iterator
+     */
+    public static void indomainMiddle(IntVar... var) {
+        throw new UnsupportedOperationException("not yet implemented");
+//        for(Variable v : var){
+//            v.setHeuristicVal(new InDomainMiddle(v));
+//        }
+    }
+
+    /**
+     * Sets the <b>inDomainRandom</b> value iterator to the list of variable in parameter.
+     * This iterator chooses a random value in the variable's domain
+     *
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void random(IntVar... vars) {
+        for (IntVar v : vars) {
+            v.setHeuristicVal(new Random(v));
+        }
+    }
+
+    /**
+     * Sets the <b>inDomainRandom</b> value iterator to the list of variable in parameter.
+     * This iterator chooses a random value in the variable's domain
+     *
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void presetI(IntVar... vars) {
+        for (IntVar v : vars) {
+            v.setHeuristicVal(presetI(v));
+        }
+    }
+
+    /**
+     * Preset heuristic val for IntVar
+     *
+     * @param ivar a integer variable
+     * @return an HeuristicVal
+     */
+    public static HeuristicVal presetI(IntVar ivar) {
+        return fastenumVal(ivar);
     }
 
     /**
@@ -81,23 +157,23 @@ public class HeuristicValFactory {
      * Build an UnsafeEnum heuristic val from a domain
      * TODO : mieux commenter
      *
-     * @param domain parameter
-     * @return {@link UnsafeEnum}
+     * @param ivar        variable to enumerate
+     * @param ivar@return {@link UnsafeEnum}
      */
-    public static UnsafeEnum unsafeEnum(IIntDomain domain) {
-        return new UnsafeEnum(domain.getLB(), 1, domain.getUB());
+    public static UnsafeEnum unsafeEnum(IntVar ivar) {
+        return new UnsafeEnum(ivar.getLB(), 1, ivar.getUB());
     }
 
     /**
      * Build an UnsafeEnum heuristic val from a domain and an action
      * TODO : mieux commenter
      *
-     * @param domain parameter
+     * @param ivar
      * @param action action
      * @return {@link UnsafeEnum}
      */
-    public static UnsafeEnum unsafeEnum(IIntDomain domain, Action action) {
-        return new UnsafeEnum(domain.getLB(), 1, domain.getUB(), action);
+    public static UnsafeEnum unsafeEnum(IntVar ivar, Action action) {
+        return new UnsafeEnum(ivar.getLB(), 1, ivar.getUB(), action);
     }
 
     /**
@@ -130,48 +206,65 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: Filter(Member(domain), UnsafeEnum(domain))
      *
-     * @param domain domain of the variable
-     * @return a {@link Filter}
+     * @param ivar@return a {@link Filter}
      */
-    public static Filter enumVal(IIntDomain domain) {
-        return new Filter(new Member(domain), unsafeEnum(domain));
+    public static Filter enumVal(IntVar ivar) {
+        return new Filter(new Member(ivar), unsafeEnum(ivar));
+    }
+
+    /**
+     * Build the following heuristic val: FastEnumVal(ivar)
+     *
+     * @param ivar@return a {@link Filter}
+     */
+    public static HeuristicVal fastenumVal(IntVar ivar) {
+        return new FastEnumVal(ivar);
     }
 
     /**
      * Build the following heuristic val: Filter(Member(domain, action), UnsafeEnum(domain, action)
      *
-     * @param domain domain of the variable
+     * @param ivar   domain of the variable
      * @param action action of Member and UnsafeEnum
      * @return a {@link Filter}
      */
-    public static Filter enumVal(IIntDomain domain, Action action) {
-        return new Filter(new Member(domain, action), unsafeEnum(domain, action));
+    public static Filter enumVal(IntVar ivar, Action action) {
+        return new Filter(new Member(ivar, action), unsafeEnum(ivar, action));
+    }
+
+    /**
+     * Build the following heuristic val: FastEnumVal(ivar)
+     *
+     * @param ivar@return a {@link Filter}
+     */
+    public static HeuristicVal fastenumVal(IntVar ivar, Action action) {
+        return new FastEnumVal(ivar, action);
     }
 
     /**
      * Build the following heuristic val: Filter(Member(domain), UnsafeEnum(domain))
      *
-     * @param domain domain of the variable
-     * @param from   starting value
-     * @param delta  gap
-     * @param to     ending value
+     * @param ivar  domain of the variable
+     * @param from  starting value
+     * @param delta gap
+     * @param to    ending value
      * @return a {@link Filter}
      */
-    public static Filter enumVal(IIntDomain domain, int from, int delta, int to) {
-        return new Filter(new Member(domain), unsafeEnum(from, delta, to));
+    public static Filter enumVal(IntVar ivar, int from, int delta, int to) {
+        return new Filter(new Member(ivar), unsafeEnum(from, delta, to));
     }
 
     /**
      * Build the following heuristic val: Filter(Member(domain, action), UnsafeEnum(domain, action)
      *
-     * @param domain domain of the variable
+     * @param ivar   domain of the variable
      * @param from   starting value
      * @param delta  gap
      * @param to     ending value
      * @param action action of Member and UnsafeEnum
      * @return a {@link Filter}
      */
-    public static Filter enumVal(IIntDomain domain, int from, int delta, int to, Action action) {
-        return new Filter(new Member(domain, action), unsafeEnum(from, delta, to, action));
+    public static Filter enumVal(IntVar ivar, int from, int delta, int to, Action action) {
+        return new Filter(new Member(ivar, action), unsafeEnum(from, delta, to, action));
     }
 }

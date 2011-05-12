@@ -110,7 +110,7 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.firstFailInDomainMin(ArrayUtils.append(rows), solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
 
     }
 

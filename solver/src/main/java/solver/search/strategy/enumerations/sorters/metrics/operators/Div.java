@@ -24,30 +24,33 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters.metrics.operators;
 
-package solver.search.strategy.enumerations;
-
-import java.util.Iterator;
+import solver.search.strategy.enumerations.sorters.metrics.IMetric;
+import solver.variables.Variable;
 
 /**
+ * A combination of 2 IMetrics to evaluate left/right
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 10/05/11
  */
-public abstract class MyCollection<A> implements Iterator<A> {
+public class Div<V extends Variable> implements IMetric<V> {
 
-    public enum Type{
-        STA, DYN
+    final IMetric<V> left, right;
+
+    private Div(IMetric<V> left, IMetric<V> right) {
+        this.left = left;
+        this.right = right;
     }
 
-    A[] elements;
-
-    protected MyCollection(A[] c) {
-        this.elements = c.clone();
+    public static <V extends Variable> Div build(IMetric<V> left, IMetric<V> right){
+        return new Div<V>(left, right);
     }
 
-    public final void remove() {
-        throw new UnsupportedOperationException("MyCollection.remove() not implemented");
+    @Override
+    public int eval(V var) {
+        return left.eval(var) / right.eval(var);
     }
 }

@@ -24,75 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters.metrics;
 
-package solver.search.strategy.enumerations;
-
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.validators.IValid;
-
-import java.util.LinkedList;
+import solver.variables.Variable;
 
 /**
+ * A metric to evaluate the degree (nb of constraints) of a Variable
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 10/05/11
  */
-public class MyCollectionDynamic<A> extends MyCollection<A> {
+public class Degree implements IMetric<Variable> {
 
-    IStateInt from;
-    final int to;
+    private static Degree singleton;
 
-    LinkedList<AbstractSorter<A>> cs;
-
-    IValid<A> vs;
-
-    A current;
-
-    public MyCollectionDynamic(A[] c, LinkedList<AbstractSorter<A>> cs, IValid<A> vs, IEnvironment env) {
-        super(c);
-        this.cs = cs;
-        this.vs = vs;
-        this.from = env.makeInt();
-        this.to = c.length;
+    private Degree() {
     }
 
-    void minima() {
-        filter();
-        // only the first element
-        int _from = from.get();
-        int to = this.to - 1;
-        for(int c = 0; c < cs.size() && to > _from; c++){
-            to = cs.get(c).minima(elements, _from, to);
+    public static Degree build() {
+        if (singleton == null) {
+            singleton = new Degree();
         }
+        return singleton;
     }
 
-    void filter() {
-        int _from = from.get();
-        for (int i = _from; i < to; i++) {
-            if (!vs.valid(elements[i])) {
-                A tmp = elements[i];
-                elements[i] = elements[_from];
-                elements[_from] = tmp;
-                _from++;
 
-            }
-        }
-        from.set(_from);
-    }
-
-    public boolean hasNext() {
-        minima(); // minima call filter, filter may change from !
-        boolean isNotEmpty = (from.get() < elements.length);
-        if (isNotEmpty) {
-            current = elements[from.get()];
-        }
-        return isNotEmpty;
-    }
-
-    public A next() {
-        return current;
+    @Override
+    public int eval(Variable var) {
+        return var.nbRequests();
     }
 }

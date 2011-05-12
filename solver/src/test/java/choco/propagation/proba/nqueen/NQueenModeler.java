@@ -79,7 +79,8 @@ public class NQueenModeler {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+
 
         //AbstractPilotPropag pilot = Pilots.preset(eng1, eng2);
         //s.post(cstrs);
@@ -119,7 +120,7 @@ public class NQueenModeler {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -162,7 +163,7 @@ public class NQueenModeler {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         //AbstractPilotPropag pilot = Pilots.basic(eng1, eng2);
         s.post(cstrs);
@@ -220,7 +221,7 @@ public class NQueenModeler {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);

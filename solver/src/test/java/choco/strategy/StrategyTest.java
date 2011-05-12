@@ -32,13 +32,14 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
-import solver.search.strategy.selectors.AdapterValueIIterator;
-import solver.search.strategy.selectors.VariableSelector;
-import solver.search.strategy.selectors.values.InDomainMin;
-import solver.search.strategy.selectors.variables.InputOrder;
-import solver.search.strategy.strategy.Assignment;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -60,10 +61,8 @@ public class StrategyTest {
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
-            variables[i].setHeuristicVal(new AdapterValueIIterator(new InDomainMin(variables[i], env)));
         }
-        VariableSelector<IntVar> varselector = new InputOrder(variables, env);
-        Assignment asg = new Assignment(variables, varselector);
+        AbstractStrategy asg = StrategyFactory.inputOrderMinVal(variables, env);
 
         s.set(asg);
 
@@ -109,15 +108,15 @@ public class StrategyTest {
         Solver s = new Solver();
         IEnvironment env = s.getEnvironment();
 
-        Assignment[] asgs = new Assignment[n];
+        AbstractStrategy[] asgs = new AbstractStrategy[n];
 
         IntVar[] variables = new IntVar[n];
         for (int i = 0; i < n; i++) {
             variables[i] = VariableFactory.enumerated("V" + i, i, n + i, s);
-            variables[i].setHeuristicVal(new AdapterValueIIterator(new InDomainMin(variables[i], env)));
+            HeuristicValFactory.indomainMin(variables[i]);
             IntVar[] tmp = new IntVar[]{variables[i]};
-            VariableSelector<IntVar> varselector = new InputOrder(tmp, env);
-            asgs[i] = new Assignment(variables, varselector);
+            asgs[i] = StrategyVarValAssign.sta(tmp, SorterFactory.inputOrder(tmp),
+                    ValidatorFactory.instanciated, env);
         }
 
         StrategiesSequencer sts = new StrategiesSequencer(env, asgs);

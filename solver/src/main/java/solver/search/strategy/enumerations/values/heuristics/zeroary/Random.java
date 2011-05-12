@@ -31,11 +31,11 @@ import gnu.trove.THashMap;
 import gnu.trove.TIntHashSet;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 public class Random extends HeuristicVal {
     long seed;
-    IIntDomain domain;
+    IntVar ivar;
     java.util.Random generator;
     TIntHashSet elts;
 
@@ -43,42 +43,42 @@ public class Random extends HeuristicVal {
         super(action);
     }
 
-    public Random(IIntDomain domain) {
-        this(domain, System.currentTimeMillis());
+    public Random(IntVar ivar) {
+        this(ivar, System.currentTimeMillis());
     }
 
-    public Random(IIntDomain domain, Action action) {
-        this(domain, System.currentTimeMillis(), action);
+    public Random(IntVar ivar, Action action) {
+        this(ivar, System.currentTimeMillis(), action);
     }
 
-    Random(IIntDomain domain, long seed) {
+    Random(IntVar ivar, long seed) {
         super();
         this.seed = seed;
-        this.domain = domain;
+        this.ivar = ivar;
         this.generator = new java.util.Random(seed);
         elts = new TIntHashSet();
     }
 
-    Random(IIntDomain domain, long seed, Action action) {
+    Random(IntVar ivar, long seed, Action action) {
         super(action);
         this.seed = seed;
-        this.domain = domain;
+        this.ivar = ivar;
         this.generator = new java.util.Random(seed);
         elts = new TIntHashSet();
     }
 
     public boolean hasNext() {
-        return domain.getSize() > elts.size();
+        return ivar.getDomainSize() > elts.size();
     }
 
     public int next() {
-        int n = generator.nextInt(domain.getSize() - elts.size());
-        int j = domain.getLB();
+        int n = generator.nextInt(ivar.getDomainSize() - elts.size());
+        int j = ivar.getLB();
         for (int i = 0; i < n;) {
             if (!elts.contains(j)) {
                 i++;
             }
-            j = domain.nextValue(j);
+            j = ivar.nextValue(j);
         }
         elts.add(j);
         return j;

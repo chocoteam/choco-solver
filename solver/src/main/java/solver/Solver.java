@@ -176,6 +176,7 @@ public class Solver implements Serializable {
             vars = new Variable[tmp.length * 2];
             System.arraycopy(tmp, 0, vars, 0, vIdx);
         }
+        variable.setUniqueID(vIdx);
         vars[vIdx++] = variable;
     }
 
@@ -321,6 +322,10 @@ public class Solver implements Serializable {
         return Arrays.copyOf(vars, vIdx);
     }
 
+
+    public int getNbVars(){
+        return vIdx;
+    }
     /**
      * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
      *
@@ -328,6 +333,10 @@ public class Solver implements Serializable {
      */
     public Constraint[] getCstrs() {
         return Arrays.copyOf(cstrs, cIdx);
+    }
+
+    public int getNbCstrs(){
+        return cIdx;
     }
 
     /**
@@ -365,6 +374,20 @@ public class Solver implements Serializable {
         ESat check = ESat.TRUE;
         for (int c = 0; c < cIdx; c++) {
             ESat satC = cstrs[c].isSatisfied();
+            if (!ESat.TRUE.equals(satC)) {
+                if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
+                    LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);
+                }
+                check = ESat.FALSE;
+            }
+        }
+        return check;
+    }
+
+    public ESat isEntailed() {
+        ESat check = ESat.TRUE;
+        for (int c = 0; c < cIdx; c++) {
+            ESat satC = cstrs[c].isEntailed();
             if (!ESat.TRUE.equals(satC)) {
                 if (LoggerFactory.getLogger("solver").isErrorEnabled()) {
                     LoggerFactory.getLogger("solver").error("FAILURE >> {} ({})", cstrs[c].toString(), satC);

@@ -81,9 +81,9 @@ public class KnapsackTest {
         for (int i = 0; i < 1; i++) {
             Solver s = ks.modelIt("../files/knapsack/knapsack.10-1.txt", 3);
             ks.solveIt(s, true);
-            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 990, "obj val");
-            Assert.assertEquals(s.getMeasures().getSolutionCount(), 1, "nb sol");
-            Assert.assertEquals(s.getMeasures().getNodeCount(), 3, "nb nod");
+            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
+            Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
+            Assert.assertEquals(s.getMeasures().getNodeCount(), 7, "nb nod");
         }
     }
 
@@ -94,9 +94,9 @@ public class KnapsackTest {
         for (int i = 0; i < 1; i++) {
             Solver s = ks.modelIt("../files/knapsack/knapsack.10-1.txt", 10);
             ks.solveIt(s, true);
-            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1845, "obj val");
-            Assert.assertEquals(s.getMeasures().getSolutionCount(), 60, "nb sol");
-            Assert.assertEquals(s.getMeasures().getNodeCount(), 6007, "nb nod");
+            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
+            Assert.assertEquals(s.getMeasures().getSolutionCount(), 144, "nb sol");
+            Assert.assertEquals(s.getMeasures().getNodeCount(), 470, "nb nod");
         }
     }
 
@@ -105,19 +105,30 @@ public class KnapsackTest {
         KnapsackTest ks = new KnapsackTest();
         Solver s = ks.modelIt("../files/knapsack/knapsack.13-1.txt", 13);
         ks.solveIt(s, true);
-        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 5187, "obj val");
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 313, "nb sol");
-        Assert.assertEquals(s.getMeasures().getNodeCount(), 648770, "nb nod");
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 214, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 210236, "nb nod");
     }
 
     @Test(groups = {"10m"})
-    public void testOPT20() throws IOException {
+    public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
         Solver s = ks.modelIt("../files/knapsack/knapsack.20-1.txt", 14);
         ks.solveIt(s, true);
-        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 5187, "obj val");
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 345, "nb sol");
-        Assert.assertEquals(s.getMeasures().getNodeCount(), 2943186, "nb nod");
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 305, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 379396, "nb nod");
+    }
+
+    @Test(groups = {"10m"})
+    public void testOPT15() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        Solver s = ks.modelIt("../files/knapsack/knapsack.20-1.txt", 15);
+//        SearchMonitorFactory.log(s, false, false);
+        ks.solveIt(s, true);
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 297, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
     }
 
 }

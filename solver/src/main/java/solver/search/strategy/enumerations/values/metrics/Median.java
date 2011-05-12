@@ -28,7 +28,7 @@
 package solver.search.strategy.enumerations.values.metrics;
 
 import solver.search.strategy.enumerations.values.heuristics.Action;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 /**
  * <br/>
@@ -38,17 +38,17 @@ import solver.variables.domain.IIntDomain;
  */
 public class Median extends Metric {
 
-    final IIntDomain domain;
+    final IntVar ivar;
     int value;
 
-    public Median(IIntDomain domain) {
+    public Median(IntVar ivar) {
         super();
-        this.domain = domain;
+        this.ivar = ivar;
     }
 
-    public Median(IIntDomain domain, Action action) {
+    public Median(IntVar ivar, Action action) {
         super(action);
-        this.domain = domain;
+        this.ivar = ivar;
     }
 
 
@@ -59,6 +59,6 @@ public class Median extends Metric {
 
     @Override
     public void doUpdate() {
-        value = domain.getSize() / 2;
+        value = ivar.getDomainSize() / 2;
     }
 }

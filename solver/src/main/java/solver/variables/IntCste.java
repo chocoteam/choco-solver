@@ -36,6 +36,8 @@ import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
+import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
@@ -50,10 +52,22 @@ public class IntCste implements IntVar {
 
     protected final int constante;
     protected final String name;
+    protected final IIntDomain domain;
+
+    protected long uniqueID;
 
     public IntCste(String name, int constante) {
         this.name = name;
         this.constante = constante;
+        domain = new CsteDomain(constante);
+    }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
     }
 
     @Override
@@ -123,7 +137,7 @@ public class IntCste implements IntVar {
 
     @Override
     public IIntDomain getDomain() {
-        throw new UnsupportedOperationException();
+        return domain;
     }
 
     @Override
@@ -171,8 +185,7 @@ public class IntCste implements IntVar {
 
     @Override
     public HeuristicVal getHeuristicVal() {
-        //useless
-        return null;
+        return Empty.get();
     }
 
     @Override

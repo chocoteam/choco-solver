@@ -232,7 +232,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             }
         }
         smList.beforeClose();
-        boolean close = close();
+        Boolean close = close();
         smList.afterClose();
         return close;
     }

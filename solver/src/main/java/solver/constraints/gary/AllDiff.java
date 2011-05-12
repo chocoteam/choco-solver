@@ -34,10 +34,12 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.PropAllDiff;
 import solver.constraints.propagators.gary.PropAtMostNNeighbors;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.Variable;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.util.BitSet;
 
 public class AllDiff<V extends Variable> extends Constraint<V, Propagator<V>>{
@@ -95,4 +97,9 @@ public class AllDiff<V extends Variable> extends Constraint<V, Propagator<V>>{
 		}
 		return ESat.TRUE;
 	}
+
+    @Override
+    public HeuristicVal getIterator(String name, V var) {
+        throw new UnsupportedOperationException("AllDiff does not provide such a service");
+    }
 }

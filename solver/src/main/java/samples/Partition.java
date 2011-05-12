@@ -116,7 +116,7 @@ public class Partition extends AbstractProblem {
     @Override
     public void configureSolver() {
 
-        solver.set(StrategyFactory.firstFailInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 new Group(

@@ -24,21 +24,28 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.strategy.enumerations.sorters;
 
+import solver.search.strategy.enumerations.sorters.metrics.IMetric;
+import solver.variables.Variable;
+
 /**
+ * An AbstractSorter which sorts 2 elements wrt increasing order
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 17/12/10
+ * @since 10/05/11
  */
-public class InputOrder<E> extends AbstractCriteriaBasedSorter<E> {
+public class Incr<V extends Variable> extends AbstractSorter<V> {
 
-    public InputOrder(E[] elts) {
-        super(elts.length);
-        for (int i = 0; i < elts.length; i++) {
-            criteria.put(elts[i], i);
-        }
+    final IMetric<V> metric;
+
+    public Incr(IMetric<V> metric) {
+        this.metric = metric;
+    }
+
+    @Override
+    public int compare(V o1, V o2) {
+        return metric.eval(o1) - metric.eval(o2);
     }
 }

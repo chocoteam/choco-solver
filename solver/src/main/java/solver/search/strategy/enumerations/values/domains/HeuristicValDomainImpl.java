@@ -28,7 +28,7 @@
 package solver.search.strategy.enumerations.values.domains;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 import java.util.BitSet;
 
@@ -40,7 +40,7 @@ import java.util.BitSet;
  */
 public class HeuristicValDomainImpl implements HeuristicValDomain {
 
-    final IIntDomain domain;
+    final IntVar ivar;
 
     BitSet bitset;
 
@@ -49,16 +49,17 @@ public class HeuristicValDomainImpl implements HeuristicValDomain {
     boolean updatedYet;
     boolean enumerated;
 
-    public HeuristicValDomainImpl(IIntDomain domain) {
-        this.domain = domain;
-        this.enumerated = domain.isEnumerated();
+    public HeuristicValDomainImpl(IntVar ivar) {
+        this.ivar = ivar;
+        this.enumerated = ivar.hasEnumeratedDomain();
+
         updatedYet = false;
     }
 
     @Override
     public boolean contains(int val) {
         if (!updatedYet) {
-            return domain.contains(val);
+            return ivar.contains(val);
         } else {
             if (enumerated) {
                 val -= lower;
@@ -71,14 +72,14 @@ public class HeuristicValDomainImpl implements HeuristicValDomain {
 
     @Override
     public void update() {
-        lower = domain.getLB();
-        upper = domain.getUB();
+        lower = ivar.getLB();
+        upper = ivar.getUB();
         if (enumerated) {
             if (bitset == null) {
-                bitset = new BitSet(domain.getUB() - domain.getLB() + 1);
+                bitset = new BitSet(ivar.getUB() - ivar.getLB() + 1);
             }
             bitset.clear();
-            DisposableIntIterator it = domain.getIterator();
+            DisposableIntIterator it = ivar.getIterator();
             while (it.hasNext()) {
                 bitset.set(it.next() - lower, true);
             }

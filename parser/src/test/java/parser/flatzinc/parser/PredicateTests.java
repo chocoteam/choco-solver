@@ -52,7 +52,7 @@ public class PredicateTests {
 
     @AfterMethod
     public void after(){
-        solver.set(StrategyFactory.forceInputOrderInDomainMin(solver.getVars(), solver.getEnvironment()));
+        solver.set(StrategyFactory.forceInputOrderMinVal(solver.getVars(), solver.getEnvironment()));
         solver.findSolution();
     }
 

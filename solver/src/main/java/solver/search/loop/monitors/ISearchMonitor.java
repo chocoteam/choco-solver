@@ -29,13 +29,15 @@ package solver.search.loop.monitors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 06/05/11
  */
-public interface ISearchMonitor {
+public interface ISearchMonitor extends Serializable{
 
     static Logger LOGGER = LoggerFactory.getLogger(ISearchMonitor.class);
 

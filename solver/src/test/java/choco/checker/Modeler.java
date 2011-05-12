@@ -70,7 +70,7 @@ public interface Modeler {
             Constraint ctr = ConstraintFactory.eq(vars[0], vars[1], s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
 
@@ -97,7 +97,7 @@ public interface Modeler {
             Constraint ctr = new InverseChanneling(X, Y, s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
             s.post(ctrs);
             s.set(strategy);
 
@@ -119,7 +119,7 @@ public interface Modeler {
             Constraint ctr = ConstraintFactory.neq(vars[0], vars[1], s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
 
@@ -141,7 +141,7 @@ public interface Modeler {
             Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -162,7 +162,7 @@ public interface Modeler {
             Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.BC);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;
@@ -183,7 +183,7 @@ public interface Modeler {
             Constraint ctr = new Times(vars[0], vars[1], vars[2], s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
-            AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
             s.post(ctrs);
             s.set(strategy);
             return s;

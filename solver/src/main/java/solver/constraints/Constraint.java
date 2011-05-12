@@ -33,7 +33,12 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.propagation.IPriority;
+import solver.search.strategy.enumerations.sorters.AbstractSorter;
+import solver.search.strategy.enumerations.sorters.Incr;
+import solver.search.strategy.enumerations.sorters.metrics.Belong;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -80,6 +85,9 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     private static final long serialVersionUID = 1L;
 
     public static PropagatorPriority _DEFAULT_THRESHOLD = PropagatorPriority.TERNARY;
+
+    public static final String VAR_DEFAULT = "var_default";
+    public static final String VAL_DEFAULT = "val_default";
 
     protected final Solver solver;
 
@@ -200,6 +208,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     /**
      * Initial propagation of the constraint
+     *
      * @throws ContradictionException
      */
     public void filter() throws ContradictionException {
@@ -239,4 +248,19 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public int getPriority() {
         return staticPropagationPriority;
     }
+
+    /**
+     * Returns an <code>this</code>-adapted comparator.
+     *
+     * @param name name of comparator (if overrides the default one)
+     * @return a comparator
+     */
+    public AbstractSorter<V> getComparator(String name) {
+        if (name.equals(VAR_DEFAULT)) {
+            return new Incr<V>(Belong.build(this));
+        }
+        throw new SolverException("Unknown comparator name :" + name);
+    }
+
+    public abstract HeuristicVal getIterator(String name, V var);
 }

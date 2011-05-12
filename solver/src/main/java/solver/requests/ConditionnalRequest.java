@@ -31,11 +31,11 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.requests.conditions.AbstractCondition;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.conditions.AbstractCondition;
 
 /**
  * A conditionnal request that call run filter under conditions.
@@ -85,12 +85,14 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     @Override
     public void filter() throws ContradictionException {
-        // for concurrent modification..
-        first.set(last.get()); // point out current last
         int evtmask_ = evtmask.get();
-        evtmask.set(0); // and clean up current mask
-        propagator.filterCall++;
-        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+        if (evtmask_ > 0) {
+            // for concurrent modification..
+            first.set(last.get()); // point out current last
+            evtmask.set(0); // and clean up current mask
+            propagator.filterCall++;
+            propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+        }
     }
 
     @Override
@@ -125,6 +127,12 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     public boolean hasChanged() {
         return evtmask.get() > 0;
+    }
+
+    @Override
+    public void desactivate() {
+        super.desactivate();
+        evtmask.set(0);
     }
 
 }

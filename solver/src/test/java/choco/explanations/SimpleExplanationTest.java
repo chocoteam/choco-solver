@@ -78,7 +78,7 @@ public class SimpleExplanationTest {
 
     private static void solve() {
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderInDomainMin(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(lcstrs);
         s.set(strategy);

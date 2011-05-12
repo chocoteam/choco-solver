@@ -30,13 +30,15 @@ package solver.propagation.engines;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 24/04/11
  */
-public interface IEngine {
+public interface IEngine extends Serializable{
 
     void fixPoint() throws ContradictionException;
     void update(IRequest request);

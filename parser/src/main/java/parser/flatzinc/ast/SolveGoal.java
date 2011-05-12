@@ -114,7 +114,7 @@ public class SolveGoal {
                 ivars[i] = (IntVar) vars[i];
             }
             strategy = IntSearch.build(ivars,
-                    VarChoice.input_order, Assignment.indomain_min, Strategy.complete, solver.getEnvironment());
+                    VarChoice.input_order, Assignment.indomain_min, Strategy.complete, solver);
         }
 
         solver.set(strategy);
@@ -161,7 +161,7 @@ public class SolveGoal {
             case int_search:
             case bool_search:
                 IntVar[] scope = exps[0].toIntVarArray(solver);
-                return IntSearch.build(scope, vchoice, assignment, Strategy.complete, solver.getEnvironment());
+                return IntSearch.build(scope, vchoice, assignment, Strategy.complete, solver);
             case set_search:
             default:
                 LoggerFactory.getLogger(SolveGoal.class).error("Unknown search annotation " + e.toString());

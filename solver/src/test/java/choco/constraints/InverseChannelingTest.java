@@ -71,7 +71,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -107,7 +107,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -135,7 +135,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -163,7 +163,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -193,7 +193,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -226,7 +226,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -263,7 +263,7 @@ public class InverseChannelingTest {
         cstrs[0] = new InverseChanneling(x, y, s);
         cstrs[1] = new AllDifferent(x, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -300,7 +300,7 @@ public class InverseChannelingTest {
         Constraint[] cstrs = new Constraint[1];
         cstrs[0] = new InverseChanneling(x, y, s);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);

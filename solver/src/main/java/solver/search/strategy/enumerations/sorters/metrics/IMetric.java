@@ -24,21 +24,20 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters.metrics;
 
-package solver.search.strategy.enumerations.sorters;
+import solver.variables.Variable;
 
-import solver.variables.IntVar;
+import java.io.Serializable;
 
 /**
+ * A metric to evaluate various elements of Variable
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 10/05/11
  */
-public class MostConstrained extends AbstractSorter<IntVar> {
+public interface IMetric<V extends Variable> extends Serializable {
 
-    @Override
-    public int compare(IntVar o1, IntVar o2) {
-        return o2.nbConstraints() - o1.nbConstraints();
-    }
+    int eval(V var);
 }

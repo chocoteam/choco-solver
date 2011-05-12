@@ -24,21 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.strategy.enumerations.sorters;
 
-import solver.variables.IntVar;
-
 /**
+ * Build a sequence (lexicographic) of AbstractSorters:
+ * applies <code>first</code> and in case of equality
+ * applies <code>second</code>.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 10/05/11
  */
-public class FirstFail extends AbstractSorter<IntVar> {
+public class Seq<E> extends AbstractSorter<E> {
+
+    final AbstractSorter<E> first, second;
+
+    public Seq(AbstractSorter<E> first, AbstractSorter<E> second) {
+        this.first = first;
+        this.second = second;
+    }
 
     @Override
-    public int compare(IntVar o1, IntVar o2) {
-        return o1.getDomainSize() - o2.getDomainSize();
+    public int compare(E o1, E o2) {
+        int eval = first.compare(o1, o2);
+        if (eval == 0) {
+            eval = second.compare(o1, o2);
+        }
+        return eval;
     }
 }

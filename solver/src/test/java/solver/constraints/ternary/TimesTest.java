@@ -54,7 +54,7 @@ public class TimesTest {
 
         s.post(new Times(X, Y, Z, s));
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(new IntVar[]{X,Y,Z}, s.getEnvironment());
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(new IntVar[]{X,Y,Z}, s.getEnvironment());
         s.set(strategy);
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 3);

@@ -34,6 +34,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.reified.PropReified;
 import solver.exception.ContradictionException;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.BoolVar;
 import solver.variables.Variable;
 
@@ -58,12 +59,12 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
 
         List<Variable> union = new ArrayList<Variable>();
         union.add(bVar);
-        for(int i = 0; i < vars1.length; i++){
+        for (int i = 0; i < vars1.length; i++) {
             if (!union.contains(vars1[i])) {
                 union.add(vars1[i]);
             }
         }
-        for(int i = 0; i < vars2.length; i++){
+        for (int i = 0; i < vars2.length; i++) {
             if (!union.contains(vars2[i])) {
                 union.add(vars2[i]);
             }
@@ -93,11 +94,11 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
 
     @Override
     public ESat isSatisfied() {
-        if(vars[0].instantiated()){
-            BoolVar b = (BoolVar)vars[0];
-            if(b.getValue() == 1){
+        if (vars[0].instantiated()) {
+            BoolVar b = (BoolVar) vars[0];
+            if (b.getValue() == 1) {
                 return cons.isSatisfied();
-            }else{
+            } else {
                 return oppcons.isSatisfied();
             }
         }
@@ -112,5 +113,10 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
     @Override
     public String toString() {
         return vars[0].toString() + "<=>" + cons.toString() + " (" + oppcons.toString() + ")";
+    }
+
+    @Override
+    public HeuristicVal getIterator(String name, Variable var) {
+        throw new UnsupportedOperationException("ReifiedConstraint does not provide such a service");
     }
 }

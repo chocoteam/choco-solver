@@ -59,7 +59,7 @@ public class ElementTest {
         lcstrs.add(new Element(index, values, var, offset, s));
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderInDomainMin(allvars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);
 
         s.post(cstrs);
         s.set(strategy);

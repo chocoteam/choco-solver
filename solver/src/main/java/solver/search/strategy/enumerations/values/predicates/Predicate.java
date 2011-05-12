@@ -29,6 +29,8 @@ package solver.search.strategy.enumerations.values.predicates;
 
 import solver.search.strategy.enumerations.values.heuristics.Action;
 
+import java.io.Serializable;
+
 /**
  * TODO: could have an internal structure that must be updated  ( pick x such as  x > max already used values) ?
  *
@@ -36,7 +38,7 @@ import solver.search.strategy.enumerations.values.heuristics.Action;
  * BEWARE: this should not embaded side effect: during HeuristicVal.duplicate(),
  * BEWARE: Predicates are shared, not duplicated !
  */
-public abstract class Predicate {
+public abstract class Predicate implements Serializable{
 
     final Action action;
 

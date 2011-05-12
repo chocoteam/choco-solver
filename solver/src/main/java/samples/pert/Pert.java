@@ -116,7 +116,7 @@ public class Pert extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 
         int[] rank = new int[n];
         boolean[] treated = new boolean[n];

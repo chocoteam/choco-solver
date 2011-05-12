@@ -32,7 +32,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.binary.NotEqualX_YC;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 
 /*
@@ -54,7 +54,7 @@ public class ConstraintTest {
     }
 
     private void preset() {
-        solver.set(StrategyFactory.forceInputOrderInDomainMin(solver.getVars(), solver.getEnvironment()));
+        solver.set(StrategyFactory.forceInputOrderMinVal(solver.getVars(), solver.getEnvironment()));
     }
 
     @Test
@@ -71,25 +71,25 @@ public class ConstraintTest {
     }
 
     @Test
-    public void testIntLinNe(){
+    public void testIntLinEq(){
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 26: a::output_var;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 26: b::output_var;");
         TerminalParser.parse(fzn.CONSTRAINT, "constraint int_lin_eq([ 1, -1 ], [ a, b ], -1);");
 
         Assert.assertEquals(solver.getCstrs().length, 1);
-        Assert.assertEquals(solver.getCstrs()[0].getClass(), IntLinComb.class);
+        Assert.assertEquals(solver.getCstrs()[0].getClass(), Sum.class);
         preset();
         solver.findAllSolutions();
         Assert.assertEquals(25, solver.getMeasures().getSolutionCount());
     }
 
     @Test
-    public void testIntLinNe2(){
+    public void testIntLinEq2(){
         TerminalParser.parse(fzn.PAR_VAR_DECL, "array[1 .. 2] of var 1 .. 2: q;");
         TerminalParser.parse(fzn.CONSTRAINT, "constraint int_lin_eq([ 1, -1 ], [ q[1], q[2] ], -1);");
 
         Assert.assertEquals(solver.getCstrs().length, 1);
-        Assert.assertEquals(solver.getCstrs()[0].getClass(), IntLinComb.class);
+        Assert.assertEquals(solver.getCstrs()[0].getClass(), Sum.class);
         preset();
         solver.findAllSolutions();
         Assert.assertEquals(1, solver.getMeasures().getSolutionCount());

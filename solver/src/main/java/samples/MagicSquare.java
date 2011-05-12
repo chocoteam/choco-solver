@@ -102,7 +102,7 @@ public class MagicSquare extends AbstractProblem {
     public void configureSolver() {
 
 
-        solver.set(StrategyFactory.firstFailInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         solver.getEngine().setDefaultComparator(
                 new Seq(

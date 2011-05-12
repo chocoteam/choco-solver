@@ -28,7 +28,7 @@
 package solver.search.strategy.enumerations.values.metrics;
 
 import solver.search.strategy.enumerations.values.heuristics.Action;
-import solver.variables.domain.IIntDomain;
+import solver.variables.IntVar;
 
 /**
  * <br/>
@@ -38,18 +38,18 @@ import solver.variables.domain.IIntDomain;
  */
 public class Middle extends Metric {
 
-    final IIntDomain domain;
+    final IntVar ivar;
 
     int value;
 
-    public Middle(IIntDomain domain) {
+    public Middle(IntVar ivar) {
         super();
-        this.domain = domain;
+        this.ivar = ivar;
     }
 
-    public Middle(IIntDomain domain, Action action) {
+    public Middle(IntVar ivar, Action action) {
         super(action);
-        this.domain = domain;
+        this.ivar = ivar;
     }
 
 
@@ -60,6 +60,6 @@ public class Middle extends Metric {
 
     @Override
     public void doUpdate() {
-        value = (domain.getLB() + domain.getUB()) / 2;
+        value = (ivar.getLB() + ivar.getUB()) / 2;
     }
 }

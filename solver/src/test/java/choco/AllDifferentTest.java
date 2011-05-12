@@ -107,7 +107,7 @@ public class AllDifferentTest {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderInDomainMin(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -160,7 +160,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -190,7 +190,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -276,7 +276,7 @@ public class AllDifferentTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.inputOrderIncDomain(vars, s.getEnvironment()));
+        s.set(StrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
         return s;
     }
 

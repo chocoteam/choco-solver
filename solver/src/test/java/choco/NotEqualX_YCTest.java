@@ -63,7 +63,7 @@ public class NotEqualX_YCTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -87,7 +87,7 @@ public class NotEqualX_YCTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
@@ -110,7 +110,7 @@ public class NotEqualX_YCTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 
         try {
             s.getSearchLoop().propEngine.init();

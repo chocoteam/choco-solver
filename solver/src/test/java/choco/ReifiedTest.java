@@ -77,7 +77,7 @@ public class ReifiedTest {
             Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, x.getDomainSize() * y.getDomainSize(), "nb sol incorrect");
@@ -106,7 +106,7 @@ public class ReifiedTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(new IntVar[]{x, y, z}, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(new IntVar[]{x, y, z}, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2, "nb sol incorrect");
@@ -131,7 +131,7 @@ public class ReifiedTest {
             Constraint[] cstrs = new Constraint[]{new ReifiedConstraint(b, cons, oppCons, s)};
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             s.findAllSolutions();
             long sol = s.getMeasures().getSolutionCount();
             Assert.assertEquals(sol, x.getDomainSize() * y.getDomainSize(), "nb sol incorrect");
@@ -159,7 +159,7 @@ public class ReifiedTest {
 
         s1.post(new AllDifferent(vars1, s1, AllDifferent.Type.AC));
 
-        s1.set(StrategyFactory.preset(vars1, s1.getEnvironment()));
+        s1.set(StrategyFactory.presetI(vars1, s1.getEnvironment()));
         return s1;
     }
 
@@ -225,7 +225,7 @@ public class ReifiedTest {
             }
         }
 
-        s2.set(StrategyFactory.preset(X, s2.getEnvironment()));
+        s2.set(StrategyFactory.presetI(X, s2.getEnvironment()));
         return s2;
     }
 

@@ -61,7 +61,7 @@ public class Pigeons extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.firstFailInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
     }
 
     @Override

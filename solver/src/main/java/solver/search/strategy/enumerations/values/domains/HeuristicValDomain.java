@@ -27,13 +27,15 @@
 
 package solver.search.strategy.enumerations.values.domains;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 31/01/11
  */
-public interface HeuristicValDomain {
+public interface HeuristicValDomain extends Serializable{
 
     /**
      * Does <code>this</code> contain <code>val</code>?

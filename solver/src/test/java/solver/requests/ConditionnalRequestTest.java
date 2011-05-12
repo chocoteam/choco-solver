@@ -117,7 +117,7 @@ public class ConditionnalRequestTest {
         castRequests(cstrs, solver.getEnvironment(), 2);
 
         solver.post(cstrs);
-        solver.set(StrategyFactory.inputOrderInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 10);

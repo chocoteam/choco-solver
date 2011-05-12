@@ -157,49 +157,4 @@ public class RequestListTest {
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
     }
-
-    @Test(groups = "1s")
-    public void testLinkedList() {
-        IEnvironment env = new EnvironmentTrailing();
-        RequestListBuilder._DEFAULT = 1;
-        IRequestList<MockRequest> list = RequestListBuilder.preset(env);
-
-        MockRequest[] requests = new MockRequest[3];
-        for (int i = 0; i < requests.length; i++) {
-            requests[i] = new MockRequest(new MockPropagator(env, 2), i);
-            list.addRequest(requests[i]);
-        }
-
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
-        Assert.assertEquals(list.size(), 3);
-
-        env.worldPush();
-        list.setPassive(requests[0]);
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
-        Assert.assertEquals(list.size(), 3);
-
-        env.worldPush();
-        list.setPassive(requests[2]);
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
-        Assert.assertEquals(list.size(), 3);
-
-        env.worldPop();
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
-        Assert.assertEquals(list.size(), 3);
-
-        env.worldPop();
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
-        Assert.assertEquals(list.size(), 3);
-    }
-
 }

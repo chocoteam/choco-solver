@@ -27,7 +27,6 @@
 
 package samples.graph;
 
-import java.util.BitSet;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,6 +39,8 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
+import java.util.BitSet;
 
 public class Tree extends AbstractProblem{
 
@@ -83,7 +84,7 @@ public class Tree extends AbstractProblem{
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g, solver.getEnvironment());
+		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
 		solver.set(strategy);
 	}
 

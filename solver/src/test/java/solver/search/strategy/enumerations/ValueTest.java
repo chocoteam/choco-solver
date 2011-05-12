@@ -33,12 +33,11 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.InputOrder;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.comparators.Distance;
 import solver.search.strategy.enumerations.values.heuristics.Action;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.nary.Join;
 import solver.search.strategy.enumerations.values.heuristics.nary.SeqN;
 import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
@@ -57,7 +56,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**
  * <br/>
@@ -95,14 +93,12 @@ public class ValueTest {
         }
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         AbstractStrategy strategy;
         switch (type) {
             default:
             case 1:
-                strategy = new StrategyVarValAssign(vars, varComp, ValidatorFactory.instanciated, solver.getEnvironment(), MyCollection.Type.DYN);
+                strategy = StrategyVarValAssign.dyn(vars, SorterFactory.inputOrder(vars),
+                        ValidatorFactory.instanciated, solver.getEnvironment());
                 break;
         }
 
@@ -121,7 +117,7 @@ public class ValueTest {
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
 
@@ -141,7 +137,7 @@ public class ValueTest {
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB())
+                    HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
             );
         }
 
@@ -162,8 +158,8 @@ public class ValueTest {
             int middle = (var.getLB() + var.getUB()) / 2;
             var.setHeuristicVal(
                     new Join(new Distance(new Const(middle)),
-                            HeuristicValFactory.enumVal(var.getDomain(), middle, -1, var.getLB()),
-                            HeuristicValFactory.enumVal(var.getDomain(), middle + 1, 1, var.getUB()))
+                            HeuristicValFactory.enumVal(var, middle, -1, var.getLB()),
+                            HeuristicValFactory.enumVal(var, middle + 1, 1, var.getUB()))
             );
         }
 
@@ -182,7 +178,7 @@ public class ValueTest {
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    new DropN(HeuristicValFactory.enumVal(var.getDomain()), new Median(var.getDomain()), Action.open_node)
+                    new DropN(HeuristicValFactory.enumVal(var), new Median(var), Action.open_node)
             );
         }
 
@@ -202,8 +198,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Last(new FirstN(HeuristicValFactory.enumVal(var.getDomain()), new Const(2), Action.open_node)),
-                            HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB())
+                            new Last(new FirstN(HeuristicValFactory.enumVal(var), new Const(2), Action.open_node)),
+                            HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
                     ));
         }
 
@@ -224,8 +220,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Last(new FirstN(HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB()), new Const(3))),
-                            HeuristicValFactory.enumVal(var.getDomain())
+                            new Last(new FirstN(HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB()), new Const(3))),
+                            HeuristicValFactory.enumVal(var)
                     ));
         }
 
@@ -245,8 +241,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(Predicate.even, HeuristicValFactory.enumVal(var.getDomain())),
-                            HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB())
+                            new Filter(Predicate.even, HeuristicValFactory.enumVal(var)),
+                            HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
                     ));
         }
 
@@ -266,8 +262,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(new Greater(3), HeuristicValFactory.enumVal(var.getDomain())),
-                            HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB())
+                            new Filter(new Greater(3), HeuristicValFactory.enumVal(var)),
+                            HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
                     ));
         }
 
@@ -287,8 +283,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(new Member(var.getDomain()), new List(7, 3, 5, 2)),
-                            HeuristicValFactory.enumVal(var.getDomain())
+                            new Filter(new Member(var), new List(7, 3, 5, 2)),
+                            HeuristicValFactory.enumVal(var)
                     ));
         }
 
@@ -308,10 +304,10 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(Predicate.odd, HeuristicValFactory.enumVal(var.getDomain())),
+                            new Filter(Predicate.odd, HeuristicValFactory.enumVal(var)),
                             new SeqN(
-                                    new Filter(new Greater(6), HeuristicValFactory.enumVal(var.getDomain())),
-                                    HeuristicValFactory.enumVal(var.getDomain(), var.getUB(), -1, var.getLB())
+                                    new Filter(new Greater(6), HeuristicValFactory.enumVal(var)),
+                                    HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB())
                             )
                     ));
         }
@@ -332,8 +328,8 @@ public class ValueTest {
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(new Member(var.getDomain()), new List(19, 17, 13, 11, 7, 5, 3, 2)),
-                            HeuristicValFactory.enumVal(var.getDomain())
+                            new Filter(new Member(var), new List(19, 17, 13, 11, 7, 5, 3, 2)),
+                            HeuristicValFactory.enumVal(var)
                     ));
         }
 

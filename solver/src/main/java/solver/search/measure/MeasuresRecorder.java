@@ -33,7 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.search.limits.TimeCacheThread;
 
-public final class MeasuresRecorder implements IMeasures{
+public final class MeasuresRecorder implements IMeasures {
 
     public long solutionCount;
 
@@ -66,6 +66,8 @@ public final class MeasuresRecorder implements IMeasures{
     protected Solver solver;
 
     protected long startingTime, startingMemory;
+
+    protected Constraint[] cstrs;
 
     public MeasuresRecorder(Solver solver) {
         super();
@@ -200,7 +202,9 @@ public final class MeasuresRecorder implements IMeasures{
     }
 
     public void updatePropagationCount() {
-        Constraint[] cstrs = solver.getCstrs();
+        if (cstrs == null || cstrs.length != solver.getNbCstrs()) {
+            cstrs = solver.getCstrs();
+        }
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] propagators = cstrs[i].propagators;
             for (int j = 0; j < propagators.length; j++) {

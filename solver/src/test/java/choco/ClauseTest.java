@@ -78,7 +78,7 @@ public class ClauseTest {
                 Constraint[] cstrs = new Constraint[]{cons};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.preset(bs, s.getEnvironment()));
+                s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
                 Assert.assertEquals(sol, nSol);
@@ -101,7 +101,7 @@ public class ClauseTest {
         Constraint[] cstrs = new Constraint[]{cons};
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(bs, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 0);
@@ -122,7 +122,7 @@ public class ClauseTest {
         BoolVar[] bs = new BoolVar[]{b};
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(bs, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(bs, s.getEnvironment()));
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 2);

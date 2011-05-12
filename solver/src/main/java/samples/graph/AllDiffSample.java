@@ -26,26 +26,19 @@
  */
 package samples.graph;
 
-import java.util.BitSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
-import solver.Constant;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.AllDiff;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.AllDifferent.Type;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.PropAllDiff;
-import solver.constraints.propagators.gary.PropAtMostNNeighbors;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
+import java.util.BitSet;
 
 public class AllDiffSample extends AbstractProblem{
 
@@ -91,7 +84,7 @@ public class AllDiffSample extends AbstractProblem{
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g, solver.getEnvironment());
+		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
 		solver.set(strategy);
 	}
 

@@ -79,7 +79,7 @@ public class SolverTest {
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderInDomainMin(objects, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(objects, env);
 
 
         s.post(cstrs);

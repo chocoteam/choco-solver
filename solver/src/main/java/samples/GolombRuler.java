@@ -98,12 +98,12 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderInDomainMin(ticks, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
 
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 new Group(
-                        new MemberV(new HashSet(Arrays.asList(ticks))),
+                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks))),
                         Queue.get(),
                         Policy.FIXPOINT
                 ));

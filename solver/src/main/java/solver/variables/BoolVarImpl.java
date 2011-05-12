@@ -75,12 +75,22 @@ public final class BoolVarImpl implements BoolVar {
 
     protected HeuristicVal heuristicVal;
 
+    protected long uniqueID;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     public BoolVarImpl(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
         requests = RequestListBuilder.preset(solver.getEnvironment());
+    }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,17 +141,17 @@ public final class BoolVarImpl implements BoolVar {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= domain.getLB())
-			return updateLowerBound(to + 1, cause);
-		else if (domain.getUB() <= to)
-			return updateUpperBound(from - 1, cause);
-		else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
-			boolean anyChange = false;
-			for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-				anyChange |= removeValue(v, cause);
-			}
-			return anyChange;
-		} else{
-			return false;
+            return updateLowerBound(to + 1, cause);
+        else if (domain.getUB() <= to)
+            return updateUpperBound(from - 1, cause);
+        else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
+            boolean anyChange = false;
+            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
+                anyChange |= removeValue(v, cause);
+            }
+            return anyChange;
+        } else {
+            return false;
         }
     }
 

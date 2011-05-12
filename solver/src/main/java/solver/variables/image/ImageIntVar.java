@@ -50,8 +50,18 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
 
     protected final IV var;
 
+    protected long uniqueID;
+
     public ImageIntVar(IV var) {
         this.var = var;
+    }
+
+    public long getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(long uniqueID) {
+        this.uniqueID = uniqueID;
     }
 
     @Override

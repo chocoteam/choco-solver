@@ -172,12 +172,12 @@ public class FlatzincModelTest {
     //****************************************************************************************************************//
 
     private void tester(String filename, boolean opt, int nbSol, String objective, int bestKnownValue) throws URISyntaxException {
-        String f = this.getClass().getResource("/benchmarks").getPath();
+        String f = this.getClass().getResource("/benchmarking").getPath();
         fzn.loadInstance(new File(f + File.separator + filename));
         Solver solver = fzn.parse();
         solver.solve();
         Assert.assertTrue(solver.getMeasures().getSolutionCount() > 0);
-        Assert.assertEquals(solver.isSatisfied(), ESat.TRUE);
+        Assert.assertEquals(solver.isEntailed(), ESat.TRUE);
     }
 
 }

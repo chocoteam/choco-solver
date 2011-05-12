@@ -90,7 +90,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{new Member(vars[0], values[1], s)};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+                s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();
@@ -118,7 +118,7 @@ public class MemberTest {
                 Constraint[] cstrs = new Constraint[]{new Member(vars[0], values[1], s)};
 
                 s.post(cstrs);
-                s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+                s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 
                 s.findAllSolutions();
                 long sol = s.getMeasures().getSolutionCount();

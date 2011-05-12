@@ -112,4 +112,14 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
     public void notifyPropagators(EventType e, ICause o) throws ContradictionException;
 
+    /**
+     * The solver attributes a unique ID to the variable (used as hashCode)
+     */
+    void setUniqueID(long id);
+
+    /**
+     * Returns the ID of the variable
+     * @return
+     */
+    long getUniqueID();
 }

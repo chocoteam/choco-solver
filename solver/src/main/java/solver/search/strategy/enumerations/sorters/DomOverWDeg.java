@@ -44,6 +44,9 @@ import solver.variables.IntVar;
  */
 public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
 
+    protected DomOverWDeg() {
+    }
+
     private int weight(IntVar v) {
         IRequestList requests = v.getRequests();
         int w = 0;

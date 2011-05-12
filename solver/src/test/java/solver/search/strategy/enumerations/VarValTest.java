@@ -33,15 +33,16 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.search.strategy.enumerations.comparators.ComparatorFactory;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.InputOrder;
-import solver.search.strategy.enumerations.sorters.Middle;
+import solver.search.strategy.enumerations.sorters.Incr;
+import solver.search.strategy.enumerations.sorters.Seq;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.sorters.metrics.Middle;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.comparators.Distance;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.nary.Join;
 import solver.search.strategy.enumerations.values.heuristics.nary.SeqN;
 import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
@@ -59,7 +60,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -135,13 +135,14 @@ public class VarValTest {
     }
 
 
-    private static void feed(LinkedList<AbstractSorter<IntVar>> varComp, int type) {
+    private static void feed(AbstractSorter<IntVar> varComp, int type) {
 
         AbstractStrategy strategy;
         switch (type) {
             default:
             case 1:
-                strategy = new StrategyVarValAssign(vars, varComp, ValidatorFactory.instanciated, solver.getEnvironment(), MyCollection.Type.DYN);
+                strategy = StrategyVarValAssign.dyn(vars, varComp,
+                        ValidatorFactory.instanciated, solver.getEnvironment());
                 break;
         }
 
@@ -157,18 +158,15 @@ public class VarValTest {
     public void test401() {
         build(SIZE);
 
-        // Heuristic var
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(ComparatorFactory.random_var);
-
         // Heuristic val
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
 
-        feed(varComp, 1);
+        // Heuristic var
+        feed(SorterFactory.random(), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -182,18 +180,14 @@ public class VarValTest {
     public void test402() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(ComparatorFactory.first_fail);
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // Heuristic val
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
 
-        feed(varComp, 1);
+        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(vars)), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -207,19 +201,14 @@ public class VarValTest {
     public void test403() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(ComparatorFactory.first_fail);
-        varComp.add(ComparatorFactory.random_var);
-
         // Heuristic val
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
 
-        feed(varComp, 1);
-
+        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random()), 1);
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), NB_SOL[SIZE]);
@@ -232,19 +221,15 @@ public class VarValTest {
     public void test404() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(ComparatorFactory.first_fail);
-        varComp.add(ComparatorFactory.most_constrained);
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
 
-        feed(varComp, 1);
+        feed(new Seq<IntVar>(SorterFactory.minDomain(),
+                new Seq<IntVar>(SorterFactory.mostConstrained(),SorterFactory.inputOrder(vars))), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -258,19 +243,14 @@ public class VarValTest {
     public void test405() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(ComparatorFactory.first_fail);
-        varComp.add(ComparatorFactory.most_constrained);
-        varComp.add(ComparatorFactory.random_var);
-
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
-                    HeuristicValFactory.enumVal(var.getDomain())
+                    HeuristicValFactory.enumVal(var)
             );
         }
-
-        feed(varComp, 1);
+        feed(new Seq<IntVar>(SorterFactory.minDomain(),
+                new Seq<IntVar>(SorterFactory.mostConstrained(),SorterFactory.random())), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -284,23 +264,19 @@ public class VarValTest {
     public void test406() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new Middle<IntVar>(vars));
-        varComp.add(ComparatorFactory.first_fail);
-        varComp.add(ComparatorFactory.random_var);
-
         // HeuristicVal
         for (IntVar var : vars) {
             //TODO: EnumVal with Metric as parameter (bounds and delta)
             Metric middle = new Const((var.getLB() + var.getUB()) / 2);
             var.setHeuristicVal(
                     new Join(new Distance(middle),
-                            HeuristicValFactory.enumVal(var.getDomain(), middle.getValue() + 1, 1, var.getUB()),
-                            HeuristicValFactory.enumVal(var.getDomain(), middle.getValue(), -1, var.getLB())
+                            HeuristicValFactory.enumVal(var, middle.getValue() + 1, 1, var.getUB()),
+                            HeuristicValFactory.enumVal(var, middle.getValue(), -1, var.getLB())
                     ));
         }
 
-        feed(varComp, 1);
+        feed(new Seq<IntVar>(new Incr<IntVar>(Middle.<IntVar>build(vars)),
+                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.random())), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -315,20 +291,17 @@ public class VarValTest {
     public void test407() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
             var.setHeuristicVal(
                     new SeqN(
-                            new Filter(new Member(var.getDomain()), new InstantiatedValues(vars)),
-                            new FirstN(HeuristicValFactory.enumVal(var.getDomain()), new Const(1), Action.first_selection)
+                            new Filter(new Member(var), new InstantiatedValues(vars)),
+                            new FirstN(HeuristicValFactory.enumVal(var), new Const(1), Action.first_selection)
                     )
             );
         }
 
-        feed(varComp, 1);
+        feed(SorterFactory.inputOrder(vars), 1);
 
         solver.findAllSolutions();
     }
@@ -340,15 +313,12 @@ public class VarValTest {
     public void test4081() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
 
             Metric metric = new NumberOfInstantiatedVariables(vars, Action.first_selection);
-            HeuristicVal hval1 = HeuristicValFactory.unsafeEnum(var.getDomain(), Action.first_selection);
-            HeuristicVal hval2 = HeuristicValFactory.unsafeEnum(var.getDomain(), Action.first_selection);
+            HeuristicVal hval1 = HeuristicValFactory.unsafeEnum(var, Action.first_selection);
+            HeuristicVal hval2 = HeuristicValFactory.unsafeEnum(var, Action.first_selection);
 
             var.setHeuristicVal(
                     new SeqN(
@@ -357,7 +327,7 @@ public class VarValTest {
             );
         }
 
-        feed(varComp, 1);
+        feed(SorterFactory.inputOrder(vars), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -371,15 +341,12 @@ public class VarValTest {
     public void test4082() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
 
             Metric metric = new NumberOfInstantiatedVariables(vars, Action.first_selection);
-            HeuristicVal hval1 = HeuristicValFactory.enumVal(var.getDomain());
-            HeuristicVal hval2 = HeuristicValFactory.enumVal(var.getDomain());
+            HeuristicVal hval1 = HeuristicValFactory.enumVal(var);
+            HeuristicVal hval2 = HeuristicValFactory.enumVal(var);
             var.setHeuristicVal(
                     new SeqN(
                             new DropN(hval1, metric, Action.first_selection),
@@ -387,7 +354,7 @@ public class VarValTest {
             );
         }
 
-        feed(varComp, 1);
+        feed(SorterFactory.inputOrder(vars), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -401,24 +368,21 @@ public class VarValTest {
     public void test4083() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
 
             Metric metric = new NumberOfInstantiatedVariables(vars, Action.first_selection);
-            HeuristicVal hval1 = HeuristicValFactory.enumVal(var.getDomain());
+            HeuristicVal hval1 = HeuristicValFactory.enumVal(var);
 
             var.setHeuristicVal(
-                    new Filter(new Member(var.getDomain()),
+                    new Filter(new Member(var),
                             HeuristicValFactory.rotateLeft(
                                     hval1,
                                     metric,
                                     Action.first_selection)));
         }
 
-        feed(varComp, 1);
+        feed(SorterFactory.inputOrder(vars), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -432,9 +396,6 @@ public class VarValTest {
     public void test4084() {
         build(SIZE);
 
-        LinkedList<AbstractSorter<IntVar>> varComp = new LinkedList<AbstractSorter<IntVar>>();
-        varComp.add(new InputOrder<IntVar>(vars));
-
         // HeuristicVal
         for (IntVar var : vars) {
 
@@ -442,14 +403,14 @@ public class VarValTest {
             HeuristicVal hval1 = new DomainUnion(vars);
 
             var.setHeuristicVal(
-                    new Filter(new Member(var.getDomain()),
+                    new Filter(new Member(var),
                             HeuristicValFactory.rotateLeft(
                                     hval1,
                                     metric,
                                     Action.first_selection)));
         }
 
-        feed(varComp, 1);
+        feed(SorterFactory.inputOrder(vars), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);

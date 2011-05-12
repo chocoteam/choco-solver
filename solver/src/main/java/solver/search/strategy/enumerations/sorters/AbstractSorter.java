@@ -27,6 +27,7 @@
 
 package solver.search.strategy.enumerations.sorters;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -36,7 +37,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 02/02/11
  */
-public abstract class AbstractSorter<E> implements Comparator<E> {
+public abstract class AbstractSorter<E> implements Comparator<E>,Serializable {
 
     /**
      * sort <code>elements</code> from the index <code>from</code> to the index <code>to</code> using <code>this</code>

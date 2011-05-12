@@ -61,7 +61,7 @@ public class IntVarAddCsteTest {
                 ConstraintFactory.neq(Y, -4, s)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -84,7 +84,7 @@ public class IntVarAddCsteTest {
                 ConstraintFactory.neq(Y, -2, s)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -106,7 +106,7 @@ public class IntVarAddCsteTest {
                 ConstraintFactory.leq(Y, upp - coeff - 1, s)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);
@@ -128,7 +128,7 @@ public class IntVarAddCsteTest {
                 new EqualX_YC(X, Y, coeff, s)
         };
 
-        AbstractStrategy strategy = StrategyFactory.inputOrderIncDomain(vars, env);
+        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
         s.post(cstrs);
         s.set(strategy);

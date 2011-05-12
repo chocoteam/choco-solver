@@ -24,21 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.strategy.enumerations.sorters;
+package solver.search.strategy.enumerations.sorters.metrics;
 
 import solver.variables.IntVar;
 
 /**
+ * A metric to evaluate the upper bound of a IntVar
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 10/05/11
  */
-public class AntiFirstFail extends AbstractSorter<IntVar> {
+public class UpperBound implements IMetric<IntVar> {
+
+    private static UpperBound singleton;
+
+    private UpperBound() {
+    }
+
+    public static UpperBound build() {
+        if (singleton == null) {
+            singleton = new UpperBound();
+        }
+        return singleton;
+    }
+
 
     @Override
-    public int compare(IntVar o1, IntVar o2) {
-        return o2.getDomainSize() - o1.getDomainSize();
+    public int eval(IntVar var) {
+        return var.getLB();
     }
 }

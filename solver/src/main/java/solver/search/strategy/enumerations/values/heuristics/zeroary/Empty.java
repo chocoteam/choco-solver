@@ -24,21 +24,49 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.values.heuristics.zeroary;
 
-package solver.search.strategy.enumerations.sorters;
-
-import solver.variables.IntVar;
+import gnu.trove.THashMap;
+import solver.search.strategy.enumerations.values.heuristics.Action;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/10
+ * @since 11/05/11
  */
-public class Smallest extends AbstractSorter<IntVar> {
+public class Empty extends HeuristicVal {
+
+    private static Empty singleton = new Empty();
+
+    private Empty() {
+    }
+
+    public static Empty get(){
+        return singleton;
+    }
 
     @Override
-    public int compare(IntVar o1, IntVar o2) {
-        return o1.getLB() - o2.getLB();
+    public HeuristicVal duplicate(THashMap<HeuristicVal, HeuristicVal> map) {
+        return null;
+    }
+
+    @Override
+    protected void doUpdate(Action action) {
+    }
+
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
+
+    @Override
+    public int next() {
+        return 0;
+    }
+
+    @Override
+    public void remove() {
     }
 }

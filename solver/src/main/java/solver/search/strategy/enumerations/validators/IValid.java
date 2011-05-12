@@ -27,13 +27,15 @@
 
 package solver.search.strategy.enumerations.validators;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 17/12/10
  */
-public interface IValid<E> {
+public interface IValid<E> extends Serializable{
 
     boolean valid(E anElement);
 

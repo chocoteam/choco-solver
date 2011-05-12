@@ -28,6 +28,7 @@
 package solver.constraints.gary;
 
 import choco.kernel.ESat;
+import gnu.trove.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -35,6 +36,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.PropNLoops;
 import solver.constraints.propagators.gary.PropNSuccs;
 import solver.constraints.propagators.gary.PropNTree;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphTools;
@@ -45,8 +47,6 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-
-import gnu.trove.TIntArrayList;
 
 import java.util.LinkedList;
 
@@ -178,4 +178,9 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		}
 		return sinks.size();
 	}
+
+    @Override
+    public HeuristicVal getIterator(String name, V var) {
+        throw new UnsupportedOperationException("NTree does not provide such a service");
+    }
 }

@@ -54,6 +54,10 @@ public class ThreadSolver extends Thread {
         this.solver = solver;
     }
 
+    public Solver getSolver() {
+        return solver;
+    }
+
     @Override
     public void run() {
         solver.solve();

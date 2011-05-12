@@ -28,7 +28,7 @@
 package solver.variables;
 
 import solver.Solver;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicValFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.domain.BitSetIntDomain;
 import solver.variables.domain.BooleanDomain;
 import solver.variables.domain.IntervalIntDomain;
@@ -64,7 +64,7 @@ public class VariableFactory {
     public static BoolVar bool(String name, Solver solver) {
         BoolVarImpl var = new BoolVarImpl(name, solver);
         var.domain = new BooleanDomain(solver.getEnvironment());
-        var.heuristicVal = HeuristicValFactory.enumVal(var.domain, var.getLB(), 1, var.getUB());
+        var.heuristicVal = HeuristicValFactory.presetI(var);
         solver.associates(var);
         return var;
     }
@@ -83,7 +83,7 @@ public class VariableFactory {
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.enumVal(var.domain, var.getLB(), 1, var.getUB());
+            var.heuristicVal = HeuristicValFactory.presetI(var);
             solver.associates(var);
             return var;
         }
@@ -103,7 +103,7 @@ public class VariableFactory {
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.enumVal(var.domain, var.getLB(), 1, var.getUB());
+            var.heuristicVal = HeuristicValFactory.presetI(var);
             solver.associates(var);
             return var;
         }
@@ -123,7 +123,7 @@ public class VariableFactory {
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new BitSetIntDomain(values, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.enumVal(var.domain, var.getLB(), 1, var.getUB());
+            var.heuristicVal = HeuristicValFactory.presetI(var);
             solver.associates(var);
             return var;
         }

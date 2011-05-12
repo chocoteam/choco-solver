@@ -66,7 +66,7 @@ public class CycleLtTest {
         cstrs[i] = ConstraintFactory.lt(vars[n - 1], vars[0], s);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         return s;
     }
 

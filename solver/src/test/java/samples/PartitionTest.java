@@ -52,7 +52,7 @@ public class PartitionTest {
     public void test4to14() {
         int[] size = {4, 6, 8, 10, 12, 14};
         int[] sols = {1, 1, 7, 24, 296, 1443};
-        int[] nodes = {4, 27, 226, 2166, 22690, 246019};
+        int[] nodes = {5, 30, 285, 3045, 30497, 300363};
 
         for (int i = 0; i < size.length; i++) {
             Solver sol = modeler(size[i]);
@@ -66,7 +66,7 @@ public class PartitionTest {
     public void test16to32() {
         int[] size = {16, 18, 20, 22, 24, 26, 28, 30, 32};
         int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-        int[] nodes = {822, 1016, 3060, 8743, 27934, 27898, 86092, 198001, 257606};
+        int[] nodes = {442, 4026, 19272, 47600, 304, 3936, 33052, 397446, 810410};
 
         for (int i = 0; i < size.length; i++) {
             Solver sol = modeler(size[i]);

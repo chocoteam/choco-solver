@@ -70,7 +70,7 @@ public class TestSolveur {
             }
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -96,7 +96,7 @@ public class TestSolveur {
             }
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             long t = System.currentTimeMillis();
             System.out.println("nb solutions : " + s.findAllSolutions());
             t = System.currentTimeMillis() - t;
@@ -125,7 +125,7 @@ public class TestSolveur {
             }
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
@@ -150,7 +150,7 @@ public class TestSolveur {
         cstrs[i] = ConstraintFactory.neq(vars[k - 1], vars[0], s);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -192,7 +192,7 @@ public class TestSolveur {
             cstrs[i] = ConstraintFactory.lt(vars[n - 1], vars[0], s);
 
             s.post(cstrs);
-            s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
             s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 0, "nb sol");
             Assert.assertEquals(s.getMeasures().getNodeCount(), 0, "nb nod");
@@ -225,7 +225,7 @@ public class TestSolveur {
         //System.out.println(cstrs[(n/2)-1]);
 
         s.post(cstrs);
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         Assert.assertEquals(s.getMeasures().getNodeCount(), nbNod, "nb nod");
@@ -265,7 +265,7 @@ public class TestSolveur {
         s.post(ConstraintFactory.lt(vars[(n / 2) - 1], vars[n / 2], s));
 
         s.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(s, -1));
-        s.set(StrategyFactory.preset(vars, s.getEnvironment()));
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         s.getMeasures().getSolutionCount();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
@@ -298,7 +298,7 @@ public class TestSolveur {
         }
         solver.post(ConstraintFactory.eq(vars[0], vars[n - 1], solver));
 
-        solver.set(StrategyFactory.inputOrderInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

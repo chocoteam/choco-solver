@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>choco</groupId>
     <artifactId>choco</artifactId>
@@ -25,14 +26,14 @@
     <modules>
         <module>solver</module>
         <module>parser</module>
-    <module>contrib</module>
-  </modules>
+        <module>contrib</module>
+    </modules>
     <dependencies>
         <dependency>
-          <groupId>org.testng</groupId>
-          <artifactId>testng</artifactId>
-          <version>5.13.1</version>
-          <scope>test</scope>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>5.13.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>gnu</groupId>
@@ -89,29 +90,30 @@
                 </configuration>
             </plugin>
             <plugin>
-            <groupId>com.mycila.maven-license-plugin</groupId>
-            <artifactId>maven-license-plugin</artifactId>
-            <configuration>
-                <header>src/etc/header.txt</header>
-                <failIfMissing>false</failIfMissing>
-                <aggregate>true</aggregate>
-                <properties>
-                    <owner>Ecole des Mines de Nantes</owner>
-                    <year>2011</year>
-                </properties>
-                <strictCheck>true</strictCheck>
-                <includes>
-                    <include>**/*.java</include>
-               </includes>
-                <excludes>
-                    <exclude>**/site/**</exclude>
-                    <exclude>**/target/**</exclude>                    
-                </excludes>
-                <headerDefinitions>
-                    <headerDefinition>src/etc/old.xml</headerDefinition>
-                </headerDefinitions>
-            </configuration>
-        </plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0 </version>
+                <configuration>
+                    <header>src/etc/header.txt</header>
+                    <failIfMissing>false</failIfMissing>
+                    <aggregate>true</aggregate>
+                    <properties>
+                        <owner>Ecole des Mines de Nantes</owner>
+                        <year>2011</year>
+                    </properties>
+                    <strictCheck>true</strictCheck>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <excludes>
+                        <exclude>**/site/**</exclude>
+                        <exclude>**/target/**</exclude>
+                    </excludes>
+                    <headerDefinitions>
+                        <headerDefinition>src/etc/old.xml</headerDefinition>
+                    </headerDefinitions>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

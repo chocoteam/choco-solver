@@ -24,22 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters.metrics;
 
-package solver.search.strategy.enumerations.sorters;
+import gnu.trove.THashSet;
+import solver.constraints.Constraint;
+import solver.variables.Variable;
+
+import java.util.Arrays;
 
 /**
+ * A metric to evaluate wether or not a variable belongs to a constraint
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/01/11
+ * @since 10/05/11
  */
-public class Middle<E> extends AbstractCriteriaBasedSorter<E> {
+public class Belong<V extends Variable> implements IMetric<V> {
 
-    public Middle(E[] elts) {
-        super(elts.length);
-        int n = elts.length / 2;
-        for (int i = 0; i < elts.length; i++) {
-            criteria.put(elts[i], Math.abs(i - n));
+    final THashSet<Variable> set;
+
+    private Belong(Constraint constraint) {
+        this.set = new THashSet<Variable>();
+        this.set.addAll(Arrays.asList(constraint.getVariables()));
+    }
+
+    public static Belong build(Constraint constraint) {
+        return new Belong(constraint);
+    }
+
+
+    @Override
+    public int eval(V var) {
+        if (set.contains(var)) {
+            return 0;
         }
+        return 1;
     }
 }

@@ -32,7 +32,10 @@ import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.enumerations.sorters.AbstractSorter;
+import solver.search.strategy.enumerations.sorters.Seq;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -50,12 +53,14 @@ public class Knapsack extends AbstractProblem {
     String filename;
 
     @Option(name = "-n", usage = "Restricted to n objects.", required = false)
-    int n;
+    int n = -1;
 
     int[] capacites;
     int[] energies;
     int[] volumes;
     int[] nbOmax;
+
+    Sum c_size, c_energy;
 
     public IntVar power;
     public IntVar[] objects;
@@ -67,12 +72,13 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void buildModel() {
+        setUp();
         int nos = energies.length;
         solver = new Solver();
 
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = VariableFactory.bounded("o_" + i, 0, nbOmax[i], solver);
+            objects[i] = VariableFactory.bounded("o_" + (i + 1), 0, nbOmax[i], solver);
         }
 
         power = VariableFactory.bounded("power", 0, 9999, solver);
@@ -80,13 +86,26 @@ public class Knapsack extends AbstractProblem {
         IntVar scalar = VariableFactory.bounded("weight", capacites[0] - 1, capacites[1] + 1, solver);
 
 
-        solver.post(Sum.eq(objects, volumes, scalar, 1, solver));
-        solver.post(Sum.eq(objects, energies, power, 1, solver));
+        c_size = Sum.eq(objects, volumes, scalar, 1, solver);
+        c_energy = Sum.eq(objects, energies, power, 1, solver);
+
+        solver.post(c_size);
+        solver.post(c_energy);
     }
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderInDomainMin(objects, solver.getEnvironment()));
+
+        AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
+        AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
+
+        AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
+
+        solver.set(StrategyVarValAssign.dyn(objects,
+                seq,
+                ValidatorFactory.instanciated,
+                solver.getEnvironment()));
+
     }
 
     @Override
@@ -99,7 +118,7 @@ public class Knapsack extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Knapsack().execute();
+        new Knapsack().execute(args);
     }
 
 

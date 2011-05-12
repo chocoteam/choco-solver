@@ -38,15 +38,15 @@ public class Random<E> extends AbstractSorter<E> {
 
     final java.util.Random rand;
 
-    public Random() {
+    protected Random() {
         this.rand = new java.util.Random();
     }
 
-    public Random(long seed) {
+    protected Random(long seed) {
         this.rand = new java.util.Random(seed);
     }
 
-    public Random(java.util.Random rand) {
+    protected Random(java.util.Random rand) {
         this.rand = rand;
     }
 

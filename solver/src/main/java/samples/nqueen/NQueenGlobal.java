@@ -65,7 +65,7 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.firstFailInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
         IPropagationEngine engine = solver.getEngine();
@@ -73,8 +73,6 @@ public class NQueenGlobal extends AbstractNQueen {
                 new IncrOrderV(orderedVars)
         );
         engine.setDefaultPolicy(Policy.ITERATE);
-        solver.getSearchLoop().getLimitsFactory().setNodeLimit(100000);
-
     }
 
     public static void main(String[] args) {

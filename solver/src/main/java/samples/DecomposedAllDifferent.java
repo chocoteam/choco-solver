@@ -132,11 +132,11 @@ public class DecomposedAllDifferent extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderInDomainMin(X, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 new Group(
-                        new MemberV(new HashSet(Arrays.asList(B))),
+                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(B))),
                         IncrArityV.get(),
                         Policy.ITERATE
                 ));

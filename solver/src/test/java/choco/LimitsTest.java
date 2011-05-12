@@ -29,11 +29,8 @@ package choco;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import samples.nqueen.NQueenBinary;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -43,45 +40,39 @@ import solver.variables.VariableFactory;
  */
 public class LimitsTest {
 
-    protected static Solver modelit(int k) {
-        int n = (2 * k);
-        int m = n - 1;
-        int min = 1;
-        int max = k - 2;
-
-        Solver s = new Solver();
-        IntVar[] vars = new IntVar[n];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = VariableFactory.enumerated("v_" + i, min, max, s);
-        }
-
-        int i;
-        for (i = 0; i < (n / 2) - 1; i++) {
-            s.post(ConstraintFactory.neq(vars[i], vars[i + 1], s));
-            int j = (n / 2);
-            s.post(ConstraintFactory.neq(vars[i + j], vars[i + j + 1], s));
-        }
-        s.post(ConstraintFactory.lt(vars[(n / 2) - 1], vars[n / 2], s));
-
-        s.set(StrategyFactory.firstFailInDomainMin(vars, s.getEnvironment()));
-        return s;
+    protected static Solver modelit() {
+        NQueenBinary pb =new NQueenBinary();
+        pb.readArgs("-q", "12");
+        pb.buildModel();
+        pb.configureSolver();
+        return pb.getSolver();
     }
 
 
     @Test(groups = "1s")
     public void testTime() {
-        Solver s = modelit(7);
+        Solver s = modelit();
+        long tl = 500;
+        s.getSearchLoop().getLimitsFactory().setTimeLimit(tl);
+        s.findAllSolutions();
+        long tc = s.getMeasures().getTimeCount();
+        Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl+" vs. "+ tc);
+    }
+
+    @Test(groups = "1s")
+    public void testThreadTime() {
+        Solver s = modelit();
         long tl = 500;
         s.getSearchLoop().getLimitsFactory().setThreadTimeLimit(tl);
         s.findAllSolutions();
         long tc = s.getMeasures().getTimeCount();
-        Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100));
+        Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl+" vs. "+ tc);
     }
 
     @Test(groups = "1s")
     public void testNode() {
-        Solver s = modelit(6);
-        long nl = 500;
+        Solver s = modelit();
+        long nl = 50;
         s.getSearchLoop().getLimitsFactory().setNodeLimit(nl);
         s.findAllSolutions();
         long nc = s.getMeasures().getNodeCount();
@@ -90,8 +81,8 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testBacktrack() {
-        Solver s = modelit(6);
-        long bl = 500;
+        Solver s = modelit();
+        long bl = 50;
         s.getSearchLoop().getLimitsFactory().setBacktrackLimit(bl);
         s.findAllSolutions();
         long bc = s.getMeasures().getBackTrackCount();
@@ -100,8 +91,8 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testFail() {
-        Solver s = modelit(6);
-        long fl = 500;
+        Solver s = modelit();
+        long fl = 50;
         s.getSearchLoop().getLimitsFactory().setFailLimit(fl);
         s.findAllSolutions();
         long fc = s.getMeasures().getFailCount();
@@ -110,8 +101,8 @@ public class LimitsTest {
 
     @Test(groups = "1s")
     public void testSolution() {
-        Solver s = modelit(6);
-        long sl = 5;
+        Solver s = modelit();
+        long sl = 50;
         s.getSearchLoop().getLimitsFactory().setSolutionLimit(sl);
         s.findAllSolutions();
         long sc = s.getMeasures().getSolutionCount();

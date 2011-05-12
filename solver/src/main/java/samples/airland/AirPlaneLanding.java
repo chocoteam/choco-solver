@@ -170,18 +170,13 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-//        solver.set(StrategyFactory.inputOrderInDomainMin(planes, solver.getEnvironment()));
-
-        solver.set(StrategyFactory.firstFailInDomainMin(planes, solver.getEnvironment()));
-//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
-
-//        solver.getSearchLoop().getLimitsFactory().setTimeLimit(3000);
+        solver.set(StrategyFactory.domwdegMindom(planes, solver));
         solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);
 
         IPropagationEngine engine = solver.getEngine();
         engine.setDefaultComparator(
                 new Cond(
-                        new MemberC(new HashSet(Arrays.asList(ranking.keys(new Constraint[ranking.size()])))),
+                        new MemberC(new HashSet<Constraint>(Arrays.asList(ranking.keys(new Constraint[ranking.size()])))),
                         new Seq(
                                 new MappingC(ranking),
                                 new IncrOrderV(ArrayUtils.append(bVars, planes))),
@@ -189,8 +184,6 @@ public class AirPlaneLanding extends AbstractProblem {
                 )
         );
         engine.setDefaultPolicy(Policy.FIXPOINT);
-//        SearchMonitorFactory.log(solver, false, true);
-//        SearchMonitorFactory.statEveryXXms(solver, 200);
 
     }
 

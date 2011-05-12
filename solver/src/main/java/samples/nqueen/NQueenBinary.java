@@ -72,7 +72,7 @@ public class NQueenBinary extends AbstractNQueen {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.firstFailInDomainMin(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
         IPropagationEngine engine = solver.getEngine();
@@ -80,7 +80,6 @@ public class NQueenBinary extends AbstractNQueen {
                 new IncrOrderV(orderedVars)
         );
         engine.setDefaultPolicy(Policy.FIXPOINT);
-        solver.getSearchLoop().getLimitsFactory().setNodeLimit(100000);
 
     }
 
