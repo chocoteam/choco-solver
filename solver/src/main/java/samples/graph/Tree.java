@@ -38,7 +38,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
+import java.io.FileWriter;
 import java.util.BitSet;
 
 public class Tree extends AbstractProblem{
@@ -114,21 +114,20 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		gtype = GraphType.DENSE;
+		gtype = GraphType.SPARSE;
 		testN();
-//		gtype = GraphType.DENSE;
-//		testN();
 	}
+	
 	private static void testN(){
 		file = "tree_"+(TIMELIMIT/1000)+"sec_d5_"+gtype+".csv";
 		clearFile(file);
 		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
 		int i = 0;
-		int[] ds = new int[]{5000};
+		int[] ds = new int[]{10};
 //		int[] ds = new int[]{5,20,50,30000};
 		int dMax = 50000;
 		int nMax = 50000;
-		for(int n=400;n<=10000;n+=100){
+		for(int n=900;n<=10000;n+=100){
 			if (n<nMax){
 				for(int d:ds){
 					if(d<dMax){
@@ -144,7 +143,7 @@ public class Tree extends AbstractProblem{
 							if(performOneTest(n, d)){
 								success = true;
 							}
-							for(int k=0;k<1;k++){
+							for(int k=0;k<100;k++){
 								System.gc();
 							}
 						}
@@ -165,33 +164,30 @@ public class Tree extends AbstractProblem{
 			}
 		}
 	}
-	private static void writeTextInto(String string, String file2) {
-		// TODO Auto-generated method stub
-		
+	
+	//***********************************************************************************
+	// RECORDING RESULTS
+	//***********************************************************************************
+
+	private static void writeTextInto(String text, String file) {
+		try{
+			FileWriter out  = new FileWriter(file,true);
+			out.write(text);
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
-	private static void clearFile(String file2) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	private static void testD(){
-		file = "results_JGF_Tree_BENCH_D_bigValues.csv";
-		clearFile(file);
-		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
-		int[] ns = new int[]{50,100,300,500};
-		int[] ds = new int[]{2,4,6,8,10,20,40,60,80,100,200,400,600,800,1000};
-		for(int n:ns){
-			for(int d:ds){
-				if(d>n){
-					d=n;
-				}
-				System.out.println(n+" : "+d);
-				performOneTest(n, d);
-				if(d==n){
-					break;
-				}
-			}
+	private static void clearFile(String file) {
+		try{
+			FileWriter out  = new FileWriter(file,false);
+			out.write("");
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 }

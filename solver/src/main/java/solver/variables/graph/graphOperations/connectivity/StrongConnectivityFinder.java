@@ -28,8 +28,8 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 import gnu.trove.TIntArrayList;
+import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -38,15 +38,13 @@ import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
 public class StrongConnectivityFinder {
 
-
-
 	/**find all strongly connected components of the partial subgraph of graph 
 	 * uses Tarjan algorithm 
 	 * run in O(n+m) worst case time
 	 * @param graph the input graph
 	 * @return all strongly connected components of the partial subgraph of graph
 	 */
-	public static LinkedList<TIntArrayList> findAllSCCOf(IDirectedGraph graph){
+	public static ArrayList<TIntArrayList> findAllSCCOf(IDirectedGraph graph){
 		int n = graph.getNbNodes();
 		BitSet bitSCC = new BitSet(n);
 		ActiveNodesIterator<IActiveNodes> iter = graph.activeNodesIterator();
@@ -55,7 +53,7 @@ public class StrongConnectivityFinder {
 		}
 		return findAllSCCOf(graph, bitSCC);
 	}
-
+	
 	/**find all strongly connected components of the partial subgraph of graph defined by restriction
 	 * uses Tarjan algorithm 
 	 * run in O(n+m) worst case time
@@ -63,7 +61,7 @@ public class StrongConnectivityFinder {
 	 * @param restriction provide a restriction : nodes set to 0 (false) will be ignored
 	 * @return all strongly connected components of the partial subgraph of graph defined by restriction
 	 */
-	public static LinkedList<TIntArrayList> findAllSCCOf(IDirectedGraph graph, BitSet restriction){
+	public static ArrayList<TIntArrayList> findAllSCCOf(IDirectedGraph graph, BitSet restriction){
 		int nb = restriction.cardinality();
 		int[] stack = new int[nb];
 		int[] p = new int[nb];
@@ -71,7 +69,8 @@ public class StrongConnectivityFinder {
 		int[] nodeOfDfsNum = new int[nb];
 		int[] dfsNumOfNode = new int[graph.getNbNodes()];
 		BitSet inStack = new BitSet(nb);
-		LinkedList<TIntArrayList> allSCC = new LinkedList<TIntArrayList>();
+		ArrayList<TIntArrayList> allSCC = new ArrayList<TIntArrayList>(nb);
+		findSingletons(graph, restriction, allSCC);
 		int first = restriction.nextSetBit(0);
 		while(first>=0){
 			findSCC(allSCC, graph, first, restriction,
@@ -79,6 +78,23 @@ public class StrongConnectivityFinder {
 			first = restriction.nextSetBit(first);
 		}
 		return allSCC;
+	}
+	
+	/**Find singletons
+	 * run in O(n)
+	 * @param graph
+	 * @param iterable
+	 * @param allSCC
+	 */
+	private static void findSingletons(IDirectedGraph graph, BitSet iterable, ArrayList<TIntArrayList> allSCC){
+		for(int i=iterable.nextSetBit(0); i>=0; i=iterable.nextSetBit(i+1)){
+			if(graph.getPredecessorsOf(i).neighborhoodSize()*graph.getSuccessorsOf(i).neighborhoodSize()==0){
+				TIntArrayList scc = new TIntArrayList();
+				scc.add(i);
+				allSCC.add(scc);
+				iterable.clear(i);
+			}
+		}
 	}
 
 	/** find all strongly connected components of the partial subgraph of graph defined by restriction reachable from the node start, and add them to the set allSCC
@@ -96,7 +112,7 @@ public class StrongConnectivityFinder {
 	 * @param dfsNumOfNode
 	 * @param inStack
 	 */
-	private static void findSCC(LinkedList<TIntArrayList> allSCC, IDirectedGraph graph, int start, BitSet restriction,int[] stack, int[] p, int[] inf, int[] nodeOfDfsNum, int[] dfsNumOfNode, BitSet inStack){
+	private static void findSCC(ArrayList<TIntArrayList> allSCC, IDirectedGraph graph, int start, BitSet restriction,int[] stack, int[] p, int[] inf, int[] nodeOfDfsNum, int[] dfsNumOfNode, BitSet inStack){
 		int nb = restriction.cardinality();
 		// trivial case
 		if (nb==1){

@@ -26,19 +26,17 @@
  */
 package samples.graph;
 
+import java.io.FileWriter;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.AllDiff;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.PropAllDiff;
+import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.AllDifferent.Type;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
-import java.util.BitSet;
 
 public class AllDiffSample extends AbstractProblem{
 
@@ -49,13 +47,17 @@ public class AllDiffSample extends AbstractProblem{
 	int n;
 	int sizeFirstSet;
 	UndirectedGraphVar g;
+	private IntVar[] vars;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AllDiffSample(){
+	public AllDiffSample(int nbVars, int nbVals){
 		super();
+		n = nbVars+nbVals;
+		sizeFirstSet = n-nbVals;
+		readArgs("-quiet");
 	}
 
 	//***********************************************************************************
@@ -64,60 +66,119 @@ public class AllDiffSample extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		sizeFirstSet = 7;
-		n = sizeFirstSet*2+2;
 		solver = new Solver();
-		BitSet[] data = new BitSet[n];
-		for(int i=0;i<n;i++){
-			data[i] = new BitSet(n);
-		}
-		for(int i=0;i<sizeFirstSet;i++){
-			for(int j=sizeFirstSet;j<n;j++){
-				data[i].set(j);
-				data[j].set(i);
-			}
-		}
-		g = VariableFactory.undirectedGraph("", data, GraphType.SPARSE, GraphType.SPARSE, solver);
-		Constraint[] cstrs = new Constraint[]{new AllDiff(g,sizeFirstSet, solver, PropagatorPriority.LINEAR)};
+		vars = VariableFactory.enumeratedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
 		solver.post(cstrs);
 	}
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
+		AbstractStrategy strategy = StrategyFactory.random(vars, solver.getEnvironment());
 		solver.set(strategy);
 	}
 
 	@Override
 	public void solve() {
 		solver.findAllSolutions();
+		if(solver.getMeasures().getSolutionCount()!=getNbSols(sizeFirstSet, n-sizeFirstSet)){
+			throw new UnsupportedOperationException("error "+solver.getMeasures().getSolutionCount()+"!="+getNbSols(sizeFirstSet, n-sizeFirstSet));
+		}
+	}
+
+	private static long getNbSols(int n1, int n2) {
+		if(n1==1)return n2;
+		return getNbSols(n1-1, n2-1)*n2;
 	}
 
 	@Override
-	public void prettyOut() {
-		System.out.println("allDiff stuff : "+PropAllDiff.duration+" ms");
+	public void prettyOut() {}
+
+	//***********************************************************************************
+	// BENCH
+	//***********************************************************************************
+
+	public static int testVarVal(int nbVars, int nbVals) {
+		int nbIter = 10;
+		AllDiffSample ads = new AllDiffSample(nbVars, nbVals);
+		ads.execute();
+		int[] results = new int[nbIter];
+		for(int i = 0; i<nbIter; i++){
+			ads = new AllDiffSample(nbVars, nbVals);
+			ads.execute();
+			results[i] = (int) ads.solver.getMeasures().getTimeCount();
+		}
+		int minV = results[0];
+		int maxV = -1;
+		int minI = 0;
+		int maxI = 0;
+		for(int i = 0; i<nbIter; i++){
+			if(results[i]>maxV){
+				maxI = i;
+				maxV = results[i];
+			}
+			if(results[i]<minV){
+				minI = i;
+				minV = results[i];
+			}
+		}
+		int mean = 0;
+		for(int i = 0; i<nbIter; i++){
+			if(i!=minI && i!=maxI){
+				mean += results[i];
+			}
+		}
+		mean = mean/(nbIter-2);
+		return mean;
 	}
 
-	public static void main(String[] args) {
-		int time = 0;
-		for(int i = 0; i<10; i++){
-			AllDiffSample ads = new AllDiffSample();
-			ads.execute();
-//			Logger log = LoggerFactory.getLogger("bench");
-//			log.info(Constant.WELCOME_TITLE);
-//			log.info(Constant.WELCOME_VERSION);
-//			log.info("* Sample library: executing {}.java ... \n", "truc");
-//			Solver solver = new Solver();
-//			int n = 7;
-//			IntVar[] vars = VariableFactory.enumeratedArray("", n, 0,n+1, solver);
-//			Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.AC)};
-//			solver.post(cstrs);
-//			solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
-////			solver.set(StrategyFactory.inputOrderIncDomain(vars, solver.getEnvironment()));
-//			solver.findAllSolutions();
-//			log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
-			time += ads.solver.getMeasures().getTimeCount();
+	public static void bench() {
+		int val;
+		String fileName = "graphAllDiff_VARS.csv";
+		try{
+			FileWriter out  = new FileWriter(fileName,false);
+			out.write("nbVars;nbVals;time;nbSols\n");
+			out.close();
 		}
-		System.out.println("total time : "+time);
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		for (int i=4; i<10; i++){
+			val = testVarVal(i, i);
+			try{
+				FileWriter out  = new FileWriter(fileName,true);
+				out.write(i+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
+				out.close();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		fileName = "graphAllDiff_VALS.csv";
+		try{
+			FileWriter out  = new FileWriter(fileName,false);
+			out.write("nbVars;nbVals;time;nbSols\n");
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		int nbVars = 5;
+		for (int i=nbVars; i<20; i++){
+			val = testVarVal(nbVars, i);
+			try{
+				FileWriter out  = new FileWriter(fileName,true);
+				out.write(nbVars+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
+				out.close();
+			}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void main(String[] args) {
+//		bench();
+		System.out.println("mean time : "+testVarVal(8,8));
 	}
 }

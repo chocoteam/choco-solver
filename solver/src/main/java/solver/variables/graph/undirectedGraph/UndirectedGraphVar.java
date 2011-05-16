@@ -56,10 +56,10 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public UndirectedGraphVar(IEnvironment env, int nbNodes, GraphType type) {
+	public UndirectedGraphVar(IEnvironment env, int nbNodes, GraphType typeEnv, GraphType typeKer) {
 		super(env);
-    	envelop = new StoredUndirectedGraph(environment, nbNodes, type);
-    	kernel = new StoredUndirectedGraph(environment, nbNodes, type);
+    	envelop = new StoredUndirectedGraph(environment, nbNodes, typeEnv);
+    	kernel = new StoredUndirectedGraph(environment, nbNodes, typeKer);
     	kernel.activeIdx.clear();
     }
 
@@ -144,7 +144,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	}
 //	private int nextArcRandom() {
 //		int n = getEnvelopGraph().getNbNodes();
-//		LinkedList<Integer> arcs = new LinkedList<Integer>();
+//		TIntArrayList arcs = new TIntArrayList(n);
 //		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 //			if(kernel.neighbors[i].neighborhoodSize()>1){
 //				throw new UnsupportedOperationException("error in 1-succ filtering");
@@ -158,7 +158,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 //				while(iter.hasNext()){
 //					j = iter.next();
 //					if (!kernel.edgeExists(i, j)){
-//						arcs.addFirst((i+1)*n+j);
+//						arcs.add((i+1)*n+j);
 //					}
 //				}
 //			}

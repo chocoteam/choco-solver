@@ -48,8 +48,20 @@ import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFin
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
+/**Constraint for tree partitioning an anti-arborscence
+ * In the modelization a root is a loop
+ * GAC ensured in O(alpha.m) worst case time (cf. paper Revisiting the tree constraint)
+ * where alpha is the inverse of ackermann function
+ * 
+ * BEWARE the case where some nodes do not belong to the solution has not been tested
+ * 
+ * @author Jean-Guillaume Fages
+ *
+ * @param <V> 
+ */
 public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 
 	//***********************************************************************************
@@ -143,7 +155,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	
 	private int calcMinTree() {
 		int n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
 		int[] sccOf = new int[n];
 		int sccNum = 0;
 		int node;

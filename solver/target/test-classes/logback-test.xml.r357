@@ -1,0 +1,36 @@
+<configuration debug="false">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern><!--%d{HH:mm:ss.SSS} -->%msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmss"/>
+
+    <!--<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>GALAK.LOG</file>
+        <encoder>
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>-->
+
+    <logger name="choco" level="error"/>
+
+    <logger name="test" level="error"/>
+
+    <logger name="debug" level="error"/>
+
+    <logger name="bench" level="error"/>
+
+    <logger name="solver" level="error"/>
+
+    <logger name="solver.search" level="error"/>
+
+     <logger name="fzn" level="error"/>
+
+    <root level="warn">
+        <appender-ref ref="STDOUT"/>
+        <!--<appender-ref ref="FILE"/>-->
+    </root>
+</configuration>

@@ -1,0 +1,35 @@
+knapsack 10 items n1
+=
+knapsack 1: 
+cmax: +550
+cmin: +500
+item 1:
+ calorie: +100
+ poids: +79
+item 2:
+ calorie: +49
+ poids: +25
+item 3:
+ calorie: +54
+ poids: +99
+item 4:
+ calorie: +12
+ poids: +41
+item 5:
+ calorie: +78
+ poids: +94
+item 6:
+ calorie: +30
+ poids: +75
+item 7:
+ calorie: +65
+ poids: +40
+item 8:
+ calorie: +31
+ poids: +59
+item 9:
+ calorie: +90
+ poids: +95
+item 10:
+ calorie: +50
+ poids: +99

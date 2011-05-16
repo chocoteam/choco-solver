@@ -27,107 +27,85 @@
 
 package solver.constraints.propagators.gary;
 
+import gnu.trove.TIntIntHashMap;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
+import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**Propagator that ensures that a node has at most N neighbors
+/**Propagator channeling an undirected graph and an array of integer variables
+ * 
+ * BEWARE : for use reasons the channeling is only performed on arcs but not on nodes
  * 
  * @author Jean-Guillaume Fages
  *
  * @param <V>
  */
-public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
+public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private UndirectedGraphVar g;
-	private IntProcedure enf_proc;
-	private int n_neighbors;
+	private IntVar[] intVars;
+	private int[] values;
+	private TIntIntHashMap valuesHash;
+	private RemVal valRemoved;
+	private IntProcedure arcEnforced;
+	private IntProcedure arcRemoved;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropAtMostNNeighbors(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, 
-			PropagatorPriority priority, boolean reactOnPromotion, int nNeigh) {
-
-		super((V[]) new UndirectedGraphVar[]{graph}, environment, constraint, priority, reactOnPromotion);
+	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,IEnvironment environment, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), environment, mixtedAllDiff, storeThreshold, b);
 		g = graph;
-		n_neighbors = nNeigh;
-		final PropAtMostNNeighbors<V> instance = this;
-		if (n_neighbors==1){
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from,to);
-						prune(to,from);
-					}else{
-						throw new UnsupportedOperationException();
-					}
+		intVars = vars;
+		this.values = v;
+		this.valuesHash = vH;
+		final PropIntVarsGraphChanneling instance = this;
+		final int n = values.length;
+		// IntVar events
+		valRemoved = new RemVal(this);
+		// Graph events
+		arcEnforced = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				int from = i/n-1;
+				int to   = i%n;
+				if(from<to){
+					intVars[from].instantiateTo(values[to], instance);
+				}else{
+					intVars[to].instantiateTo(values[from], instance);
 				}
-				private void prune(int from, int mate) throws ContradictionException{
-					int to;
-					INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-					AbstractNeighborsIterator<INeighbors> iter = succs.iterator(); 
-					while (iter.hasNext()){
-						to = iter.next();
-						if (mate!=to){
-							g.removeArc(from, to, instance);
-						}
-					}
+			}
+		};
+		arcRemoved = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				int from = i/n-1;
+				int to   = i%n;
+				if(from<to){
+					intVars[from].removeValue(values[to], instance);
+				}else{
+					intVars[to].removeValue(values[from], instance);
 				}
-			};
-		}else{
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from);
-						prune(to);
-					}else{
-						throw new UnsupportedOperationException();
-					}
-				}
-				private void prune(int from) throws ContradictionException{
-					int to;
-					if(g.getKernelGraph().getNeighborhoodSize(from)==n_neighbors &&
-					   g.getEnvelopGraph().getNeighborhoodSize(from)>n_neighbors){
-						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-						AbstractNeighborsIterator<INeighbors> iter = succs.iterator(); 
-						while (iter.hasNext()){
-							to = iter.next();
-							if (!g.getKernelGraph().edgeExists(from, to)){
-								g.removeArc(from, to, instance);
-							}
-						}
-					}
-				}
-			};
-		}
+			}
+		};
 	}
 
 	//***********************************************************************************
@@ -135,30 +113,30 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
-		int node,next;
-		AbstractNeighborsIterator<INeighbors> siter;
-		while (niter.hasNext()){
-			node = niter.next();
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
-				siter = g.getEnvelopGraph().neighborsIteratorOf(node); 
-				while (siter.hasNext()){
-					next = siter.next();
-					if (!g.getKernelGraph().edgeExists(node, next)){
-						g.removeArc(node, next, this);
-					}
-				}
-			}
-		}
-	}
+	public void propagate() throws ContradictionException {}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-			d.forEach(enf_proc, gv.fromArcEnforcing(), gv.toArcEnforcing());
+			if((mask & EventType.ENFORCEARC.mask) !=0){
+				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+				d.forEach(arcEnforced, gv.fromArcEnforcing(), gv.toArcEnforcing());
+			}
+			if((mask & EventType.REMOVEARC.mask) !=0){
+				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+				d.forEach(arcRemoved, gv.fromArcRemoval(), gv.toArcRemoval());
+			}
+		}else{
+			if(EventType.anInstantiationEvent(mask)){
+				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
+			}
+			if((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) !=0){
+				IntVar var = (IntVar) request.getVariable();
+				IntDelta d = var.getDelta();
+				valRemoved.set(idxVarInProp);
+				d.forEach(valRemoved, request.fromDelta(), request.toDelta());
+			}
 		}
 	}
 
@@ -168,11 +146,35 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		return EventType.ALL_MASK() + EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private class RemVal implements IntProcedure {
+		private int idx;
+		private Propagator p;
+
+		private RemVal(Propagator p){
+			this.p = p;
+		}
+
+		private void set(int i) {
+			idx = i;
+		}
+
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = idx;
+			int to   = valuesHash.get(i);
+			g.removeArc(from, to,p);
+		}
 	}
 }

@@ -27,13 +27,13 @@
 package solver.constraints.propagators.gary;
 
 import gnu.trove.TIntArrayList;
+import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
-import solver.constraints.gary.AllDiff;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,6 +42,7 @@ import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
@@ -51,14 +52,25 @@ import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
+/**Main propagator for AllDifferent constraint
+ * Uses Regin algorithm
+ * Runs in O(m.rac(n)) worst case time
+ * 
+ * Use incrementality for current matching and strongly connected components
+ * but sometimes needs to recomputed everything from scratch
+ * 
+ * BEWARE : pretty heavy and not so good in practice (especially because of domain restoring)
+ * 
+ * @author Jean-Guillaume Fages
+ *
+ * @param <V>
+ */
+public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	public static long duration;
-	
 	private int n;
 	private int sizeFirstSet;
 	private UndirectedGraphVar g;
@@ -70,7 +82,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 	private IStateInt[] nodeSCCnext;
 	private IntProcedure maintain_matching;
 	private IntProcedure maintain_scc;
-	private boolean matchingZgueg;
+	private boolean obsoleteMatching;
 	private long nbBks;
 	private BitSet repairedSCC;
 
@@ -78,7 +90,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAllDiff(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, AllDiff<V> constraint, PropagatorPriority storeThreshold, boolean b) {
+	public PropAllDiffGraph(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, Constraint constraint, PropagatorPriority storeThreshold, boolean b) {
 		super((V[]) new Variable[]{graph}, sol.getEnvironment(), constraint, storeThreshold, b);
 		this.sizeFirstSet = sizeFirstSet;
 		this.solver = sol;
@@ -97,7 +109,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 			nodeSCCref[i] = environment.makeInt(-1);
 			nodeSCCnext[i] = environment.makeInt(-1);
 		}
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n+1,g.getEnvelopGraph().getType());
+		digraph = new StoredDirectedGraph(solver.getEnvironment(), n+1,GraphType.SPARSE);
 		maintain_matching = new IntProcedure() {
 			@Override
 			public void execute(int i) throws ContradictionException {
@@ -107,7 +119,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 				if(matching[from]==to && matching[to] == from){
 					matching[from] = -1;
 					matching[to] = -1;
-					matchingZgueg = true;
+					obsoleteMatching = true;
 				}
 			}
 		};
@@ -125,7 +137,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 						bitSCC.set(nodeI);
 						nodeI = nodeSCCnext[nodeI].get();
 					}
-					LinkedList<TIntArrayList> allscc = StrongConnectivityFinder.findAllSCCOf(digraph, bitSCC);
+					ArrayList<TIntArrayList> allscc = StrongConnectivityFinder.findAllSCCOf(digraph, bitSCC);
 					int size = allscc.size();
 					if(size==1)return;
 					int node,origin,first;
@@ -147,9 +159,8 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 		};
 	}
 
-
 	//***********************************************************************************
-	// BUILD
+	// PROPAGATE
 	//***********************************************************************************
 
 	private void buildDigraph() {
@@ -187,7 +198,7 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	private void buildSCC() {
-		LinkedList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
+		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
 		int origin,nodeI,nodeIPlus1;
 		for(TIntArrayList in:allSCC){
 			origin = in.get(0);
@@ -207,17 +218,15 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 	// MATCHING      
 	//***********************************************************************************
 
-	private void repairMatching(){
+	private void repairMatching() throws ContradictionException{
 		BitSet iterable = new BitSet(n+1);
 		ActiveNodesIterator<IActiveNodes> niter = this.g.getEnvelopGraph().activeNodesIterator();
 		int node;
 		while(niter.hasNext()){
 			node = niter.next();
-				if(g.getKernelGraph().getNeighborhoodSize(node)==0){
-					iterable.set(node);
-				}else if(matching[node]==-1){
-					iterable.set(node);
-				}
+//			if(g.getKernelGraph().getNeighborhoodSize(node)==0 || matching[node]==-1){
+				iterable.set(node);
+//			}
 		}
 		int[] A = new int[sizeFirstSet];
 		int i=0;
@@ -231,28 +240,37 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 		BipartiteMaxCardMatching.maxCardBipartiteMatching_HK(digraph, A,iterable,free, sizeFirstSet);
 		int size;
 		int mate;
-		INeighbors succs;
-		for (i=iterable.nextSetBit(sizeFirstSet);i>=0;i=iterable.nextSetBit(i+1)){
-			digraph.removeArc(i, n);
-			succs = digraph.getSuccessorsOf(i);
-			size = succs.neighborhoodSize();
-			if(size==1){
-				mate = succs.getFirstElement();
-				matching[i]=mate;
-				matching[mate]=i;
-				digraph.addArc(n, i);
-			}else if(size==0){
-				matching[i]=-1;
-				digraph.addArc(i, n);
-				digraph.removeArc(n, i);
+		INeighbors preds;
+		for (i=iterable.nextSetBit(0);i>=0;i=iterable.nextSetBit(i+1)){
+			if(i<sizeFirstSet){
+				preds = digraph.getPredecessorsOf(i);
+				size = preds.neighborhoodSize();
+				if(size==1){
+					mate = preds.getFirstElement();
+					if(matching[i]!=mate){
+						matching[i]=mate;
+						matching[mate]=i;
+					}
+					if(digraph.addArc(n, mate)){
+						digraph.removeArc(mate,n);
+					}
+					iterable.clear(mate);
+				}else{
+					ContradictionException.throwIt(this, g, "");
+				}
 			}else{
-				throw new UnsupportedOperationException("not a matching");
+				if(matching[i]!=-1){
+					matching[i]=-1;
+				}
+				if(digraph.addArc(i, n)){
+					digraph.removeArc(n, i);
+				}
 			}
 		}
 	}
 
 	//***********************************************************************************
-	// PROPAGATIONS
+	// PROPAGATION ON REQUEST
 	//***********************************************************************************
 
 	@Override
@@ -274,39 +292,29 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		if(nbBks != solver.getMeasures().getBackTrackCount()){
-//			int j;
-//			for(int i=0;i<sizeFirstSet;i++){
-//				j = digraph.getPredecessorsOf(i).getFirstElement();
-//				if(matching[i]!=j){
-//					matching[i]=j;
-//					matching[j]=i;
-//				}
-//			}
 			for(int i=0;i<n;i++){
 				matching[i]=storedMatching[i].get();
 			}
+			nbBks = solver.getMeasures().getBackTrackCount();
 		}
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
 			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 			// maintient du COUPLAGE et des SCC
-			matchingZgueg = false;
+			obsoleteMatching = false;
 			d.forEach(maintain_matching, gv.fromArcRemoval(), gv.toArcRemoval());
-			if(matchingZgueg){
+			if(obsoleteMatching){
 				repairMatching();
 				buildSCC();
 				filter();
+				for(int i=0;i<n;i++){
+					storedMatching[i].set(matching[i]);
+				}
 			}else{
-				long time = System.currentTimeMillis();
 				repairedSCC.clear();
 				d.forEach(maintain_scc, gv.fromArcRemoval(), gv.toArcRemoval());
-				duration += (System.currentTimeMillis()-time);
 				filter();
 			}
-		}
-		nbBks = solver.getMeasures().getBackTrackCount();
-		for(int i=0;i<n;i++){
-			storedMatching[i].set(matching[i]);
 		}
 	}
 
@@ -329,6 +337,17 @@ public class PropAllDiff<V extends Variable> extends GraphPropagator<V> {
 							g.removeArc(i, j, this);
 						}
 					}
+				}
+			}
+		}
+		niter = g.getKernelGraph().activeNodesIterator();
+		while(niter.hasNext()){
+			i=niter.next();
+			if(i>=sizeFirstSet)return;
+			if(g.getKernelGraph().getNeighborhoodSize(i)==1){
+				j = g.getKernelGraph().getNeighborsOf(i).getFirstElement();
+				if(matching[i]!=j || matching[j]!=i){
+					ContradictionException.throwIt(this, g, "");
 				}
 			}
 		}

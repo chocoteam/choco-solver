@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary;
 
 import gnu.trove.TIntArrayList;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
@@ -251,7 +252,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	private void computeSinks() {
 		int n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
 		int[] sccOf = new int[n];
 		int sccNum = 0;
 		int node;
