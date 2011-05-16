@@ -24,46 +24,75 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.search.limits;
-
-import solver.search.loop.AbstractSearchLoop;
+package solver.search.restart;
 
 /**
- * Set a limit over the number of nodes opened allowed during the search.
- * When this limit is reached, the search loop is informed and the resolution is stopped.
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 15 juil. 2010
+ * @author Charles Prud'homme, , Arnaud Malapert
+ * @since 13/05/11
  */
-public final class NodeLimit extends ALimit {
+public abstract class AbstractRestartStrategy implements IRestartStrategy {
 
-    private long nodelimit;
+    private final String name;
 
-    protected NodeLimit(AbstractSearchLoop searchLoop, long nodelimit) {
-        super(searchLoop.getMeasures());
-        this.nodelimit = nodelimit;
+    protected int scaleFactor = 1;
+
+    protected double geometricalFactor = 1;
+
+    protected AbstractRestartStrategy(String name, int scaleFactor, double geometricalFactor) {
+        this.name = name;
+        setScaleFactor(scaleFactor);
+        setGeometricalFactor(geometricalFactor);
+    }
+
+
+    protected static void checkPositiveValue(double value) {
+        if (value <= 0) {
+            throw new IllegalArgumentException("arguments should be strictly positive.");
+        }
     }
 
     @Override
-    public boolean isReached() {
-        final long diff = nodelimit - measures.getNodeCount() ;
-        return diff <= 0;
+    public double getGeometricalFactor() {
+        return geometricalFactor;
+    }
+
+    @Override
+    public final String getName() {
+        return name;
+    }
+
+
+    @Override
+    public final int getScaleFactor() {
+        return scaleFactor;
+    }
+
+    @Override
+    public void setGeometricalFactor(double geometricalFactor) {
+        checkPositiveValue(geometricalFactor);
+        this.geometricalFactor = geometricalFactor;
+
+    }
+
+    @Override
+    public final void setScaleFactor(int scaleFactor) {
+        checkPositiveValue(scaleFactor);
+        this.scaleFactor = scaleFactor;
     }
 
     @Override
     public String toString() {
-        return String.format("Nodes: %d >= %d", measures.getNodeCount(), nodelimit);
+        return getName() + '(' + getScaleFactor() + ',' + getGeometricalFactor() + ')';
     }
 
-    @Override
-    public long getLimitValue() {
-        return nodelimit;
+    public int[] getSequenceExample(int length) {
+        int[] res = new int[length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = getNextCutoff(i);
+        }
+        return res;
     }
 
-    @Override
-    public void overrideLimit(long newLimit) {
-        nodelimit = newLimit;
-    }
 }

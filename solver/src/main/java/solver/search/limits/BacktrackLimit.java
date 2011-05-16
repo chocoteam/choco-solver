@@ -40,7 +40,7 @@ import solver.search.loop.AbstractSearchLoop;
  */
 public final class BacktrackLimit extends ALimit {
 
-    private final long backtracklimit;
+    private long backtracklimit;
 
     protected BacktrackLimit(AbstractSearchLoop searchLoop, long backtracklimit) {
         super(searchLoop.getMeasures());
@@ -56,5 +56,15 @@ public final class BacktrackLimit extends ALimit {
     @Override
     public String toString() {
         return String.format("backtracks: %d >= %d", measures.getBackTrackCount(), backtracklimit);
+    }
+
+    @Override
+    public long getLimitValue() {
+        return backtracklimit;
+    }
+
+    @Override
+    public void overrideLimit(long newLimit) {
+        backtracklimit = newLimit;
     }
 }

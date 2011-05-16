@@ -36,7 +36,7 @@ import solver.search.loop.AbstractSearchLoop;
  * @since 19/04/11
  */
 public class TimeLimit extends ALimit {
-    private final long timeLimit;
+    private long timeLimit;
 
     protected TimeLimit(AbstractSearchLoop searchLoop, long timeLimit) {
         super(searchLoop.getMeasures());
@@ -53,5 +53,15 @@ public class TimeLimit extends ALimit {
     @Override
     public String toString() {
         return String.format("Time: %d >= %d", measures.getTimeCount(), timeLimit);
+    }
+
+    @Override
+    public long getLimitValue() {
+        return timeLimit;
+    }
+
+    @Override
+    public void overrideLimit(long newLimit) {
+        timeLimit = newLimit;
     }
 }

@@ -71,6 +71,8 @@ public abstract class IObjectiveManager implements ICause {
         decision.apply();
     }
 
+    public abstract void postDynamicCut() throws ContradictionException;
+
 
     @Override
     public Constraint getConstraint() {

@@ -56,5 +56,8 @@ public interface ILimit extends Serializable{
 
     void update();
 
+    long getLimitValue();
+
+    void overrideLimit(long newLimit);
 
 }

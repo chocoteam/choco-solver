@@ -251,12 +251,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void beforeOpenNode() {
-        nodeCount++;
         updateTimeCount();
     }
 
     @Override
     public void afterOpenNode() {
+        nodeCount++;
     }
 
     @Override
@@ -285,11 +285,11 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void beforeUpBranch() {
-        backtrackCount++;
     }
 
     @Override
     public void afterUpBranch() {
+        backtrackCount++;
 
     }
 
@@ -300,11 +300,11 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void beforeRestart() {
-        restartCount++;
     }
 
     @Override
     public void afterRestart() {
+        restartCount++;
     }
 
     @Override
@@ -328,7 +328,7 @@ public final class MeasuresRecorder implements IMeasures {
     public String toOneLineString() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("%d Solutions, %sResolution %dms, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
-                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", " : "", timeCount, nodeCount, backtrackCount, failCount, 0,
+                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", " : "", timeCount, nodeCount, backtrackCount, failCount, restartCount,
                 propagationCount));
         return st.toString();
     }
@@ -341,7 +341,7 @@ public final class MeasuresRecorder implements IMeasures {
                 "\n\tResolution : %dms\n\tNodes: %d\n\tBacktracks: %d\n\tFails: %d\n\t" +
                 "Restarts: %d\n\tPropagations: %d\n\tMemory: %dmb\n\tVariables: %d\n\tConstraints: %d\n\tRequests: %d",
                 solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", \n\t" : "", readingTimeCount,
-                initialPropagationTimeCount, timeCount, nodeCount, backtrackCount, failCount, 0, propagationCount,
+                initialPropagationTimeCount, timeCount, nodeCount, backtrackCount, failCount, restartCount, propagationCount,
                 usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();

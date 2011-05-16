@@ -41,7 +41,7 @@ public class ThreadTimeLimit extends Thread implements ILimit {
 
     private final long threshold;
 
-    private final long duration;
+    private long duration;
 
     private volatile boolean isreached;
 
@@ -84,5 +84,17 @@ public class ThreadTimeLimit extends Thread implements ILimit {
 
     @Override
     public void update() {
+    }
+
+    @Override
+    public long getLimitValue() {
+        return duration;
+    }
+
+    @Override
+    public void overrideLimit(long newLimit) {
+        long diff = newLimit - duration;
+        duration = newLimit;
+        timelimit += diff;
     }
 }

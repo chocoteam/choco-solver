@@ -30,15 +30,12 @@ package choco;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User: cprudhom
@@ -57,14 +54,10 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("v_"+i,0,n, s);
         }
-        List<Constraint> lcstrs = new ArrayList<Constraint>(1);
-        lcstrs.add(ConstraintFactory.neq(vars[0],vars[1], s));
+        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
-//        ChocoLogging.toSolution();
+        SearchMonitorFactory.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 6, "nb sol incorrect");
@@ -81,12 +74,7 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.bounded("v_"+i,0,n, s);
         }
-        List<Constraint> lcstrs = new ArrayList<Constraint>(1);
-        lcstrs.add(ConstraintFactory.neq(vars[0],vars[1], s));
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
+        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 //        ChocoLogging.toSolution();
         s.findAllSolutions();
@@ -104,12 +92,7 @@ public class NotEqualX_YCTest {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.bounded("v_"+i,0,n, s);
         }
-        List<Constraint> lcstrs = new ArrayList<Constraint>(1);
-        lcstrs.add(ConstraintFactory.neq(vars[0],vars[1], s));
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
+        s.post(ConstraintFactory.neq(vars[0],vars[1], s));
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
 
         try {

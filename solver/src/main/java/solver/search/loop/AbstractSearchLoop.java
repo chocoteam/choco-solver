@@ -101,6 +101,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* Reference to the environment of the solver */
     IEnvironment env;
 
+    /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
+    int stateAfterSolution = UP_BRANCH;
+
     /* Reference to the propagation pilot */
     public IPropagationEngine propEngine;
 
@@ -109,8 +112,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     boolean stopAtFirstSolution;
 
-    /* index of the initial world of search (can be different from 0) */
-    int baseWorld;
+    /* initila world index, before initial propagation (can be different from 0) */
+    int rootWorldIndex;
+
+    /* world index just after initial propagation (commonly rootWorldIndex + 1) */
+    int searchWorldIndex;
 
     /* store the next state of the search loop.
      * initial value is <code>INITIAL_PROPAGATION</code> */
@@ -154,6 +160,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.propEngine = propEngine;
     }
 
+    @SuppressWarnings({"unchecked"})
     public void set(AbstractStrategy strategy) {
         this.strategy = strategy;
     }
@@ -241,10 +248,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Initializes the measures, just before the beginning of the search
      */
     public void initialize() {
-
-        this.baseWorld = env.getWorldIndex();
+        this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-
         propEngine.init();
         limitsfactory.init();
         this.nextState = INITIAL_PROPAGATION;
@@ -282,7 +287,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     public Boolean close() {
         if (solutionpool.size() > 0 && (!stopAtFirstSolution)) {
-            env.worldPopUntil(baseWorld);
+            restaureRootNode();
             solutionpool.getBest().restore();
         }
 //            return existsSolution() && !stopAtFirstSolution && !isEncounteredLimit();
@@ -295,6 +300,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             return null;
         }
         return false;
+    }
+
+    public void restaureRootNode() {
+        env.worldPopUntil(searchWorldIndex);
     }
 
     /**
@@ -314,11 +323,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     public final void restart() {
         nextState = RESTART;
-    }
-
-
-    public void _forceInit() {
-        nextState = INIT;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -364,6 +368,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void setSolutionpool(ISolutionPool solutionpool) {
         this.solutionpool = solutionpool;
+    }
+
+    public void restartAfterEachSolution(boolean does){
+        stateAfterSolution =  does?RESTART:UP_BRANCH;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

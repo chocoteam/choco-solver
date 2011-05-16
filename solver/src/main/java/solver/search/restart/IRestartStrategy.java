@@ -24,42 +24,28 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.restart;
 
-import choco.kernel.memory.IEnvironment;
-import solver.search.loop.AbstractSearchLoop;
+import java.io.Serializable;
 
 /**
- * a class to control the restarting process in the search loop.
- * @author Arnaud Malapert
- * @author Charles Prud'homme
- * @since 29 juil. 2009
+ * Interface defining services for restart strategy
+ * <br/>
+ *
+ * @author Charles Prud'homme, Arnaud Malapert
+ * @since 13/05/11
  */
-public abstract class AbstractKickRestart {
+public interface IRestartStrategy extends Serializable {
 
+    String getName();
 
-	public final AbstractSearchLoop searchLoop;
+    int getScaleFactor();
 
-    public final IEnvironment env;
+    void setScaleFactor(int scaleFactor);
 
-	public AbstractKickRestart(AbstractSearchLoop searchLoop, IEnvironment env) {
-		super();
-		this.searchLoop = searchLoop;
-        this.env = env;
-    }
+    double getGeometricalFactor();
 
+    void setGeometricalFactor(double geometricalFactor);
 
-	public AbstractSearchLoop getSearchLoop() {
-		return searchLoop;
-	}
-
-    /**
-	 * This function restore a previous state (commonly, the root node).
-	 * @param world index of the world to reach.
-	 */
-	public abstract void restoreRootNode(int world);
-
-
+    int getNextCutoff(int nbRestarts);
 }
-

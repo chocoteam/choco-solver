@@ -39,7 +39,7 @@ import solver.search.loop.AbstractSearchLoop;
  */
 public class SolutionLimit extends ALimit {
 
-    private final long solutionlimit;
+    private long solutionlimit;
 
     protected SolutionLimit(AbstractSearchLoop searchLoop, long solutionlimit) {
         super(searchLoop.getMeasures());
@@ -55,5 +55,15 @@ public class SolutionLimit extends ALimit {
     @Override
     public String toString() {
         return String.format("Solutions: %d >= %d", measures.getSolutionCount(), solutionlimit);
+    }
+
+    @Override
+    public long getLimitValue() {
+        return solutionlimit;
+    }
+
+    @Override
+    public void overrideLimit(long newLimit) {
+        solutionlimit = newLimit;
     }
 }

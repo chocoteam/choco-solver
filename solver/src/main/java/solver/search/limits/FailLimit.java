@@ -39,7 +39,7 @@ import solver.search.loop.AbstractSearchLoop;
  */
 public final class FailLimit extends ALimit {
 
-    private final long faillimit;
+    private long faillimit;
 
     protected FailLimit(AbstractSearchLoop searchLoop, long faillimit) {
         super(searchLoop.getMeasures());
@@ -55,5 +55,15 @@ public final class FailLimit extends ALimit {
     @Override
     public String toString() {
         return String.format("Fails: %d >= %d", measures.getFailCount(), faillimit);
+    }
+
+    @Override
+    public long getLimitValue() {
+        return faillimit;
+    }
+
+    @Override
+    public void overrideLimit(long newLimit) {
+        faillimit = newLimit;
     }
 }

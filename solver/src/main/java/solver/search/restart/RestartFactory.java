@@ -24,26 +24,34 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.restart;
-
-import choco.kernel.memory.IEnvironment;
-import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19 juil. 2010
+ * @since 13/05/11
  */
-public class BasicKickRestart extends AbstractKickRestart{
+public class RestartFactory {
 
-    public BasicKickRestart(AbstractSearchLoop searchLoop, IEnvironment env) {
-        super(searchLoop, env);
+    private RestartFactory() {
     }
 
-    @Override
-    public void restoreRootNode(int world) {
-        env.worldPopUntil(world);
+    /**
+     * Build a luby restart strategy
+     * @param geometricalFactor increasing factor
+     * @return a luby restart strategy
+     */
+    public static IRestartStrategy luby(int scaleFactor, int geometricalFactor) {
+        return new LubyRestartStrategy(scaleFactor, geometricalFactor);
+    }
+
+    /**
+     * Build a geometrical restart strategy
+     * @param geometricalFactor increasing factor
+     * @return a geometrical restart strategy
+     */
+    public static  IRestartStrategy geometrical(int scaleFactor, double geometricalFactor){
+        return new GeometricalRestartStrategy(scaleFactor, geometricalFactor);
     }
 }

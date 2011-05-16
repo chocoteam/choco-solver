@@ -69,6 +69,7 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                 int nbPrevDec = nbPrevisouDecisions.get();
                 if (nbPrevDec > 0) {
                     objectivemanager.apply(decision);
+                    objectivemanager.postDynamicCut();
                     Decision previous = decision.getPrevious();
                     for (int i = 0; i < nbPrevDec; i++) {
                         previous.apply();
@@ -97,6 +98,7 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
         try {
             decision.buildNext();
             objectivemanager.apply(decision);
+            objectivemanager.postDynamicCut();
             Decision prev = decision.getPrevious();
             int nbPrevDec = nbPrevisouDecisions.get();
             for (int i = 0; i < nbPrevDec; i++) {

@@ -31,7 +31,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
 /**
@@ -57,7 +56,7 @@ public class MinObjectiveManager extends IObjectiveManager {
         this.bestKnownUpperBound = objective.getUB() + 1;
     }
 
-    public void setMeasures(IMeasures measures){
+    public void setMeasures(IMeasures measures) {
         this.measures = measures;
     }
 
@@ -79,14 +78,8 @@ public class MinObjectiveManager extends IObjectiveManager {
         this.measures.setObjectiveValue(this.bestKnownUpperBound);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param decision
-     */
     @Override
-    public void apply(Decision decision) throws ContradictionException {
-        super.apply(decision);
+    public void postDynamicCut() throws ContradictionException {
         this.objective.updateUpperBound(bestKnownUpperBound - 1, null);
     }
 

@@ -32,7 +32,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.measure.IMeasures;
-import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
 /**
@@ -79,13 +78,8 @@ public class MaxObjectiveManager extends IObjectiveManager {
         this.measures.setObjectiveValue(this.bestKnownLowerBound);
     }
 
-    /**
-     * {@inheritDoc}
-     * @param decision
-     */
     @Override
-    public void apply(Decision decision) throws ContradictionException {
-        super.apply(decision);
+    public void postDynamicCut() throws ContradictionException {
         this.objective.updateLowerBound(bestKnownLowerBound+1, this);
     }
 

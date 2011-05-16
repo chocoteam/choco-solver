@@ -27,6 +27,7 @@
 
 package solver.search.limits;
 
+import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
 
 import java.io.Serializable;
@@ -171,4 +172,26 @@ public class LimitFactory implements Serializable {
         this.add(new SolutionLimit(this.searchloop, solutionLimit));
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    public static ILimit timeLimit(Solver solver, long timelimit) {
+        return new TimeLimit(solver.getSearchLoop(), timelimit);
+    }
+
+    public static ILimit nodeLimit(Solver solver, long nodeLimit) {
+        return new NodeLimit(solver.getSearchLoop(), nodeLimit);
+    }
+
+    public static ILimit backTrackLimit(Solver solver, long backtracklimit) {
+        return new BacktrackLimit(solver.getSearchLoop(), backtracklimit);
+    }
+
+    public static ILimit failLimit(Solver solver, long faillimit) {
+        return new FailLimit(solver.getSearchLoop(), faillimit);
+    }
+
+    public static ILimit solutionLimit(Solver solver, long solutionLimit) {
+        return new SolutionLimit(solver.getSearchLoop(), solutionLimit);
+    }
 }

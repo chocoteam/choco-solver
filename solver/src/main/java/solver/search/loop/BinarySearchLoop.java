@@ -46,9 +46,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
     Decision decision;
 
-    /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
-    static final int stateAfterSolution = UP_BRANCH;
-
     @SuppressWarnings({"unchecked"})
     BinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
         super(solver,propEngine);
@@ -67,6 +64,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             propEngine.flushAll();
             interrupt();
         }
+        this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         strategy.init();
         moveTo(OPEN_NODE);
@@ -152,6 +150,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         try {
             decision.buildNext();
             objectivemanager.apply(decision);
+            objectivemanager.postDynamicCut();
 
             propEngine.fixPoint();
             moveTo(OPEN_NODE);
@@ -172,7 +171,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void upBranch() {
         env.worldPop();
-        if (env.getWorldIndex() == baseWorld) {
+        if (env.getWorldIndex() == rootWorldIndex) {
             // The entire tree search has been explored, the search cannot be followed
             interrupt();
         } else {
@@ -190,7 +189,14 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      */
     @Override
     public final void restartSearch() {
-        throw new UnsupportedOperationException();
+        restaureRootNode();
+        try {
+            objectivemanager.postDynamicCut();
+            propEngine.fixPoint();
+            nextState = OPEN_NODE;
+        } catch (ContradictionException e) {
+            interrupt();
+        }
     }
 
     /**

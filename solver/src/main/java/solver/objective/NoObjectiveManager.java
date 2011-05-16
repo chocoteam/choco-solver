@@ -27,6 +27,7 @@
 
 package solver.objective;
 
+import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.variables.IntVar;
@@ -64,6 +65,9 @@ public class NoObjectiveManager extends IObjectiveManager {
      */
     @Override
     public void update() {}
+
+    @Override
+    public void postDynamicCut() throws ContradictionException {}
 
     /**
      * {@inheritDoc}

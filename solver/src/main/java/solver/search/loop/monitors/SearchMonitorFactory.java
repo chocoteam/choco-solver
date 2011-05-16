@@ -27,7 +27,9 @@
 package solver.search.loop.monitors;
 
 import solver.Solver;
+import solver.search.limits.ILimit;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.restart.IRestartStrategy;
 
 /**
  * <br/>
@@ -68,4 +70,16 @@ public class SearchMonitorFactory {
         }
     }
 
+    /**
+     * Branch a restart strategy on the search
+     * @param solver the solver
+     * @param restartStrategy the kind of restart strategy
+     * @param restartStrategyLimit restart trigger
+     * @param restartLimit restart limits (limit of number of restarts)
+     */
+    public static void restart(Solver solver, IRestartStrategy restartStrategy, ILimit restartStrategyLimit, int restartLimit) {
+        solver.getSearchLoop().branchSearchMonitor(new RestartManager(
+                restartStrategy, restartStrategyLimit, solver.getSearchLoop(), restartLimit
+        ));
+    }
 }

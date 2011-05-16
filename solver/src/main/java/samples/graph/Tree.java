@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.NTree;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.search.limits.ILimit;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -90,15 +89,7 @@ public class Tree extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		solver.getSearchLoop().getLimitsFactory().add(new ILimit() {
-			private long iniTime;
-			@Override
-			public void update() {}
-			@Override
-			public boolean isReached() {return System.currentTimeMillis()-iniTime>TIMELIMIT;}
-			@Override
-			public void init() {iniTime = System.currentTimeMillis();}
-		});
+		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIMELIMIT);
 		sat = solver.findSolution();
 		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
 				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+NTree.filteringCounter+";"+sat+";\n", file);
