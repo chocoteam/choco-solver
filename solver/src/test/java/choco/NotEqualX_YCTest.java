@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -57,7 +56,6 @@ public class NotEqualX_YCTest {
         s.post(ConstraintFactory.neq(vars[0],vars[1], s));
 
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
-        SearchMonitorFactory.log(s, true, true);
         s.findAllSolutions();
         long sol = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sol, 6, "nb sol incorrect");

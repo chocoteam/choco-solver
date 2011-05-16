@@ -56,9 +56,9 @@ public class RestartTest {
                 LimitFactory.nodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
         Assert.assertEquals(solver.getMeasures().getRestartCount(), 2);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 19);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 12);
     }
 
     @Test(groups = "1s")
@@ -68,9 +68,9 @@ public class RestartTest {
                 LimitFactory.nodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
-        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4);
+        Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
         Assert.assertEquals(solver.getMeasures().getRestartCount(), 2);
-        Assert.assertEquals(solver.getMeasures().getNodeCount(), 18);
+        Assert.assertEquals(solver.getMeasures().getNodeCount(), 11);
     }
 
 

@@ -252,11 +252,12 @@ public final class MeasuresRecorder implements IMeasures {
     @Override
     public void beforeOpenNode() {
         updateTimeCount();
+        nodeCount++;
     }
 
     @Override
     public void afterOpenNode() {
-        nodeCount++;
+
     }
 
     @Override
@@ -285,11 +286,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void beforeUpBranch() {
+        backtrackCount++;
     }
 
     @Override
     public void afterUpBranch() {
-        backtrackCount++;
+
 
     }
 
