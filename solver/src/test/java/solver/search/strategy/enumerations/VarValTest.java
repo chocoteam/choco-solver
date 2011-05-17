@@ -28,16 +28,26 @@
 package solver.search.strategy.enumerations;
 
 import choco.checker.DomainBuilder;
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.Sum;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.sorters.metrics.IMetric;
+import solver.search.strategy.enumerations.sorters.metrics.Map;
 import solver.search.strategy.enumerations.sorters.metrics.Middle;
+import solver.search.strategy.enumerations.sorters.metrics.operators.GetI;
+import solver.search.strategy.enumerations.sorters.metrics.operators.Remap;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.comparators.Distance;
@@ -61,6 +71,7 @@ import solver.variables.VariableFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * <br/>
@@ -229,7 +240,7 @@ public class VarValTest {
         }
 
         feed(new Seq<IntVar>(SorterFactory.minDomain(),
-                new Seq<IntVar>(SorterFactory.mostConstrained(),SorterFactory.inputOrder(vars))), 1);
+                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.inputOrder(vars))), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -250,7 +261,7 @@ public class VarValTest {
             );
         }
         feed(new Seq<IntVar>(SorterFactory.minDomain(),
-                new Seq<IntVar>(SorterFactory.mostConstrained(),SorterFactory.random())), 1);
+                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.random())), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -276,7 +287,7 @@ public class VarValTest {
         }
 
         feed(new Seq<IntVar>(new Incr<IntVar>(Middle.<IntVar>build(vars)),
-                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.random())), 1);
+                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random())), 1);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -415,5 +426,113 @@ public class VarValTest {
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), NB_SOL[SIZE]);
+    }
+
+    @Test(groups = "1s")
+    public void testSDEM() throws ContradictionException {
+        Random random = new Random(0);
+        Solver solver = new Solver();
+        int n = 10;
+        int l = 3, r = 5; // lines, rows
+
+        IntVar[][] vars = new IntVar[l][r];
+        int[][] coeffs = new int[l][r];
+        int[][] lines = new int[l][r];
+        int[][] rows = new int[l][r];
+        int[] idx = new int[r];
+        IMetric<IntVar>[] metrics = new IMetric[l];
+        int k = 1;
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < r; j++, k++) {
+                vars[i][j] = VariableFactory.bounded("V_" + k, -2 * n, 2 * n, solver);
+                coeffs[i][j] = -n / 2 + random.nextInt(n);
+                lines[i][j] = i;
+                rows[i][j] = j;
+                idx[j] = j;
+            }
+            Constraint cstr = Sum.eq(vars[i], coeffs[i], 0, solver);
+            solver.post(cstr);
+            metrics[i] = cstr.getMetric(Sum.METRIC_COEFFS);
+        }
+        IntVar[][] tvars = ArrayUtils.transpose(vars);
+        for (int j = 0; j < r; j++) {
+            solver.post(new AllDifferent(tvars[j], solver, AllDifferent.Type.BC));
+        }
+
+//        solver.set(StrategyFactory.presetI(ArrayUtils.flatten(vars), solver.getEnvironment()));
+        IMetric<IntVar> maprow = new Map<IntVar>(ArrayUtils.flatten(vars), ArrayUtils.flatten(rows));
+        int[] _idx = idx.clone();
+        ArrayUtils.reverse(idx);
+        IMetric<IntVar> remap = new Remap<IntVar>(maprow, _idx, idx);
+
+        IMetric<IntVar> maplin = new Map<IntVar>(ArrayUtils.flatten(vars), ArrayUtils.flatten(lines));
+        IMetric<IntVar> nth = new GetI<IntVar>(maplin, metrics);
+
+        AbstractSorter<IntVar> seq = new Seq<IntVar>(new Incr<IntVar>(remap), new Incr<IntVar>(nth));
+        AbstractStrategy strategy = StrategyVarValAssign.dyn(ArrayUtils.flatten(vars), seq, ValidatorFactory.instanciated, solver.getEnvironment());
+        solver.set(strategy);
+
+        // initial propagation
+        solver.propagate();
+
+        Decision[] ds = new Decision[r * l];
+        k = 0;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_10  ==  -20 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_5  ==  -19 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_15  ==  -18 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_14  ==  -20 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_4  ==  -19 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_9  ==  -18 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_8  ==  -20 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_13  ==  -10 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        k++;
+        ds[k] = strategy.getDecision();
+        Assert.assertEquals(ds[k].toString(), "V_3  ==  -19 (0)");
+        ds[k].buildNext();
+        ds[k].apply();
+        solver.propagate();
+        SearchMonitorFactory.log(solver,  false, false);
+        solver.findSolution();
+
+
     }
 }

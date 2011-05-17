@@ -123,7 +123,7 @@ public final class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public boolean initialzed() {
+    public boolean initialized() {
         return engine != null;
     }
 
@@ -160,6 +160,7 @@ public final class PropagationEngine implements IPropagationEngine {
         size = k;
     }
 
+    @Override
     public void addGroup(Group group) {
         if (groups.length == nbGroup) {
             Group[] tmp = groups;

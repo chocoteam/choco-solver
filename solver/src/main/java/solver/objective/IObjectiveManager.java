@@ -96,4 +96,7 @@ public abstract class IObjectiveManager implements ICause {
     public long getFails() {
         return fails;
     }
+
+    public abstract boolean isOptimization();
+
 }

@@ -35,6 +35,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.sum.PropSumGeq;
 import solver.constraints.propagators.nary.sum.PropSumLeq;
+import solver.exception.SolverException;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Decr;
 import solver.search.strategy.enumerations.sorters.Incr;
@@ -58,7 +59,8 @@ public class Sum extends IntConstraint {
     public static final String
             VAR_DECRCOEFFS = "var_decrcoeffs",
             VAR_DOMOVERCOEFFS = "var_domovercoeffs",
-            VAL_TOTO = "domovercoeffs";
+            VAL_TOTO = "domovercoeffs",
+            METRIC_COEFFS = "met_coeffs";
 
 
     final int[] coeffs;
@@ -242,6 +244,16 @@ public class Sum extends IntConstraint {
             return HeuristicValFactory.enumVal(var, var.getUB(), -1, var.getLB());
         }
         return super.getIterator(name, var);
+    }
+
+
+    @Override
+    public IMetric<IntVar> getMetric(String name) {
+        if (name.equals(METRIC_COEFFS)) {
+            //TODO: must be composed with BELONG
+            return new Coeffs(this);//Belong.build(this);
+        }
+        throw new SolverException("Unknown comparator name :" + name);
     }
 
     static class Coeffs implements IMetric<IntVar> {

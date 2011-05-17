@@ -80,5 +80,5 @@ public interface IPropagationEngine extends Serializable {
      * Returns <code>true</code> if <code>this</code> is initialized, <code>false</code> otherwise.
      * @return <code>true</code> if <code>this</code> is initialized, <code>false</code> otherwise
      */
-    boolean initialzed();
+    boolean initialized();
 }

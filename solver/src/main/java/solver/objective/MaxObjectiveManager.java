@@ -83,6 +83,11 @@ public class MaxObjectiveManager extends IObjectiveManager {
         this.objective.updateLowerBound(bestKnownLowerBound+1, this);
     }
 
+    @Override
+    public boolean isOptimization() {
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */

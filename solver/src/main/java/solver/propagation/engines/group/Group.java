@@ -31,6 +31,7 @@ import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.requests.IRequest;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -41,7 +42,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 14/04/11
  */
-public class Group {
+public class Group implements Serializable {
 
     protected Comparator<IRequest> comparator;
 

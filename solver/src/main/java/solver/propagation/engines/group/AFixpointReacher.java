@@ -30,13 +30,15 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 04/04/11
  */
-public abstract class AFixpointReacher {
+public abstract class AFixpointReacher implements Serializable{
 
     /**
      * Propagate one or more elements (see Policy).

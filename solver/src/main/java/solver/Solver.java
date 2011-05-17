@@ -318,7 +318,7 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (!engine.initialzed()) {
+        if (!engine.initialized()) {
             engine.init();
         }
         engine.initialPropagation();

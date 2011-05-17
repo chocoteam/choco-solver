@@ -83,6 +83,11 @@ public class MinObjectiveManager extends IObjectiveManager {
         this.objective.updateUpperBound(bestKnownUpperBound - 1, null);
     }
 
+    @Override
+    public boolean isOptimization() {
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -252,7 +252,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        if (!propEngine.initialzed()) {
+        if (!propEngine.initialized()) {
             propEngine.init();
         }
         limitsfactory.init();
@@ -290,7 +290,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Close the search
      */
     public Boolean close() {
-        if (solutionpool.size() > 0 && (!stopAtFirstSolution)) {
+        if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {
             restaureRootNode();
             solutionpool.getBest().restore();
         }

@@ -28,6 +28,7 @@ package solver.search.strategy.enumerations.sorters.metrics;
 
 import gnu.trove.THashSet;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.variables.Variable;
 
 import java.util.Arrays;
@@ -41,15 +42,15 @@ import java.util.Arrays;
  */
 public class Belong<V extends Variable> implements IMetric<V> {
 
-    final THashSet<Variable> set;
+    final THashSet<V> set;
 
-    private Belong(Constraint constraint) {
-        this.set = new THashSet<Variable>();
+    private Belong(Constraint<V, ? extends Propagator<V>> constraint) {
+        this.set = new THashSet<V>();
         this.set.addAll(Arrays.asList(constraint.getVariables()));
     }
 
-    public static Belong build(Constraint constraint) {
-        return new Belong(constraint);
+    public static <V extends Variable> Belong build(Constraint<V, ? extends Propagator<V>> constraint) {
+        return new Belong<V>(constraint);
     }
 
 

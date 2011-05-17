@@ -38,6 +38,7 @@ import solver.propagation.IPriority;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
+import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.Variable;
 
@@ -86,6 +87,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     public static final String VAR_DEFAULT = "var_default";
     public static final String VAL_DEFAULT = "val_default";
+    public static final String METRIC_DEFAULT = "met_default";
 
     protected final Solver solver;
 
@@ -261,4 +263,11 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     }
 
     public abstract HeuristicVal getIterator(String name, V var);
+
+    public IMetric<V> getMetric(String name) {
+        if (name.equals(METRIC_DEFAULT)) {
+            return Belong.build(this);
+        }
+        throw new SolverException("Unknown metric name :" + name);
+    }
 }

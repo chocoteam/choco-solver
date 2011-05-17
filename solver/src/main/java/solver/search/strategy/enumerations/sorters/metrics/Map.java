@@ -24,67 +24,35 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.enumerations.sorters.metrics;
 
-package solver.objective;
-
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.variables.IntVar;
+import gnu.trove.TObjectIntHashMap;
+import solver.exception.SolverException;
+import solver.variables.Variable;
 
 /**
- * This implementation of <code>IObjectiveManager</code> interface provides empty methods for satisfaction problems,
- * where no objective variable is defined. A static reference to this object is available using <code>get()</code>.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 27 juil. 2010
+ * @since 17/05/11
  */
-public class NoObjectiveManager extends IObjectiveManager {
+public class Map<V extends Variable> implements IMetric<V> {
 
-    public static final NoObjectiveManager internal = new NoObjectiveManager();
+    final TObjectIntHashMap<V> map;
 
-    public static NoObjectiveManager get(){
-        return internal;
+    public Map(V[] variables, int[] indices) {
+        map = new TObjectIntHashMap<V>(variables.length);
+        for (int i = 0; i < variables.length; i++) {
+            map.put(variables[i], indices[i]);
+        }
     }
 
-    private NoObjectiveManager(){}
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int getBestValue() {
-        return 0;
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Empty method for <code>this</code>.
-     */
-    @Override
-    public void update() {}
-
-    @Override
-    public void postDynamicCut() throws ContradictionException {}
-
-    @Override
-    public boolean isOptimization(){
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "";
-    }
-
-   
-    @Override
-    public Explanation explain(IntVar v, Deduction d) {
-        return null;  //TODO change body of implemented methods use File | Settings | File Templates.
+    public int eval(V var) {
+        if (map.contains(var)) {
+            return map.get(var);
+        } else {
+            throw new SolverException("Map: unknown variable " + var);
+        }
     }
 }
