@@ -201,7 +201,7 @@ public class AllDifferentTest {
     @Test(groups = "30m")
     public void test6() {
         Random rand;
-        for (int seed = 0; seed < 1; seed++) {
+        for (int seed = 0; seed < 10; seed++) {
             rand = new Random(seed);
             for (double d = 0.25; d <= 1.0; d += 0.25) {
                 for (int h = 0; h <= 1; h++) {
