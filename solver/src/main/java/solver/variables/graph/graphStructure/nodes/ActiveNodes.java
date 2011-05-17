@@ -39,8 +39,11 @@ import java.util.BitSet;
  */
 public class ActiveNodes extends BitSet implements IActiveNodes {
 
+	private int n;
+	
     public ActiveNodes(int nbBits) {
         super(nbBits);
+        n = nbBits;
     }
 
     @Override
@@ -75,6 +78,6 @@ public class ActiveNodes extends BitSet implements IActiveNodes {
 
 	@Override
 	public int nbNodes() {
-		return this.cardinality();
+		return n;
 	}
 }

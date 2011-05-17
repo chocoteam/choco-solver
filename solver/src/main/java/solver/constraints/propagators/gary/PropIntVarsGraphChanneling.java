@@ -123,7 +123,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
 				d.forEach(arcEnforced, gv.fromArcEnforcing(), gv.toArcEnforcing());
 			}
-			if((mask & EventType.REMOVEARC.mask) !=0){
+			if((mask & EventType.REMOVEARC.mask)!=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gv.fromArcRemoval(), gv.toArcRemoval());
 			}
@@ -151,6 +151,23 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public ESat isEntailed() {
+		if (isCompletelyInstantiated()) {
+			for (int vIdx=0; vIdx<intVars.length; vIdx++) {
+				IntVar v = intVars[vIdx];
+				if(g.getKernelGraph().getNeighborhoodSize(vIdx)>1){
+					return ESat.FALSE;
+				}
+				if (v.instantiated()) {
+					int vv = v.getValue();
+					if(!g.getKernelGraph().edgeExists(vIdx, valuesHash.get(vv))){
+						return ESat.FALSE;
+					}
+				} else {
+					return ESat.UNDEFINED;
+				}
+			}
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 

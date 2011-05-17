@@ -297,6 +297,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 			}
 			nbBks = solver.getMeasures().getBackTrackCount();
 		}
+		if(mask!=EventType.REMOVEARC.mask)return;
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
 			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
@@ -364,6 +365,25 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public ESat isEntailed() {
-		return ESat.UNDEFINED;
+		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
+		int node;
+		while(niter.hasNext()){
+			node = niter.next();
+			if(node<sizeFirstSet){
+				if(g.getEnvelopGraph().getNeighborhoodSize(node)==0){
+					return ESat.FALSE;
+				}
+			}
+			if(g.getKernelGraph().getNeighborhoodSize(node)>1){
+				return ESat.FALSE;
+			}
+			if(g.getKernelGraph().getNeighborhoodSize(node)!=g.getEnvelopGraph().getNeighborhoodSize(node)){
+				return ESat.UNDEFINED;
+			}
+		}
+		if(g.getEnvelopOrder()!=g.getKernelOrder()){
+			return ESat.UNDEFINED;
+		}
+		return ESat.TRUE;
 	}
 }

@@ -39,8 +39,11 @@ import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
  */
 public class StoredActiveNodes extends S64BitSet implements IActiveNodes {
 
+	private int n;
+	
     public StoredActiveNodes(IEnvironment environment, int nbits) {
         super(environment, nbits);
+        n = nbits;
     }
 
     @Override
@@ -75,7 +78,7 @@ public class StoredActiveNodes extends S64BitSet implements IActiveNodes {
 
 	@Override
 	public int nbNodes() {
-		return this.cardinality();
+		return n;
 	}
 
 }

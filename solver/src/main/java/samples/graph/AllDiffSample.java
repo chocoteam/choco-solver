@@ -68,7 +68,7 @@ public class AllDiffSample extends AbstractProblem{
 	public void buildModel() {
 		solver = new Solver();
 		vars = VariableFactory.enumeratedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
-		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.AC)};
 		solver.post(cstrs);
 	}
 
@@ -180,5 +180,6 @@ public class AllDiffSample extends AbstractProblem{
 	public static void main(String[] args) {
 //		bench();
 		System.out.println("mean time : "+testVarVal(8,8));
+//		System.out.println(getNbSols(6, 12));
 	}
 }
