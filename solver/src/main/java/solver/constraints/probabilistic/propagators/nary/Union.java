@@ -27,7 +27,6 @@
 
 package solver.constraints.probabilistic.propagators.nary;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.TIntIntHashMap;
@@ -67,28 +66,27 @@ public class Union {
         Set<Value> vals = new HashSet<Value>();
         TIntObjectHashMap<Value> int2Value = new TIntObjectHashMap<Value>();
         for (IntVar var : variables) {
-            DisposableIntIterator it = var.getIterator();
-            while (it.hasNext()) {
-                int value = it.next();
+            int ub = var.getUB();
+            for (int value = var.getLB(); value <= ub; value = var.nextValue(value)) {
                 Value v = int2Value.get(value);
                 if (v == null) {
-                    v = new Value(value,environment);
+                    v = new Value(value, environment);
                     vals.add(v);
-                    int2Value.put(value,v);
+                    int2Value.put(value, v);
                 }
                 v.incrOcc();
                 nbOcc.add(1);
             }
         }
         values = vals.toArray(new Value[vals.size()]);
-        idx = environment.makeInt(values.length-1);
+        idx = environment.makeInt(values.length - 1);
         val2idx = new TIntIntHashMap();
-        for(int i = 0; i < values.length; i++){
+        for (int i = 0; i < values.length; i++) {
             val2idx.put(values[i].getValue(), i);
         }
     }
 
-    public void remove(int value){
+    public void remove(int value) {
         int lastPresent = idx.get();
         int indice = val2idx.get(value);
         Value v = values[indice];
@@ -105,7 +103,7 @@ public class Union {
     }
 
 
-    public int getUnionSize(){
+    public int getUnionSize() {
         return idx.get();
     }
 
@@ -113,8 +111,8 @@ public class Union {
         return nbOcc.get();
     }
 
-    public int[] getValues(){
-        int[] tmp = new int[idx.get()+1];
+    public int[] getValues() {
+        int[] tmp = new int[idx.get() + 1];
         for (int i = 0; i < tmp.length; i++) {
             tmp[i] = values[i].getValue();
         }
@@ -126,7 +124,7 @@ public class Union {
         for (int i = 0; i <= idx.get(); i++) {
             res += values[i].getValue() + ", ";
         }
-        res = res.substring(0,res.length()-2);
+        res = res.substring(0, res.length() - 2);
         res += "]";
         return res;
     }

@@ -28,7 +28,6 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
@@ -76,7 +75,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-       if (vars[vIdx].hasEnumeratedDomain()) {
+        if (vars[vIdx].hasEnumeratedDomain()) {
             return EventType.ALL_MASK();
         } else {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
@@ -138,14 +137,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
     }
 
     private void adjust() throws ContradictionException {
-        DisposableIntIterator it;
         int left, right;
         // X[i] = j' && j' = j - Ox[i] => 0 <= j < nbY
         for (int i = 0; i < nbX; i++) {
-            it = X[i].getIterator();
             left = right = Integer.MIN_VALUE;
-            while (it.hasNext()) {
-                int val = it.next();
+            int ub = X[i].getUB();
+            for (int val = X[i].getLB(); val <= ub; val = X[i].nextValue(val)) {
                 int j = val + Ox;
                 if (j < 0 || j >= nbY) {
                     if (val == right + 1) {
@@ -160,10 +157,9 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         }
         // Y[j] = i' && i' = i - Oy[j] => 0 <= i < nbX
         for (int j = 0; j < nbY; j++) {
-            it = Y[j].getIterator();
             left = right = Integer.MIN_VALUE;
-            while (it.hasNext()) {
-                int val = it.next();
+            int ub = Y[j].getUB();
+            for (int val = Y[j].getLB(); val <= ub; val = Y[j].nextValue(val)) {
                 int i = val + Oy;
                 if (i < 0 || i >= nbX) {
                     if (val == right + 1) {

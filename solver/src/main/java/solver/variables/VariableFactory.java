@@ -28,6 +28,7 @@
 package solver.variables;
 
 import solver.Solver;
+import solver.exception.SolverException;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.domain.BitSetIntDomain;
 import solver.variables.domain.BooleanDomain;
@@ -54,6 +55,15 @@ public class VariableFactory {
     protected VariableFactory() {
     }
 
+    private static void checkIntVar(String name, int min, int max) {
+        if (min - Integer.MIN_VALUE == 0 || max - Integer.MAX_VALUE == 0) {
+            throw new SolverException(name+": consider reducing the bounds to avoid unexpected results");
+        }
+        if (min - max > 0) {
+            throw new SolverException(name+": wrong domain definition, lower bound > upper bound");
+        }
+    }
+
     /**
      * Build a boolean variable, ie domain is [0,1]
      *
@@ -78,6 +88,7 @@ public class VariableFactory {
     }
 
     public static IntVar bounded(String name, int min, int max, Solver solver) {
+        checkIntVar(name, min, max);
         if (min == max) {
             return fixed(name, min);
         } else {
@@ -98,6 +109,7 @@ public class VariableFactory {
     }
 
     public static IntVar enumerated(String name, int min, int max, Solver solver) {
+        checkIntVar(name, min, max);
         if (min == max) {
             return fixed(name, min);
         } else {
@@ -118,6 +130,7 @@ public class VariableFactory {
     }
 
     public static IntVar enumerated(String name, int[] values, Solver solver) {
+        checkIntVar(name, values[0], values[values.length - 1]);
         if (values.length == 1) {
             return fixed(name, values[0]);
         } else {
@@ -186,15 +199,15 @@ public class VariableFactory {
         return new DirectedGraphVar(solver.getEnvironment(), n, type, options);
     }
 
-	public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-		return new DirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
-	}
+    public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
+        return new DirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
+    }
 
-	public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType type, Solver solver) {
-		return digraph(string, data, type, type, solver);
-	}
+    public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType type, Solver solver) {
+        return digraph(string, data, type, type, solver);
+    }
 
-	public static UndirectedGraphVar undirectedGraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-		return new UndirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
-	}
+    public static UndirectedGraphVar undirectedGraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
+        return new UndirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
+    }
 }

@@ -27,9 +27,6 @@
 
 package solver.variables.domain;
 
-import choco.kernel.common.util.iterators.BooleanDomainIterator;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.iterators.OneValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.exception.SolverException;
@@ -148,11 +145,6 @@ public class BooleanDomain implements IIntDomain {
         return Integer.MIN_VALUE;
     }
 
-    @Override
-    public DisposableIntIterator getIterator() {
-        if (getSize() == 1) return OneValueIterator.getIterator(getLB());
-        return BooleanDomainIterator.getIterator();
-    }
 
     @Override
     public boolean restrict(int aValue) {

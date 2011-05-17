@@ -32,9 +32,6 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.domain.BitSetIntDomain;
-import solver.variables.domain.BooleanDomain;
-import solver.variables.domain.IntervalIntDomain;
 
 /*
 * User : CPRUDHOM
@@ -57,7 +54,6 @@ public class PVariableTest {
         Object o = fzn.map.get("bb");
         Assert.assertTrue(BoolVar.class.isInstance(o));
         BoolVar oi = (BoolVar)o;
-        Assert.assertEquals(oi.getDomain().getClass(), BooleanDomain.class);
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 1);
     }
@@ -68,7 +64,7 @@ public class PVariableTest {
         Object o = fzn.map.get("A");
         Assert.assertTrue(IntVar.class.isInstance(o));
         IntVar oi = (IntVar)o;
-        Assert.assertEquals(oi.getDomain().getClass(), IntervalIntDomain.class);
+        Assert.assertFalse(oi.hasEnumeratedDomain());
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 9);
         Assert.assertEquals(oi.getDomainSize(), 10);
@@ -80,7 +76,7 @@ public class PVariableTest {
         Object o = fzn.map.get("B");
         Assert.assertTrue(IntVar.class.isInstance(o));
         IntVar oi = (IntVar)o;
-        Assert.assertEquals(oi.getDomain().getClass(), BitSetIntDomain.class);
+        Assert.assertTrue(oi.hasEnumeratedDomain());
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 18);
         Assert.assertEquals(oi.getDomainSize(), 3);

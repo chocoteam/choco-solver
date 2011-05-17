@@ -286,48 +286,6 @@ public final class IntervalIntDomain implements IIntDomain {
      * {@inheritDoc}
      */
     @Override
-    public DisposableIntIterator getIterator() {
-        IntDomainIterator iter = (IntDomainIterator) _cachedIterator;
-        if (iter != null && iter.reusable) {
-            iter.init();
-            return iter;
-        }
-        _cachedIterator = new IntDomainIterator(this);
-        return _cachedIterator;
-    }
-
-    protected static class IntDomainIterator extends DisposableIntIterator {
-        protected IntervalIntDomain domain;
-        protected int nextValue;
-
-        private IntDomainIterator(IntervalIntDomain dom) {
-            this.domain = dom;
-            init();
-        }
-
-        @Override
-        public void init() {
-            super.init();
-            if (domain.getSize() >= 1) {
-                nextValue = domain.getLB() - 1;
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        }
-
-        public boolean hasNext() {
-            return nextValue < domain.getUB();
-        }
-
-        public int next() {
-            return ++nextValue;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String toString() {
         if (size.get() == 1) {
             return Integer.toString(getLB());

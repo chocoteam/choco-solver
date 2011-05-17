@@ -27,7 +27,6 @@
 
 package solver.constraints.probabilistic.propagators.nary;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
@@ -60,7 +59,7 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     @Override
     protected void linkToVariables() {
         //noinspection unchecked
-        AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length/2);
+        AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length / 2);
         requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
             vars[i].addPropagator(this, i);
@@ -72,8 +71,6 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
         }
     }
 
-
-    
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -124,10 +121,9 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     private int[] computeUnion() {
         Set<Integer> vals = new HashSet<Integer>();
         for (IntVar var : vars) {
-            DisposableIntIterator it = var.getIterator();
-            while (it.hasNext()) {
-                int value = it.next();
-                vals.add(value);
+            int ub = var.getUB();
+            for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+                vals.add(i);
             }
         }
         int[] res = new int[vals.size()];

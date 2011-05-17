@@ -28,7 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -92,29 +91,18 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
         updateInfV1();
         updateSupV1();
         // ensure that, in case of enumerated domains, holes are also propagated
-        int val;
         if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
-            DisposableIntIterator iterator = x.getIterator();
-            try {
-                while (iterator.hasNext()) {
-                    val = iterator.next();
-                    if (!y.contains(cste - val)) {
-                        x.removeValue(val, this);
-                    }
+            int ub = x.getUB();
+            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                if (!y.contains(cste - val)) {
+                    x.removeValue(val, this);
                 }
-            } finally {
-                iterator.dispose();
             }
-            iterator = y.getIterator();
-            try {
-                while (iterator.hasNext()) {
-                    val = iterator.next();
-                    if (!x.contains(cste - val)) {
-                        y.removeValue(val, this);
-                    }
+            ub = y.getUB();
+            for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                if (!x.contains(cste - val)) {
+                    y.removeValue(val, this);
                 }
-            } finally {
-                iterator.dispose();
             }
         }
     }

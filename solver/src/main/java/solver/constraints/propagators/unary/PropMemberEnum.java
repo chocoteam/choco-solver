@@ -28,7 +28,6 @@
 package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
@@ -59,28 +58,23 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void propagate() throws ContradictionException {
-        final DisposableIntIterator iterator = vars[0].getDomain().getIterator();
-        try {
-            int left = Integer.MIN_VALUE;
-            int right = left;
-            boolean rall = true;
-            while (iterator.hasNext()) {
-                final int val = iterator.next();
-                if (!values.contains(val)) {
-                    if (val == right + 1) {
-                        right = val;
-                    } else {
-                        rall &= vars[0].removeInterval(left, right, this);
-                        left = right = val;
-                    }
+        int left = Integer.MIN_VALUE;
+        int right = left;
+        boolean rall = true;
+        int ub = this.vars[0].getUB();
+        for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
+            if (!values.contains(val)) {
+                if (val == right + 1) {
+                    right = val;
+                } else {
+                    rall &= vars[0].removeInterval(left, right, this);
+                    left = right = val;
                 }
             }
-            rall &= vars[0].removeInterval(left, right, this);
-            if (rall) {
-                this.setPassive();
-            }
-        } finally {
-            iterator.dispose();
+        }
+        rall &= vars[0].removeInterval(left, right, this);
+        if (rall) {
+            this.setPassive();
         }
     }
 
@@ -99,15 +93,13 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        final DisposableIntIterator it = vars[0].getIterator();
         int nb = 0;
-        while (it.hasNext()) {
-            final int val = it.next();
+        int ub = this.vars[0].getUB();
+        for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
             if (values.contains(val)) {
                 nb++;
             }
         }
-        it.dispose();
         if (nb == 0) return ESat.FALSE;
         else if (nb == vars[0].getDomainSize()) return ESat.TRUE;
         return ESat.UNDEFINED;

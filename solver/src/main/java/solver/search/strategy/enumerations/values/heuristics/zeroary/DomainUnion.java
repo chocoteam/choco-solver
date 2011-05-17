@@ -27,7 +27,6 @@
 
 package solver.search.strategy.enumerations.values.heuristics.zeroary;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import gnu.trove.THashMap;
 import gnu.trove.TIntHashSet;
 import solver.search.strategy.enumerations.values.heuristics.Action;
@@ -65,11 +64,11 @@ public class DomainUnion extends HeuristicVal {
 
     private void init() {
         for (int i = 0; i < variables.length; i++) {
-            DisposableIntIterator it = variables[i].getIterator();
-            while(it.hasNext()){
-                _hs.add(it.next());
+            IntVar var = this.variables[i];
+            int ub = var.getUB();
+            for (int val = var.getLB(); val <= ub; val = var.nextValue(val)) {
+                _hs.add(val);
             }
-            it.dispose();
         }
         values = _hs.toArray();
         //TODO: DO we need to sort the values?
@@ -101,9 +100,9 @@ public class DomainUnion extends HeuristicVal {
 
     @Override
     public HeuristicVal duplicate(THashMap<HeuristicVal, HeuristicVal> map) {
-        if(map.containsKey(this)){
+        if (map.containsKey(this)) {
             return map.get(this);
-        }else{
+        } else {
             DomainUnion duplicata = new DomainUnion(this.action);
             //TODO: share variables and values?
             duplicata.variables = this.variables.clone();

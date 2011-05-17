@@ -28,7 +28,6 @@
 package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -79,15 +78,13 @@ public class PropNotMemberBound extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        final DisposableIntIterator it = vars[0].getIterator();
+        int UB = this.vars[0].getUB();
         int nb = 0;
-        while (it.hasNext()) {
-            final int val = it.next();
+        for (int val = this.vars[0].getLB(); val <= UB; val = this.vars[0].nextValue(val)) {
             if (val < lb || val > ub) {
                 nb++;
             }
         }
-        it.dispose();
         if (nb == 0) return ESat.FALSE;
         else if (nb == vars[0].getDomainSize()) return ESat.TRUE;
         return ESat.UNDEFINED;

@@ -27,8 +27,6 @@
 
 package solver.variables.domain;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.iterators.OneValueIterator;
 import solver.exception.SolverException;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
@@ -103,11 +101,6 @@ public class CsteDomain implements IIntDomain {
         if (aValue > getUB()) return getUB();
         if (aValue > getLB()) return getLB();
         return Integer.MIN_VALUE;
-    }
-
-    @Override
-    public DisposableIntIterator getIterator() {
-        return OneValueIterator.getIterator(value);
     }
 
     @Override

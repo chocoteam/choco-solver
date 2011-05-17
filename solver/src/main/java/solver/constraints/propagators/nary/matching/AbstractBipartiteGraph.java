@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.nary.matching;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
@@ -37,10 +36,10 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.requests.IRequest;
 
 import java.text.MessageFormat;
 
@@ -59,7 +58,7 @@ import java.text.MessageFormat;
  * class StrongConnectionDecomposition have been included in this one
  */
 
-public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
+public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
 
     // slots storing the graph as a matching
     protected int nbLeftVertices, nbRightVertices, nbVertices;
@@ -168,12 +167,11 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
     public int[] mayMatch(int i) {
         int[] ret = new int[this.getVar(i).getDomainSize()];
         int offset = 0;
-        DisposableIntIterator iterator = this.getVar(i).getIterator();
-        for (; iterator.hasNext();) {
-            int j = iterator.next();
-            ret[offset++] = j - this.minValue;
+        IntVar var = this.getVar(i);
+        int ub = var.getUB();
+        for (int val = var.getLB(); val <= ub; val = var.nextValue(val)) {
+            ret[offset++] = val - this.minValue;
         }
-        iterator.dispose();
         return ret;
 
     }
@@ -304,8 +302,8 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
      * deleteMatch          -> removes it from the graph data strutures
      * deleteEdgeAndPublish -> same + publishes the information outside the constraint
      *
-     * @param i          a left vertex
-     * @param j          a right vertex
+     * @param i a left vertex
+     * @param j a right vertex
      * @throws ContradictionException fail
      */
     public abstract boolean deleteEdgeAndPublish(int i, int j) throws ContradictionException;
@@ -412,7 +410,7 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
             }
             if (this.matchingSize.get() < n1) {
                 // assert exist i, 0 <= i < n1, this.match(i) == 0
-                ContradictionException.throwIt(this, null, "matching size < "+ n1);                
+                ContradictionException.throwIt(this, null, "matching size < " + n1);
             }
         }
     }
@@ -635,15 +633,15 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
     /**
      * when a value is removed from a domain var, removed the corresponding edge in current matching
      *
-     * @param idx        the variable index
-     * @param val        the removed value
+     * @param idx the variable index
+     * @param val the removed value
      */
     protected abstract void awakeOnRem(int idx, int val) throws ContradictionException;
 
     /**
      * update current matching when a variable has been instantiated
      *
-     * @param idx        the variable index
+     * @param idx the variable index
      * @throws ContradictionException
      */
     protected abstract void awakeOnInst(int idx) throws ContradictionException;
@@ -755,12 +753,12 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar>{
 
         /**
          * @param i integer
-		 * @return true if i is in the queue
-		 */
-		public boolean onceInQueue(int i) {
-			return this.onceInQueue[i];
-		}
-	}
+         * @return true if i is in the queue
+         */
+        public boolean onceInQueue(int i) {
+            return this.onceInQueue[i];
+        }
+    }
 
     private static class RemProc implements IntProcedure1<Integer> {
 

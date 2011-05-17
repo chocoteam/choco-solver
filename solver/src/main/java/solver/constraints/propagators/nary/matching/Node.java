@@ -27,7 +27,6 @@
 
 package solver.constraints.propagators.nary.matching;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
@@ -60,9 +59,9 @@ public class Node implements Serializable {
         offset = var.getLB();
         size = var.getUB() - offset + 1;
         edges = env.makeBitSet(size);
-        DisposableIntIterator it = var.getIterator();
-        while (it.hasNext()) {
-            edges.set(it.next() - offset, true);
+        int ub = var.getUB();
+        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+            edges.set(i - offset, true);
         }
         refMatch = env.makeInt(-1);
     }
@@ -107,22 +106,24 @@ public class Node implements Serializable {
 
     /**
      * Return the value after val (exclusive) or Integer.MIN_VALUE
+     *
      * @param val initial value
      * @return a value or Integer.MIN_VALUE if doesn't exist
      */
-    public int next(int val){
-        int w = edges.nextSetBit(val - offset +1);
-        return (w == -1? Integer.MIN_VALUE:w + offset);
+    public int next(int val) {
+        int w = edges.nextSetBit(val - offset + 1);
+        return (w == -1 ? Integer.MIN_VALUE : w + offset);
     }
 
     /**
      * Return the value after val (exclusive) or Integer.MIN_VALUE
+     *
      * @param val initial value
      * @return a value or Integer.MIN_VALUE if doesn't exist
      */
-    public int previous(int val){
+    public int previous(int val) {
         int w = edges.prevSetBit(val - offset - 1);
-        return (w == -1? Integer.MIN_VALUE:w + offset);
+        return (w == -1 ? Integer.MIN_VALUE : w + offset);
     }
 
     public int[] edges(int minvalue) {
@@ -136,9 +137,9 @@ public class Node implements Serializable {
 
     public void check() {
         assert (var.getDomainSize() == edges.cardinality());
-        DisposableIntIterator it = var.getIterator();
-        while (it.hasNext()) {
-            assert (edges.get(it.next() - offset));
+        int ub = var.getUB();
+        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+            assert (edges.get(i - offset));
         }
     }
 

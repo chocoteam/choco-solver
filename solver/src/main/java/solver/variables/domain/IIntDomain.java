@@ -27,7 +27,6 @@
 
 package solver.variables.domain;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.variables.domain.delta.IntDelta;
 
 import java.io.Serializable;
@@ -112,12 +111,6 @@ public interface IIntDomain extends Serializable{
      * @return the value before aValue in the domain
      */
     int previousValue(int aValue);
-
-    /**
-     * Gets an iterator over the values of <code>this</code>, in increasing order
-     * @return a disposable iterator (call to #dispose() is mandatory)
-     */
-    DisposableIntIterator getIterator();
 
     /**
      * Restricts <code>this</code> to a singleton: <code>aValue</code>

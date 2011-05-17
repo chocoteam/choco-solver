@@ -27,8 +27,6 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.iterators.OneValueIterator;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -136,11 +134,6 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public IIntDomain getDomain() {
-        return domain;
-    }
-
-    @Override
     public int getDomainSize() {
         return 1;
     }
@@ -171,11 +164,6 @@ public class IntCste implements IntVar {
     @Override
     public IntDelta getDelta() {
         return NoDelta.singleton;
-    }
-
-    @Override
-    public DisposableIntIterator getIterator() {
-        return OneValueIterator.getIterator(constante);
     }
 
     @Override

@@ -27,10 +27,9 @@
 
 package solver.constraints.nary;
 
+import choco.kernel.ESat;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
-import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDifferent;
@@ -55,153 +54,150 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  */
 public class AllDifferent extends IntConstraint<IntVar> {
 
-	public static enum Type {
-		AC, PROBABILISTIC, BC, CLIQUE, GRAPH
-	}
+    public static enum Type {
+        AC, PROBABILISTIC, BC, CLIQUE, GRAPH
+    }
 
 
-	public AllDifferent(IntVar[] vars, Solver solver) {
-		this(vars, solver, _DEFAULT_THRESHOLD, Type.BC);
-	}
+    public AllDifferent(IntVar[] vars, Solver solver) {
+        this(vars, solver, _DEFAULT_THRESHOLD, Type.BC);
+    }
 
-	public AllDifferent(IntVar[] vars, Solver solver,
-			PropagatorPriority threshold) {
-		this(vars, solver, threshold, Type.BC);
-	}
+    public AllDifferent(IntVar[] vars, Solver solver,
+                        PropagatorPriority threshold) {
+        this(vars, solver, threshold, Type.BC);
+    }
 
-	public AllDifferent(IntVar[] vars, Solver solver, Type type) {
-		this(vars, solver, _DEFAULT_THRESHOLD, type);
-	}
+    public AllDifferent(IntVar[] vars, Solver solver, Type type) {
+        this(vars, solver, _DEFAULT_THRESHOLD, type);
+    }
 
-	public AllDifferent(IntVar[] vars, Solver solver,
-			PropagatorPriority threshold, Type type) {
-		super(vars, solver, threshold);
-		switch (type) {
-		case CLIQUE:
-			int s = vars.length;
-			int k = 0;
-			Propagator[] props = new Propagator[(s*s-s)/2];
-			for(int i = 0; i < s-1; i++){
-				for(int j = i+1; j < s; j++){
-					props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver.getEnvironment(), this);
-				}
-			}
-			setPropagators(props);
-			break;
-		case PROBABILISTIC:
-			setPropagators(new PropProbaAllDifferent(vars, solver.getEnvironment(), this));
-			break;
-		case GRAPH:
-			buildGraphAllDifferent(vars, solver);
-			break;
-		case AC:
-			setPropagators(new PropAllDiffAC(vars, solver.getEnvironment(), this));
-			break;
-		case BC:
-		default:
-			setPropagators(new PropAllDiffBC(vars, solver.getEnvironment(), this));
-			break;
-		}
-	}
+    public AllDifferent(IntVar[] vars, Solver solver,
+                        PropagatorPriority threshold, Type type) {
+        super(vars, solver, threshold);
+        switch (type) {
+            case CLIQUE:
+                int s = vars.length;
+                int k = 0;
+                Propagator[] props = new Propagator[(s * s - s) / 2];
+                for (int i = 0; i < s - 1; i++) {
+                    for (int j = i + 1; j < s; j++) {
+                        props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver.getEnvironment(), this);
+                    }
+                }
+                setPropagators(props);
+                break;
+            case PROBABILISTIC:
+                setPropagators(new PropProbaAllDifferent(vars, solver.getEnvironment(), this));
+                break;
+            case GRAPH:
+                buildGraphAllDifferent(vars, solver);
+                break;
+            case AC:
+                setPropagators(new PropAllDiffAC(vars, solver.getEnvironment(), this));
+                break;
+            case BC:
+            default:
+                setPropagators(new PropAllDiffBC(vars, solver.getEnvironment(), this));
+                break;
+        }
+    }
 
-	/**AllDifferent constraint using an explicit graph variables-values 
-	 * Uses Regin algorithm GAC in O(m.rac(n)) worst case time
-	 * 
-	 * BEWARE pretty heavy : to avo•d when the amount of bks is high and when 
-	 * there are much more values than variables
-	 * 
-	 * @param vars
-	 * @param solver
-	 */
-	 private void buildGraphAllDifferent(IntVar[] vars, Solver solver){
-		 TIntArrayList valuesList = new TIntArrayList();
-		 DisposableIntIterator viter;
-		 int val;
-		 for(IntVar v:vars){
-			 viter = v.getDomain().getIterator();
-			 while(viter.hasNext()){
-				 val = viter.next();
-				 if(!valuesList.contains(val)){
-					 valuesList.add(val);
-				 }
-			 }
-		 }
-		 int n = vars.length+valuesList.size();
-		 int[] values = new int[n];
-		 TIntIntHashMap valuesHash = new TIntIntHashMap();
-		 for(int i=0; i<vars.length; i++){
-			 values[i] = i;
-			 valuesHash.put(i, i);
-		 }
-		 for(int i=vars.length; i<n; i++){
-			 values[i] = valuesList.get(i-vars.length);
-			 valuesHash.put(values[i], i);
-		 }
-		 UndirectedGraphVar graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.SPARSE, GraphType.SPARSE);
-		 for(int v=0; v<vars.length; v++){
-			 viter = vars[v].getDomain().getIterator();
-			 while(viter.hasNext()){
-				 val = viter.next();
-				 graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
-			 }
-		 }
-		 setPropagators(
-				 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, true),  
-				 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),
-				 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true, values, valuesHash)
-		 );
-	 }
+    /**
+     * AllDifferent constraint using an explicit graph variables-values
+     * Uses Regin algorithm GAC in O(m.rac(n)) worst case time
+     * <p/>
+     * BEWARE pretty heavy : to avo•d when the amount of bks is high and when
+     * there are much more values than variables
+     *
+     * @param vars
+     * @param solver
+     */
+    private void buildGraphAllDifferent(IntVar[] vars, Solver solver) {
+        TIntArrayList valuesList = new TIntArrayList();
+        for (int v = 0; v < vars.length; v++) {
+            int ub = vars[v].getUB();
+            for (int val = vars[v].getLB(); val <= ub; val = vars[v].nextValue(val)) {
+                if (!valuesList.contains(val)) {
+                    valuesList.add(val);
+                }
+            }
+        }
+        int n = vars.length + valuesList.size();
+        int[] values = new int[n];
+        TIntIntHashMap valuesHash = new TIntIntHashMap();
+        for (int i = 0; i < vars.length; i++) {
+            values[i] = i;
+            valuesHash.put(i, i);
+        }
+        for (int i = vars.length; i < n; i++) {
+            values[i] = valuesList.get(i - vars.length);
+            valuesHash.put(values[i], i);
+        }
+        UndirectedGraphVar graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.SPARSE, GraphType.SPARSE);
+        for (int v = 0; v < vars.length; v++) {
+            int ub = vars[v].getUB();
+            for (int val = vars[v].getLB(); val <= ub; val = vars[v].nextValue(val)) {
+                graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
+            }
+        }
+        setPropagators(
+                new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, true),
+                new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true, 1),
+                new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true, values, valuesHash)
+        );
+    }
 
-	 /**
-	  * Checks if the constraint is satisfied when all variables are instantiated.
-	  *
-	  * @param tuple an complete instantiation
-	  * @return true iff a solution
-	  */
-	 @Override
-	 public ESat isSatisfied(int[] tuple) {
-		 for (int i = 0; i < vars.length; i++) {
-			 for (int j = 0; j < i; j++) {
-				 if (tuple[i] == tuple[j]) {
-					 return ESat.FALSE;
-				 }
-			 }
-		 }
-		 return ESat.TRUE;
-	 }
+    /**
+     * Checks if the constraint is satisfied when all variables are instantiated.
+     *
+     * @param tuple an complete instantiation
+     * @return true iff a solution
+     */
+    @Override
+    public ESat isSatisfied(int[] tuple) {
+        for (int i = 0; i < vars.length; i++) {
+            for (int j = 0; j < i; j++) {
+                if (tuple[i] == tuple[j]) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        return ESat.TRUE;
+    }
 
-	 @Override
-	 public ESat isSatisfied() {
-		 for (IntVar v : vars) {
-			 if (v.instantiated()) {
-				 int vv = v.getValue();
-				 for (IntVar w : vars) {
-					 if (w != v) {
-						 if (w.instantiated()) {
-							 if (vv == w.getValue()) {
-								 return ESat.FALSE;
-							 }
-						 } else {
-							 return ESat.UNDEFINED;
-						 }
-					 }
-				 }
-			 } else {
-				 return ESat.UNDEFINED;
-			 }
-		 }
-		 return ESat.TRUE;
-	 }
+    @Override
+    public ESat isSatisfied() {
+        for (IntVar v : vars) {
+            if (v.instantiated()) {
+                int vv = v.getValue();
+                for (IntVar w : vars) {
+                    if (w != v) {
+                        if (w.instantiated()) {
+                            if (vv == w.getValue()) {
+                                return ESat.FALSE;
+                            }
+                        } else {
+                            return ESat.UNDEFINED;
+                        }
+                    }
+                }
+            } else {
+                return ESat.UNDEFINED;
+            }
+        }
+        return ESat.TRUE;
+    }
 
-	 public String toString() {
-		 StringBuilder sb = new StringBuilder(32);
-		 sb.append("AllDifferent({");
-		 for (int i = 0; i < vars.length; i++) {
-			 if (i > 0) sb.append(", ");
-			 Variable var = vars[i];
-			 sb.append(var);
-		 }
-		 sb.append("})");
-		 return sb.toString();
-	 }
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append("AllDifferent({");
+        for (int i = 0; i < vars.length; i++) {
+            if (i > 0) sb.append(", ");
+            Variable var = vars[i];
+            sb.append(var);
+        }
+        sb.append("})");
+        return sb.toString();
+    }
 }

@@ -27,7 +27,6 @@
 
 package choco.checker;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -95,12 +94,11 @@ public class DomainBuilder {
         int[][] domains = new int[vars.length][];
         for (int j = 0; j < vars.length; j++) {
             domains[j] = new int[vars[j].getDomainSize()];
-            DisposableIntIterator it = vars[j].getIterator();
             int k = 0;
-            while (it.hasNext()) {
-                domains[j][k++] = it.next();
+            int ub = vars[j].getUB();
+            for (int val = vars[j].getLB(); val <= ub; val = vars[j].nextValue(val)) {
+                domains[j][k++] = val;
             }
-            it.dispose();
         }
         return domains;
     }

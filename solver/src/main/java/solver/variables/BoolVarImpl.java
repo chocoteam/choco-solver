@@ -28,7 +28,6 @@
 package solver.variables;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -298,10 +297,6 @@ public final class BoolVarImpl implements BoolVar {
         return this.domain.getUB();
     }
 
-    public IIntDomain getDomain() {
-        return domain;
-    }
-
     public int getDomainSize() {
         return this.domain.getSize();
     }
@@ -331,10 +326,6 @@ public final class BoolVarImpl implements BoolVar {
     @Override
     public IntDelta getDelta() {
         return domain.getDelta();
-    }
-
-    public DisposableIntIterator getIterator() {
-        return this.domain.getIterator();
     }
 
     public String toString() {

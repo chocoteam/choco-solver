@@ -27,7 +27,6 @@
 
 package solver.search.strategy.enumerations.values.domains;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.variables.IntVar;
 
 import java.util.BitSet;
@@ -79,11 +78,10 @@ public class HeuristicValDomainImpl implements HeuristicValDomain {
                 bitset = new BitSet(ivar.getUB() - ivar.getLB() + 1);
             }
             bitset.clear();
-            DisposableIntIterator it = ivar.getIterator();
-            while (it.hasNext()) {
-                bitset.set(it.next() - lower, true);
+            int ub = ivar.getUB();
+            for (int val = ivar.getLB(); val <= ub; val = ivar.nextValue(val)) {
+                bitset.set(val - lower, true);
             }
-            it.dispose();
         }
         updatedYet = true;
     }

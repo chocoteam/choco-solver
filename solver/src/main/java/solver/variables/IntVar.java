@@ -27,14 +27,15 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
 
 /**
+ * Interface for integer variables. Provides every required services.
+ * The domain is explictly represented but is not (and should not be) accessible from outside.
+ * <br/>
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
@@ -174,32 +175,47 @@ public interface IntVar extends Variable<IntDelta> {
     int getUB();
 
     /**
-     * Returns the domain of <code>this</code>
-     *
-     * @return a IIntDomain object
-     */
-    IIntDomain getDomain();
-
-    /**
      * Returns the size of the domain of <code>this</code>
      *
      * @return size of the domain
      */
     int getDomainSize();
 
-    //todo: move to domain
-
+    /**
+     * Returns the next value just after v in <code>this</code>.
+     * If no such value exists, returns Integer.MAX_VALUE;
+     *
+     * To iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     *
+     * <pre>
+     * int ub = iv.getUB();
+     * for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
+     *     // operate on value i here
+     * }</pre>
+     *
+     * @param v the value to start checking (exclusive)
+     * @return the next value in the domain
+     */
     int nextValue(int v);
 
-    int previousValue(int v);
-
     /**
-     * Provides an iterator over the values contained within the domain of <code>this</code>
+     * Returns the previous value just befor v in <code>this</code>.
+     * If no such value exists, returns Integer.MIN_VALUE;
      *
-     * @return a disposable iterator (#dispose() must be called after)
+     * To iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     *
+     * <pre>
+     * int lb = iv.getLB();
+     * for (int i = iv.getUB(); i >= lb; i = iv.previousValue(i)) {
+     *     // operate on value i here
+     * }</pre>
+     *
+     * @param v the value to start checking (exclusive)
+     * @return the previous value in the domain
      */
-    //todo: move to domain
-    DisposableIntIterator getIterator();
+    int previousValue(int v);
 
     /**
      * Defines the value iterator, ie the way to iterate over the domain's values, for <code>this</code>
@@ -215,5 +231,10 @@ public interface IntVar extends Variable<IntDelta> {
      */
     HeuristicVal getHeuristicVal();
 
+    /**
+     * Indicates wether (or not) <code>this</code> has an enumerated domain (represented in extension)
+     * or not (only bounds)
+     * @return <code>true</code> if the domain is enumerated, <code>false</code> otherwise.
+     */
     boolean hasEnumeratedDomain();
 }

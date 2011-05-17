@@ -28,7 +28,6 @@
 package choco.constraints;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -368,9 +367,9 @@ public class InverseChannelingTest {
         for (int i = 0; i < vars.length; i++) {
             IntVar var = (IntVar) vars[i];
             result.append(var.getName()).append('{');
-            DisposableIntIterator values = var.getIterator();
-            while (values.hasNext()) {
-                result.append(values.next()).append(",");
+            int ub = var.getUB();
+            for (int val = var.getLB(); val <= ub; val = var.nextValue(val)) {
+                result.append(val).append(",");
             }
             result.append("} ");
         }
@@ -410,9 +409,9 @@ public class InverseChannelingTest {
         for (int i = 0; i < vars.length; i++) {
             IntVar var = (IntVar) vars[i];
             result.append(var.getName()).append('{');
-            DisposableIntIterator values = var.getIterator();
-            while (values.hasNext()) {
-                result.append(values.next()).append(",");
+            int ub = var.getUB();
+            for (int val = var.getLB(); val <= ub; val = var.nextValue(val)) {
+                result.append(val).append(",");
             }
             result.append("} ");
         }

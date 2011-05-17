@@ -28,7 +28,6 @@
 package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
@@ -95,15 +94,13 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        final DisposableIntIterator it = vars[0].getIterator();
+        int ub = this.vars[0].getUB();
         int nb = 0;
-        while (it.hasNext()) {
-            final int val = it.next();
+        for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
             if (!values.contains(val)) {
                 nb++;
             }
         }
-        it.dispose();
         if (nb == 0) return ESat.FALSE;
         else if (nb == vars[0].getDomainSize()) return ESat.TRUE;
         return ESat.UNDEFINED;

@@ -28,7 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.IntConstraint;
@@ -72,13 +71,11 @@ public class PropElement extends Propagator<IntVar> {
     protected void updateValueFromIndex() throws ContradictionException {
         int minVal = Integer.MAX_VALUE;
         int maxVal = Integer.MIN_VALUE;
-        DisposableIntIterator iter = this.vars[0].getIterator();
-        for (; iter.hasNext();) {
-            int index = iter.next();
+        int ub = vars[0].getUB();
+        for (int index = vars[0].getLB(); index <= ub; index = vars[0].nextValue(index)) {
             if (minVal > this.lval[index - cste]) minVal = this.lval[index - cste];
             if (maxVal < this.lval[index - cste]) maxVal = this.lval[index - cste];
         }
-        iter.dispose();
         this.vars[1].updateLowerBound(minVal, this);
         this.vars[1].updateUpperBound(maxVal, this);
 
@@ -113,7 +110,7 @@ public class PropElement extends Propagator<IntVar> {
                         hasChange |= this.vars[0].removeValue(i, this);
                 }
             }
-        } while (hasChange && !this.vars[1].getDomain().isEnumerated());
+        } while (hasChange && !this.vars[1].hasEnumeratedDomain());
     }
 
     void awakeOnInst(int index) throws ContradictionException {
@@ -151,16 +148,14 @@ public class PropElement extends Propagator<IntVar> {
         if (this.vars[1].instantiated()) {
             boolean allVal = true;
             boolean oneVal = false;
-            DisposableIntIterator iter = this.vars[0].getIterator();
-            for (; iter.hasNext();) {
-                int val = iter.next();
+            int ub = this.vars[0].getUB();
+            for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
                 boolean b = (val - this.cste) >= 0
                         && (val - this.cste) < this.lval.length
                         && this.lval[val - this.cste] == this.vars[1].getValue();
                 allVal &= b;
                 oneVal |= b;
             }
-            iter.dispose();
             if (allVal) {
                 return ESat.TRUE;
             }
@@ -168,19 +163,16 @@ public class PropElement extends Propagator<IntVar> {
                 return ESat.UNDEFINED;
             }
         } else {
-            DisposableIntIterator iter = this.vars[0].getIterator();
-            while (iter.hasNext()) {
-                int val = iter.next();
+            int ub = this.vars[0].getUB();
+            for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
                 if ((val - this.cste) >= 0 &&
                         (val - this.cste) < this.lval.length) {
                     if (this.vars[1].contains(this.lval[val - this.cste])) {
-                        iter.dispose();
                         return ESat.UNDEFINED;
 
                     }
                 }
             }
-            iter.dispose();
         }
         return ESat.FALSE;
     }

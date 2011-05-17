@@ -28,7 +28,6 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.IntConstraint;
@@ -48,7 +47,7 @@ import solver.variables.domain.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-public final class PropEqualX_YC extends Propagator<IntVar>{
+public final class PropEqualX_YC extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
@@ -93,36 +92,27 @@ public final class PropEqualX_YC extends Propagator<IntVar>{
         updateInfY();
         updateSupY();
         // ensure that, in case of enumerated domains,  holes are also propagated
-        int val;
         if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
-            DisposableIntIterator reuseIter = x.getIterator();
-            try {
-                while (reuseIter.hasNext()) {
-                    val = reuseIter.next();
-                    if (!(y.contains(val - cste))) {
-                        x.removeValue(val, this);
-                    }
+            int ub = x.getUB();
+            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
+                if (!(y.contains(val - cste))) {
+                    x.removeValue(val, this);
                 }
-            } finally {
-                reuseIter.dispose();
             }
-            reuseIter = y.getIterator();
-            try {
-                while (reuseIter.hasNext()) {
-                    val = reuseIter.next();
-                    if (!(x.contains(val + cste))) {
-                        y.removeValue(val, this);
-                    }
+            ub = y.getUB();
+            for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                if (!(x.contains(val + cste))) {
+                    y.removeValue(val, this);
                 }
-            } finally {
-                reuseIter.dispose();
             }
         }
     }
 
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public void propagateOnRequest
+            (IRequest<IntVar> request, int varIdx,
+             int mask) throws ContradictionException {
         IntDelta delta = request.getVariable().getDelta();
         int f = request.fromDelta();
         int l = request.toDelta();
@@ -145,8 +135,7 @@ public final class PropEqualX_YC extends Propagator<IntVar>{
     void awakeOnInst(int index) throws ContradictionException {
         if (index == 0) {
             y.instantiateTo(x.getValue() - cste, this);
-        }
-        else{
+        } else {
             x.instantiateTo(y.getValue() + cste, this);
         }
     }
@@ -171,14 +160,14 @@ public final class PropEqualX_YC extends Propagator<IntVar>{
     @Override
     public ESat isEntailed() {
         if ((x.getUB() < y.getLB() + cste) ||
-				(x.getLB() > y.getUB() + cste))
-			return ESat.FALSE;
-		else if (x.instantiated() &&
-				y.instantiated() &&
-				(x.getValue() == y.getValue() + cste))
-			return ESat.TRUE;
-		else
-			return ESat.UNDEFINED;
+                (x.getLB() > y.getUB() + cste))
+            return ESat.FALSE;
+        else if (x.instantiated() &&
+                y.instantiated() &&
+                (x.getValue() == y.getValue() + cste))
+            return ESat.TRUE;
+        else
+            return ESat.UNDEFINED;
     }
 
     private static class RemProc implements IntProcedure1<Integer> {

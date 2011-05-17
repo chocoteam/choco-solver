@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -61,7 +60,7 @@ public final class IntVarImpl implements IntVar {
     /**
      * Domain definition
      */
-    public IIntDomain domain;
+    protected IIntDomain domain;
 
     /**
      * List of requests
@@ -378,10 +377,6 @@ public final class IntVarImpl implements IntVar {
         return this.domain.getUB();
     }
 
-    public IIntDomain getDomain() {
-        return domain;
-    }
-
     public int getDomainSize() {
         return this.domain.getSize();
     }
@@ -411,10 +406,6 @@ public final class IntVarImpl implements IntVar {
     @Override
     public IntDelta getDelta() {
         return domain.getDelta();
-    }
-
-    public DisposableIntIterator getIterator() {
-        return this.domain.getIterator();
     }
 
     public String toString() {

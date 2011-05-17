@@ -27,7 +27,6 @@
 
 package solver.variables.image;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -37,7 +36,6 @@ import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
 
 /**
@@ -65,19 +63,8 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public IIntDomain getDomain() {
-        //return var.getDomain();
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public int getDomainSize() {
         return var.getDomainSize();
-    }
-
-    @Override
-    public DisposableIntIterator getIterator() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
