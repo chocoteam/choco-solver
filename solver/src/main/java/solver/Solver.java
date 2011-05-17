@@ -140,6 +140,7 @@ public class Solver implements Serializable {
 
 
     public Solver(String name) {
+        loadProperties();
         this.name = name;
         this.vars = new Variable[32];
         vIdx = 0;
@@ -158,13 +159,18 @@ public class Solver implements Serializable {
         this.engine = new PropagationEngine();
         this.search = SearchLoops.preset(this, engine);
         /*new RecorderExplanationEngine(); // TODO faire un builder*/
+    }
+
+    private void loadProperties() {
         try {
+            properties = new Properties();
             InputStream is = getClass().getResourceAsStream("/solver.properties");
             properties.load(is);
         } catch (IOException e) {
             throw new SolverException("Could not open solver.properties");
         }
     }
+
 
     public void set(AbstractStrategy strategies) {
         this.search.set(strategies);

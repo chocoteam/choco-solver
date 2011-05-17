@@ -159,7 +159,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
 
     protected void loadProperties(Properties properties) {
-        solutionPoolCapacity = Integer.getInteger((String) properties.get("solver.solution.capacity"));
+        solutionPoolCapacity = Integer.parseInt((String) properties.get("solver.solution.capacity"));
     }
 
     @SuppressWarnings({"unchecked"})
