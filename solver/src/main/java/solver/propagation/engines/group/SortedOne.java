@@ -40,6 +40,8 @@ import java.util.Comparator;
  */
 public abstract class SortedOne extends AFixpointReacher {
 
+    Comparator<IRequest> comparator;
+
     protected final IRequest[] requests;
 
     protected final int size;
@@ -50,8 +52,8 @@ public abstract class SortedOne extends AFixpointReacher {
 
 
     public SortedOne(IRequest[] requests, Comparator<IRequest> comparator) {
-        super(comparator);
         this.requests = requests;
+        this.comparator = comparator;
         size = requests.length;
         this.toPropagate = new BitSet(size);
     }
@@ -59,11 +61,9 @@ public abstract class SortedOne extends AFixpointReacher {
 
     @Override
     public void update(IRequest request) {
-        update++;
         if (!request.enqueued()) {
             toPropagate.set(request.getIndex(), true);
             request.enqueue();
-            pushed++;
         }
     }
 

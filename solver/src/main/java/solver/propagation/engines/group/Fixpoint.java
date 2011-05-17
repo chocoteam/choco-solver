@@ -51,7 +51,6 @@ final class Fixpoint extends SortedOne {
             lastPoppedRequest = requests[index];
             toPropagate.set(index, false);
             lastPoppedRequest.deque();
-            popped++;
             lastPoppedRequest.filter();
             index = toPropagate.nextSetBit(0);
         }

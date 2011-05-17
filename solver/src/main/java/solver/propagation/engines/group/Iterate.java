@@ -50,7 +50,6 @@ class Iterate extends SortedOne {
             lastPoppedRequest = requests[index];
             toPropagate.set(index, false);
             lastPoppedRequest.deque();
-            popped++;
             lastPoppedRequest.filter();
         }
         return toPropagate.isEmpty();

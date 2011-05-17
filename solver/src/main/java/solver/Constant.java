@@ -37,8 +37,8 @@ public class Constant {
 
     protected Constant() {}
 
-    public static final String WELCOME_TITLE = "** GALAK : Constraint Programming Solver";
-    public static final String WELCOME_VERSION = "** GALAK v0.1 (January, 2011), Copyleft (c) 2010-2011";
+    public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
+    public static final String WELCOME_VERSION = "** CHOCO v{} (May, 2011), Copyleft (c) 2010-2011";
     public static final String CALLER = "** Solve : {}";
 
 }

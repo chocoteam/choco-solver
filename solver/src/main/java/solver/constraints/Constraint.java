@@ -75,8 +75,6 @@ import java.io.Serializable;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.propagators.Propagator
- * @see solver.Observer
- * @see solver.Observable
  * @see solver.propagation.engines.IPropagationEngine
  * @since 0.01
  */

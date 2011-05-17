@@ -33,6 +33,8 @@ import solver.constraints.ConstraintFactory;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrOrderV;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -76,10 +78,13 @@ public class NQueenBinary extends AbstractNQueen {
 
         IntVar[] orderedVars = orederIt2();
         IPropagationEngine engine = solver.getEngine();
-        engine.setDefaultComparator(
-                new IncrOrderV(orderedVars)
-        );
-        engine.setDefaultPolicy(Policy.FIXPOINT);
+        // default group
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        new IncrOrderV(orderedVars),
+                        Policy.FIXPOINT
+                ));
 
     }
 

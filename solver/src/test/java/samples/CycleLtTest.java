@@ -34,7 +34,10 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -93,17 +96,17 @@ public class CycleLtTest {
             st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
                 Solver rand = modeler(n);
-                rand.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(rand, j));
+                 rand.getEngine().addGroup(
+                         Group.buildGroup(
+                                 Predicate.TRUE,
+                                 EngineStrategyFactory.comparator(rand, j),
+                                 Policy.FIXPOINT
+                         ));
                 rand.findAllSolutions();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
                 times[i] = rand.getMeasures().getInitialPropagationTimeCount();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getNodeCount()), -7, " "));
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getBackTrackCount()), -7, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.updated()), -15, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.pushed()), -15, " "));
-                st.append(StringUtils.pad(String.format("%d ", rand.getSearchLoop().propEngine.popped()), -15, " "));
-                st.append(StringUtils.pad(String.format("(%d)",
-                        rand.getSearchLoop().propEngine.pushed() - rand.getSearchLoop().propEngine.popped()), -15, " "));
                 log.info(st.toString());
                 st.setLength(0);
             }

@@ -38,8 +38,9 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
 import solver.propagation.engines.comparators.IncrPriorityP;
-import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.comparators.Shuffle;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 
 /**
  * <br/>
@@ -91,16 +92,13 @@ public abstract class AbstractProblem {
         IPropagationEngine engine = solver.getEngine();
         if (policy.equals("shuffle")) {
             engine.deleteGroups();
-            engine.setDefaultComparator(new Shuffle());
-            engine.setDefaultPolicy(Policy.FIXPOINT);
+            engine.addGroup(Group.buildGroup(Predicate.TRUE, new Shuffle(), Policy.FIXPOINT));
         } else if (policy.equals("oldest")) {
             engine.deleteGroups();
-            engine.setDefaultComparator(Queue.get());
-            engine.setDefaultPolicy(Policy.FIXPOINT);
+          engine.addGroup(Group.buildQueue(Predicate.TRUE));
         } else if (policy.equals("priorityC")) {
             engine.deleteGroups();
-            engine.setDefaultComparator(IncrPriorityP.get());
-            engine.setDefaultPolicy(Policy.FIXPOINT);
+            engine.addGroup(Group.buildGroup(Predicate.TRUE, IncrPriorityP.get(), Policy.FIXPOINT));
         } else if (policy.equals("var-oriented")) {
             engine.deleteGroups();
             EngineStrategyFactory.variableOriented(solver);
@@ -116,7 +114,7 @@ public abstract class AbstractProblem {
         Logger log = LoggerFactory.getLogger("bench");
         if (!quiet) {
             log.info(Constant.WELCOME_TITLE);
-            log.info(Constant.WELCOME_VERSION);
+            log.info(Constant.WELCOME_VERSION, solver.properties.get("solver.version"));
             log.info("* Sample library: executing {}.java ... \n", getClass().getName());
         }
 

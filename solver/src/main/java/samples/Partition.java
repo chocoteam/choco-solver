@@ -40,6 +40,7 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
 import solver.propagation.engines.comparators.predicate.LeftHandSide;
+import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.comparators.predicate.PriorityP;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -119,7 +120,7 @@ public class Partition extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
-                new Group(
+                Group.buildGroup(
                         new PriorityP(PropagatorPriority.TERNARY.priority),
                         new Cond(
                                 new LeftHandSide(),
@@ -127,12 +128,16 @@ public class Partition extends AbstractProblem {
                                 new Decr(new IncrOrderV(vars))),
                         Policy.ITERATE
                 ));
-        solver.getEngine().setDefaultComparator(
-                new Seq(
-                        IncrArityP.get(),
-                        new Decr(IncrDomDeg.get())
-                )
-        );
+        // set default
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        new Seq(
+                                IncrArityP.get(),
+                                new Decr(IncrDomDeg.get())
+                        ),
+                        Policy.FIXPOINT
+                ));
 
     }
 

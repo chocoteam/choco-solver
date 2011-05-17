@@ -75,7 +75,6 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @version 0.01, june 2010
  * @see solver.variables.Variable
- * @see solver.Observable
  * @see solver.constraints.Constraint
  * @since 0.01
  */

@@ -35,8 +35,10 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.Queue;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -158,13 +160,17 @@ public class NQueenTest {
         Solver sol;
         for (int j = 4; j < 23; j++) {
             sol = modeler(new NQueenBinary(), j);
-            sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, -1));
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < 9; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, t));
+                sol.getEngine().addGroup(
+                        Group.buildGroup(
+                                Predicate.TRUE,
+                                EngineStrategyFactory.comparator(sol, t),
+                                Policy.FIXPOINT
+                        ));
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -178,13 +184,18 @@ public class NQueenTest {
         Solver sol;
         for (int j = 4; j < 23; j++) {
             sol = modeler(new NQueenBinary(), j);
-            sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, -1));
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < 9; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, t));
+                // default group
+                sol.getEngine().addGroup(
+                        Group.buildGroup(
+                                Predicate.TRUE,
+                                EngineStrategyFactory.comparator(sol, t),
+                                Policy.FIXPOINT
+                        ));
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -198,10 +209,7 @@ public class NQueenTest {
     public void testBug1() throws ContradictionException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Solver solver = modeler(new NQueenBinaryGlobal(), 16);
-        solver.getEngine().setDefaultComparator(Queue.get());
-        solver.getSearchLoop().propEngine.init();
-        solver.getSearchLoop().propEngine.initialPropagation();
-        solver.getSearchLoop().propEngine.fixPoint();
+        solver.propagate();
         Variable[] vars = solver.getVars();
         ((IntVar) vars[0]).instantiateTo(1, null);
         ((IntVar) vars[1]).instantiateTo(3, null);
@@ -225,7 +233,6 @@ public class NQueenTest {
     @Test(groups = "1s", expectedExceptions = SolverException.class)
     public void testInit1() {
         Solver solver = modeler(new NQueenBinaryGlobal(), 16);
-        solver.getEngine().setDefaultComparator(Queue.get());
         solver.getEngine().init();
         solver.getEngine().init();
     }

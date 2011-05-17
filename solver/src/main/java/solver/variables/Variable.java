@@ -102,7 +102,7 @@ public interface Variable<D extends IDelta> extends Serializable {
     public void deletePropagator(Propagator observer);
 
     /**
-     * If this <code>Observable</code> object has changed, then notify all of its observers.<br/>
+     * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *
      *

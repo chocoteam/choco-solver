@@ -33,7 +33,6 @@ import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,12 +51,6 @@ public interface IPropagationEngine extends Serializable {
     void addConstraint(Constraint constraint);
 
     void setDeal(Deal deal);
-
-    void setDefaultComparator(Comparator<IRequest> comparator);
-
-    Comparator<IRequest> getDefaultComparator();
-
-    void setDefaultPolicy(Policy policy);
 
     void addGroup(Group group);
 
@@ -83,10 +76,9 @@ public interface IPropagationEngine extends Serializable {
 
     int getNbRequests();
 
-    long pushed();
-
-    long popped();
-
-    long updated();
-
+    /**
+     * Returns <code>true</code> if <code>this</code> is initialized, <code>false</code> otherwise.
+     * @return <code>true</code> if <code>this</code> is initialized, <code>false</code> otherwise
+     */
+    boolean initialzed();
 }

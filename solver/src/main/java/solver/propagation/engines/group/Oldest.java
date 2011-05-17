@@ -28,7 +28,6 @@
 package solver.propagation.engines.group;
 
 import solver.exception.ContradictionException;
-import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
 import solver.requests.IRequest;
 
@@ -48,7 +47,6 @@ public final class Oldest extends AFixpointReacher {
     protected FixSizeCircularQueue<IRequest> toPropagate;
 
     public Oldest(int nbElement) {
-        super(Queue.get());
         toPropagate = new FixSizeCircularQueue<IRequest>(nbElement);
     }
 
@@ -57,7 +55,6 @@ public final class Oldest extends AFixpointReacher {
         while (!toPropagate.isEmpty()) {
             lastPoppedRequest = toPropagate.pop();
             lastPoppedRequest.deque();
-            popped++;
             lastPoppedRequest.filter();
         }
         return true;
@@ -65,11 +62,9 @@ public final class Oldest extends AFixpointReacher {
 
     @Override
     public void update(IRequest request) {
-        update++;
         if (!request.enqueued()) {
             toPropagate.add(request);
             request.enqueue();
-            pushed++;
         }
 
     }

@@ -42,6 +42,7 @@ import solver.propagation.engines.comparators.Decr;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.MappingV;
 import solver.propagation.engines.comparators.predicate.LeftHandSide;
+import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.comparators.predicate.PriorityP;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -139,7 +140,7 @@ public class Pert extends AbstractProblem {
 
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
-                new Group(
+                Group.buildGroup(
                         new PriorityP(PropagatorPriority.TERNARY.priority),
                         new Cond(
                                 new LeftHandSide(),
@@ -147,9 +148,12 @@ public class Pert extends AbstractProblem {
                                 new Decr(new MappingV(vars, rank))),
                         Policy.ITERATE
                 ));
-        engine.setDefaultComparator(
-                IncrArityP.get()
-        );
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        IncrArityP.get(),
+                        Policy.FIXPOINT
+                ));
 
 
     }

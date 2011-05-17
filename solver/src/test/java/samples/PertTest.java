@@ -33,7 +33,10 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.objective.MaxObjectiveManager;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -102,13 +105,17 @@ public class PertTest {
     public void testAll() {
         Solver sol;
         sol = modeler();
-        sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, -1));
         sol.findAllSolutions();
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
         for (int t = 0; t < 9; t++) {
             sol = modeler();
-            sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, t));
+             sol.getEngine().addGroup(
+                     Group.buildGroup(
+                             Predicate.TRUE,
+                             EngineStrategyFactory.comparator(sol, t),
+                             Policy.FIXPOINT
+                     ));
             sol.findAllSolutions();
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
             Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

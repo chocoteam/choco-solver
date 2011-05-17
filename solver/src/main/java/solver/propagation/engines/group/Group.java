@@ -28,7 +28,6 @@
 package solver.propagation.engines.group;
 
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.requests.IRequest;
 
@@ -57,16 +56,20 @@ public class Group {
     protected IRequest[] requests;
     protected int nbRequests;
 
-    public Group(Predicate predicate, Comparator<IRequest> comparator, Policy policy) {
+    public static Group buildQueue(Predicate predicate){
+        return new Group(predicate, null, null);
+    }
+
+    public static Group buildGroup(Predicate predicate, Comparator<IRequest> comparator, Policy policy){
+        return new Group(predicate, comparator, policy);
+    }
+
+    Group(Predicate predicate, Comparator<IRequest> comparator, Policy policy) {
         this.comparator = comparator;
         this.predicate = predicate;
         this.policy = policy;
         requests = new IRequest[8];
         nbRequests = 0;
-    }
-
-    public Comparator<IRequest> getComparator() {
-        return comparator;
     }
 
     public Predicate getPredicate() {
@@ -79,13 +82,10 @@ public class Group {
 
     public void make() {
         requests = Arrays.copyOf(requests, nbRequests);
-        Arrays.sort(requests, comparator);
-        for (int i = 0; i < nbRequests; i++) {
-            requests[i].setIndex(i);
-        }
-        if (comparator == Queue.get()) {
+        if (comparator == null) {
             reacher = new Oldest(nbRequests);
         } else {
+            Arrays.sort(requests, comparator);
             switch (policy) {
                 case ONE:
                     reacher = new One(requests, comparator);
@@ -98,6 +98,9 @@ public class Group {
                     reacher = new Fixpoint(requests, comparator);
                     break;
             }
+        }
+        for (int i = 0; i < nbRequests; i++) {
+            requests[i].setIndex(i);
         }
     }
 

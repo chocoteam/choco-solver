@@ -34,6 +34,8 @@ import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
+import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
@@ -50,13 +52,13 @@ import sun.reflect.Reflection;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * The <code>Solver</code> is the header component of Constraint Programming.
  * It embeds the list of <code>Variable</code> (and their <code>Domain</code>), the <code>Constraint</code>'s network,
  * and a <code>IPropagationEngine</code> to pilot the propagation.<br/>
- * It requires a <code>Configuration</code> object defining the<code>Solver</code>'s default properties,
- * which can be redefined.<br/>
+ * It reads default properties in <code>/solver.properties</code> (it can be overriden).<br/>
  * <code>Solver</code> includes a <code>AbstractSearchLoop</code> to guide the search loop: apply decisions and propagate,
  * run backups and rollbacks and store solutions.
  *
@@ -80,7 +82,7 @@ public class Solver implements Serializable {
     /**
      * Properties of the solver
      */
-    public Configuration configuration;
+    public Properties properties;
 
     /**
      * Explanation engine for the solver
@@ -156,11 +158,16 @@ public class Solver implements Serializable {
         this.engine = new PropagationEngine();
         this.search = SearchLoops.preset(this, engine);
         /*new RecorderExplanationEngine(); // TODO faire un builder*/
+        try {
+            InputStream is = getClass().getResourceAsStream("/solver.properties");
+            properties.load(is);
+        } catch (IOException e) {
+            throw new SolverException("Could not open solver.properties");
+        }
     }
 
     public void set(AbstractStrategy strategies) {
         this.search.set(strategies);
-        this.configuration = new Configuration();
     }
 
     /**
@@ -278,7 +285,11 @@ public class Solver implements Serializable {
 
     public Boolean findOptimalSolution(ResolutionPolicy policy, IntVar objective) {
         search.stopAtFirstSolution(false);
-        configuration.putInt(Configuration.SOLUTION_POOL_CAPACITY, 1);
+        //search.setSolutionPoolCapacity(1);
+        if (search.getSolutionPoolCapacity() < 1) {
+            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
+            search.setSolutionPoolCapacity(1);
+        }
         switch (policy) {
             case MAXIMIZE:
                 MaxObjectiveManager maom = new MaxObjectiveManager(objective);
@@ -296,8 +307,15 @@ public class Solver implements Serializable {
 
     public Boolean solve() {
         measures.setReadingTimeCount(creationTime + System.currentTimeMillis());
-        search.setup(configuration);
+        search.setup();
         return search.launch();
+    }
+
+    public void propagate() throws ContradictionException {
+        if (!engine.initialzed()) {
+            engine.init();
+        }
+        engine.initialPropagation();
     }
 
     /**
@@ -323,9 +341,10 @@ public class Solver implements Serializable {
     }
 
 
-    public int getNbVars(){
+    public int getNbVars() {
         return vIdx;
     }
+
     /**
      * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
      *
@@ -335,7 +354,7 @@ public class Solver implements Serializable {
         return Arrays.copyOf(cstrs, cIdx);
     }
 
-    public int getNbCstrs(){
+    public int getNbCstrs() {
         return cIdx;
     }
 

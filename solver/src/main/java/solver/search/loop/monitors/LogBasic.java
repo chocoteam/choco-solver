@@ -41,16 +41,17 @@ import solver.Solver;
 public class LogBasic implements ISearchMonitor {
 
     final Solver solver;
-
+    final String version;
     public LogBasic(Solver solver) {
         this.solver = solver;
+        this.version = (String) solver.properties.get("solver.version");
     }
 
     @Override
     public void beforeInitialize() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(Constant.WELCOME_TITLE);
-            LOGGER.info(Constant.WELCOME_VERSION);
+            LOGGER.info(Constant.WELCOME_VERSION, version);
             LOGGER.info(Constant.CALLER, solver.getName());
         }
     }

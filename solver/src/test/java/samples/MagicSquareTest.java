@@ -32,7 +32,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -58,13 +61,17 @@ public class MagicSquareTest {
         Solver sol;
         for (int j = 3; j < 7; j++) {
             sol = modeler(j);
-            sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, -1));
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < 9; t++) {
                 sol = modeler(j);
-                sol.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(sol, t));
+                 sol.getEngine().addGroup(
+                         Group.buildGroup(
+                                 Predicate.TRUE,
+                                 EngineStrategyFactory.comparator(sol, t),
+                                 Policy.FIXPOINT
+                         ));
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -264,7 +263,6 @@ public class TestSolveur {
         }
         s.post(ConstraintFactory.lt(vars[(n / 2) - 1], vars[n / 2], s));
 
-        s.getEngine().setDefaultComparator(EngineStrategyFactory.comparator(s, -1));
         s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
         s.findAllSolutions();
         s.getMeasures().getSolutionCount();

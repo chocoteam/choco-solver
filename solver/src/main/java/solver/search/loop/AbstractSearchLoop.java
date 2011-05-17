@@ -28,9 +28,6 @@
 package solver.search.loop;
 
 import choco.kernel.memory.IEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.Configuration;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
@@ -44,6 +41,8 @@ import solver.search.solution.ISolutionPool;
 import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
+
+import java.util.Properties;
 
 /**
  * An <code>AbstractSearchLoop</code> object is part of the <code>Solver</code> object
@@ -80,7 +79,6 @@ import solver.variables.Variable;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
-    final static Logger LOGGER = LoggerFactory.getLogger(AbstractSearchLoop.class);
     public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
 
     static final int INIT = 0;
@@ -91,9 +89,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     static final int UP_BRANCH = 1 << 4;
     static final int RESTART = 1 << 5;
     static final int RESUME = 1 << 6;
-
-    /* The configuraiton file */
-    Configuration configuration;
 
     /* Reference to the solver */
     final Solver solver;
@@ -134,6 +129,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* factory for limits management */
     LimitFactory limitsfactory;
 
+
+    protected int solutionPoolCapacity;
     /**
      * Solution pool -- way to record solutions. Default object is no solution recorded.
      */
@@ -158,6 +155,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.nextState = INIT;
         this.limitsfactory = new LimitFactory(this);
         this.propEngine = propEngine;
+        loadProperties(solver.properties);
+    }
+
+    protected void loadProperties(Properties properties) {
+        solutionPoolCapacity = Integer.getInteger((String) properties.get("solver.solution.capacity"));
     }
 
     @SuppressWarnings({"unchecked"})
@@ -250,7 +252,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        propEngine.init();
+        if (!propEngine.initialzed()) {
+            propEngine.init();
+        }
         limitsfactory.init();
         this.nextState = INITIAL_PROPAGATION;
     }
@@ -326,15 +330,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Reads the configuration file and sets this <code>AbstractSearchLoop</code> up.
-     *
-     * @param configuration main configuration file
-     */
-    public void setup(Configuration configuration) {
-        this.configuration = configuration;
-        this.solutionpool =
-                SolutionPoolFactory.makeSolutionPool(configuration.readInt(Configuration.SOLUTION_POOL_CAPACITY));
+    public void setup() {
+        this.solutionpool = SolutionPoolFactory.makeSolutionPool(solutionPoolCapacity);
     }
 
 
@@ -370,9 +367,14 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.solutionpool = solutionpool;
     }
 
-    public void restartAfterEachSolution(boolean does){
-        stateAfterSolution =  does?RESTART:UP_BRANCH;
+    public void restartAfterEachSolution(boolean does) {
+        stateAfterSolution = does ? RESTART : UP_BRANCH;
     }
+
+    public void setSolutionPoolCapacity(int solutionPoolCapacity) {
+        this.solutionPoolCapacity = solutionPoolCapacity;
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////
@@ -395,4 +397,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
 
     public abstract String decisionToString();
+
+    public int getSolutionPoolCapacity() {
+        return solutionPoolCapacity;
+    }
 }

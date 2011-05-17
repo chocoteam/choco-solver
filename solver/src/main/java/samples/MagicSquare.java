@@ -34,9 +34,12 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrOrderV;
 import solver.propagation.engines.comparators.Seq;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -104,12 +107,16 @@ public class MagicSquare extends AbstractProblem {
 
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
-        solver.getEngine().setDefaultComparator(
-                new Seq(
-                        IncrArityP.get(),
-                        new IncrOrderV(vars)
-                )
-        );
+        // default group
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        new Seq(
+                                IncrArityP.get(),
+                                new IncrOrderV(vars)
+                        ),
+                        Policy.FIXPOINT
+                ));
         if (n > 4) {
             long nl = (long) Math.pow(10, n);
             solver.getSearchLoop().getLimitsFactory().setNodeLimit(nl);
@@ -133,7 +140,7 @@ public class MagicSquare extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             st.append("|");
             for (int j = 0; j < n; j++) {
-                st.append(StringUtils.pad(vars[i*n+j].getValue()+"", -3, " ")).append(" |");
+                st.append(StringUtils.pad(vars[i * n + j].getValue() + "", -3, " ")).append(" |");
             }
             st.append(MessageFormat.format("\n{0}", line));
         }

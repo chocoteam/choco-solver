@@ -40,6 +40,7 @@ import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.MappingV;
 import solver.propagation.engines.comparators.predicate.LeftHandSide;
 import solver.propagation.engines.comparators.predicate.MemberP;
+import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.comparators.predicate.PriorityP;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -133,13 +134,13 @@ public class PertReified extends Pert {
 
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
-                new Group(
+                Group.buildGroup(
                         new MemberP(reifieds),
                         IncrArityP.get(),
                         Policy.ITERATE
                 ));
         engine.addGroup(
-                new Group(
+                Group.buildGroup(
                         new PriorityP(PropagatorPriority.TERNARY.priority),
                         new Cond(
                                 new LeftHandSide(),
@@ -148,10 +149,13 @@ public class PertReified extends Pert {
                         ),
                         Policy.ITERATE
                 ));
-        engine.setDefaultComparator(
-                IncrArityP.get()
-        );
-        solver.getEngine().setDefaultComparator(IncrArityP.get());
+        // default group
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        IncrArityP.get(),
+                        Policy.FIXPOINT
+                ));
     }
 
     public static void main(String[] args) {

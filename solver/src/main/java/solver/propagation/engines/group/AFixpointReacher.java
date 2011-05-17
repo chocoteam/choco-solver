@@ -30,8 +30,6 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
-import java.util.Comparator;
-
 /**
  * <br/>
  *
@@ -39,22 +37,6 @@ import java.util.Comparator;
  * @since 04/04/11
  */
 public abstract class AFixpointReacher {
-
-    public long update, pushed, popped;
-
-    Comparator<IRequest> comparator;
-
-    protected AFixpointReacher(Comparator<IRequest> comparator) {
-        this.comparator = comparator;
-    }
-
-    /**
-     * Initialize this <code>IPropagationEngine</code> object with the array of <code>Constraint</code> and <code>Variable</code> objects.
-     * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
-     */
-    public void init() {
-        pushed = popped = update = 0;
-    }
 
     /**
      * Propagate one or more elements (see Policy).
@@ -68,18 +50,5 @@ public abstract class AFixpointReacher {
     public abstract boolean remove(IRequest request);
 
     public abstract void flushAll();
-
-    public long pushed() {
-        return pushed;
-    }
-
-    public long popped() {
-        return popped;
-    }
-
-    public long updated() {
-        return update;
-    }
-
 
 }

@@ -34,8 +34,8 @@ import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.EqualC;
 import solver.propagation.engines.comparators.predicate.EqualV;
 import solver.propagation.engines.group.Group;
-import solver.variables.Variable;
 import solver.requests.IRequest;
+import solver.variables.Variable;
 
 import java.util.Comparator;
 
@@ -48,7 +48,6 @@ import java.util.Comparator;
 public class EngineStrategyFactory {
 
     public static final int
-            QUEUE = -1,
             INPUT_ORDER_VAR = 0,
             ARITY_PROP = 1,
             PRIORITY_PROP = 2,
@@ -65,8 +64,6 @@ public class EngineStrategyFactory {
 
     public static Comparator<IRequest> comparator(Solver solver, int type) {
         switch (type) {
-            case QUEUE:
-                return Queue.get();
             case INPUT_ORDER_VAR:
                 return new IncrOrderV(solver.getVars());
             case ARITY_PROP:
@@ -98,7 +95,7 @@ public class EngineStrategyFactory {
         Variable[] vars = solver.getVars();
         for (Variable var : vars) {
             engine.addGroup(
-                    new Group(
+                    Group.buildGroup(
                             new EqualV(var),
                             IncrArityC.get(),
                             Policy.ITERATE
@@ -113,7 +110,7 @@ public class EngineStrategyFactory {
         Constraint[] cstrs = solver.getCstrs();
         for (Constraint cstr : cstrs) {
             engine.addGroup(
-                    new Group(
+                    Group.buildGroup(
                             new EqualC(cstr),
                             IncrArityV.get(),
                             Policy.ITERATE

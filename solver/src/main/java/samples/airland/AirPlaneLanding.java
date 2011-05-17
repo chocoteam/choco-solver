@@ -43,6 +43,8 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
 import solver.propagation.engines.comparators.predicate.MemberC;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -174,16 +176,19 @@ public class AirPlaneLanding extends AbstractProblem {
         solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);
 
         IPropagationEngine engine = solver.getEngine();
-        engine.setDefaultComparator(
-                new Cond(
-                        new MemberC(new HashSet<Constraint>(Arrays.asList(ranking.keys(new Constraint[ranking.size()])))),
-                        new Seq(
-                                new MappingC(ranking),
-                                new IncrOrderV(ArrayUtils.append(bVars, planes))),
-                        new MappingV(planes, costLAT)
-                )
-        );
-        engine.setDefaultPolicy(Policy.FIXPOINT);
+        // default group
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        new Cond(
+                                new MemberC(new HashSet<Constraint>(Arrays.asList(ranking.keys(new Constraint[ranking.size()])))),
+                                new Seq(
+                                        new MappingC(ranking),
+                                        new IncrOrderV(ArrayUtils.append(bVars, planes))),
+                                new MappingV(planes, costLAT)
+                        ),
+                        Policy.FIXPOINT
+                ));
 
     }
 

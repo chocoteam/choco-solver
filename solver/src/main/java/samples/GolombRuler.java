@@ -34,8 +34,6 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -101,17 +99,9 @@ public class GolombRuler extends AbstractProblem {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
 
         IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(
-                new Group(
-                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks))),
-                        Queue.get(),
-                        Policy.FIXPOINT
-                ));
-
-        engine.setDefaultComparator(
-                Queue.get()
-        );
-        engine.setDefaultPolicy(Policy.FIXPOINT);
+        engine.addGroup(Group.buildQueue(
+                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks)))
+        ));
     }
 
     @Override

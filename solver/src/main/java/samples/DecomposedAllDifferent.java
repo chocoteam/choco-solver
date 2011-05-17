@@ -39,8 +39,8 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrArityV;
-import solver.propagation.engines.comparators.Queue;
 import solver.propagation.engines.comparators.predicate.MemberV;
+import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -135,17 +135,19 @@ public class DecomposedAllDifferent extends AbstractProblem {
         solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
-                new Group(
+                Group.buildGroup(
                         new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(B))),
                         IncrArityV.get(),
                         Policy.ITERATE
                 ));
 
-        engine.setDefaultComparator(
-                Queue.get()
-        );
-        engine.setDefaultComparator(IncrArityP.get());
-        engine.setDefaultPolicy(Policy.ITERATE);
+        // default group
+        engine.addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        IncrArityP.get(),
+                        Policy.ITERATE
+                ));
     }
 
     @Override

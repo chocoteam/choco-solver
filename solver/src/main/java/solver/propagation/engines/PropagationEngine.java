@@ -77,7 +77,7 @@ public final class PropagationEngine implements IPropagationEngine {
      * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
      */
     public void init() {
-        if(engine != null){
+        if (engine != null) {
             throw new SolverException("PropagationEngine.init() has already been called once");
         }
         IRequest[] tmp = requests;
@@ -93,7 +93,7 @@ public final class PropagationEngine implements IPropagationEngine {
             request.setIndex(i);
             request.enqueue();
         }
-        addGroup(new Group(Predicate.TRUE, comparator, policy));
+        addGroup(Group.buildQueue(Predicate.TRUE));
         // first we set request to one group
         int j;
         for (i = 0; i < offset; i++) {
@@ -120,6 +120,11 @@ public final class PropagationEngine implements IPropagationEngine {
         }
 
 
+    }
+
+    @Override
+    public boolean initialzed() {
+        return engine != null;
     }
 
     @Override
@@ -155,7 +160,6 @@ public final class PropagationEngine implements IPropagationEngine {
         size = k;
     }
 
-    @Override
     public void addGroup(Group group) {
         if (groups.length == nbGroup) {
             Group[] tmp = groups;
@@ -164,7 +168,6 @@ public final class PropagationEngine implements IPropagationEngine {
         }
         groups[nbGroup] = group;
         group.setIndex(nbGroup++);
-
     }
 
     @Override
@@ -178,26 +181,13 @@ public final class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void setDefaultComparator(Comparator<IRequest> comparator) {
-        this.comparator = comparator;
-    }
-
-    @Override
-    public Comparator<IRequest> getDefaultComparator() {
-        return comparator;
-    }
-
-    @Override
-    public void setDefaultPolicy(Policy policy) {
-        this.policy = policy;
-    }
-
-    @Override
     public void initialPropagation() throws ContradictionException {
         for (int i = offset; i < size; i++) {
             lastPoppedRequest = requests[i];
-            lastPoppedRequest.deque();
-            lastPoppedRequest.filter();
+            if (lastPoppedRequest.enqueued()) {
+                lastPoppedRequest.deque();
+                lastPoppedRequest.filter();
+            }
         }
         engine.fixPoint();
     }
@@ -237,30 +227,6 @@ public final class PropagationEngine implements IPropagationEngine {
     @Override
     public int getNbRequests() {
         return size;
-    }
-
-    public long pushed() {
-        long _p = 0;
-        for (int i = nbGroup - 1; i >= 0; i--) {
-            _p += groups[i].getReacher().pushed();
-        }
-        return _p;
-    }
-
-    public long popped() {
-        long _p = 0;
-        for (int i = nbGroup - 1; i >= 0; i--) {
-            _p += groups[i].getReacher().popped();
-        }
-        return _p;
-    }
-
-    public long updated() {
-        long _p = 0;
-        for (int i = nbGroup - 1; i >= 0; i--) {
-            _p += groups[i].getReacher().updated();
-        }
-        return _p;
     }
 
 }
