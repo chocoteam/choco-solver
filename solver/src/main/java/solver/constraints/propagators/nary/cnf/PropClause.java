@@ -88,7 +88,7 @@ public class PropClause extends Propagator<BoolVar> {
         while (i < vars.length && (vars[i].instantiated() || otherWL == i)) {
             i++;
         }
-        if (i >= vars.length) {
+        if (i == vars.length) {
             if (otherWL < firstNotPosLit) {
                 vars[otherWL].instantiateTo(1, this);
             } else {
@@ -113,7 +113,37 @@ public class PropClause extends Propagator<BoolVar> {
             }
             setPassive();
         } else {
-            if (!setWatchLiteral(0)) {
+            // search for watch literals and check the clause
+            int n = vars.length;
+            int i = 0, wl = 0, cnt = 0;
+            while (i < n && wl < 2) {
+                BoolVar bv = vars[i];
+                if (bv.instantiated()) {
+                    if (i < firstNotPosLit) {
+                        if (bv.getValue() == 1) {
+                            setPassive();
+                            return;
+                        }else{
+                            cnt++;
+                        }
+                    } else {
+                        if (bv.getValue() == 0) {
+                            setPassive();
+                            return;
+                        }else{
+                            cnt++;
+                        }
+                    }
+                } else {
+                    watchLit2 = watchLit1;
+                    watchLit1 = i;
+                    wl++;
+                }
+                i++;
+            }
+            if(cnt == n){
+                ContradictionException.throwIt(this, null, "Inconsistent");
+            }else if(cnt == n-1){
                 setWatchLiteral(watchLit1);
             }
         }
