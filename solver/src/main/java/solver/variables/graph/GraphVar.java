@@ -82,10 +82,10 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
 	@Override
     public boolean instantiated() {
+		if(getEnvelopOrder()!=getKernelOrder()){
+			return false;
+		}
     	for(int n=envelop.getActiveNodes().nextValue(0); n>=0; n=envelop.getActiveNodes().nextValue(n+1)){
-    		if(!kernel.getActiveNodes().isActive(n)){
-    			return false;
-    		}
     		AbstractNeighborsIterator<INeighbors> iter = envelop.neighborsIteratorOf(n);
     		while (iter.hasNext()){
     			if(!kernel.edgeExists(n, iter.next())){

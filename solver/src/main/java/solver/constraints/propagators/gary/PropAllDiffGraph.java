@@ -224,9 +224,9 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 		int node;
 		while(niter.hasNext()){
 			node = niter.next();
-//			if(g.getKernelGraph().getNeighborhoodSize(node)==0 || matching[node]==-1){
+			if(g.getKernelGraph().getNeighborhoodSize(node)==0 || matching[node]==-1){// BEWARE should be good but brought mistakes once (before some bug corrections)
 				iterable.set(node);
-//			}
+			}
 		}
 		int[] A = new int[sizeFirstSet];
 		int i=0;
@@ -365,25 +365,10 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public ESat isEntailed() {
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
-		int node;
-		while(niter.hasNext()){
-			node = niter.next();
-			if(node<sizeFirstSet){
-				if(g.getEnvelopGraph().getNeighborhoodSize(node)==0){
-					return ESat.FALSE;
-				}
-			}
-			if(g.getKernelGraph().getNeighborhoodSize(node)>1){
-				return ESat.FALSE;
-			}
-			if(g.getKernelGraph().getNeighborhoodSize(node)!=g.getEnvelopGraph().getNeighborhoodSize(node)){
-				return ESat.UNDEFINED;
-			}
-		}
-		if(g.getEnvelopOrder()!=g.getKernelOrder()){
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}else{
 			return ESat.UNDEFINED;
 		}
-		return ESat.TRUE;
 	}
 }

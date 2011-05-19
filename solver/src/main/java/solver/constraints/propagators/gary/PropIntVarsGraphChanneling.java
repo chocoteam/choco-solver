@@ -63,7 +63,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	private IntVar[] intVars;
 	private int[] values;
 	private TIntIntHashMap valuesHash;
-	private RemVal valRemoved;
+	private ValRem valRemoved;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
 
@@ -77,35 +77,12 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		intVars = vars;
 		this.values = v;
 		this.valuesHash = vH;
-		final PropIntVarsGraphChanneling instance = this;
-		final int n = values.length;
+		int n = values.length;
 		// IntVar events
-		valRemoved = new RemVal(this);
+		valRemoved = new ValRem(this);
 		// Graph events
-		arcEnforced = new IntProcedure() {
-			@Override
-			public void execute(int i) throws ContradictionException {
-				int from = i/n-1;
-				int to   = i%n;
-				if(from<to){
-					intVars[from].instantiateTo(values[to], instance);
-				}else{
-					intVars[to].instantiateTo(values[from], instance);
-				}
-			}
-		};
-		arcRemoved = new IntProcedure() {
-			@Override
-			public void execute(int i) throws ContradictionException {
-				int from = i/n-1;
-				int to   = i%n;
-				if(from<to){
-					intVars[from].removeValue(values[to], instance);
-				}else{
-					intVars[to].removeValue(values[from], instance);
-				}
-			}
-		};
+		arcEnforced = new EdgeEnf(this, n);
+		arcRemoved = new EdgeRem(this, n);
 	}
 
 	//***********************************************************************************
@@ -113,7 +90,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {}
+	public void propagate() throws ContradictionException {
+		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
+	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
@@ -127,7 +106,8 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gv.fromArcRemoval(), gv.toArcRemoval());
 			}
-		}else{
+		}
+		else{
 			if(EventType.anInstantiationEvent(mask)){
 				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
 			}
@@ -151,21 +131,25 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public ESat isEntailed() {
-		if (isCompletelyInstantiated()) {
-			for (int vIdx=0; vIdx<intVars.length; vIdx++) {
-				IntVar v = intVars[vIdx];
-				if(g.getKernelGraph().getNeighborhoodSize(vIdx)>1){
+		for (int vIdx=0; vIdx<intVars.length; vIdx++) {
+			IntVar v = intVars[vIdx];
+			// An IntVar cannot be instantiated to more than one value
+			if(g.getKernelGraph().getNeighborhoodSize(vIdx)>1){ 
+				return ESat.FALSE;
+			}
+			// the instantiation value of the IntVar must match with the graph
+			if(g.getKernelGraph().getNeighborhoodSize(vIdx)==1 && 
+					!intVars[vIdx].contains(values[g.getKernelGraph().getNeighborsOf(vIdx).getFirstElement()])){
+				return ESat.FALSE;
+			}
+			if (v.instantiated()) {
+				int vv = v.getValue();
+				if(!g.getKernelGraph().edgeExists(vIdx, valuesHash.get(vv))){
 					return ESat.FALSE;
 				}
-				if (v.instantiated()) {
-					int vv = v.getValue();
-					if(!g.getKernelGraph().edgeExists(vIdx, valuesHash.get(vv))){
-						return ESat.FALSE;
-					}
-				} else {
-					return ESat.UNDEFINED;
-				}
 			}
+		}
+		if (isCompletelyInstantiated()) {
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
@@ -175,11 +159,12 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class RemVal implements IntProcedure {
+	/** When a value y is removed from the domain of x then the edge (x,y) must be pruned*/
+	private class ValRem implements IntProcedure {
 		private int idx;
 		private Propagator p;
 
-		private RemVal(Propagator p){
+		private ValRem(Propagator p){
 			this.p = p;
 		}
 
@@ -193,5 +178,53 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 			int to   = valuesHash.get(i);
 			g.removeArc(from, to,p);
 		}
+	}
+	
+	/** When an edge (x,y), x<=y, is enforced than x must be instantiated to y */
+	private class EdgeEnf implements IntProcedure {
+
+		private Propagator p;
+		private int n;
+
+		private EdgeEnf(Propagator p, int n){
+			this.p = p;
+			this.n = n;
+		}
+		
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = i/n-1;
+			int to   = i%n;
+			if(from<to){
+				intVars[from].instantiateTo(values[to], p);
+			}else{
+				intVars[to].instantiateTo(values[from], p);
+			}
+		}
+		
+	}
+	
+	/** When an edge (x,y), x<=y, is removed than a value y must be removed from the domain of x */
+	private class EdgeRem implements IntProcedure {
+
+		private Propagator p;
+		private int n;
+
+		private EdgeRem(Propagator p, int n){
+			this.p = p;
+			this.n = n;
+		}
+		
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = i/n-1;
+			int to   = i%n;
+			if(from<to){
+				intVars[from].removeValue(values[to], p);
+			}else{
+				intVars[to].removeValue(values[from], p);
+			}
+		}
+		
 	}
 }

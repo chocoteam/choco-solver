@@ -112,15 +112,16 @@ public abstract class AbstractProblem {
     public final void execute(String... args) {
         this.readArgs(args);
         Logger log = LoggerFactory.getLogger("bench");
+        
+        this.printDescription();
+        this.buildModel();
+        this.configureSolver();
+
         if (!quiet) {
             log.info(Constant.WELCOME_TITLE);
             log.info(Constant.WELCOME_VERSION, solver.properties.get("solver.version"));
             log.info("* Sample library: executing {}.java ... \n", getClass().getName());
         }
-
-        this.printDescription();
-        this.buildModel();
-        this.configureSolver();
 
         if (policy.length() > 0) {
             overridePolicy();

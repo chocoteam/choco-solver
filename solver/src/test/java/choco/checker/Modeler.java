@@ -169,6 +169,48 @@ public interface Modeler {
         }
     };
 
+    Modeler modelAllDiffGraph = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map) {
+            Solver s = new Solver("AllDiffGRAPH_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.GRAPH);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelAllDiffGraphBc = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map) {
+            Solver s = new Solver("AllDiffGRAPH_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0],domains[i][domains[i].length-1], s);
+                map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.GRAPH);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
     Modeler modelTimes = new Modeler() {
         @Override
         public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map) {

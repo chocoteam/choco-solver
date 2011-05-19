@@ -30,8 +30,11 @@ package solver.variables.graph.graphOperations.connectivity;
 import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.BitSet;
+
+import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
@@ -195,7 +198,19 @@ public class StrongConnectivityFinder {
 	
 	
 	
-	
+	public static void main(String[] args) {
+		DirectedGraph dig = new DirectedGraph(5, GraphType.SPARSE);
+		dig.addArc(0, 1);
+		dig.addArc(2, 3);
+		dig.addArc(1, 0);
+		dig.addArc(3, 2);
+		dig.addArc(0, 3);
+		dig.addArc(2, 1);
+		dig.addArc(4, 3);
+		dig.addArc(4, 1);
+		System.out.println(dig);
+		System.out.println(StrongConnectivityFinder.findAllSCCOf(dig));
+	}
 	
 	
 	

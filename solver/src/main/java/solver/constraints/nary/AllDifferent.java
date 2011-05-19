@@ -39,6 +39,7 @@ import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.gary.PropAllDiffGraph;
 import solver.constraints.propagators.gary.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropAllDiffBC;
@@ -110,13 +111,17 @@ public class AllDifferent extends IntConstraint<IntVar> {
 	 * BEWARE pretty heavy : to avo•d when the amount of bks is high and when 
 	 * there are much more values than variables
 	 * 
-	 * @param vars
+	 * @param vars should be enumerated variables otherwise a BC choice would be much more relevant
 	 * @param solver
 	 */
 	 private void buildGraphAllDifferent(IntVar[] vars, Solver solver){
 		 TIntArrayList valuesList = new TIntArrayList();
+		 boolean bcMode = false;;
 		 int val,ub;
 		 for(int v=0; v<vars.length;v++){
+			 if(!vars[v].hasEnumeratedDomain()){
+				 bcMode = true;
+			 }
 			 ub = vars[v].getUB();
 			 for(val=vars[v].getLB(); val<=ub; val = vars[v].nextValue(val)){
 				 if(!valuesList.contains(val)){
@@ -142,12 +147,22 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				 graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
 			 }
 		 }
-		 setPropagators(
-				 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, true),  
-				 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),
-				 new PropAtLeastNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),
-				 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true, values, valuesHash)
-		 );
+		 if(bcMode){
+			 setPropagators(
+					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
+					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
+					 new PropAtLeastNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),
+					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash),
+					 new PropGraphAllDiffBC(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, valuesHash)
+			 );
+		 }else{
+			 setPropagators(
+					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
+					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
+					 new PropAtLeastNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),// enables a clean implemetation but is not fundamental 
+					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash)
+			 );
+		 }
 	 }
 
 	 /**

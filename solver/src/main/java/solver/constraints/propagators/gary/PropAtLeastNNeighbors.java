@@ -47,6 +47,9 @@ import solver.requests.IRequest;
 
 /**Propagator that ensures that a node has at least N neighbors
  * 
+ * BEWARE : the case where N=1 may should be automatic? (Who needs a node with no arcs?)
+ *          the case where N>1 is not implemented yet
+ * 
  * @author Jean-Guillaume Fages
  *
  * @param <V>
@@ -60,6 +63,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	private UndirectedGraphVar g;
 	private IntProcedure rem_proc;
 	private int n_neighbors;
+	private IntProcedure enf_nodes_proc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -72,10 +76,19 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		g = graph;
 		n_neighbors = nNeigh;
 		final PropAtLeastNNeighbors<V> instance = this;
+		final int n = g.getEnvelopGraph().getNbNodes();
+
+		enf_nodes_proc = new IntProcedure() {
+			@Override
+			public void execute(int i) throws ContradictionException {
+				if(g.getEnvelopGraph().getNeighborhoodSize(i)==1){
+					g.enforceArc(i, g.getEnvelopGraph().getNeighborsOf(i).getFirstElement(), instance);
+				}
+			}
+		};
 		rem_proc = new IntProcedure() {
 			@Override
 			public void execute(int i) throws ContradictionException {
-				int n = g.getEnvelopGraph().getNbNodes();
 				if (i>=n){
 					int from = i/n-1;
 					int to   = i%n;
@@ -86,20 +99,17 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 				}
 			}
 			private void prune(int from) throws ContradictionException{
-				int to;
-				if(g.getEnvelopGraph().getNeighborhoodSize(from)<n_neighbors){
+				if(g.getEnvelopGraph().getNeighborhoodSize(from)==0){
 					g.removeNode(from, instance);
 				}else if (g.getKernelGraph().getActiveNodes().isActive(from) &&
-						  g.getEnvelopGraph().getNeighborhoodSize(from)==n_neighbors && 
-						  g.getKernelGraph().getNeighborhoodSize(from)<n_neighbors){
-					AbstractNeighborsIterator<INeighbors> iter = g.getEnvelopGraph().neighborsIteratorOf(from);
-					while (iter.hasNext()){
-						to = iter.next();
-						g.enforceArc(from, to, instance);
-					}
+						g.getEnvelopGraph().getNeighborhoodSize(from)==1){
+					g.enforceArc(from, g.getEnvelopGraph().getNeighborsOf(from).getFirstElement(), instance);
 				}
 			}
 		};
+		if (n_neighbors!=1){
+			throw new UnsupportedOperationException("case not implemented yet... ");
+		}
 	}
 
 	//***********************************************************************************
@@ -129,11 +139,18 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if(mask!=EventType.REMOVEARC.mask)return;
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
-			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-			d.forEach(rem_proc, gv.fromArcRemoval(), gv.toArcRemoval());
+			if((mask & EventType.REMOVEARC.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+				d.forEach(rem_proc, gv.fromArcRemoval(), gv.toArcRemoval());
+			}
+			if((mask & EventType.ENFORCENODE.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
+				d.forEach(enf_nodes_proc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
+			}
+		}else{
+			throw new UnsupportedOperationException("error ");
 		}
 	}
 
@@ -143,28 +160,21 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
+		ActiveNodesIterator<IActiveNodes> niter = g.getKernelGraph().activeNodesIterator();
 		int node;
 		while(niter.hasNext()){
 			node = niter.next();
-			if(g.getEnvelopGraph().getNeighborhoodSize(node)<n_neighbors){return ESat.FALSE;
+			if(g.getEnvelopGraph().getNeighborhoodSize(node)<n_neighbors){
+				return ESat.FALSE;
 			}
-			if(g.getKernelGraph().getActiveNodes().isActive(node)){
-				if(g.getKernelGraph().getNeighborhoodSize(node)<n_neighbors &&
-				 g.getEnvelopGraph().getNeighborhoodSize(node)==n_neighbors){return ESat.FALSE;
-				}
-			}
-			if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-				return ESat.UNDEFINED;
-			}
-			if(g.getKernelGraph().getNeighborhoodSize(node)!=g.getEnvelopGraph().getNeighborhoodSize(node)){
-				return ESat.UNDEFINED;
-			}
+		}
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
 		}
 		return ESat.TRUE;
 	}

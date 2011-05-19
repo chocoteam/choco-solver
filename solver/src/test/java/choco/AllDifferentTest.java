@@ -54,240 +54,238 @@ import java.util.Random;
  */
 public class AllDifferentTest {
 
-    public static void model(boolean simple, int n, int nbSol) {
-        Solver s = new Solver();
-        IEnvironment env = s.getEnvironment();
+	public static void model(boolean simple, int n, int nbSol) {
+		Solver s = new Solver();
+		IEnvironment env = s.getEnvironment();
 
-        IntVar[] vars = new IntVar[n];
-        int i = 0;
-        vars[0] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[1] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[2] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[3] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[4] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[5] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[6] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-        vars[7] = VariableFactory.enumerated("v_" + (i), 1, n, s);
+		IntVar[] vars = new IntVar[n];
+		int i = 0;
+		vars[0] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[1] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[2] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[3] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[4] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[5] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[6] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
+		vars[7] = VariableFactory.enumerated("v_" + (i), 1, n, s);
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
-        IntVar[] allvars;
-        if (simple) {
-            allvars = vars;
+		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+		IntVar[] allvars;
+		if (simple) {
+			allvars = vars;
 
-            lcstrs.add(new AllDifferent(vars, s));
-            for (i = 0; i < n - 1; i++) {
-                for (int j = i + 1; j < n; j++) {
-                    int k = j - i;
-                    lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
-                    lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], k, s));
-                    lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], -k, s));
-                }
-            }
-        } else {
-            IntVar[] diag1 = new IntVar[n];
-            IntVar[] diag2 = new IntVar[n];
+			lcstrs.add(new AllDifferent(vars, s));
+			for (i = 0; i < n - 1; i++) {
+				for (int j = i + 1; j < n; j++) {
+					int k = j - i;
+					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
+					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], k, s));
+					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], -k, s));
+				}
+			}
+		} else {
+			IntVar[] diag1 = new IntVar[n];
+			IntVar[] diag2 = new IntVar[n];
 
-            for (i = 0; i < n; i++) {
-                diag1[i] = VariableFactory.enumerated("v_" + (i + 2 * n), -n, n, s);
-                diag2[i] = VariableFactory.enumerated("v_" + (i + n), 1, 2 * n, s);
-            }
-            allvars = ArrayUtils.append(vars, diag1, diag2);
+			for (i = 0; i < n; i++) {
+				diag1[i] = VariableFactory.enumerated("v_" + (i + 2 * n), -n, n, s);
+				diag2[i] = VariableFactory.enumerated("v_" + (i + n), 1, 2 * n, s);
+			}
+			allvars = ArrayUtils.append(vars, diag1, diag2);
 
-            lcstrs.add(new AllDifferent(vars, s));
+			lcstrs.add(new AllDifferent(vars, s));
 
-            for (i = 0; i < n; i++) {
-                lcstrs.add(ConstraintFactory.eq(diag1[i], vars[i], -i, s));
-                lcstrs.add(ConstraintFactory.eq(diag2[i], vars[i], i, s));
-            }
-            lcstrs.add(new AllDifferent(diag1, s));
-            lcstrs.add(new AllDifferent(diag2, s));
+			for (i = 0; i < n; i++) {
+				lcstrs.add(ConstraintFactory.eq(diag1[i], vars[i], -i, s));
+				lcstrs.add(ConstraintFactory.eq(diag2[i], vars[i], i, s));
+			}
+			lcstrs.add(new AllDifferent(diag1, s));
+			lcstrs.add(new AllDifferent(diag2, s));
 
-        }
-
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-
-        s.post(cstrs);
-        s.set(strategy);
-
-        s.findAllSolutions();
-        long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, nbSol, "nb sol incorrect");
-    }
+		}
 
 
-    @Test(groups = "10s")
-    public void test1() {
-        model(true, 8, 92);
-        model(false, 8, 92);
-    }
+		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-    @Test(groups = "1s")
-    public void test2() {
-        model(true, 8, 92);
-    }
+		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
 
-    @Test(groups = "1s")
-    public void test3() {
+		s.post(cstrs);
+		s.set(strategy);
 
-        Solver s = new Solver();
-
-        int n = 4;
-        IntVar[] vars = new IntVar[n];
-        vars[0] = VariableFactory.enumerated("v_0", new int[]{1, 6}, s);
-        vars[1] = VariableFactory.enumerated("v_1", new int[]{1, 3}, s);
-        vars[2] = VariableFactory.enumerated("v_2", new int[]{3, 5}, s);
-        vars[3] = VariableFactory.enumerated("v_3", new int[]{1, 3, 5, 6}, s);
+		s.findAllSolutions();
+		long sol = s.getMeasures().getSolutionCount();
+		Assert.assertEquals(sol, nbSol, "nb sol incorrect");
+	}
 
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
-        List<Constraint> lcstrs1 = new ArrayList<Constraint>(1);
-        List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
+	@Test(groups = "10s")
+	public void test1() {
+		model(true, 8, 92);
+		model(false, 8, 92);
+	}
 
-        lcstrs1.add(new AllDifferent(vars, s));
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                lcstrs2.add(ConstraintFactory.neq(vars[i], vars[j], -k, s));
-                lcstrs2.add(ConstraintFactory.neq(vars[i], vars[j], k, s));
-            }
-        }
-        lcstrs.addAll(lcstrs1);
-        lcstrs.addAll(lcstrs2);
+	@Test(groups = "1s")
+	public void test2() {
+		model(true, 8, 92);
+	}
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+	@Test(groups = "1s")
+	public void test3() {
 
-        s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
-//        ChocoLogging.toSolution();
-        s.findAllSolutions();
-        long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 1, "nb sol incorrect");
+		Solver s = new Solver();
 
-    }
+		int n = 4;
+		IntVar[] vars = new IntVar[n];
+		vars[0] = VariableFactory.enumerated("v_0", new int[]{1, 6}, s);
+		vars[1] = VariableFactory.enumerated("v_1", new int[]{1, 3}, s);
+		vars[2] = VariableFactory.enumerated("v_2", new int[]{3, 5}, s);
+		vars[3] = VariableFactory.enumerated("v_3", new int[]{1, 3, 5, 6}, s);
 
 
-    @Test(groups = "1s")
-    public void test4() {
+		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+		List<Constraint> lcstrs1 = new ArrayList<Constraint>(1);
+		List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
 
-        Solver s = new Solver();
+		lcstrs1.add(new AllDifferent(vars, s));
+		for (int i = 0; i < n - 1; i++) {
+			for (int j = i + 1; j < n; j++) {
+				int k = j - i;
+				lcstrs2.add(ConstraintFactory.neq(vars[i], vars[j], -k, s));
+				lcstrs2.add(ConstraintFactory.neq(vars[i], vars[j], k, s));
+			}
+		}
+		lcstrs.addAll(lcstrs1);
+		lcstrs.addAll(lcstrs2);
 
-        int n = 5;
-        IntVar[] vars = new IntVar[n];
-        vars[0] = VariableFactory.fixed("v_0", 5);
-        vars[1] = VariableFactory.fixed("v_1", 3);
-        vars[2] = VariableFactory.bounded("v_2", 3, 4, s);
-        vars[3] = VariableFactory.bounded("v_3", 2, 6, s);
-        vars[4] = VariableFactory.bounded("v_4", 2, 6, s);
+		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
+		s.post(cstrs);
+		s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+		//        ChocoLogging.toSolution();
+		s.findAllSolutions();
+		long sol = s.getMeasures().getSolutionCount();
+		Assert.assertEquals(sol, 1, "nb sol incorrect");
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
-
-        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
-
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
-        s.post(cstrs);
-        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
-        s.findAllSolutions();
-        long sol = s.getMeasures().getSolutionCount();
-        Assert.assertEquals(sol, 2, "nb sol incorrect");
-
-    }
+	}
 
 
-    @Test(groups = "30m")
-    public void test6() {
-        Random rand;
-        for (int seed = 0; seed < 10; seed++) {
-            rand = new Random(seed);
-            for (double d = 0.25; d <= 1.0; d += 0.25) {
-                for (int h = 0; h <= 1; h++) {
-                    for (int b = 0; b <= 1; b++) {
-                        int n = 1 + rand.nextInt(7);
-                        int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2*n, rand, d, h == 0);
+	@Test(groups = "1s")
+	public void test4() {
 
-                        Solver neqs = alldiffs(domains, 0, b == 0);
-                        neqs.findAllSolutions();
+		Solver s = new Solver();
 
-                        Solver clique = alldiffs(domains, 1, b == 0);
-                        clique.findAllSolutions();
-                        Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-                        Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
-
-                        Solver bc = alldiffs(domains, 2, b == 0);
-                        bc.findAllSolutions();
-                        Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-                        Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
-
-                        Solver ac = alldiffs(domains, 3, b == 0);
-                        ac.findAllSolutions();
-                        Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-                        Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
-
-                        if(b==1){ // only relevant for enumerated domains
-                            Solver graph = alldiffs(domains, 4, false);
-                            graph.findAllSolutions();
-                            Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-                            Assert.assertTrue(graph.getMeasures().getFailCount() == 0, "gac failed"+ seed);
-                            Assert.assertTrue(graph.getMeasures().getNodeCount() <= ac.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
-                        }
-                        
-                        LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
-                                neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
-                                bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount()});
-                    }
-                }
-            }
-        }
-    }
+		int n = 5;
+		IntVar[] vars = new IntVar[n];
+		vars[0] = VariableFactory.fixed("v_0", 5);
+		vars[1] = VariableFactory.fixed("v_1", 3);
+		vars[2] = VariableFactory.bounded("v_2", 3, 4, s);
+		vars[3] = VariableFactory.bounded("v_3", 2, 6, s);
+		vars[4] = VariableFactory.bounded("v_4", 2, 6, s);
 
 
-    protected Solver alldiffs(int[][] domains, int c, boolean bounded) {
-        Solver s = new Solver();
+		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
 
-        IntVar[] vars = new IntVar[domains.length];
-        if (bounded) {
-            for (int i = 0; i < domains.length; i++) {
-                vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
-            }
-        } else {
-            for (int i = 0; i < domains.length; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
-            }
-        }
+		lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
 
-        List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
-        switch (c) {
-            case 0:
-                for (int i = 0; i < vars.length - 1; i++) {
-                    for (int j = i + 1; j < vars.length; j++) {
-                        lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
-                    }
-                }
-                break;
-            case 1:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
-                break;
-            case 2:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
-                break;
-            case 3:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
-                break;
-            case 4:
-                lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
-                break;
-        }
+		s.post(cstrs);
+		s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+		s.findAllSolutions();
+		long sol = s.getMeasures().getSolutionCount();
+		Assert.assertEquals(sol, 2, "nb sol incorrect");
 
-        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+	}
 
-        s.post(cstrs);
-        s.set(StrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
-        return s;
-    }
+
+	@Test(groups = "1h")
+	public void test6() {
+		Random rand;
+		for (int seed = 0; seed < 10; seed++) {
+			rand = new Random(seed);
+			for (double d = 0.25; d <= 1.0; d += 0.25) {
+				for (int h = 0; h <= 1; h++) {
+					for (int b = 0; b <= 1; b++) {
+						int n = 1 + rand.nextInt(7);
+						int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2*n, rand, d, h == 0);
+
+						Solver neqs = alldiffs(domains, 0, b == 0);
+						neqs.findAllSolutions();
+
+						Solver clique = alldiffs(domains, 1, b == 0);
+						clique.findAllSolutions();
+						Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
+						Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+
+						Solver bc = alldiffs(domains, 2, b == 0);
+						bc.findAllSolutions();
+						Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
+						Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+
+						Solver ac = alldiffs(domains, 3, b == 0);
+						ac.findAllSolutions();
+						Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
+						Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+
+						Solver graph = alldiffs(domains, 4, b==0);
+						graph.findAllSolutions();
+						Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
+						Assert.assertTrue(graph.getMeasures().getFailCount() == 0 || b==0, "gac failed"+ seed);
+						Assert.assertTrue(graph.getMeasures().getNodeCount() == ac.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+						
+						LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
+								neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
+								bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount()});
+					}
+				}
+			}
+		}
+	}
+
+
+	protected Solver alldiffs(int[][] domains, int c, boolean bounded) {
+		Solver s = new Solver();
+
+		IntVar[] vars = new IntVar[domains.length];
+		if (bounded) {
+			for (int i = 0; i < domains.length; i++) {
+				vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
+			}
+		} else {
+			for (int i = 0; i < domains.length; i++) {
+				vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+			}
+		}
+
+		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
+
+		switch (c) {
+		case 0:
+			for (int i = 0; i < vars.length - 1; i++) {
+				for (int j = i + 1; j < vars.length; j++) {
+					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
+				}
+			}
+			break;
+		case 1:
+			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
+			break;
+		case 2:
+			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
+			break;
+		case 3:
+			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
+			break;
+		case 4:
+			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
+			break;
+		}
+
+		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+
+		s.post(cstrs);
+		s.set(StrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
+		return s;
+	}
 
 }

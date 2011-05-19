@@ -173,17 +173,16 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 
 	@Override
 	public ESat isEntailed() {
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
+		ActiveNodesIterator<IActiveNodes> niter = g.getKernelGraph().activeNodesIterator();
 		int node;
 		while(niter.hasNext()){
 			node = niter.next();
 			if(g.getKernelGraph().getNeighborhoodSize(node)>n_neighbors){
 				return ESat.FALSE;
 			}
-			if(g.getKernelGraph().getNeighborhoodSize(node)!=g.getEnvelopGraph().getNeighborhoodSize(node)){
-				return ESat.UNDEFINED;
-			}
 		}
-		return ESat.TRUE;
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}return ESat.UNDEFINED;
 	}
 }

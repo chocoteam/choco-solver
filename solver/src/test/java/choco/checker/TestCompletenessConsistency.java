@@ -57,7 +57,7 @@ public class TestCompletenessConsistency {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+    // EQ *******************************************************
     @Test(groups = "1s")
     public void testEQ1() {
         long seed = System.currentTimeMillis();
@@ -70,6 +70,7 @@ public class TestCompletenessConsistency {
         checkConsistency(Modeler.modelEqAC, 2, 0, 100, seed, "ac");
     }
 
+    // NEQ *******************************************************
     @Test(groups = "1s")
     public void testNEQ2() {
         long seed = System.currentTimeMillis();
@@ -82,6 +83,7 @@ public class TestCompletenessConsistency {
         checkConsistency(Modeler.modelNeqAC, 2, 0, 100, seed, "ac");
     }
 
+    // AllDifferent AC *******************************************************
     @Test(groups = "1s")
     public void testALLDIFFERENT1() {
         long seed = System.currentTimeMillis();
@@ -105,7 +107,14 @@ public class TestCompletenessConsistency {
         long seed = System.currentTimeMillis();
         checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, seed, "ac");
     }
-
+    
+    @Test(groups = "1m")
+    public void testALLDIFFERENTGRAPHAC() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, seed, "ac");
+    }
+    
+    // InverseChanneling *******************************************************
     @Test(groups = "10s")
     public void testINVERSECHANNELING1() {
         long seed = System.currentTimeMillis();
@@ -124,6 +133,7 @@ public class TestCompletenessConsistency {
         checkConsistency(Modeler.modelInverseChannelingAC, 10, -10, 120, seed, "ac");
     }
 
+    // AllDifferent BC *******************************************************
     @Test(groups = "1s")
     public void testALLDIFFERENTBC1() {
         long seed = System.currentTimeMillis();
@@ -146,6 +156,12 @@ public class TestCompletenessConsistency {
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
         checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, seed, "bc");
+    }
+    
+    @Test(groups = "1m")
+    public void testALLDIFFERENTGRAPHBC() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, seed, "bc");
     }
 
     /*@Test

@@ -125,6 +125,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 
 	public int nextArc() {
 		return nextArcLexicographic();
+//		return nextArcRandom();
 	}
 	private int nextArcLexicographic() {
 		int n = getEnvelopGraph().getNbNodes();
@@ -142,31 +143,31 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 		}
 		return -1;
 	}
-//	private int nextArcRandom() {
-//		int n = getEnvelopGraph().getNbNodes();
-//		TIntArrayList arcs = new TIntArrayList(n);
-//		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
-//			if(kernel.neighbors[i].neighborhoodSize()>1){
-//				throw new UnsupportedOperationException("error in 1-succ filtering");
-//			}
-//			if(envelop.neighbors[i].neighborhoodSize()<1){
-//				throw new UnsupportedOperationException("error in 1-succ filtering");
-//			}
-//			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-//				AbstractNeighborsIterator<INeighbors> iter = envelop.neighbors[i].iterator();
-//				int j;
-//				while(iter.hasNext()){
-//					j = iter.next();
-//					if (!kernel.edgeExists(i, j)){
-//						arcs.add((i+1)*n+j);
-//					}
-//				}
-//			}
-//		}
-//		if(arcs.size()==0)return -1;
-//		Random rd = new Random(0);
-//		return arcs.get(rd.nextInt(arcs.size()));
-//	}
+	private int nextArcRandom() {
+		int n = getEnvelopGraph().getNbNodes();
+		TIntArrayList arcs = new TIntArrayList(n);
+		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+			if(kernel.neighbors[i].neighborhoodSize()>1){
+				throw new UnsupportedOperationException("error in 1-succ filtering");
+			}
+			if(envelop.neighbors[i].neighborhoodSize()<1){
+				throw new UnsupportedOperationException("error in 1-succ filtering");
+			}
+			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
+				AbstractNeighborsIterator<INeighbors> iter = envelop.neighbors[i].iterator();
+				int j;
+				while(iter.hasNext()){
+					j = iter.next();
+					if (!kernel.edgeExists(i, j)){
+						arcs.add((i+1)*n+j);
+					}
+				}
+			}
+		}
+		if(arcs.size()==0)return -1;
+		Random rd = new Random(0);
+		return arcs.get(rd.nextInt(arcs.size()));
+	}
 	private int nextArcRandom2() {
 		int n = getEnvelopGraph().getNbNodes();
 		TIntArrayList arcs = new TIntArrayList(n);
