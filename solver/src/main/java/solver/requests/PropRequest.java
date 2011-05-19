@@ -114,7 +114,7 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
 
     @Override
     public String toString() {
-        return "(" + variable.getName() + " - " + propagator.getConstraint().toString() + ")";
+        return "(" + variable.getName() + " :: " + propagator.getConstraint().toString() + ")";
     }
 
     @Override

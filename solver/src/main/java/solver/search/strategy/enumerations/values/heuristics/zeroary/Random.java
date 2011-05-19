@@ -36,6 +36,7 @@ import solver.variables.IntVar;
 public class Random extends HeuristicVal {
     long seed;
     IntVar ivar;
+    boolean enumerated;
     java.util.Random generator;
     TIntHashSet elts;
 
@@ -51,18 +52,20 @@ public class Random extends HeuristicVal {
         this(ivar, System.currentTimeMillis(), action);
     }
 
-    Random(IntVar ivar, long seed) {
+    public Random(IntVar ivar, long seed) {
         super();
         this.seed = seed;
         this.ivar = ivar;
+        enumerated = ivar.hasEnumeratedDomain();
         this.generator = new java.util.Random(seed);
         elts = new TIntHashSet();
     }
 
-    Random(IntVar ivar, long seed, Action action) {
+    public Random(IntVar ivar, long seed, Action action) {
         super(action);
         this.seed = seed;
         this.ivar = ivar;
+        enumerated = ivar.hasEnumeratedDomain();
         this.generator = new java.util.Random(seed);
         elts = new TIntHashSet();
     }
@@ -72,16 +75,40 @@ public class Random extends HeuristicVal {
     }
 
     public int next() {
-        int n = generator.nextInt(ivar.getDomainSize() - elts.size());
-        int j = ivar.getLB();
-        for (int i = 0; i < n;) {
-            if (!elts.contains(j)) {
-                i++;
+        if (enumerated) {
+            int n = generator.nextInt(ivar.getDomainSize() - elts.size());
+            int j = ivar.getLB();
+            for (int i = 0; i < n;) {
+                if (!elts.contains(j)) {
+                    i++;
+                }
+                j = ivar.nextValue(j);
             }
-            j = ivar.nextValue(j);
+            elts.add(j);
+            return j;
+        }else{
+            boolean getlb = generator.nextBoolean();
+            int lb = ivar.getLB();
+            int ub = ivar.getUB();
+            if(getlb){
+                if(!elts.contains(lb)){
+                    elts.add(lb);
+                    return lb;
+                }else{
+                    elts.add(ub);
+                    return ub;
+                }
+            }else{
+                if(!elts.contains(ub)){
+                    elts.add(ub);
+                    return ub;
+                }else{
+                    elts.add(lb);
+                    return ivar.getLB();
+                }
+            }
+//            throw new UnsupportedOperationException("Random for bounded variable is unavailable");
         }
-        elts.add(j);
-        return j;
     }
 
     public void remove() {

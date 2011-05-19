@@ -137,6 +137,14 @@ public final class StrategyFactory {
                 environment);
     }
 
+    public static AbstractStrategy<IntVar> random(IntVar[] vars, IEnvironment environment, long seed) {
+        HeuristicValFactory.random(seed, vars);
+        return StrategyVarValAssign.dyn(vars,
+                SorterFactory.random(seed),
+                ValidatorFactory.instanciated,
+                environment);
+    }
+
     public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, Solver solver) {
         for (IntVar var : vars) {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));

@@ -37,7 +37,7 @@ import java.lang.reflect.Array;
 import java.util.BitSet;
 
 
-public class S64BitSet implements IStateBitSet{
+public class S64BitSet implements IStateBitSet {
 
     /*
     * BitSets are packed into arrays of "words."  Currently a word is
@@ -69,6 +69,7 @@ public class S64BitSet implements IStateBitSet{
 
     /**
      * Given a bit index, return word index containing it.
+     *
      * @param bitIndex bit index
      */
     private static int wordIndex(int bitIndex) {
@@ -101,6 +102,7 @@ public class S64BitSet implements IStateBitSet{
 
     /**
      * Creates a new bit set. All bits are initially <code>false</code>.
+     *
      * @param environment bactrackable environment
      */
     public S64BitSet(IEnvironment environment) {
@@ -115,13 +117,13 @@ public class S64BitSet implements IStateBitSet{
      * <code>nbits-1</code>. All bits are initially <code>false</code>.
      *
      * @param environment backtrackable environment
-     * @param nbits the initial size of the bit set.
+     * @param nbits       the initial size of the bit set.
      * @throws NegativeArraySizeException if the specified initial size
      *                                    is negative.
      */
     public S64BitSet(IEnvironment environment, int nbits) {
         this.environment = environment;
-        this.wordsInUse =  environment.makeInt(0);
+        this.wordsInUse = environment.makeInt(0);
         // nbits can't be negative; size 0 is OK
         if (nbits < 0)
             throw new NegativeArraySizeException("nbits < 0: " + nbits);
@@ -144,11 +146,11 @@ public class S64BitSet implements IStateBitSet{
         if (words.length < wordsRequired) {
             // Allocate larger of doubled size or required size
             int request = Math.max(2 * words.length, wordsRequired);
-          int oldSize = words.length;
+            int oldSize = words.length;
             words = copyOf(words, request);
-          for(int i = oldSize; i < request; i++) {
-            words[i] = environment.makeLong(0);
-          }
+            for (int i = oldSize; i < request; i++) {
+                words[i] = environment.makeLong(0);
+            }
         }
     }
 
@@ -170,8 +172,8 @@ public class S64BitSet implements IStateBitSet{
     }
 
     @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy", "RedundantCast"})
-    public static <T,U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        T[] copy = ((Object)newType == (Object)Object[].class)
+    public static <T, U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
+        T[] copy = ((Object) newType == (Object) Object[].class)
                 ? (T[]) new Object[newLength]
                 : (T[]) Array.newInstance(newType.getComponentType(), newLength);
         System.arraycopy(original, 0, copy, 0,
@@ -181,7 +183,7 @@ public class S64BitSet implements IStateBitSet{
 
     public BitSet copyToBitSet() {
         BitSet view = new BitSet(this.size());
-        for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i,true);
+        for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
         return view;
     }
 
@@ -203,8 +205,9 @@ public class S64BitSet implements IStateBitSet{
 
     /**
      * Checks that fromIndex ... toIndex is a valid range of bit indices.
+     *
      * @param fromIndex starting index
-     * @param toIndex ending index
+     * @param toIndex   ending index
      */
     private static void checkRange(int fromIndex, int toIndex) {
         if (fromIndex < 0)
@@ -480,7 +483,7 @@ public class S64BitSet implements IStateBitSet{
 
         //checkInvariants();
 
-        int wordIndex =  bitIndex >> ADDRESS_BITS_PER_WORD; //wordIndex(bitIndex);
+        int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD; //wordIndex(bitIndex);
         return (wordIndex < wordsInUse.get())
                 && ((words[wordIndex].get() & (1L << bitIndex)) != 0);
     }
@@ -543,28 +546,28 @@ public class S64BitSet implements IStateBitSet{
     }
 
     /**
-     * Returns the index of the first bit that is set to <code>true</code>
+     * Returns the index of the first bit that is set to {@code true}
      * that occurs on or after the specified starting index. If no such
-     * bit exists then -1 is returned.
+     * bit exists then {@code -1} is returned.
      * <p/>
-     * To iterate over the <code>true</code> bits in a <code>BitSet</code>,
+     * <p>To iterate over the {@code true} bits in a {@code BitSet},
      * use the following loop:
      * <p/>
-     * <pre>
+     * <pre> {@code
      * for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
      *     // operate on index i here
-     * }</pre>
+     * }}</pre>
      *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the next set bit.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the next set bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
     public int nextSetBit(int fromIndex) {
-        //if (fromIndex < 0)
-        //    throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
 
         int u = wordIndex(fromIndex);
         if (u >= wordsInUse.get())
@@ -582,84 +585,20 @@ public class S64BitSet implements IStateBitSet{
     }
 
     /**
-     * Returns the index of the first bit that is set to <code>true</code>
-     * that occurs on or before the specified starting index. If no such
-     * bit exists then -1 is returned.
-     *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the previous set bit.
-     * @throws IndexOutOfBoundsException if the specified index is
-     *                                   negative or too large
-     */
-
-
-
-    public int prevSetBit(int fromIndex) {
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
-
-        int u = wordIndex(fromIndex);
-        if (u >= wordsInUse.get()) {
-            return length() - 1;
-        }
-
-        long mask = ~(WORD_MASK << fromIndex + 1);
-        long word = words[u].get() & ( mask != 0 ? mask : WORD_MASK );
-
-        while (true) {
-            if (word != 0)
-                return (u * BITS_PER_WORD) + BIT_INDEX_MASK - Long.numberOfLeadingZeros(word);
-            if (u-- == 0)
-                return -1;
-            word = words[u].get();
-        }
-    }
-
-    public int prevClearBit(int fromIndex) {
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
-
-        int u = wordIndex(fromIndex);
-        if (u >= wordsInUse.get()) {
-            return fromIndex;
-        }
-
-        long mask = ~(WORD_MASK << fromIndex + 1);
-        long word = ~words[u].get() & ( mask != 0 ? mask : WORD_MASK );
-
-        while (true) {
-            if (word != 0)
-                return (u * BITS_PER_WORD) + BIT_INDEX_MASK - Long.numberOfLeadingZeros(word);
-            if (u-- == 0)
-                return -1;
-            word = ~words[u].get();
-        }
-    }
-
-    public int capacity() {
-        return words.length*BITS_PER_WORD;
-    }
-
-    /**
-     * Returns the index of the first bit that is set to <code>false</code>
+     * Returns the index of the first bit that is set to {@code false}
      * that occurs on or after the specified starting index.
      *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the next clear bit.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the next clear bit
+     * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
     public int nextClearBit(int fromIndex) {
         // Neither spec nor implementation handle bitsets of maximal length.
         // See 4816253.
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
 
         int u = wordIndex(fromIndex);
         if (u >= wordsInUse.get())
@@ -674,6 +613,84 @@ public class S64BitSet implements IStateBitSet{
                 return wordsInUse.get() * BITS_PER_WORD;
             word = ~words[u].get();
         }
+    }
+
+    /**
+     * Returns the index of the nearest bit that is set to {@code true}
+     * that occurs on or before the specified starting index.
+     * If no such bit exists, or if {@code -1} is given as the
+     * starting index, then {@code -1} is returned.
+     * <p/>
+     * <p>To iterate over the {@code true} bits in a {@code BitSet},
+     * use the following loop:
+     * <p/>
+     * <pre> {@code
+     * for (int i = bs.length(); (i = bs.previousSetBit(i-1)) >= 0; ) {
+     *     // operate on index i here
+     * }}</pre>
+     *
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the previous set bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less
+     *                                   than {@code -1}
+     * @since 1.7
+     */
+    public int prevSetBit(int fromIndex) {
+        if (fromIndex < 0) {
+            return -1;
+        }
+
+        int u = wordIndex(fromIndex);
+        if (u >= wordsInUse.get())
+            return length() - 1;
+
+        long word = words[u].get() & (WORD_MASK >>> -(fromIndex + 1));
+
+        while (true) {
+            if (word != 0)
+                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+            if (u-- == 0)
+                return -1;
+            word = words[u].get();
+        }
+    }
+
+    /**
+     * Returns the index of the nearest bit that is set to {@code false}
+     * that occurs on or before the specified starting index.
+     * If no such bit exists, or if {@code -1} is given as the
+     * starting index, then {@code -1} is returned.
+     *
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the previous clear bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less
+     *                                   than {@code -1}
+     * @since 1.7
+     */
+    public int prevClearBit(int fromIndex) {
+        if (fromIndex < 0) {
+            return -1;
+        }
+
+        int u = wordIndex(fromIndex);
+        if (u >= wordsInUse.get())
+            return fromIndex;
+
+        long word = ~words[u].get() & (WORD_MASK >>> -(fromIndex + 1));
+
+        while (true) {
+            if (word != 0)
+                return (u + 1) * BITS_PER_WORD - 1 - Long.numberOfLeadingZeros(word);
+            if (u-- == 0)
+                return -1;
+            word = ~words[u].get();
+        }
+    }
+
+    public int capacity() {
+        return words.length * BITS_PER_WORD;
     }
 
     /**
@@ -839,7 +856,7 @@ public class S64BitSet implements IStateBitSet{
      * bit is set in the specified <code>BitSet</code>.
      *
      * @param setI the <code>BitSet</code> with which to mask this
-     *            <code>BitSet</code>.
+     *             <code>BitSet</code>.
      * @since 1.2
      */
     public void andNot(IStateBitSet setI) {
@@ -857,10 +874,10 @@ public class S64BitSet implements IStateBitSet{
      * <code>true</code> that are also set to <code>true</code> in this
      * <code>BitSet</code>.
      *
-     * @param	setI <code>BitSet</code> to intersect with
-     * @return  boolean indicating whether this <code>BitSet</code> intersects
-     *          the specified <code>BitSet</code>.
-     * @since   1.4
+     * @param setI <code>BitSet</code> to intersect with
+     * @return boolean indicating whether this <code>BitSet</code> intersects
+     *         the specified <code>BitSet</code>.
+     * @since 1.4
      */
     public boolean intersects(IStateBitSet setI) {
         S64BitSet set = (S64BitSet) setI;
@@ -872,7 +889,7 @@ public class S64BitSet implements IStateBitSet{
 
     public int hashCode() {
         long h = 1234;
-        for (int i = wordsInUse.get(); --i >= 0;)
+        for (int i = wordsInUse.get(); --i >= 0; )
             h ^= words[i].get() * (i + 1);
 
         return (int) ((h >> 32) ^ h);

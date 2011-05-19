@@ -106,6 +106,19 @@ public class HeuristicValFactory {
      * Sets the <b>inDomainRandom</b> value iterator to the list of variable in parameter.
      * This iterator chooses a random value in the variable's domain
      *
+     * @param seed seed for random
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void random(long seed, IntVar... vars) {
+        for (IntVar v : vars) {
+            v.setHeuristicVal(new Random(v, seed));
+        }
+    }
+
+    /**
+     * Sets the <b>inDomainRandom</b> value iterator to the list of variable in parameter.
+     * This iterator chooses a random value in the variable's domain
+     *
      * @param vars list of variables declaring this value iterator
      */
     public static void presetI(IntVar... vars) {
@@ -158,7 +171,7 @@ public class HeuristicValFactory {
      * TODO : mieux commenter
      *
      * @param ivar        variable to enumerate
-     * @param ivar@return {@link UnsafeEnum}
+     * @return {@link UnsafeEnum}
      */
     public static UnsafeEnum unsafeEnum(IntVar ivar) {
         return new UnsafeEnum(ivar.getLB(), 1, ivar.getUB());
@@ -168,7 +181,7 @@ public class HeuristicValFactory {
      * Build an UnsafeEnum heuristic val from a domain and an action
      * TODO : mieux commenter
      *
-     * @param ivar
+     * @param ivar variable to enumerate
      * @param action action
      * @return {@link UnsafeEnum}
      */
@@ -206,7 +219,8 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: Filter(Member(domain), UnsafeEnum(domain))
      *
-     * @param ivar@return a {@link Filter}
+     * @param ivar variable to enumerate
+     * @return a {@link Filter}
      */
     public static Filter enumVal(IntVar ivar) {
         return new Filter(new Member(ivar), unsafeEnum(ivar));
@@ -215,7 +229,8 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: FastEnumVal(ivar)
      *
-     * @param ivar@return a {@link Filter}
+     * @param ivar variable to enumerate
+     * @return a {@link Filter}
      */
     public static HeuristicVal fastenumVal(IntVar ivar) {
         return new FastEnumVal(ivar);
@@ -224,7 +239,7 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: Filter(Member(domain, action), UnsafeEnum(domain, action)
      *
-     * @param ivar   domain of the variable
+     * @param ivar   variable to enumerate
      * @param action action of Member and UnsafeEnum
      * @return a {@link Filter}
      */
@@ -235,7 +250,8 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: FastEnumVal(ivar)
      *
-     * @param ivar@return a {@link Filter}
+     * @param ivar variable to enumerate
+     * @return a {@link Filter}
      */
     public static HeuristicVal fastenumVal(IntVar ivar, Action action) {
         return new FastEnumVal(ivar, action);

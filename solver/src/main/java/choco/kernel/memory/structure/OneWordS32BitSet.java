@@ -321,118 +321,135 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     /**
-     * Returns the index of the first bit that is set to <code>true</code>
+     * Returns the index of the first bit that is set to {@code true}
      * that occurs on or after the specified starting index. If no such
-     * bit exists then -1 is returned.
+     * bit exists then {@code -1} is returned.
      * <p/>
-     * To iterate over the <code>true</code> bits in a <code>BitSet</code>,
+     * <p>To iterate over the {@code true} bits in a {@code BitSet},
      * use the following loop:
      * <p/>
-     * <pre>
+     * <pre> {@code
      * for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
      *     // operate on index i here
-     * }</pre>
+     * }}</pre>
      *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the next set bit.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the next set bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
     public int nextSetBit(int fromIndex) {
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
 
-        //checkInvariants();
+        if (fromIndex >= 32)
+            return -1;
 
         int word = this.word.get() & (WORD_MASK << fromIndex);
 
-        if (word != 0) {
+        if (word != 0)
             return Integer.numberOfTrailingZeros(word);
-        } else {
+        else
             return -1;
-        }
     }
 
     /**
-     * Returns the index of the first bit that is set to <code>true</code>
-     * that occurs on or before the specified starting index. If no such
-     * bit exists then -1 is returned.
-     *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the previous set bit.
-     * @throws IndexOutOfBoundsException if the specified index is
-     *                                   negative or too large
-     */
-
-
-    public int prevSetBit(int fromIndex) {
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
-        if (fromIndex > 32) {
-            return length() - 1;
-        }
-        int mask = ~(WORD_MASK << fromIndex + 1);
-        int word = this.word.get() & (mask != 0 ? mask : WORD_MASK);
-
-        if (word != 0) {
-            return BIT_INDEX_MASK - Integer.numberOfLeadingZeros(word);
-        } else {
-            return -1;
-        }
-    }
-
-    public int prevClearBit(int fromIndex) {
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-//
-        //checkInvariants();
-        if (fromIndex < 0) {
-            return -1;
-        } else if (fromIndex > 32) {
-            return fromIndex;
-        }
-        int mask = ~(WORD_MASK << fromIndex + 1);
-        int word = ~this.word.get() & (mask != 0 ? mask : WORD_MASK);
-
-        if (word != 0) {
-            return BIT_INDEX_MASK - Integer.numberOfLeadingZeros(word);
-        } else {
-            return -1;
-        }
-    }
-
-    public int capacity() {
-        return BITS_PER_WORD;
-    }
-
-    /**
-     * Returns the index of the first bit that is set to <code>false</code>
+     * Returns the index of the first bit that is set to {@code false}
      * that occurs on or after the specified starting index.
      *
-     * @param fromIndex the index to start checking from (inclusive).
-     * @return the index of the next clear bit.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the next clear bit
+     * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
     public int nextClearBit(int fromIndex) {
         // Neither spec nor implementation handle bitsets of maximal length.
         // See 4816253.
-//        if (fromIndex < 0)
-//            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-
-        //checkInvariants();
-        if (fromIndex > 32) {
-            return fromIndex;
+        if (fromIndex < 0) {
+            fromIndex = 0;
         }
+
+        if (fromIndex >= 64)
+            return fromIndex;
 
         int word = ~this.word.get() & (WORD_MASK << fromIndex);
 
         if (word != 0)
             return Integer.numberOfTrailingZeros(word);
         else
-            return BITS_PER_WORD;
+            return 0;
+    }
+
+    /**
+     * Returns the index of the nearest bit that is set to {@code true}
+     * that occurs on or before the specified starting index.
+     * If no such bit exists, or if {@code -1} is given as the
+     * starting index, then {@code -1} is returned.
+     * <p/>
+     * <p>To iterate over the {@code true} bits in a {@code BitSet},
+     * use the following loop:
+     * <p/>
+     * <pre> {@code
+     * for (int i = bs.length(); (i = bs.previousSetBit(i-1)) >= 0; ) {
+     *     // operate on index i here
+     * }}</pre>
+     *
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the previous set bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less
+     *                                   than {@code -1}
+     * @since 1.7
+     */
+    public int prevSetBit(int fromIndex) {
+        if (fromIndex < 0) {
+            return -1;
+        }
+
+        if (fromIndex >= 64)
+            return length() - 1;
+
+        int word = this.word.get() & (WORD_MASK >>> -(fromIndex + 1));
+
+        if (word != 0)
+            return BITS_PER_WORD - 1 - Integer.numberOfLeadingZeros(word);
+        else
+            return -1;
+    }
+
+    /**
+     * Returns the index of the nearest bit that is set to {@code false}
+     * that occurs on or before the specified starting index.
+     * If no such bit exists, or if {@code -1} is given as the
+     * starting index, then {@code -1} is returned.
+     *
+     * @param fromIndex the index to start checking from (inclusive)
+     * @return the index of the previous clear bit, or {@code -1} if there
+     *         is no such bit
+     * @throws IndexOutOfBoundsException if the specified index is less
+     *                                   than {@code -1}
+     * @since 1.7
+     */
+    public int prevClearBit(int fromIndex) {
+        if (fromIndex < 0) {
+            return -1;
+        }
+
+        if (fromIndex >= 64)
+            return fromIndex;
+
+        int word = ~this.word.get() & (WORD_MASK >>> -(fromIndex + 1));
+
+        if (word != 0)
+            return BITS_PER_WORD - 1 - Integer.numberOfLeadingZeros(word);
+        else
+            return -1;
+    }
+
+    public int capacity() {
+        return BITS_PER_WORD;
     }
 
     /**
