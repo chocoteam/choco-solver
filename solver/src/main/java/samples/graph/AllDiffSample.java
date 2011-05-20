@@ -183,8 +183,30 @@ public class AllDiffSample extends AbstractProblem{
 		}
 	}
 	
+	public static void pb(){
+		Solver solver = new Solver();
+		IntVar[] vars = new IntVar[5];
+		vars[0] = VariableFactory.enumerated("v0", new int[]{4,6}, solver);
+		vars[1] = VariableFactory.enumerated("v1", new int[]{2,4}, solver);
+		vars[2] = VariableFactory.enumerated("v2", new int[]{2,5}, solver);
+		vars[3] = VariableFactory.enumerated("v3", new int[]{5,6}, solver);
+		vars[4] = VariableFactory.enumerated("v4", new int[]{2,6}, solver);
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
+		solver.post(cstrs);
+		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment());
+		solver.set(strategy);
+		solver.findAllSolutions();
+		if(solver.getMeasures().getFailCount()>0){
+			throw new UnsupportedOperationException("error "+solver.getMeasures().getFailCount()+" fails");
+		}
+		System.out.println("nbSols "+solver.getMeasures().getSolutionCount());
+		System.out.println("nbNodes "+solver.getMeasures().getNodeCount());
+		System.out.println("time "+solver.getMeasures().getTimeCount()+"ms");
+	}
+	
 	public static void main(String[] args) {
-		bench();
+		pb();
+//		bench();
 //		System.out.println("mean time : "+testVarVal(6,8));
 //		System.out.println(getNbSols(6, 12));
 	}

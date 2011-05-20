@@ -36,9 +36,9 @@ import solver.constraints.probabilistic.propagators.nary.PropProbaAllDifferent;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
-import solver.constraints.propagators.gary.PropAllDiffGraph;
-import solver.constraints.propagators.gary.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
+import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropAllDiffBC;
@@ -115,7 +115,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 	 */
 	 private void buildGraphAllDifferent(IntVar[] vars, Solver solver){
 		 TIntArrayList valuesList = new TIntArrayList();
-		 boolean bcMode = false;;
+		 boolean bcMode = false;
 		 int val,ub;
 		 for(int v=0; v<vars.length;v++){
 			 if(!vars[v].hasEnumeratedDomain()){

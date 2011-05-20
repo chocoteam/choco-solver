@@ -123,6 +123,9 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
             	if(neig.neighborhoodSize()==1){
             		enforceArc(x, neig.getFirstElement(), null);
             	}
+            	if(neig.neighborhoodSize()==0){
+            		ContradictionException.throwIt(null, this, "cannot enforce nodes with no arcs");
+            	}
             	return true;
     		}return false;
     	}

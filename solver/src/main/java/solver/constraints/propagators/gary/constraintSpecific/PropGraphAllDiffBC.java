@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.constraintSpecific;
 
 import gnu.trove.TIntIntHashMap;
 import choco.kernel.ESat;

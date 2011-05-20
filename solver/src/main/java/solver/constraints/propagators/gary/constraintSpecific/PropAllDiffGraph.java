@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.constraintSpecific;
 
 import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
