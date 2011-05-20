@@ -43,6 +43,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**Propagator channeling an undirected graph and an array of integer variables
@@ -92,6 +93,19 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	@Override
 	public void propagate() throws ContradictionException {
 		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
+		for(int i=0; i<intVars.length; i++){
+			if(intVars[i].instantiated()){
+				g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this);
+			}
+		}
+		IActiveNodes act = g.getKernelGraph().getActiveNodes();
+		for(int i=act.nextValue(0); i>=0; i=act.nextValue(i+1)){
+			if (g.getKernelGraph().getNeighborhoodSize(i)==1){
+				if(i<intVars.length){
+					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
+				}
+			}
+		}
 	}
 
 	@Override

@@ -27,9 +27,7 @@
 
 package solver.variables.graph;
 
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-
-/**
+/**Class representing the neighborhood (a set of nodes) of a node
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 févr. 2011
@@ -64,12 +62,6 @@ public interface INeighbors {
      */
     int neighborhoodSize();
 
-    /**Get an iterator to iterate on the neighborhood
-     * @param <N>
-     * @return an iterator to iterate on the neighborhood
-     */
-    <N extends INeighbors> AbstractNeighborsIterator<N> iterator();
-    
     /**
      * Remove all elements from the neighborhood
      */
@@ -79,4 +71,18 @@ public interface INeighbors {
      * @return the first element of the neighborhood, -1 empty set
      */
     int getFirstElement();
+
+	/**enables to iterate over the neighborhood
+	 * 
+	 * should be used as follow :
+	 * 
+	 * for(int i=getFirstElement(); i>=0; i = getNextElement(){
+	 * 		...
+	 * }
+	 * 
+	 * The use of getFirstElement() is necessary to ensure a complete iteration
+	 * 
+	 * @return the next element of the neighborhood
+	 */
+	int getNextElement();
 }

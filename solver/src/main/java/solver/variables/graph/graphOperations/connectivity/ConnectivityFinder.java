@@ -28,14 +28,9 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 import java.util.BitSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
 /**Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
  * it uses Tarjan algorithm in a non recursive way and can be performed in O(M+N) time c.f. Gondrand Minoux
@@ -58,20 +53,19 @@ public class ConnectivityFinder {
 		int[] p = new int[nb];
 		int[] num = new int[nb];
 		int[] inf = new int[nb];
-		AbstractNeighborsIterator<INeighbors>[] neighbors = new AbstractNeighborsIterator[nb];
+		INeighbors[] neighbors = new INeighbors[nb];
 		BitSet notOpenedNodes = new BitSet(nb);
-		ActiveNodesIterator<IActiveNodes> iter = graph.activeNodesIterator();
-		int i;
-		while (iter.hasNext()){
-			i = iter.next();
+		BitSet notFirst = new BitSet(nb);
+		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
 			inf[i] = Integer.MAX_VALUE;
 			p[i] = -1;
 			notOpenedNodes.set(i);
+			neighbors[i] = graph.getNeighborsOf(i);
 		}
 		int first = 0;
 		first = notOpenedNodes.nextSetBit(first);
 		while(first>=0){
-			findCCandAP(co, graph, neighbors, first, p, num, inf, notOpenedNodes);
+			findCCandAP(co, neighbors, first, p, num, inf, notOpenedNodes, notFirst);
 			first = notOpenedNodes.nextSetBit(first);
 		}
 		return co;
@@ -79,27 +73,37 @@ public class ConnectivityFinder {
 	
 	/**
 	 * @param co the object which encapsulates CC and AP
-	 * @param graph the studied graph
 	 * @param neighbors iterators for neighbors of nodes
 	 * @param start the starting node of the procedure
 	 * @param p the array of parents of nodes in the dfs
 	 * @param num dfs numerotation
 	 * @param inf array used to find AP
 	 * @param notOpenedNodes enables to find the next starting point to consider
+	 * @param notFirst enables to know whether getFirstElement() or getNextElement() should be called to iterate
 	 */
-	private static void findCCandAP(ConnectivityObject co, IGraph graph, AbstractNeighborsIterator<INeighbors>[] neighbors, int start, int[] p, int[] num, int[] inf, BitSet notOpenedNodes){
+	private static void findCCandAP(ConnectivityObject co, INeighbors[] neighbors, int start, int[] p, int[] num, int[] inf, BitSet notOpenedNodes, BitSet notFirst){
 		co.newCC();
 		int i = start;
 		int k = 1;
 		num[start] = 1;
 		p[start] = start;
 		notOpenedNodes.clear(start);
-		neighbors[start] = graph.neighborsIteratorOf(start);
-		int j,q;
+		int j=0,q;
 		co.addCCNode(start);
 		int nbRootChildren = 0;
-		while((i!=start) || neighbors[i].hasNext()){
-			if(!neighbors[i].hasNext()){
+		boolean notFinished = true;
+		while(notFinished){
+			if(notFirst.get(i)){
+				j = neighbors[i].getNextElement();
+			}else{
+				j = neighbors[i].getFirstElement();
+				notFirst.set(i);
+			}
+			if(j<0){
+				if(i==start){
+					notFinished = false;
+					break;
+				}
 				if (p[i]==-1){Exception e = new Exception("error in DFS");e.printStackTrace();System.exit(0);}
 				q = inf[i];
 				i = p[i];
@@ -108,14 +112,12 @@ public class ConnectivityFinder {
 					co.addArticulationPoint(i);
 				}
 			}else{
-				j = neighbors[i].next();
 				if (p[j]==-1) {
 					p[j] = i;
 					if (i == start){
 						nbRootChildren++;
 					}
 					i = j;
-					neighbors[i] = graph.neighborsIteratorOf(i);
 					notOpenedNodes.clear(i);
 					k++;
 					num[i] = k;
@@ -144,19 +146,18 @@ public class ConnectivityFinder {
 		int nb = graph.getNbNodes();
 		ConnectivityObject co = new ConnectivityObject();
 		int[] p = new int[nb];
-		AbstractNeighborsIterator<INeighbors>[] neighbors = new AbstractNeighborsIterator[nb];
+		INeighbors[] neighbors = new INeighbors[nb];
 		BitSet notOpenedNodes = new BitSet(nb);
-		ActiveNodesIterator<IActiveNodes> iter = graph.activeNodesIterator();
-		int i;
-		while (iter.hasNext()){
-			i = iter.next();
+		BitSet notFirsts = new BitSet(nb);
+		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
 			p[i] = -1;
 			notOpenedNodes.set(i);
+			neighbors[i] = graph.getNeighborsOf(i);
 		}
 		int first = 0;
 		first = notOpenedNodes.nextSetBit(first);
 		while(first>=0){
-			findCC(co, graph, neighbors, first, p, notOpenedNodes);
+			findCC(co, neighbors, first, p, notOpenedNodes, notFirsts);
 			first = notOpenedNodes.nextSetBit(first);
 		}
 		return co;
@@ -165,32 +166,40 @@ public class ConnectivityFinder {
 	
 	/**
 	 * @param co the object which encapsulates CC and AP but here AP will be empty
-	 * @param graph the studied graph
 	 * @param neighbors iterators for neighbors of nodes
 	 * @param start the starting node of the procedure
 	 * @param p the array of parents of nodes in the dfs
 	 * @param notOpenedNodes enables to find the next starting point to consider
+	 * @param notFirsts enables to know whether getFirstElement() or getNextElement() should be called to iterate
 	 */
-	private static void findCC(ConnectivityObject co, IGraph graph, AbstractNeighborsIterator<INeighbors>[] neighbors, int start, int[] p, BitSet notOpenedNodes){
+	private static void findCC(ConnectivityObject co, INeighbors[] neighbors, int start, int[] p, BitSet notOpenedNodes, BitSet notFirsts){
 		co.newCC();
 		int i = start;
 		int k = 1;
 		p[start] = start;
 		notOpenedNodes.clear(start);
-		neighbors[start] = graph.neighborsIteratorOf(start);
 		int j;
 		co.addCCNode(start);
 		int nbRemainings = notOpenedNodes.cardinality();
-		while((i!=start) || neighbors[i].hasNext()){
-			if(!neighbors[i].hasNext()){
+		boolean notFinished = true;
+		while(notFinished){
+			if(notFirsts.get(i)){
+				j = neighbors[i].getNextElement();
+			}else{
+				notFirsts.set(i);
+				j = neighbors[i].getFirstElement();
+			}
+			if(j<0){
 				if (p[i]==-1){Exception e = new Exception("error in DFS");e.printStackTrace();System.exit(0);}
+				if(i==start){
+					notFinished = false;
+					break;
+				}
 				i = p[i];
 			}else{
-				j = neighbors[i].next();
 				if (p[j]==-1) {
 					p[j] = i;
 					i = j;
-					neighbors[i] = graph.neighborsIteratorOf(i);
 					notOpenedNodes.clear(i);
 					nbRemainings--;
 					k++;

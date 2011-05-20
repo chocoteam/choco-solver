@@ -48,8 +48,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphOperations.coupling.BipartiteMaxCardMatching;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**Main propagator for AllDifferent constraint
@@ -160,7 +158,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	//***********************************************************************************
-	// PROPAGATE
+	// Initialization
 	//***********************************************************************************
 
 	private void buildDigraph() {
@@ -170,19 +168,16 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 		}
 		int mate;
 		int pot;
-		AbstractNeighborsIterator<INeighbors> iter;
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
-		int i;
-		while(niter.hasNext()){
-			i = niter.next();
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		INeighbors nei;
+		for (int i = act.nextValue(0); i>=0; i = act.nextValue(i+1)) {
 			if(i<sizeFirstSet){
 				mate = matching[i];
 				if(mate!=-1){
 					digraph.addArc(mate, i);
 				}
-				iter = g.getEnvelopGraph().neighborsIteratorOf(i);
-				while(iter.hasNext()){
-					pot = iter.next();
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				for(pot = nei.getFirstElement(); pot>=0; pot = nei.getNextElement()){
 					if(pot!=mate){
 						digraph.addArc(i, pot);
 					}
@@ -220,17 +215,15 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 
 	private void repairMatching() throws ContradictionException{
 		BitSet iterable = new BitSet(n+1);
-		ActiveNodesIterator<IActiveNodes> niter = this.g.getEnvelopGraph().activeNodesIterator();
-		int node;
-		while(niter.hasNext()){
-			node = niter.next();
+		IActiveNodes act = this.g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 			if(g.getKernelGraph().getNeighborhoodSize(node)==0 || matching[node]==-1){// BEWARE should be good but brought mistakes once (before some bug corrections)
 				iterable.set(node);
 			}
 		}
 		int[] A = new int[sizeFirstSet];
 		int i=0;
-		for(node = iterable.nextSetBit(0); node>=0 && node<sizeFirstSet; node = iterable.nextSetBit(node+1)){
+		for(int node = iterable.nextSetBit(0); node>=0 && node<sizeFirstSet; node = iterable.nextSetBit(node+1)){
 			A[i++] = node;
 		}
 		BitSet free = new BitSet(n);
@@ -270,7 +263,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	//***********************************************************************************
-	// PROPAGATION ON REQUEST
+	// PRUNING
 	//***********************************************************************************
 
 	@Override
@@ -320,34 +313,30 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	private void filter() throws ContradictionException {
-		ActiveNodesIterator<IActiveNodes> niter = g.getEnvelopGraph().activeNodesIterator();
-		int i;
-		AbstractNeighborsIterator<INeighbors> iter;
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		INeighbors nei;
 		int j;
-		while(niter.hasNext()){
-			i=niter.next();
-			if(i>=sizeFirstSet)return;
-			if(g.getKernelGraph().getNeighborhoodSize(i)==0){
-				iter = g.getEnvelopGraph().neighborsIteratorOf(i);
-				while(iter.hasNext()){
-					j = iter.next();
-					if(nodeSCCref[i].get()!=nodeSCCref[j].get()){
-						if(matching[i]==j&&matching[j]==i){
-							g.enforceArc(i, j, this);
+		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			if(node>=sizeFirstSet)return;
+			if(g.getKernelGraph().getNeighborhoodSize(node)==0){
+				nei = g.getEnvelopGraph().getNeighborsOf(node);
+				for(j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+					if(nodeSCCref[node].get()!=nodeSCCref[j].get()){
+						if(matching[node]==j&&matching[j]==node){
+							g.enforceArc(node, j, this);
 						}else{
-							g.removeArc(i, j, this);
+							g.removeArc(node, j, this);
 						}
 					}
 				}
 			}
 		}
-		niter = g.getKernelGraph().activeNodesIterator();
-		while(niter.hasNext()){
-			i=niter.next();
-			if(i>=sizeFirstSet)return;
-			if(g.getKernelGraph().getNeighborhoodSize(i)==1){
-				j = g.getKernelGraph().getNeighborsOf(i).getFirstElement();
-				if(matching[i]!=j || matching[j]!=i){
+		act = g.getKernelGraph().getActiveNodes();
+		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			if(node>=sizeFirstSet)return;
+			if(g.getKernelGraph().getNeighborhoodSize(node)==1){
+				j = g.getKernelGraph().getNeighborsOf(node).getFirstElement();
+				if(matching[node]!=j || matching[j]!=node){
 					ContradictionException.throwIt(this, g, "");
 				}
 			}

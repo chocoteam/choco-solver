@@ -93,8 +93,8 @@ public class Tree extends AbstractProblem{
 		sat = solver.findSolution();
 		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
 				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+NTree.filteringCounter+";"+sat+";\n", file);
-		if(solver.getMeasures().getBackTrackCount()>0){
-			throw new UnsupportedOperationException("error bksCount>0");
+		if(solver.getMeasures().getFailCount()>0){
+			throw new UnsupportedOperationException("error gac");
 		}
 	}
 
@@ -106,6 +106,7 @@ public class Tree extends AbstractProblem{
 		BitSet[] data = DataGenerator.makeTreeData(n, d);
 		Tree tsample = new Tree(data,d);
 		tsample.execute();
+		System.out.println(tsample.solver.getMeasures().getTimeCount());
 		return tsample.sat!=null && tsample.solver.getMeasures().getTimeCount()<=TIMELIMIT;
 	}
 
@@ -114,7 +115,7 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		gtype = GraphType.SPARSE;
+		gtype = GraphType.DENSE;
 		testN();
 	}
 	
@@ -123,11 +124,11 @@ public class Tree extends AbstractProblem{
 		clearFile(file);
 		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
 		int i = 0;
-		int[] ds = new int[]{10};
+		int[] ds = new int[]{5};
 //		int[] ds = new int[]{5,20,50,30000};
 		int dMax = 50000;
 		int nMax = 50000;
-		for(int n=900;n<=10000;n+=100){
+		for(int n=200;n<=10000;n+=100){
 			if (n<nMax){
 				for(int d:ds){
 					if(d<dMax){
@@ -143,7 +144,7 @@ public class Tree extends AbstractProblem{
 							if(performOneTest(n, d)){
 								success = true;
 							}
-							for(int k=0;k<100;k++){
+							for(int k=0;k<10;k++){
 								System.gc();
 							}
 						}
@@ -170,24 +171,24 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	private static void writeTextInto(String text, String file) {
-		try{
-			FileWriter out  = new FileWriter(file,true);
-			out.write(text);
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+//		try{
+//			FileWriter out  = new FileWriter(file,true);
+//			out.write(text);
+//			out.close();
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
 	}
 
 	private static void clearFile(String file) {
-		try{
-			FileWriter out  = new FileWriter(file,false);
-			out.write("");
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+//		try{
+//			FileWriter out  = new FileWriter(file,false);
+//			out.write("");
+//			out.close();
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
 	}
 }

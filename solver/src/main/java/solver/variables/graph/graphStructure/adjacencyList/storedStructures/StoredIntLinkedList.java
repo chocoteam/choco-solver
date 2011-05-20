@@ -77,10 +77,8 @@ public class StoredIntLinkedList extends IntLinkedList {
 
     @Override
     public void clear() {
-        IntCell e = getFirst();
-        while (e!=null){
-        	new AddOperation(environment, this, e.getElement());
-        	e = e.getNext();
+        for(int i=getFirstElement(); i>=0; i=getNextElement()){
+        	new AddOperation(environment, this, i);
         }
         super.clear();
     }

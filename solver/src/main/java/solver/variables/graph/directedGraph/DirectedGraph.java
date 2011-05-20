@@ -32,8 +32,6 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
@@ -52,159 +50,120 @@ public class DirectedGraph implements IDirectedGraph {
 	//***********************************************************************************
 
 	INeighbors[] successors;
-    INeighbors[] predecessors;
-    /** activeIdx represents the nodes available in the graph */
-    IActiveNodes activeIdx;
-    GraphType type;
+	INeighbors[] predecessors;
+	/** activeIdx represents the nodes available in the graph */
+	IActiveNodes activeIdx;
+	GraphType type;
 
-    //***********************************************************************************
+	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	public DirectedGraph(int order, GraphType type) {
-    	this.type = type;
-    	switch (type) {
-            case SPARSE:
-                this.successors = new IntLinkedList[order];
-                this.predecessors = new IntLinkedList[order];
-                for (int i = 0; i < order; i++) {
-                    this.successors[i] = new IntLinkedList();
-                    this.predecessors[i] = new IntLinkedList();
-                }
-                break;
-            case DENSE:
-                this.successors = new BitSetNeighbors[order];
-                this.predecessors = new BitSetNeighbors[order];
-                for (int i = 0; i < order; i++) {
-                    this.successors[i] = new BitSetNeighbors(order);
-                    this.predecessors[i] = new BitSetNeighbors(order);
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-        this.activeIdx = new ActiveNodes(order);
-        for (int i = 0; i < order; i++) {
-            this.activeIdx.activate(i);
-        }
-    }
+		this.type = type;
+		switch (type) {
+		case SPARSE:
+			this.successors = new IntLinkedList[order];
+			this.predecessors = new IntLinkedList[order];
+			for (int i = 0; i < order; i++) {
+				this.successors[i] = new IntLinkedList();
+				this.predecessors[i] = new IntLinkedList();
+			}
+			break;
+		case DENSE:
+			this.successors = new BitSetNeighbors[order];
+			this.predecessors = new BitSetNeighbors[order];
+			for (int i = 0; i < order; i++) {
+				this.successors[i] = new BitSetNeighbors(order);
+				this.predecessors[i] = new BitSetNeighbors(order);
+			}
+			break;
+		default:
+			throw new UnsupportedOperationException();
+		}
+		this.activeIdx = new ActiveNodes(order);
+		for (int i = 0; i < order; i++) {
+			this.activeIdx.activate(i);
+		}
+	}
 
-    public DirectedGraph(int order, boolean[][] matrix, GraphType type) {
-        this(order,type);
-        for (int i = 0; i < order; i++) {
-            for (int j = 0; j < order; j++) {
-                if (matrix[i][j]) {
-                    this.successors[i].add(j);
-                    this.predecessors[j].add(i);
-                }
-            }
-        }
-    }
-    
-    public DirectedGraph() {}
+	public DirectedGraph(int order, boolean[][] matrix, GraphType type) {
+		this(order,type);
+		for (int i = 0; i < order; i++) {
+			for (int j = 0; j < order; j++) {
+				if (matrix[i][j]) {
+					this.successors[i].add(j);
+					this.predecessors[j].add(i);
+				}
+			}
+		}
+	}
 
-    
+	public DirectedGraph() {}
+
+
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	public String toString() {
-        return "Successors :\n"+toStringSuccs() +"\nPredecessors :\n"+ toStringPreds();
-    }
+		return "Successors :\n"+toStringSuccs() +"\nPredecessors :\n"+ toStringPreds();
+	}
 
-    public String toStringSuccs() {
-        String res = "";
-        for (ActiveNodesIterator<IActiveNodes> itNode = activeIdx.iterator(); itNode.hasNext();) {
-            int i = itNode.next();
-            res += "pot-" + i + ": ";
-            AbstractNeighborsIterator<INeighbors> itNext = successors[i].iterator();
-            while(itNext.hasNext()) {
-                int j = itNext.next();
-                res += j + " ";
-            }
-            res += "\n";
-        }
-        return res;
-    }
-    
-    public String toStringPreds() {
-        String res = "";
-        for (ActiveNodesIterator<IActiveNodes> itNode = activeIdx.iterator(); itNode.hasNext();) {
-            int i = itNode.next();
-            res += "pot-" + i + ": ";
-            AbstractNeighborsIterator<INeighbors> itPrev = predecessors[i].iterator();
-            while(itPrev.hasNext()) {
-                int j = itPrev.next();
-                res += j + " ";
-            }
-            res += "\n";
-        }
-        return res;
-    }
+	public String toStringSuccs() {
+		String res = "";
+		for (int i = activeIdx.nextValue(0); i>=0; i = activeIdx.nextValue(i+1)) {
+			res += "pot-" + i + ": ";
+			for(int j=successors[i].getFirstElement();j>=0; j=successors[i].getNextElement()){
+				res += j + " ";
+			}
+			res += "\n";
+		}
+		return res;
+	}
 
-    @Override
-    /**
-     * @inheritedDoc
-     */
-    public int getNbNodes() {
-        return activeIdx.nbNodes();
-    }
-    
-    @Override
-    /**
-     * @inheritedDoc
-     */
-    public IActiveNodes getActiveNodes() {
-        return activeIdx;
-    }
-    
-    @Override
-    /**
-     * @inheritedDoc
-     */
-    public ActiveNodesIterator<IActiveNodes> activeNodesIterator() {
-        return activeIdx.iterator();
-    }
-
-    @Override
-    /**
-     * @inheritedDoc
-     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-     */
-    public int getNeighborhoodSize(int x) {
-    	return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes()).neighborhoodSize();
-    }
-
-    @Override
-    /**
-     * @inheritedDoc
-     * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-     */
-    public <N extends INeighbors> AbstractNeighborsIterator<N> neighborsIteratorOf(int x) {
-        return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes()).iterator();
-    }
-
-	@Override
-	/**
-     * @inheritedDoc
-     */
-    public <N extends INeighbors> AbstractNeighborsIterator<N> successorsIteratorOf(int x) {
-		return successors[x].iterator();
+	public String toStringPreds() {
+		String res = "";
+		for (int i = activeIdx.nextValue(0); i>=0; i = activeIdx.nextValue(i+1)) {
+			res += "pot-" + i + ": ";
+			for(int j=predecessors[i].getFirstElement();j>=0; j=predecessors[i].getNextElement()){
+				res += j + " ";
+			}
+			res += "\n";
+		}
+		return res;
 	}
 
 	@Override
 	/**
-     * @inheritedDoc
-     */
-    public <N extends INeighbors> AbstractNeighborsIterator<N> predecessorsIteratorOf(int x) {
-		return predecessors[x].iterator();
+	 * @inheritedDoc
+	 */
+	public int getNbNodes() {
+		return activeIdx.nbNodes();
 	}
-	
+
 	@Override
 	/**
-     * @inheritedDoc
-     */
-    public GraphType getType() {
+	 * @inheritedDoc
+	 */
+	public IActiveNodes getActiveNodes() {
+		return activeIdx;
+	}
+
+	@Override
+	/**
+	 * @inheritedDoc
+	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
+	 */
+	public int getNeighborhoodSize(int x) {
+		return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes()).neighborhoodSize();
+	}
+
+	@Override
+	/**
+	 * @inheritedDoc
+	 */
+	public GraphType getType() {
 		return type;
 	}
 
@@ -219,14 +178,13 @@ public class DirectedGraph implements IDirectedGraph {
 	public boolean desactivateNode(int x) {
 		if(!activeIdx.isActive(x))return false;
 		activeIdx.desactivate(x);
-		AbstractNeighborsIterator<INeighbors> iter = successorsIteratorOf(x); 
-		while (iter.hasNext()){
-			predecessors[iter.next()].remove(x);
+
+		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
+			predecessors[j].remove(x);
 		}
 		successors[x].clear();
-		iter = predecessorsIteratorOf(x); 
-		while (iter.hasNext()){
-			successors[iter.next()].remove(x);
+		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
+			successors[j].remove(x);
 		}
 		predecessors[x].clear();
 		return true;
@@ -241,7 +199,7 @@ public class DirectedGraph implements IDirectedGraph {
 	public boolean removeEdge(int x, int y) {
 		return removeArc(x, y) || removeArc(y, x);
 	}
-	
+
 	@Override
 	public boolean edgeExists(int x, int y) {
 		return arcExists(x, y) || arcExists(y, x);
@@ -259,7 +217,7 @@ public class DirectedGraph implements IDirectedGraph {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean arcExists(int from, int to){
 		if (successors[from].contain(to) || predecessors[to].contain(from)){

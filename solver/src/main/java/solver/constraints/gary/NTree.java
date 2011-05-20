@@ -34,8 +34,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.PropNLoops;
-import solver.constraints.propagators.gary.PropNSuccs;
 import solver.constraints.propagators.gary.PropNTree;
+import solver.constraints.propagators.gary.directed.PropNSuccs;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -45,9 +45,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -104,19 +101,16 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		IntVar nTree = (IntVar) vars[1];
 		int MINTREE = calcMinTree();
 		int MAXTREE = calcMaxTree();
+		INeighbors nei;
 		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
-			ActiveNodesIterator<IActiveNodes> nodeIter = g.getEnvelopGraph().getActiveNodes().iterator();
-			int node;
+			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
-			while (nodeIter.hasNext()){
-				node = nodeIter.next();
+			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
 					return ESat.FALSE;
 				}
-				AbstractNeighborsIterator<INeighbors> sucIter = g.getEnvelopGraph().successorsIteratorOf(node);
-				int suc;
-				while (sucIter.hasNext()){
-					suc = sucIter.next();
+				nei = g.getEnvelopGraph().getSuccessorsOf(node);
+				for(int suc=nei.getFirstElement(); suc>=0; suc=nei.getNextElement()){
 					Grs.addArc(suc, node);
 					if(suc==node){
 						Grs.addArc(node, n);
@@ -142,10 +136,8 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	
 	private int calcMaxTree() {
 		int ct = 0;
-		ActiveNodesIterator<IActiveNodes> nodeIter = g.getEnvelopGraph().activeNodesIterator();
-		int node;
-		while(nodeIter.hasNext()){
-			node = nodeIter.next();
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				ct++;
 			}
@@ -167,15 +159,13 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		}
 		LinkedList<TIntArrayList> sinks = new LinkedList<TIntArrayList>();
 		boolean looksSink = true;
-		int suc;
-		AbstractNeighborsIterator<INeighbors> succIter;
+		INeighbors nei;
 		for (TIntArrayList scc:allSCC){
 			looksSink = true;
 			for(int x=0;x<scc.size();x++){
 				node = scc.get(x);
-				succIter = g.getEnvelopGraph().successorsIteratorOf(node);
-				while(looksSink && succIter.hasNext()){
-					suc = succIter.next();
+				nei = g.getEnvelopGraph().getSuccessorsOf(node);
+				for(int suc=nei.getFirstElement(); suc>=0 && looksSink; suc=nei.getNextElement()){
 					if (sccOf[suc]!=sccOf[node]){
 						looksSink = false;
 					}

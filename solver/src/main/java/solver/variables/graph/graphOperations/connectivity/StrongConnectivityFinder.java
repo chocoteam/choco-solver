@@ -30,14 +30,10 @@ package solver.variables.graph.graphOperations.connectivity;
 import gnu.trove.TIntArrayList;
 import java.util.ArrayList;
 import java.util.BitSet;
-
 import solver.variables.graph.GraphType;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
 public class StrongConnectivityFinder {
 
@@ -50,9 +46,8 @@ public class StrongConnectivityFinder {
 	public static ArrayList<TIntArrayList> findAllSCCOf(IDirectedGraph graph){
 		int n = graph.getNbNodes();
 		BitSet bitSCC = new BitSet(n);
-		ActiveNodesIterator<IActiveNodes> iter = graph.activeNodesIterator();
-		while(iter.hasNext()){
-			bitSCC.set(iter.next());
+		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
+			bitSCC.set(i);
 		}
 		return findAllSCCOf(graph, bitSCC);
 	}
@@ -127,7 +122,8 @@ public class StrongConnectivityFinder {
 		}
 		//initialization
 		int stackIdx= 0;
-		AbstractNeighborsIterator<INeighbors>[] successors = new AbstractNeighborsIterator[nb];
+		INeighbors[] successors = new INeighbors[nb];
+		BitSet notFirsts = new BitSet(nb);
 		for(int m=0;m<nb;m++){
 			inf[m] = nb+2;
 		}	
@@ -138,12 +134,18 @@ public class StrongConnectivityFinder {
 		stack[stackIdx++] = i;
 		inStack.set(i);
 		p[k] = k;
-		successors[k] = graph.successorsIteratorOf(start);
+		successors[k] = graph.getSuccessorsOf(start);
 		int j = 0;
 		// algo
-		while((i!=0) || successors[i].hasNext()){
-			if(successors[i].hasNext()){
-				j = successors[i].next();
+		boolean notFinished = true;
+		while(notFinished){
+			if(notFirsts.get(i)){
+				j = successors[i].getNextElement();
+			}else{
+				j = successors[i].getFirstElement();
+				notFirsts.set(i);
+			}
+			if(j>=0){
 				if(restriction.get(j)){
 					if (dfsNumOfNode[j]==0 && j!=start) {
 						k++;
@@ -151,7 +153,7 @@ public class StrongConnectivityFinder {
 						dfsNumOfNode[j] = k;
 						p[k] = i;
 						i = k;
-						successors[i] = graph.successorsIteratorOf(j);
+						successors[i] = graph.getSuccessorsOf(j);
 						stack[stackIdx++] = i;
 						inStack.set(i);
 						inf[i] = i;
@@ -160,6 +162,10 @@ public class StrongConnectivityFinder {
 					}
 				}
 			}else{
+				if(i==0){
+					notFinished = false;
+					break;
+				}
 				if (inf[i] >= i){
 					TIntArrayList scc = new TIntArrayList();
 					int y,z;
@@ -185,7 +191,6 @@ public class StrongConnectivityFinder {
 				scc.add(y);
 			}while(y!= start);
 			allSCC.add(scc);
-			inStack.clear();
 		}
 	}
 	

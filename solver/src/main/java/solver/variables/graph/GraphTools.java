@@ -27,19 +27,17 @@
 
 package solver.variables.graph;
 
+import java.util.BitSet;
 import java.util.HashMap;
-
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 /**Class containing some static methods to manipulate graphs
  * @author Jean-Guillaume Fages */
 public class GraphTools {
 
-	
+
 	//***********************************************************************************
 	// IGraph explorations
 	//***********************************************************************************
@@ -51,35 +49,45 @@ public class GraphTools {
 	 */
 	public static int[] performDFS(int root, IGraph graph){
 		int nb = graph.getNbNodes();
-        AbstractNeighborsIterator<INeighbors>[] neighbors = new AbstractNeighborsIterator[nb];
+		INeighbors[] neighbors = new INeighbors[nb];
 		int[] father = new int[nb];
 		int[] num = new int[nb];
+		BitSet notFirstTime = new BitSet(nb);
 		for (int i=0; i<nb; i++){
 			father[i] = -1;
-            neighbors[i] = graph.neighborsIteratorOf(i);
+			neighbors[i] = graph.getNeighborsOf(i);
 		}
 		int i = root;
 		int k = 0;
 		num[root] = k;
 		father[root] = root;
-		int j;
-		while((i!=root) || neighbors[i].hasNext()){
-			if(!neighbors[i].hasNext()){
+		int j=0;
+		while(true){
+			if(notFirstTime.get(i)){
+				j = neighbors[i].getNextElement();
+			}else{
+				j = neighbors[i].getFirstElement();
+				notFirstTime.set(i);
+			}
+			while(j == i){
+				j = neighbors[i].getNextElement();
+			}
+			if(j<0){
+				if(i==root){
+					return num;
+				}
 				i = father[i];
 			}else{
-                j = neighbors[i].next();
 				if (father[j]==-1) {
 					father[j] = i;
 					i = j;
-					neighbors[i] = graph.neighborsIteratorOf(i);
 					k++;
 					num[i] = k;
 				}
 			}
 		}
-		return num;
 	}
-	
+
 	//***********************************************************************************
 	// Subgraphs
 	//***********************************************************************************
@@ -93,41 +101,47 @@ public class GraphTools {
 	 * @returna new graph which is a subraph of graph deduced from a subset and some parameters.
 	 */
 	public static IDirectedGraph createSubgraph(IDirectedGraph graph, INeighbors subset, boolean skipFirst, boolean reverse){
-		AbstractNeighborsIterator<INeighbors> nodeIter = subset.iterator();
 		int nb = subset.neighborhoodSize();
-		if (skipFirst && nodeIter.hasNext()){
-			nodeIter.next();//skip the first element
+		if(subset.neighborhoodSize()==0){
+			throw new UnsupportedOperationException("error ");
+		}
+		if (skipFirst){
 			nb--;
 		}
+		
 		boolean[][] matrix = new boolean[nb][nb];
 		int[] indexes = new int[nb];
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 		int nodeInNewGraph = 0;
-		int nodeInG;
-		while (nodeIter.hasNext()){
-			nodeInG = nodeIter.next();
-			indexes[nodeInNewGraph] = nodeInG;
-			map.put(nodeInG, nodeInNewGraph);
-			nodeInNewGraph++;
+		boolean first = true;
+		for(int k=subset.getFirstElement(); k>=0;k=subset.getNextElement()){
+			if(first && skipFirst){
+				first = false;
+			}else{
+				indexes[nodeInNewGraph] = k;
+				map.put(k, nodeInNewGraph);
+				nodeInNewGraph++;
+			}
 		}
 		nodeInNewGraph = 0;
-		nodeIter = subset.iterator();
-		if (skipFirst && nodeIter.hasNext()){
-			nodeIter.next();
-		}		
-		while (nodeIter.hasNext()){
-			AbstractNeighborsIterator<INeighbors> succIter = graph.successorsIteratorOf(nodeIter.next());
-			while (succIter.hasNext()){
-				nodeInG = succIter.next();
-				if (map.get(nodeInG)!=null){
-					if (!reverse){
-						matrix[nodeInNewGraph][map.get(nodeInG)] = true;
-					}else{
-						matrix[map.get(nodeInG)][nodeInNewGraph] = true;
+		first = true;
+		INeighbors nei;
+		for(int k=subset.getFirstElement(); k>=0;k=subset.getNextElement()){
+			if(first && skipFirst){
+				first = false;
+			}else{
+				nei = graph.getSuccessorsOf(k);
+				for(int l=nei.getFirstElement(); l>=0;l=nei.getNextElement()){
+					if (map.get(l)!=null){
+						if (!reverse){
+							matrix[nodeInNewGraph][map.get(l)] = true;
+						}else{
+							matrix[map.get(l)][nodeInNewGraph] = true;
+						}
 					}
 				}
+				nodeInNewGraph++;
 			}
-			nodeInNewGraph++;
 		}
 		return new DirectedGraph(nb, matrix, graph.getType());
 	}
@@ -141,34 +155,33 @@ public class GraphTools {
 	 * @returna new directed graph which is a subraph of an undirected graph deduced from a subset.
 	 */
 	public static IDirectedGraph createSubgraph(IGraph undirectedGraph, INeighbors subset){
-		AbstractNeighborsIterator<INeighbors> nodeIter = subset.iterator();
 		int nb = subset.neighborhoodSize();
 		boolean[][] matrix = new boolean[nb][nb];
 		int[] indexes = new int[nb];
 		HashMap<Integer, Integer> map = new HashMap<Integer, Integer>();
 		int nodeInNewGraph = 0;
-		int nodeInG;
-		while (nodeIter.hasNext()){
-			nodeInG = nodeIter.next();
-			indexes[nodeInNewGraph] = nodeInG;
-			map.put(nodeInG, nodeInNewGraph);
+		for(int j=subset.getFirstElement(); j>=0;j=subset.getNextElement()){
+			indexes[nodeInNewGraph] = j;
+			map.put(j, nodeInNewGraph);
 			nodeInNewGraph++;
 		}
 		nodeInNewGraph = 0;
-		nodeIter = subset.iterator();
-		while (nodeIter.hasNext()){
-			AbstractNeighborsIterator<INeighbors> neighbors = undirectedGraph.neighborsIteratorOf(nodeIter.next());
-			while (neighbors.hasNext()){
-				nodeInG = neighbors.next();
-				if (map.get(nodeInG)!=null){
-						matrix[nodeInNewGraph][map.get(nodeInG)] = true;
+		INeighbors nei;
+		for(int j=subset.getFirstElement(); j>=0;j=subset.getNextElement()){
+			indexes[nodeInNewGraph] = j;
+			map.put(j, nodeInNewGraph);
+			nodeInNewGraph++;
+			nei = undirectedGraph.getNeighborsOf(j);
+			for(int k=nei.getFirstElement(); k>=0;k=nei.getNextElement()){
+				if (map.get(k)!=null){
+					matrix[nodeInNewGraph][map.get(k)] = true;
 				}
 			}
 			nodeInNewGraph++;
 		}
 		return new DirectedGraph(nb, matrix, undirectedGraph.getType());
 	}
-	
+
 	//***********************************************************************************
 	// INeighbors operations
 	//***********************************************************************************
@@ -182,15 +195,13 @@ public class GraphTools {
 	 * this new INeighbors is a BitSet to avoid duplicated elements
 	 */
 	public static INeighbors mergeNeighborhoods(INeighbors n1, INeighbors n2, int nbNodes){
-    	BitSetNeighbors merged = new BitSetNeighbors(nbNodes);
-    	AbstractNeighborsIterator<INeighbors> iter = n1.iterator();
-    	while(iter.hasNext()){
-    		merged.add(iter.next());
-    	}
-    	iter = n2.iterator();
-    	while(iter.hasNext()){
-    		merged.add(iter.next());
-    	}
+		BitSetNeighbors merged = new BitSetNeighbors(nbNodes);
+		for(int j=n1.getFirstElement(); j>=0;j=n1.getNextElement()){
+			merged.add(j);
+		}
+		for(int j=n2.getFirstElement(); j>=0;j=n2.getNextElement()){
+			merged.add(j);
+		}
 		return merged;
-    }
+	}
 }

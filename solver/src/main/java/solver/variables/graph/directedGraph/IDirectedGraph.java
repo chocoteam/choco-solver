@@ -29,7 +29,6 @@ package solver.variables.graph.directedGraph;
 
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**
  * @author Jean-Guillaume Fages
@@ -71,19 +70,4 @@ public interface IDirectedGraph extends IGraph {
      */
     boolean arcExists(int x, int y);
 
-	/**
-     * An iterator over the successors of node x in the graph
-     * @param x node's index
-     * @param <N> an iterable data structure representing the successors of node x
-     * @return an iterator over the indices of the successors of node x in the graph
-     */
-    <N extends INeighbors> AbstractNeighborsIterator<N> successorsIteratorOf(int x);
-    
-    /**
-     * An iterator over the predecessors of node x in the graph
-     * @param x node's index
-     * @param <N> an iterable data structure representing the predecessors of node x
-     * @return an iterator over the indices of the predecessors of node x in the graph
-     */
-    <N extends INeighbors> AbstractNeighborsIterator<N> predecessorsIteratorOf(int x);
 }

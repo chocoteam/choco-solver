@@ -34,7 +34,6 @@ import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 import java.util.BitSet;
 import java.util.LinkedList;
@@ -99,15 +98,15 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			if(!kernel.activeIdx.isActive(n)){
 				return false;
 			}
-			AbstractNeighborsIterator<INeighbors> iter = envelop.successorsIteratorOf(n);
-			while (iter.hasNext()){
-				if(!kernel.arcExists(n, iter.next())){
+			for(int j=envelop.getSuccessorsOf(n).getFirstElement();j>=0; j=envelop.getSuccessorsOf(n).getNextElement()){
+				if(!kernel.arcExists(n, j)){
 					return false;
 				}
 			}
 		}
 		return true;
 	}
+	
 	@Override
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
@@ -120,7 +119,13 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			}
 			EventType e = EventType.REMOVEARC;
 			notifyPropagators(e, cause);
-			return true;
+			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
+        		removeNode(x, null);
+        	}
+			if(getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize()==0){
+        		removeNode(y, null);
+        	}
+        	return true;
 		}return false;
 	}
 	@Override
@@ -153,7 +158,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	@Override
 	public StoredDirectedGraph getEnvelopGraph() {
 		return envelop;
-	}
+	} 
 
 	///////////////////////////////////////////////////////////////////////
 
@@ -165,13 +170,12 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		//		return nextArcLexicographic();
 	}
 	private int nextArcLexicographic() {
+		INeighbors nei;
 		int n = getEnvelopGraph().getNbNodes();
 		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
-				AbstractNeighborsIterator<INeighbors> iter = envelop.successors[i].iterator();
-				int j;
-				while(iter.hasNext()){
-					j = iter.next();
+				nei = envelop.getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 					if (!kernel.arcExists(i, j)){
 						return (i+1)*n+j;
 					}
@@ -183,12 +187,11 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	private int nextArcRandom() {
 		int n = getEnvelopGraph().getNbNodes();
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
+		INeighbors nei;
 		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
-				AbstractNeighborsIterator<INeighbors> iter = envelop.successors[i].iterator();
-				int j;
-				while(iter.hasNext()){
-					j = iter.next();
+				nei = envelop.getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 					if (!kernel.arcExists(i, j)){
 						arcs.addFirst((i+1)*n+j);
 					}
@@ -200,6 +203,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		return arcs.get(rd.nextInt(arcs.size()));
 	}
 	private int nextArcRandom2() {
+		INeighbors nei;
 		int n = getEnvelopGraph().getNbNodes();
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
 		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
@@ -214,10 +218,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		Random rd = new Random(seed);
 		int node = arcs.get(rd.nextInt(arcs.size()));
 		arcs.clear();
-		AbstractNeighborsIterator<INeighbors> iter = envelop.successors[node].iterator();
-		int j;
-		while(iter.hasNext()){
-			j = iter.next();
+		nei = envelop.getSuccessorsOf(node);
+		for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 			if (!kernel.arcExists(node, j)){
 				arcs.addFirst((node+1)*n+j);
 			}

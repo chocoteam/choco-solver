@@ -44,8 +44,6 @@ import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-
 import java.util.LinkedList;
 
 /**
@@ -91,12 +89,10 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-		ActiveNodesIterator<IActiveNodes> nodeIter = g.getEnvelopGraph().activeNodesIterator();
-		int node;
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int ker = 0;
 		int env = 0;
-		while(nodeIter.hasNext()){
-			node = nodeIter.next();
+		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				env++;
 				if (g.getKernelGraph().arcExists(node, node)){
@@ -109,9 +105,7 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 		nLoops.updateUpperBound(env, this);
 		int added = 0;
 		if(env==nLoops.getLB()){
-			nodeIter = g.getEnvelopGraph().activeNodesIterator();
-			while(nodeIter.hasNext()){
-				node = nodeIter.next();
+			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
 					g.enforceArc(node, node, this);
 					added ++;
@@ -151,11 +145,9 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 		if(loopsInKer>nLoops.getUB()){
 			ContradictionException.throwIt(this, g, "too many loops");
 		}else{
-			ActiveNodesIterator<IActiveNodes> nodeIter = g.getEnvelopGraph().activeNodesIterator();
-			int node;
+			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 			LinkedList<Integer> loopOutOfKer = new LinkedList<Integer>();
-			while(nodeIter.hasNext()){
-				node = nodeIter.next();
+			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
 				if (!g.getKernelGraph().arcExists(node, node)){
 					if (g.getEnvelopGraph().arcExists(node, node)){
 						loopOutOfKer.addFirst(node);
@@ -212,15 +204,14 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
         			p.nbEnvLoop.set(p.nbEnvLoop.get()-1);
         			int env = p.nbEnvLoop.get();
         			int ker = p.nbKerLoop.get();
-        			ActiveNodesIterator<IActiveNodes> nodeIter;
+        			IActiveNodes act;
         			p.nLoops.updateUpperBound(env, p);
         			p.nLoops.updateLowerBound(ker, p);
         			if(p.nLoops.getLB() == env && env>ker){
-        				nodeIter = p.g.getEnvelopGraph().activeNodesIterator();
-            			while(nodeIter.hasNext()){
-            				from = nodeIter.next();
-            				if (p.g.getEnvelopGraph().arcExists(from, from)){
-            					p.g.enforceArc(from, from, p);
+        				act = p.g.getEnvelopGraph().getActiveNodes();
+        				for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+            				if (p.g.getEnvelopGraph().arcExists(node, node)){
+            					p.g.enforceArc(node, node, p);
             				}
             			}
         			}

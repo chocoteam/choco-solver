@@ -28,9 +28,6 @@
 package solver.variables.graph.graphStructure.matrix;
 
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-import solver.variables.graph.graphStructure.iterators.BitSetIterator;
-
 import java.util.BitSet;
 
 /**
@@ -40,18 +37,21 @@ import java.util.BitSet;
  */
 public class BitSetNeighbors extends BitSet implements INeighbors {
 
-    public BitSetNeighbors(int nbits) {
+	private int current;//enables to iterate
+    
+	public BitSetNeighbors(int nbits) {
         super(nbits);
+        current = 0;
     }
 
-    public int nextValue(int from) {
-        return this.nextSetBit(from);
-    }
+//    public int nextValue(int from) {
+//        return this.nextSetBit(from);
+//    }
 
-    @Override
-    public AbstractNeighborsIterator<BitSetNeighbors> iterator() {
-        return new BitSetIterator<BitSetNeighbors>(this);
-    }
+//    @Override
+//    public AbstractNeighborsIterator<BitSetNeighbors> iterator() {
+//        return new BitSetIterator<BitSetNeighbors>(this);
+//    }
 
     @Override
     public void add(int element) {
@@ -84,6 +84,13 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
 
 	@Override
 	public int getFirstElement() {
+		current = 0;
 		return nextSetBit(0);
+	}
+
+	@Override
+	public int getNextElement() {
+		current = nextSetBit(current+1);
+		return current;
 	}
 }

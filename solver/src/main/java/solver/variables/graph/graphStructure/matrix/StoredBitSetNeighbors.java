@@ -32,7 +32,6 @@ import choco.kernel.memory.structure.S64BitSet;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphStructure.adjacencyList.IntCell;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.RemOperation;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,8 +40,11 @@ import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator
  */
 public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 
+	private int current;
+	
     public StoredBitSetNeighbors(IEnvironment environment, int nbits) {
         super(environment, nbits);
+        current = 0;
     }
 
     @Override
@@ -69,43 +71,50 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
         return this.cardinality();
     }
 
-    public int nextValue(int from) {
-        return this.nextSetBit(from);
-    }
+//    public int nextValue(int from) {
+//        return this.nextSetBit(from);
+//    }
 
-    @Override
-    public AbstractNeighborsIterator<StoredBitSetNeighbors> iterator() {
-        return new SBIterator(this);  //To change body of implemented methods use File | Settings | File Templates.
-    }
+//    @Override
+//    public AbstractNeighborsIterator<StoredBitSetNeighbors> iterator() {
+//        return new SBIterator(this);  //To change body of implemented methods use File | Settings | File Templates.
+//    }
     
     @Override
 	public int getFirstElement() {
+    	current = 0;
 		return nextSetBit(0);
 	}
 
-    private class SBIterator extends AbstractNeighborsIterator<StoredBitSetNeighbors>{
+//    private class SBIterator extends AbstractNeighborsIterator<StoredBitSetNeighbors>{
+//
+//    	private int index;
+//    	
+//		public SBIterator(StoredBitSetNeighbors data) {
+//			super(data);
+//			index = -1;
+//		}
+//
+//		@Override
+//		public boolean hasNext() {
+//			return data.nextSetBit(index+1)>=0;
+//		}
+//
+//		@Override
+//		public int next() {
+//			index = data.nextSetBit(index+1);
+//			return index;
+//		}
+//
+//		@Override
+//		public void remove() {
+//			throw new UnsupportedOperationException();
+//		}
+//    }
 
-    	private int index;
-    	
-		public SBIterator(StoredBitSetNeighbors data) {
-			super(data);
-			index = -1;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return data.nextSetBit(index+1)>=0;
-		}
-
-		@Override
-		public int next() {
-			index = data.nextSetBit(index+1);
-			return index;
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-    }
+	@Override
+	public int getNextElement() {
+		current = nextSetBit(current+1);
+		return current;
+	}
 }

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -41,8 +41,6 @@ import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
-
 import java.util.LinkedList;
 
 /**
@@ -130,9 +128,8 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				int to   = i%n;
 				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
 				if(prds.neighborhoodSize()==p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()!=p.nPreds){
-					AbstractNeighborsIterator<INeighbors> iter = prds.iterator();
-					while (iter.hasNext()){
-						p.g.enforceArc(iter.next(),to, p);
+					for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
+						p.g.enforceArc(j,to, p);
 					}
 				}
 			}
@@ -156,10 +153,8 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				int to   = i%n;
 				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
 				if(prds.neighborhoodSize()>p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==p.nPreds){
-					AbstractNeighborsIterator<INeighbors> iter = prds.iterator();
 					LinkedList<Integer> toRemove = new LinkedList<Integer>();
-					while (iter.hasNext()){
-						from = iter.next();
+					for(from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
 						if (!p.g.getKernelGraph().arcExists(from, to)){
 							toRemove.addFirst(from);
 						}
@@ -175,6 +170,7 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	private void check() throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
 		int k;
+		INeighbors nei;
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
 		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			k = g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize();
@@ -185,10 +181,8 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				ContradictionException.throwIt(this, g, "not enough potential predecessors");
 			}
 			if(k==nPreds && g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize() != k){
-				AbstractNeighborsIterator<INeighbors> iter = g.getEnvelopGraph().getPredecessorsOf(i).iterator();
-				int j;
-				while(iter.hasNext()){
-					j = iter.next();
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 					if (!g.getKernelGraph().arcExists(j,i)){
 						arcs.addFirst((j+1)*n+i);
 					}

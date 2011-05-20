@@ -37,10 +37,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.gary.PropAllDiffGraph;
-import solver.constraints.propagators.gary.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
+import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.variables.IntVar;
@@ -151,7 +150,6 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			 setPropagators(
 					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
 					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
-					 new PropAtLeastNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),
 					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash),
 					 new PropGraphAllDiffBC(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, valuesHash)
 			 );
@@ -159,7 +157,6 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			 setPropagators(
 					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
 					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
-					 new PropAtLeastNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, true,1),// enables a clean implemetation but is not fundamental 
 					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash)
 			 );
 		 }

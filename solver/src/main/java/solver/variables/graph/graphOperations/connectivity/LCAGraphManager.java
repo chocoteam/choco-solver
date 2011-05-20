@@ -27,9 +27,10 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
+import java.util.BitSet;
+
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**Class enabling to compute LCA queries in constant time over the DFS tree of a given graph
  * use a O(n+m) time preprocessing
@@ -93,10 +94,10 @@ public class LCAGraphManager {
 
 	/** perform a dfs in graph to label nodes */
 	private void proceedFirstDFS(){
-		AbstractNeighborsIterator<INeighbors>[] successors = new AbstractNeighborsIterator[nbNodes];
+		INeighbors[] successors = new INeighbors[nbNodes];
 		for (int i=0; i<nbNodes; i++){
 			father[i] = -1;
-			successors[i] = graph.successorsIteratorOf(i);
+			successors[i] = graph.getSuccessorsOf(i);
 		}
 		int i = root;
 		father[0] = 0;
@@ -104,11 +105,22 @@ public class LCAGraphManager {
 		nodeOfDfsNumber[0] = root;
 		int k = 0;
 		int j;
-		while((i!=root) || successors[i].hasNext()){
-			if(!successors[i].hasNext()){
+		boolean finished = false;
+		BitSet notFirsts = new BitSet(nbNodes);
+		while(!finished){
+			if(notFirsts.get(i)){
+				j = successors[i].getNextElement();
+			}else{
+				notFirsts.set(i);
+				j = successors[i].getFirstElement();
+			}
+			if(j<0){
+				if(i==root){
+					finished = true;
+					break;
+				}
 				i = nodeOfDfsNumber[father[dfsNumberOfNode[i]]];
 			}else{
-				j = successors[i].next();
 				if (dfsNumberOfNode[j]==-1) {
 					k++;
 					father[k] = dfsNumberOfNode[i];
@@ -143,6 +155,7 @@ public class LCAGraphManager {
 		L = new int[nbNodes];
 		h = new int[nbNodes];
 		int[] htmp = new int[nbNodes];
+		INeighbors nei;
 		for (int i=nbNodes-1; i>=0; i--){
 			h[i] = BitOperations.getFirstExp(i+1);
 			if (h[i]==-1){throw new UnsupportedOperationException();}
@@ -150,10 +163,10 @@ public class LCAGraphManager {
 			I[i] = i;
 			L[i] = i;
 			int sucInRun = -1;
-			AbstractNeighborsIterator<INeighbors> succs = graph.successorsIteratorOf(nodeOfDfsNumber[i]);
+			nei = graph.getSuccessorsOf(nodeOfDfsNumber[i]);
 			int s;
-			while (succs.hasNext()){
-				s = dfsNumberOfNode[succs.next()];
+			for(int k=nei.getFirstElement(); k>=0; k = nei.getNextElement()){
+				s = dfsNumberOfNode[k];
 				if(i!=s && father[s]==i && htmp[s]>htmp[i]){
 					htmp[i] = htmp[s];
 					sucInRun = s;

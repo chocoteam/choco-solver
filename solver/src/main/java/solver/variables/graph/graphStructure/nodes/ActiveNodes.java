@@ -28,8 +28,6 @@
 package solver.variables.graph.graphStructure.nodes;
 
 import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
-
 import java.util.BitSet;
 
 /**
@@ -69,11 +67,6 @@ public class ActiveNodes extends BitSet implements IActiveNodes {
     @Override
     public boolean isActive(int idx) {
         return this.get(idx);
-    }
-
-    @Override
-    public ActiveNodesIterator<IActiveNodes> iterator() {
-        return new ActiveNodesIterator<IActiveNodes>(this);
     }
 
 	@Override

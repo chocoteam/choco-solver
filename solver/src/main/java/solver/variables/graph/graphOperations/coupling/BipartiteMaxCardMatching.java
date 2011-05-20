@@ -32,7 +32,6 @@ import gnu.trove.TIntStack;
 import java.util.BitSet;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 public class BipartiteMaxCardMatching {
 
@@ -108,13 +107,13 @@ public class BipartiteMaxCardMatching {
 			dist[v] = 0; reached[v] = phaseNumber;
 		}
 		boolean augmentingPathFound = false;
+		INeighbors nei;
 		while(stack.size()>0){
 			v = stack.pop();
 			dv = dist[v];
-			AbstractNeighborsIterator<INeighbors> iter = g.successorsIteratorOf(v);
-			while(iter.hasNext()){
-				w = iter.next();
-				if(iterable.get(w)){
+			nei = g.getSuccessorsOf(v);
+    		for(w=nei.getFirstElement(); w>=0;w=nei.getNextElement()){
+    			if(iterable.get(w)){
 					if(reached[w] != phaseNumber){
 						dist[w] = dv+1; reached[w] = phaseNumber;
 						if(free.get(w)){
@@ -127,7 +126,7 @@ public class BipartiteMaxCardMatching {
 						useful.put(e, phaseNumber);
 					}
 				}
-			}
+    		}
 		}
 		return augmentingPathFound;
 	}
@@ -153,11 +152,11 @@ public class BipartiteMaxCardMatching {
 		// not edges but nodes (path)
 		TIntStack lasts = new TIntStack();
 		int origin,w,e,last;
+		INeighbors nei;
 		for (origin=freeInA.nextSetBit(0); origin>=0; origin = freeInA.nextSetBit(origin+1)){
-			AbstractNeighborsIterator<INeighbors> iter = g.successorsIteratorOf(origin);
-			while(iter.hasNext()){
-				w = iter.next();
-				if(iterable.get(w)){
+			nei = g.getSuccessorsOf(origin);
+    		for(w=nei.getFirstElement(); w>=0;w=nei.getNextElement()){
+    			if(iterable.get(w)){
 					e = (origin+1)*n+w;
 					if(pred[w]==-1 && useful.get(e) == phaseNumber){
 						last = findAugmentingPath(g,origin,w, n, free,pred,useful,phaseNumber, iterable);
@@ -166,7 +165,7 @@ public class BipartiteMaxCardMatching {
 						}
 					}
 				}
-			}
+    		}
 		}
 		while(lasts.size()>0){
 			w = lasts.pop();
@@ -203,9 +202,8 @@ public class BipartiteMaxCardMatching {
 		if(free.get(w)) return w;
 		int e;
 		int rec;
-		AbstractNeighborsIterator<INeighbors> iter = g.successorsIteratorOf(w);
-		while(iter.hasNext()){
-			v = iter.next();
+		INeighbors nei = g.getSuccessorsOf(w);
+		for(v=nei.getFirstElement(); v>=0;v=nei.getNextElement()){
 			if(iterable.get(v)){
 				e = (w+1)*n+v;
 				if(pred[v]==-1 && useful.containsKey(e) && useful.get(e)==phaseNumber){

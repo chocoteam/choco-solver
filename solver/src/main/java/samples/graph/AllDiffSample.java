@@ -58,6 +58,7 @@ public class AllDiffSample extends AbstractProblem{
 		n = nbVars+nbVals;
 		sizeFirstSet = n-nbVals;
 		readArgs("-quiet");
+		System.out.println(nbVars+" : "+nbVals);
 	}
 
 	//***********************************************************************************
@@ -67,14 +68,16 @@ public class AllDiffSample extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		solver = new Solver();
-		vars = VariableFactory.enumeratedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
-		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.AC)};
+		vars = VariableFactory.boundedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
+//		vars = VariableFactory.enumeratedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
 		solver.post(cstrs);
 	}
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.random(vars, solver.getEnvironment());
+		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment());
+//		AbstractStrategy strategy = StrategyFactory.random(vars, solver.getEnvironment());
 		solver.set(strategy);
 	}
 
@@ -83,6 +86,9 @@ public class AllDiffSample extends AbstractProblem{
 		solver.findAllSolutions();
 		if(solver.getMeasures().getSolutionCount()!=getNbSols(sizeFirstSet, n-sizeFirstSet)){
 			throw new UnsupportedOperationException("error "+solver.getMeasures().getSolutionCount()+"!="+getNbSols(sizeFirstSet, n-sizeFirstSet));
+		}
+		if(solver.getMeasures().getFailCount()>0){
+			throw new UnsupportedOperationException("error "+solver.getMeasures().getFailCount()+" fails");
 		}
 	}
 
@@ -134,52 +140,52 @@ public class AllDiffSample extends AbstractProblem{
 
 	public static void bench() {
 		int val;
-		String fileName = "graphAllDiff_VARS.csv";
-		try{
-			FileWriter out  = new FileWriter(fileName,false);
-			out.write("nbVars;nbVals;time;nbSols\n");
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-		for (int i=4; i<10; i++){
+//		String fileName = "graphAllDiff_VARS.csv";
+//		try{
+//			FileWriter out  = new FileWriter(fileName,false);
+//			out.write("nbVars;nbVals;time;nbSols\n");
+//			out.close();
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
+		for (int i=4; i<8; i++){
 			val = testVarVal(i, i);
-			try{
-				FileWriter out  = new FileWriter(fileName,true);
-				out.write(i+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
-				out.close();
-			}
-			catch(Exception e){
-				e.printStackTrace();
-			}
+//			try{
+//				FileWriter out  = new FileWriter(fileName,true);
+//				out.write(i+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
+//				out.close();
+//			}
+//			catch(Exception e){
+//				e.printStackTrace();
+//			}
 		}
-		fileName = "graphAllDiff_VALS.csv";
-		try{
-			FileWriter out  = new FileWriter(fileName,false);
-			out.write("nbVars;nbVals;time;nbSols\n");
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
+//		fileName = "graphAllDiff_VALS.csv";
+//		try{
+//			FileWriter out  = new FileWriter(fileName,false);
+//			out.write("nbVars;nbVals;time;nbSols\n");
+//			out.close();
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
 		int nbVars = 5;
 		for (int i=nbVars; i<20; i++){
 			val = testVarVal(nbVars, i);
-			try{
-				FileWriter out  = new FileWriter(fileName,true);
-				out.write(nbVars+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
-				out.close();
-			}
-			catch(Exception e){
-				e.printStackTrace();
-			}
+//			try{
+//				FileWriter out  = new FileWriter(fileName,true);
+//				out.write(nbVars+";"+i+";"+val+";"+getNbSols(i, i)+"\n");
+//				out.close();
+//			}
+//			catch(Exception e){
+//				e.printStackTrace();
+//			}
 		}
 	}
 	
 	public static void main(String[] args) {
-//		bench();
-		System.out.println("mean time : "+testVarVal(8,8));
+		bench();
+//		System.out.println("mean time : "+testVarVal(6,8));
 //		System.out.println(getNbSols(6, 12));
 	}
 }

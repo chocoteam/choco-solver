@@ -37,7 +37,6 @@ import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -85,6 +84,13 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         	}
         	EventType e = EventType.REMOVEARC;
         	notifyPropagators(e, cause);
+        	// A node has at least one arc/edge otherwise it is meaningless
+        	if(getEnvelopGraph().getNeighborhoodSize(x)==0){
+        		removeNode(x, null);
+        	}
+        	if(getEnvelopGraph().getNeighborhoodSize(y)==0){
+        		removeNode(y, null);
+        	}
         	return true;
         }return false;
     }
@@ -131,14 +137,12 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 		int n = getEnvelopGraph().getNbNodes();
 		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-				AbstractNeighborsIterator<INeighbors> iter = envelop.neighbors[i].iterator();
-				int j;
-				while(iter.hasNext()){
-					j = iter.next();
-					if (!kernel.edgeExists(i, j)){
-						return (i+1)*n+j;
-					}
-				}
+				INeighbors nei = envelop.getNeighborsOf(i);
+	    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+	    			if(!kernel.edgeExists(i, j)){
+	    				return (i+1)*n+j;
+	    			}
+	    		}
 			}
 		}
 		return -1;
@@ -154,14 +158,12 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 				throw new UnsupportedOperationException("error in 1-succ filtering");
 			}
 			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-				AbstractNeighborsIterator<INeighbors> iter = envelop.neighbors[i].iterator();
-				int j;
-				while(iter.hasNext()){
-					j = iter.next();
-					if (!kernel.edgeExists(i, j)){
-						arcs.add((i+1)*n+j);
-					}
-				}
+				INeighbors nei = envelop.getNeighborsOf(i);
+	    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+	    			if(!kernel.edgeExists(i, j)){
+	    				arcs.add((i+1)*n+j);
+	    			}
+	    		}
 			}
 		}
 		if(arcs.size()==0)return -1;
@@ -184,11 +186,9 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 		Random rd = new Random(0);
 		int node = arcs.get(rd.nextInt(arcs.size()));
 		arcs.clear();
-		AbstractNeighborsIterator<INeighbors> iter = envelop.neighbors[node].iterator();
-		int j;
-		while(iter.hasNext()){
-			j = iter.next();
-			if (!kernel.edgeExists(node, j)){
+		INeighbors nei = envelop.getNeighborsOf(node);
+		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+			if(!kernel.edgeExists(node, j)){
 				arcs.add((node+1)*n+j);
 			}
 		}

@@ -30,7 +30,6 @@ package solver.variables.graph.graphStructure.nodes;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.S64BitSet;
 import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.graphStructure.iterators.ActiveNodesIterator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -71,14 +70,8 @@ public class StoredActiveNodes extends S64BitSet implements IActiveNodes {
         return this.get(idx);
     }
 
-    @Override
-    public ActiveNodesIterator<IActiveNodes> iterator() {
-        return new ActiveNodesIterator<IActiveNodes>(this);
-    }
-
 	@Override
 	public int nbNodes() {
 		return n;
 	}
-
 }

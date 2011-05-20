@@ -40,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.domain.delta.GraphDelta;
 import solver.variables.domain.delta.IGraphDelta;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**
  * Created by IntelliJ IDEA.
@@ -85,10 +84,11 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 		if(getEnvelopOrder()!=getKernelOrder()){
 			return false;
 		}
+		INeighbors nei;
     	for(int n=envelop.getActiveNodes().nextValue(0); n>=0; n=envelop.getActiveNodes().nextValue(n+1)){
-    		AbstractNeighborsIterator<INeighbors> iter = envelop.neighborsIteratorOf(n);
-    		while (iter.hasNext()){
-    			if(!kernel.edgeExists(n, iter.next())){
+    		nei = envelop.getNeighborsOf(n);
+    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+    			if(!kernel.edgeExists(n, j)){
     				return false;
     			}
     		}
@@ -119,6 +119,10 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
             	}
     			EventType e = EventType.ENFORCENODE;
             	notifyPropagators(e, cause);
+            	INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
+            	if(neig.neighborhoodSize()==1){
+            		enforceArc(x, neig.getFirstElement(), null);
+            	}
             	return true;
     		}return false;
     	}

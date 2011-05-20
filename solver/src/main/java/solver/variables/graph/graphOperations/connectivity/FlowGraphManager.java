@@ -32,10 +32,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.graphStructure.iterators.AbstractNeighborsIterator;
 
 /**Class enabling to find dominators and strong bridges of a directed flow graph, i.e. a strongly connected graph
  * with a specified root node.
+ * 
+ * BEWARE : consider all nodes of the input graph as active
  * 
  * This part is the most complicated of the connectivity package
  * many algorithms exists : 
@@ -124,21 +125,32 @@ public class FlowGraphManager {
 
 	/** perform a dfs in graph to label nodes */
 	private void proceedFirstDFS(){
-		AbstractNeighborsIterator<INeighbors>[] successors = new AbstractNeighborsIterator[nbNodes];
+		INeighbors[] successors = new INeighbors[nbNodes];
 		for (int i=0; i<nbNodes; i++){
-			successors[i] = graph.successorsIteratorOf(i);
+			successors[i] = graph.getSuccessorsOf(i);
 		}
 		int i = root;
 		father[0] = 0;
 		dfsNumberOfNode[root] = 0;
 		nodeOfDfsNumber[0] = root;
+		BitSet notFirsts = new BitSet(nbNodes);
+		boolean finish = false;
 		int k = 0;
 		int j;
-		while((i!=root) || successors[i].hasNext()){
-			if(!successors[i].hasNext()){
+		while(!finish){
+			if(notFirsts.get(i)){
+				j = successors[i].getNextElement();
+			}else{
+				notFirsts.set(i);
+				j = successors[i].getFirstElement();
+			}
+			if(j<0){
+				if(i==root){
+					finish = true;
+					break;
+				}
 				i = nodeOfDfsNumber[father[dfsNumberOfNode[i]]];
 			}else{
-				j = successors[i].next();
 				if (dfsNumberOfNode[j]==-1) {
 					k++;
 					father[k] = dfsNumberOfNode[i];
@@ -160,12 +172,12 @@ public class FlowGraphManager {
 	private void findAllIdom(){
 		idom[0] = 0;
 		sdom[0] = 0;
-		AbstractNeighborsIterator<INeighbors> prediter;
+		INeighbors nei;
 		int u,v;
 		for (int w=nbNodes-1; w>=1; w--){
-			prediter = graph.predecessorsIteratorOf(nodeOfDfsNumber[w]);
-			while(prediter.hasNext()){
-				v = dfsNumberOfNode[prediter.next()];
+			nei = graph.getPredecessorsOf(nodeOfDfsNumber[w]);
+			for(int k = nei.getFirstElement(); k>=0; k = nei.getNextElement()){
+				v = dfsNumberOfNode[k];
 				u = EVAL(v);
 				if(sdom[u]<sdom[w]){
 					sdom[w] = sdom[u];
@@ -293,10 +305,10 @@ public class FlowGraphManager {
 		if (idom[dfsNumberOfNode[y]] != dfsNumberOfNode[x] || father[dfsNumberOfNode[y]] != dfsNumberOfNode[x]){
 			return false;
 		}
-		AbstractNeighborsIterator<INeighbors> preds = graph.predecessorsIteratorOf(y);
+		INeighbors preds = graph.getPredecessorsOf(y);
 		int p;
-		while (preds.hasNext()){
-			p = dfsNumberOfNode[preds.next()];
+		for(int k = preds.getFirstElement(); k >=0; k = preds.getNextElement()){
+			p = dfsNumberOfNode[k];
 			if (p!=dfsNumberOfNode[y] && p!=dfsNumberOfNode[x] && (idom[p]<dfsNumberOfNode[y] || lcaManager.getLCA(nodeOfDfsNumber[p],y)!=y)){
 				return false;
 			}
