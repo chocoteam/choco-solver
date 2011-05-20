@@ -138,14 +138,8 @@ public final class BitSetIntDomain implements IIntDomain {
     @Override
     public boolean restrict(int aValue) {
         aValue -= offset;
-        int i = values.nextSetBit(this.lowerbound.get());
-        for (; i < aValue; i = values.nextSetBit(i + 1)) {
-            values.set(i, false);
-        }
-        i = values.nextSetBit(aValue + 1);
-        for (; i >= 0; i = values.nextSetBit(i + 1)) {
-            values.set(i, false);
-        }
+        this.values.clear();
+        this.values.set(aValue);
         this.lowerbound.set(aValue);
         this.upperbound.set(aValue);
         boolean change = size.get() > 1;
@@ -161,14 +155,14 @@ public final class BitSetIntDomain implements IIntDomain {
         aValue -= offset;
         int i = values.nextSetBit(this.lowerbound.get());
         for (; i < aValue; i = values.nextSetBit(i + 1)) {
-            values.set(i, false);
             delta.add(i + offset);
         }
         i = values.nextSetBit(aValue + 1);
         for (; i >= 0; i = values.nextSetBit(i + 1)) {
-            values.set(i, false);
             delta.add(i + offset);
         }
+        this.values.clear();
+        this.values.set(aValue);
         this.lowerbound.set(aValue);
         this.upperbound.set(aValue);
         boolean change = size.get() > 1;
@@ -199,14 +193,12 @@ public final class BitSetIntDomain implements IIntDomain {
     @Override
     public boolean updateUpperBound(int aValue) {
         aValue -= offset;
-        int c = 0;
-        for (int i = upperbound.get(); i > aValue; i = values.prevSetBit(i - 1)) {
-            values.clear(i);
-            c++;
-        }
+        values.clear(aValue+1, upperbound.get()+1);
         upperbound.set(values.prevSetBit(aValue));
-        size.add(-c);
-        return c > 0;
+        int _size = size.get();
+        int card = values.cardinality();
+        size.set(card);
+        return _size - card >0;
     }
 
     /**
@@ -215,16 +207,16 @@ public final class BitSetIntDomain implements IIntDomain {
     @Override
     public boolean updateUpperBoundAndDelta(int aValue) {
         aValue -= offset;
-        int c = 0;
+        //BEWARE: this loop significantly decreases performances
         for (int i = upperbound.get(); i > aValue; i = values.prevSetBit(i - 1)) {
-            values.clear(i);
-            //BEWARE: this line significantly decreases performances
             delta.add(i + offset);
-            c++;
         }
+        values.clear(aValue+1, upperbound.get()+1);
         upperbound.set(values.prevSetBit(aValue));
-        size.add(-c);
-        return c > 0;
+        int _size = size.get();
+        int card = values.cardinality();
+        size.set(card);
+        return _size - card >0;
     }
 
     /**
@@ -233,14 +225,12 @@ public final class BitSetIntDomain implements IIntDomain {
     @Override
     public boolean updateLowerBound(int aValue) {
         aValue -= offset;
-        int c = 0;
-        for (int i = lowerbound.get(); i < aValue; i = values.nextSetBit(i + 1)) {
-            values.clear(i);
-            c++;
-        }
+        values.clear(lowerbound.get(), aValue);
         lowerbound.set(values.nextSetBit(aValue));
-        size.add(-c);
-        return c > 0;
+        int _size = size.get();
+        int card = values.cardinality();
+        size.set(card);
+        return _size - card >0;
     }
 
     /**
@@ -249,16 +239,16 @@ public final class BitSetIntDomain implements IIntDomain {
     @Override
     public boolean updateLowerBoundAndDelta(int aValue) {
         aValue -= offset;
-        int c = 0;
+        //BEWARE: this loop significantly decreases performances
         for (int i = lowerbound.get(); i < aValue; i = values.nextSetBit(i + 1)) {
-            values.clear(i);
-            //BEWARE: this line significantly decreases performances
             delta.add(i + offset);
-            c++;
         }
+        values.clear(lowerbound.get(), aValue);
         lowerbound.set(values.nextSetBit(aValue));
-        size.add(-c);
-        return c > 0;
+        int _size = size.get();
+        int card = values.cardinality();
+        size.set(card);
+        return _size - card >0;
     }
 
     /**

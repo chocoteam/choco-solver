@@ -67,6 +67,14 @@ public class TestCorrectness {
     }
 
     @Test(groups = "1m")
+    public void testABSOLUTE() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 8) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed);
+        }
+    }
+
+    @Test(groups = "1m")
     public void testALLDIFFERENTBC() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {

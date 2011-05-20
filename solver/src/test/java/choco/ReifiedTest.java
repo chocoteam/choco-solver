@@ -234,7 +234,7 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups = {"1m"})
+    @Test(groups = {"10s"})
     public void testAllDifferentDecomp() {
 
         for (int i = 1; i < 12; i++) {
@@ -261,7 +261,7 @@ public class ReifiedTest {
 
     }
 
-    @Test(groups = {"1m"})
+    @Test(groups = {"1s"})
     public void testAllDifferentDecompSpe1() {
 
         int[][] values; //= DomainBuilder.buildFullDomains(i, 1, i, r, d, false);

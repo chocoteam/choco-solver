@@ -33,6 +33,7 @@ import gnu.trove.THashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.binary.Absolute;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.ternary.Times;
@@ -223,6 +224,27 @@ public interface Modeler {
                 map.put(domains[i], vars[i]);
             }
             Constraint ctr = new Times(vars[0], vars[1], vars[2], s);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelAbsolute = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map) {
+            Solver s = new Solver("Absolute_" + n);
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
+                map.put(domains[i], vars[i]);
+            }
+            Constraint ctr = new Absolute(vars[0], vars[1], s);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

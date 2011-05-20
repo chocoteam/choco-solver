@@ -235,7 +235,6 @@ public class AbsoluteTest {
 
             int minY = -20 + rand.nextInt(40);
             int maxY = minY + rand.nextInt(40);
-            System.out.printf(String.format("[%d,%d] - [%d,%d]\n", minX, maxX, minY, maxY));
 
             Solver ref = reformulate(minX, maxX, minY, maxY);
             ref.findAllSolutions();

@@ -72,6 +72,8 @@ public interface IStateBitSet extends Serializable {
      */
     void clear();
 
+    void clear(int fromIndex, int toIndex);
+
     void set(int index, boolean value);
 
     void set(int fromIdex, int toIndex);

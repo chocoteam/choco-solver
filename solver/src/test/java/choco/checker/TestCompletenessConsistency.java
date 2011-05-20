@@ -146,22 +146,79 @@ public class TestCompletenessConsistency {
         checkConsistency(Modeler.modelAllDiffBC, 2, 0, 2, seed, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testALLDIFFERENTBC3() {
         long seed = System.currentTimeMillis();
         checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, seed, "bc");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
         checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, seed, "bc");
     }
     
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testALLDIFFERENTGRAPHBC() {
         long seed = System.currentTimeMillis();
         checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, seed, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testTIMES1() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelTimes, 3, 2, 50, seed, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testTIMES2() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelTimes, 3, -25, 25, seed, "bc");
+    }
+
+
+    @Test(groups = "10s")
+    public void testTIMES3() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelTimes, 3, -50, -3, seed, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testABSOLUTEBC1() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testABSOLUTEBC2() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed, "bc");
+    }
+
+
+    @Test(groups = "10s")
+    public void testABSOLUTEBC3() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, -50, -3, seed, "bc");
+    }
+
+    @Test(groups = "10s")
+    public void testABSOLUTEAC1() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed, "ac");
+    }
+
+    @Test(groups = "10s")
+    public void testABSOLUTEAC2() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed, "ac");
+    }
+
+
+    @Test(groups = "10s")
+    public void testABSOLUTEAC3() {
+        long seed = System.currentTimeMillis();
+        checkConsistency(Modeler.modelAbsolute, 2, -50, -3, seed, "ac");
     }
 
     /*@Test
