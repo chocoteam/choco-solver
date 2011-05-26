@@ -30,16 +30,19 @@ package solver.constraints.gary;
 import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.*;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**Constraint for working on graph properties
@@ -52,9 +55,10 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	//***********************************************************************************
 
 	GraphVar graph;
-	IntVar[] inputVars;
-	IntVar[] parameterVars;
-	boolean directed;
+	IntVar[] inputVars; 	// nodes of the graph
+	BoolVar[][] relations;  // arcs of the graph
+	IntVar[] parameterVars; // graph properties parameters
+	boolean directed;		
 	LinkedList<GraphProperty> properties;
 
 
@@ -62,12 +66,15 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public GraphConstraint(IntVar[] vars, Solver solver, PropagatorPriority storeThreshold, boolean directed) {
-		super((V[]) vars, solver, storeThreshold);
+	public GraphConstraint(IntVar[] vars, BoolVar[][] rel, Solver solver, PropagatorPriority storeThreshold, boolean directed) {
+		super(solver, storeThreshold);
+		
 		int n = vars.length;
+		this.relations = rel;
+		this.inputVars = vars;
 		this.directed = directed;
 		if(directed){
-			graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
+			graph = new DirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
 		}else{
 			graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
 		}
@@ -77,130 +84,12 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 			}
 		}
 		properties = new LinkedList<GraphProperty>();
+		setPropagators(new PropBoolGraphChanneling(graph, relations, solver.getEnvironment(), this, storeThreshold));
 	}
 
 	//***********************************************************************************
-	// GRAPH PROPERTIES
+	// ADDING GRAPH PROPERTIES
 	//***********************************************************************************
-	
-	public enum GraphProperty{
-		// Trivial cases
-		/** All nodes will figure in the final graph
-		 * BEWARE By definition, each node must have at least one arc in the final graph
-		 * - No parameter */
-		ALL_NODES {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				return new Propagator[]{new PropAllNodes(cons.graph, cons.solver.getEnvironment(), cons)};
-			}
-		},
-		/** All loops will be removed from the envelope graph
-		 * - No parameter */
-		NO_LOOPS {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				return new Propagator[]{new PropNoLoop(cons.graph, cons.solver.getEnvironment(), cons)};
-			}
-		},
-		// With parameter
-		/** Restrict the number of nodes in the final graph
-		 * - One parameter : an IntVar representing the expected number of nodes*/
-		K_NODES {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				if(parameters.length==0){
-					throw new UnsupportedOperationException("K_NODES require a parameter (K)");
-				}
-				IntVar k = parameters[0];
-				if(k.getLB()>=cons.graph.getEnvelopOrder()){
-					throw new UnsupportedOperationException("K must be < number of variables, if equality expected, use ALL_NODES instead");
-				}
-				return new Propagator[]{new PropKNodes(cons.graph, cons.solver.getEnvironment(), cons,k)};
-			}
-		},
-		/** Restrict the number of neighbors of each node in the final graph
-		 * - One parameter : an IntVar representing the expected number of neighbors per node*/
-		K_NEIGHBORS {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the number of successor of each node in the final graph
-		 * - One parameter : an IntVar representing the expected number of successors per node
-		 * BEWARE the graph must be directed*/
-		K_SUCCESSORS {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				if(!cons.directed){
-					throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
-				}
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the number of predecessors of each node in the final graph
-		 * - One parameter : an IntVar representing the expected number of predecessors per node
-		 * BEWARE the graph must be directed*/
-		K_PREDECESSORS {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				if(!cons.directed){
-					throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
-				}
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the number of connected components in the final graph
-		 * - One parameter : an IntVar representing the expected number of connected components*/
-		K_CC {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the number of strongly connected components in the final graph
-		 * - One parameter : an IntVar representing the expected number of strongly connected components
-		 * BEWARE the graph must be directed*/
-		K_SCC {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				if(!cons.directed){
-					throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
-				}
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		// Partitioning
-		/** Restrict the final graph to be a clique partition
-		 * - One parameter : an IntVar representing the expected number of cliques in the final graph
-		 * BEWARE in such a case it is useless and thus depreciated to use a directed graph*/
-		CLIQUE_PARTITIONNING {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the final graph to be a tree partition
-		 * - One parameter : an IntVar representing the expected number of trees in the final graph
-		 * BEWARE the graph must be undirected*/
-		TREE_PARTITIONNING {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		},
-		/** Restrict the final graph to be an anti-arborescence partition
-		 * - One parameter : an IntVar representing the expected number of anti-arborescences in the final graph
-		 * BEWARE the graph must be directed*/
-		ANTI_ARBORESCENCE_PARTITIONING {
-			@Override
-			protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-				throw new UnsupportedOperationException("Property not implemented yet");
-			}
-		};
-
-		protected abstract Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters);
-	}
 	
 	/**Add a graph property to the constraint
 	 * @param prop property required on the graph
@@ -212,9 +101,18 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		}else{
 			properties.add(prop);
 			setPropagators(ArrayUtils.append(propagators, prop.getPropagators(this, parameters)));
+			this.vars = (V[])ArrayUtils.append(inputVars,parameterVars,ArrayUtils.flatten(relations)).clone();
 		}
 	}
 
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
+
+	public IEnvironment getEnvironment(){
+		return solver.getEnvironment();
+	}
+	
 	//***********************************************************************************
 	// CONSTRAINT METHODS
 	//***********************************************************************************

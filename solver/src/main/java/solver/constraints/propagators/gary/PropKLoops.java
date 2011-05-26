@@ -27,63 +27,54 @@
 
 package solver.constraints.propagators.gary;
 
-import gnu.trove.TIntIntHashMap;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 
-/**Propagator channeling an undirected graph and an array of integer variables
- * 
- * BEWARE : for use reasons the channeling is only performed on arcs but not on nodes
+/**Propagator that ensures that K loops belong to the final graph
  * 
  * @author Jean-Guillaume Fages
  *
- * @param <V>
  */
-public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropagator<V> {
+public class PropKLoops<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private UndirectedGraphVar g;
-	private IntVar[] intVars;
-	private int[] values;
-	private TIntIntHashMap valuesHash;
-	private ValRem valRemoved;
+	private GraphVar g;
+	private IntVar k;
+	private IStateInt nbInKer, nbInEnv;
+	private int n;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
 
 	//***********************************************************************************
-	// CONSTRUCTOR
+	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,IEnvironment environment, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), environment, mixtedAllDiff, storeThreshold, b);
+	public PropKLoops(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, IntVar k) {
+		super((V[]) new GraphVar[]{graph}, environment, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
-		intVars = vars;
-		this.values = v;
-		this.valuesHash = vH;
-		int n = values.length;
-		// IntVar events
-		valRemoved = new ValRem(this);
-		// Graph events
-		arcEnforced = new EdgeEnf(this, n);
-		arcRemoved = new EdgeRem(this, n);
+		this.k = k;
+		n = g.getEnvelopGraph().getNbNodes();
+		nbInEnv = environment.makeInt();
+		nbInKer = environment.makeInt();
+		arcEnforced = new EnfArc();
+		arcRemoved  = new RemArc();
 	}
 
 	//***********************************************************************************
@@ -92,17 +83,44 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public void propagate() throws ContradictionException {
-		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
-		for(int i=0; i<intVars.length; i++){
-			if(intVars[i].instantiated()){
-				g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this);
+		int min = 0;
+		int max = 0;
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for(int i=ker.nextValue(0);i>=0;i = ker.nextValue(i+1)){
+			if(g.getKernelGraph().edgeExists(i, i)){
+				min++;
 			}
 		}
-		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for(int i=act.nextValue(0); i>=0; i=act.nextValue(i+1)){
-			if (g.getKernelGraph().getNeighborhoodSize(i)==1){
-				if(i<intVars.length){
-					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
+		for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+			if(g.getEnvelopGraph().edgeExists(i, i)){
+				max++;
+			}
+		}
+		k.updateLowerBound(min, this);
+		k.updateUpperBound(max, this);
+		nbInEnv.set(max);
+		nbInKer.set(min);
+		if(k.instantiated()){
+			if(min==max){
+				setPassive();
+			}else{
+				if(max==k.getValue()){
+					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+						if(g.getEnvelopGraph().edgeExists(node, node)){
+							g.enforceArc(node,node, this);
+						}
+					}
+					setPassive();
+				}else if(min==k.getValue()){
+					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+						if(g.getEnvelopGraph().edgeExists(node, node) && !g.getKernelGraph().edgeExists(node, node)){
+							g.removeArc(node,node, this);
+						}
+					}
+					setPassive();
 				}
 			}
 		}
@@ -110,7 +128,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
+		if( request instanceof GraphRequest){
 			GraphRequest gr = (GraphRequest) request;
 			if((mask & EventType.ENFORCEARC.mask) !=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
@@ -120,16 +138,26 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 			}
+			k.updateLowerBound(nbInKer.get(), this);
+			k.updateUpperBound(nbInEnv.get(), this);
 		}
-		else{
-			if(EventType.anInstantiationEvent(mask)){
-				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
-			}
-			if((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) !=0){
-				IntVar var = (IntVar) request.getVariable();
-				IntDelta d = var.getDelta();
-				valRemoved.set(idxVarInProp);
-				d.forEach(valRemoved, request.fromDelta(), request.toDelta());
+		if(k.instantiated()){
+			if(nbInEnv.get()==k.getValue()){
+				IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+				for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					if(g.getEnvelopGraph().edgeExists(node, node)){
+						g.enforceArc(node,node, this);
+					}
+				}
+				setPassive();
+			}else if(nbInKer.get()==k.getValue()){
+				IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+				for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					if(g.getEnvelopGraph().edgeExists(node, node) && !g.getKernelGraph().edgeExists(node, node)){
+						g.removeArc(node,node, this);
+					}
+				}
+				setPassive();
 			}
 		}
 	}
@@ -140,32 +168,11 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_MASK() + EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		for (int vIdx=0; vIdx<intVars.length; vIdx++) {
-			IntVar v = intVars[vIdx];
-			// An IntVar cannot be instantiated to more than one value
-			if(g.getKernelGraph().getNeighborhoodSize(vIdx)>1){ 
-				return ESat.FALSE;
-			}
-			// the instantiation value of the IntVar must match with the graph
-			if(g.getKernelGraph().getNeighborhoodSize(vIdx)==1 && 
-					!intVars[vIdx].contains(values[g.getKernelGraph().getNeighborsOf(vIdx).getFirstElement()])){
-				return ESat.FALSE;
-			}
-			if (v.instantiated()) {
-				int vv = v.getValue();
-				if(!g.getKernelGraph().edgeExists(vIdx, valuesHash.get(vv))){
-					return ESat.FALSE;
-				}
-			}
-		}
-		if (isCompletelyInstantiated()) {
-			return ESat.TRUE;
-		}
 		return ESat.UNDEFINED;
 	}
 
@@ -173,72 +180,24 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	// PROCEDURES
 	//***********************************************************************************
 
-	/** When a value y is removed from the domain of x then the edge (x,y) must be pruned*/
-	private class ValRem implements IntProcedure {
-		private int idx;
-		private Propagator p;
-
-		private ValRem(Propagator p){
-			this.p = p;
-		}
-
-		private void set(int i) {
-			idx = i;
-		}
-
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = idx;
-			int to   = valuesHash.get(i);
-			g.removeArc(from, to,p);
-		}
-	}
-	
-	/** When an edge (x,y), x<=y, is enforced than x must be instantiated to y */
-	private class EdgeEnf implements IntProcedure {
-
-		private Propagator p;
-		private int n;
-
-		private EdgeEnf(Propagator p, int n){
-			this.p = p;
-			this.n = n;
-		}
-		
+	private class EnfArc implements IntProcedure{
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
 			int to   = i%n;
-			if(from<to){
-				intVars[from].instantiateTo(values[to], p);
-			}else{
-				intVars[to].instantiateTo(values[from], p);
+			if(from == to){
+				nbInKer.set(nbInKer.get()+1);
 			}
 		}
-		
 	}
-	
-	/** When an edge (x,y), x<=y, is removed than a value y must be removed from the domain of x */
-	private class EdgeRem implements IntProcedure {
-
-		private Propagator p;
-		private int n;
-
-		private EdgeRem(Propagator p, int n){
-			this.p = p;
-			this.n = n;
-		}
-		
+	private class RemArc implements IntProcedure{
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
 			int to   = i%n;
-			if(from<to){
-				intVars[from].removeValue(values[to], p);
-			}else{
-				intVars[to].removeValue(values[from], p);
+			if(from == to){
+				nbInEnv.set(nbInEnv.get()-1);
 			}
 		}
-		
 	}
 }

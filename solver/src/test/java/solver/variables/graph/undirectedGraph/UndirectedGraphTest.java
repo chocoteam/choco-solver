@@ -54,7 +54,7 @@ public class UndirectedGraphTest {
         System.out.println(g1);
         System.out.println(g2);
         System.out.println("-----------------");
-        System.out.println(ConnectivityFinder.findAllCCandAP(g2));
+        System.out.println(ConnectivityFinder.findAll(g2));
 //        System.out.println("card of max bipartite matching : "+BipartiteMaxCardMatching.maxCardBipartiteMatching(g1).size());
 
 //        System.out.println("enforecNode");

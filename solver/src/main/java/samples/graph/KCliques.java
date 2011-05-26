@@ -24,76 +24,93 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.graph;
 
-package solver.constraints.propagators.gary;
-
-import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import choco.kernel.common.util.tools.ArrayUtils;
+import samples.AbstractProblem;
+import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.gary.GraphConstraint;
+import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.requests.IRequest;
+import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
-/**Propagator that ensures that all nodes belong to the final graph
- * 
- * @author Jean-Guillaume Fages
- *
- */
-public class PropAllNodes<V extends GraphVar> extends GraphPropagator<V>{
+public class KCliques extends AbstractProblem{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
+	private int n;
+	private int k;
+	private IntVar[] vars;
+	private BoolVar[][] rel;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAllNodes(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new GraphVar[]{graph}, environment, constraint, PropagatorPriority.VERY_SLOW, false);
-		g = graph;
+	
+	public KCliques(int n, int k) {
+		this.n = n;
+		this.k = k;
+		System.out.println(n+" : "+k);
 	}
 
 	//***********************************************************************************
-	// PROPAGATIONS
+	// METHODS
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
-			g.enforceNode(node, this);
+	public void buildModel() {
+		solver = new Solver();
+		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
+		rel = new BoolVar[n][n];
+
+		for(int i=0; i<n; i++){
+			rel[i]  = VariableFactory.boolArray("rel "+i, n, solver);
 		}
-		//TODO entail
+
+		GraphConstraint gc = new GraphConstraint(vars, rel, solver, PropagatorPriority.LINEAR, false);
+		Constraint[] cstrs = new Constraint[]{gc};
+
+		IntVar nv = VariableFactory.enumerated("n", n, n, solver);
+		gc.addProperty(GraphProperty.K_LOOPS, nv);
+		gc.addProperty(GraphProperty.K_CC, VariableFactory.bounded("N_CC", k, k, solver));
+		
+		solver.post(cstrs);
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {}
-
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.VOID.mask;
+	public void configureSolver() {
+		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(rel), solver.getEnvironment());
+		solver.set(strategy);
 	}
 
 	@Override
-	public ESat isEntailed() {
-		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
-			if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
+	public void solve() {
+		Boolean status = solver.findAllSolutions();
+	}
+
+	@Override
+	public void prettyOut() {
+		System.out.println(solver.getMeasures().getSolutionCount()+" sols");
+		System.out.println(solver.getMeasures().getFailCount()+" fails");
+		System.out.println(solver.getMeasures().getTimeCount()+" ms");
+	}
+
+	//***********************************************************************************
+	// MAIN
+	//***********************************************************************************
+
+	public static void main(String[] args) {
+		int n = 6;
+		int k = 3;
+		KCliques nc = new KCliques(n,k);
+		nc.execute();
 	}
 }
