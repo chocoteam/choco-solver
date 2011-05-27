@@ -136,11 +136,11 @@ public class ConnectivityFinder {
 					ND[currentNode] += ND[s];
 					L[currentNode] = Math.min(L[currentNode], L[s]);
 					H[currentNode] = Math.max(H[currentNode], H[s]);
-				}else{
+				}else if(s!=p[currentNode]){
 					L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
 					H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
 				}
-				if (p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s]){ 
+				if (s!=currentNode && p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s]){ 
 					co.addIsthmus((currentNode+1)*n+s); // ISTHMUS DETECTED
 				}
 			}

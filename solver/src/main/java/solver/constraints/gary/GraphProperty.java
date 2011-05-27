@@ -26,12 +26,14 @@
  */
 package solver.constraints.gary;
 
-import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.gary.PropKCC;
 import solver.constraints.propagators.gary.PropKLoops;
 import solver.constraints.propagators.gary.PropKNodes;
 import solver.constraints.propagators.gary.PropEachNodeHasLoop;
+import solver.constraints.propagators.gary.PropTransitivityUndirected;
 import solver.variables.IntVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 public enum GraphProperty {
 
@@ -40,8 +42,8 @@ public enum GraphProperty {
 	 * - No parameter */
 	EACH_NODE_HAS_A_LOOP {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			return new Propagator[]{new PropEachNodeHasLoop(cons.graph, cons.getEnvironment(), cons)};
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+			return new GraphPropagator[]{new PropEachNodeHasLoop(cons.graph, cons.getEnvironment(), cons)};
 		}
 	},
 	// With parameter
@@ -49,7 +51,7 @@ public enum GraphProperty {
 	 * - One parameter : an IntVar representing the expected number of nodes*/
 	K_NODES {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(parameters.length==0){
 				throw new UnsupportedOperationException("K_NODES requires a parameter (K)");
 			}
@@ -57,14 +59,14 @@ public enum GraphProperty {
 			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be <= number of nodes");
 			}
-			return new Propagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
 		}
 	},
 	/** Restrict the number of loops in the final graph
 	 * - One parameter : an IntVar representing the expected number of nodes*/
 	K_LOOPS {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(parameters.length==0){
 				throw new UnsupportedOperationException("K_LOOPS requires a parameter (K)");
 			}
@@ -72,14 +74,14 @@ public enum GraphProperty {
 			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be <= number of nodes");
 			}
-			return new Propagator[]{new PropKLoops(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKLoops(cons.graph, cons.getEnvironment(), cons,k)};
 		}
 	},
 	/** Restrict the number of neighbors of each node in the final graph
 	 * - One parameter : an IntVar representing the expected number of neighbors per node*/
 	K_NEIGHBORS {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(parameters.length==0){
 				throw new UnsupportedOperationException("K_NEIGHBORS requires a parameter (K)");
 			}
@@ -87,7 +89,7 @@ public enum GraphProperty {
 			if(k.getLB()>=cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be < number of nodes, if equality expected, use ALL_NODES instead");
 			}
-			return new Propagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
 		}
 	},
 	/** Restrict the number of successor of each node in the final graph
@@ -95,7 +97,7 @@ public enum GraphProperty {
 	 * BEWARE the graph must be directed*/
 	K_SUCCESSORS {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(!cons.directed){
 				throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
 			}
@@ -107,7 +109,7 @@ public enum GraphProperty {
 	 * BEWARE the graph must be directed*/
 	K_PREDECESSORS {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(!cons.directed){
 				throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
 			}
@@ -118,12 +120,12 @@ public enum GraphProperty {
 	 * - One parameter : an IntVar representing the expected number of connected components*/
 	K_CC {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(parameters.length==0){
 				throw new UnsupportedOperationException("K_CC requires a parameter (K)");
 			}
 			IntVar k = parameters[0];
-			return new Propagator[]{new PropKCC(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getEnvironment(), cons,k)};
 		}
 	},
 	/** Restrict the number of strongly connected components in the final graph
@@ -131,7 +133,7 @@ public enum GraphProperty {
 	 * BEWARE the graph must be directed*/
 	K_SCC {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			if(!cons.directed){
 				throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
 			}
@@ -142,10 +144,14 @@ public enum GraphProperty {
 	/** Restrict the final graph to be a clique partition
 	 * - One parameter : an IntVar representing the expected number of cliques in the final graph
 	 * BEWARE in such a case it is useless and thus depreciated to use a directed graph*/
-	CLIQUE_PARTITIONNING {
+	K_CLIQUES {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			throw new UnsupportedOperationException("Property not implemented yet");
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+			if(parameters.length==0){
+				throw new UnsupportedOperationException("K_CC requires a parameter (K)");
+			}
+			IntVar k = parameters[0];
+			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getEnvironment(), cons,k), new PropTransitivityUndirected((UndirectedGraphVar)cons.graph,cons.getEnvironment(), cons)};
 		}
 	},
 	/** Restrict the final graph to be a tree partition
@@ -153,7 +159,7 @@ public enum GraphProperty {
 	 * BEWARE the graph must be undirected*/
 	TREE_PARTITIONNING {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			throw new UnsupportedOperationException("Property not implemented yet");
 		}
 	},
@@ -162,10 +168,10 @@ public enum GraphProperty {
 	 * BEWARE the graph must be directed*/
 	ANTI_ARBORESCENCE_PARTITIONING {
 		@Override
-		protected Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
 			throw new UnsupportedOperationException("Property not implemented yet");
 		}
 	};
 
-	protected abstract Propagator[] getPropagators(GraphConstraint cons, IntVar... parameters);
+	protected abstract GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters);
 }

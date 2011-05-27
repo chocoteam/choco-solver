@@ -44,15 +44,6 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
         current = 0;
     }
 
-//    public int nextValue(int from) {
-//        return this.nextSetBit(from);
-//    }
-
-//    @Override
-//    public AbstractNeighborsIterator<BitSetNeighbors> iterator() {
-//        return new BitSetIterator<BitSetNeighbors>(this);
-//    }
-
     @Override
     public void add(int element) {
         this.set(element, true);
@@ -84,8 +75,8 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
 
 	@Override
 	public int getFirstElement() {
-		current = 0;
-		return nextSetBit(0);
+		current = nextSetBit(0);
+		return current;
 	}
 
 	@Override

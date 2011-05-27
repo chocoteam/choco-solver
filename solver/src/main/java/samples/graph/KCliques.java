@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphProperty;
+import solver.constraints.gary.GraphRelation;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -71,29 +72,36 @@ public class KCliques extends AbstractProblem{
 		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
 		rel = new BoolVar[n][n];
 
+		vars[0] = VariableFactory.enumerated("v0", new int[]{2,5,42}, solver);
 		for(int i=0; i<n; i++){
-			rel[i]  = VariableFactory.boolArray("rel "+i, n, solver);
+			for(int j=i; j<n; j++){
+				rel[i][j]  = VariableFactory.bool("rel "+i+"_"+j, solver);
+			}
+		}
+		for(int i=0; i<n; i++){
+			for(int j=0; j<i; j++){
+				rel[i][j]  = rel[j][i];
+			}
 		}
 
-		GraphConstraint gc = new GraphConstraint(vars, rel, solver, PropagatorPriority.LINEAR, false);
+		GraphConstraint gc = new GraphConstraint(vars, rel, solver, PropagatorPriority.LINEAR, false, GraphRelation.EQUALITY);
 		Constraint[] cstrs = new Constraint[]{gc};
 
 		IntVar nv = VariableFactory.enumerated("n", n, n, solver);
 		gc.addProperty(GraphProperty.K_LOOPS, nv);
-		gc.addProperty(GraphProperty.K_CC, VariableFactory.bounded("N_CC", k, k, solver));
-		
+		gc.addProperty(GraphProperty.K_CLIQUES, VariableFactory.bounded("N_CC", k, k, solver));
 		solver.post(cstrs);
 	}
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(rel), solver.getEnvironment());
+		AbstractStrategy strategy = StrategyFactory.inputOrderMaxVal(ArrayUtils.flatten(rel), solver.getEnvironment());
 		solver.set(strategy);
 	}
 
 	@Override
 	public void solve() {
-		Boolean status = solver.findAllSolutions();
+		Boolean status = solver.findSolution();
 	}
 
 	@Override
@@ -101,6 +109,9 @@ public class KCliques extends AbstractProblem{
 		System.out.println(solver.getMeasures().getSolutionCount()+" sols");
 		System.out.println(solver.getMeasures().getFailCount()+" fails");
 		System.out.println(solver.getMeasures().getTimeCount()+" ms");
+		for(int i=0;i<n;i++){
+			System.out.println(vars[i]);
+		}
 	}
 
 	//***********************************************************************************
@@ -109,7 +120,7 @@ public class KCliques extends AbstractProblem{
 
 	public static void main(String[] args) {
 		int n = 6;
-		int k = 3;
+		int k = 2;
 		KCliques nc = new KCliques(n,k);
 		nc.execute();
 	}

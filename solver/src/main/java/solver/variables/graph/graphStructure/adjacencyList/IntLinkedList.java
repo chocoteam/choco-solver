@@ -61,11 +61,6 @@ public class IntLinkedList implements INeighbors {
         this.size = k;
     }
 
-//    @Override
-//    public LinkedListIterator<IntLinkedList> iterator() {
-//        return new LinkedListIterator<IntLinkedList>(this);
-//    }
-
     @Override
     /**
      * Test for an empty list
@@ -83,14 +78,6 @@ public class IntLinkedList implements INeighbors {
     public int neighborhoodSize() {
         return this.size;
     }
-
-//    /**
-//     * Accessor on the first cell of the linked list
-//     * @return a cell
-//     */
-//    public IntCell get() {
-//        return first;
-//    }
 
     @Override
     /**
@@ -110,10 +97,6 @@ public class IntLinkedList implements INeighbors {
         return res;
     }
 
-//    public IntCell getFirst() {
-//        return first;
-//    }
-
     /**
      * Return the cell containing the value element if it exists
      * @param element an int
@@ -130,21 +113,6 @@ public class IntLinkedList implements INeighbors {
         }
         return res;
     }
-
-//    /**
-//     * Search for the last element of the linked list FROM THE BEGINING!
-//     * @return the last cell of the linked list
-//     */
-//    @ Deprecated
-//    public IntCell getLast() {
-//        IntCell current = first;
-//        IntCell res = null;
-//        while (current != null) {
-//            res = current;
-//            current = current.getNext();
-//        }
-//        return res;
-//    }
 
     @Override
     /**
@@ -188,15 +156,6 @@ public class IntLinkedList implements INeighbors {
         return removed;
     }
 
-//    /**
-//     * Add the linked list list at the end of the current linked list
-//     * @param list a linked list
-//     */
-//    public void merge(IntLinkedList list) {
-//        this.getLast().setNext(list.get());
-//        this.size += list.size;
-//    }
-
     @Override
     public String toString() {
         String res = "";
@@ -225,14 +184,12 @@ public class IntLinkedList implements INeighbors {
 		return first.getElement();
 	}
 	
-	private int el; // avoid to declare an int at each getNextElement()
-	
 	@Override
 	public int getNextElement() {
 		if(nextCell==null){
 			return -1;
 		}
-		el = nextCell.element;
+		int el = nextCell.element;
 		nextCell = nextCell.next;
 		return el;
 	}

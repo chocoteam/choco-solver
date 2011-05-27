@@ -32,13 +32,14 @@ import java.util.LinkedList;
 import gnu.trove.TIntArrayList;
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import solver.constraints.Constraint;
+import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -49,11 +50,13 @@ import solver.requests.IRequest;
 
 /**Propagator that ensures that the final graph consists in K Connected Components (CC)
  * 
+ * Arc consistant with EACH_NODE_HAS_A_LOOP propagator
+ * 
  * TODO : couplage generalise, incremental?
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
+public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -66,8 +69,8 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new GraphVar[]{graph}, environment, constraint, PropagatorPriority.LINEAR, false);
+	public PropKCC(GraphVar graph, IEnvironment environment, GraphConstraint constraint, IntVar k) {
+		super((V[]) new Variable[]{graph,k}, environment, constraint, PropagatorPriority.LINEAR, false);//
 		g = graph;
 		this.k = k;
 		initDataStructure();
@@ -86,23 +89,33 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 		boolean tV;
 		int min = 0;
 		LinkedList<TIntArrayList> ccWithNoTV = new LinkedList<TIntArrayList>();
-		int[] ccof = new int[n];
-		int idx=0;
 		for(TIntArrayList cc:envCcObj.getConnectedComponents()){
 			tV = false;
 			for(int i=0; i<cc.size(); i++){
-				ccof[cc.get(i)] = idx;
 				if(ker.isActive(cc.get(i))){
 					tV = true;
+					break;
 				}
 			}
 			if(tV){
 				min++;
 			}else{
 				ccWithNoTV.add(cc);
-			}idx++;
+			}
 		}
-		int max = ConnectivityFinder.findCCOf(g.getKernelGraph()).size() + g.getEnvelopOrder() - g.getKernelOrder();
+		LinkedList<TIntArrayList> ccKer = ConnectivityFinder.findCCOf(g.getKernelGraph());
+		int[] ccOf = new int[n];
+		int idx = 0;
+		for(TIntArrayList cc:ccKer){
+			for(int i=0; i<cc.size(); i++){
+				ccOf[cc.get(i)] = idx;
+			}
+			idx++;
+		}
+		int max = ccKer.size();
+		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
+			throw new UnsupportedOperationException("case not implemented yet ");
+		}
 		// TODO couplage generalise
 		
 		// PRUNING
@@ -113,17 +126,18 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 			// --- Max
 			if(k.getValue()==max){
 				INeighbors nei;
+				env = g.getEnvelopGraph().getActiveNodes();
 				for(int i = env.nextValue(0); i>=0; i = env.nextValue(i+1)){
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-						if(ccof[i]!=ccof[j] && i!=j){
+						if(ccOf[i]!=ccOf[j]){
 							g.removeArc(i, j, this);
 						}
 					}
 				}
 			}
 			// --- Min
-			if(k.getValue()==min){
+			else if(k.getValue()==min){
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
@@ -131,9 +145,9 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel
-				BitSet ap = envCcObj.getArticulationPoints();
-				for(int i=ap.nextSetBit(0); i>=0; i = ap.nextSetBit(i+1)){
-					g.enforceNode(i, this);
+				TIntArrayList ap = envCcObj.getArticulationPoints();
+				for(int i=0;i<ap.size();i++){
+					g.enforceNode(ap.get(i), this);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();
@@ -148,6 +162,7 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 						}else {
 							g.enforceArc(to, from, this);
 						}
+						throw new UnsupportedOperationException("check that case ");
 					}else{
 						g.enforceArc(from, to, this);
 					}
@@ -156,6 +171,7 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 		}
 	}
 
+	
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
@@ -165,23 +181,33 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 		boolean tV;
 		int min = 0;
 		LinkedList<TIntArrayList> ccWithNoTV = new LinkedList<TIntArrayList>();
-		int[] ccof = new int[n];
-		int idx=0;
 		for(TIntArrayList cc:envCcObj.getConnectedComponents()){
 			tV = false;
 			for(int i=0; i<cc.size(); i++){
-				ccof[cc.get(i)] = idx;
 				if(ker.isActive(cc.get(i))){
 					tV = true;
+					break;
 				}
 			}
 			if(tV){
 				min++;
 			}else{
 				ccWithNoTV.add(cc);
-			}idx++;
+			}
 		}
-		int max = ConnectivityFinder.findCCOf(g.getKernelGraph()).size() + g.getEnvelopOrder() - g.getKernelOrder();
+		LinkedList<TIntArrayList> ccKer = ConnectivityFinder.findCCOf(g.getKernelGraph());
+		int[] ccOf = new int[n];
+		int idx = 0;
+		for(TIntArrayList cc:ccKer){
+			for(int i=0; i<cc.size(); i++){
+				ccOf[cc.get(i)] = idx;
+			}
+			idx++;
+		}
+		int max = ccKer.size();
+		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
+			throw new UnsupportedOperationException("case not implemented yet ");
+		}
 		// TODO couplage generalise
 		
 		// PRUNING
@@ -192,17 +218,18 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 			// --- Max
 			if(k.getValue()==max){
 				INeighbors nei;
+				env = g.getEnvelopGraph().getActiveNodes();
 				for(int i = env.nextValue(0); i>=0; i = env.nextValue(i+1)){
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-						if(ccof[i]!=ccof[j] && i!=j){
+						if(ccOf[i]!=ccOf[j]){
 							g.removeArc(i, j, this);
 						}
 					}
 				}
 			}
 			// --- Min
-			if(k.getValue()==min){
+			else if(k.getValue()==min){
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
@@ -210,9 +237,9 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel
-				BitSet ap = envCcObj.getArticulationPoints();
-				for(int i=ap.nextSetBit(0); i>=0; i = ap.nextSetBit(i+1)){
-					g.enforceNode(i, this);
+				TIntArrayList ap = envCcObj.getArticulationPoints();
+				for(int i=0;i<ap.size();i++){
+					g.enforceNode(ap.get(i), this);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();
@@ -227,6 +254,7 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 						}else {
 							g.enforceArc(to, from, this);
 						}
+						throw new UnsupportedOperationException("check that case ");
 					}else{
 						g.enforceArc(from, to, this);
 					}
@@ -357,6 +385,14 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 		}
 		
 		// POST ORDER PASS FOR FINDING ISTHMUS
+		BitSet importantNode = new BitSet(inf.length);
+		for (i = g.getKernelGraph().getActiveNodes().nextValue(0); i>=0; i = g.getKernelGraph().getActiveNodes().nextValue(i+1)) {
+			importantNode.set(i);
+		}
+		for(i=0;i<co.getArticulationPoints().size();i++){
+			importantNode.set(co.getArticulationPoints().get(i));
+		}
+		
 		int n = neighbors.length;
 		int currentNode;
 		for(i=k; i>=0; i--){
@@ -369,11 +405,11 @@ public class PropKCC<V extends GraphVar> extends GraphPropagator<V>{
 					ND[currentNode] += ND[s];
 					L[currentNode] = Math.min(L[currentNode], L[s]);
 					H[currentNode] = Math.max(H[currentNode], H[s]);
-				}else{
+				}else if(s!=p[currentNode]){
 					L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
 					H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
 				}
-				if (p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s] && co.isArticulationPoints(s) && co.isArticulationPoints(currentNode)){ 
+				if (s!=currentNode && p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s] && importantNode.get(s) && importantNode.get(currentNode)){ 
 					co.addIsthmus((currentNode+1)*n+s); // ISTHMUS DETECTED
 				}
 			}

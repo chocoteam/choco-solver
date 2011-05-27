@@ -24,60 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.gary;
 
-package solver.variables.graph.graphStructure.matrix;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.binary.EqualX_YC;
+import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.reified.PropReified;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.S64BitSet;
-import solver.variables.graph.INeighbors;
+public enum GraphRelation {
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
- */
-public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
-
-	private int current;
-	
-    public StoredBitSetNeighbors(IEnvironment environment, int nbits) {
-        super(environment, nbits);
-        current = 0;
-    }
-
-    @Override
-    public void add(int element) {
-        this.set(element,true);
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.cardinality();
-    }
-
-    @Override
-	public int getFirstElement() {
-    	current = nextSetBit(0);
-		return current;
-	}
-
-	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
-	}
+	EQUALITY {
+		@Override
+		public Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons) {
+			return new PropReified(new Variable[]{bool,x,y}, new EqualX_YC(x, y, 0, solver), new NotEqualX_YC(x, y, 0, solver), solver.getEnvironment(), cons, PropagatorPriority.BINARY, true);
+		}
+	};	
+	public abstract Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons);
 }

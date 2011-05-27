@@ -56,7 +56,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 
 	GraphVar graph;
 	IntVar[] inputVars; 	// nodes of the graph
-	BoolVar[][] relations;  // arcs of the graph
+	BoolVar[][] relBools;  // arcs of the graph
 	IntVar[] parameterVars; // graph properties parameters
 	boolean directed;		
 	LinkedList<GraphProperty> properties;
@@ -66,25 +66,28 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public GraphConstraint(IntVar[] vars, BoolVar[][] rel, Solver solver, PropagatorPriority storeThreshold, boolean directed) {
+	public GraphConstraint(IntVar[] vars, BoolVar[][] rel, Solver solver, PropagatorPriority storeThreshold, boolean directed, GraphRelation relation) {
 		super(solver, storeThreshold);
 		
 		int n = vars.length;
-		this.relations = rel;
+		this.relBools = rel;
 		this.inputVars = vars;
 		this.directed = directed;
 		if(directed){
 			graph = new DirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
 		}else{
-			graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
+			graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.SPARSE, GraphType.DENSE);
 		}
+		Propagator[][] propsBools = new Propagator[n][n];
 		for(int v=0; v<vars.length; v++){
 			for(int w=0; w<vars.length; w ++){
+				propsBools[v][w] = relation.getPropagator(relBools[v][w], inputVars[v], inputVars[w], solver, this);
 				graph.getEnvelopGraph().addEdge(v, w);
 			}
 		}
 		properties = new LinkedList<GraphProperty>();
-		setPropagators(new PropBoolGraphChanneling(graph, relations, solver.getEnvironment(), this, storeThreshold));
+		
+		setPropagators(ArrayUtils.append(ArrayUtils.flatten(propsBools),new Propagator[]{new PropBoolGraphChanneling(graph, relBools, solver.getEnvironment(), this, storeThreshold)}));
 	}
 
 	//***********************************************************************************
@@ -101,7 +104,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		}else{
 			properties.add(prop);
 			setPropagators(ArrayUtils.append(propagators, prop.getPropagators(this, parameters)));
-			this.vars = (V[])ArrayUtils.append(inputVars,parameterVars,ArrayUtils.flatten(relations)).clone();
+			this.vars = (V[])ArrayUtils.append(inputVars,parameterVars,ArrayUtils.flatten(relBools)).clone();
 		}
 	}
 
@@ -111,6 +114,10 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 
 	public IEnvironment getEnvironment(){
 		return solver.getEnvironment();
+	}
+	
+	public Solver getSolver(){
+		return solver;
 	}
 	
 	//***********************************************************************************

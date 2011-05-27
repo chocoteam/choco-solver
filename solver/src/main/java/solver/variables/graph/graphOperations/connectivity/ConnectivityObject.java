@@ -28,8 +28,6 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 import gnu.trove.TIntArrayList;
-
-import java.util.BitSet;
 import java.util.LinkedList;
 
 /**Class which encapsulates Isthmus, Articulation Points (AP) and Connected Components (CC)
@@ -42,7 +40,7 @@ public class ConnectivityObject {
 	//***********************************************************************************
 
 	private LinkedList<TIntArrayList> connectedComponents;
-	private BitSet articulationPoints;
+	private TIntArrayList articulationPoints;
 	private TIntArrayList isthmus;
 
 	//***********************************************************************************
@@ -53,7 +51,7 @@ public class ConnectivityObject {
 	public ConnectivityObject() {
 		connectedComponents = new LinkedList<TIntArrayList>();
 		isthmus = new TIntArrayList();
-		articulationPoints = new BitSet();
+		articulationPoints = new TIntArrayList();
 	}
 
 	//***********************************************************************************
@@ -79,7 +77,7 @@ public class ConnectivityObject {
 	 * @param point node which is an articulation point
 	 */
 	public void addArticulationPoint(int point) {
-		articulationPoints.set(point);
+		articulationPoints.add(point);
 	}
 
 	/**Add an isthmus
@@ -110,14 +108,8 @@ public class ConnectivityObject {
 	/**Get articulation points 
 	 * @return articulationPoints 
 	 */
-	public BitSet getArticulationPoints() {
+	public TIntArrayList getArticulationPoints() {
 		return articulationPoints;
-	}
-	/**
-	 * @return true iff i is an articulationPoint
-	 */
-	public boolean isArticulationPoints(int i) {
-		return articulationPoints.get(i);
 	}
 	/**Get isthmus of the graph
 	 * @return isthmus 

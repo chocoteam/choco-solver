@@ -101,12 +101,7 @@ public class UndirectedGraph implements IGraph {
 	public String toString() {
 		String res = "";
 		for (int i = activeIdx.nextValue(0); i>=0; i = activeIdx.nextValue(i+1)) {
-			res += "pot-" + i + ": ";
-			INeighbors nei = getNeighborsOf(i);
-			for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-				res += j+" ";
-			}
-			res += "\n";
+			res += "pot-" + i + ": "+ getNeighborsOf(i)+"\n";
 		}
 		return res;
 	}
@@ -164,6 +159,10 @@ public class UndirectedGraph implements IGraph {
 
 	@Override
 	public boolean addEdge(int x, int y) {
+		if(x==y && !neighbors[x].contain(y)){
+			neighbors[x].add(y);
+			return true;
+		}
 		if ((!neighbors[x].contain(y)) && (!neighbors[y].contain(x))){
 			neighbors[x].add(y);
 			neighbors[y].add(x);
@@ -188,6 +187,10 @@ public class UndirectedGraph implements IGraph {
 
 	@Override
 	public boolean removeEdge(int x, int y) {
+		if (x==y && neighbors[x].contain(y)){
+			neighbors[y].remove(x);
+			return true;
+		}
 		if ((neighbors[x].contain(y)) && (neighbors[y].contain(x))){
 			neighbors[x].remove(y);
 			neighbors[y].remove(x);

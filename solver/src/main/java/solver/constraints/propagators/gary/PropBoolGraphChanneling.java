@@ -133,9 +133,6 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			}
 		}
 		else{
-			if((!request.getVariable().instantiated()) || (! (request.getVariable() instanceof BoolVar))){
-				throw new UnsupportedOperationException(" error ");
-			}
 			int i = idxVarInProp/n;
 			int j = idxVarInProp%n;
 			boolChanged.execute(i,j, relations[i][j].getBooleanValue()==ESat.TRUE);
@@ -148,7 +145,6 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		// TODO check boolean events included
 		return EventType.ALL_MASK() + EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 

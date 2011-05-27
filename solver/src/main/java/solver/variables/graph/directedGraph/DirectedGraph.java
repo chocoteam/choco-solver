@@ -192,7 +192,11 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addEdge(int x, int y) {
-		return addArc(x, y) || addArc(y, x);
+		if(x==y){
+			return addArc(x, y);
+		}
+		boolean b = addArc(x, y) || addArc(y, x);
+		return b;
 	}
 
 	@Override
