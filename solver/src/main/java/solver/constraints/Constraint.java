@@ -29,12 +29,14 @@ package solver.constraints;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
+import solver.propagation.engines.IPropagationEngine;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
@@ -103,16 +105,21 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     protected transient boolean initialize = false;
 
+    protected final IPropagationEngine engine;
+
     public Constraint(V[] vars, Solver solver, PropagatorPriority storeThreshold) {
         this.vars = vars.clone();
         this.solver = solver;
         this.storeThreshold = storeThreshold;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        initialize = false;
+        this.initialize = false;
+        this.engine = solver.getEngine();
     }
-    
-    
-    /**BEWARE : ONLY FOR GRAPH CONSTRAINTS
+
+
+    /**
+     * BEWARE : ONLY FOR GRAPH CONSTRAINTS
+     *
      * @param solver
      * @param storeThreshold
      */
@@ -121,8 +128,9 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         this.storeThreshold = storeThreshold;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
         initialize = false;
+        this.engine = solver.getEngine();
     }
-    
+
     public V[] getVariables() {
         return vars;
     }
@@ -231,7 +239,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
             ESat entailed = prop.isEntailed();
             switch (entailed) {
                 case FALSE:
-                    ContradictionException.throwIt(prop, null, "Entailed false");
+                    this.contradiction(prop, null, "Entailed false");
                     break;
                 case TRUE:
                     prop.setPassive();
@@ -281,5 +289,17 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
             return Belong.build(this);
         }
         throw new SolverException("Unknown metric name :" + name);
+    }
+
+    /**
+     * Throws a contradiction exception based on <variable, message>
+     *
+     * @param cause ICause object causes the exception
+     * @param variable involved variable
+     * @param message  detailed message
+     * @throws ContradictionException expected behavior
+     */
+    protected void contradiction(ICause cause, Variable variable, String message) throws ContradictionException {
+        engine.fails(cause, variable, message);
     }
 }

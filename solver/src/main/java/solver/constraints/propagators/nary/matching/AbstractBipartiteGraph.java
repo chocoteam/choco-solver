@@ -31,6 +31,7 @@ import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.IStateIntVector;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -90,16 +91,16 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
      * @param vars        the graph, a left vextex per vars, a right vertex per domain value
      * @param nbLeft      number of left nodes, = vars.length
      * @param nbRight     number of right nodes, domain values of vars
-     * @param environment memory management
+     * @param solver
      * @param constraint  the constraint associated with
      * @param priority
      * @param promote
      */
     @SuppressWarnings({"unchecked"})
-    public AbstractBipartiteGraph(IntVar[] vars, int nbLeft, int nbRight, IEnvironment environment,
+    public AbstractBipartiteGraph(IntVar[] vars, int nbLeft, int nbRight, Solver solver,
                                   IntConstraint constraint, PropagatorPriority priority, boolean promote) {
-        super(vars, environment, constraint, priority, promote);
-        init(nbLeft, nbRight, environment);
+        super(vars, solver, constraint, priority, promote);
+        init(nbLeft, nbRight, solver.getEnvironment());
         rem_proc = new RemProc(this);
     }
 
@@ -410,7 +411,7 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
             }
             if (this.matchingSize.get() < n1) {
                 // assert exist i, 0 <= i < n1, this.match(i) == 0
-                ContradictionException.throwIt(this, null, "matching size < " + n1);
+                this.contradiction(null, "matching size < " + n1);
             }
         }
     }

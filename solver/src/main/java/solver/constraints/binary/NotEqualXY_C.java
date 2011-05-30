@@ -56,7 +56,7 @@ public final class NotEqualXY_C extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.c = c;
-        setPropagators(new PropNotEqualXY_C(vars, c, solver.getEnvironment(), this));
+        setPropagators(new PropNotEqualXY_C(vars, c, solver, this));
     }
 
     @Override

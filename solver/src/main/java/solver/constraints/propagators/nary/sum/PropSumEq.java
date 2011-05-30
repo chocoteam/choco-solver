@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -68,9 +68,9 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] vars, int k, int b, IEnvironment environment,
-                     Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, environment, intVarPropagatorConstraint, computePriority(vars.length), false);
+    public PropSumEq(IntVar[] vars, int k, int b,
+                     Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
         this.x = vars.clone();
         this.k = k;
         l = x.length;
@@ -134,7 +134,7 @@ public class PropSumEq extends Propagator<IntVar> {
         boolean doIt;
         boolean anychange = false;
         if (b - sumLB < 0) {
-            ContradictionException.throwIt(this, null, "b - sumLB < 0");
+            this.contradiction(null, "b - sumLB < 0");
         }
         do {
             doIt = false;
@@ -174,7 +174,7 @@ public class PropSumEq extends Propagator<IntVar> {
         boolean doIt;
         boolean anychange = false;
         if (b - sumUB > 0) {
-            ContradictionException.throwIt(this, null, "b - sumUB > 0");
+            this.contradiction(null, "b - sumUB > 0");
         }
         do {
             doIt = false;

@@ -129,13 +129,13 @@ public class Sum extends IntConstraint {
 
         {
             case LEQ:
-                setPropagators(new PropSumLeq(x, s, b, solver.getEnvironment(), this));
+                setPropagators(new PropSumLeq(x, s, b, solver, this));
                 break;
             case GEQ:
-                setPropagators(new PropSumGeq(x, s, b, solver.getEnvironment(), this));
+                setPropagators(new PropSumGeq(x, s, b, solver, this));
                 break;
             case EQ:
-                setPropagators(new PropSumEq(x, s, b, solver.getEnvironment(), this));
+                setPropagators(new PropSumEq(x, s, b, solver, this));
                 break;
         }
 

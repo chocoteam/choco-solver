@@ -29,8 +29,8 @@ package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
@@ -44,6 +44,7 @@ import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.LinkedList;
 
 /**
@@ -71,10 +72,10 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 
 	public PropNLoops(
 			DirectedGraphVar graph, IntVar nL,
-			IEnvironment environment,
+			Solver solver,
 			Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph,nL}, environment, constraint, priority, reactOnPromotion);
+		super((V[]) new Variable[]{graph,nL}, solver, constraint, priority, reactOnPromotion);
 		g = graph;
 		nLoops = nL;
 		removeProc = new RemProc(this);
@@ -143,7 +144,7 @@ public class PropNLoops<V extends Variable> extends GraphPropagator<V>{
 		int loopsInKer = nbKerLoop.get();
 		int loopsInEnv = nbEnvLoop.get();
 		if(loopsInKer>nLoops.getUB()){
-			ContradictionException.throwIt(this, g, "too many loops");
+			this.contradiction(g, "too many loops");
 		}else{
 			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 			LinkedList<Integer> loopOutOfKer = new LinkedList<Integer>();

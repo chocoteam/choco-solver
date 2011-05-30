@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
@@ -75,12 +76,15 @@ public final class IntVarImpl implements IntVar {
 
     protected long uniqueID;
 
+    protected final IPropagationEngine engine;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected IntVarImpl(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        requests = RequestListBuilder.preset(solver.getEnvironment());;
+        this.engine = solver.getEngine();
+        this.requests = RequestListBuilder.preset(solver.getEnvironment());
     }
 
     public long getUniqueID() {
@@ -133,7 +137,7 @@ public final class IntVarImpl implements IntVar {
         int sup = domain.getUB();
         if (value == inf && value == sup) {
             solver.explainer.removeValue(this, value, cause);
-            ContradictionException.throwIt(cause, this, "remove last value");
+            this.contradiction(cause, "remove last value");
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
@@ -169,7 +173,7 @@ public final class IntVarImpl implements IntVar {
                 } else {
                     if (this.domain.empty()) {
                         solver.explainer.removeValue(this, value, cause);
-                        ContradictionException.throwIt(cause, this, "empty domain");
+                        this.contradiction(cause, "empty domain");
                     }
                 }
             }
@@ -221,7 +225,7 @@ public final class IntVarImpl implements IntVar {
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 solver.explainer.instantiateTo(this, value, cause);
-                ContradictionException.throwIt(cause, this, "already instantiated");
+                this.contradiction(cause, "already instantiated");
             }
             return false;
         } else if (contains(value)) {
@@ -233,14 +237,14 @@ public final class IntVarImpl implements IntVar {
             }
             if (this.domain.empty()) {
                 solver.explainer.removeValue(this, value, cause);
-                ContradictionException.throwIt(cause, this, "empty domain");
+                this.contradiction(cause, "empty domain");
             }
             this.notifyPropagators(e, cause);
             solver.explainer.instantiateTo(this, value, cause);
             return true;
-        }else{
+        } else {
             solver.explainer.instantiateTo(this, value, cause);
-            ContradictionException.throwIt(cause, this, "unknown value");
+            this.contradiction(cause, "unknown value");
             return false;
         }
     }
@@ -269,7 +273,7 @@ public final class IntVarImpl implements IntVar {
         if (old < value) {
             if (this.getUB() < value) {
                 solver.explainer.updateLowerBound(this, old, value, cause);
-                ContradictionException.throwIt(cause, this, "new lower bound is greater than upper bound ");
+                this.contradiction(cause, "new lower bound is greater than upper bound ");
             } else {
                 EventType e = EventType.INCLOW;
                 if (reactOnRemoval) {
@@ -316,7 +320,7 @@ public final class IntVarImpl implements IntVar {
         if (old > value) {
             if (this.getLB() > value) {
                 solver.explainer.updateUpperBound(this, old, value, cause);
-                ContradictionException.throwIt(cause, this, "new upper bound is lesser than lower bound ");
+                this.contradiction(cause, "new upper bound is lesser than lower bound ");
             } else {
                 EventType e = EventType.DECUPP;
                 if (reactOnRemoval) {
@@ -478,5 +482,13 @@ public final class IntVarImpl implements IntVar {
         return expl;
     }
 
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        engine.fails(cause, this, message);
+    }
 
+    @Override
+    public Solver getSolver() {
+        return solver;
+    }
 }

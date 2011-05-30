@@ -49,7 +49,7 @@ public class Absolute extends IntConstraint<IntVar> {
 
     public Absolute(IntVar X, IntVar Y, Solver solver, PropagatorPriority storeThreshold) {
         super(ArrayUtils.toArray(X, Y), solver, storeThreshold);
-        setPropagators(new PropAbsolute(X, Y, solver.getEnvironment(), this));
+        setPropagators(new PropAbsolute(X, Y, solver, this));
     }
 
     @Override

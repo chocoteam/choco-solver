@@ -24,61 +24,61 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package sandbox;
 
-package solver.constraints.propagators.nary.sum;
-
-import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.binary.Element;
 import solver.exception.ContradictionException;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+
+import java.util.Random;
 
 /**
- * A propagator for SUM(x_i) >= b
  * <br/>
- * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
- * W. Harvey and J. Schimpf
  *
  * @author Charles Prud'homme
- * @since 18/03/11
+ * @since 19/05/11
  */
-public final class PropSumGeq extends PropSumEq {
+public class ArnaudTest {
 
-    public PropSumGeq(IntVar[] vars, int k, int b, Solver solver,
-                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, k, b, solver, intVarPropagatorConstraint);
-    }
+    public static void main(String[] args) throws ContradictionException {
+        long t1 = System.currentTimeMillis();
+        Solver s = new Solver();
+        int nv = 15000;
+        IntVar[] vars = new IntVar[2 * nv];
+        //create variables
+        for (int i = 0; i < nv; i++) {
+            vars[2 * i] = VariableFactory.enumerated("i_" + i, 0, 100, s); //index vars
+            vars[2 * i + 1] = VariableFactory.enumerated("v_" + i, 0, 3500, s); //value vars
+//           s.createBoundIntVar("v_"+i, 0, 3500); //value vars
+//            s.createListIntVar("v_" + i, 0, 3500); //value vars
 
-
-    @Override
-    boolean filterOnLeq() throws ContradictionException {
-        return false;
-    }
-
-    @Override
-    protected void checkEntailment() {
-        if (sumLB - b >= 0) {
-            this.setPassive();
         }
-    }
+        //create values arrays
+        int[][] values = new int[5][101];
+        Random rnd = new Random();
+        for (int i = 0; i < values.length; i++) {
+            for (int j = 0; j < values[i].length; j++) {
+                values[i][j] = rnd.nextInt(3501);
+            }
+        }
+        //create constraints
+        for (int i = 0; i < nv; i++) {
+            s.post(new Element(vars[2 * i], values[i % 5], vars[2 * i + 1], s));
+        }
+        long t2 = System.currentTimeMillis();
+        s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
+        System.out.println("build solver: " + (t2 - t1) + " ms");
+        t1 = System.currentTimeMillis();
+        s.propagate();
+        t2 = System.currentTimeMillis();
+        System.out.println("pi: " + (t2 - t1) + " ms");
+        t1 = System.currentTimeMillis();
+        s.findSolution();
+        t2 = System.currentTimeMillis();
+        System.out.println("res: " + (t2 - t1) + " ms");
 
-    @Override
-    public ESat isEntailed() {
-        int sumUB = 0, sumLB = 0, i =0;
-        for (; i < k; i++) {
-            sumLB += x[i].getLB();
-            sumUB += x[i].getUB();
-        }
-        for (; i < l; i++) {
-            sumLB -= x[i].getUB();
-            sumUB -= x[i].getLB();
-        }
-        if (sumLB >= b) {
-            return ESat.TRUE;
-        } else if (sumUB < b) {
-            return ESat.FALSE;
-        }
-        return ESat.UNDEFINED;
     }
 }

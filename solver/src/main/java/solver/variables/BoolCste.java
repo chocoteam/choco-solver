@@ -29,6 +29,7 @@ package solver.variables;
 
 import choco.kernel.ESat;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 
 /**
@@ -39,8 +40,8 @@ import solver.exception.ContradictionException;
  */
 public class BoolCste extends IntCste implements BoolVar {
 
-    protected BoolCste(String name, int constante) {
-        super(name, constante);
+    protected BoolCste(String name, int constante, Solver solver) {
+        super(name, constante, solver);
     }
 
     @Override

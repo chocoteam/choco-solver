@@ -27,18 +27,17 @@
 
 package solver.constraints.propagators.gary.constraintSpecific;
 
-import gnu.trove.TIntArrayList;
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.LinkedList;
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import gnu.trove.TIntArrayList;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.NTree;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -50,8 +49,10 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.LinkedList;
 
 public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
@@ -69,10 +70,10 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNTree(DirectedGraphVar graph, IntVar nT,IEnvironment environment,
+	public PropNTree(DirectedGraphVar graph, IntVar nT,Solver solver,
 			Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph,nT}, environment, constraint, priority, reactOnPromotion);
+		super((V[]) new Variable[]{graph,nT}, solver, constraint, priority, reactOnPromotion);
 		g = graph;
 		nTree = nT;
 	}
@@ -139,7 +140,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	public void propagate() throws ContradictionException {
 		NTree.filteringCounter++;
 		if(!checkFeasibility()){
-			ContradictionException.throwIt(this, g, "infeasible");
+			this.contradiction(g, "infeasible");
 		}else{
 			structuralPruning();
 		}

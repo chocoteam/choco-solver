@@ -34,10 +34,12 @@ import choco.kernel.memory.IStateInt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.InitializeRequest;
 import solver.requests.PropRequest;
@@ -124,18 +126,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final boolean reactOnPromotion;
 
+    protected final IPropagationEngine engine;
+
     @SuppressWarnings({"unchecked"})
-    protected Propagator(V[] vars, IEnvironment environment, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
+    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
         this.vars = vars;
-        this.environment = environment;
-        isActive = environment.makeBool(true);
+        this.environment = solver.getEnvironment();
+        this.engine = solver.getEngine();
+        this.isActive = environment.makeBool(true);
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        initializeRequest = new InitializeRequest(this, -1);
+        this.initializeRequest = new InitializeRequest(this, -1);
         int nbNi = 0;
-        for (int  v = 0; v < vars.length; v++){
-            if(!vars[v].instantiated()){
+        for (int v = 0; v < vars.length; v++) {
+            if (!vars[v].instantiated()) {
                 nbNi++;
             }
         }
@@ -155,7 +160,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param request         request to propagate
+     * @param request      request to propagate
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
      * @throws solver.exception.ContradictionException
@@ -289,34 +294,45 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    protected int getNbRequestEnqued(){
+    protected int getNbRequestEnqued() {
         return nbRequestEnqued;
     }
 
-    public void incNbRequestEnqued(){
-        assert(nbRequestEnqued >=0):"number of enqued requests is < 0";
+    public void incNbRequestEnqued() {
+        assert (nbRequestEnqued >= 0) : "number of enqued requests is < 0";
         nbRequestEnqued++;
     }
 
-    public void decNbRequestEnqued(){
-        assert(nbRequestEnqued >0):"number of enqued requests is < 0";
+    public void decNbRequestEnqued() {
+        assert (nbRequestEnqued > 0) : "number of enqued requests is < 0";
         nbRequestEnqued--;
     }
 
-    public int arity(){
+    public int arity() {
         return arity.get();
     }
 
-    public void decArity(){
-        assert(arity.get()>=0):"arity < 0";
+    public void decArity() {
+        assert (arity.get() >= 0) : "arity < 0";
         arity.add(-1);
     }
 
-    public void incFail(){
+    public void incFail() {
         fails++;
     }
 
-    public long getFails(){
+    public long getFails() {
         return fails;
+    }
+
+    /**
+     * Throws a contradiction exception based on <variable, message>
+     *
+     * @param variable involved variable
+     * @param message  detailed message
+     * @throws ContradictionException expected behavior
+     */
+    protected void contradiction(Variable variable, String message) throws ContradictionException {
+        engine.fails(this, variable, message);
     }
 }

@@ -27,10 +27,12 @@
 
 package solver.propagation.engines;
 
+import solver.ICause;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
+import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -81,4 +83,13 @@ public interface IPropagationEngine extends Serializable {
      * @return <code>true</code> if <code>this</code> is initialized, <code>false</code> otherwise
      */
     boolean initialized();
+
+    /**
+     * Set and throw a ContradictionException based on the 3-uple: <cause, variable, message>
+     * @param cause ICause object that causes the exception (if any, null otherwise)
+     * @param variable Variable object that causes the exception (if any, null otherwise)
+     * @param message detailed message of the exception reason
+     * @throws ContradictionException expected behavior
+     */
+    void fails(ICause cause, Variable variable, String message) throws ContradictionException;
 }

@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.cnf;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.propagators.Propagator;
@@ -52,16 +52,16 @@ public class PropClause extends Propagator<BoolVar> {
     int watchLit1, watchLit2;
 
     @SuppressWarnings({"unchecked"})
-    public PropClause(ALogicTree t, IEnvironment environment,
+    public PropClause(ALogicTree t, Solver solver,
                       Constraint constraint) {
-        super(t.flattenBoolVar(), environment, constraint, PropagatorPriority.LINEAR, false);
+        super(t.flattenBoolVar(), solver, constraint, PropagatorPriority.LINEAR, false);
         this.firstNotPosLit = t.getNbPositiveLiterals();
     }
 
     @SuppressWarnings({"unchecked"})
-    protected PropClause(IEnvironment environment,
+    protected PropClause(Solver solver,
                          Constraint constraint) {
-        super(new BoolVar[0], environment, constraint, PropagatorPriority.UNARY, false);
+        super(new BoolVar[0], solver, constraint, PropagatorPriority.UNARY, false);
         this.firstNotPosLit = 0;
     }
 
@@ -142,7 +142,7 @@ public class PropClause extends Propagator<BoolVar> {
                 i++;
             }
             if(cnt == n){
-                ContradictionException.throwIt(this, null, "Inconsistent");
+                this.contradiction(null, "Inconsistent");
             }else if(cnt == n-1){
                 setWatchLiteral(watchLit1);
             }

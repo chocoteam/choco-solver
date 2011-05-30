@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.intlincomb;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
@@ -41,9 +41,9 @@ import solver.variables.IntVar;
  */
 public final class PropIntLinCombLeq extends AbstractPropIntLinComb {
 
-    public PropIntLinCombLeq(final int[] coeffs, final int nbPosVars, final int cste, final IntVar[] vars,
-                            final Constraint constraint, final IEnvironment env) {
-        super(coeffs, nbPosVars, cste, vars, constraint, env);
+    public PropIntLinCombLeq(int[] coeffs, int nbPosVars, int cste, IntVar[] vars,
+                            Constraint constraint, Solver solver) {
+        super(coeffs, nbPosVars, cste, vars, constraint, solver);
     }
 
     /**

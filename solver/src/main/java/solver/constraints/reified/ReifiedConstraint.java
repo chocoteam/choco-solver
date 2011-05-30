@@ -84,7 +84,7 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         super(extractVariable(bVar, constraint, oppositeConstraint), solver, storeThreshold);
         cons = constraint;
         oppcons = oppositeConstraint;
-        setPropagators(new PropReified(vars, constraint, oppositeConstraint, solver.getEnvironment(), this, storeThreshold, true));
+        setPropagators(new PropReified(vars, constraint, oppositeConstraint, solver, this, storeThreshold, true));
     }
 
     public ReifiedConstraint(BoolVar bVar, Constraint constraint, Constraint oppositeConstraint,

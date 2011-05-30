@@ -27,11 +27,11 @@
 
 package solver.constraints.propagators.gary.constraintSpecific;
 
-import gnu.trove.TIntIntHashMap;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import gnu.trove.TIntIntHashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -62,8 +62,8 @@ public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph,IEnvironment environment, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, TIntIntHashMap vH) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), environment, mixtedAllDiff, storeThreshold, false);
+	public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph,Solver solver, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, TIntIntHashMap vH) {
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, false);
 		g = graph;
 		intVars = vars;
 		this.valuesHash = vH;

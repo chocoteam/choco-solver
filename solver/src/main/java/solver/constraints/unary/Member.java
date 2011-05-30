@@ -58,7 +58,7 @@ public class Member extends IntConstraint<IntVar> {
         this.values = new TIntHashSet(values);
         lb = 0;
         ub = 0;
-        setPropagators(new PropMemberEnum(var, this.values, solver.getEnvironment(), this, storeThreshold, false));
+        setPropagators(new PropMemberEnum(var, this.values, solver, this, storeThreshold, false));
     }
 
     public Member(IntVar var, int lowerbound, int upperbound, Solver solver) {
@@ -70,7 +70,7 @@ public class Member extends IntConstraint<IntVar> {
         this.values = null;
         this.lb = lowerbound;
         this.ub = upperbound;
-        setPropagators(new PropMemberBound(var, lowerbound, upperbound, solver.getEnvironment(), this, storeThreshold, false));
+        setPropagators(new PropMemberBound(var, lowerbound, upperbound, solver, this, storeThreshold, false));
     }
 
     @Override

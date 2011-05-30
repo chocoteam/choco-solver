@@ -30,7 +30,7 @@ package solver.constraints.propagators.nary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -62,8 +62,8 @@ public class PropInverseChanneling extends Propagator<IntVar> {
     protected final RemProc rem_proc;
 
     @SuppressWarnings({"unchecked"})
-    public PropInverseChanneling(IntVar[] X, IntVar[] Y, int Ox, int Oy, IEnvironment environment, IntConstraint constraint) {
-        super(ArrayUtils.append(X, Y), environment, constraint, PropagatorPriority.CUBIC, false);
+    public PropInverseChanneling(IntVar[] X, IntVar[] Y, int Ox, int Oy, Solver solver, IntConstraint constraint) {
+        super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.CUBIC, false);
         this.X = X;
         this.Y = Y;
         nbX = X.length;

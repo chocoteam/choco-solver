@@ -29,7 +29,7 @@ package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -55,11 +55,11 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
 
     @SuppressWarnings({"unchecked"})
-    public PropAllDiffAC(IntVar[] vars, IEnvironment environment, Constraint constraint) {
-        super(vars, environment, constraint, PropagatorPriority.CUBIC, true);
+    public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver solver) {
+        super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
         //this.var = var;
         //this.idxVar = idxVar;
-        this.struct = new MatchingStructure(vars, vars.length, getValueGap(vars), environment);
+        this.struct = new MatchingStructure(vars, vars.length, getValueGap(vars), solver);
         rem_proc = new RemProc(this);
     }
 

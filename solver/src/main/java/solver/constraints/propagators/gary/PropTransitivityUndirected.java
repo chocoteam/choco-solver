@@ -27,23 +27,23 @@
 
 package solver.constraints.propagators.gary;
 
-import java.util.LinkedList;
-
-import gnu.trove.TIntArrayList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
+import gnu.trove.TIntArrayList;
+import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+
+import java.util.LinkedList;
 
 /**Propagator that ensures that the relation modeled by edges (undirected graph) is transitive
  * 
@@ -66,8 +66,8 @@ public class PropTransitivityUndirected<V extends UndirectedGraphVar> extends Gr
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTransitivityUndirected(V graph, IEnvironment environment, GraphConstraint constraint) {
-		super((V[]) new UndirectedGraphVar[]{graph}, environment, constraint, PropagatorPriority.LINEAR, false);
+	public PropTransitivityUndirected(V graph, Solver solver, GraphConstraint constraint) {
+		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
 		n = graph.getEnvelopGraph().getNbNodes();
 //		arcEnforced = new EnfArc(this);

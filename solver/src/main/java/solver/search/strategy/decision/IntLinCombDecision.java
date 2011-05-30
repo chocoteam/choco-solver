@@ -67,20 +67,20 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
         this.operator = operator;
         switch (operator) {
             case EQ:
-                prop = new PropIntLinCombEq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
-                negprop = new PropIntLinCombNeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
+                prop = new PropIntLinCombEq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
+                negprop = new PropIntLinCombNeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
                 break;
             case GEQ:
-                prop = new PropIntLinCombGeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
-                negprop = new PropIntLinCombLeq(coefficients, nbPositiveCoefficients, constant - 1, vars, this, solver.getEnvironment());
+                prop = new PropIntLinCombGeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
+                negprop = new PropIntLinCombLeq(coefficients, nbPositiveCoefficients, constant - 1, vars, this, solver);
                 break;
             case LEQ:
-                prop = new PropIntLinCombLeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
-                negprop = new PropIntLinCombGeq(coefficients, nbPositiveCoefficients, constant + 1, vars, this, solver.getEnvironment());
+                prop = new PropIntLinCombLeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
+                negprop = new PropIntLinCombGeq(coefficients, nbPositiveCoefficients, constant + 1, vars, this, solver);
                 break;
             case NEQ:
-                prop = new PropIntLinCombNeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
-                negprop = new PropIntLinCombEq(coefficients, nbPositiveCoefficients, constant, vars, this, solver.getEnvironment());
+                prop = new PropIntLinCombNeq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
+                negprop = new PropIntLinCombEq(coefficients, nbPositiveCoefficients, constant, vars, this, solver);
                 break;
         }
         return this;

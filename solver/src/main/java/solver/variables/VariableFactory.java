@@ -38,7 +38,6 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.image.IntVarAddCste;
 import solver.variables.image.IntVarTimesPosCste;
-import solver.variables.image.OppIntVar;
 
 import java.util.BitSet;
 
@@ -57,10 +56,10 @@ public class VariableFactory {
 
     private static void checkIntVar(String name, int min, int max) {
         if (min - Integer.MIN_VALUE == 0 || max - Integer.MAX_VALUE == 0) {
-            throw new SolverException(name+": consider reducing the bounds to avoid unexpected results");
+            throw new SolverException(name + ": consider reducing the bounds to avoid unexpected results");
         }
         if (min - max > 0) {
-            throw new SolverException(name+": wrong domain definition, lower bound > upper bound");
+            throw new SolverException(name + ": wrong domain definition, lower bound > upper bound");
         }
     }
 
@@ -90,7 +89,7 @@ public class VariableFactory {
     public static IntVar bounded(String name, int min, int max, Solver solver) {
         checkIntVar(name, min, max);
         if (min == max) {
-            return fixed(name, min);
+            return fixed(name, min, solver);
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
@@ -111,7 +110,7 @@ public class VariableFactory {
     public static IntVar enumerated(String name, int min, int max, Solver solver) {
         checkIntVar(name, min, max);
         if (min == max) {
-            return fixed(name, min);
+            return fixed(name, min, solver);
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
@@ -132,7 +131,7 @@ public class VariableFactory {
     public static IntVar enumerated(String name, int[] values, Solver solver) {
         checkIntVar(name, values[0], values[values.length - 1]);
         if (values.length == 1) {
-            return fixed(name, values[0]);
+            return fixed(name, values[0], solver);
         } else {
             IntVarImpl var = new IntVarImpl(name, solver);
             var.domain = new BitSetIntDomain(values, solver.getEnvironment());
@@ -151,41 +150,37 @@ public class VariableFactory {
     }
 
 
-    public static IntVar fixed(int value) {
-        return fixed("cste -- " + value, value);
+    public static IntVar fixed(int value, Solver solver) {
+        return fixed("cste -- " + value, value, solver);
     }
 
-    public static IntVar fixed(String name, int value) {
+    public static IntVar fixed(String name, int value, Solver solver) {
         if (value == 0 || value == 1) {
-            BoolCste var = new BoolCste(name, value);
+            BoolCste var = new BoolCste(name, value, solver);
 //            solver.associates(var);
             return var;
         } else {
-            IntCste var = new IntCste("cste -- " + value, value);
+            IntCste var = new IntCste("cste -- " + value, value, solver);
 //            solver.associates(var);
             return var;
         }
     }
 
     public static IntVar addCste(IntVar ivar, int cste) {
-        return new IntVarAddCste(ivar, cste);
+        return new IntVarAddCste(ivar, cste, ivar.getSolver());
     }
 
     public static IntVar timesPosCste(IntVar ivar, int cste) {
         IntVar var;
         if (cste < 0) {
-            //var = new OppIntVar(new IntVarTimesPosCste(ivar, -cste));
             throw new UnsupportedOperationException("timesPosCste required positive coefficient! " +
                     "(due to opposite var bug...)");
         } else {
-            var = new IntVarTimesPosCste(ivar, cste);
+            var = new IntVarTimesPosCste(ivar, cste, ivar.getSolver());
         }
         return var;
     }
 
-    public static IntVar opposite(IntVar ivar) {
-        return new OppIntVar(ivar);
-    }
 
     public static IntVar[] toIntVar(Variable... variables) {
         IntVar[] ivars = new IntVar[variables.length];
@@ -196,11 +191,11 @@ public class VariableFactory {
     }
 
     public static DirectedGraphVar digraph(String string, int n, GraphType type, Solver solver, String options) {
-        return new DirectedGraphVar(solver.getEnvironment(), n, type, options);
+        return new DirectedGraphVar(solver, n, type, options);
     }
 
     public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-        return new DirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
+        return new DirectedGraphVar(solver, data, typeEnv, typeKer);
     }
 
     public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType type, Solver solver) {
@@ -208,6 +203,6 @@ public class VariableFactory {
     }
 
     public static UndirectedGraphVar undirectedGraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-        return new UndirectedGraphVar(solver.getEnvironment(), data, typeEnv, typeKer);
+        return new UndirectedGraphVar(solver, data, typeEnv, typeKer);
     }
 }

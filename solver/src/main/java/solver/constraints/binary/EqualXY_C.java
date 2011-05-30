@@ -59,7 +59,7 @@ public class EqualXY_C extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.cste = c;
-        setPropagators(new PropEqualXY_C(vars, c, solver.getEnvironment(), this));
+        setPropagators(new PropEqualXY_C(vars, c, solver, this));
     }
 
     @Override

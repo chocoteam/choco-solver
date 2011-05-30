@@ -59,7 +59,7 @@ public class GreaterOrEqualX_YC extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.cste = c;
-        setPropagators(new PropGreaterOrEqualX_YC(vars, c, solver.getEnvironment(), this));
+        setPropagators(new PropGreaterOrEqualX_YC(vars, c, solver, this));
     }
 
     @Override

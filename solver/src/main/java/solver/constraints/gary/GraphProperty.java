@@ -27,11 +27,7 @@
 package solver.constraints.gary;
 
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.gary.PropKCC;
-import solver.constraints.propagators.gary.PropKLoops;
-import solver.constraints.propagators.gary.PropKNodes;
-import solver.constraints.propagators.gary.PropEachNodeHasLoop;
-import solver.constraints.propagators.gary.PropTransitivityUndirected;
+import solver.constraints.propagators.gary.*;
 import solver.variables.IntVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -43,7 +39,7 @@ public enum GraphProperty {
 	EACH_NODE_HAS_A_LOOP {
 		@Override
 		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			return new GraphPropagator[]{new PropEachNodeHasLoop(cons.graph, cons.getEnvironment(), cons)};
+			return new GraphPropagator[]{new PropEachNodeHasLoop(cons.graph, cons.getSolver(), cons)};
 		}
 	},
 	// With parameter
@@ -59,7 +55,7 @@ public enum GraphProperty {
 			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be <= number of nodes");
 			}
-			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getSolver(), cons,k)};
 		}
 	},
 	/** Restrict the number of loops in the final graph
@@ -74,7 +70,7 @@ public enum GraphProperty {
 			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be <= number of nodes");
 			}
-			return new GraphPropagator[]{new PropKLoops(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKLoops(cons.graph, cons.getSolver(), cons,k)};
 		}
 	},
 	/** Restrict the number of neighbors of each node in the final graph
@@ -89,7 +85,7 @@ public enum GraphProperty {
 			if(k.getLB()>=cons.graph.getEnvelopGraph().getNbNodes()){
 				throw new UnsupportedOperationException("K must be < number of nodes, if equality expected, use ALL_NODES instead");
 			}
-			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getSolver(), cons,k)};
 		}
 	},
 	/** Restrict the number of successor of each node in the final graph
@@ -125,7 +121,7 @@ public enum GraphProperty {
 				throw new UnsupportedOperationException("K_CC requires a parameter (K)");
 			}
 			IntVar k = parameters[0];
-			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getEnvironment(), cons,k)};
+			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getSolver(), cons,k)};
 		}
 	},
 	/** Restrict the number of strongly connected components in the final graph
@@ -151,7 +147,7 @@ public enum GraphProperty {
 				throw new UnsupportedOperationException("K_CC requires a parameter (K)");
 			}
 			IntVar k = parameters[0];
-			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getEnvironment(), cons,k), new PropTransitivityUndirected((UndirectedGraphVar)cons.graph,cons.getEnvironment(), cons)};
+			return new GraphPropagator[]{new PropKCC(cons.graph, cons.getSolver(), cons,k), new PropTransitivityUndirected((UndirectedGraphVar)cons.graph,cons.getSolver(), cons)};
 		}
 	},
 	/** Restrict the final graph to be a tree partition

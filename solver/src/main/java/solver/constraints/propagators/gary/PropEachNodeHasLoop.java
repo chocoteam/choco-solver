@@ -29,18 +29,18 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that each node of the final graph has a loop
  * 
@@ -59,8 +59,8 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEachNodeHasLoop(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new GraphVar[]{graph}, environment, constraint, PropagatorPriority.VERY_SLOW, false);
+	public PropEachNodeHasLoop(V graph, Solver solver, Constraint<V, Propagator<V>> constraint) {
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.VERY_SLOW, false);
 		g = graph;
 		enfNodeProc = new NodeEnf(this);
 	}

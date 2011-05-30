@@ -47,7 +47,7 @@ import solver.variables.Variable;
  */
 public final class ContradictionException extends Exception {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     public static final ContradictionException EXCEPTION = new ContradictionException();
 
@@ -55,7 +55,7 @@ public final class ContradictionException extends Exception {
     public Variable v = null;
     public String s;
 
-    private ContradictionException() {
+    public ContradictionException() {
         super();
     }
 
@@ -64,13 +64,9 @@ public final class ContradictionException extends Exception {
      * @param c the constraint at the origin of the contradiction
      * @param v the variable concerned by the contradiction
      * @param s the message to print
-     * @throws ContradictionException the filled exception
+     * @return ContradictionException the filled exception
      */
-    public static void throwIt(ICause c, Variable v, String s) throws ContradictionException {
-        throw EXCEPTION.set(c, v, s);
-    }
-
-    private ContradictionException set(ICause c, Variable v, String s) {
+    public ContradictionException set(ICause c, Variable v, String s) {
         this.c = c;
         this.v = v;
         this.s = s;

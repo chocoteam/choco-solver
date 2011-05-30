@@ -81,7 +81,7 @@ public class Sudoku extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (grid[i][j] > 0) {
-                    rows[i][j] = VariableFactory.fixed(grid[i][j]);
+                    rows[i][j] = VariableFactory.fixed(grid[i][j], solver);
                 } else {
                     rows[i][j] = VariableFactory.enumerated("c_" + i + "_" + j, 1, n, solver);
                 }

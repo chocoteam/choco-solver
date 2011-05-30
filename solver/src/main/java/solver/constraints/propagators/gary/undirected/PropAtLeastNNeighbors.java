@@ -29,19 +29,19 @@ package solver.constraints.propagators.gary.undirected;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that a node has at least N neighbors
  * 
@@ -66,9 +66,9 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtLeastNNeighbors(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, 
+	public PropAtLeastNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion, int nNeigh) {
-		super((V[]) new UndirectedGraphVar[]{graph}, environment, constraint, priority, reactOnPromotion);
+		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
 		g = graph;
 		n_neighbors = nNeigh;
 		int n = g.getEnvelopGraph().getNbNodes();

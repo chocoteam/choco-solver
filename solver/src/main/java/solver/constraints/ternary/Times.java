@@ -49,7 +49,7 @@ public class Times extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropTimes(X, Y, Z, solver.getEnvironment(), this, storeThreshold, false));
+        setPropagators(new PropTimes(X, Y, Z, solver, this, storeThreshold, false));
     }
 
     public Times(IntVar X, IntVar Y, IntVar Z, Solver solver) {
@@ -57,7 +57,7 @@ public class Times extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropTimes(X, Y, Z, solver.getEnvironment(), this, PropagatorPriority.TERNARY, false));
+        setPropagators(new PropTimes(X, Y, Z, solver, this, PropagatorPriority.TERNARY, false));
     }
 
     @Override

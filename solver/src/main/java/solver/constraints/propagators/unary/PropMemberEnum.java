@@ -28,8 +28,8 @@
 package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
 import gnu.trove.TIntHashSet;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -49,10 +49,10 @@ public class PropMemberEnum extends Propagator<IntVar> {
     final TIntHashSet values;
 
 
-    public PropMemberEnum(IntVar var, TIntHashSet values, IEnvironment environment,
+    public PropMemberEnum(IntVar var, TIntHashSet values, Solver solver,
                           Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint,
                           PropagatorPriority priority, boolean reactOnPromotion) {
-        super(new IntVar[]{var}, environment, intVarPropagatorConstraint, priority, reactOnPromotion);
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, priority, reactOnPromotion);
         this.values = values;
     }
 

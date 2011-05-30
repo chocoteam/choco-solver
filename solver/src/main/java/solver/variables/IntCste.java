@@ -28,6 +28,7 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -51,13 +52,15 @@ public class IntCste implements IntVar {
     protected final int constante;
     protected final String name;
     protected final IIntDomain domain;
+    protected final Solver solver;
 
     protected long uniqueID;
 
-    public IntCste(String name, int constante) {
+    public IntCste(String name, int constante, Solver solver) {
         this.name = name;
+        this.solver = solver;
         this.constante = constante;
-        domain = new CsteDomain(constante);
+        this.domain = new CsteDomain(constante);
     }
 
     public long getUniqueID() {
@@ -71,7 +74,7 @@ public class IntCste implements IntVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
-            ContradictionException.throwIt(cause, this, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -79,7 +82,7 @@ public class IntCste implements IntVar {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
-            ContradictionException.throwIt(cause, this, "unique value removal");
+            this.contradiction(cause, "unique value removal");
         }
         return false;
     }
@@ -87,7 +90,7 @@ public class IntCste implements IntVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
-            ContradictionException.throwIt(cause, this, "outside domain instantitation");
+            this.contradiction(cause, "outside domain instantitation");
         }
         return false;
     }
@@ -95,7 +98,7 @@ public class IntCste implements IntVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
-            ContradictionException.throwIt(cause, this, "outside domain update bound");
+            this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
@@ -103,7 +106,7 @@ public class IntCste implements IntVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
-            ContradictionException.throwIt(cause, this, "outside domain update bound");
+            this.contradiction(cause, "outside domain update bound");
         }
         return false;
     }
@@ -237,5 +240,15 @@ public class IntCste implements IntVar {
     @Override
     public String toString() {
         return name + "=" + String.valueOf(constante);
+    }
+
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        solver.getEngine().fails(cause, this, message);
+    }
+
+    @Override
+    public Solver getSolver() {
+        return solver;
     }
 }

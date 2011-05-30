@@ -69,16 +69,16 @@ public class IntLinComb extends IntConstraint<IntVar> {
         this.constant = c;
         switch (operator) {
             case EQ:
-                setPropagators(new PropIntLinCombEq(coeffs, nbPos, c, vars, this, solver.getEnvironment()));
+                setPropagators(new PropIntLinCombEq(coeffs, nbPos, c, vars, this, solver));
                 break;
             case GEQ:
-                setPropagators(new PropIntLinCombGeq(coeffs, nbPos, c, vars, this, solver.getEnvironment()));
+                setPropagators(new PropIntLinCombGeq(coeffs, nbPos, c, vars, this, solver));
                 break;
             case LEQ:
-                setPropagators(new PropIntLinCombLeq(coeffs, nbPos, c, vars, this, solver.getEnvironment()));
+                setPropagators(new PropIntLinCombLeq(coeffs, nbPos, c, vars, this, solver));
                 break;
             case NEQ:
-                setPropagators(new PropIntLinCombNeq(coeffs, nbPos, c, vars, this, solver.getEnvironment()));
+                setPropagators(new PropIntLinCombNeq(coeffs, nbPos, c, vars, this, solver));
                 break;
         }
     }

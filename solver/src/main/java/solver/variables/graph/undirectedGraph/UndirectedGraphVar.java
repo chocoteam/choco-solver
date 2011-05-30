@@ -28,15 +28,16 @@
 package solver.variables.graph.undirectedGraph;
 
 import gnu.trove.TIntArrayList;
-import java.util.BitSet;
-import java.util.Random;
-import choco.kernel.memory.IEnvironment;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
+
+import java.util.BitSet;
+import java.util.Random;
 
 /**
  * Created by IntelliJ IDEA.
@@ -55,15 +56,15 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public UndirectedGraphVar(IEnvironment env, int nbNodes, GraphType typeEnv, GraphType typeKer) {
-		super(env);
+	public UndirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
+		super(solver);
     	envelop = new StoredUndirectedGraph(environment, nbNodes, typeEnv);
     	kernel = new StoredUndirectedGraph(environment, nbNodes, typeKer);
     	kernel.activeIdx.clear();
     }
 
-	public UndirectedGraphVar(IEnvironment environment, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
-		super(environment);
+	public UndirectedGraphVar(Solver solver, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
+		super(solver);
 		envelop = new StoredUndirectedGraph(environment, data, typeEnv);
 		kernel = new StoredUndirectedGraph(environment, data.length, typeKer);
 		kernel.getActiveNodes().clear();
@@ -75,7 +76,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
     	if(kernel.edgeExists(x, y)){
-    		ContradictionException.throwIt(cause, this, "remove mandatory arc");
+    		this.contradiction(cause, "remove mandatory arc");
         	return false;
     	}
         if (envelop.removeEdge(x, y)){
@@ -107,7 +108,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
             	return true;
         	}return false;
     	}
-    	ContradictionException.throwIt(cause, this, "enforce arc which is not in the domain");
+    	this.contradiction(cause, "enforce arc which is not in the domain");
     	return false;
     }
     

@@ -29,21 +29,21 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K loops belong to the final graph
  * 
@@ -67,8 +67,8 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKLoops(GraphVar graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, environment, constraint, PropagatorPriority.LINEAR, false);
+	public PropKLoops(GraphVar graph, Solver solver, Constraint<V, Propagator<V>> constraint, IntVar k) {
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();

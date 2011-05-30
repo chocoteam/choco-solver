@@ -27,6 +27,7 @@
 
 package solver.propagation.engines;
 
+import solver.ICause;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -36,6 +37,7 @@ import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
+import solver.variables.Variable;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -71,6 +73,12 @@ public final class PropagationEngine implements IPropagationEngine {
     protected int nbGroup = 0;
 
     protected Deal deal = Deal.SEQUENCE;
+
+    protected final ContradictionException exception;
+
+    public PropagationEngine() {
+        exception = new ContradictionException();
+    }
 
     /**
      * Initialize this <code>IPropagationEngine</code> object with the array of <code>Constraint</code> and <code>Variable</code> objects.
@@ -125,6 +133,11 @@ public final class PropagationEngine implements IPropagationEngine {
     @Override
     public boolean initialized() {
         return engine != null;
+    }
+
+    @Override
+    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
+        throw exception.set(cause, variable, message);
     }
 
     @Override

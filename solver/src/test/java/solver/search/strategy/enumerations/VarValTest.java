@@ -37,7 +37,6 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
@@ -530,7 +529,7 @@ public class VarValTest {
         ds[k].buildNext();
         ds[k].apply();
         solver.propagate();
-        SearchMonitorFactory.log(solver,  false, false);
+        //SearchMonitorFactory.log(solver,  false, false);
         solver.findSolution();
 
 

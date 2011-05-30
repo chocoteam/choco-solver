@@ -27,16 +27,14 @@
 
 package solver.constraints.propagators.gary;
 
-import java.util.BitSet;
-import java.util.LinkedList;
-import gnu.trove.TIntArrayList;
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import gnu.trove.TIntArrayList;
+import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -46,7 +44,9 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityObject;
-import solver.requests.IRequest;
+
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**Propagator that ensures that the final graph consists in K Connected Components (CC)
  * 
@@ -69,8 +69,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(GraphVar graph, IEnvironment environment, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, environment, constraint, PropagatorPriority.LINEAR, false);//
+	public PropKCC(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR, false);//
 		g = graph;
 		this.k = k;
 		initDataStructure();

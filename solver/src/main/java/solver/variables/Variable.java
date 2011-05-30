@@ -28,6 +28,7 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -122,4 +123,18 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @return
      */
     long getUniqueID();
+
+    /**
+     * Throws a contradiction exception based on <cause, message>
+     * @param cause ICause causing the exception
+     * @param message detailed message
+     * @throws ContradictionException expected behavior
+     */
+    void contradiction(ICause cause, String message) throws ContradictionException;
+
+    /**
+     * Return the associated solver
+     * @return a Solver object
+     */
+    Solver getSolver();
 }

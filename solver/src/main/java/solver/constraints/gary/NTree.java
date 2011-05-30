@@ -45,6 +45,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -82,9 +83,9 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver, PropagatorPriority storeThreshold) {
 		super((V[]) new Variable[]{graph,nTree}, solver, storeThreshold);
 		setPropagators(
-				new PropNSuccs(graph, solver.getEnvironment(), this, storeThreshold, true, 1),
-				new PropNLoops(graph, nTree, solver.getEnvironment(), this, storeThreshold, true),
-				new PropNTree(graph, nTree,solver.getEnvironment(),this, storeThreshold,true));
+				new PropNSuccs(graph, solver, this, storeThreshold, true, 1),
+				new PropNLoops(graph, nTree, solver, this, storeThreshold, true),
+				new PropNTree(graph, nTree,solver,this, storeThreshold,true));
 		this.g = graph;
 		this.nTree = nTree;
 	}

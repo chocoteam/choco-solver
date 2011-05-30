@@ -26,12 +26,10 @@
  */
 package solver.constraints.propagators.gary.constraintSpecific;
 
-import gnu.trove.TIntArrayList;
-import java.util.ArrayList;
-import java.util.BitSet;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
+import gnu.trove.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -49,6 +47,9 @@ import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphOperations.coupling.BipartiteMaxCardMatching;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
+import java.util.ArrayList;
+import java.util.BitSet;
 
 /**Main propagator for AllDifferent constraint
  * Uses Regin algorithm
@@ -89,7 +90,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 	//***********************************************************************************
 
 	public PropAllDiffGraph(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, Constraint constraint, PropagatorPriority storeThreshold, boolean b) {
-		super((V[]) new Variable[]{graph}, sol.getEnvironment(), constraint, storeThreshold, b);
+		super((V[]) new Variable[]{graph}, sol, constraint, storeThreshold, b);
 		this.sizeFirstSet = sizeFirstSet;
 		this.solver = sol;
 		n = graph.getEnvelopGraph().getNbNodes();
@@ -249,7 +250,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 					}
 					iterable.clear(mate);
 				}else{
-					ContradictionException.throwIt(this, g, "");
+					this.contradiction(g, "");
 				}
 			}else{
 				if(matching[i]!=-1){
@@ -337,7 +338,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 			if(g.getKernelGraph().getNeighborhoodSize(node)==1){
 				j = g.getKernelGraph().getNeighborsOf(node).getFirstElement();
 				if(matching[node]!=j || matching[j]!=node){
-					ContradictionException.throwIt(this, g, "");
+					this.contradiction(g, "");
 				}
 			}
 		}

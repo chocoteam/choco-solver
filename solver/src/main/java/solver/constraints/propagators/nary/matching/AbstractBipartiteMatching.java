@@ -29,6 +29,7 @@ package solver.constraints.propagators.nary.matching;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateIntVector;
+import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.variables.IntVar;
@@ -50,14 +51,14 @@ public abstract class AbstractBipartiteMatching extends AbstractBipartiteGraph {
      * @param vars        the variables
      * @param nbLeft      number of nodes in the first part of the bipartite matching
      * @param nbRight     number of nodes in the second part
-     * @param environment memory management
+     * @param solver        declarative solver
      * @param constraint  the constraint associated with
      * @param priority
      * @param promote
      */
-    public AbstractBipartiteMatching(final IntVar[] vars, final int nbLeft, final int nbRight, IEnvironment environment,
+    public AbstractBipartiteMatching(final IntVar[] vars, final int nbLeft, final int nbRight, Solver solver,
                                      IntConstraint constraint, PropagatorPriority priority, boolean promote) {
-        super(vars, nbLeft, nbRight, environment, constraint, priority, promote);
+        super(vars, nbLeft, nbRight, solver, constraint, priority, promote);
         initAbstractBipartiteMatching(environment);
     }
 

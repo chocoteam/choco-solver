@@ -27,8 +27,8 @@
 
 package solver.variables.graph.directedGraph;
 
-import choco.kernel.memory.IEnvironment;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
@@ -57,23 +57,23 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraphVar(IEnvironment env, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
-		super(env);
+	public DirectedGraphVar(Solver solver, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
+		super(solver);
 		envelop = new StoredDirectedGraph(environment, data, typeEnv);
 		kernel = new StoredDirectedGraph(environment, data.length, typeKer);
 		kernel.getActiveNodes().clear();
 	}
-	public DirectedGraphVar(IEnvironment env, BitSet[] data, GraphType type) {
-		this(env,data,type,type);
+	public DirectedGraphVar(Solver solver, BitSet[] data, GraphType type) {
+		this(solver,data,type,type);
 	}
-	public DirectedGraphVar(IEnvironment env, int nbNodes, GraphType typeEnv, GraphType typeKer) {
-		super(env);
+	public DirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
+		super(solver);
 		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv);
 		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer);
 		kernel.getActiveNodes().clear();
 	}
-	public DirectedGraphVar(IEnvironment env, int nbNodes, GraphType type) {
-		this(env,nbNodes,type,type);
+	public DirectedGraphVar(Solver solver, int nbNodes, GraphType type) {
+		this(solver,nbNodes,type,type);
 	}
 	
 
@@ -81,8 +81,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	// METHODS
 	//***********************************************************************************
 
-	public DirectedGraphVar(IEnvironment environment, int n, GraphType dense, String options) {
-		this(environment,n,dense);
+	public DirectedGraphVar(Solver solver, int n, GraphType dense, String options) {
+		this(solver,n,dense);
 		if(options.equals("clique")){
 			for (int i=0;i<n;i++){
 				for(int j = 0;j<n ; j++){
@@ -110,7 +110,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	@Override
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
-			ContradictionException.throwIt(cause, this, "remove mandatory arc");
+			this.contradiction(cause, "remove mandatory arc");
 			return false;
 		}
 		if (envelop.removeArc(x, y)){
@@ -142,7 +142,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				return true;
 			}return false;
 		}
-		ContradictionException.throwIt(cause, this, "enforce arc which is not in the domain");
+		this.contradiction(cause, "enforce arc which is not in the domain");
 		return false;
 	}
 

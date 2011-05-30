@@ -29,7 +29,7 @@ package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -51,9 +51,9 @@ public class PropElement extends Propagator<IntVar> {
     final int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropElement(IntVar v0, int[] values, IntVar v1, int offset, IEnvironment environment,
+    public PropElement(IntVar v0, int[] values, IntVar v1, int offset, Solver solver,
                        IntConstraint constraint) {
-        super(ArrayUtils.toArray(v0, v1), environment, constraint, PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(v0, v1), solver, constraint, PropagatorPriority.BINARY, false);
         this.lval = values;
         this.cste = offset;
     }
@@ -90,7 +90,7 @@ public class PropElement extends Propagator<IntVar> {
             int maxFeasibleIndex = Math.min(this.vars[0].getUB(), lval.length - 1 + cste);
 
             if (minFeasibleIndex > maxFeasibleIndex) {
-                ContradictionException.throwIt(this, null, "feasible index is incoherent");
+                this.contradiction(null, "feasible index is incoherent");
             }
             while ((this.vars[0].contains(minFeasibleIndex))
                     && !(this.vars[1].contains(lval[minFeasibleIndex - this.cste]))) {
@@ -116,6 +116,7 @@ public class PropElement extends Propagator<IntVar> {
     void awakeOnInst(int index) throws ContradictionException {
         if (index == 0) {
             this.vars[1].instantiateTo(this.lval[this.vars[0].getValue() - this.cste], this);
+            this.setPassive();
         }
     }
 

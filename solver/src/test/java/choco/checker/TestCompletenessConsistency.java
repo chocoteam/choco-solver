@@ -46,7 +46,7 @@ public class TestCompletenessConsistency {
     }
 
     public TestCompletenessConsistency(int peType) {
-        this.slType = slType;
+        this.slType = peType;
     }
 
     @BeforeTest(alwaysRun = true)
@@ -111,7 +111,8 @@ public class TestCompletenessConsistency {
     @Test(groups = "1m")
     public void testALLDIFFERENTGRAPHAC() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, seed, "ac");
+        for(int i = 0 ; i < 20; i++)
+        checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, seed+i, "ac");
     }
     
     // InverseChanneling *******************************************************

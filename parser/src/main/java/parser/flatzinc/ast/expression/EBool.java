@@ -69,7 +69,7 @@ public final class EBool extends Expression {
 
     @Override
     public BoolVar boolVarValue(Solver solver) {
-        return (BoolVar) VariableFactory.fixed(intValue());
+        return (BoolVar) VariableFactory.fixed(intValue(), solver);
     }
 
     @Override
@@ -79,7 +79,7 @@ public final class EBool extends Expression {
 
     @Override
     public IntVar intVarValue(Solver solver) {
-        return VariableFactory.fixed(intValue());
+        return VariableFactory.fixed(intValue(), solver);
     }
 
     @Override

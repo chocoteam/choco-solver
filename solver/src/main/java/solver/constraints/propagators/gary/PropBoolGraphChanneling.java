@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
@@ -44,7 +44,6 @@ import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**Propagator channeling between arcs of a graph and a boolean matrix
  * 
@@ -67,17 +66,17 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropBoolGraphChanneling(GraphVar graph, BoolVar[][] rel, IEnvironment environment, Constraint cstr,PropagatorPriority storeThreshold) {
-		super((V[]) ArrayUtils.append(ArrayUtils.flatten(rel),new Variable[]{graph}), environment, cstr, storeThreshold, false);
+	public PropBoolGraphChanneling(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr,PropagatorPriority storeThreshold) {
+		super((V[]) ArrayUtils.append(ArrayUtils.flatten(rel),new Variable[]{graph}), solver, cstr, storeThreshold, false);
 		this.graph = graph;
 		relations = rel;
 		n = rel.length;
 		if (graph instanceof DirectedGraphVar){
-			boolChanged = new BoolInstG(this, (DirectedGraphVar)graph);
+			boolChanged = new BoolInstG(this, graph);
 			enf = new EnfArc(this);
 			rem = new RemArc(this);
 		}else{
-			boolChanged = new BoolInstG(this, (UndirectedGraphVar)graph);
+			boolChanged = new BoolInstG(this, graph);
 			enf = new EnfEdge(this);
 			rem = new RemEdge(this);
 		}

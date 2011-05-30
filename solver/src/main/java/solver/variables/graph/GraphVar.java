@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
@@ -48,23 +49,34 @@ import solver.variables.domain.delta.IGraphDelta;
  */
 public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGraphDelta>, IVariableGraph {
 
-	//////////////////////////////// GRAPH PART /////////////////////////////////////////
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //////////////////////////////// GRAPH PART /////////////////////////////////////////
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected E envelop, kernel;
-	protected IEnvironment environment;
+    protected E envelop, kernel;
+    protected IEnvironment environment;
     protected long uniqueID;
 
-	protected IGraphDelta delta;
+    protected IGraphDelta delta;
+
+    protected final Solver solver;
+    protected final IPropagationEngine engine;
+
+    ///////////// Attributes related to Variable ////////////
+    protected String name;
+    protected IRequestList<IRequest> requests;
+    protected int modificationEvents;
+    protected boolean reactOnModification;
 
     //***********************************************************************************
     // CONSTRUCTORS
-	//***********************************************************************************
-    public GraphVar(IEnvironment env) {
-    	environment = env;
-    	requests = RequestListBuilder.preset(env);
+    //***********************************************************************************
+    public GraphVar(Solver solver) {
+        this.solver = solver;
+        this.environment = solver.getEnvironment();
+        this.engine = solver.getEngine();
+        this.requests = RequestListBuilder.preset(environment);
     }
 
     public long getUniqueID() {
@@ -75,106 +87,104 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
         this.uniqueID = uniqueID;
     }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
+    @Override
     public boolean instantiated() {
-		if(getEnvelopOrder()!=getKernelOrder()){
-			return false;
-		}
-		INeighbors nei;
-    	for(int n=envelop.getActiveNodes().nextValue(0); n>=0; n=envelop.getActiveNodes().nextValue(n+1)){
-    		nei = envelop.getNeighborsOf(n);
-    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-    			if(!kernel.edgeExists(n, j)){
-    				return false;
-    			}
-    		}
-    	}
+        if (getEnvelopOrder() != getKernelOrder()) {
+            return false;
+        }
+        INeighbors nei;
+        for (int n = envelop.getActiveNodes().nextValue(0); n >= 0; n = envelop.getActiveNodes().nextValue(n + 1)) {
+            nei = envelop.getNeighborsOf(n);
+            for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                if (!kernel.edgeExists(n, j)) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
-	@Override
-	public boolean removeNode(int x, ICause cause) throws ContradictionException {
-    	if(kernel.getActiveNodes().isActive(x)){
-    		ContradictionException.throwIt(cause, this, "remove mandatory node");
-        	return true;
-    	}
-        if (envelop.desactivateNode(x)){
-        	if (reactOnModification){
-        		delta.getNodeRemovalDelta().add(x);
-        	}
-        	EventType e = EventType.REMOVENODE;
-        	notifyPropagators(e, cause);
-        	return true;
-        }return false;
-    }
+
     @Override
-	public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-    	if(envelop.getActiveNodes().isActive(x)){
-    		if (kernel.activateNode(x)){
-    			if (reactOnModification){
-            		delta.getNodeEnforcingDelta().add(x);
-            	}
-    			EventType e = EventType.ENFORCENODE;
-            	notifyPropagators(e, cause);
-            	INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
-            	if(neig.neighborhoodSize()==1){
-            		enforceArc(x, neig.getFirstElement(), null);
-            	}
-            	if(neig.neighborhoodSize()==0){
-            		ContradictionException.throwIt(null, this, "cannot enforce nodes with no arcs");
-            	}
-            	return true;
-    		}return false;
-    	}
-    	ContradictionException.throwIt(cause, this, "enforce node which is not in the domain");
-    	return true;
+    public boolean removeNode(int x, ICause cause) throws ContradictionException {
+        if (kernel.getActiveNodes().isActive(x)) {
+            this.contradiction(cause, "remove mandatory node");
+            return true;
+        }
+        if (envelop.desactivateNode(x)) {
+            if (reactOnModification) {
+                delta.getNodeRemovalDelta().add(x);
+            }
+            EventType e = EventType.REMOVENODE;
+            notifyPropagators(e, cause);
+            return true;
+        }
+        return false;
     }
-    
+
+    @Override
+    public boolean enforceNode(int x, ICause cause) throws ContradictionException {
+        if (envelop.getActiveNodes().isActive(x)) {
+            if (kernel.activateNode(x)) {
+                if (reactOnModification) {
+                    delta.getNodeEnforcingDelta().add(x);
+                }
+                EventType e = EventType.ENFORCENODE;
+                notifyPropagators(e, cause);
+                INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
+                if (neig.neighborhoodSize() == 1) {
+                    enforceArc(x, neig.getFirstElement(), null);
+                }
+                if (neig.neighborhoodSize() == 0) {
+                    this.contradiction(null, "cannot enforce nodes with no arcs");
+                }
+                return true;
+            }
+            return false;
+        }
+        this.contradiction(cause, "enforce node which is not in the domain");
+        return true;
+    }
+
     //***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
 
-	@Override
-	public int getEnvelopOrder() {
-    	return envelop.getActiveNodes().nbActive();
-	}
+    @Override
+    public int getEnvelopOrder() {
+        return envelop.getActiveNodes().nbActive();
+    }
 
-	@Override
-	public int getKernelOrder() {
-		return kernel.getActiveNodes().nbActive();
-	}
+    @Override
+    public int getKernelOrder() {
+        return kernel.getActiveNodes().nbActive();
+    }
 
-	@Override
-	public IStoredGraph getKernelGraph() {
-		return kernel;
-	}
+    @Override
+    public IStoredGraph getKernelGraph() {
+        return kernel;
+    }
 
-	@Override
-	public IStoredGraph getEnvelopGraph() {
-		return envelop;
-	}
-	
-	//***********************************************************************************
-	// VARIABLE STUFF
-	//***********************************************************************************
-	
-    ///////////// Attributes related to Variable ////////////
-	protected String name;
-    protected Solver solver;
-    protected IRequestList<IRequest> requests;
-    protected int modificationEvents;
-    protected boolean reactOnModification;
-	/////////////////////////////////////////////////////////
-	
+    @Override
+    public IStoredGraph getEnvelopGraph() {
+        return envelop;
+    }
+
+    //***********************************************************************************
+    // VARIABLE STUFF
+    //***********************************************************************************
+    /////////////////////////////////////////////////////////
+
 
     //////////////////// Accessors related to Variable ///////////////////
     @Override
     public String getName() {
         return this.name;
     }
+
     @Override
     public int nbConstraints() {
         return requests.size();
@@ -182,19 +192,20 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     ///////////////////////////////////////////////////////////////////////
 
 
-
     ////////////////////// Method related to Variable /////////////////////
     @Override
     public void updateEntailment(IRequest request) {
-    	requests.setPassive(request);
+        requests.setPassive(request);
     }
+
     @Override
     public void addRequest(IRequest request) {
-    	requests.addRequest(request);
+        requests.addRequest(request);
     }
+
     @Override
     public void deleteRequest(IRequest request) {
-    	requests.deleteRequest(request);
+        requests.deleteRequest(request);
     }
 
     @Override
@@ -214,26 +225,39 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
     @Override
     public void addPropagator(Propagator observer, int idxInProp) {
-    	modificationEvents |= observer.getPropagationConditions(idxInProp);
-        if(!reactOnModification){
-        	reactOnModification = true;
-        	delta = new GraphDelta();
+        modificationEvents |= observer.getPropagationConditions(idxInProp);
+        if (!reactOnModification) {
+            reactOnModification = true;
+            delta = new GraphDelta();
         }
     }
+
     @Override
     public void deletePropagator(Propagator observer) {
-    	throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
     }
+
     @Override
     public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
-    	if ((modificationEvents & e.mask) != 0) {
+        if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, getDelta());
         }
     }
-    @Override
-	public int nbRequests() {
-		return requests.cardinality();
-	}
 
-	public abstract int nextArc();
+    @Override
+    public int nbRequests() {
+        return requests.cardinality();
+    }
+
+    public abstract int nextArc();
+
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        engine.fails(cause, this, message);
+    }
+
+    @Override
+    public Solver getSolver() {
+        return solver;
+    }
 }

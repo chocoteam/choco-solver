@@ -28,7 +28,7 @@
 package solver.constraints.propagators.reified;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -56,10 +56,10 @@ public class PropReified extends Propagator<Variable> {
     public PropReified(Variable[] vars,
                        Constraint cons,
                        Constraint oppCons,
-                       IEnvironment environment,
+                       Solver solver,
                        Constraint<Variable, Propagator<Variable>> owner,
                        PropagatorPriority priority, boolean reactOnPromotion) {
-        super(vars, environment, owner, priority, reactOnPromotion);
+        super(vars, solver, owner, priority, reactOnPromotion);
         this.bVar = (BoolVar) vars[0];
         this.constraint = cons;
         this.oppositeConstraint = oppCons;
@@ -131,7 +131,7 @@ public class PropReified extends Propagator<Variable> {
                         this.setPassive();
                         break;
                     case FALSE:
-                        ContradictionException.throwIt(this, bVar, "reified, inconsistency");
+                        this.contradiction(bVar, "reified, inconsistency");
                         break;
                 }
                 break;

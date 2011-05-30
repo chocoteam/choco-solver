@@ -27,7 +27,7 @@
 
 package solver.constraints.probabilistic.propagators.nary;
 
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDifferent;
@@ -51,8 +51,8 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
 
     protected Union unionset;
 
-    public PropProbaAllDifferent(IntVar[] vars, IEnvironment environment, IntConstraint constraint) {
-        super(vars, environment, constraint);
+    public PropProbaAllDifferent(IntVar[] vars, Solver solver, IntConstraint constraint) {
+        super(vars, solver, constraint);
         unionset = new Union(vars, environment);
     }
 

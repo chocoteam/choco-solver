@@ -27,9 +27,9 @@
 
 package solver.constraints.nary;
 
+import choco.kernel.ESat;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntIntHashMap;
-import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDifferent;
@@ -83,23 +83,23 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			Propagator[] props = new Propagator[(s*s-s)/2];
 			for(int i = 0; i < s-1; i++){
 				for(int j = i+1; j < s; j++){
-					props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver.getEnvironment(), this);
+					props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver, this);
 				}
 			}
 			setPropagators(props);
 			break;
 		case PROBABILISTIC:
-			setPropagators(new PropProbaAllDifferent(vars, solver.getEnvironment(), this));
+			setPropagators(new PropProbaAllDifferent(vars, solver, this));
 			break;
 		case GRAPH:
 			buildGraphAllDifferent(vars, solver);
 			break;
 		case AC:
-			setPropagators(new PropAllDiffAC(vars, solver.getEnvironment(), this));
+			setPropagators(new PropAllDiffAC(vars, this, solver));
 			break;
 		case BC:
 		default:
-			setPropagators(new PropAllDiffBC(vars, solver.getEnvironment(), this));
+			setPropagators(new PropAllDiffBC(vars, solver, this));
 			break;
 		}
 	}
@@ -139,7 +139,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			 values[i] = valuesList.get(i-vars.length);
 			 valuesHash.put(values[i], i);
 		 }
-		 UndirectedGraphVar graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.SPARSE, GraphType.SPARSE);
+		 UndirectedGraphVar graph = new UndirectedGraphVar(solver, n, GraphType.SPARSE, GraphType.SPARSE);
 		 for(int v=0; v<vars.length; v++){
 			 ub = vars[v].getUB();
 			 for(val=vars[v].getLB(); val<=ub; val = vars[v].nextValue(val)){
@@ -149,15 +149,15 @@ public class AllDifferent extends IntConstraint<IntVar> {
 		 if(bcMode){
 			 setPropagators(
 					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
-					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
-					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash),
-					 new PropGraphAllDiffBC(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, valuesHash)
+					 new PropAtMostNNeighbors(graph, solver, this, PropagatorPriority.LINEAR, false,1),
+					 new PropIntVarsGraphChanneling(vars, graph, solver, this, PropagatorPriority.LINEAR, false, values, valuesHash),
+					 new PropGraphAllDiffBC(vars, graph, solver, this, PropagatorPriority.LINEAR, valuesHash)
 			 );
 		 }else{
 			 setPropagators(
 					 new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),  
-					 new PropAtMostNNeighbors(graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false,1),
-					 new PropIntVarsGraphChanneling(vars, graph, solver.getEnvironment(), this, PropagatorPriority.LINEAR, false, values, valuesHash)
+					 new PropAtMostNNeighbors(graph, solver, this, PropagatorPriority.LINEAR, false,1),
+					 new PropIntVarsGraphChanneling(vars, graph, solver, this, PropagatorPriority.LINEAR, false, values, valuesHash)
 			 );
 		 }
 	 }

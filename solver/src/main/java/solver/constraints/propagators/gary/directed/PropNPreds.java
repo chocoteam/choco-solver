@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
@@ -41,6 +41,7 @@ import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.LinkedList;
 
 /**
@@ -67,10 +68,10 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	public PropNPreds(
 			V graph,
-			IEnvironment environment,
+			Solver solver,
 			Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion, int nbPreds) {
-		super((V[]) new DirectedGraphVar[]{graph}, environment, constraint, priority, reactOnPromotion);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
 		g = graph;
 		nPreds = nbPreds;
 		rem = new RemProc(this);
@@ -148,9 +149,9 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>n){
-				int from = i/n-1;
-				int to   = i%n;
+            if (i>n){
+                int from = i/n-1;
+                int to   = i%n;
 				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
 				if(prds.neighborhoodSize()>p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==p.nPreds){
 					LinkedList<Integer> toRemove = new LinkedList<Integer>();
@@ -175,10 +176,10 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			k = g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize();
 			if(k>nPreds){
-				ContradictionException.throwIt(this, g, "more than one predecessors");
+				this.contradiction(g, "more than one predecessors");
 			}
 			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds){
-				ContradictionException.throwIt(this, g, "not enough potential predecessors");
+				this.contradiction(g, "not enough potential predecessors");
 			}
 			if(k==nPreds && g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize() != k){
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);

@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators;
 
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
@@ -41,10 +41,10 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	protected GraphPropagator(V[] vars, IEnvironment environment,
+	protected GraphPropagator(V[] vars, Solver solver,
 			Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion) {
-		super(vars, environment, constraint, priority, reactOnPromotion);
+		super(vars, solver, constraint, priority, reactOnPromotion);
 	}
 
 	//***********************************************************************************

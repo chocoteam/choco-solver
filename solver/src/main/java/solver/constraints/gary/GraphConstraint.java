@@ -27,7 +27,6 @@
 
 package solver.constraints.gary;
 
-import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
@@ -35,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.*;
+import solver.constraints.propagators.gary.PropBoolGraphChanneling;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -44,6 +43,8 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
+import java.util.LinkedList;
 
 /**Constraint for working on graph properties
  * @author Jean-Guillaume Fages
@@ -74,9 +75,9 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		this.inputVars = vars;
 		this.directed = directed;
 		if(directed){
-			graph = new DirectedGraphVar(solver.getEnvironment(), n, GraphType.DENSE, GraphType.SPARSE);
+			graph = new DirectedGraphVar(solver, n, GraphType.DENSE, GraphType.SPARSE);
 		}else{
-			graph = new UndirectedGraphVar(solver.getEnvironment(), n, GraphType.SPARSE, GraphType.DENSE);
+			graph = new UndirectedGraphVar(solver, n, GraphType.SPARSE, GraphType.DENSE);
 		}
 		Propagator[][] propsBools = new Propagator[n][n];
 		for(int v=0; v<vars.length; v++){
@@ -87,7 +88,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		}
 		properties = new LinkedList<GraphProperty>();
 		
-		setPropagators(ArrayUtils.append(ArrayUtils.flatten(propsBools),new Propagator[]{new PropBoolGraphChanneling(graph, relBools, solver.getEnvironment(), this, storeThreshold)}));
+		setPropagators(ArrayUtils.append(ArrayUtils.flatten(propsBools),new Propagator[]{new PropBoolGraphChanneling(graph, relBools, solver, this, storeThreshold)}));
 	}
 
 	//***********************************************************************************

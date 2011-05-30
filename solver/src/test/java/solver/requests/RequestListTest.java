@@ -29,9 +29,9 @@ package solver.requests;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -85,8 +85,8 @@ public class RequestListTest {
 
         int propCond = 0;
 
-        protected MockPropagator(IEnvironment environment, int propCond) {
-            super(new IntVar[0], environment, null, PropagatorPriority.UNARY, false);
+        protected MockPropagator(Solver solver, int propCond) {
+            super(new IntVar[0], solver, null, PropagatorPriority.UNARY, false);
             this.propCond = propCond;
         }
 
@@ -111,13 +111,14 @@ public class RequestListTest {
 
     @Test(groups = "1s")
     public void testArrayList() {
-        IEnvironment env = new EnvironmentTrailing();
+        Solver solver = new Solver();
+        IEnvironment env = solver.getEnvironment();
         RequestListBuilder._DEFAULT = 0;
         IRequestList<MockRequest> list = RequestListBuilder.preset(env);
 
         MockRequest[] requests = new MockRequest[3];
         for (int i = 0; i < requests.length; i++) {
-            requests[i] = new MockRequest(new MockPropagator(env, 2), i);
+            requests[i] = new MockRequest(new MockPropagator(solver, 2), i);
             list.addRequest(requests[i]);
         }
 

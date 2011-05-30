@@ -28,8 +28,8 @@
 package solver.constraints.propagators.nary.intlincomb;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -46,10 +46,10 @@ public final class PropIntLinCombNeq extends AbstractPropIntLinComb {
 
     private final IStateInt nb_instantiated;
 
-    public PropIntLinCombNeq(final int[] coeffs, final int nbPosVars, final int cste, final IntVar[] vars,
-                            final Constraint constraint, final IEnvironment env) {
-        super(coeffs, nbPosVars, cste, vars, constraint, env);
-        nb_instantiated = env.makeInt(0);
+    public PropIntLinCombNeq(int[] coeffs, int nbPosVars, int cste, IntVar[] vars,
+                            Constraint constraint, Solver solver) {
+        super(coeffs, nbPosVars, cste, vars, constraint, solver);
+        nb_instantiated = solver.getEnvironment().makeInt(0);
     }
 
     @Override
@@ -100,7 +100,7 @@ public final class PropIntLinCombNeq extends AbstractPropIntLinComb {
                 // then check the sum is not equal to 0
                 if(sum == 0){
                     // Otherwise, FAIL, the constraint is not satisfied
-                    ContradictionException.throwIt(this, null, "sum is equal to 0");
+                    this.contradiction(null, "sum is equal to 0");
                 }
             }else{
                 // Compute the value to remove (including position in the linear combination)

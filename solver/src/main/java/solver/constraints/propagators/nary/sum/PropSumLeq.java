@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -46,9 +46,9 @@ import solver.variables.IntVar;
 public final class PropSumLeq extends PropSumEq {
 
 
-    public PropSumLeq(IntVar[] vars, int k, int b, IEnvironment environment,
+    public PropSumLeq(IntVar[] vars, int k, int b, Solver solver,
                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, k, b, environment, intVarPropagatorConstraint);
+        super(vars, k, b, solver, intVarPropagatorConstraint);
     }
 
 

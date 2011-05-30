@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.matching.AbstractBipartiteMatching;
@@ -46,8 +46,8 @@ import solver.variables.IntVar;
 public class PropAllDifferent extends AbstractBipartiteMatching {
 
 
-    public PropAllDifferent(IntVar[] vars, IEnvironment environment, IntConstraint constraint) {
-        super(vars.clone(), vars.length, PropAllDifferent.getValueGap(vars), environment, constraint,
+    public PropAllDifferent(IntVar[] vars, Solver solver, IntConstraint constraint) {
+        super(vars.clone(), vars.length, PropAllDifferent.getValueGap(vars), solver, constraint,
                 PropagatorPriority.CUBIC, true);
         minValue = Integer.MAX_VALUE;
         maxValue = Integer.MIN_VALUE;

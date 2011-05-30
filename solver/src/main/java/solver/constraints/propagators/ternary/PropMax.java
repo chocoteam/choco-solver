@@ -29,7 +29,7 @@ package solver.constraints.propagators.ternary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -51,9 +51,9 @@ public class PropMax extends Propagator<IntVar> {
     IntVar v0, v1, v2;
     protected final RemProc rem_proc;
 
-    public PropMax(IntVar X, IntVar Y, IntVar Z, IEnvironment environment, Constraint<IntVar,
+    public PropMax(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{X, Y, Z}, environment, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
+        super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
         this.v0 = X;
         this.v1 = Y;
         this.v2 = Z;

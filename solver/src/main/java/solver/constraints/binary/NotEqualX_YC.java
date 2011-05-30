@@ -64,11 +64,11 @@ public final class NotEqualX_YC extends IntConstraint<IntVar> {
         this.y = y;
         this.c = c;
         if (_DEFAULT) {
-            setPropagators(new PropNotEqualX_YC(new IntVar[]{x, y}, c, solver.getEnvironment(), this));
+            setPropagators(new PropNotEqualX_YC(new IntVar[]{x, y}, c, solver, this));
         } else {
             Propagator<IntVar>[] propagators = new Propagator[2];
-            propagators[0] = new Prop_X_NotEqualX_YC(x, y, c, solver.getEnvironment(), this);
-            propagators[1] = new Prop_Y_NotEqualX_YC(x, y, c, solver.getEnvironment(), this);
+            propagators[0] = new Prop_X_NotEqualX_YC(x, y, c, solver, this);
+            propagators[1] = new Prop_Y_NotEqualX_YC(x, y, c, solver, this);
             setPropagators(propagators);
         }
     }

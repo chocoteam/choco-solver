@@ -27,11 +27,11 @@
 
 package solver.constraints.propagators.gary;
 
-import gnu.trove.TIntIntHashMap;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import gnu.trove.TIntIntHashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
@@ -72,8 +72,8 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,IEnvironment environment, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), environment, mixtedAllDiff, storeThreshold, b);
+	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,Solver solver, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, b);
 		g = graph;
 		intVars = vars;
 		this.values = v;

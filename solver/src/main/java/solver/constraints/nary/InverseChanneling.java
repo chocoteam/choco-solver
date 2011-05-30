@@ -80,9 +80,9 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         Oy = -_oY;
 
         setPropagators(
-                new PropAllDiffAC(this.X, solver.getEnvironment(), this),
-                new PropAllDiffAC(this.Y, solver.getEnvironment(), this),
-                new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver.getEnvironment(), this));
+                new PropAllDiffAC(this.X, this, solver),
+                new PropAllDiffAC(this.Y, this, solver),
+                new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver, this));
     }
 
     /**

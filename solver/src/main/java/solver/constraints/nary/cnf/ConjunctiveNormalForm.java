@@ -73,9 +73,9 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
         tree = LogicTreeToolBox.toCNF(tree);
 
         if (Singleton.TRUE.equals(tree)) {
-            setPropagators(new PropTrue(solver.getEnvironment(), this));
+            setPropagators(new PropTrue(solver, this));
         } else if (Singleton.FALSE.equals(tree)) {
-            setPropagators(new PropFalse(solver.getEnvironment(), this));
+            setPropagators(new PropFalse(solver, this));
         } else {
 
             ALogicTree[] clauses;
@@ -89,7 +89,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
             for (int i = 0; i < clauses.length; i++) {
                 ALogicTree clause = clauses[i];
                 // create the propagator, based on the i^th clause
-                propClauses[i] = new PropClause(clause, solver.getEnvironment(), this);
+                propClauses[i] = new PropClause(clause, solver, this);
                 // create the link between the variables and the propagator,
                 // required for #filterOnRequest() step
                 BoolVar[] bvars = clause.flattenBoolVar();

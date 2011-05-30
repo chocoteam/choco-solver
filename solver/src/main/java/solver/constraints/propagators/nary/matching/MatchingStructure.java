@@ -27,13 +27,14 @@
 
 package solver.constraints.propagators.nary.matching;
 
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.IStateIntVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.engines.IPropagationEngine;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
@@ -72,20 +73,23 @@ public class MatchingStructure implements Serializable {
     protected boolean[][] componentOrder; // componentOrder[i,j]=true <=> there exists an edge in the SCC graph from
     // component i to component j
 
+    protected final IPropagationEngine engine;
+
     /**
      * Constructor
      *
      * @param vars        the graph, a left vextex per vars, a right vertex per domain value
      * @param nbLeft      number of left nodes, = vars.length
      * @param nbRight     number of right nodes, domain values of vars
-     * @param environment memory management
+     * @param solver
      */
-    public MatchingStructure(IntVar[] vars, int nbLeft, int nbRight, IEnvironment environment) {
+    public MatchingStructure(IntVar[] vars, int nbLeft, int nbRight, Solver solver) {
         this.nbLeftVertices = nbLeft;
         this.nbRightVertices = nbRight;
+        this.engine = solver.getEngine();
         this.nbVertices = this.nbLeftVertices + this.nbRightVertices + 1;
 
-        this.matchingSize = environment.makeInt(0);
+        this.matchingSize = solver.getEnvironment().makeInt(0);
         this.queue = new IntQueue(this.nbVertices - 1);
         this.left2rightArc = new int[this.nbLeftVertices];
         this.right2leftArc = new int[this.nbRightVertices];
@@ -100,12 +104,12 @@ public class MatchingStructure implements Serializable {
         for (int i = 0; i < this.nbVertices; i++) {
             this.componentOrder[i][i] = true;
         }
-        this.refInverseMatch = environment.makeIntVector(this.nbRightVertices, -1);
+        this.refInverseMatch = solver.getEnvironment().makeIntVector(this.nbRightVertices, -1);
         minValue = Integer.MAX_VALUE;
         maxValue = Integer.MIN_VALUE;
         nodes = new Node[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            nodes[i] = new Node(vars[i], environment);
+            nodes[i] = new Node(vars[i], solver.getEnvironment());
             minValue = Math.min(vars[i].getLB(), minValue);
             maxValue = Math.max(vars[i].getUB(), maxValue);
         }
@@ -496,7 +500,7 @@ public class MatchingStructure implements Serializable {
             updateMatching = false;
             if (this.matchingSize.get() < this.nbLeftVertices) {
                 if (!this.augmentFlow()) {
-                    ContradictionException.throwIt(propagator, null, "matching size < " + this.nbLeftVertices);
+                    engine.fails(propagator, null, "matching size < " + this.nbLeftVertices);
                 }
             }
             refreshSCC();

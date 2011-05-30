@@ -29,7 +29,7 @@ package solver.constraints.propagators.ternary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.MathUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -51,9 +51,9 @@ public class PropTimes extends Propagator<IntVar> {
 
     IntVar v0, v1, v2;
 
-    public PropTimes(IntVar X, IntVar Y, IntVar Z, IEnvironment environment, Constraint<IntVar,
+    public PropTimes(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint, PropagatorPriority priority, boolean reactOnPromotion) {
-        super(new IntVar[]{X, Y, Z}, environment, intVarPropagatorConstraint, priority, reactOnPromotion);
+        super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, priority, reactOnPromotion);
         this.v0 = X;
         this.v1 = Y;
         this.v2 = Z;

@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
@@ -41,6 +41,7 @@ import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.LinkedList;
 
 /**
@@ -67,10 +68,10 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	public PropNSuccs(
 			V graph,
-			IEnvironment environment,
+			Solver solver,
 			Constraint<V, Propagator<V>> constraint,
 			PropagatorPriority priority, boolean reactOnPromotion, int nbSuccs) {
-		super((V[]) new DirectedGraphVar[]{graph}, environment, constraint, priority, reactOnPromotion);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
 		g = graph;
 		nSuccs = nbSuccs;
 		rem = new RemProc(this);
@@ -179,10 +180,10 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
 			k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
 			if(k>nSuccs){
-				ContradictionException.throwIt(this, g, "more than one successor");
+				this.contradiction(g, "more than one successor");
 			}
 			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<nSuccs){
-				ContradictionException.throwIt(this, g, "not enough successors");
+				this.contradiction(g, "not enough successors");
 			}
 			if(k==nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() != k){
 				nei = g.getEnvelopGraph().getSuccessorsOf(i);

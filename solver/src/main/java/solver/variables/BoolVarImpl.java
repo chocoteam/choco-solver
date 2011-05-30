@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
@@ -76,11 +77,14 @@ public final class BoolVarImpl implements BoolVar {
 
     protected long uniqueID;
 
+    protected final IPropagationEngine engine;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     public BoolVarImpl(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
+        this.engine = solver.getEngine();
         requests = RequestListBuilder.preset(solver.getEnvironment());
     }
 
@@ -175,7 +179,7 @@ public final class BoolVarImpl implements BoolVar {
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 solver.explainer.instantiateTo(this, value, cause);
-                ContradictionException.throwIt(cause, this, "already instantiated");
+                this.contradiction(cause, "already instantiated");
             }
             return false;
         } else {
@@ -191,7 +195,7 @@ public final class BoolVarImpl implements BoolVar {
                 return true;
             } else {
                 solver.explainer.instantiateTo(this, value, cause);
-                ContradictionException.throwIt(cause, this, "value out of domain");
+                this.contradiction(cause, "value out of domain");
                 return false;
             }
         }
@@ -405,6 +409,16 @@ public final class BoolVarImpl implements BoolVar {
             val = invdom.nextSetBit(val + 1);
         }
         return expl;
+    }
+
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        engine.fails(cause, this, message);
+    }
+
+    @Override
+    public Solver getSolver() {
+        return solver;
     }
 
 }

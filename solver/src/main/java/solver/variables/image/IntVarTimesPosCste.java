@@ -29,6 +29,7 @@ package solver.variables.image;
 
 import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
@@ -47,8 +48,8 @@ public final class IntVarTimesPosCste extends ImageIntVar<IntVar> {
     final int cste;
     final DeltaTimeCste delta;
 
-    public IntVarTimesPosCste(IntVar var, int cste) {
-        super(var);
+    public IntVarTimesPosCste(IntVar var, int cste, Solver solver) {
+        super(var, solver);
         this.cste = cste;
         this.delta = new DeltaTimeCste(var.getDelta(), cste);
     }

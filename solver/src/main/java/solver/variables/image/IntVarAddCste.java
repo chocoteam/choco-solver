@@ -28,6 +28,7 @@
 package solver.variables.image;
 
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
@@ -46,8 +47,8 @@ public final class IntVarAddCste extends ImageIntVar<IntVar> {
     final int cste;
     final IntDelta delta;
 
-    public IntVarAddCste(IntVar var, int cste) {
-        super(var);
+    public IntVarAddCste(IntVar var, int cste, Solver solver) {
+        super(var, solver);
         this.cste = cste;
         delta = new DeltaAddCste(var.getDelta(), cste);
     }

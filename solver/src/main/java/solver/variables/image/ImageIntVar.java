@@ -28,6 +28,7 @@
 package solver.variables.image;
 
 import solver.ICause;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -50,8 +51,11 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
 
     protected long uniqueID;
 
-    public ImageIntVar(IV var) {
+    protected final Solver solver;
+
+    public ImageIntVar(IV var, Solver solver) {
         this.var = var;
+        this.solver = solver;
     }
 
     public long getUniqueID() {
@@ -147,4 +151,13 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
         return toString();
     }
 
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        var.contradiction(cause, message);
+    }
+
+    @Override
+    public Solver getSolver() {
+        return solver;
+    }
 }

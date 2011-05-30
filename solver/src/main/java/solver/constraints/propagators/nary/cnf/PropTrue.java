@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.cnf;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -41,8 +41,8 @@ import solver.variables.EventType;
  */
 public class PropTrue extends PropClause {
 
-    public PropTrue(IEnvironment environment, Constraint constraint) {
-        super(environment, constraint);
+    public PropTrue(Solver solver, Constraint constraint) {
+        super(solver, constraint);
     }
 
     @Override

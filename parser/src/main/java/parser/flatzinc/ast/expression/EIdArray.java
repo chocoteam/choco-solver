@@ -80,9 +80,9 @@ public final class EIdArray extends Expression{
     @Override
     public BoolVar boolVarValue(Solver solver) {
         if(Integer.class.isInstance(object)){
-            return (BoolVar)VariableFactory.fixed((Integer)object);
+            return (BoolVar)VariableFactory.fixed((Integer)object, solver);
         }else if(Boolean.class.isInstance(object)){
-            return (BoolVar)VariableFactory.fixed(((Boolean)object)?1:0);
+            return (BoolVar)VariableFactory.fixed(((Boolean)object)?1:0, solver);
         }
         return (BoolVar)object;
     }
@@ -95,9 +95,9 @@ public final class EIdArray extends Expression{
     @Override
     public IntVar intVarValue(Solver solver) {
         if(Integer.class.isInstance(object)){
-            return VariableFactory.fixed((Integer)object);
+            return VariableFactory.fixed((Integer)object, solver);
         }else if(Boolean.class.isInstance(object)){
-            return VariableFactory.fixed(((Boolean)object)?1:0);
+            return VariableFactory.fixed(((Boolean)object)?1:0, solver);
         }
         return (IntVar)object;
     }

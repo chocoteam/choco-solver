@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary.cnf;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -41,13 +41,13 @@ import solver.variables.EventType;
  */
 public class PropFalse extends PropClause {
 
-    public PropFalse(IEnvironment environment, Constraint constraint) {
-        super(environment, constraint);
+    public PropFalse(Solver solver, Constraint constraint) {
+        super(solver, constraint);
     }
 
     @Override
     public void propagate() throws ContradictionException {
-        ContradictionException.throwIt(this, null, "FALSE");
+        this.contradiction(null, "FALSE");
     }
 
     @Override

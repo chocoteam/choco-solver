@@ -118,7 +118,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = VariableFactory.fixed("C", coeff);
+        IntVar C = VariableFactory.fixed("C", coeff, s);
         IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
 
         IntVar[] vars = {X, Y};

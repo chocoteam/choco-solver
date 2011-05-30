@@ -57,7 +57,7 @@ public class Element extends IntConstraint<IntVar> {
         super(ArrayUtils.toArray(v0, v1), solver, threshold);
         this.values = values;
         this.offset = offset;
-        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver.getEnvironment(), this));
+        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver, this));
     }
 
     public Element(IntVar v0, int[] values, IntVar v1, Solver solver) {

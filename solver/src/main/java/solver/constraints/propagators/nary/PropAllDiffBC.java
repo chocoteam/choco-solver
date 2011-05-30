@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -63,8 +63,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     boolean infBoundModified = true;
     boolean supBoundModified = true;
 
-    public PropAllDiffBC(IntVar[] vars, IEnvironment environment, Constraint<IntVar, Propagator<IntVar>> constraint) {
-        super(vars, environment, constraint, PropagatorPriority.CUBIC, true);
+    public PropAllDiffBC(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
+        super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
         int n = vars.length;
 
         t = new int[2 * n + 2];
@@ -315,7 +315,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             pathset(t, x + 1, z, z);
 
             if (d[z] < bounds[z] - bounds[y]) {
-                ContradictionException.throwIt(this, null, "");
+                this.contradiction(null, "");
             }
 
             if (h[x] > x) {
@@ -353,7 +353,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             pathset(t, x - 1, z, z);
 
             if (d[z] < bounds[y] - bounds[z]) {
-                ContradictionException.throwIt(this, null, "");
+                this.contradiction(null, "");
             }
 
             if (h[x] < x) {

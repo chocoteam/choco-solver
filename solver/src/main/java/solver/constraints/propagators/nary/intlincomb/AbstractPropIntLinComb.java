@@ -29,7 +29,7 @@ package solver.constraints.propagators.nary.intlincomb;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.MathUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -82,9 +82,9 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
 
 
     @SuppressWarnings({"unchecked"})
-    public AbstractPropIntLinComb(final int[] coeffs, final int nbPosVars, final int cste, final IntVar[] vars,
-                                  final Constraint constraint, final IEnvironment env) {
-        super(vars.clone(), env, constraint, computePriority(vars.length), false);
+    public AbstractPropIntLinComb(int[] coeffs, int nbPosVars, int cste, IntVar[] vars,
+                                  Constraint constraint, Solver solver) {
+        super(vars.clone(), solver, constraint, computePriority(vars.length), false);
         this.coeffs = coeffs;
         this.nbPosVars = nbPosVars;
         this.cste = cste;
@@ -258,7 +258,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         boolean anyChange = false;
         int nbVars = vars.length;
         if (mylb > 0) {
-            ContradictionException.throwIt(this, null, "computed lower bound > 0");
+            this.contradiction(null, "computed lower bound > 0");
         }
         int i;
         for (i = 0; i < nbPosVars; i++) {
@@ -293,7 +293,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         boolean anyChange = false;
         int nbVars = vars.length;
         if (myub < 0) {
-            ContradictionException.throwIt(this, null, "computed upper bound > 0");
+            this.contradiction(null, "computed upper bound > 0");
         }
         int i;
         for (i = 0; i < nbPosVars; i++) {

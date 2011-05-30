@@ -66,7 +66,7 @@ public final class EInt extends Expression{
 
     @Override
     public IntVar intVarValue(Solver solver) {
-        return VariableFactory.fixed(intValue());
+        return VariableFactory.fixed(intValue(), solver);
     }
 
     @Override

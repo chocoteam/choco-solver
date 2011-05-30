@@ -29,7 +29,7 @@ package solver.constraints.propagators.binary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -50,9 +50,9 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
-    public PropAbsolute(IntVar X, IntVar Y, IEnvironment environment,
+    public PropAbsolute(IntVar X, IntVar Y, Solver solver,
                         Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(ArrayUtils.toArray(X, Y), environment, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
         rem_proc = new RemProc(this);
     }
 

@@ -181,11 +181,11 @@ public class InverseChannelingTest {
 
         IntVar[] x = new IntVar[2];
         IntVar[] y = new IntVar[2];
-        x[0] = VariableFactory.fixed("x0", 1);
-        x[1] = VariableFactory.fixed("x1", 2);
+        x[0] = VariableFactory.fixed("x0", 1, s);
+        x[1] = VariableFactory.fixed("x1", 2, s);
 
-        y[0] = VariableFactory.fixed("y0", -1);
-        y[1] = VariableFactory.fixed("y1", 0);
+        y[0] = VariableFactory.fixed("y0", -1, s);
+        y[1] = VariableFactory.fixed("y1", 0, s);
 
         IntVar[] allvars = ArrayUtils.append(x, y);
 
@@ -211,10 +211,10 @@ public class InverseChannelingTest {
 
         IntVar[] x = new IntVar[4];
         IntVar[] y = new IntVar[4];
-        x[0] = VariableFactory.fixed("x0", 2);
-        x[1] = VariableFactory.fixed("x1", 4);
-        x[2] = VariableFactory.fixed("x2", 1);
-        x[3] = VariableFactory.fixed("x3", 3);
+        x[0] = VariableFactory.fixed("x0", 2, s);
+        x[1] = VariableFactory.fixed("x1", 4, s);
+        x[2] = VariableFactory.fixed("x2", 1, s);
+        x[3] = VariableFactory.fixed("x3", 3, s);
 
         for (int i = 0; i < 4; i++) {
             y[i] = VariableFactory.enumerated("y" + i, 1, 4, s);

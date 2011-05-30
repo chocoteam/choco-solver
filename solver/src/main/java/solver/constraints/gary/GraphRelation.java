@@ -42,7 +42,7 @@ public enum GraphRelation {
 	EQUALITY {
 		@Override
 		public Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons) {
-			return new PropReified(new Variable[]{bool,x,y}, new EqualX_YC(x, y, 0, solver), new NotEqualX_YC(x, y, 0, solver), solver.getEnvironment(), cons, PropagatorPriority.BINARY, true);
+			return new PropReified(new Variable[]{bool,x,y}, new EqualX_YC(x, y, 0, solver), new NotEqualX_YC(x, y, 0, solver), solver, cons, PropagatorPriority.BINARY, true);
 		}
 	};	
 	public abstract Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons);

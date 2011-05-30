@@ -50,7 +50,7 @@ public class MaxXYZ extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropMax(X, Y, Z, solver.getEnvironment(), this));
+        setPropagators(new PropMax(X, Y, Z, solver, this));
     }
 
     public MaxXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
@@ -58,7 +58,7 @@ public class MaxXYZ extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropMax(X, Y, Z, solver.getEnvironment(), this));
+        setPropagators(new PropMax(X, Y, Z, solver, this));
     }
 
     @Override

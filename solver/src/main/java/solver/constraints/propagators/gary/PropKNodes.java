@@ -28,17 +28,17 @@
 package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K nodes belong to the final graph
  * 
@@ -58,8 +58,8 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKNodes(V graph, IEnvironment environment, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new GraphVar[]{graph}, environment, constraint, PropagatorPriority.LINEAR, false);
+	public PropKNodes(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, IntVar k) {
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
 		this.k = k;
 		if(k.getLB()<=0){
