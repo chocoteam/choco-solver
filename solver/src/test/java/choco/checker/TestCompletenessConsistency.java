@@ -61,165 +61,190 @@ public class TestCompletenessConsistency {
     @Test(groups = "1s")
     public void testEQ1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelEqAC, 2, 0, 2, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelEqAC, 2, 0, 2, seed + i, "ac");
     }
 
     @Test(groups = "1m")
     public void testEQ2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelEqAC, 2, 0, 100, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelEqAC, 2, 0, 100, seed + i, "ac");
     }
 
     // NEQ *******************************************************
     @Test(groups = "1s")
     public void testNEQ2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelNeqAC, 2, 0, 2, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelNeqAC, 2, 0, 2, seed + i, "ac");
     }
 
     @Test(groups = "1m")
     public void testNEQ() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelNeqAC, 2, 0, 100, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelNeqAC, 2, 0, 100, seed + i, "ac");
     }
 
     // AllDifferent AC *******************************************************
     @Test(groups = "1s")
     public void testALLDIFFERENT1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffAC, 1, 0, 10, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffAC, 1, 0, 10, seed + i, "ac");
     }
 
     @Test(groups = "1s")
     public void testALLDIFFERENT2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffAC, 2, 0, 2, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffAC, 2, 0, 2, seed + i, "ac");
     }
 
     @Test(groups = "1m")
     public void testALLDIFFERENT3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffAC, 5, 2, 50, seed + i, "ac");
     }
 
     @Test(groups = ">30m")
     public void testALLDIFFERENT4() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffAC, 10, 0, 100, seed + i, "ac");
     }
-    
+
     @Test(groups = "1m")
     public void testALLDIFFERENTGRAPHAC() {
         long seed = System.currentTimeMillis();
-        for(int i = 0 ; i < 20; i++)
-        checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, seed+i, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffGraph, 5, 2, 50, seed + i, "ac");
     }
-    
+
     // InverseChanneling *******************************************************
     @Test(groups = "10s")
     public void testINVERSECHANNELING1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelInverseChannelingAC, 20, 0, 40, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelInverseChannelingAC, 20, 0, 40, seed + i, "ac");
     }
 
     @Test(groups = "10s")
     public void testINVERSECHANNELING2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelInverseChannelingAC, 10, 10, 120, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelInverseChannelingAC, 10, 10, 120, seed + i, "ac");
     }
 
     @Test(groups = "10s")
     public void testINVERSECHANNELING3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelInverseChannelingAC, 10, -10, 120, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelInverseChannelingAC, 10, -10, 120, seed + i, "ac");
     }
 
     // AllDifferent BC *******************************************************
     @Test(groups = "1s")
     public void testALLDIFFERENTBC1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffBC, 1, 0, 10, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffBC, 1, 0, 10, seed + i, "bc");
     }
 
     @Test(groups = "1s")
     public void testALLDIFFERENTBC2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffBC, 2, 0, 2, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffBC, 2, 0, 2, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testALLDIFFERENTBC3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffBC, 5, 2, 50, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testALLDIFFERENTBC4() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffBC, 10, 0, 100, seed + i, "bc");
     }
-    
+
     @Test(groups = "10s")
     public void testALLDIFFERENTGRAPHBC() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAllDiffGraphBc, 5, 2, 50, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testTIMES1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelTimes, 3, 2, 50, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelTimes, 3, 2, 50, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testTIMES2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelTimes, 3, -25, 25, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelTimes, 3, -25, 25, seed + i, "bc");
     }
 
 
     @Test(groups = "10s")
     public void testTIMES3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelTimes, 3, -50, -3, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelTimes, 3, -50, -3, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testABSOLUTEBC1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed + i, "bc");
     }
 
     @Test(groups = "10s")
     public void testABSOLUTEBC2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed + i, "bc");
     }
 
 
     @Test(groups = "10s")
     public void testABSOLUTEBC3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, -50, -3, seed, "bc");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, -50, 50, seed + i, "bc");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testABSOLUTEAC1() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, 2, 50, seed + i, "ac");
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testABSOLUTEAC2() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, -25, 25, seed + i, "ac");
     }
 
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testABSOLUTEAC3() {
         long seed = System.currentTimeMillis();
-        checkConsistency(Modeler.modelAbsolute, 2, -50, -3, seed, "ac");
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAbsolute, 2, -50, 50, seed + i, "ac");
     }
 
     /*@Test
