@@ -301,7 +301,7 @@ public class OneWordS32BitSet implements IStateBitSet {
         //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         //checkInvariants();
-        return ((word.get() & (1 << bitIndex)) != 0);
+        return bitIndex < 32 && ((word.get() & (1 << bitIndex)) != 0);
     }
 
     /**
