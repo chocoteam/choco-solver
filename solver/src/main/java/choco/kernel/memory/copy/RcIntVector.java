@@ -27,7 +27,6 @@
 
 package choco.kernel.memory.copy;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IStateIntVector;
 
 /* 
@@ -270,10 +269,5 @@ public final class RcIntVector implements IStateIntVector, RecomputableElement {
     public int getTimeStamp() {
         return timeStamp;
     }
-    
-	@Override
-	public DisposableIntIterator getIterator() {
-		throw new UnsupportedOperationException("not yet implemented");
-	}
 
 }

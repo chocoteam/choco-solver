@@ -51,7 +51,6 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     //int idxVar; // index of var in struct
     public MatchingStructure struct;
     protected final RemProc rem_proc;
-    protected boolean effect;
 
 
     @SuppressWarnings({"unchecked"})
@@ -100,7 +99,6 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         } else {
             int f = request.fromDelta();
             int l = request.toDelta();
-            effect = false;
             delta.forEach(rem_proc.set(varIdx), f, l);
         }
         if (getNbRequestEnqued() == 0) {
@@ -152,7 +150,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         @Override
         public void execute(int i) throws ContradictionException {
             p.struct.nodes[idxVar].removeEdge(i);
-            p.effect |= p.struct.deleteMatch(idxVar, i - p.struct.getMinValue());
+            p.struct.deleteMatch(idxVar, i - p.struct.getMinValue());
         }
     }
 }

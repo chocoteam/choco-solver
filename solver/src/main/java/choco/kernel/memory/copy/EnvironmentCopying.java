@@ -382,14 +382,6 @@ public class EnvironmentCopying extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateBinaryTree makeBinaryTree(int inf, int sup) {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateObject makeObject(Object obj) {
         return new RcObject(this, obj);
     }

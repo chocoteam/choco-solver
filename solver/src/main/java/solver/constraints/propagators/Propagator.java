@@ -150,8 +150,23 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
+     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
+     *
+     * @param vIdx index of the variable within the propagator
+     * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
+     *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
+     */
+    public abstract int getPropagationConditions(int vIdx);
+
+    /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.
      * It considers the current state of this objects to remove some values from domains and/or instantiate some variables.
+     * Calling this method is done from 2 (and only 2) steps:
+     * <br/>- at the initial propagation step,
+     * <br/>- when involved in a reified constraint.
+     * <br/>
+     * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
      * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
@@ -167,16 +182,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *          if a contradiction occurs
      */
     public abstract void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException;
-
-    /**
-     * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
-     * <i>Checks are made applying bitwise AND between the mask and the event.</i>
-     *
-     * @param vIdx index of the variable within the propagator
-     * @return int composed of <code>REMOVE</code> and/or <code>INSTANTIATE</code>
-     *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
-     */
-    public abstract int getPropagationConditions(int vIdx);
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {

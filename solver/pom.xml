@@ -27,5 +27,16 @@
             <artifactId>jcommon</artifactId>
             <version>1.0.16</version>
         </dependency>
+        <dependency>
+            <groupId>dk.brics</groupId>
+            <artifactId>automaton</artifactId>
+            <version>1.11-2</version>
+            <scope>compile</scope>
+        </dependency>
+		<dependency>
+	    	<groupId>jgrapht</groupId>
+	        <artifactId>jgrapht</artifactId>
+	        <version>0.8.1</version>
+	    </dependency>
     </dependencies>
 </project>

@@ -190,10 +190,6 @@ public interface IEnvironment extends Serializable{
 
     IStateDouble makeFloat(double initialValue);
 
-
-
-    IStateBinaryTree makeBinaryTree(int inf, int sup);
-
     IStateObject makeObject(Object obj);
 
     /**

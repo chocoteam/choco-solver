@@ -62,7 +62,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
     private StoredIntVectorTrail intVectorTrail;
     private StoredDoubleVectorTrail doubleVectorTrail;
     private StoredDoubleTrail doubleTrail;
-    private StoredBinaryTreeTrail btreeTrail;
     private OperationTrail operationTrail;
 
 
@@ -242,14 +241,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateBinaryTree makeBinaryTree(final int inf, final int sup) {
-        return new StoredBinaryTree(this, inf, sup);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public IStateLong makeLong() {
         return makeLong(0);
     }
@@ -337,15 +328,6 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
             trails[trailSize++] = doubleVectorTrail;
         }
         return doubleVectorTrail;
-    }
-
-    public StoredBinaryTreeTrail getBinaryTreeTrail() {
-        if (btreeTrail == null) {
-            btreeTrail = new StoredBinaryTreeTrail(MaxHist, maxWorld);
-            increaseTrail();
-            trails[trailSize++] = btreeTrail;
-        }
-        return btreeTrail;
     }
 
     public OperationTrail getOperationTrail() {

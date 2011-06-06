@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,85 +25,75 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory;
-
-import java.io.Serializable;
+package solver.constraints.nary.automaton.penalty;
 
 /**
- * Describes an search vector with states (describing some history of the data structure).
+ * Created by IntelliJ IDEA.
+ * User: julien
+ * Date: May 3, 2010
+ * Time: 5:49:24 PM
  */
-public interface IStateIntVector extends Serializable {
+public class LinearPenaltyFunction extends AbstractPenaltyFunction {
 
     /**
-     * Minimal capacity of a vector
+     * minimum bound
      */
-    int MIN_CAPACITY = 8;
+    private int min;
 
     /**
-     * Returns the current size of the stored search vector.
+     * soft minimum bound (= min if not soft).
      */
-
-    int size();
+    private int minPref;
 
     /**
-     * Checks if the vector is empty.
+     * unit violation cost of the soft minimum bound (= 0 if not soft).
      */
-
-    boolean isEmpty();
+    private int minPenalty;
 
     /**
-     * Adds a new search at the end of the vector.
-     *
-     * @param i The search to add.
+     * maximum value
      */
-
-    void add(int i);
-
-    boolean contains(int val);
+    private int max;
 
     /**
-     * Removes an int.
-     *
-     * @param i The search to remove.
+     * soft maximum value (= max if not soft).
      */
-
-    void remove(int i);
-
+    private int maxPref;
 
     /**
-     * removes the search at the end of the vector.
-     * does nothing when called on an empty vector
+     * unit violation cost of the soft maximum value (= 0 if not soft).
      */
+    private int maxPenalty;
 
-    void removeLast();
 
-    /**
-     * Returns the <code>index</code>th element of the vector.
-     */
+    public LinearPenaltyFunction(int min, int minPref, int minPenalty, int max, int maxPref, int maxPenalty) {
+        this.min = min;
+        this.max = max;
+        this.minPref = minPref;
+        this.maxPref = maxPref;
+        this.minPenalty = minPenalty;
+        this.maxPenalty = maxPenalty;
 
-    int get(int index);
+    }
 
-    /**
-     * access an element without any bound check
-     *
-     * @param index
-     * @return
-     */
-    int quickGet(int index);
 
-    /**
-     * Assigns a new value <code>val</code> to the element <code>index</code> and returns
-     * the old value
-     */
+    @Override
+    public int penalty(int value) {
+        if (value < minPref) {
+            if (value >= min) {
+                return (minPref - value) * minPenalty;
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        } else if (value > maxPref) {
+            if (value <= max) {
+                return (value - maxPref) * maxPenalty;
+            } else {
+                return Integer.MAX_VALUE;
+            }
 
-    int set(int index, int val);
-
-    /**
-     * Assigns a new value val to the element indexth and return the old value without bound check
-     *
-     * @param index the index where the value is modified
-     * @param val   the new value
-     * @return the old value
-     */
-    int quickSet(int index, int val);
+        } else {
+            return 0;
+        }
+    }
 }

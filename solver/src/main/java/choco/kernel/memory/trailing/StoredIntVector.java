@@ -27,7 +27,6 @@
 
 package choco.kernel.memory.trailing;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IStateIntVector;
 import choco.kernel.memory.trailing.trail.StoredIntVectorTrail;
 
@@ -287,12 +286,6 @@ public final class StoredIntVector implements IStateIntVector {
 		elementData[index] = val;
 		worldStamps[index] = stamp;
 		return oldval;
-	}
-
-
-	@Override
-	public DisposableIntIterator getIterator() {
-		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 
