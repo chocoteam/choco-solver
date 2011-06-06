@@ -211,6 +211,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars[i];
     }
 
+    /**
+     * Returns the number of variables involved in <code>this</code>.
+     *
+     * @return number of variables
+     */
+    public final int getNbVars() {
+        return vars.length;
+    }
+
     public int nbRequests() {
         return requests.length;
     }
@@ -308,6 +317,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         nbRequestEnqued--;
     }
 
+    /**
+     * Returns the number of uninstanciated variables
+     *
+     * @return number of uninstanciated variables
+     */
     public int arity() {
         return arity.get();
     }

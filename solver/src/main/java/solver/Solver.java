@@ -157,6 +157,7 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this);
         this.creationTime -= System.currentTimeMillis();
         this.engine = new PropagationEngine();
+        //this.engine = new ThreadedPropagationEngine(this, Runtime.getRuntime().availableProcessors());
         this.search = SearchLoops.preset(this, engine);
         /*new RecorderExplanationEngine(); // TODO faire un builder*/
     }

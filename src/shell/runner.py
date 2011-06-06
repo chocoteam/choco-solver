@@ -7,7 +7,7 @@ listfilename = './runner.list'
 
 ## java class-path for rocs
 m2_repo='/Users/cprudhom/.m2/repository/'
-CP='-cp .:../../solver/target/solver-1.0-SNAPSHOT.jar'
+CP='-cp .:../../solver/target/solver-rocs-1.0-SNAPSHOT.jar'
 CP+=':'+m2_repo+'args4j/args4j/2.0.12/args4j-2.0.12.jar'
 CP+=':'+m2_repo+'ch/qos/logback/logback-classic/0.9.24/logback-classic-0.9.24.jar'
 CP+=':'+m2_repo+'ch/qos/logback/logback-core/0.9.24/logback-core-0.9.24.jar'

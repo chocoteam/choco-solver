@@ -49,7 +49,7 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
 
     protected final IV var;
 
-    protected long uniqueID;
+    protected int uniqueID;
 
     protected final Solver solver;
 
@@ -58,11 +58,11 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
         this.solver = solver;
     }
 
-    public long getUniqueID() {
+    public int getUniqueID() {
         return uniqueID;
     }
 
-    public void setUniqueID(long uniqueID) {
+    public void setUniqueID(int uniqueID) {
         this.uniqueID = uniqueID;
     }
 

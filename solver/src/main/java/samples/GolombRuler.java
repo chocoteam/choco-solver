@@ -97,7 +97,7 @@ public class GolombRuler extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
-
+//        SearchMonitorFactory.log(solver, false, true);
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(Group.buildQueue(
                         new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks)))

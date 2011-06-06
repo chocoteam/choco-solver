@@ -116,13 +116,13 @@ public interface Variable<D extends IDelta> extends Serializable {
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)
      */
-    void setUniqueID(long id);
+    void setUniqueID(int id);
 
     /**
      * Returns the ID of the variable
      * @return
      */
-    long getUniqueID();
+    int getUniqueID();
 
     /**
      * Throws a contradiction exception based on <cause, message>

@@ -54,7 +54,7 @@ public class IntCste implements IntVar {
     protected final IIntDomain domain;
     protected final Solver solver;
 
-    protected long uniqueID;
+    protected int uniqueID;
 
     public IntCste(String name, int constante, Solver solver) {
         this.name = name;
@@ -63,11 +63,11 @@ public class IntCste implements IntVar {
         this.domain = new CsteDomain(constante);
     }
 
-    public long getUniqueID() {
+    public int getUniqueID() {
         return uniqueID;
     }
 
-    public void setUniqueID(long uniqueID) {
+    public void setUniqueID(int uniqueID) {
         this.uniqueID = uniqueID;
     }
 

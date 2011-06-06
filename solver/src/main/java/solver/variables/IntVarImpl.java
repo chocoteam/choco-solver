@@ -74,7 +74,7 @@ public final class IntVarImpl implements IntVar {
 
     protected HeuristicVal heuristicVal;
 
-    protected long uniqueID;
+    protected int uniqueID;
 
     protected final IPropagationEngine engine;
 
@@ -87,11 +87,11 @@ public final class IntVarImpl implements IntVar {
         this.requests = RequestListBuilder.preset(solver.getEnvironment());
     }
 
-    public long getUniqueID() {
+    public int getUniqueID() {
         return uniqueID;
     }
 
-    public void setUniqueID(long uniqueID) {
+    public void setUniqueID(int uniqueID) {
         this.uniqueID = uniqueID;
     }
 

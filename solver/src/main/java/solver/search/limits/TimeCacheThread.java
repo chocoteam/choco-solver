@@ -45,7 +45,7 @@ public final class TimeCacheThread extends Thread {
 
 
     private TimeCacheThread() {
-        super();
+        super("TimeCachedThread");
         setDaemon(true);
     }
 
@@ -66,5 +66,8 @@ public final class TimeCacheThread extends Thread {
         }
     }
 
-
+    @Override
+    public String toString() {
+        return "TimeCacheThread";
+    }
 }

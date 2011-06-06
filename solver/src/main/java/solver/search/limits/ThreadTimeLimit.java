@@ -46,6 +46,7 @@ public class ThreadTimeLimit extends Thread implements ILimit {
     private volatile boolean isreached;
 
     protected ThreadTimeLimit(long duration) {
+        super("time limit");
         this.duration = duration;
         this.threshold = duration / 10;
         this.isreached = false;
