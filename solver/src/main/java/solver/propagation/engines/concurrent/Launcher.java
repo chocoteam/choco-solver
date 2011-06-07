@@ -27,7 +27,6 @@
 package solver.propagation.engines.concurrent;
 
 import solver.exception.ContradictionException;
-import solver.propagation.engines.ThreadedPropagationEngine;
 import solver.requests.IRequest;
 
 /**
@@ -39,48 +38,31 @@ import solver.requests.IRequest;
 public class Launcher extends Thread {
     int id;
     IRequest lastPoppedRequest;
-
-    final ThreadedPropagationEngine master;
-
+    final Sequencer master;
     volatile boolean runnable = true;
 
-    public Launcher(ThreadedPropagationEngine master, int id) {
+    public Launcher(Sequencer master, int id) {
         super("Launcher " + id);
         this.master = master;
         this.id = id;
         setDaemon(true);
+        setPriority(3);
     }
 
     @Override
     public void run() {
         while (runnable) {
-            if (master.isPropagating) {
-                int index = master.sequencer.getFreeRequestId();
-                if (index > -1) {
-//                    LoggerFactory.getLogger("solver").info("{} starts on {}", this.toString(), master.requests[index].toString());
-                    assert master.nbWorkers >= 0;
-                    master.nbWorkers++;
-                    lastPoppedRequest = master.requests[index];
-                    assert lastPoppedRequest.enqueued() : "request not enqued.. double access?";
-                    lastPoppedRequest.deque();
-                    try {
-                        lastPoppedRequest.filter();
-                    } catch (ContradictionException e) {
-//                            LoggerFactory.getLogger("solver").info("{} fails on {}", this.toString(), master.requests[index].toString());
-                        master.interrupt();
-                    }
-                    int to = lastPoppedRequest.getPropagator().getNbVars();
-                    for (int i = 0; i < to; i++) {
-                        master.sequencer.allow(lastPoppedRequest.getPropagator().getVar(i).getUniqueID());
-                    }
-                    master.nbWorkers--;
-                    assert master.nbWorkers >= 0;
-//                        LoggerFactory.getLogger("solver").info("{} forb: {}", this.toString(), Arrays.toString(master.sequencer.forbidden));
-//                    LoggerFactory.getLogger("solver").info("{} ends on {}", this.toString(), master.requests[index].toString());
+            lastPoppedRequest = master.getFreeRequestId();
+            if (lastPoppedRequest != null) {
+//                    LoggerFactory.getLogger("solver").info("{} starts on {}", this.toString(), lastPoppedRequest);
+                try {
+                    lastPoppedRequest.filter();
+                } catch (ContradictionException e) {
+//                        LoggerFactory.getLogger("solver").info("{} fails : {}", this, e.toString());
+                    master.interrupt();
                 }
-            }
-            synchronized (master) {
-                master.notify();
+                master.allow(lastPoppedRequest);
+//                    LoggerFactory.getLogger("solver").info("{} ends on {}", this.toString(), lastPoppedRequest);
             }
         }
     }

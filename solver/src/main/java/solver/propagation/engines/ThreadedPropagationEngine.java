@@ -35,7 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.engines.comparators.IncrPriorityP;
-import solver.propagation.engines.concurrent.Launcher;
 import solver.propagation.engines.concurrent.Sequencer;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
@@ -71,28 +70,15 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     protected final ContradictionException exception; // the exception of the prop. engine
 
     private boolean init = false; // is the prop. engine intialized
-    private volatile boolean
-            hasFailed = false; // does the propagation encountered a contradiction
-    public volatile boolean isPropagating = false; // is this in a propagation period
-
-    protected Launcher[] launchers; // propagator a request -- in a thread
 
     protected int nbThreads; // number of threads available
-
-    public volatile int nbWorkers; // number of thread currently working on a request
 
     public Sequencer sequencer; // a sequencer to provide the next request to propagate
 
     public ThreadedPropagationEngine(Solver solver, int nbThreads) {
         this.solver = solver;
         this.exception = new ContradictionException();
-
         this.nbThreads = nbThreads;
-        this.launchers = new Launcher[nbThreads];
-        for (int i = 0; i < nbThreads; i++) {
-            launchers[i] = new Launcher(this, i);
-            launchers[i].start();
-        }
     }
 
     /**
@@ -121,7 +107,7 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
             request.setIndex(i);
         }
         init = false;
-        sequencer = new Sequencer(requests, offset, solver.getNbVars());
+        sequencer = new Sequencer(this, offset, solver.getNbVars(), nbThreads);
     }
 
     @Override
@@ -130,7 +116,7 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
+    public synchronized void fails(ICause cause, Variable variable, String message) throws ContradictionException {
         throw exception.set(cause, variable, message);
     }
 
@@ -194,36 +180,21 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         fixPoint();
     }
 
-
     @Override
     public void fixPoint() throws ContradictionException {
-        assert nbWorkers == 0 : "nb of workers != 0";
-
-        hasFailed = false;
-        isPropagating = true;
-        do {
-            pause();
-        } while (!hasFailed && (nbWorkers > 0 || sequencer.cardinality() > 0));
-        isPropagating = false;
-
-        // wait for ending thread -- required when hasFailed
-        while (nbWorkers > 0) {
-            pause();
-        }
-        assert nbWorkers == 0 : "nb of workers != 0";
-        if (hasFailed) {
-            throw exception;
-        }
-        assert (sequencer.cardinality() == 0) : "hasFailed:" + hasFailed + ", card:" + sequencer.cardinality();
-    }
-
-    private void pause() {
+//        LoggerFactory.getLogger("solver").info("start...");
+//        exception.set(null, null, "");
+        sequencer.awake();
         try {
             synchronized (this) {
                 this.wait();
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+//        LoggerFactory.getLogger("solver").info("...end");
+        if (sequencer.hasFailed()) {
+            throw exception;
         }
     }
 
@@ -233,6 +204,9 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
             sequencer.set(request.getIndex(), true);
             request.enqueue();
         }
+//        LoggerFactory.getLogger("solver").info("{} updates {} from {}",
+//                new String[]{Thread.currentThread().toString(), request.toString(), Reflection.getCallerClass(6).toString()}
+//        );
     }
 
     @Override
@@ -256,8 +230,8 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         return size;
     }
 
-    public void interrupt() {
-        hasFailed = true;
+    @Override
+    public ContradictionException getContradictionException() {
+        return exception;
     }
-
 }

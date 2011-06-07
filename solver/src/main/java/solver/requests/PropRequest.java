@@ -75,6 +75,7 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
 
     @Override
     public void filter() throws ContradictionException {
+//        LoggerFactory.getLogger("solver").info("{} filter on {}", this.toString(), evtmask);
         if (evtmask>0) {
             int evtmask_ = evtmask;
             // for concurrent modification..
@@ -120,6 +121,7 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
     @Override
     public void desactivate() {
         super.desactivate();
+//        LoggerFactory.getLogger("solver").info("{} >> {} clean mask", Thread.currentThread().toString(),this.toString());
         evtmask = 0;
     }
 }

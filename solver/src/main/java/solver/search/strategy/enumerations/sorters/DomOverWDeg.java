@@ -27,7 +27,7 @@
 package solver.search.strategy.enumerations.sorters;
 
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
+import solver.propagation.engines.IPropagationEngine;
 import solver.requests.list.IRequestList;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
@@ -44,7 +44,10 @@ import solver.variables.IntVar;
  */
 public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
 
-    protected DomOverWDeg() {
+    final IPropagationEngine propEngine;
+
+    protected DomOverWDeg(IPropagationEngine propEngine) {
+        this.propEngine = propEngine;
     }
 
     private int weight(IntVar v) {
@@ -74,8 +77,8 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
 
     @Override
     public void onContradiction() {
-        if (ContradictionException.EXCEPTION.c != null) {
-            ContradictionException.EXCEPTION.c.incFail();
+        if (propEngine.getContradictionException().c != null) {
+            propEngine.getContradictionException().c.incFail();
         }
     }
 

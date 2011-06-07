@@ -243,4 +243,9 @@ public final class PropagationEngine implements IPropagationEngine {
         return size;
     }
 
+    @Override
+    public ContradictionException getContradictionException() {
+        return exception;
+    }
+
 }

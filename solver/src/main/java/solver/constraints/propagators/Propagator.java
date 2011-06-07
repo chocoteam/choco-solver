@@ -332,7 +332,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void decArity() {
-        assert (arity.get() >= 0) : "arity < 0";
+        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
         arity.add(-1);
     }
 

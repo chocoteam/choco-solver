@@ -137,7 +137,7 @@ public final class IntVarImpl implements IntVar {
         int sup = domain.getUB();
         if (value == inf && value == sup) {
             solver.explainer.removeValue(this, value, cause);
-            this.contradiction(cause, "remove last value");
+            this.contradiction(cause, "remove last value :"+value);
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
@@ -360,6 +360,7 @@ public final class IntVarImpl implements IntVar {
      * @return the current value (or lower bound if not yet instantiated).
      */
     public int getValue() {
+        assert instantiated(): "not instantiated";
         return this.domain.getLB();
     }
 
@@ -441,6 +442,7 @@ public final class IntVarImpl implements IntVar {
     @Override
     public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
+//            LoggerFactory.getLogger("solver").info("{} - {} - {}", new Object[]{this, e, (cause==null?"null":cause.getConstraint())});
             requests.notifyButCause(cause, e, domain.getDelta());
         }
     }

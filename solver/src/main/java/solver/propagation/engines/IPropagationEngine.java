@@ -92,4 +92,6 @@ public interface IPropagationEngine extends Serializable {
      * @throws ContradictionException expected behavior
      */
     void fails(ICause cause, Variable variable, String message) throws ContradictionException;
+
+    ContradictionException getContradictionException();
 }

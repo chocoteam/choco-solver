@@ -49,8 +49,6 @@ public final class ContradictionException extends Exception {
 
     private static final long serialVersionUID = 2L;
 
-    public static final ContradictionException EXCEPTION = new ContradictionException();
-
     public ICause c = null;
     public Variable v = null;
     public String s;
@@ -77,7 +75,7 @@ public final class ContradictionException extends Exception {
      * {@inheritDoc}
      */
     public String toString() {
-        return "fail : " + c + "  " + v + "  " + s;
+        return "fail : " + (c == null ?c : c.getConstraint()) + "  " + v + "  " + s;
     }
 
     /**

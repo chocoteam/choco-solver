@@ -168,7 +168,7 @@ public class SorterFactory {
      * @return dom/wdeg sorter
      */
     public static AbstractSorter<IntVar> domOverWDeg(Solver solver) {
-        DomOverWDeg dd = new DomOverWDeg();
+        DomOverWDeg dd = new DomOverWDeg(solver.getEngine());
         solver.getSearchLoop().branchSearchMonitor(dd);
         return dd;
     }
