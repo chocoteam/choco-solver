@@ -4,14 +4,11 @@ import sys, subprocess, shlex, time, threading, os, signal, re, logging, tempfil
 from threading import Thread
 from os.path import join
 
-## file name containing list of command to run
-listfilename = './runner.list'
-
+## ENVIRONMENT VARIABLES
+CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/'
 
 # ENVIRONMENT VARIABLES
 MINIZINC_DIR = '/Users/cprudhom/Documents/Projects/_Librairies/minizinc-1.2.2'
-
-CHOCO_LIB = '/Users/cprudhom/Documents/Projects/Sources/Choco/ref/choco-parsers/src/main/resources/std_lib'
 
 M2_REPO = '/Users/cprudhom/.m2/repository/'
 ARGS = join(M2_REPO, 'args4j', 'args4j', '2.0.12', 'args4j-2.0.12.jar')
@@ -23,9 +20,9 @@ JPARSEC = join(M2_REPO, 'jparsec', 'jparsec', '2.0.1', 'jparsec-2.0.1.jar')
 CGLIB = join(M2_REPO, 'cglib', 'cglib-nodep', '2.2', 'cglib-nodep-2.2.jar')
 CP = '.:' + ARGS + ':' + LOGBACK_CL + ':' + LOGBACK_CO + ':' + SLF4J + ':' + TROVE + ':'+JPARSEC +':'+CGLIB
 
-CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/'
 CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT.jar')
 CHOCO_PARSERS = join(CHOCO_HOME, 'parser','target',  'parser-rocs-1.0-SNAPSHOT.jar')
+CHOCO_LIB = join(CHOCO_HOME, 'parser','src', 'lib','minizinc')
 
 JAVA_OPTS = CMD = '-Xmx256m -Xms256m -XX:+AggressiveOpts'
 
@@ -117,8 +114,8 @@ def parse():
     OUTPUT = tempfile.NamedTemporaryFile(suffix='.fzn', prefix='tmp', delete=False)
 
     COMMAND = join(MINIZINC_DIR, 'bin', 'mzn2fzn')
-    #    COMMAND+=' --stdlib-dir '+ CHOCO_LIB
-    #    COMMAND+=' -G choco_std'
+    COMMAND+=' --stdlib-dir '+ CHOCO_LIB
+    COMMAND+=' -G std'
     COMMAND += ' ' + MZN_FILE
     COMMAND += ' -o ' + OUTPUT.name
     if DZN_FILE != '':
