@@ -27,6 +27,7 @@
 
 package solver.propagation.engines;
 
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -49,6 +50,9 @@ import java.util.Arrays;
  * <p/>
  * This deals with thread-like propagation of request.
  * At the beginning, the number of available threads is given and each thread feed itself.
+ * <p/>
+ * Things to know about parallelisation of choco:
+ * <br/>- EnvironmentTrailing does not allow concurrent modification of stored object (that's why it throws an error at construction),
  * <p/>
  * Created by IntelliJ IDEA.
  * User: cprudhom
@@ -76,6 +80,9 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     public Sequencer sequencer; // a sequencer to provide the next request to propagate
 
     public ThreadedPropagationEngine(Solver solver, int nbThreads) {
+        if(solver.getEnvironment() instanceof EnvironmentTrailing){
+            throw new SolverException("EnvironmentTrailing does not allow concurrent modification");
+        }
         this.solver = solver;
         this.exception = new ContradictionException();
         this.nbThreads = nbThreads;
