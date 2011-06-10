@@ -36,7 +36,8 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.engines.comparators.IncrPriorityP;
-import solver.propagation.engines.concurrent.Sequencer;
+import solver.propagation.engines.concurrent.ISequencer;
+import solver.propagation.engines.concurrent.LonelySequencer;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
 import solver.variables.Variable;
@@ -77,10 +78,10 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
 
     protected int nbThreads; // number of threads available
 
-    public Sequencer sequencer; // a sequencer to provide the next request to propagate
+    public ISequencer sequencer; // a sequencer to provide the next request to propagate
 
     public ThreadedPropagationEngine(Solver solver, int nbThreads) {
-        if(solver.getEnvironment() instanceof EnvironmentTrailing){
+        if (solver.getEnvironment() instanceof EnvironmentTrailing) {
             throw new SolverException("EnvironmentTrailing does not allow concurrent modification");
         }
         this.solver = solver;
@@ -114,7 +115,7 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
             request.setIndex(i);
         }
         init = false;
-        sequencer = new Sequencer(this, offset, solver.getNbVars(), nbThreads);
+        sequencer = new LonelySequencer(this, offset, solver.getNbVars(), nbThreads);
     }
 
     @Override
@@ -191,7 +192,7 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     public void fixPoint() throws ContradictionException {
 //        LoggerFactory.getLogger("solver").info("start...");
 //        exception.set(null, null, "");
-        sequencer.awake();
+        sequencer.fixpoint();
         try {
             synchronized (this) {
                 this.wait();
@@ -211,9 +212,6 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
             sequencer.set(request.getIndex(), true);
             request.enqueue();
         }
-//        LoggerFactory.getLogger("solver").info("{} updates {} from {}",
-//                new String[]{Thread.currentThread().toString(), request.toString(), Reflection.getCallerClass(6).toString()}
-//        );
     }
 
     @Override

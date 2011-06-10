@@ -26,37 +26,28 @@
  */
 package solver.propagation.engines.concurrent;
 
+import solver.exception.ContradictionException;
 import solver.propagation.engines.ThreadedPropagationEngine;
 import solver.requests.IRequest;
 
-import java.util.BitSet;
-
 /**
+ * A sequencer oriented from Thread to sequencer:
+ * a thread (<code>Launcher</code>) ask to the sequencer the index of the next request to propagate.
+ * <br/>
+ * Getting the next ID locks the sequencer during the computation. The propagation is then executed in a thread.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 06/06/11
  */
-public class Sequencer {
-
-    private enum State {
-        RUN, SUSPEND, SLEEP
-    }
+public class Sequencer extends AbstractSequencer {
 
     public int nbWorkers; // number of thread currently working on a request
-    private final ThreadedPropagationEngine master;
-    private BitSet toPropagate; // indices of requests to propagate
-    private BitSet forbidden; // indices of forbidden variables for active requests
     protected Launcher[] launchers; // propagator a request -- in a thread
-    protected volatile State currentState;
-    protected volatile boolean fail;
 
     public Sequencer(ThreadedPropagationEngine master, int nbRequests, int nbVars, int nbThreads) {
-        this.master = master;
-        this.toPropagate = new BitSet(nbRequests);
-        this.forbidden = new BitSet(nbVars);
+        super(master, nbRequests, nbVars, nbThreads);
         this.nbWorkers = 0;
-        currentState = State.SLEEP;
         this.launchers = new Launcher[nbThreads];
         for (int i = 0; i < nbThreads; i++) {
             launchers[i] = new Launcher(this, i);
@@ -64,17 +55,7 @@ public class Sequencer {
         }
     }
 
-    public void awake() {
-        synchronized (this) {
-//            LoggerFactory.getLogger("solver").info("awake");
-            assert nbWorkers == 0;
-            assert forbidden.cardinality() == 0;
-            fail = false;
-            currentState = State.RUN;
-        }
-    }
-
-    public synchronized IRequest getFreeRequestId() {
+    private synchronized IRequest getFreeRequestId() {
 //        synchronized (this) {
         IRequest request = null;
         switch (currentState) {
@@ -99,13 +80,13 @@ public class Sequencer {
 //                    LoggerFactory.getLogger("solver").info(">{}", forbidden);
                     request.deque();
                 } else if (toPropagate.cardinality() == 0 && nbWorkers == 0) {
-                    currentState = State.SUSPEND;
+                    currentState = ISequencer.State.SLEEP;
                 }
             case SUSPEND:
 //                LoggerFactory.getLogger("solver").info("~{}", forbidden);
                 if (nbWorkers == 0) {
                     assert forbidden.cardinality() == 0;
-                    currentState = State.SLEEP;
+                    currentState = ISequencer.State.SLEEP;
                 }
                 break;
             case SLEEP:
@@ -118,18 +99,8 @@ public class Sequencer {
         return request;
     }
 
-    private boolean conditions(int ridx) {
-        int nbV = master.requests[ridx].getPropagator().getNbVars();
-        for (int i = 0; i < nbV; i++) {
-            int idx = master.requests[ridx].getPropagator().getVar(i).getUniqueID();
-            if (forbidden.get(idx)) return false;
-        }
-        return true;
-    }
-
-    public void allow(IRequest request) {
+    protected void allow(IRequest request) {
         synchronized (this) {
-//            LoggerFactory.getLogger("solver").info("{} free {}", this, request);
             int to = request.getPropagator().getNbVars();
             for (int i = 0; i < to; i++) {
                 forbidden.set(request.getPropagator().getVar(i).getUniqueID(), false);
@@ -138,34 +109,49 @@ public class Sequencer {
         }
     }
 
-    public void set(int index, boolean value) {
-        synchronized (this) {
-            toPropagate.set(index, value);
-        }
-    }
-
-    public boolean hasFailed() {
-        return fail;
-    }
-
-    public void interrupt() {
-        synchronized (this) {
-//            LoggerFactory.getLogger("solver").info("toPropagate.card = {}, fail = {}", toPropagate.cardinality(), fail);
-            fail = true;
-            currentState = State.SUSPEND;
-        }
-    }
-
-    public void flushAll() {
-        assert currentState == State.SLEEP : "wrong state: " + currentState;
-        for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i + 1)) {
-            master.requests[i].deque();
-            toPropagate.clear(i);
-        }
-    }
-
     @Override
     public String toString() {
         return "W:" + nbWorkers + ", C:" + toPropagate.cardinality();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static class Launcher extends Thread {
+        int id;
+        IRequest lastPoppedRequest;
+        final Sequencer master;
+        boolean runnable = true;
+
+        public Launcher(Sequencer master, int id) {
+            super("Launcher " + id);
+            this.master = master;
+            this.id = id;
+            setDaemon(true);
+            setPriority(3);
+        }
+
+        @Override
+        public void run() {
+            while (runnable) {
+                lastPoppedRequest = master.getFreeRequestId();
+                if (lastPoppedRequest != null) {
+                    try {
+                        lastPoppedRequest.filter();
+                    } catch (ContradictionException e) {
+                        master.exception();
+                    }
+                    master.allow(lastPoppedRequest);
+                }
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "T" + id;
+        }
+
+        public void kill() {
+            runnable = false;
+        }
     }
 }

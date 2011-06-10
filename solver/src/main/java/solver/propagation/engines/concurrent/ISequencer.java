@@ -26,53 +26,40 @@
  */
 package solver.propagation.engines.concurrent;
 
-import solver.exception.ContradictionException;
-import solver.requests.IRequest;
-
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 06/06/11
+ * Created by IntelliJ IDEA.
+ * User: cprudhom
+ * Date: 10/06/11
  */
-public class Launcher extends Thread {
-    int id;
-    IRequest lastPoppedRequest;
-    final Sequencer master;
-    volatile boolean runnable = true;
+public interface ISequencer {
 
-    public Launcher(Sequencer master, int id) {
-        super("Launcher " + id);
-        this.master = master;
-        this.id = id;
-        setDaemon(true);
-        setPriority(3);
+    enum State {
+        RUN, SUSPEND, SLEEP
     }
 
-    @Override
-    public void run() {
-        while (runnable) {
-            lastPoppedRequest = master.getFreeRequestId();
-            if (lastPoppedRequest != null) {
-//                    LoggerFactory.getLogger("solver").info("{} starts on {}", this.toString(), lastPoppedRequest);
-                try {
-                    lastPoppedRequest.filter();
-                } catch (ContradictionException e) {
-//                        LoggerFactory.getLogger("solver").info("{} fails : {}", this, e.toString());
-                    master.interrupt();
-                }
-                master.allow(lastPoppedRequest);
-//                    LoggerFactory.getLogger("solver").info("{} ends on {}", this.toString(), lastPoppedRequest);
-            }
-        }
-    }
+    /**
+     * Propagate events
+     */
+    void fixpoint();
 
-    @Override
-    public String toString() {
-        return "T" + id;
-    }
+    /**
+     * Activate (<code>value</code>=<code>true</code>) or desactivate (<code>value</code>=<code>false</code>) a particular
+     * request indiced by <code>index</code>.
+     *
+     * @param index index of the request
+     * @param value activate or not
+     */
+    void set(int index, boolean value);
 
-    public void kill() {
-        runnable = false;
-    }
+    /**
+     * Returns <code>true</code> if at least one propagation has leaded to a fail during this proapgation loop
+     *
+     * @return a boolean
+     */
+    boolean hasFailed();
+
+    /**
+     * Flushes every events in the internal data structure (ie, deque requests)
+     */
+    void flushAll();
 }
