@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,40 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+import solver.variables.IntVar;
 
-    int NB_TYPE = 8;
-    
-    int getType();
+/*
+* Created by IntelliJ IDEA.
+* User: hcambaza
+* Date: Jul 31, 2008
+* Since : Choco 2.0.0
+*
+*/
+public final class FastBooleanValidityChecker extends ValidityChecker {
 
-    int getTimeStamp();
+	public FastBooleanValidityChecker(int arity, IntVar[] vars) {
+		super(arity, vars);
+	}
+
+	// Is tuple valide ?
+	public final boolean isValid(final int[] tuple) {
+        nbCheck++;
+        for (int i = 0; i < arity; i++) {
+			if (sortedvs[i].instantiated()) {
+				if (sortedvs[i].getValue() != tuple[position[i]])
+					return false;
+			} else break;
+			// variable are sorted by domain size so only non instantiated variables remain
+			// and non instantiated variables do not need to be checked in boolean !
+		}
+		return true;
+	}
+
+    public boolean isValid(int[] tuple, int i) {
+        nbCheck++;
+		return sortedvs[i].contains(tuple[position[i]]);
+	}
+
 }

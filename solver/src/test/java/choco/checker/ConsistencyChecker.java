@@ -53,7 +53,7 @@ public class ConsistencyChecker {
         ac, bc
     }
 
-    public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, long seed, String consistency) {
+    public static void checkConsistency(Modeler modeler, int nbVar, int lowerB, int upperB, Object parameters, long seed, String consistency) {
         Random r = new Random(seed);
 
         Consistency _consistency = Consistency.valueOf(consistency);
@@ -67,7 +67,7 @@ public class ConsistencyChecker {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
                     int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
-                    Solver ref = referencePropagation(modeler, nbVar, domains, map);
+                    Solver ref = referencePropagation(modeler, nbVar, domains, map, parameters);
                     if (ref == null) break; // no solution found for this generated problem
 
                     // otherwise, link original domains with refernce one.
@@ -88,7 +88,7 @@ public class ConsistencyChecker {
                             _domains[d] = new int[]{val};
                             System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
-                            Solver test = modeler.model(nbVar, _domains, map);
+                            Solver test = modeler.model(nbVar, _domains, map, parameters);
                             try {
                                 if (!test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
@@ -117,8 +117,8 @@ public class ConsistencyChecker {
         }
     }
 
-    private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map) {
-        Solver ref = modeler.model(nbVar, domains, map);
+    private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+        Solver ref = modeler.model(nbVar, domains, map, parameters);
         ref.getSearchLoop().propEngine.init();
         try {
             ref.getSearchLoop().propEngine.initialPropagation();

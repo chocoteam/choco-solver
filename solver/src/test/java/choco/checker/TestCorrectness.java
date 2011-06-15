@@ -62,7 +62,7 @@ public class TestCorrectness {
     public void testTIMES() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelTimes, 3, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -70,7 +70,7 @@ public class TestCorrectness {
     public void testABSOLUTE() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -78,7 +78,7 @@ public class TestCorrectness {
     public void testALLDIFFERENTBC() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffBC, n, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffBC, n, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -86,7 +86,7 @@ public class TestCorrectness {
     public void testEQ() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelEqAC, 2, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelEqAC, 2, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -94,7 +94,7 @@ public class TestCorrectness {
     public void testNEQ() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelNeqAC, 2, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelNeqAC, 2, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -102,7 +102,7 @@ public class TestCorrectness {
     public void testALLDIFFERENTAC() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 7) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffAC, n, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelAllDiffAC, n, -n / 2, 2 * n, seed, null);
         }
     }
 
@@ -113,7 +113,55 @@ public class TestCorrectness {
     public void testINVERSECHANNELING() {
         long seed = System.currentTimeMillis();
         for (int n = 2; n < (1 << 8) + 1; n *= 2) {
-            CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed);
+            CorrectnessChecker.checkCorrectness(Modeler.modelInverseChannelingAC, n, -n / 2, 2 * n, seed, null);
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTBCEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTACEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTBCLEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTACLEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTBCGEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testCOUNTACGEQ() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
         }
     }
 }

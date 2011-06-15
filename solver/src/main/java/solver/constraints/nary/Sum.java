@@ -48,6 +48,8 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
+import java.util.Arrays;
+
 /**
  * <br/>
  *
@@ -173,6 +175,12 @@ public class Sum extends IntConstraint {
         return build(vars, coeffs, Type.EQ, c, solver);
     }
 
+    public static Sum eq(IntVar[] vars, int c, Solver solver) {
+        int[] coeffs = new int[vars.length];
+        Arrays.fill(coeffs, 1);
+        return build(vars, coeffs, Type.EQ, c, solver);
+    }
+
     public static Sum eq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
         IntVar[] x = new IntVar[vars.length + 1];
         System.arraycopy(vars, 0, x, 0, vars.length);
@@ -180,6 +188,16 @@ public class Sum extends IntConstraint {
         int[] cs = new int[coeffs.length + 1];
         System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
         cs[cs.length - 1] = -c;
+        return build(x, cs, Type.EQ, 0, solver);
+    }
+
+    public static Sum eq(IntVar[] vars, IntVar b, Solver solver) {
+        int[] cs = new int[vars.length + 1];
+        Arrays.fill(cs, 1);
+        cs[vars.length] = -1;
+        IntVar[] x = new IntVar[vars.length + 1];
+        System.arraycopy(vars, 0, x, 0, vars.length);
+        x[vars.length] = b;
         return build(x, cs, Type.EQ, 0, solver);
     }
 

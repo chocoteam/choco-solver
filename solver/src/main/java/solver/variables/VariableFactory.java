@@ -128,6 +128,16 @@ public class VariableFactory {
         return vars;
     }
 
+    public static IntVar[][] enumeratedArray(String name, int size1, int size2, int min, int max, Solver solver) {
+        IntVar[][] vars = new IntVar[size1][size2];
+        for (int i = 0; i < size1; i++) {
+            for (int j = 0; j < size2; j++) {
+                vars[i][j] = enumerated(name + "_" + i + "_" + j, min, max, solver);
+            }
+        }
+        return vars;
+    }
+
     public static IntVar enumerated(String name, int[] values, Solver solver) {
         checkIntVar(name, values[0], values[values.length - 1]);
         if (values.length == 1) {

@@ -30,6 +30,8 @@ package solver.variables.domain;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import org.slf4j.LoggerFactory;
+import solver.variables.domain.delta.Delta;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
 
@@ -92,8 +94,8 @@ public final class IntervalIntDomain implements IIntDomain {
         for (; i < aValue; i++) {
             delta.add(i);
         }
-        i = aValue;
-        for (; i < ub; i++) {
+        i = aValue+1;
+        for (; i <= ub; i++) {
             delta.add(i);
         }
         this.lowerbound.set(aValue);
@@ -236,6 +238,8 @@ public final class IntervalIntDomain implements IIntDomain {
     @Override
     public void recordRemoveValues() {
         //nothing to do, interval domain does not react on value removals
+        LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
+        delta = new Delta();
     }
 
     /**

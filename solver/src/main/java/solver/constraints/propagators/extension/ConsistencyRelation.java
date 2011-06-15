@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+public abstract class ConsistencyRelation {
 
-    int NB_TYPE = 8;
-    
-    int getType();
+    protected boolean feasible;
 
-    int getTimeStamp();
+    /**
+     * currentElement if the relation is defined with feasible tuples or
+     * infeasible one.
+     */
+    public boolean isDefinedByFeasability() {
+        return feasible;
+    }
+
+    /**
+     * inverse the feasability of the relation
+     */
+    public void switchToOppositeRelation() {
+        feasible = !feasible;
+    }
+
+    /**
+     * return the opposite relation of itself
+     */
+    public abstract ConsistencyRelation getOpposite();
+
 }

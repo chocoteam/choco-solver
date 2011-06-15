@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,40 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension.nary;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+/**
+ * A large relation that provides the seekNextSupport function from
+ * a given support of given pair var/val and indexes the tuples
+ * by integers to store (eventually) the support as StoredInt
+ */
+public interface IterLargeRelation {
 
-    int NB_TYPE = 8;
-    
-    int getType();
+	/**
+	 * seek from the next support available from the index of the
+	 * old support and the pair variable/value given in argument
+	 * @param oldIdxSupport
+	 * @param var
+	 * @param val
+	 * @return
+	 */
+	public int seekNextTuple(int oldIdxSupport, int var, int val);
 
-    int getTimeStamp();
+
+	/**
+	 * return the tuple corresponding to the given index
+	 *
+	 * @param support
+	 * @return
+	 */
+	public int[] getTuple(int support);
+
+
+	/**
+	 * returns the number of supports for the pair (var,val)
+	 * @param var
+	 * @param val
+	 * @return
+	 */
+	public int getNbSupport(int var, int val);
 }

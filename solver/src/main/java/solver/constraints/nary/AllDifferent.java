@@ -89,17 +89,17 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			setPropagators(props);
 			break;
 		case PROBABILISTIC:
-			setPropagators(new PropProbaAllDifferent(vars, solver, this));
+			setPropagators(new PropProbaAllDifferent(this.vars, solver, this));
 			break;
 		case GRAPH:
-			buildGraphAllDifferent(vars, solver);
+			buildGraphAllDifferent(this.vars, solver);
 			break;
 		case AC:
-			setPropagators(new PropAllDiffAC(vars, this, solver));
+			setPropagators(new PropAllDiffAC(this.vars, this, solver));
 			break;
 		case BC:
 		default:
-			setPropagators(new PropAllDiffBC(vars, solver, this));
+			setPropagators(new PropAllDiffBC(this.vars, solver, this));
 			break;
 		}
 	}

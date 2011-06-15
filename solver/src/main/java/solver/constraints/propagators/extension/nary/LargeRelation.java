@@ -25,21 +25,25 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension.nary;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+public interface LargeRelation {
 
-    int NB_TYPE = 8;
-    
-    int getType();
+  /**
+   * return true if tuple is feasible according
+   * to the definition of the relation. e.g if the relation is defined
+   * with infeasible tuples, it returns true if tuple is one of them.
+   *
+   * @return
+   */
+  public boolean checkTuple(int[] tuple);
 
-    int getTimeStamp();
+  /**
+   * Test whether a tuple is consistent
+   *
+   * @return true if tuple is consistent.
+   */
+  public boolean isConsistent(int[] tuple);
+
+
 }

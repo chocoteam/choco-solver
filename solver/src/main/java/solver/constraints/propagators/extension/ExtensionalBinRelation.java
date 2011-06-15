@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,21 +25,25 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+import solver.constraints.propagators.extension.binary.BinRelation;
 
-    int NB_TYPE = 8;
-    
-    int getType();
+/*
+* Created by IntelliJ IDEA.
+* User: hcambaza
+* Date: Jul 29, 2008
+* Since : Choco 2.0.0
+*
+*/
+public interface ExtensionalBinRelation extends BinRelation {
 
-    int getTimeStamp();
+	/**
+	 * Set the couple (x,y) as consistent
+	 *
+	 * @param x
+	 * @param y
+	 */
+	public void setCouple(int x, int y);
+	
 }

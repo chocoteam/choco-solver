@@ -363,6 +363,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.measures.declareObjective();
     }
 
+    public ISolutionPool getSolutionpool() {
+        return solutionpool;
+    }
+
     public void setSolutionpool(ISolutionPool solutionpool) {
         this.solutionpool = solutionpool;
     }

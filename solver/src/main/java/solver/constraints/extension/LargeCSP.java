@@ -24,22 +24,47 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.extension;
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.IntConstraint;
+import solver.constraints.propagators.extension.nary.IterTuplesTable;
+import solver.constraints.propagators.extension.nary.LargeRelation;
+import solver.constraints.propagators.extension.nary.PropLargeCSP;
+import solver.constraints.propagators.extension.nary.PropLargeGAC3rmPositive;
+import solver.variables.IntVar;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 08/06/11
+ */
+public class LargeCSP extends IntConstraint<IntVar> {
 
-    int NB_TYPE = 8;
-    
-    int getType();
+    public static enum Type {
+        AC32, FC
+    }
 
-    int getTimeStamp();
+    protected final LargeRelation relation;
+
+    public LargeCSP(IntVar[] vars, LargeRelation relation, Type type, Solver solver) {
+        super(vars, solver, _DEFAULT_THRESHOLD);
+        this.relation = relation;
+        switch (type) {
+            case FC:
+                setPropagators(new PropLargeCSP(vars, relation, solver, this));
+                break;
+            default:
+            case AC32:
+                setPropagators(new PropLargeGAC3rmPositive(vars, (IterTuplesTable) relation, solver, this));
+                break;
+        }
+    }
+
+    @Override
+    public ESat isSatisfied(int[] tuple) {
+        return ESat.eval(relation.isConsistent(tuple));
+    }
 }

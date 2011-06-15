@@ -25,21 +25,28 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.memory.copy;
-public interface RecomputableElement {
+package solver.constraints.propagators.extension.binary;
 
-    int BOOL = 0;
-    int INT = 1;
-    int VECTOR = 2;
-    int INTVECTOR = 3;
-    int DOUBLEVECTOR = 4;
-    int LONG = 5;
-    int DOUBLE = 6;
-    int OBJECT = 7;
+public interface BinRelation {
 
-    int NB_TYPE = 8;
-    
-    int getType();
+	/**
+	 * return true if couple (x,y) is feasible according
+	 * to the definition of the relation. e.g if the relation is defined
+	 * with infeasible tuples, it returns true if (x,y) is one of them.
+	 *
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public boolean checkCouple(int x, int y);
 
-    int getTimeStamp();
+	/**
+	 * Test whether the couple (x,y) is consistent
+	 *
+	 * @param x
+	 * @param y
+	 * @return true if (x,y) is a consistent couple
+	 */
+	public boolean isConsistent(int x, int y);
+
 }
