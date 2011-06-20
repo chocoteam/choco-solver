@@ -24,41 +24,56 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.nary;
 
-package solver.exception;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.exception.ContradictionException;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
-import org.slf4j.LoggerFactory;
+import static org.testng.Assert.assertEquals;
 
 /**
- *
- * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
- * problem resolution.
  * <br/>
- * A method is not required to declare in its <code>throws</code>
- * clause a <code>SolverException</code> that might
- * be thrown during the execution of the method but not caught. 
- * <p>
  *
- * @author Arnaud Malapert
  * @author Charles Prud'homme
- * @since 20 juil. 2010
+ * @since 15/06/11
  */
-public class SolverException extends RuntimeException{
-
-    private static final long serialVersionUID = 1L;
+public class GlobalCardinalityTest {
 
 
-	/**
-     * Constructs a new solver exception with the specified detailed message.
-	 * @param message message to print
-	 */
-	public SolverException(String message) {
-//		super(message);
-        LoggerFactory.getLogger("solver").error(message);
+    @Test
+    public void testGCC() {
+        Solver solver = new Solver();
+
+        IntVar peter = VariableFactory.enumerated("Peter", 0, 1, solver);
+        IntVar paul = VariableFactory.enumerated("Paul", 0, 1, solver);
+        IntVar mary = VariableFactory.enumerated("Mary", 0, 1, solver);
+        IntVar john = VariableFactory.enumerated("John", 0, 1, solver);
+        IntVar bob = VariableFactory.enumerated("Bob", 0, 2, solver);
+        IntVar mike = VariableFactory.enumerated("Mike", 1, 4, solver);
+        IntVar julia = VariableFactory.enumerated("Julia", 2, 4, solver);
+
+        IntVar[] vars = new IntVar[]{peter, paul, mary, john, bob, mike, julia};
+
+        Constraint gcc = new GlobalCardinality(vars,
+                new int[]{1, 1, 1, 0, 0}, new int[]{2, 2, 1, 2, 2}, 0,
+                GlobalCardinality.Consistency.AC, solver);
+
+        solver.post(gcc);
+        try {
+            solver.propagate();
+            assertEquals(bob.getLB(), 2);
+            assertEquals(bob.getUB(), 2);
+            julia.removeValue(3, null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
     }
 
-    @Override
-    public Throwable fillInStackTrace() {
-        return this;
-    }
+
 }

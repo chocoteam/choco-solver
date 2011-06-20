@@ -24,41 +24,41 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.unary;
 
-package solver.exception;
-
-import org.slf4j.LoggerFactory;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.IntConstraint;
+import solver.constraints.propagators.unary.PropEqualXC;
+import solver.variables.IntVar;
 
 /**
- *
- * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
- * problem resolution.
+ * Unary constraint ensuring:
  * <br/>
- * A method is not required to declare in its <code>throws</code>
- * clause a <code>SolverException</code> that might
- * be thrown during the execution of the method but not caught. 
- * <p>
+ * X = C, where X is a variable and C is a constant
+ * <p/>
+ * <br/>
  *
- * @author Arnaud Malapert
  * @author Charles Prud'homme
- * @since 20 juil. 2010
+ * @since 16/06/11
  */
-public class SolverException extends RuntimeException{
+public class EqualXC extends IntConstraint<IntVar> {
 
-    private static final long serialVersionUID = 1L;
+    private final int constant;
 
-
-	/**
-     * Constructs a new solver exception with the specified detailed message.
-	 * @param message message to print
-	 */
-	public SolverException(String message) {
-//		super(message);
-        LoggerFactory.getLogger("solver").error(message);
+    public EqualXC(IntVar var, int cste, Solver solver) {
+        super(new IntVar[]{var}, solver, _DEFAULT_THRESHOLD);
+        this.constant = cste;
+        setPropagators(new PropEqualXC(var, constant, solver, this));
     }
 
     @Override
-    public Throwable fillInStackTrace() {
-        return this;
+    public ESat isSatisfied(int[] tuple) {
+        return ESat.eval(tuple[0] == constant);
+    }
+
+    @Override
+    public String toString() {
+        return vars[0].getName() + " = " + constant;
     }
 }

@@ -24,41 +24,61 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.propagators.unary;
 
-package solver.exception;
-
-import org.slf4j.LoggerFactory;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.requests.IRequest;
+import solver.variables.EventType;
+import solver.variables.IntVar;
 
 /**
- *
- * A specific <code>RuntimeException</code> that can be thrown during the normal execution of the
- * problem resolution.
  * <br/>
- * A method is not required to declare in its <code>throws</code>
- * clause a <code>SolverException</code> that might
- * be thrown during the execution of the method but not caught. 
- * <p>
  *
- * @author Arnaud Malapert
  * @author Charles Prud'homme
- * @since 20 juil. 2010
+ * @since 16/06/11
  */
-public class SolverException extends RuntimeException{
+public class PropEqualXC extends Propagator<IntVar> {
 
-    private static final long serialVersionUID = 1L;
+    private final int constant;
 
-
-	/**
-     * Constructs a new solver exception with the specified detailed message.
-	 * @param message message to print
-	 */
-	public SolverException(String message) {
-//		super(message);
-        LoggerFactory.getLogger("solver").error(message);
+    public PropEqualXC(IntVar var, int cste, Solver solver,
+                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        this.constant = cste;
     }
 
     @Override
-    public Throwable fillInStackTrace() {
-        return this;
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask;
+    }
+
+    @Override
+    public void propagate() throws ContradictionException {
+        vars[0].instantiateTo(constant, this);
+    }
+
+    @Override
+    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
+        propagate();
+    }
+
+    @Override
+    public ESat isEntailed() {
+        if (vars[0].instantiatedTo(constant)) {
+            return ESat.TRUE;
+        } else if (vars[0].contains(constant)) {
+            return ESat.UNDEFINED;
+        }
+        return ESat.FALSE;
+    }
+
+    @Override
+    public String toString() {
+        return vars[0].getName() + " = " + constant;
     }
 }

@@ -75,7 +75,20 @@ public final class ArrayUtils {
                 && column >= 0 && array[0].length > column) {
             T[] res = (T[]) java.lang.reflect.Array.newInstance(array[0][column].getClass(), array.length);
             for (int i = 0; i < array.length; i++) {
-                res[i] = array[i][column];
+                res[i] = (T)array[i][column];
+            }
+            return res;
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T[] getColumn(final T[][] array, final int column, Class clazz) {
+        if (array != null && array.length > 0
+                && column >= 0 && array[0].length > column) {
+            T[] res = (T[]) java.lang.reflect.Array.newInstance(clazz, array.length);
+            for (int i = 0; i < array.length; i++) {
+                res[i] = (T)array[i][column];
             }
             return res;
         }

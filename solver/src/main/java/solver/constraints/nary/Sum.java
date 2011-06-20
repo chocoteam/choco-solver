@@ -201,6 +201,18 @@ public class Sum extends IntConstraint {
         return build(x, cs, Type.EQ, 0, solver);
     }
 
+    public static Sum leq(IntVar[] vars, int c, Solver solver) {
+        int[] coeffs = new int[vars.length];
+        Arrays.fill(coeffs, 1);
+        return build(vars, coeffs, Type.LEQ, c, solver);
+    }
+
+    public static Sum geq(IntVar[] vars, int c, Solver solver) {
+        int[] coeffs = new int[vars.length];
+        Arrays.fill(coeffs, 1);
+        return build(vars, coeffs, Type.GEQ, c, solver);
+    }
+
     @Override
     public ESat isSatisfied(int[] tuple) {
         int sum = 0;

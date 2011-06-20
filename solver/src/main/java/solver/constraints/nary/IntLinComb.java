@@ -109,7 +109,7 @@ public class IntLinComb extends IntConstraint<IntVar> {
     }
 
     public String toString() {
-        StringBuilder linComb = new StringBuilder(20);
+        StringBuilder linComb = new StringBuilder("ILC ");
         linComb.append(coefficients[0]).append('*').append(vars[0].getName());
         for (int i = 1; i < coefficients.length; i++) {
             linComb.append(coefficients[i]>=0?" +":" ").append(coefficients[i]).append('*').append(vars[i].getName());
