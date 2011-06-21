@@ -160,7 +160,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint lt(IntVar x, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 1, solver);
+        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -1, solver);
     }
 
     /**
