@@ -59,7 +59,7 @@ public class Sequencer extends AbstractSequencer {
 //        synchronized (this) {
         IRequest request = null;
         switch (currentState) {
-            case RUN:
+            case RUNNING:
                 int idx = -1;
                 do {
                     idx = toPropagate.nextSetBit(idx + 1);
@@ -80,16 +80,16 @@ public class Sequencer extends AbstractSequencer {
 //                    LoggerFactory.getLogger("solver").info(">{}", forbidden);
                     request.deque();
                 } else if (toPropagate.cardinality() == 0 && nbWorkers == 0) {
-                    currentState = ISequencer.State.SLEEP;
+                    currentState = ISequencer.State.SLEEPING;
                 }
-            case SUSPEND:
+            case SUSPENDING:
 //                LoggerFactory.getLogger("solver").info("~{}", forbidden);
                 if (nbWorkers == 0) {
                     assert forbidden.cardinality() == 0;
-                    currentState = ISequencer.State.SLEEP;
+                    currentState = ISequencer.State.SLEEPING;
                 }
                 break;
-            case SLEEP:
+            case SLEEPING:
             default:
                 synchronized (master) {
                     master.notify();
@@ -138,7 +138,7 @@ public class Sequencer extends AbstractSequencer {
                     try {
                         lastPoppedRequest.filter();
                     } catch (ContradictionException e) {
-                        master.exception();
+                        master.exception(e);
                     }
                     master.allow(lastPoppedRequest);
                 }

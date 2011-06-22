@@ -27,6 +27,7 @@
 
 package solver.propagation.engines.concurrent;
 
+import solver.exception.ContradictionException;
 import solver.propagation.engines.ThreadedPropagationEngine;
 
 import java.util.BitSet;
@@ -51,14 +52,15 @@ public abstract class AbstractSequencer extends Thread implements ISequencer {
         this.toPropagate = new BitSet(nbRequests);
         this.forbidden = new BitSet(nbVars);
         this.nbThreads = nbThreads;
-        currentState = ISequencer.State.SLEEP;
+        currentState = ISequencer.State.SLEEPING;
     }
 
     public void fixpoint() {
         synchronized (this) {
             assert forbidden.cardinality() == 0;
             fail = false;
-            currentState = ISequencer.State.RUN;
+            currentState = ISequencer.State.RUNNING;
+            this.notify();
         }
     }
 
@@ -81,15 +83,16 @@ public abstract class AbstractSequencer extends Thread implements ISequencer {
         return fail;
     }
 
-    protected final void exception() {
+    protected final void exception(ContradictionException e) {
         synchronized (this) {
             fail = true;
-            currentState = ISequencer.State.SUSPEND;
+//            LoggerFactory.getLogger("solver").error("FAIL RU->SU");
+            currentState = ISequencer.State.SUSPENDING;
         }
     }
 
     public final void flushAll() {
-        assert currentState == ISequencer.State.SLEEP : "wrong state: " + currentState;
+        assert currentState == ISequencer.State.SLEEPING : "wrong state: " + currentState;
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i + 1)) {
             master.requests[i].deque();
             toPropagate.clear(i);

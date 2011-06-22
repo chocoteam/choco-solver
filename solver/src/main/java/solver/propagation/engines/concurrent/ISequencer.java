@@ -34,7 +34,7 @@ package solver.propagation.engines.concurrent;
 public interface ISequencer {
 
     enum State {
-        RUN, SUSPEND, SLEEP
+        RUNNING, SUSPENDING, SLEEPING
     }
 
     /**

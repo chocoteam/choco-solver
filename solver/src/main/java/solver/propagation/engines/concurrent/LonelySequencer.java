@@ -63,7 +63,7 @@ public class LonelySequencer extends AbstractSequencer {
         while (runnable) {
             IRequest request = null;
             switch (currentState) {
-                case RUN:
+                case RUNNING:
                     synchronized (LonelySequencer.this) {
 //                        System.out.println(Thread.currentThread() + ":" + Thread.holdsLock(this));
                         int idx = -1;
@@ -91,17 +91,17 @@ public class LonelySequencer extends AbstractSequencer {
                                 launchers[tidx].execute(request);
                             }
                         } else if (toPropagate.cardinality() == 0 && waiting.cardinality() == nbThreads) {
-                            currentState = ISequencer.State.SLEEP;
+                            currentState = ISequencer.State.SLEEPING;
                         }
                     }
                     break;
-                case SUSPEND:
+                case SUSPENDING:
                     if (waiting.cardinality() == nbThreads) {
                         assert forbidden.cardinality() == 0;
-                        currentState = ISequencer.State.SLEEP;
+                        currentState = ISequencer.State.SLEEPING;
                     }
                     break;
-                case SLEEP:
+                case SLEEPING:
                 default:
                     synchronized (master) {
                         master.notify();
@@ -160,7 +160,7 @@ public class LonelySequencer extends AbstractSequencer {
                     try {
                         request.filter();
                     } catch (ContradictionException e) {
-                        master.exception();
+                        master.exception(e);
                     }
                     master.allow(request);
                     LoggerFactory.getLogger("solver").info("{} ends {}", this.toString(), request.toString());
