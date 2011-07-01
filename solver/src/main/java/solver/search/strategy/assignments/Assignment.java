@@ -142,10 +142,8 @@ public abstract class Assignment<V extends Variable> {
             if (value>=n){
             	int from = value/n-1;
             	int to   = value%n;
-//            	System.out.println("rem "+value + " : "+from +" : "+to);
             	var.removeArc(from, to, cause);
             }else{
-//            	System.out.println("rem "+value);
             	var.removeNode(value, cause);
             }
         }
