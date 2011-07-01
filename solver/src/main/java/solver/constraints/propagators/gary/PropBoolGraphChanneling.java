@@ -61,6 +61,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	protected EnfEdge enf;
 	protected RemEdge rem;
 	protected int n;
+	public static long duration = 0;
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -88,6 +89,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 
 	@Override
 	public void propagate() throws ContradictionException {
+		long tps = System.currentTimeMillis();
 		for(int i=0; i<n; i++){
 			for(int j = 0; j<n; j++){
 				if(relations[i][j].instantiated()){
@@ -106,20 +108,24 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 							relations[i][j].setToTrue(this);
 						}
 					}else{
-						if(!graph.getEnvelopGraph().edgeExists(i, j)){
-							relations[i][j].setToFalse(this);
-						}
-						if(graph.getKernelGraph().edgeExists(i, j)){
-							relations[i][j].setToTrue(this);
+						if(i>=j){
+							if(!graph.getEnvelopGraph().edgeExists(i, j)){
+								relations[i][j].setToFalse(this);
+							}
+							if(graph.getKernelGraph().edgeExists(i, j)){
+								relations[i][j].setToTrue(this);
+							}
 						}
 					}
 				}
 			}
 		}
+		duration+=System.currentTimeMillis()-tps;
 	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		long tps = System.currentTimeMillis();
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
 			if((mask & EventType.ENFORCEARC.mask) !=0){
@@ -136,6 +142,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			int j = idxVarInProp%n;
 			boolChanged.execute(i,j, relations[i][j].getBooleanValue()==ESat.TRUE);
 		}
+		duration+=System.currentTimeMillis()-tps;
 	}
 
 	//***********************************************************************************
@@ -153,6 +160,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	 */
 	@Override
 	public ESat isEntailed() {
+		long tps = System.currentTimeMillis();
 		for(int i=0; i<n; i++){
 			for(int j = 0; j<n; j++){
 				if(relations[i][j].instantiated()){
@@ -199,6 +207,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 				}
 			}
 		}
+		duration+=System.currentTimeMillis()-tps;
 		return ESat.TRUE;
 	}
 
@@ -255,7 +264,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			relations[i][j].setToTrue(p);
 		}
 	}
-	
+
 	/** When an edge (x,y), is removed then the relation between x and y is false */
 	private class RemEdge implements IntProcedure{
 		protected Propagator p;

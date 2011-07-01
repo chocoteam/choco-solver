@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import gnu.trove.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.NTree;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
@@ -49,7 +48,6 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
@@ -128,7 +126,6 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	private void filtering() throws ContradictionException{
-		NTree.filteringCounter++;
 		computeSinks();
 		//1) Bound pruning
 		minTreePruning(); // MAXTREE pruning is done by PropNLoops
@@ -138,7 +135,6 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-		NTree.filteringCounter++;
 		if(!checkFeasibility()){
 			this.contradiction(g, "infeasible");
 		}else{

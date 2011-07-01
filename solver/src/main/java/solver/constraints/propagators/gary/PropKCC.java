@@ -50,9 +50,12 @@ import java.util.LinkedList;
 
 /**Propagator that ensures that the final graph consists in K Connected Components (CC)
  * 
- * Arc consistant with EACH_NODE_HAS_A_LOOP propagator
+ * Arc consistant when combined with EACH_NODE_HAS_A_LOOP propagator
  * 
- * TODO : couplage generalise, incremental?
+ * TODO :	- pas tous les noeuds (OSEF)
+ * 			- tous les noeuds n'ont pas une boucle (OSEF)
+ * 			- couplage generalise (OSEF)
+ * 			- cc incrementales? (a faire)
  * 
  * @author Jean-Guillaume Fages
  */
@@ -62,6 +65,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	// VARIABLES
 	//***********************************************************************************
 
+	public static long duration;
 	private GraphVar g;
 	private IntVar k;
 
@@ -70,10 +74,11 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKCC(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR, false);//
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.VERY_SLOW, false);//
 		g = graph;
 		this.k = k;
 		initDataStructure();
+		duration = 0;
 	}
 
 	//***********************************************************************************
@@ -114,10 +119,9 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		}
 		int max = ccKer.size();
 		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
-			throw new UnsupportedOperationException("case not implemented yet ");
+//			throw new UnsupportedOperationException("case not implemented yet ");
 		}
 		// TODO couplage generalise
-		
 		// PRUNING
 		// --- Bounds
 		k.updateLowerBound(min, this);
@@ -174,6 +178,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		long time = System.currentTimeMillis();
 		int n = g.getEnvelopGraph().getNbNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
@@ -209,7 +214,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 			throw new UnsupportedOperationException("case not implemented yet ");
 		}
 		// TODO couplage generalise
-		
+
 		// PRUNING
 		// --- Bounds
 		k.updateLowerBound(min, this);
@@ -261,6 +266,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 		}
+		duration += (System.currentTimeMillis()-time);
 	}
 
 	//***********************************************************************************
@@ -274,6 +280,33 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public ESat isEntailed() {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		ConnectivityObject envCcObj = findAll();
+		boolean tV;
+		int min = 0;
+		for(TIntArrayList cc:envCcObj.getConnectedComponents()){
+			tV = false;
+			for(int i=0; i<cc.size(); i++){
+				if(ker.isActive(cc.get(i))){
+					tV = true;
+					break;
+				}
+			}
+			if(tV){
+				min++;
+			}
+		}
+		LinkedList<TIntArrayList> ccKer = ConnectivityFinder.findCCOf(g.getKernelGraph());
+		int max = ccKer.size();
+		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
+			throw new UnsupportedOperationException("case not implemented yet ");
+		}
+		if(min>k.getUB() || max < k.getLB()){
+			return ESat.UNDEFINED;
+		}
+		if(min == max && k.instantiated()){
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 	

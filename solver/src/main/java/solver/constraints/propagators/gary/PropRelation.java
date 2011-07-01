@@ -29,49 +29,52 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import gnu.trove.TIntArrayList;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
+import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.GraphVar;
 
-import java.util.LinkedList;
-
-/**Propagator that ensures that the relation modeled by edges (undirected graph) is transitive
- * 
- * TODO Incrementalite
+/**Propagator channeling a graph and an array of integer variables
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropTransitivityUndirected<V extends UndirectedGraphVar> extends GraphPropagator<V>{
+public class PropRelation<V extends Variable, G extends GraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private V g;
+	private G g;
 	private int n;
-//	private IntProcedure arcEnforced;
+	public static long duration;
+	private Variable[] intVars;
+	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
+	private Solver solver;
+	private GraphRelation relation;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropTransitivityUndirected(V graph, Solver solver, GraphConstraint constraint) {
-		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
-		g = graph;
-		n = graph.getEnvelopGraph().getNbNodes();
-//		arcEnforced = new EnfArc(this);
-		arcRemoved  = new RemArc(this);
+	public PropRelation(Variable[] vars, G graph,Solver solver, GraphConstraint cons,GraphRelation relation) {
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, cons, relation.getPriority(), true);
+		this.g = graph;
+		this.intVars = vars;
+		this.n = intVars.length;
+		this.relation = relation;
+		this.solver = solver;
+		this.arcEnforced = new EdgeEnf();
+		this.arcRemoved = new EdgeRem();
+		duration = 0;
 	}
 
 	//***********************************************************************************
@@ -80,32 +83,44 @@ public class PropTransitivityUndirected<V extends UndirectedGraphVar> extends Gr
 
 	@Override
 	public void propagate() throws ContradictionException {
-		
-	}
-
-	
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		LinkedList<TIntArrayList> kerCC = ConnectivityFinder.findCCOf(g.getKernelGraph());
-		for(TIntArrayList cc:kerCC){
-			for(int i = 0; i<cc.size(); i++){
-				for(int j = 0; j<cc.size(); j++){
-					g.enforceArc(cc.get(i), cc.get(j), this);
+		long time = System.currentTimeMillis();
+		for(int i=0; i<n; i++){
+			for(int j=0; j<n; j++){
+				if(g.getKernelGraph().arcExists(i, j)){
+					apply(i, j);
+				}else{
+					if(g.getEnvelopGraph().arcExists(i, j)){
+						switch(relation.isEntail(i,j)){
+						case TRUE: g.enforceArc(i, j, null);break;
+						case FALSE: g.removeArc(i, j, null);break;
+						}
+					}else{
+						unapply(i, j);
+					}
 				}
 			}
 		}
-		
-		if( request instanceof GraphRequest){
+		duration += System.currentTimeMillis()-time;
+	}
+
+	@Override
+	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		long time = System.currentTimeMillis();
+		if (request instanceof GraphRequest) {
 			GraphRequest gr = (GraphRequest) request;
-//			if((mask & EventType.ENFORCEARC.mask) !=0){
-//				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-//				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
-//			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
+			if((mask & EventType.ENFORCEARC.mask) !=0){
+				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+			}
+			if((mask & EventType.REMOVEARC.mask) !=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 			}
 		}
+		else{
+			checkVar(idxVarInProp);
+		}
+		duration += System.currentTimeMillis()-time;
 	}
 
 	//***********************************************************************************
@@ -114,64 +129,60 @@ public class PropTransitivityUndirected<V extends UndirectedGraphVar> extends Gr
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask +  EventType.ENFORCEARC.mask;
+		return EventType.ALL_MASK() + EventType.ENFORCEARC.mask + EventType.REMOVEARC.mask + EventType.META.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
 	}
-	
+
 	//***********************************************************************************
-	// PROCEDURE
+	// PROCEDURES
 	//***********************************************************************************
 
-//	private class EnfArc implements IntProcedure{
-//		private GraphPropagator p;
-//		
-//		private EnfArc(GraphPropagator p){
-//			this.p = p;
-//		}
-//		@Override
-//		public void execute(int i) throws ContradictionException {
-//			int from = i/n-1;
-//			int to   = i%n;
-//			if(from != to){
-//				apply(from,to);
-//				apply(to,from);
-//			}
-//		}
-//
-//		private void apply(int node, int mate) throws ContradictionException {
-//			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(node);
-//			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-//				g.enforceArc(i, mate, p);
-//			}
-//		}
-//	}
-//	
-	private class RemArc implements IntProcedure{
-		private GraphPropagator p;
-		
-		private RemArc(GraphPropagator p){
-			this.p = p;
+	private void apply(int x, int y) throws ContradictionException{
+		relation.applyTrue(x,y, solver, null);
+	}
+
+	private void unapply(int x, int y) throws ContradictionException{
+		relation.applyFalse(x,y, solver, null);
+	}
+
+	private void checkVar(int i) throws ContradictionException {
+		for(int j=0; j<n; j++){
+			if(g.getKernelGraph().arcExists(i, j)){
+				apply(i, j);
+			}else{
+				if(g.getEnvelopGraph().arcExists(i, j)){
+					switch(relation.isEntail(i,j)){
+					case TRUE: g.enforceArc(i, j, null);break;
+					case FALSE: g.removeArc(i, j, null);break;
+					}
+				}else{
+					unapply(i, j);
+				}
+			}
 		}
+	}
+
+	/** When an edge (x,y), is enforced then the relation xRy must be true */
+	private class EdgeEnf implements IntProcedure {
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
 			int to   = i%n;
-			if(from != to){
-				apply(from,to);
-				apply(to,from);
-			}
+			apply(from, to);
 		}
-
-		private void apply(int node, int mate) throws ContradictionException {
-			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(node);
-			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
-				if(g.getKernelGraph().edgeExists(i, mate)){
-					g.removeArc(node, i, p);
-				}
+	}
+	/** When an edge (x,y), is removed then the non relation x!Ry must be true iff both x and y are in the kernel */
+	private class EdgeRem implements IntProcedure {
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = i/n-1;
+			int to   = i%n;
+			if(g.getKernelGraph().getActiveNodes().isActive(from) && g.getKernelGraph().getActiveNodes().isActive(to)){
+				unapply(from, to);
 			}
 		}
 	}
