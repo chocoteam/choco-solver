@@ -24,71 +24,33 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.gary.relations;
 
-package solver.variables.graph.graphStructure.matrix;
+import solver.constraints.gary.GraphProperty;
+import solver.variables.IntVar;
+import solver.variables.MetaVariable;
 
-import solver.variables.graph.INeighbors;
-import java.util.BitSet;
-
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
- */
-public class BitSetNeighbors extends BitSet implements INeighbors {
-
-	private int current;//enables to iterate
-	private int card;	// enable to get the cardinality in O(1)
-    
-	public BitSetNeighbors(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
-
-    @Override
-    public void add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-    	}
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.card;
-//        return this.cardinality();
-    }
-
-	@Override
-	public int getFirstElement() {
-		current = nextSetBit(0);
-		return current;
+public class Eq_IntVector extends MetaRelation {
+	
+	protected Eq_IntVector(MetaVariable[] vars) {
+		super(vars);
+		dim = vars[0].getComponents().length;
+		for(int i=0;i<dim;i++){
+			IntVar[] dimIVars = new IntVar[vars.length];
+			for(int v=0;v<vars.length; v++){
+				dimIVars[v] = (IntVar)vars[v].getComponents()[i];
+			}
+			unidimRelation[i] = new Eq_Int(dimIVars);
+		}
 	}
 
 	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
+	public boolean isDirected() {
+		return false;
+	}
+	
+	@Override
+	public GraphProperty[] getGraphProperties() {
+		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};
 	}
 }

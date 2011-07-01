@@ -38,7 +38,6 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
-import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.NoDelta;
 
 /**
@@ -165,7 +164,7 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public IntDelta getDelta() {
+    public NoDelta getDelta() {
         return NoDelta.singleton;
     }
 

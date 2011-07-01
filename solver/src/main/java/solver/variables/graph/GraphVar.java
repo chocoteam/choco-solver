@@ -33,10 +33,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
-import solver.requests.list.RequestListBuilder;
+import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.domain.delta.GraphDelta;
@@ -47,7 +44,7 @@ import solver.variables.domain.delta.IGraphDelta;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGraphDelta>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable implements Variable<IGraphDelta>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -56,35 +53,16 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
 
     protected E envelop, kernel;
     protected IEnvironment environment;
-    protected int uniqueID;
-
     protected IGraphDelta delta;
-
-    protected final Solver solver;
-    protected final IPropagationEngine engine;
-
     ///////////// Attributes related to Variable ////////////
-    protected String name;
-    protected IRequestList<IRequest> requests;
-    protected int modificationEvents;
     protected boolean reactOnModification;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
     public GraphVar(Solver solver) {
-        this.solver = solver;
+    	super("",solver);
         this.environment = solver.getEnvironment();
-        this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(environment);
-    }
-
-    public int getUniqueID() {
-        return uniqueID;
-    }
-
-    public void setUniqueID(int uniqueID) {
-        this.uniqueID = uniqueID;
     }
 
     //***********************************************************************************
@@ -173,45 +151,15 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
         return envelop;
     }
 
+    /**Used for the tree search
+     * TODO Ugly
+     * @return the next arc to enforce (decision)
+     */
+    public abstract int nextArc();
+
     //***********************************************************************************
     // VARIABLE STUFF
     //***********************************************************************************
-    /////////////////////////////////////////////////////////
-
-
-    //////////////////// Accessors related to Variable ///////////////////
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public int nbConstraints() {
-        return requests.size();
-    }
-    ///////////////////////////////////////////////////////////////////////
-
-
-    ////////////////////// Method related to Variable /////////////////////
-    @Override
-    public void updateEntailment(IRequest request) {
-        requests.setPassive(request);
-    }
-
-    @Override
-    public void addRequest(IRequest request) {
-        requests.addRequest(request);
-    }
-
-    @Override
-    public void deleteRequest(IRequest request) {
-        requests.deleteRequest(request);
-    }
-
-    @Override
-    public IRequestList getRequests() {
-        return requests;
-    }
 
     @Override
     public Explanation explain() {
@@ -233,31 +181,7 @@ public abstract class GraphVar<E extends IStoredGraph> implements Variable<IGrap
     }
 
     @Override
-    public void deletePropagator(Propagator observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
-        if ((modificationEvents & e.mask) != 0) {
-            requests.notifyButCause(cause, e, getDelta());
-        }
-    }
-
-    @Override
-    public int nbRequests() {
-        return requests.cardinality();
-    }
-
-    public abstract int nextArc();
-
-    @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         engine.fails(cause, this, message);
-    }
-
-    @Override
-    public Solver getSolver() {
-        return solver;
     }
 }

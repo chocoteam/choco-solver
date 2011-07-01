@@ -24,26 +24,60 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.gary;
+package solver.variables;
 
+import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.reified.PropReified;
-import solver.variables.BoolVar;
-import solver.variables.IntVar;
-import solver.variables.Variable;
+import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.variables.domain.delta.NoDelta;
 
-public enum GraphRelation {
+public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
 
-	EQUALITY {
-		@Override
-		public Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons) {
-			return new PropReified(new Variable[]{bool,x,y}, new EqualX_YC(x, y, 0, solver), new NotEqualX_YC(x, y, 0, solver), solver, cons, PropagatorPriority.BINARY, true);
-		}
-	};	
-	public abstract Propagator getPropagator(BoolVar bool, IntVar x, IntVar y, Solver solver, Constraint cons);
+	protected V[] components;
+	protected int dim;
+	
+	public MetaVariable(String name, Solver sol, V[] vars){
+		super(name, sol);
+		components = vars;
+		dim = vars.length;
+	}
+
+	@Override
+	public boolean instantiated() {
+		for(int i=0;i<dim;i++){
+			if (!components[i].instantiated()){
+				return false;
+			}
+		}return true;
+	}
+
+
+	@Override
+	public Explanation explain() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public NoDelta getDelta() {
+		return NoDelta.singleton;
+	}
+	
+	public String toString() {
+        String s = this.name +"\n";
+        for(int i=0; i<dim; i++){
+        	s+=components[i].toString();
+        }
+        return s;
+    }
+
+	public V[] getComponents() {
+		return components;
+	}
+
+	@Override
+	public void contradiction(ICause cause, String message) throws ContradictionException {
+		engine.fails(cause, this, message);
+	}
 }

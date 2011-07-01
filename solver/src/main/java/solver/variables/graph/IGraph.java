@@ -54,12 +54,20 @@ public interface IGraph {
 	 */
 	boolean desactivateNode(int x);
 	
-	/**test whether (x,y) is in the graph or not
+	/**test whether edge (x,y) is in the graph or not
 	 * @param x
 	 * @param y
-	 * @return true iff (x,y) is in the graph
+	 * @return true iff edge (x,y) is in the graph
 	 */
 	boolean edgeExists(int x, int y);
+	
+	/**test whether arc (x,y) is in the graph or not
+	 * NB : arc is oriented whereas edge is not
+	 * @param x
+	 * @param y
+	 * @return true iff arc (x,y) is in the graph
+	 */
+	boolean arcExists(int x, int y);
 	
 	/**Add edge (x,y) to the graph
 	 * @param x

@@ -24,71 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.gary.relations;
 
-package solver.variables.graph.graphStructure.matrix;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.gary.GraphProperty;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.variables.IntVar;
 
-import solver.variables.graph.INeighbors;
-import java.util.BitSet;
-
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
- */
-public class BitSetNeighbors extends BitSet implements INeighbors {
-
-	private int current;//enables to iterate
-	private int card;	// enable to get the cardinality in O(1)
-    
-	public BitSetNeighbors(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
-
-    @Override
-    public void add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-    	}
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.card;
-//        return this.cardinality();
-    }
-
-	@Override
-	public int getFirstElement() {
-		current = nextSetBit(0);
-		return current;
+public class IndexOf extends GraphRelation<IntVar> {
+	
+	protected IndexOf(IntVar[] vars) {
+		super(vars);
 	}
 
 	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
+	public ESat isEntail(int var1, int var2) {
+		IntVar x = vars[var1];
+		if(!x.contains(var2)){
+			return ESat.FALSE;
+		}
+		if(x.instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
+	
+	@Override
+	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+		vars[var1].instantiateTo(var2,prop);
+	}
+	
+	@Override
+	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+		vars[var1].removeValue(var2, prop);
+	}
+
+	@Override
+	public boolean isDirected() {
+		return true;
+	}
+	
+	@Override
+	public GraphProperty[] getGraphProperties() {
+		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};
+//		return new GraphProperty[]{};
 	}
 }

@@ -25,70 +25,45 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.matrix;
+package solver.constraints;
 
-import solver.variables.graph.INeighbors;
-import java.util.BitSet;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.propagators.*;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.MetaVariable;
+import solver.variables.Variable;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+/**Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified 
+ * @author Jean-Guillaume Fages
  */
-public class BitSetNeighbors extends BitSet implements INeighbors {
+public class MetaVarConstraint<V extends Variable> extends Constraint<V, Propagator<V>>{
 
-	private int current;//enables to iterate
-	private int card;	// enable to get the cardinality in O(1)
-    
-	public BitSetNeighbors(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    @Override
-    public void add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-    	}
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.card;
-//        return this.cardinality();
-    }
+	/**create a Meta variable constraint : when a variable of vars is modified then the metavariable (to which it should belong) is notified 
+	 * @param vars components of the metavariable
+	 * @param meta metavariable that encapsulates vars
+	 * @param solver
+	 */
+	public MetaVarConstraint(V[] vars, MetaVariable meta, Solver solver) {
+		super(solver, PropagatorPriority.BINARY);
+		setPropagators(new Propagator[]{new MetaVarPropagator(vars, meta, solver, this)});
+	}
+	
+	//***********************************************************************************
+	// CONSTRAINT METHODS
+	//***********************************************************************************
 
 	@Override
-	public int getFirstElement() {
-		current = nextSetBit(0);
-		return current;
+	public ESat isSatisfied() {
+		return isEntailed();
 	}
 
 	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
+	public HeuristicVal getIterator(String name, V var) {
+		throw new UnsupportedOperationException("MetaVarConstraint does not provide such a service");
 	}
 }

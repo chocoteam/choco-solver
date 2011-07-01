@@ -170,17 +170,25 @@ public class UndirectedGraph implements IGraph {
 		}
 		if ((!neighbors[x].contain(y)) || (!neighbors[y].contain(x))){
 			throw new UnsupportedOperationException("asymmetric adjacency matrix in an undirected graph");
-		}
+		} 
 		return false;
 	}
 
 	@Override
-	public boolean edgeExists(int x, int y) {
+	public boolean edgeExists(int x, int y) {//TODO maybe remove symmetry checking
 		if(neighbors[x].contain(y) && neighbors[y].contain(x)){
 			return true;
 		}
 		if(neighbors[x].contain(y) || neighbors[y].contain(x)){
 			throw new UnsupportedOperationException("asymmetric adjacency matrix in an undirected graph");
+		}
+		return false;
+	}
+
+	@Override
+	public boolean arcExists(int x, int y) {
+		if(neighbors[x].contain(y)){
+			return true;
 		}
 		return false;
 	}

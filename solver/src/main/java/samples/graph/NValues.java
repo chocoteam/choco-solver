@@ -26,21 +26,20 @@
  */
 package samples.graph;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
+import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.gary.GraphRelation;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-public class KCliques extends AbstractProblem{
+public class NValues extends AbstractProblem{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -49,14 +48,14 @@ public class KCliques extends AbstractProblem{
 	private int n;
 	private int k;
 	private IntVar[] vars;
-	private BoolVar[][] rel;
+	private UndirectedGraphVar g;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	
-	public KCliques(int n, int k) {
+	public NValues(int n, int k) {
 		this.n = n;
 		this.k = k;
 		System.out.println(n+" : "+k);
@@ -67,35 +66,25 @@ public class KCliques extends AbstractProblem{
 	//***********************************************************************************
 
 	@Override
-	public void buildModel() {
+	public void buildModel() { 
 		solver = new Solver();
 		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
-		rel = new BoolVar[n][n];
-
-		vars[0] = VariableFactory.enumerated("v0", new int[]{2,5,42}, solver);
-		for(int i=0; i<n; i++){
-			for(int j=i; j<n; j++){
-				rel[i][j]  = VariableFactory.bool("rel "+i+"_"+j, solver);
-			}
-		}
-		for(int i=0; i<n; i++){
-			for(int j=0; j<i; j++){
-				rel[i][j]  = rel[j][i];
-			}
-		}
-
-		GraphConstraint gc = new GraphConstraint(vars, rel, solver, PropagatorPriority.LINEAR, false, GraphRelation.EQUALITY);
-		Constraint[] cstrs = new Constraint[]{gc};
-
+		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2,5,42}, solver);
+		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3,5,12}, solver);
+		vars[2] = VariableFactory.enumerated("vars_2", new int[]{1,2,12}, solver);
+		vars[3] = VariableFactory.enumerated("vars_3", new int[]{1,2}, solver);
 		IntVar nv = VariableFactory.enumerated("n", n, n, solver);
+		IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
+		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver, PropagatorPriority.LINEAR);
+		g = (UndirectedGraphVar) gc.getGraph();
 		gc.addProperty(GraphProperty.K_LOOPS, nv);
-		gc.addProperty(GraphProperty.K_CLIQUES, VariableFactory.bounded("N_CC", k, k, solver));
+		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.inputOrderMaxVal(ArrayUtils.flatten(rel), solver.getEnvironment());
+		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
 		solver.set(strategy);
 	}
 
@@ -112,6 +101,7 @@ public class KCliques extends AbstractProblem{
 		for(int i=0;i<n;i++){
 			System.out.println(vars[i]);
 		}
+		System.out.println(g.instantiated());
 	}
 
 	//***********************************************************************************
@@ -119,9 +109,9 @@ public class KCliques extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		int n = 6;
+		int n = 10;
 		int k = 2;
-		KCliques nc = new KCliques(n,k);
+		NValues nc = new NValues(n,k);
 		nc.execute();
 	}
 }

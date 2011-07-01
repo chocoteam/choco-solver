@@ -30,15 +30,17 @@ package samples.graph;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.NTree;
+import solver.constraints.gary.GraphConstraint;
+import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import java.io.FileWriter;
 import java.util.BitSet;
 
 public class Tree extends AbstractProblem{
@@ -75,9 +77,21 @@ public class Tree extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		g = VariableFactory.digraph("G",data, gtype, GraphType.SPARSE,solver);
-		nTree = VariableFactory.enumerated("NTREE ", 1,n, solver);
-		Constraint[] cstrs = new Constraint[]{new NTree(g,nTree, solver, PropagatorPriority.LINEAR)};
+		IntVar[] vars = VariableFactory.enumeratedArray("v", n, 0, n-1, solver);
+		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);
+		try{
+		for(int i=0; i<n; i++){
+			for(int j=0; j<n ;j++){
+				if(!data[i].get(j)){
+					vars[i].removeValue(j, null);
+				}
+			}
+		}
+		}catch(Exception e){}
+		GraphConstraint gc = GraphConstraintFactory.nTrees(vars, nTree, solver, PropagatorPriority.LINEAR);
+		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("n", n,n, solver));
+		g = (DirectedGraphVar) gc.getGraph();
+		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
 
@@ -90,23 +104,30 @@ public class Tree extends AbstractProblem{
 	@Override
 	public void solve() {
 		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIMELIMIT);
+		SearchMonitorFactory.log(solver, false, false);
 		sat = solver.findSolution();
 		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+
-				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+NTree.filteringCounter+";"+sat+";\n", file);
+				solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+sat+";\n", file);
 		if(solver.getMeasures().getFailCount()>0){
 			throw new UnsupportedOperationException("error gac");
 		}
+//		System.out.println(g.getEnvelopGraph());
 	}
 
 	@Override
-	public void prettyOut() {}
+	public void prettyOut() {
+		System.out.println("iniProp  : "+ solver.getMeasures().getInitialPropagationTimeCount()+"ms");
+		System.out.println("duration : "+solver.getMeasures().getTimeCount()+"ms");
+		System.out.println("nbnodes  : "+solver.getMeasures().getNodeCount()+" nodes ");
+		System.out.println("nbSols  : "+solver.getMeasures().getSolutionCount()+" sols ");
+	}
 
 	public static boolean performOneTest(int n, int d){
 		if(n<d)throw new UnsupportedOperationException("n must be greater or equal to d");
 		BitSet[] data = DataGenerator.makeTreeData(n, d);
 		Tree tsample = new Tree(data,d);
 		tsample.execute();
-		System.out.println(tsample.solver.getMeasures().getTimeCount());
+		System.out.println("time : "+tsample.solver.getMeasures().getTimeCount());
 		return tsample.sat!=null && tsample.solver.getMeasures().getTimeCount()<=TIMELIMIT;
 	}
 
@@ -120,43 +141,43 @@ public class Tree extends AbstractProblem{
 	}
 	
 	private static void testN(){
-		file = "tree_"+(TIMELIMIT/1000)+"sec_d5_"+gtype+".csv";
+		file = "tree_"+(TIMELIMIT/1000)+"sec_"+gtype+".csv";
 		clearFile(file);
-		writeTextInto("n;d;nodes;bks;time;counter;solved;\n", file);
+		writeTextInto("n;d;nodes;bks;time;solved;\n", file);
 		int i = 0;
-		int[] ds = new int[]{5};
-//		int[] ds = new int[]{5,20,50,30000};
+		int[] ns = new int[]{10,600,700,800};
+		int[] ds = new int[]{30000};
 		int dMax = 50000;
 		int nMax = 50000;
-		for(int n=200;n<=10000;n+=100){
+		for(int n:ns){
 			if (n<nMax){
 				for(int d:ds){
 					if(d<dMax){
 						if(d>n){
 							d=n;
 						}
-						boolean success = false;
+//						boolean success = false;
 						for(i=0;i<1;i++){
 							seed = i;
 							DirectedGraphVar.seed = i;
 							DataGenerator.seed = i;
 							System.out.println(n+" : "+d);
 							if(performOneTest(n, d)){
-								success = true;
+//								success = true;
 							}
-							for(int k=0;k<10;k++){
+							for(int k=0;k<5;k++){
 								System.gc();
 							}
 						}
-						if(!success){
-							dMax = d;
-							if (dMax == 5){
-								nMax = n;
-							}
-						}
-						if(d==n){
-							break;
-						}
+//						if(!success){
+//							dMax = d;
+//							if (dMax == 5){
+//								nMax = n;
+//							}
+//						}
+//						if(d==n){
+//							break;
+//						}
 					}
 				}
 			

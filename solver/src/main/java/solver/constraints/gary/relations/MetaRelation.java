@@ -24,71 +24,49 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.gary.relations;
 
-package solver.variables.graph.graphStructure.matrix;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.variables.MetaVariable;
 
-import solver.variables.graph.INeighbors;
-import java.util.BitSet;
+public abstract class MetaRelation extends GraphRelation<MetaVariable> {
+	
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
- */
-public class BitSetNeighbors extends BitSet implements INeighbors {
-
-	private int current;//enables to iterate
-	private int card;	// enable to get the cardinality in O(1)
-    
-	public BitSetNeighbors(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
-
-    @Override
-    public void add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-    	}
-    }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.card;
-//        return this.cardinality();
-    }
-
-	@Override
-	public int getFirstElement() {
-		current = nextSetBit(0);
-		return current;
+	protected int dim;
+	protected GraphRelation[] unidimRelation;
+	
+	protected MetaRelation(MetaVariable[] vars) {
+		super(vars);
+		dim = vars[0].getComponents().length;
+		unidimRelation = new GraphRelation[dim];
 	}
 
 	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
+	public ESat isEntail(int var1, int var2) {
+		ESat entail = ESat.TRUE;
+		for(int i=0; i<dim; i++){
+			entail = and(entail, unidimRelation[i].isEntail(var1, var2));
+			if(entail == ESat.FALSE){
+				return entail;
+			}
+		}
+		return entail;
+	}
+	
+	@Override
+	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+		for(int i=0; i<dim; i++){
+			unidimRelation[i].applyTrue(var1, var2, solver, prop);
+		}
+	}
+	
+	@Override
+	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+		for(int i=0; i<dim; i++){
+			unidimRelation[i].applyFalse(var1, var2, solver, prop);
+		}
 	}
 }

@@ -62,7 +62,9 @@ public enum EventType {
     REMOVENODE(1 << 8),
     ENFORCENODE(1 << 9),
     REMOVEARC(1 << 10),
-    ENFORCEARC(1 << 11);
+    ENFORCEARC(1 << 11),
+    // META VARIABLE
+    META(1<<12);
 
     public final int mask;
 

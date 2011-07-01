@@ -33,14 +33,9 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
-import solver.requests.list.RequestListBuilder;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
-
 import java.util.BitSet;
 
 /**
@@ -49,51 +44,23 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BoolVarImpl implements BoolVar {
+public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     private static final long serialVersionUID = 1L;
-    /**
-     * Reference to the solver containing this variable.
-     */
-    protected Solver solver;
-
-    protected String name;
 
     /**
      * Domain definition
      */
     public IIntDomain domain;
 
-    /**
-     * List of requests
-     */
-    protected final IRequestList requests;
-
-    protected int modificationEvents;
-
     protected boolean reactOnRemoval = false;
 
     protected HeuristicVal heuristicVal;
 
-    protected int uniqueID;
-
-    protected final IPropagationEngine engine;
-
     //////////////////////////////////////////////////////////////////////////////////////
 
     public BoolVarImpl(String name, Solver solver) {
-        this.name = name;
-        this.solver = solver;
-        this.engine = solver.getEngine();
-        requests = RequestListBuilder.preset(solver.getEnvironment());
-    }
-
-    public int getUniqueID() {
-        return uniqueID;
-    }
-
-    public void setUniqueID(int uniqueID) {
-        this.uniqueID = uniqueID;
+    	super(name,solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,10 +74,6 @@ public final class BoolVarImpl implements BoolVar {
     @Override
     public HeuristicVal getHeuristicVal() {
         return heuristicVal;
-    }
-
-    public void updateEntailment(IRequest request) {
-        requests.setPassive(request);
     }
 
     /**
@@ -336,10 +299,6 @@ public final class BoolVarImpl implements BoolVar {
         return this.name +/* '[' + this.nbConstraints() + "]:*/"=" + this.domain.toString();
     }
 
-    public String getName() {
-        return this.name;
-    }
-
     ////////////////////////////////////////////////////////////////
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
@@ -352,48 +311,6 @@ public final class BoolVarImpl implements BoolVar {
             reactOnRemoval = true;
         }
 //        reactOnRemoval |= ((modificationEvents & EventType.REMOVE.mask) != 0);
-    }
-
-    @Override
-    public void deletePropagator(Propagator observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
-        if ((modificationEvents & e.mask) != 0) {
-            requests.notifyButCause(cause, e, domain.getDelta());
-        }
-    }
-
-    @Override
-    public void addRequest(IRequest request) {
-        requests.addRequest(request);
-    }
-
-    @Override
-    public void deleteRequest(IRequest request) {
-        requests.deleteRequest(request);
-    }
-
-    @Override
-    public IRequestList getRequests() {
-        return requests;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    public int nbConstraints() {
-        return requests.size();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public int nbRequests() {
-        return requests.cardinality();
     }
 
     /**
@@ -411,14 +328,8 @@ public final class BoolVarImpl implements BoolVar {
         return expl;
     }
 
-    @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        engine.fails(cause, this, message);
-    }
-
-    @Override
-    public Solver getSolver() {
-        return solver;
-    }
-
+	@Override
+	public void contradiction(ICause cause, String message) throws ContradictionException {
+		engine.fails(cause, this, message);
+	}
 }

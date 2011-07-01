@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.constraintSpecific.PropNLoops;
+import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.directed.PropNSuccs;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -45,7 +45,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -68,7 +67,6 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 
 	DirectedGraphVar g;
 	IntVar nTree;
-	public static int filteringCounter=0;
 	
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -84,7 +82,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		super((V[]) new Variable[]{graph,nTree}, solver, storeThreshold);
 		setPropagators(
 				new PropNSuccs(graph, solver, this, storeThreshold, true, 1),
-				new PropNLoops(graph, nTree, solver, this, storeThreshold, true),
+				new PropNLoopsTree(graph, nTree, solver, this, storeThreshold, true),
 				new PropNTree(graph, nTree,solver,this, storeThreshold,true));
 		this.g = graph;
 		this.nTree = nTree;

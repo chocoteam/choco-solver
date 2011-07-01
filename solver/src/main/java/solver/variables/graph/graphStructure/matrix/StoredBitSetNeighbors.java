@@ -28,6 +28,7 @@
 package solver.variables.graph.graphStructure.matrix;
 
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.S64BitSet;
 import solver.variables.graph.INeighbors;
 
@@ -38,16 +39,21 @@ import solver.variables.graph.INeighbors;
  */
 public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 
-	private int current;
+	private int current;	//enables to iterate
+	private IStateInt card;	// enables to get the cardinality in O(1)
 	
     public StoredBitSetNeighbors(IEnvironment environment, int nbits) {
         super(environment, nbits);
         current = 0;
+        card = environment.makeInt(0);
     }
 
     @Override
     public void add(int element) {
-        this.set(element,true);
+    	if(!get(element)){
+    		card.add(1);
+    		this.set(element,true);
+    	}
     }
 
     @Override
@@ -55,6 +61,7 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
         boolean isIn = this.get(element);
         if (isIn) {
             this.set(element, false);
+            card.add(-1);
         }
         return isIn;
     }
@@ -66,7 +73,8 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 
     @Override
     public int neighborhoodSize() {
-        return this.cardinality();
+        return this.card.get();
+//        return this.cardinality();
     }
 
     @Override

@@ -27,26 +27,22 @@
 
 package solver.constraints.gary;
 
+import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.PropBoolGraphChanneling;
+import solver.constraints.*;
+import solver.constraints.gary.relations.GraphRelation;
+import solver.constraints.propagators.*;
+import solver.constraints.propagators.gary.*;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
-import java.util.LinkedList;
 
 /**Constraint for working on graph properties
+ * TODO : change properties management
  * @author Jean-Guillaume Fages
  */
 public class GraphConstraint<V extends Variable> extends Constraint<V, Propagator<V>>{
@@ -56,41 +52,36 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	//***********************************************************************************
 
 	GraphVar graph;
-	IntVar[] inputVars; 	// nodes of the graph
-	BoolVar[][] relBools;  // arcs of the graph
+	V[] inputVars; 	// nodes of the graph
 	IntVar[] parameterVars; // graph properties parameters
-	boolean directed;		
+	GraphRelation<V> relation;
 	LinkedList<GraphProperty> properties;
-
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public GraphConstraint(IntVar[] vars, BoolVar[][] rel, Solver solver, PropagatorPriority storeThreshold, boolean directed, GraphRelation relation) {
+	/** Please use ConstraintFactory.makeConstraint(...) 
+	 *
+	 * create a new generic graph constraint
+	 * @param vars (nodes)
+	 * @param solver
+	 * @param storeThreshold
+	 * @param relation (arc meaning)
+	 */
+	GraphConstraint(V[] vars, Solver solver, PropagatorPriority storeThreshold, GraphRelation relation) {
 		super(solver, storeThreshold);
-		
-		int n = vars.length;
-		this.relBools = rel;
 		this.inputVars = vars;
-		this.directed = directed;
-		if(directed){
-			graph = new DirectedGraphVar(solver, n, GraphType.DENSE, GraphType.SPARSE);
-		}else{
-			graph = new UndirectedGraphVar(solver, n, GraphType.SPARSE, GraphType.DENSE);
+		this.relation   = relation;
+		this.graph = relation.generateInitialGraph(vars, solver);
+		this.properties = new LinkedList<GraphProperty>();
+		Propagator pr = new PropRelation(vars, graph, solver, this, relation);
+		setPropagators(new Propagator[]{pr});
+		for(GraphProperty gp:relation.getGraphProperties()){
+			addProperty(gp);
 		}
-		Propagator[][] propsBools = new Propagator[n][n];
-		for(int v=0; v<vars.length; v++){
-			for(int w=0; w<vars.length; w ++){
-				propsBools[v][w] = relation.getPropagator(relBools[v][w], inputVars[v], inputVars[w], solver, this);
-				graph.getEnvelopGraph().addEdge(v, w);
-			}
-		}
-		properties = new LinkedList<GraphProperty>();
-		
-		setPropagators(ArrayUtils.append(ArrayUtils.flatten(propsBools),new Propagator[]{new PropBoolGraphChanneling(graph, relBools, solver, this, storeThreshold)}));
 	}
-
+	
 	//***********************************************************************************
 	// ADDING GRAPH PROPERTIES
 	//***********************************************************************************
@@ -104,8 +95,10 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 			throw new UnsupportedOperationException("GraphProperty "+prop+" already loaded");
 		}else{
 			properties.add(prop);
+			if(parameters != null && parameters.length>0){
+				this.vars = (V[])ArrayUtils.append(vars,parameters);
+			}
 			setPropagators(ArrayUtils.append(propagators, prop.getPropagators(this, parameters)));
-			this.vars = (V[])ArrayUtils.append(inputVars,parameterVars,ArrayUtils.flatten(relBools)).clone();
 		}
 	}
 
@@ -121,6 +114,20 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		return solver;
 	}
 	
+	/**get the graph representing the constraint
+	 * @return graph
+	 */
+	public GraphVar getGraph(){
+		return graph;
+	}
+	
+	/**Get the meaning of an arc
+	 * @return relation
+	 */
+	public GraphRelation<V> getRelation(){
+		return relation;
+	}
+	
 	//***********************************************************************************
 	// CONSTRAINT METHODS
 	//***********************************************************************************
@@ -132,6 +139,6 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 
 	@Override
 	public HeuristicVal getIterator(String name, V var) {
-		throw new UnsupportedOperationException("NTree does not provide such a service");
+		throw new UnsupportedOperationException("GraphConstraint does not provide such a service");
 	}
 }

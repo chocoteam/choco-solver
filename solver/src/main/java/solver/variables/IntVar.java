@@ -39,7 +39,7 @@ import solver.variables.domain.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable<IntDelta> {
+public interface IntVar extends Variable<IntDelta>{
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
