@@ -40,6 +40,7 @@ import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -47,11 +48,11 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 /**
  * @author Jean-Guillaume Fages
  * 
- * Ensures that each node in the kernel has exactly NPreds predecessors
- *A VERIFIER
+ * Ensures that each node in the kernel has exactly NPreds proper predecessors (excluding loops)
+ * TODO parameter modification events
  * @param <V>
  */
-public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
+public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -67,7 +68,7 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNPreds(
+	public PropNProperPreds(
 			V graph,
 			Solver solver,
 			Constraint<V, Propagator<V>> constraint, IntVar nbPreds) {
@@ -85,16 +86,22 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-//		check();
+		int np=0;
 		for(int i=0; i<n ; i++){
 			INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);
-			if(preds.neighborhoodSize()==nPreds.getLB()){
+			np = preds.neighborhoodSize();
+			if(g.getEnvelopGraph().arcExists(i, i)){
+				np--;
+			}
+			if(np==nPreds.getLB()){
 				for(int j=preds.getFirstElement(); j>=0; j=preds.getNextElement()){
-					g.enforceArc(j,i, this);
+					if(i!=j){
+						g.enforceArc(j,i, this);
+					}
 				}
 			}
-			if(preds.neighborhoodSize()<nPreds.getLB()){
-				this.contradiction(g, "no predecessor");
+			if(np<nPreds.getLB()){
+				this.contradiction(g, "no proper predecessor");
 			}
 		}
 		//TODO
@@ -107,22 +114,30 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 			if ((mask & EventType.REMOVEARC.mask)!=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(rem, gv.fromArcRemoval(), gv.toArcRemoval());
-			}else if ((mask & EventType.ENFORCEARC.mask) != 0){
+			}
+			if ((mask & EventType.ENFORCEARC.mask) != 0){
 				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
 				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
 			}
 		}else{
-			
+			//TODO
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask + EventType.ALL_MASK();
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.ALL_MASK();
 	}
 
 	@Override
 	public ESat isEntailed() {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for(int i=ker.nextValue(0); i>=0; i = ker.nextValue(i+1)){
+			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds.getLB() ||
+			   g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()>nPreds.getUB()){
+				return ESat.FALSE;
+			}
+		}
 		return ESat.UNDEFINED;
 	}
 
@@ -133,9 +148,9 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	/** Enable to add arcs to the kernel when only NSUCCS arcs remain in the envelop */
 	private static class RemProc implements IntProcedure {
 
-		private final PropNPreds p;
+		private final PropNProperPreds p;
 
-		public RemProc(PropNPreds p) {
+		public RemProc(PropNProperPreds p) {
 			this.p = p;
 		}
 
@@ -145,12 +160,27 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 			if (i>=p.n){
 				int to   = i%p.n;
 				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
-				if(prds.neighborhoodSize()<np){
-					p.contradiction(p.g, "no predecessor");
+				int envSize = prds.neighborhoodSize();
+				if(p.g.getEnvelopGraph().arcExists(to, to)){
+					envSize --;
 				}
-				if(prds.neighborhoodSize()==np && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()!= np){
-					for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
-						p.g.enforceArc(j,to, p);
+				if(envSize<np){
+					p.contradiction(p.g, "no proper predecessor");
+				}
+				if(envSize==np){
+					int kerSize = p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize();
+					if(p.g.getKernelGraph().arcExists(to, to)){
+						kerSize--;
+					}
+					if(kerSize > np){
+						throw new UnsupportedOperationException("error ");
+					}
+					if(kerSize != np){
+						for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
+							if(j!=to) {
+								p.g.enforceArc(j,to, p);
+							}
+						}
 					}
 				}
 			}
@@ -160,25 +190,33 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	/** Enable to remove useless outgoing arcs of a node when the kernel contains NSUCCS outgoing arcs */
 	private static class EnfProc implements IntProcedure {
 
-		private final PropNPreds p;
+		private final PropNProperPreds p;
 
-		public EnfProc(PropNPreds p) {
+		public EnfProc(PropNProperPreds p) {
 			this.p = p;
 		}
 
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int np = p.nPreds.getUB();
-            if (i>p.n){
-                int from = i/p.n-1;
-                int to   = i%p.n;
-				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
-				if(p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()>np){
+			if (i>p.n){
+				int from = i/p.n-1;
+				int to   = i%p.n;
+				int kerSize = p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize();
+				if(p.g.getKernelGraph().arcExists(to, to)){
+					kerSize--;
+				}
+				if(kerSize>np){
 					p.contradiction(p.g, "too many predecessors");
 				}
-				if(prds.neighborhoodSize()>np && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==np){
+				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
+				int envSize = prds.neighborhoodSize();
+				if(p.g.getEnvelopGraph().arcExists(to, to)){
+					envSize--;
+				}
+				if(envSize>np && kerSize==np){
 					for(from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
-						if (!p.g.getKernelGraph().arcExists(from, to)){
+						if (from!=to && !p.g.getKernelGraph().arcExists(from, to)){
 							p.g.removeArc(from,to, p);
 						}
 					}
@@ -187,30 +225,30 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		}
 	}
 
-//	private void check() throws ContradictionException {
-//		int n = g.getEnvelopGraph().getNbNodes();
-//		int k;
-//		INeighbors nei;
-//		LinkedList<Integer> arcs = new LinkedList<Integer>();
-//		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
-//			k = g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize();
-//			if(k>nPreds){
-//				this.contradiction(g, "more than one predecessors");
-//			}
-//			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds){
-//				this.contradiction(g, "not enough potential predecessors");
-//			}
-//			if(k==nPreds && g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize() != k){
-//				nei = g.getEnvelopGraph().getPredecessorsOf(i);
-//				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-//					if (!g.getKernelGraph().arcExists(j,i)){
-//						arcs.addFirst((j+1)*n+i);
-//					}
-//				}
-//			}
-//		}
-//		for(int next:arcs){
-//			g.removeArc(next/n-1, next%n, this);
-//		}
-//	}
+	//	private void check() throws ContradictionException {
+	//		int n = g.getEnvelopGraph().getNbNodes();
+	//		int k;
+	//		INeighbors nei;
+	//		LinkedList<Integer> arcs = new LinkedList<Integer>();
+	//		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+	//			k = g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize();
+	//			if(k>nPreds){
+	//				this.contradiction(g, "more than one predecessors");
+	//			}
+	//			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds){
+	//				this.contradiction(g, "not enough potential predecessors");
+	//			}
+	//			if(k==nPreds && g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize() != k){
+	//				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+	//				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
+	//					if (!g.getKernelGraph().arcExists(j,i)){
+	//						arcs.addFirst((j+1)*n+i);
+	//					}
+	//				}
+	//			}
+	//		}
+	//		for(int next:arcs){
+	//			g.removeArc(next/n-1, next%n, this);
+	//		}
+	//	}
 }
