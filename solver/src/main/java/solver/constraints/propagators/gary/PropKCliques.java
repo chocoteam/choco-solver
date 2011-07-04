@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -39,10 +38,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import java.util.BitSet;
-import java.util.LinkedList;
 
 /**Propagator that ensures that the final graph consists in K cliques
  * @author Jean-Guillaume Fages
@@ -73,108 +71,25 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
+		filter();
 		duration = 0;
 	}
 
 	
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-//		homogeniousCase();
 		long time = System.currentTimeMillis();
-		case2();
+		filter();
 		duration += (System.currentTimeMillis()-time);
 	}
 	
-	private void homogeniousCase() throws ContradictionException{
-		float n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<TIntArrayList> ccs = ConnectivityFinder.findCCOf(g.getEnvelopGraph());
-		int[] ccOf = new int[(int)n];
-		float[] mCC = new float[ccs.size()];
-		float[] nCC = new float[ccs.size()];
-		// finding CC
-		TIntArrayList cc;
-		for(int i=0;i<ccs.size();i++){
-			cc = ccs.get(i);
-			nCC[i] = cc.size();
-			for(int j=0;j<cc.size();j++){
-				ccOf[cc.get(j)] = i;
-			}
-		}
-		// arcs of the CC
-		INeighbors nei;
-		int ccNum;
-		for(int i=0;i<n;i++){
-			ccNum = ccOf[i];
-			nei = g.getEnvelopGraph().getNeighborsOf(i);
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(ccOf[j]==ccNum)	mCC[ccNum] ++;
-			}
-		}
-		//	estimation nClique per CC
-		int min = 0;
-		for(int i=0;i<ccs.size();i++){
-			mCC[i] = (mCC[i]-nCC[i])/2+nCC[i];
-			float k2 = nCC[i]*nCC[i] / (nCC[i]+2*mCC[i]);
-			min += Math.ceil(k2);
-//			int k = 1;
-//			int n1 = nCC[i]-k+1;
-////			int k2 = (int) Math.ceil((double)(mCC[i]-nCC[i])/(double)nCC[i]);
-//			int mMax = n1*(n1-1)/2+nCC[i];
-//			if(mMax<mCC[i]){
-//				System.out.println(mMax);
-//				System.out.println(mCC[i]);
-//				throw new UnsupportedOperationException("error ");
-//			}
-//			while(mMax>mCC[i]){
-//				k ++;
-//				n1 = nCC[i]-k+1;
-//				mMax = n1*(n1-1)/2+nCC[i];
-//			}
-////			min += k1;
-////			max += k2;
-//			min += k;
-		}
-//		float m =0;
-//		INeighbors nei;
-//		int ccNum;
-//		int min = 0;
-//		for(int i=0;i<n;i++){
-//			nei = g.getEnvelopGraph().getNeighborsOf(i);
-//			m += nei.neighborhoodSize();
-//		}
-//		m = (m-n)/2+n;
-//			int kk = 1;
-//			int n1 = n-kk+1;
-//			int k2 = (int) Math.ceil((double)(m-n)/(double)n);
-//			int mMax = n1*(n1-1)/2+n;
-//			if(mMax<m){
-//				System.out.println(mMax);
-//				System.out.println(m);
-//				throw new UnsupportedOperationException("error ");
-//			}
-//			while(mMax>m){
-//				kk ++;
-//				n1 = n-kk+1;
-//				mMax = n1*(n1-1)/2+n;
-//			}
-////			min += k1;
-////			max += k2;
-//			min += kk;
-//		float k2 = n*n / (n+2*m);
-//		int k2 = Math.round((float)n/(float)(1+(float)(2*m)/(float)n));
-//			System.out.println(m);
-//			System.out.println(n);
-//			System.out.println("kkk");
-//			System.out.println(k2);
-//		System.out.println(min);
-		k.updateLowerBound(min, this);
-//		k.updateUpperBound(k2, this);
-	}
-	
-	private void case2() throws ContradictionException{
+	private void filter() throws ContradictionException{
 		float n = g.getEnvelopGraph().getNbNodes();
 		BitSet iter = new BitSet((int)n);
-		iter.flip(0, (int)n);
+		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+		for(int i=nodes.nextValue(0);i>=0;i = nodes.nextValue(i+1)){
+				iter.set(i);
+		}
 		int idx = -1;
 		INeighbors nei;
 		int min = 0;
@@ -187,7 +102,6 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 			}
 			min ++;
 		}
-//		System.out.println("         :   "+min);
 		k.updateLowerBound(min, this);
 	}
 

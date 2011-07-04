@@ -120,6 +120,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		int max = ccKer.size();
 		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
 //			throw new UnsupportedOperationException("case not implemented yet ");
+			max += env.nbActive() - ker.nbActive();
 		}
 		// TODO couplage generalise
 		// PRUNING
@@ -211,7 +212,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		}
 		int max = ccKer.size();
 		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
-			throw new UnsupportedOperationException("case not implemented yet ");
+			max += env.nbActive() - ker.nbActive();
+//			throw new UnsupportedOperationException("case not implemented yet ");
 		}
 		// TODO couplage generalise
 

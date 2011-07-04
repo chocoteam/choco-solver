@@ -41,6 +41,7 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 
 /**Propagator channeling a graph and an array of integer variables
  * 
@@ -55,7 +56,8 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	private G g;
 	private int n;
 	public static long duration;
-	private Variable[] intVars;
+	private Variable[] nodeVars;
+	private IntProcedure nodeEnforced;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
 	private Solver solver;
@@ -68,10 +70,11 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	public PropRelation(Variable[] vars, G graph,Solver solver, GraphConstraint cons,GraphRelation relation) {
 		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, cons, relation.getPriority(), true);
 		this.g = graph;
-		this.intVars = vars;
-		this.n = intVars.length;
+		this.nodeVars = vars;
+		this.n = nodeVars.length;
 		this.relation = relation;
 		this.solver = solver;
+		this.nodeEnforced = new NodeEnf();
 		this.arcEnforced = new EdgeEnf();
 		this.arcRemoved = new EdgeRem();
 		duration = 0;
@@ -84,6 +87,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	@Override
 	public void propagate() throws ContradictionException {
 		long time = System.currentTimeMillis();
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for(int i=0; i<n; i++){
 			for(int j=0; j<n; j++){
 				if(g.getKernelGraph().arcExists(i, j)){
@@ -91,11 +95,16 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 				}else{
 					if(g.getEnvelopGraph().arcExists(i, j)){
 						switch(relation.isEntail(i,j)){
-						case TRUE: g.enforceArc(i, j, null);break;
+						case TRUE: 
+							if(ker.isActive(i) && ker.isActive(j)){
+								g.enforceArc(i, j, null);
+							}break;
 						case FALSE: g.removeArc(i, j, null);break;
 						}
 					}else{
-						unapply(i, j);
+						if(ker.isActive(i) && ker.isActive(j)){
+							unapply(i, j);
+						}
 					}
 				}
 			}
@@ -111,6 +120,10 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 			if((mask & EventType.ENFORCEARC.mask) !=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
 				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+			}
+			if((mask & EventType.ENFORCENODE.mask) !=0){
+				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
+				d.forEach(nodeEnforced, gr.fromNodeEnforcing(), gr.toNodeEnforcing());
 			}
 			if((mask & EventType.REMOVEARC.mask) !=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
@@ -129,7 +142,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_MASK() + EventType.ENFORCEARC.mask + EventType.REMOVEARC.mask + EventType.META.mask;
+		return EventType.ALL_MASK() + EventType.ENFORCEARC.mask  + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
 	}
 
 	@Override
@@ -150,17 +163,23 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	}
 
 	private void checkVar(int i) throws ContradictionException {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for(int j=0; j<n; j++){
 			if(g.getKernelGraph().arcExists(i, j)){
 				apply(i, j);
 			}else{
 				if(g.getEnvelopGraph().arcExists(i, j)){
 					switch(relation.isEntail(i,j)){
-					case TRUE: g.enforceArc(i, j, null);break;
+					case TRUE: 
+						if(ker.isActive(i) && ker.isActive(j)){
+							g.enforceArc(i, j, null);
+						}break;
 					case FALSE: g.removeArc(i, j, null);break;
 					}
 				}else{
-					unapply(i, j);
+					if(ker.isActive(i) && ker.isActive(j)){
+						unapply(i, j);
+					}
 				}
 			}
 		}
@@ -173,6 +192,32 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 			int from = i/n-1;
 			int to   = i%n;
 			apply(from, to);
+		}
+	}
+	/** When a node is enforced, the corresponding variable is checked */
+	private class NodeEnf implements IntProcedure {
+		@Override
+		public void execute(int i) throws ContradictionException {
+			IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+			for(int j=0; j<n; j++){
+				if(g.getKernelGraph().arcExists(i, j)){
+					apply(i, j);
+				}else{
+					if(g.getEnvelopGraph().arcExists(i, j)){
+						switch(relation.isEntail(i,j)){
+						case TRUE: 
+							if(ker.isActive(j)){
+								g.enforceArc(i, j, null);
+							}break;
+						case FALSE: g.removeArc(i, j, null);break;
+						}
+					}else{
+						if(ker.isActive(j)){
+							unapply(i, j);
+						}
+					}
+				}
+			}
 		}
 	}
 	/** When an edge (x,y), is removed then the non relation x!Ry must be true iff both x and y are in the kernel */

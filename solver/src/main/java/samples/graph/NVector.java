@@ -108,6 +108,7 @@ public class NVector extends AbstractProblem{
 		GraphConstraint gc = GraphConstraintFactory.nVectors(vectors, nVect, solver, PropagatorPriority.LINEAR);
 		g = (UndirectedGraphVar) gc.getGraph();
 		gc.addProperty(GraphProperty.K_LOOPS, nv);
+		gc.addProperty(GraphProperty.K_NODES, nv);
 		Constraint[] cstrs = ArrayUtils.append(meta,new Constraint[]{gc});
 		solver.post(cstrs);
 	}

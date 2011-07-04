@@ -68,16 +68,16 @@ public class NValues extends AbstractProblem{
 	@Override
 	public void buildModel() { 
 		solver = new Solver();
-		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
-		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2,5,42}, solver);
-		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3,5,12}, solver);
-		vars[2] = VariableFactory.enumerated("vars_2", new int[]{1,2,12}, solver);
-		vars[3] = VariableFactory.enumerated("vars_3", new int[]{1,2}, solver);
-		IntVar nv = VariableFactory.enumerated("n", n, n, solver);
-		IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
+		vars = VariableFactory.enumeratedArray("vars", n, 0, 2*n-1, solver);
+//		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2,5,42}, solver);
+//		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3,5,12}, solver);
+		vars[2] = VariableFactory.enumerated("vars_2", new int[]{1,2}, solver);
+		vars[3] = VariableFactory.enumerated("vars_3", new int[]{2,3}, solver);
+		IntVar nv = VariableFactory.enumerated("n", 4,4, solver);
+		IntVar nVal = VariableFactory.bounded("N_CC", 3,3, solver);
 		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver, PropagatorPriority.LINEAR);
 		g = (UndirectedGraphVar) gc.getGraph();
-		gc.addProperty(GraphProperty.K_LOOPS, nv);
+		gc.addProperty(GraphProperty.K_NODES, nv);
 		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
@@ -102,6 +102,8 @@ public class NValues extends AbstractProblem{
 			System.out.println(vars[i]);
 		}
 		System.out.println(g.instantiated());
+		System.out.println("env"+g.getEnvelopGraph());
+		System.out.println("ker "+g.getKernelGraph());
 	}
 
 	//***********************************************************************************
@@ -110,7 +112,7 @@ public class NValues extends AbstractProblem{
 
 	public static void main(String[] args) {
 		int n = 10;
-		int k = 2;
+		int k = 3;
 		NValues nc = new NValues(n,k);
 		nc.execute();
 	}
