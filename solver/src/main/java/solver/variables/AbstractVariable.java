@@ -37,6 +37,8 @@ import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
 import solver.variables.domain.delta.IDelta;
 
+import java.io.Serializable;
+
 /**
  * Class used to factorise code
  * The subclass must implement Variable interface
@@ -45,7 +47,7 @@ import solver.variables.domain.delta.IDelta;
  * @author Jean-Guillaume Fages
  * @since 30 june 2011
  */
-public abstract class AbstractVariable  {
+public abstract class AbstractVariable implements Serializable {
 
     private static final long serialVersionUID = 1L;
     /**
