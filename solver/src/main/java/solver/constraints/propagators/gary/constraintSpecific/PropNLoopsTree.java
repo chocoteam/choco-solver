@@ -59,7 +59,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	// VARIABLES
 	//***********************************************************************************
 
-	DirectedGraphVar g;
+	DirectedGraphVar g; 
 	IntVar nLoops;
 	IntProcedure removeProc;
 	IntProcedure enforceProc;
