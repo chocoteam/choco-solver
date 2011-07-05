@@ -31,7 +31,6 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.DigraphArcDecision;
 import solver.search.strategy.assignments.Assignment;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
  * <br/>

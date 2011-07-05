@@ -88,7 +88,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getEnvelopGraph().getNeighborhoodSize(node)<n_neighbors){
 				g.removeNode(node, this);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(node) 
@@ -127,7 +127,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	@Override
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getEnvelopGraph().getNeighborhoodSize(node)<n_neighbors){
 				return ESat.FALSE;
 			}

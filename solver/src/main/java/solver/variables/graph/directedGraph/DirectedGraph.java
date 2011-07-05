@@ -112,7 +112,7 @@ public class DirectedGraph implements IDirectedGraph {
 
 	public String toStringSuccs() {
 		String res = "";
-		for (int i = activeIdx.nextValue(0); i>=0; i = activeIdx.nextValue(i+1)) {
+		for (int i = activeIdx.getFirstElement(); i>=0; i = activeIdx.getNextElement()) {
 			res += "pot-" + i + ": ";
 			for(int j=successors[i].getFirstElement();j>=0; j=successors[i].getNextElement()){
 				res += j + " ";
@@ -124,7 +124,7 @@ public class DirectedGraph implements IDirectedGraph {
 
 	public String toStringPreds() {
 		String res = "";
-		for (int i = activeIdx.nextValue(0); i>=0; i = activeIdx.nextValue(i+1)) {
+		for (int i = activeIdx.getFirstElement(); i>=0; i = activeIdx.getNextElement()) {
 			res += "pot-" + i + ": ";
 			for(int j=predecessors[i].getFirstElement();j>=0; j=predecessors[i].getNextElement()){
 				res += j + " ";
@@ -178,15 +178,15 @@ public class DirectedGraph implements IDirectedGraph {
 	public boolean desactivateNode(int x) {
 		if(!activeIdx.isActive(x))return false;
 		activeIdx.desactivate(x);
-
-		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
-			predecessors[j].remove(x);
-		}
-		successors[x].clear();
-		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
-			successors[j].remove(x);
-		}
-		predecessors[x].clear();
+//
+//		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
+//			predecessors[j].remove(x);
+//		}
+//		successors[x].clear();
+//		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
+//			successors[j].remove(x);
+//		}
+//		predecessors[x].clear();
 		return true;
 	}
 

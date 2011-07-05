@@ -39,6 +39,7 @@ import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -177,7 +178,8 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		int k;
 		INeighbors nei;
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
-		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
 			if(k>nSuccs){
 				this.contradiction(g, "more than one successor");

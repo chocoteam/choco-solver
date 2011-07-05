@@ -33,7 +33,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
@@ -77,7 +76,7 @@ public class NPaths extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		IntVar[] vars = VariableFactory.enumeratedArray("v", n, 0, n-1, solver);
-		nPaths = VariableFactory.enumerated("NTREE ", 1,1, solver);
+		nPaths = VariableFactory.enumerated("NTREE ", 3,3, solver);
 		try{
 			for(int i=0; i<n; i++){
 				for(int j=0; j<n ;j++){
@@ -87,12 +86,18 @@ public class NPaths extends AbstractProblem{
 				}
 			}
 		}catch(Exception e){}
-		GraphConstraint gc = GraphConstraintFactory.nPaths(vars, nPaths, solver, PropagatorPriority.LINEAR);
-//		GraphConstraint gc = GraphConstraintFactory.makeConstraint(vars, GraphRelationFactory.indexOf(vars), solver, PropagatorPriority.LINEAR);
-		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("n",2,2, solver));
-//		gc.addProperty(GraphProperty.K_CC, VariableFactory.bounded("ncc", 2, 2, solver));
+		GraphConstraint gc = GraphConstraintFactory.nTrees(vars, nPaths, solver, PropagatorPriority.LINEAR);
+		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("n",30,30, solver));
+		gc.addProperty(GraphProperty.K_LOOPS, nPaths);
+//		gc.addProperty(GraphProperty.K_CC, nPaths);
+//		for(int i=0;i<30;i++){
+//			try {
+//				gc.getGraph().getKernelGraph().activateNode(i);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
 		g = (DirectedGraphVar) gc.getGraph();
-		System.out.println(g.getEnvelopGraph());
 		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
@@ -117,8 +122,8 @@ public class NPaths extends AbstractProblem{
 		System.out.println("total duration : "+solver.getMeasures().getTimeCount()+"ms");
 		System.out.println("nbnodes  : "+solver.getMeasures().getNodeCount()+" nodes ");
 		System.out.println("nbSols  : "+solver.getMeasures().getSolutionCount()+" sols ");
-		System.out.println("env "+g.getEnvelopGraph());
-		System.out.println("ker "+g.getKernelGraph());
+//		System.out.println("env "+g.getEnvelopGraph());
+//		System.out.println("ker "+g.getKernelGraph());
 	}
 
 	public static boolean performOneTest(int n, int d){
@@ -134,7 +139,7 @@ public class NPaths extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		smallTest(5,3);
+		smallTest(100,20);
 	}
 
 	private static void smallTest(int n, int d){

@@ -171,7 +171,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 		int pot;
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		INeighbors nei;
-		for (int i = act.nextValue(0); i>=0; i = act.nextValue(i+1)) {
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			if(i<sizeFirstSet){
 				mate = matching[i];
 				if(mate!=-1){
@@ -217,7 +217,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 	private void repairMatching() throws ContradictionException{
 		BitSet iterable = new BitSet(n+1);
 		IActiveNodes act = this.g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getKernelGraph().getNeighborhoodSize(node)==0 || matching[node]==-1){// BEWARE should be good but brought mistakes once (before some bug corrections)
 				iterable.set(node);
 			}
@@ -317,7 +317,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		INeighbors nei;
 		int j;
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(node>=sizeFirstSet)return;
 			if(g.getKernelGraph().getNeighborhoodSize(node)==0){
 				nei = g.getEnvelopGraph().getNeighborsOf(node);
@@ -333,7 +333,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
 			}
 		}
 		act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(node>=sizeFirstSet)return;
 			if(g.getKernelGraph().getNeighborhoodSize(node)==1){
 				j = g.getKernelGraph().getNeighborsOf(node).getFirstElement();

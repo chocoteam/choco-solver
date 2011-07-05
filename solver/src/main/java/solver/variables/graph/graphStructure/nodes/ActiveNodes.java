@@ -28,14 +28,14 @@
 package solver.variables.graph.graphStructure.nodes;
 
 import solver.variables.graph.IActiveNodes;
-import java.util.BitSet;
+import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 févr. 2011
  */
-public class ActiveNodes extends BitSet implements IActiveNodes {
+public class ActiveNodes extends BitSetNeighbors implements IActiveNodes {
 
 	private int n;
 	
@@ -45,28 +45,18 @@ public class ActiveNodes extends BitSet implements IActiveNodes {
     }
 
     @Override
-    public int nextValue(int from) {
-        return this.nextSetBit(from);
-    }
-
-    @Override
-    public int nbActive() {
-        return this.cardinality();
-    }
-
-    @Override
     public void activate(int idx) {
-        this.set(idx,true);
+        add(idx);
     }
 
     @Override
     public void desactivate(int idx) {
-        this.set(idx,false);
+        remove(idx);
     }
 
     @Override
     public boolean isActive(int idx) {
-        return this.get(idx);
+        return contain(idx);
     }
 
 	@Override

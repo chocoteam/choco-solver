@@ -32,9 +32,7 @@ package solver.variables.graph;
  * User: chameau
  * Date: 9 fŽvr. 2011
  */
-public interface IActiveNodes {
-
-    int nbActive();
+public interface IActiveNodes extends INeighbors{
 
     void activate(int idx);
 
@@ -42,19 +40,5 @@ public interface IActiveNodes {
 
     boolean isActive(int idx);
 
-    /**enables to iterate over active nodes
-     * an iteration should be performed using :
-     * 
-     * for(int i=activeNodes.nextValue(0); i>=0; i = activeNodes.nextValue(i+1)){
-     * 		...
-     * }
-     * 
-     * @param from starting position for finding an active node
-     * @return the next active node from position from
-     */
-    int nextValue(int from);
-
-    void clear();
-    
     int nbNodes();
 }

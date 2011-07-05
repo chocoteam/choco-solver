@@ -75,10 +75,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
             return false;
         }
         INeighbors nei;
-        for (int n = envelop.getActiveNodes().nextValue(0); n >= 0; n = envelop.getActiveNodes().nextValue(n + 1)) {
-            nei = envelop.getNeighborsOf(n);
+        IActiveNodes act = getEnvelopGraph().getActiveNodes();
+        for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
+            nei = envelop.getNeighborsOf(i);
             for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                if (!kernel.edgeExists(n, j)) {
+                if (!kernel.edgeExists(i, j)) {
                     return false;
                 }
             }
@@ -91,6 +92,15 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         if (kernel.getActiveNodes().isActive(x)) {
             this.contradiction(cause, "remove mandatory node");
             return true;
+        }else if (!envelop.getActiveNodes().isActive(x)){
+        	return false;
+        }
+        if (reactOnModification) {
+        	INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+        	for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
+        		removeArc(x, i, cause);
+        		removeArc(i, x, cause);
+        	}
         }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
@@ -103,7 +113,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         return false;
     }
 
-    @Override
+	@Override
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
@@ -133,12 +143,12 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public int getEnvelopOrder() {
-        return envelop.getActiveNodes().nbActive();
+        return envelop.getActiveNodes().neighborhoodSize();
     }
 
     @Override
     public int getKernelOrder() {
-        return kernel.getActiveNodes().nbActive();
+        return kernel.getActiveNodes().neighborhoodSize();
     }
 
     @Override

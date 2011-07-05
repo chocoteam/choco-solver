@@ -71,9 +71,9 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
-			g.enforceArc(node, node, this);
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
+			g.enforceArc(i, i, this);
 		}
 	}
 
@@ -95,9 +95,9 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
-			if(!g.getEnvelopGraph().getNeighborsOf(node).contain(node)){
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
+			if(!g.getKernelGraph().getNeighborsOf(i).contain(i)){
 				return ESat.FALSE;
 			}
 		}

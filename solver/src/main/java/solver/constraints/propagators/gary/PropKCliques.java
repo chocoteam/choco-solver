@@ -87,7 +87,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 		float n = g.getEnvelopGraph().getNbNodes();
 		BitSet iter = new BitSet((int)n);
 		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-		for(int i=nodes.nextValue(0);i>=0;i = nodes.nextValue(i+1)){
+		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
 				iter.set(i);
 		}
 		int idx = -1;

@@ -29,7 +29,6 @@ package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -93,7 +92,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int ker = 0;
 		int env = 0;
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				env++;
 				if (g.getKernelGraph().arcExists(node, node)){
@@ -106,7 +105,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		nLoops.updateUpperBound(env, this);
 		int added = 0;
 		if(env==nLoops.getLB()){
-			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
 					g.enforceArc(node, node, this);
 					added ++;
@@ -148,7 +147,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		}else{
 			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 			LinkedList<Integer> loopOutOfKer = new LinkedList<Integer>();
-			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 				if (!g.getKernelGraph().arcExists(node, node)){
 					if (g.getEnvelopGraph().arcExists(node, node)){
 						loopOutOfKer.addFirst(node);
@@ -210,7 +209,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
         			p.nLoops.updateLowerBound(ker, p);
         			if(p.nLoops.getLB() == env && env>ker){
         				act = p.g.getEnvelopGraph().getActiveNodes();
-        				for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+        				for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
             				if (p.g.getEnvelopGraph().arcExists(node, node)){
             					p.g.enforceArc(node, node, p);
             				}

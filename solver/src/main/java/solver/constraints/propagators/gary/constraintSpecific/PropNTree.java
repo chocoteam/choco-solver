@@ -87,9 +87,9 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 		int MAXTREE = calcMaxTree();
 		INeighbors nei;
 		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
-			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
-			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
 					return false;
 				}
@@ -103,11 +103,20 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 			int[] numDFS = GraphTools.performDFS(n, Grs);
-			boolean rootFound = false;
-			for(int i:numDFS){
-				if(rootFound && i==0)return false;
-				if(i==0)rootFound = true;
+//			boolean rootFound = false;
+			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+				if(numDFS[node]==0){
+					System.out.println("merde");
+					return false;
+				}
 			}
+//			for(int i:numDFS){
+//				if(rootFound && i==0){
+//					System.out.println("relou");
+//					return false;
+//				}
+//				if(i==0)rootFound = true;
+//			}
 		}else{
 			return false;
 		}
@@ -116,8 +125,8 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	private int calcMaxTree() {
 		int ct = 0;
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				ct++;
 			}
@@ -136,6 +145,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagate() throws ContradictionException {
 		if(!checkFeasibility()){
+			System.out.println("zgueg");
 			this.contradiction(g, "infeasible");
 		}else{
 			structuralPruning();
@@ -145,30 +155,40 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		if (request instanceof GraphRequest) {
-			filtering();
+			if(!checkFeasibility()){
+				System.out.println("z");
+				this.contradiction(g, "infeasible");
+			}else{
+				filtering();
+			}
 		}
 	}
 
 	private void structuralPruning() throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
 		INeighbors nei;
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
-			nei = g.getEnvelopGraph().getSuccessorsOf(node);
-			for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
-				Grs.addArc(suc, node);
-				if(suc==node){
-					Grs.addArc(node, n);
-					Grs.addArc(n, node);
+		for (int node = 0; node<n; node++) {
+			if(env.isActive(node)){
+				nei = g.getEnvelopGraph().getSuccessorsOf(node);
+				for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
+					Grs.addArc(suc, node);
+					if(suc==node){
+						Grs.addArc(node, n);
+						Grs.addArc(n, node);
+					}
 				}
+			} else{ // enables to manage deleted nodes
+				Grs.addArc(node, n);
+				Grs.addArc(n, node);
 			}
 		}
 		//dominators
 		FlowGraphManager flowGM = new FlowGraphManager(n, Grs); 
 		//LCA preprocessing
 		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.SPARSE);
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 			dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
 		}
 		//PREPROCESSING
@@ -215,7 +235,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 		out[n] = time;
 		//END_PREPROCESSING
 		//queries
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 			nei = g.getEnvelopGraph().getSuccessorsOf(node);
 			for(int suc = nei.getFirstElement(); suc>=0; suc = nei.getNextElement()){
 				//--- STANDART PRUNING
@@ -282,7 +302,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
 	}
 
 	@Override

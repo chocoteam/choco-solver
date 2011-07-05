@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -84,14 +83,14 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				setPassive();
 			}else{
 				if(g.getEnvelopOrder()==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
 							g.removeNode(node, this);
 						}
@@ -111,14 +110,14 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				setPassive();
 			}else{
 				if(g.getEnvelopOrder()==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
 							g.removeNode(node, this);
 						}

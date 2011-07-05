@@ -120,7 +120,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		int max = ccKer.size();
 		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
 //			throw new UnsupportedOperationException("case not implemented yet ");
-			max += env.nbActive() - ker.nbActive();
+			max += env.neighborhoodSize() - ker.neighborhoodSize();
 		}
 		// TODO couplage generalise
 		// PRUNING
@@ -132,7 +132,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 			if(k.getValue()==max){
 				INeighbors nei;
 				env = g.getEnvelopGraph().getActiveNodes();
-				for(int i = env.nextValue(0); i>=0; i = env.nextValue(i+1)){
+				for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
@@ -212,7 +212,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		}
 		int max = ccKer.size();
 		if(g.getEnvelopOrder() - g.getKernelOrder()!=0){
-			max += env.nbActive() - ker.nbActive();
+			max += env.neighborhoodSize() - ker.neighborhoodSize();
 //			throw new UnsupportedOperationException("case not implemented yet ");
 		}
 		// TODO couplage generalise
@@ -226,7 +226,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 			if(k.getValue()==max){
 				INeighbors nei;
 				env = g.getEnvelopGraph().getActiveNodes();
-				for(int i = env.nextValue(0); i>=0; i = env.nextValue(i+1)){
+				for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
@@ -349,7 +349,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		leadToActiveNode.clear();
 		notOpenedNodes.clear();
 		notFirst.clear();
-		for (int i = g.getEnvelopGraph().getActiveNodes().nextValue(0); i>=0; i = g.getEnvelopGraph().getActiveNodes().nextValue(i+1)) {
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			p[i] = -1;
 			neighbors[i] = g.getEnvelopGraph().getNeighborsOf(i);
 			if(actKer.isActive(i)){
@@ -421,7 +422,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		
 		// POST ORDER PASS FOR FINDING ISTHMUS
 		BitSet importantNode = new BitSet(inf.length);
-		for (i = g.getKernelGraph().getActiveNodes().nextValue(0); i>=0; i = g.getKernelGraph().getActiveNodes().nextValue(i+1)) {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for (i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
 			importantNode.set(i);
 		}
 		for(i=0;i<co.getArticulationPoints().size();i++){

@@ -33,6 +33,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 
 import java.util.BitSet;
@@ -94,12 +95,12 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 
 	@Override
 	public boolean instantiated() {
-		for(int n=envelop.activeIdx.nextValue(0); n>=0; n=envelop.activeIdx.nextValue(n+1)){
-			if(!kernel.activeIdx.isActive(n)){
+		for(int i=envelop.activeIdx.getFirstElement(); i>=0; i=envelop.activeIdx.getNextElement()){
+			if(!kernel.activeIdx.isActive(i)){
 				return false;
 			}
-			for(int j=envelop.getSuccessorsOf(n).getFirstElement();j>=0; j=envelop.getSuccessorsOf(n).getNextElement()){
-				if(!kernel.arcExists(n, j)){
+			for(int j=envelop.getSuccessorsOf(i).getFirstElement();j>=0; j=envelop.getSuccessorsOf(i).getNextElement()){
+				if(!kernel.arcExists(i, j)){
 					return false;
 				}
 			}
@@ -166,13 +167,21 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	 * @return a randomly choosen arc 
 	 */
 	public int nextArc() {
-		return nextArcRandom2();
-		//		return nextArcLexicographic();
+//		return nextArcRandom2();
+		return NodesThenArcsLex();
 	}
-	private int nextArcLexicographic() {
+	private int NodesThenArcsLex() {
 		INeighbors nei;
 		int n = getEnvelopGraph().getNbNodes();
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes env = getEnvelopGraph().getActiveNodes();
+		if(getEnvelopOrder()!=getKernelOrder()){
+			for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+				if(!getKernelGraph().getActiveNodes().isActive(i)){
+					return i;
+				}
+			}
+		}
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
 				nei = envelop.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -188,7 +197,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		int n = getEnvelopGraph().getNbNodes();
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
 		INeighbors nei;
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
 			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
 				nei = envelop.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -206,7 +216,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		INeighbors nei;
 		int n = getEnvelopGraph().getNbNodes();
 		LinkedList<Integer> arcs = new LinkedList<Integer>();
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
 			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
 				if(kernel.successors[i].neighborhoodSize()>0){
 					throw new UnsupportedOperationException("error in 1-succ filtering");

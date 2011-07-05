@@ -32,6 +32,7 @@ import gnu.trove.TIntArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
 
@@ -63,7 +64,8 @@ public class ConnectivityFinder {
 		INeighbors[] neighbors = new INeighbors[nb];
 		BitSet notOpenedNodes = new BitSet(nb);
 		BitSet notFirst = new BitSet(nb);
-		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
+		IActiveNodes act = graph.getActiveNodes();
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			inf[i] = Integer.MAX_VALUE;
 			p[i] = -1;
 			notOpenedNodes.set(i);
@@ -254,7 +256,7 @@ public class ConnectivityFinder {
 		INeighbors[] neighbors = new INeighbors[nb];
 		BitSet notOpenedNodes = new BitSet(nb);
 		BitSet notFirsts = new BitSet(nb);
-		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
+		for (int i = graph.getActiveNodes().getFirstElement(); i>=0; i = graph.getActiveNodes().getNextElement()) {
 			p[i] = -1;
 			notOpenedNodes.set(i);
 			neighbors[i] = graph.getNeighborsOf(i);

@@ -144,6 +144,7 @@ public abstract class Assignment<V extends Variable> {
             	int to   = value%n;
             	var.removeArc(from, to, cause);
             }else{
+//            	System.out.println("rem "+value);
             	var.removeNode(value, cause);
             }
         }

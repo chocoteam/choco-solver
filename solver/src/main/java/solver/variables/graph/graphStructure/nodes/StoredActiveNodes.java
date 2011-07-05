@@ -28,15 +28,15 @@
 package solver.variables.graph.graphStructure.nodes;
 
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.S64BitSet;
 import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 9 févr. 2011
  */
-public class StoredActiveNodes extends S64BitSet implements IActiveNodes {
+public class StoredActiveNodes extends StoredBitSetNeighbors implements IActiveNodes {
 
 	private int n;
 	
@@ -46,28 +46,18 @@ public class StoredActiveNodes extends S64BitSet implements IActiveNodes {
     }
 
     @Override
-    public int nextValue(int from) {
-        return this.nextSetBit(from);
-    }
-
-    @Override
-    public int nbActive() {
-        return this.cardinality();
-    }
-
-    @Override
     public void activate(int idx) {
-        this.set(idx,true);
+        add(idx);
     }
 
     @Override
     public void desactivate(int idx) {
-        this.set(idx,false);
+        remove(idx);
     }
 
     @Override
     public boolean isActive(int idx) {
-        return this.get(idx);
+        return contain(idx);
     }
 
 	@Override

@@ -131,7 +131,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			nei = g.getEnvelopGraph().getNeighborsOf(node); 
 			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && nei.neighborhoodSize()>n_neighbors){
 				for(next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
@@ -164,7 +164,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	@Override
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getKernelGraph().getNeighborhoodSize(node)>n_neighbors){
 				return ESat.FALSE;
 			}

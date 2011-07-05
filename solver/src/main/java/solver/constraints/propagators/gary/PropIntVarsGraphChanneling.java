@@ -99,7 +99,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 			}
 		}
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
-		for(int i=act.nextValue(0); i>=0; i=act.nextValue(i+1)){
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			if (g.getKernelGraph().getNeighborhoodSize(i)==1){
 				if(i<intVars.length){
 					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);

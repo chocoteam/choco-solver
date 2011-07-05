@@ -39,8 +39,8 @@ import solver.variables.graph.INeighbors;
  */
 public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 
-	private int current;	//enables to iterate
-	private IStateInt card;	// enables to get the cardinality in O(1)
+	protected int current;	//enables to iterate
+	protected IStateInt card;	// enables to get the cardinality in O(1)
 	
     public StoredBitSetNeighbors(IEnvironment environment, int nbits) {
         super(environment, nbits);
@@ -88,4 +88,10 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
 		current = nextSetBit(current+1);
 		return current;
 	}
+	
+	@Override
+    public void clear() {
+		super.clear();
+		card.set(0);
+    }
 }

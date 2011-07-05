@@ -104,7 +104,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
 			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
-			for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
 					return ESat.FALSE;
 				}
@@ -136,7 +136,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	private int calcMaxTree() {
 		int ct = 0;
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		for (int node = act.nextValue(0); node>=0; node = act.nextValue(node+1)) {
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if (g.getEnvelopGraph().arcExists(node, node)){
 				ct++;
 			}

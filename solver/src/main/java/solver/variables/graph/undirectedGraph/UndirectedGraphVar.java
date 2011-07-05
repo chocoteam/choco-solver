@@ -34,6 +34,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 
 import java.util.BitSet;
@@ -136,7 +137,17 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	}
 	private int nextArcLexicographic() {
 		int n = getEnvelopGraph().getNbNodes();
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		
+		if(getEnvelopOrder()!=getKernelOrder()){
+			for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
+				if(!getKernelGraph().getActiveNodes().isActive(i)){
+					return i;
+				}
+			}
+		}
+		
+		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
 			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
 				INeighbors nei = envelop.getNeighborsOf(i);
 	    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
@@ -151,7 +162,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	private int nextArcRandom() {
 		int n = getEnvelopGraph().getNbNodes();
 		TIntArrayList arcs = new TIntArrayList(n);
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
 			if(kernel.neighbors[i].neighborhoodSize()>1){
 				throw new UnsupportedOperationException("error in 1-succ filtering");
 			}
@@ -174,7 +186,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	private int nextArcRandom2() {
 		int n = getEnvelopGraph().getNbNodes();
 		TIntArrayList arcs = new TIntArrayList(n);
-		for (int i=getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=getEnvelopGraph().getActiveNodes().nextValue(i+1)){
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
 			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
 				if(kernel.neighbors[i].neighborhoodSize()>0){
 					throw new UnsupportedOperationException("error in 1-succ filtering");

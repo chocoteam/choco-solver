@@ -132,7 +132,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 	@Override
 	public ESat isEntailed() {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		for(int i=ker.nextValue(0); i>=0; i = ker.nextValue(i+1)){
+		for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
 			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds.getLB() ||
 			   g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()>nPreds.getUB()){
 				return ESat.FALSE;

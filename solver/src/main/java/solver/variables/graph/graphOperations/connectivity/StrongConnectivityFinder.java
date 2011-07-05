@@ -46,7 +46,7 @@ public class StrongConnectivityFinder {
 	public static ArrayList<TIntArrayList> findAllSCCOf(IDirectedGraph graph){
 		int n = graph.getNbNodes();
 		BitSet bitSCC = new BitSet(n);
-		for (int i = graph.getActiveNodes().nextValue(0); i>=0; i = graph.getActiveNodes().nextValue(i+1)) {
+		for (int i = graph.getActiveNodes().getFirstElement(); i>=0; i = graph.getActiveNodes().getNextElement()) {
 			bitSCC.set(i);
 		}
 		return findAllSCCOf(graph, bitSCC);

@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -68,10 +67,10 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		INeighbors nei;
-		for(int i=ker.nextValue(0);i>=0;i = ker.nextValue(i+1)){
+		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
 			min += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
-		for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			max += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
 		k.updateLowerBound(min, this);
@@ -83,7 +82,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 				setPassive();
 			}else{
 				if(max==k.getValue()){
-					for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							g.enforceArc(i, j, this);
@@ -92,7 +91,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 					setPassive();
 				}else if(min==k.getValue()){
 					INeighbors kernei;
-					for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						kernei = g.getKernelGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
@@ -117,7 +116,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 				INeighbors nei;
 				if(nbInEnv.get()==k.getValue()){
-					for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							g.enforceArc(i, j, this);
@@ -126,7 +125,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 					setPassive();
 				}else if(nbInKer.get()==k.getValue()){
 					INeighbors kernei;
-					for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						kernei = g.getKernelGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
@@ -156,10 +155,10 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 		int max = 0;
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for(int i=ker.nextValue(0);i>=0;i = ker.nextValue(i+1)){
+		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
 			min += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
-		for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			max += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
 		if(k.getLB()>max || k.getUB()<min){

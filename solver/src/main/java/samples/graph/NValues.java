@@ -33,6 +33,7 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -68,13 +69,13 @@ public class NValues extends AbstractProblem{
 	@Override
 	public void buildModel() { 
 		solver = new Solver();
-		vars = VariableFactory.enumeratedArray("vars", n, 0, 2*n-1, solver);
-//		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2,5,42}, solver);
-//		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3,5,12}, solver);
-		vars[2] = VariableFactory.enumerated("vars_2", new int[]{1,2}, solver);
+		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
+		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2}, solver);
+		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
+		vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
 		vars[3] = VariableFactory.enumerated("vars_3", new int[]{2,3}, solver);
 		IntVar nv = VariableFactory.enumerated("n", 4,4, solver);
-		IntVar nVal = VariableFactory.bounded("N_CC", 3,3, solver);
+		IntVar nVal = VariableFactory.bounded("N_CC", k,k, solver);
 		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver, PropagatorPriority.LINEAR);
 		g = (UndirectedGraphVar) gc.getGraph();
 		gc.addProperty(GraphProperty.K_NODES, nv);
@@ -90,6 +91,7 @@ public class NValues extends AbstractProblem{
 
 	@Override
 	public void solve() {
+		SearchMonitorFactory.log(solver, false, false);
 		Boolean status = solver.findSolution();
 	}
 

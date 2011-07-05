@@ -75,7 +75,6 @@ public class GraphConstraintFactory {
 	
 	/**There will be exactly NVal distinct values in the collection of variables (integers,vectors,tasks,sets...) vars 
 	 * It is generic!
-	 * WARNING very bad if a subgraph is required
 	 * @param vars variables (nodes in the graph), they must have the same type
 	 * @param NVal number of distinct values
 	 * @param solver 
@@ -90,7 +89,6 @@ public class GraphConstraintFactory {
 	}
 	
 	/**There will be exactly NVal distinct integer values in the collection of integer variables vars 
-	 * WARNING very bad if a subgraph is required
 	 * @param vars variables (nodes in the graph)
 	 * @param NInt number of distinct integer values
 	 * @param solver 
@@ -102,7 +100,6 @@ public class GraphConstraintFactory {
 	}
 	
 	/**There will be exactly NVal distinct vectors in the collection of vector variables vars 
-	 * WARNING very bad if a subgraph is required
 	 * @param vars variables (nodes in the graph)
 	 * @param NVect number of distinct vectors
 	 * @param solver 

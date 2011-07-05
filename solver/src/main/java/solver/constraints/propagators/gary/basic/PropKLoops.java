@@ -29,7 +29,6 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -63,6 +62,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	private int n;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
+	private IntProcedure nodeRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -73,8 +73,8 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();
-		nbInEnv = environment.makeInt();
-		nbInKer = environment.makeInt();
+		nbInEnv = environment.makeInt(0);
+		nbInKer = environment.makeInt(0);
 		arcEnforced = new EnfArc();
 		arcRemoved  = new RemArc();
 	}
@@ -87,15 +87,12 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	public void propagate() throws ContradictionException {
 		int min = 0;
 		int max = 0;
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for(int i=ker.nextValue(0);i>=0;i = ker.nextValue(i+1)){
-			if(g.getKernelGraph().edgeExists(i, i)){
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+			if(g.getKernelGraph().arcExists(i, i)){
 				min++;
 			}
-		}
-		for(int i=env.nextValue(0);i>=0;i = env.nextValue(i+1)){
-			if(g.getEnvelopGraph().edgeExists(i, i)){
+			if(g.getEnvelopGraph().arcExists(i, i)){
 				max++;
 			}
 		}
@@ -108,17 +105,15 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				setPassive();
 			}else{
 				if(max==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
-						if(g.getEnvelopGraph().edgeExists(node, node)){
+					for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+						if(g.getEnvelopGraph().arcExists(node, node)){
 							g.enforceArc(node,node, this);
 						}
 					}
 					setPassive();
 				}else if(min==k.getValue()){
-					IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-					for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
-						if(g.getEnvelopGraph().edgeExists(node, node) && !g.getKernelGraph().edgeExists(node, node)){
+					for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+						if(g.getEnvelopGraph().arcExists(node, node) && !g.getKernelGraph().arcExists(node, node)){
 							g.removeArc(node,node, this);
 						}
 					}
@@ -140,21 +135,25 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 			}
+//			if((mask & EventType.REMOVENODE.mask)!=0){
+//				IntDelta d = (IntDelta) g.getDelta().getNodeRemovalDelta();
+//				d.forEach(nodeRemoved, gr.fromNodeRemoval(), gr.toNodeRemoval());
+//			}
 			k.updateLowerBound(nbInKer.get(), this);
 			k.updateUpperBound(nbInEnv.get(), this);
 		}
 		if(k.instantiated()){
 			if(nbInEnv.get()==k.getValue()){
-				IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-				for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+				for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 					if(g.getEnvelopGraph().edgeExists(node, node)){
 						g.enforceArc(node,node, this);
 					}
 				}
 				setPassive();
 			}else if(nbInKer.get()==k.getValue()){
-				IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-				for(int node=act.nextValue(0); node>=0; node = act.nextValue(node+1)){
+				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+				for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 					if(g.getEnvelopGraph().edgeExists(node, node) && !g.getKernelGraph().edgeExists(node, node)){
 						g.removeArc(node,node, this);
 					}
@@ -170,11 +169,27 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
+		return  EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		int min = 0;
+		int max = 0;
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
+			if(g.getKernelGraph().arcExists(i, i)){
+				min++;
+			}else if(g.getEnvelopGraph().arcExists(i, i)){
+				max++;
+			}
+		}
+		if(k.getLB()>min+max || k.getUB()<min){
+			return ESat.FALSE;
+		}
+		if(k.instantiated()){
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 
@@ -199,6 +214,21 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 			int to   = i%n;
 			if(from == to){
 				nbInEnv.set(nbInEnv.get()-1);
+			}
+		}
+	}
+	private class RemNode implements IntProcedure{
+		@Override
+		public void execute(int i) throws ContradictionException {
+			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+			int max = 0;
+			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+				if(g.getEnvelopGraph().edgeExists(node, node)){
+					max ++;
+				}
+			}
+			if(max < nbInEnv.get()){
+				nbInEnv.set(max);
 			}
 		}
 	}
