@@ -36,7 +36,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphVar;
 
-public class DigraphArcDecision extends AbstractDecision<GraphVar> {
+public class GraphDecision extends AbstractDecision<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -51,7 +51,7 @@ public class DigraphArcDecision extends AbstractDecision<GraphVar> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 	
-    public DigraphArcDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
+    public GraphDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
 		g = variable;
 		this.fromTo = fromTo;
 		assignment = graph_ass;

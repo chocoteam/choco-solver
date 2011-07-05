@@ -33,7 +33,7 @@ import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.DigraphStrategy;
+import solver.search.strategy.strategy.GraphStrategy;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -157,6 +157,6 @@ public final class StrategyFactory {
 
 
     public static <G extends GraphVar> AbstractStrategy randomArcs(G vars) {
-        return new DigraphStrategy(vars);
+        return new GraphStrategy(vars);
     }
 }
