@@ -111,6 +111,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 					added ++;
 				}			
 			}
+			setPassive();
 		}
 		nbEnvLoop.set(env);
 		nbKerLoop.set(ker+added);

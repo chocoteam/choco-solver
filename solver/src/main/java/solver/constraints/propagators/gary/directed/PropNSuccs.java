@@ -43,8 +43,6 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-import java.util.LinkedList;
-
 /**
  * @author Jean-Guillaume Fages
  * 
@@ -129,7 +127,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 			if (i>=n){
 				int from = i/n-1;
 				INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
-				if(succs.neighborhoodSize()==p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()!=p.nSuccs){
+				if(p.g.getKernelGraph().getActiveNodes().isActive(from) && succs.neighborhoodSize()==p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()!=p.nSuccs){
 					for(int j= succs.getFirstElement(); j>=0; j=succs.getNextElement()){
 						p.g.enforceArc(from, j, p);
 					}
@@ -157,14 +155,10 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				int eto   = i%n;
 				INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
 				if(succs.neighborhoodSize()>p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()==p.nSuccs){
-					LinkedList<Integer> toRemove = new LinkedList<Integer>();
 					for(eto = succs.getFirstElement(); eto>=0; eto = succs.getNextElement()){
 						if (!p.g.getKernelGraph().arcExists(from, eto)){
-							toRemove.addFirst(eto);
+							p.g.removeArc(from, eto, p);
 						}
-					}
-					for(int next:toRemove){
-						p.g.removeArc(from, next, p);
 					}
 				}
 			}else{
@@ -174,10 +168,8 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	}
 
 	private void check() throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
 		int k;
 		INeighbors nei;
-		LinkedList<Integer> arcs = new LinkedList<Integer>();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 			k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
@@ -191,22 +183,16 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 					if (!g.getKernelGraph().arcExists(i, j)){
-						arcs.addFirst((i+1)*n+j);
+						g.removeArc(i, j, this);
 					}
 				}
 			}
-			if(k<nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == nSuccs){
+			if(k<nSuccs && g.getKernelGraph().getActiveNodes().isActive(i) && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == nSuccs){
 				nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-					if (!g.getKernelGraph().arcExists(i, j)){
-						arcs.addFirst((i+1)*n+j);
-					}
 					g.enforceArc(i, j, this);
 				}
 			}
-		}
-		for(int next:arcs){
-			g.removeArc(next/n-1, next%n, this);
 		}
 	}
 }

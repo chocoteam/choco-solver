@@ -81,11 +81,11 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 			addProperty(gp);
 		}
 	}
-	
+
 	//***********************************************************************************
 	// ADDING GRAPH PROPERTIES
 	//***********************************************************************************
-	
+
 	/**Add a graph property to the constraint
 	 * @param prop property required on the graph
 	 * @param parameters eventually required parameters (see the description of the graph property)
@@ -96,7 +96,24 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		}else{
 			properties.add(prop);
 			if(parameters != null && parameters.length>0){
-				this.vars = (V[])ArrayUtils.append(vars,parameters);
+				if(vars == null){
+					this.vars = (V[])ArrayUtils.append(vars,parameters);
+				}else{
+					boolean notIn;
+					for(IntVar var:parameters){
+						notIn = true;
+						for(V v:vars){
+							if(v==var){
+								notIn = false;
+								break;
+							}
+						}
+						if(notIn){
+							this.vars = (V[])ArrayUtils.append(vars,new IntVar[]{var});
+						}
+					}
+					//				this.vars = (V[])ArrayUtils.append(vars,parameters);
+				}
 			}
 			setPropagators(ArrayUtils.append(propagators, prop.getPropagators(this, parameters)));
 		}
@@ -109,31 +126,33 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	public IEnvironment getEnvironment(){
 		return solver.getEnvironment();
 	}
-	
+
 	public Solver getSolver(){
 		return solver;
 	}
-	
+
 	/**get the graph representing the constraint
 	 * @return graph
 	 */
 	public GraphVar getGraph(){
 		return graph;
 	}
-	
+
 	/**Get the meaning of an arc
 	 * @return relation
 	 */
 	public GraphRelation<V> getRelation(){
 		return relation;
 	}
-	
+
 	//***********************************************************************************
 	// CONSTRAINT METHODS
 	//***********************************************************************************
 
 	@Override
 	public ESat isSatisfied() {
+		if(true)throw new UnsupportedOperationException("error ");
+
 		return isEntailed();
 	}
 

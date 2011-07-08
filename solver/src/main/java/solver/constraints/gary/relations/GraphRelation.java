@@ -71,6 +71,20 @@ public abstract class GraphRelation<V extends Variable> {
 	 * @throws ContradictionException
 	 */
 	public abstract void applyFalse(int x, int y, Solver solver, Propagator prop) throws ContradictionException;
+	
+
+	/** say !(xRy) AND !(yRx)
+	 * TO USE ONLY WHEN A DIRECTED META RELATION COMPOSED OF AT LEAST ONE UNDIRECTED RELATION IS USED
+	 * Apply the filtering defined by !(xRy) so it apply the filtering of the opposite relation : x(!R)y
+	 * @param x index of node/var
+	 * @param y index of node/var
+	 * @param solver
+	 * @param prop
+	 * @throws ContradictionException
+	 */
+	public void applySymmetricFalse(int x, int y, Solver solver, Propagator prop) throws ContradictionException {
+		applyFalse(x, y, solver, prop);
+	}
 
 	/**
 	 * @return true iff the relation is not symmetric : the corresponding graph should be directed. 

@@ -106,7 +106,6 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 //			boolean rootFound = false;
 			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 				if(numDFS[node]==0){
-					System.out.println("merde");
 					return false;
 				}
 			}
@@ -145,10 +144,10 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagate() throws ContradictionException {
 		if(!checkFeasibility()){
-			System.out.println("zgueg");
 			this.contradiction(g, "infeasible");
 		}else{
-			structuralPruning();
+//			structuralPruning();
+			filtering();
 		}
 	}
 
@@ -156,7 +155,6 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		if (request instanceof GraphRequest) {
 			if(!checkFeasibility()){
-				System.out.println("z");
 				this.contradiction(g, "infeasible");
 			}else{
 				filtering();

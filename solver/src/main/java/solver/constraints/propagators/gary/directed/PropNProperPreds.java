@@ -72,7 +72,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 			V graph,
 			Solver solver,
 			Constraint<V, Propagator<V>> constraint, IntVar nbPreds) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, true);
 		g = graph;
 		nPreds = nbPreds;
 		rem = new RemProc(this);
@@ -101,7 +101,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 				}
 			}
 			if(np<nPreds.getLB()){
-				this.contradiction(g, "no proper predecessor");
+				this.contradiction(g, "not enough proper predecessor");
 			}
 		}
 		//TODO

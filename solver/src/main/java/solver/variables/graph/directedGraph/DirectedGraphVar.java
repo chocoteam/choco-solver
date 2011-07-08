@@ -76,7 +76,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	public DirectedGraphVar(Solver solver, int nbNodes, GraphType type) {
 		this(solver,nbNodes,type,type);
 	}
-	
+
 
 	//***********************************************************************************
 	// METHODS
@@ -107,7 +107,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
@@ -121,12 +121,12 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			EventType e = EventType.REMOVEARC;
 			notifyPropagators(e, cause);
 			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
-        		removeNode(x, null);
-        	}
+				removeNode(x, null);
+			}
 			if(getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize()==0){
-        		removeNode(y, null);
-        	}
-        	return true;
+				removeNode(y, null);
+			}
+			return true;
 		}return false;
 	}
 	@Override
@@ -167,8 +167,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	 * @return a randomly choosen arc 
 	 */
 	public int nextArc() {
-//		return nextArcRandom2();
-		return NodesThenArcsLex();
+		return NodesThenArcsRd();
 	}
 	private int NodesThenArcsLex() {
 		INeighbors nei;
@@ -187,6 +186,42 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 					if (!kernel.arcExists(i, j)){
 						return (i+1)*n+j;
+					}
+				}
+			}
+		}
+		return -1;
+	}
+	private int NodesThenArcsRd() {
+		INeighbors nei;
+		int n = getEnvelopGraph().getNbNodes();
+		IActiveNodes env = getEnvelopGraph().getActiveNodes();
+		Random rd = new Random(seed);
+		int delta = getEnvelopOrder()-getKernelOrder();
+		if(delta!=0){
+			delta = rd.nextInt(delta);
+			for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+				if(!getKernelGraph().getActiveNodes().isActive(i)){
+					if(delta == 0){
+						return i;
+					}else{
+						delta--;
+					}
+				}
+			}
+		}
+		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+			delta = envelop.successors[i].neighborhoodSize() - kernel.successors[i].neighborhoodSize();
+			if(delta != 0){
+				nei = envelop.getSuccessorsOf(i);
+				delta = rd.nextInt(delta);
+				for (int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!getKernelGraph().arcExists(i, j)){
+						if(delta == 0){
+							return (i+1)*n+j;
+						}else{
+							delta--;
+						}
 					}
 				}
 			}

@@ -257,7 +257,8 @@ public enum GraphProperty {
 			}
 			DirectedGraphVar graph = (DirectedGraphVar) cons.graph;
 			Solver solver = cons.getSolver();
-			return new GraphPropagator[]{new PropNSuccs(graph, solver, cons, PropagatorPriority.LINEAR, true, 1),
+			return new GraphPropagator[]{
+					new PropNSuccs(graph, solver, cons, PropagatorPriority.LINEAR, true, 1),
 					new PropNLoopsTree(graph, k, solver, cons, PropagatorPriority.LINEAR, true),
 					new PropNTree(graph, k,solver,cons, PropagatorPriority.VERY_SLOW,true)};
 		}

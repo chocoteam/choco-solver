@@ -28,65 +28,84 @@ package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
 import solver.Solver;
+import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.MetaVariable;
+import solver.variables.IntVar;
 
-public abstract class MetaRelation extends GraphRelation<MetaVariable> {
+/**Relation of distance (fixed) between two integer variables 
+ * Used for VRP (time windows)
+ * Xi + MATRIX_i_j = Xj
+ * 
+ * @author Jean-Guillaume Fages
+ *
+ */
+public class Dist_Int extends GraphRelation<IntVar> {
 	
+	private int[][] distanceMatrix;
 
-	protected int dim;
-	protected GraphRelation[] unidimRelation;
-	
-	protected MetaRelation(MetaVariable[] vars) {
+	protected Dist_Int(IntVar[] vars, int[][] matrix) {
 		super(vars);
-		dim = vars[0].getComponents().length;
-		unidimRelation = new GraphRelation[dim];
+		this.distanceMatrix = matrix;
+		if(matrix.length!=matrix[0].length){
+			throw new UnsupportedOperationException("the distance matrix should be squarred");
+		}
 	}
 
 	@Override
 	public ESat isEntail(int var1, int var2) {
-		ESat entail = ESat.TRUE;
-		for(int i=0; i<dim; i++){
-			entail = and(entail, unidimRelation[i].isEntail(var1, var2));
-			if(entail == ESat.FALSE){
-				return entail;
+		if(var1 == var2){
+			if(distanceMatrix[var1][var2]==0){
+				return ESat.TRUE;
+			}else{
+				return ESat.FALSE;
 			}
 		}
-		if(entail==ESat.TRUE)return ESat.UNDEFINED;
-		return entail;
+		IntVar x = vars[var1];
+		IntVar y = vars[var2];
+		if(x.getLB()+distanceMatrix[var1][var2]>y.getUB() || x.getUB()+distanceMatrix[var1][var2]<y.getLB()){
+			return ESat.FALSE;
+		}
+		if(x.instantiated() && y.instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
 	
 	@Override
 	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, prop);
+		if(var1 != var2){
+			IntVar x = vars[var1];
+			IntVar y = vars[var2];
+			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], prop);
+			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], prop);
+			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], prop);
+			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], prop);
 		}
 	}
 	
 	@Override
 	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, prop);
-			}
-		}
-	}
-	
-	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, prop);
+		if(var1 != var2){
+			IntVar x = vars[var1];
+			IntVar y = vars[var2];
+			if (x.instantiated()) {
+	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], prop);
+	        } else if (y.instantiated()) {
+	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], prop);
+	        }
+		}else if(distanceMatrix[var1][var2]==0){
+//			vars[var1].contradiction(prop, "x != x"); 
 		}
 	}
 	
 	@Override
 	public boolean isDirected() {
-		for(int i=0; i<dim; i++){
-			if(unidimRelation[i].isDirected()){
-				return true;
-			}
-		}
-		return false;
+		return true;
+	}
+	
+	@Override
+	public GraphProperty[] getGraphProperties() {
+		return new GraphProperty[]{GraphProperty.REFLEXIVITY};
 	}
 }
