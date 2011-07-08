@@ -37,6 +37,7 @@ import solver.constraints.gary.GraphProperty;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.constraintSpecific.PropTruckDepArr;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -45,7 +46,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import java.util.Random;
-
 import choco.kernel.ResolutionPolicy;
 
 public class VRP extends AbstractProblem{
@@ -114,6 +114,9 @@ public class VRP extends AbstractProblem{
 		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
 		// controls the number of visited customers
 		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("nNodes",nbVisitedCustomers+2*nTrucks.getLB(),nbVisitedCustomers+2*nTrucks.getUB(), solver));
+
+		gc.addAdHocProp(new PropTruckDepArr(g, nbMaxTrucks, solver, gc, PropagatorPriority.UNARY, false));
+		
 		Constraint[] cstrs = new Constraint[n+1];
 		for(int i=0;i<n;i++){ // meta constraints : when a component variable (e.g. time window variable) is modifyed the meta variable to which it belongs is notifyed
 			cstrs[i] = new MetaVarConstraint(nodes[i].getComponents(), nodes[i], solver);
@@ -133,17 +136,17 @@ public class VRP extends AbstractProblem{
 	public void solve() {
 		solver.getSearchLoop().getLimitsFactory().setTimeLimit(30000);
 		SearchMonitorFactory.log(solver, true, false);
-		solver.findSolution();
-//		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
+//		solver.findSolution();
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
 	}
 
 	@Override
 	public void prettyOut() {
 //		System.out.println("env "+g.getEnvelopGraph());
 		for(int i=0;i<n;i++){
-			System.out.println(nodes[i]);
+//			System.out.println(nodes[i]);
 		}
-		System.out.println("ker "+g.getKernelGraph());
+//		System.out.println("ker "+g.getKernelGraph());
 		
 		System.out.println(nTrucks);
 	}
@@ -177,15 +180,15 @@ public class VRP extends AbstractProblem{
 			}
 			distancesMatrix[i+1][i+1] = 0; // (only truck arrival nodes have a loop)
 		}
-		//String s = "";
-		//for(int i=0; i<n ; i++){
-		//	s+="\n";
-		//	for(int j=0;j<n;j++){
-		//		s+="\t"+distancesMatrix[i][j];
-		//	}
-		//}
-		//System.out.println(s);
-		//System.exit(0);
+//		String s = "";
+//		for(int i=0; i<n ; i++){
+//			s+="\n";
+//			for(int j=0;j<n;j++){
+//				s+="\t"+distancesMatrix[i][j];
+//			}
+//		}
+//		System.out.println(s);
+//		System.exit(0);
 		return distancesMatrix;
 	}
 	
@@ -194,9 +197,9 @@ public class VRP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		int nbCustomers = 10;
+		int nbCustomers = 8;
 		int nbSatisfyedCustomers = 5;
-		int nbTrucks	 = 2;
+		int nbTrucks	 = 3;
 		seed = 0;
 		DirectedGraphVar.seed = seed;
 		VRP sample = new VRP(nbCustomers, nbSatisfyedCustomers, nbTrucks);

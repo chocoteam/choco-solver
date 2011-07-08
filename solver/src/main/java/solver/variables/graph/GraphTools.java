@@ -41,13 +41,13 @@ public class GraphTools {
 	//***********************************************************************************
 	// IGraph explorations
 	//***********************************************************************************
-
+	
 	/**perform a dfs in graph.
 	 * @param root starting point of the dfs
 	 * @param graph to perform a dfs on
 	 * @return num an array to represent node numbers in the dfs tree
 	 */
-	public static int[] performDFS(int root, IGraph graph){
+	public static int[] performDFS(int root, IDirectedGraph graph){
 		int nb = graph.getNbNodes();
 		INeighbors[] neighbors = new INeighbors[nb];
 		int[] father = new int[nb];
@@ -55,7 +55,7 @@ public class GraphTools {
 		BitSet notFirstTime = new BitSet(nb);
 		for (int i=0; i<nb; i++){
 			father[i] = -1;
-			neighbors[i] = graph.getNeighborsOf(i);
+			neighbors[i] = graph.getSuccessorsOf(i);
 		}
 		int i = root;
 		int k = 0;

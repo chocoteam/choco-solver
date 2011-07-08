@@ -160,8 +160,11 @@ public class FlowGraphManager {
 				}
 			}
 		}
-		for(i=0;i<nbNodes;i++){
-			if(dfsNumberOfNode[i]==-1)throw new UnsupportedOperationException();
+		INeighbors nei = graph.getActiveNodes();
+		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+			if(dfsNumberOfNode[i]==-1) {
+				throw new UnsupportedOperationException();
+			}
 		}
 	}
 
@@ -175,30 +178,32 @@ public class FlowGraphManager {
 		INeighbors nei;
 		int u,v;
 		for (int w=nbNodes-1; w>=1; w--){
-			nei = graph.getPredecessorsOf(nodeOfDfsNumber[w]);
-			for(int k = nei.getFirstElement(); k>=0; k = nei.getNextElement()){
-				v = dfsNumberOfNode[k];
-				u = EVAL(v);
-				if(sdom[u]<sdom[w]){
-					sdom[w] = sdom[u];
+			if(nodeOfDfsNumber[w]!=-1){
+				nei = graph.getPredecessorsOf(nodeOfDfsNumber[w]);
+				for(int k = nei.getFirstElement(); k>=0; k = nei.getNextElement()){
+					v = dfsNumberOfNode[k];
+					u = EVAL(v);
+					if(sdom[u]<sdom[w]){
+						sdom[w] = sdom[u];
+					}
+					buckets[sdom[w]].add(w);
 				}
-				buckets[sdom[w]].add(w);
-			}
-			LINK(father[w],w);
-			Iterator<Integer> buciter = buckets[father[w]].iterator();
-			while(buciter.hasNext()){
-				v = buciter.next();
-				buciter.remove();
-				u = EVAL(v);
-				if(sdom[u]<sdom[v]){
-					idom[v] = u;
-				}else{
-					idom[v] = father[w];
+				LINK(father[w],w);
+				Iterator<Integer> buciter = buckets[father[w]].iterator();
+				while(buciter.hasNext()){
+					v = buciter.next();
+					buciter.remove();
+					u = EVAL(v);
+					if(sdom[u]<sdom[v]){
+						idom[v] = u;
+					}else{
+						idom[v] = father[w];
+					}
 				}
 			}
 		}//step 4
 		for (int w=1; w<nbNodes; w++){
-			if(idom[w] != sdom[w]){
+			if(nodeOfDfsNumber[w]!=-1 && idom[w] != sdom[w]){
 				idom[w] = sdom[sdom[w]];
 			}
 		}

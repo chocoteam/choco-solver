@@ -167,7 +167,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	 * @return a randomly choosen arc 
 	 */
 	public int nextArc() {
-		return NodesThenArcsRd();
+		return NodesThenArcsLex();
+//		return NodesThenArcsLex();
 	}
 	private int NodesThenArcsLex() {
 		INeighbors nei;

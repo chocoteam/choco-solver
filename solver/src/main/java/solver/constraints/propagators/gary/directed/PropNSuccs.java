@@ -34,6 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
@@ -58,6 +59,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	DirectedGraphVar g;
 	int nSuccs;
+	IntProcedure enforceNodeProc;
 	RemProc rem;
 	EnfProc enf;
 
@@ -75,6 +77,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		nSuccs = nbSuccs;
 		rem = new RemProc(this);
 		enf = new EnfProc(this);
+		enforceNodeProc = new EnfNode(this);
 	}
 
 	//***********************************************************************************
@@ -94,13 +97,16 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 			}if ((mask & EventType.ENFORCEARC.mask) != 0){
 				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
 				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
+			}if ((mask & EventType.ENFORCENODE.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
+				d.forEach(enforceNodeProc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
 			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask+EventType.ENFORCENODE.mask;
 	}
 
 	@Override
@@ -131,6 +137,9 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 					for(int j= succs.getFirstElement(); j>=0; j=succs.getNextElement()){
 						p.g.enforceArc(from, j, p);
 					}
+				}
+				if(succs.neighborhoodSize()<p.nSuccs){
+					p.g.removeNode(from, p);
 				}
 			}else{
 				throw new UnsupportedOperationException();
@@ -177,7 +186,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 				this.contradiction(g, "more than one successor");
 			}
 			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<nSuccs){
-				this.contradiction(g, "not enough successors");
+				g.removeNode(i, this);
 			}
 			if(k==nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() != k){
 				nei = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -195,4 +204,28 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 			}
 		}
 	}
+	
+	private static class EnfNode implements IntProcedure {
+
+        private final PropNSuccs p;
+
+        public EnfNode(PropNSuccs p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int i) throws ContradictionException {
+    		int n = p.g.getEnvelopGraph().getNbNodes();
+        	if (i<n){
+        		INeighbors suc = p.g.getEnvelopGraph().getSuccessorsOf(i);
+        		if(suc.neighborhoodSize() == p.nSuccs){
+        			for(int j=suc.getFirstElement(); j<=0;j=suc.getNextElement()){
+        				p.g.enforceArc(i, j, p);
+        			}
+        		}
+        	}else{
+        		throw new UnsupportedOperationException();
+        	}
+        }
+    }
 }

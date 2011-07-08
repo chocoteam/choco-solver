@@ -178,15 +178,14 @@ public class DirectedGraph implements IDirectedGraph {
 	public boolean desactivateNode(int x) {
 		if(!activeIdx.isActive(x))return false;
 		activeIdx.desactivate(x);
-//
-//		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
-//			predecessors[j].remove(x);
-//		}
-//		successors[x].clear();
-//		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
-//			successors[j].remove(x);
-//		}
-//		predecessors[x].clear();
+		for(int j=successors[x].getFirstElement();j>=0; j=successors[x].getNextElement()){
+			predecessors[j].remove(x);
+		}
+		successors[x].clear();
+		for(int j=predecessors[x].getFirstElement();j>=0; j=predecessors[x].getNextElement()){
+			successors[j].remove(x);
+		}
+		predecessors[x].clear();
 		return true;
 	}
 

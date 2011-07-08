@@ -149,11 +149,11 @@ public class UndirectedGraph implements IGraph {
 	public boolean desactivateNode(int x) {
 		if(!activeIdx.isActive(x))return false;
 		activeIdx.desactivate(x);
-//		INeighbors nei = getNeighborsOf(x);
-//		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-//			neighbors[j].remove(x);
-//		}
-//		neighbors[x].clear();
+		INeighbors nei = getNeighborsOf(x);
+		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
+			neighbors[j].remove(x);
+		}
+		neighbors[x].clear();
 		return true;
 	}
 

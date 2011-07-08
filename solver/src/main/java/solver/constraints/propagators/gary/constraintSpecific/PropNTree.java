@@ -80,41 +80,33 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-	private boolean checkFeasibility() {
-		int n = g.getEnvelopGraph().getNbNodes();
+	private boolean checkFeasibility() throws ContradictionException {
+//		int n = g.getEnvelopGraph().getNbNodes();
 		computeSinks();
 		int MINTREE = minTree;
 		int MAXTREE = calcMaxTree();
-		INeighbors nei;
+//		INeighbors nei;
 		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
-			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
-			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
-					return false;
-				}
-				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-				for(int suc=nei.getFirstElement(); suc>=0; suc = nei.getNextElement()){
-					Grs.addArc(suc, node);
-					if(suc==node){
-						Grs.addArc(node, n);
-						Grs.addArc(n, node);
-					}
-				}
-			}
-			int[] numDFS = GraphTools.performDFS(n, Grs);
-//			boolean rootFound = false;
-			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-				if(numDFS[node]==0){
-					return false;
-				}
-			}
-//			for(int i:numDFS){
-//				if(rootFound && i==0){
-//					System.out.println("relou");
+//			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+//			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
+//			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+//				if (g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>1){
 //					return false;
 //				}
-//				if(i==0)rootFound = true;
+//				nei = g.getEnvelopGraph().getSuccessorsOf(node);
+//				for(int suc=nei.getFirstElement(); suc>=0; suc = nei.getNextElement()){
+//					Grs.addArc(suc, node);
+//					if(suc==node){
+//						Grs.addArc(node, n);
+//						Grs.addArc(n, node);
+//					}
+//				}
+//			}
+//			int[] numDFS = GraphTools.performDFS(n, Grs);
+//			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+//				if(numDFS[node]==0){
+//					g.removeNode(node, this);
+//				}
 //			}
 		}else{
 			return false;
@@ -178,17 +170,27 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 					}
 				}
 			} else{ // enables to manage deleted nodes
-				Grs.addArc(node, n);
-				Grs.addArc(n, node);
+				Grs.desactivateNode(node);
+			}
+		}
+		// for subgraphs
+		int[] numDFS = GraphTools.performDFS(n, Grs);
+		INeighbors tr = Grs.getActiveNodes();
+		for (int node=tr.getFirstElement();node>=0;node=tr.getNextElement()){
+			if(numDFS[node]==0 && node !=n){
+				Grs.desactivateNode(node);
+				g.removeNode(node, this);
 			}
 		}
 		//dominators
 		FlowGraphManager flowGM = new FlowGraphManager(n, Grs); 
+		
 		//LCA preprocessing
 		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.SPARSE);
 		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 			dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
 		}
+		
 		//PREPROCESSING
 		int[] in = new int[n+1];
 		int[] out = new int[n+1];
@@ -277,8 +279,12 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 		INeighbors nei;
 		for (TIntArrayList scc:allSCC){
 			looksSink = true;
+			boolean inKer = false;
 			for(int x=0;x<scc.size();x++){
 				node = scc.get(x);
+				if(g.getKernelGraph().getActiveNodes().isActive(node)){
+					inKer = true;
+				}
 				nei = g.getEnvelopGraph().getSuccessorsOf(node);
 				for(int suc = nei.getFirstElement(); suc>=0 && looksSink; suc = nei.getNextElement()){
 					if (sccOf[suc]!=sccOf[node]){
@@ -289,7 +295,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 					x = scc.size();
 				}
 			}
-			if(looksSink){
+			if(looksSink && inKer){
 				sinks.add(scc);
 			}else{
 				nonSinks.add(scc);
