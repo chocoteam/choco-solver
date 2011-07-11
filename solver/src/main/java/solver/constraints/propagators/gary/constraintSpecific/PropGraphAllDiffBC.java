@@ -42,77 +42,78 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**This class enables to manage bounded integer variables in a graph context
+/**
+ * This class enables to manage bounded integer variables in a graph context
  * It maintains the bounds of integers variables
+ *
  * @author Jean-Guillaume Fages
  * @param <V>
  */
 public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private UndirectedGraphVar g;
-	private IntVar[] intVars;
-	private TIntIntHashMap valuesHash;
-	private IntProcedure valRemoved;
+    private UndirectedGraphVar g;
+    private IntVar[] intVars;
+    private TIntIntHashMap valuesHash;
+    private IntProcedure valRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTOR
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
-	public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph,Solver solver, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, TIntIntHashMap vH) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, false);
-		g = graph;
-		intVars = vars;
-		this.valuesHash = vH;
-		final PropGraphAllDiffBC instance = this;
-		valRemoved = new IntProcedure() {
-			@Override
-			public void execute(int i) throws ContradictionException {
-				int lb = intVars[i].getLB();
-				while(!g.getEnvelopGraph().edgeExists(i, valuesHash.get(lb))){
-					intVars[i].removeValue(lb, instance);
-					lb = intVars[i].getLB();
-				}
-				int ub = intVars[i].getUB();
-				while(!g.getEnvelopGraph().edgeExists(i, valuesHash.get(ub))){
-					intVars[i].removeValue(ub, instance);
-					ub = intVars[i].getUB();
-				}
-			}
-		};
-	}
+    public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph, Solver solver, Constraint mixtedAllDiff, PropagatorPriority storeThreshold, TIntIntHashMap vH) {
+        super((V[]) ArrayUtils.append(vars, new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, false);
+        g = graph;
+        intVars = vars;
+        this.valuesHash = vH;
+        final PropGraphAllDiffBC instance = this;
+        valRemoved = new IntProcedure() {
+            public void execute(int i) throws ContradictionException {
+                int lb = intVars[i].getLB();
+                while (!g.getEnvelopGraph().edgeExists(i, valuesHash.get(lb))) {
+                    intVars[i].removeValue(lb, instance);
+                    lb = intVars[i].getLB();
+                }
+                int ub = intVars[i].getUB();
+                while (!g.getEnvelopGraph().edgeExists(i, valuesHash.get(ub))) {
+                    intVars[i].removeValue(ub, instance);
+                    ub = intVars[i].getUB();
+                }
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
-		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
-	}
+    @Override
+    public void propagate() throws ContradictionException {
+        // BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
+    }
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		valRemoved.execute(idxVarInProp);
-	}
+    @Override
+    public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+        valRemoved.execute(idxVarInProp);
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INCLOW.mask + EventType.DECUPP.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INCLOW.mask + EventType.DECUPP.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if (isCompletelyInstantiated()) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

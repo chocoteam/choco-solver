@@ -119,7 +119,6 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			this.p = p;
 		}
 
-		@Override
 		public void execute(int i) throws ContradictionException {
 			if(i<2*p.nbTrucks){
 				if(i/2==0){
@@ -142,7 +141,6 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			this.p = p;
 		}
 
-		@Override
 		public void execute(int i) throws ContradictionException {
 			if(i<2*p.nbTrucks){
 				if(i/2==0){
