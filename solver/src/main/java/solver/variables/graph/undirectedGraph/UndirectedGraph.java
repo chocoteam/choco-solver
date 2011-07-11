@@ -83,17 +83,6 @@ public class UndirectedGraph implements IGraph {
 		}
 	}
 
-	public UndirectedGraph(int order, boolean[][] matrix, GraphType type) {
-		this(order,type);
-		for (int i = 0; i < order; i++) {
-			for (int j = 0; j < order; j++) {
-				if (matrix[i][j]) {
-					this.neighbors[i].add(j);
-				}
-			}
-		}
-	}
-
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
@@ -120,14 +109,6 @@ public class UndirectedGraph implements IGraph {
 	 */
 	public IActiveNodes getActiveNodes() {
 		return activeIdx;
-	}
-
-	@Override
-	/**
-	 * @inheritedDoc
-	 */
-	public int getNeighborhoodSize(int x) {
-		return neighbors[x].neighborhoodSize();
 	}
 
 	@Override
@@ -212,6 +193,16 @@ public class UndirectedGraph implements IGraph {
 
 	@Override
 	public INeighbors getNeighborsOf(int x) {
+		return neighbors[x];
+	}
+	
+	@Override
+	public INeighbors getPredecessorsOf(int x) {
+		return neighbors[x];
+	}
+	
+	@Override
+	public INeighbors getSuccessorsOf(int x) {
 		return neighbors[x];
 	}
 }

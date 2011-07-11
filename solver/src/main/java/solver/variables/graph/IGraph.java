@@ -82,7 +82,24 @@ public interface IGraph {
 	 * @return true iff (x,y) was in the graph
 	 */
 	boolean removeEdge(int x,int y);
+	
+	/**Get neighbors of x
+	 * @param x node
+	 * @return neighbors of x (predecessors and/or successors)
+	 */
 	INeighbors getNeighborsOf(int x);
+	
+	/**Get predecessors of x
+	 * @param x node
+	 * @return predecessors of x 
+	 */
+	INeighbors getPredecessorsOf(int x);
+	
+	/**Get successors of x
+	 * @param x node
+	 * @return successors of x 
+	 */
+	INeighbors getSuccessorsOf(int x);
 	
     /**
      * The number of nodes of the graph
@@ -90,13 +107,6 @@ public interface IGraph {
      */
     int getNbNodes();
     
-    /**
-     * Neighborhood size of node x
-     * @param x node's index
-     * @return the size of the neighborhood of node x
-     */
-    int getNeighborhoodSize(int x);
-
     /**Get the type of the graph
      * @return the type of the graph SPARSE or DENSE
      */

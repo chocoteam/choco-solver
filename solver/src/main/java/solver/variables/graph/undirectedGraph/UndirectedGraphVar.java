@@ -27,18 +27,12 @@
 
 package solver.variables.graph.undirectedGraph;
 
-import gnu.trove.TIntArrayList;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-
-import java.util.BitSet;
-import java.util.Random;
 
 /**
  * Created by IntelliJ IDEA.
@@ -64,13 +58,6 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	kernel.activeIdx.clear();
     }
 
-	public UndirectedGraphVar(Solver solver, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
-		super(solver);
-		envelop = new StoredUndirectedGraph(environment, data, typeEnv);
-		kernel = new StoredUndirectedGraph(environment, data.length, typeKer);
-		kernel.getActiveNodes().clear();
-	}
-	
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
@@ -87,10 +74,10 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         	EventType e = EventType.REMOVEARC;
         	notifyPropagators(e, cause);
         	// A node has at least one arc/edge otherwise it is meaningless
-        	if(getEnvelopGraph().getNeighborhoodSize(x)==0){
+        	if(getEnvelopGraph().getNeighborsOf(x).neighborhoodSize()==0){
         		removeNode(x, null);
         	}
-        	if(getEnvelopGraph().getNeighborhoodSize(y)==0){
+        	if(getEnvelopGraph().getNeighborsOf(y).neighborhoodSize()==0){
         		removeNode(y, null);
         	}
         	return true;
@@ -125,87 +112,5 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	@Override
 	public StoredUndirectedGraph getEnvelopGraph() {
 		return envelop;
-	}
-	
-	//***********************************************************************************
-	// STRATEGIES
-	//***********************************************************************************
-
-	public int nextArc() {
-		return nextArcLexicographic();
-//		return nextArcRandom();
-	}
-	private int nextArcLexicographic() {
-		int n = getEnvelopGraph().getNbNodes();
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
-		
-		if(getEnvelopOrder()!=getKernelOrder()){
-			for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-				if(!getKernelGraph().getActiveNodes().isActive(i)){
-					return i;
-				}
-			}
-		}
-		
-		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-				INeighbors nei = envelop.getNeighborsOf(i);
-	    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-	    			if(!kernel.edgeExists(i, j)){
-	    				return (i+1)*n+j;
-	    			}
-	    		}
-			}
-		}
-		return -1;
-	}
-	private int nextArcRandom() {
-		int n = getEnvelopGraph().getNbNodes();
-		TIntArrayList arcs = new TIntArrayList(n);
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
-		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-			if(kernel.neighbors[i].neighborhoodSize()>1){
-				throw new UnsupportedOperationException("error in 1-succ filtering");
-			}
-			if(envelop.neighbors[i].neighborhoodSize()<1){
-				throw new UnsupportedOperationException("error in 1-succ filtering");
-			}
-			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-				INeighbors nei = envelop.getNeighborsOf(i);
-	    		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-	    			if(!kernel.edgeExists(i, j)){
-	    				arcs.add((i+1)*n+j);
-	    			}
-	    		}
-			}
-		}
-		if(arcs.size()==0)return -1;
-		Random rd = new Random(0);
-		return arcs.get(rd.nextInt(arcs.size()));
-	}
-	private int nextArcRandom2() {
-		int n = getEnvelopGraph().getNbNodes();
-		TIntArrayList arcs = new TIntArrayList(n);
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
-		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-			if(envelop.neighbors[i].neighborhoodSize() != kernel.neighbors[i].neighborhoodSize()){
-				if(kernel.neighbors[i].neighborhoodSize()>0){
-					throw new UnsupportedOperationException("error in 1-succ filtering");
-				}
-				arcs.add(i);
-			}
-		}
-		int card = arcs.size();
-		if(card==0)return -1;
-		Random rd = new Random(0);
-		int node = arcs.get(rd.nextInt(arcs.size()));
-		arcs.clear();
-		INeighbors nei = envelop.getNeighborsOf(node);
-		for(int j=nei.getFirstElement(); j>=0;j=nei.getNextElement()){
-			if(!kernel.edgeExists(node, j)){
-				arcs.add((node+1)*n+j);
-			}
-		}
-		return arcs.get(rd.nextInt(arcs.size()));
 	}
 }

@@ -30,7 +30,6 @@ package solver.variables.graph.undirectedGraph;
 import org.testng.annotations.Test;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.graph.graphOperations.coupling.BipartiteMaxCardMatching;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,8 +47,16 @@ public class UndirectedGraphTest {
                                 {true,false,true,false}    };
 
         System.out.println("creation");
-        UndirectedGraph g1 = new UndirectedGraph(order,data, GraphType.SPARSE);
-        UndirectedGraph g2 = new UndirectedGraph(order,data,GraphType.DENSE);
+        UndirectedGraph g1 = new UndirectedGraph(order, GraphType.SPARSE);
+        UndirectedGraph g2 = new UndirectedGraph(order, GraphType.DENSE);
+        for(int i=0;i<order; i++){
+        	for(int j=0;j<order;j++){
+        		if(data[i][j]){
+        			g1.addEdge(i, j);
+        			g2.addEdge(i, j);
+        		}
+        	}
+        }
 
         System.out.println(g1);
         System.out.println(g2);

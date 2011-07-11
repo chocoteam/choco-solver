@@ -33,13 +33,8 @@ import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.domain.BitSetIntDomain;
 import solver.variables.domain.BooleanDomain;
 import solver.variables.domain.IntervalIntDomain;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import solver.variables.image.IntVarAddCste;
 import solver.variables.image.IntVarTimesPosCste;
-
-import java.util.BitSet;
 
 /**
  * <br/>
@@ -198,21 +193,5 @@ public class VariableFactory {
             ivars[i] = (IntVar) variables[i];
         }
         return ivars;
-    }
-
-    public static DirectedGraphVar digraph(String string, int n, GraphType type, Solver solver, String options) {
-        return new DirectedGraphVar(solver, n, type, options);
-    }
-
-    public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-        return new DirectedGraphVar(solver, data, typeEnv, typeKer);
-    }
-
-    public static DirectedGraphVar digraph(String string, BitSet[] data, GraphType type, Solver solver) {
-        return digraph(string, data, type, type, solver);
-    }
-
-    public static UndirectedGraphVar undirectedGraph(String string, BitSet[] data, GraphType typeEnv, GraphType typeKer, Solver solver) {
-        return new UndirectedGraphVar(solver, data, typeEnv, typeKer);
     }
 }

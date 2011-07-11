@@ -24,68 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.gary.relations;
+package solver.search.strategy.selectors.graph.arcs;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.MetaVariable;
+import solver.search.strategy.strategy.graph.ArcStrategy;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.INeighbors;
 
-public abstract class MetaRelation extends GraphRelation<MetaVariable> {
-	
+public class LexArc extends ArcStrategy<GraphVar>{
 
-	protected int dim;
-	protected GraphRelation[] unidimRelation;
-	
-	protected MetaRelation(MetaVariable[] vars) {
-		super(vars);
-		dim = vars[0].getComponents().length;
-		unidimRelation = new GraphRelation[dim];
-	}
-
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		ESat entail = ESat.TRUE;
-		for(int i=0; i<dim; i++){
-			entail = and(entail, unidimRelation[i].isEntail(var1, var2));
-			if(entail == ESat.FALSE){
-				return entail;
-			}
-		}
-		return entail;
+	public LexArc (GraphVar g){
+		super(g);
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, prop);
+	public int nextArc() {
+		INeighbors envSuc, kerSuc;
+		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
+			kerSuc = g.getKernelGraph().getSuccessorsOf(i);
+//			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
+				for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
+					if(!kerSuc.contain(j)){
+						return (i+1)*n+j;
+					}
+				}
+//			}
 		}
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, prop);
-			}
-		}
-	}
-	
-	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, prop);
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		for(int i=0; i<dim; i++){
-			if(unidimRelation[i].isDirected()){
-				return true;
-			}
-		}
-		return false;
+		return -1;
 	}
 }

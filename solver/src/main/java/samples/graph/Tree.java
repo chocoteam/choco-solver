@@ -97,7 +97,7 @@ public class Tree extends AbstractProblem{
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
+		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		solver.set(strategy);
 	}
 

@@ -108,8 +108,8 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 					}
 				}
 				private void prune(int from) throws ContradictionException{
-					if(g.getKernelGraph().getNeighborhoodSize(from)==n_neighbors &&
-					   g.getEnvelopGraph().getNeighborhoodSize(from)>n_neighbors){
+					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors &&
+					   g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
 						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
 						for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
 							if (!g.getKernelGraph().edgeExists(from, to)){
@@ -165,7 +165,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getNeighborhoodSize(node)>n_neighbors){
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
 				return ESat.FALSE;
 			}
 		}

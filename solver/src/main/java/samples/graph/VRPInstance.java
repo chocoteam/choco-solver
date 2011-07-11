@@ -24,91 +24,83 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples.graph;
 
-package solver.search.strategy.decision.graph;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.AbstractDecision;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.graph.GraphVar;
-
-public class GraphDecision extends AbstractDecision<GraphVar> {
+public class VRPInstance {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	int branch;
-	Assignment<GraphVar> assignment;
-	int fromTo;
-	GraphVar g;
+	private int[][] distMatrix;
+	private int[] openings;
+	private int[] closures;
+	
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
+	public VRPInstance(String instanceFile){
+		loadInstance(instanceFile);
+	}
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// IMPORT
+	//***********************************************************************************
+
+	private void loadInstance(String instanceFile){
+    	File file = new File(instanceFile);
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			int n = Integer.parseInt(line);
+			distMatrix = new int[n][n];
+			openings = new int[n];
+			closures = new int[n];
+			String[] distLine;
+			for(int i=0;i<n;i++){
+				line = buf.readLine();
+				distLine = line.split(" ");
+				for(int j=0;j<n;j++){
+					distMatrix[i][j] = (int)Double.parseDouble(distLine[j]);
+				}
+			}
+			for(int i=0;i<n;i++){
+				line = buf.readLine();
+				line = line.replaceAll(" +", " ");
+				distLine = line.split(" ");
+				openings[i] = Integer.parseInt(distLine[0]);
+				closures[i] = Integer.parseInt(distLine[1]);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+
+	//***********************************************************************************
+	// ACCESSORS
 	//***********************************************************************************
 	
-    public GraphDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
-		g = variable;
-		this.fromTo = fromTo;
-		assignment = graph_ass;
-		branch = 0;
+	public int[][] getDistMatrix() {
+		return distMatrix;
 	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-    public boolean hasNext() {
-        return branch < 2;
-    }
-
-    @Override
-    public void buildNext() {
-        branch++;
-    }
-
-	@Override
-	public void apply() throws ContradictionException {
-		 if (branch == 1) {
-			 assignment.apply(g, fromTo, this);
-	     } else if (branch == 2) {
-	    	 assignment.unapply(g, fromTo, this);
-	     }
+	public int[] getOpenings() {
+		return openings;
 	}
-
-	@Override
-	public void free() {
-		// TODO
+	public int[] getClosures() {
+		return closures;
 	}
-
-	@Override
-	public String toString() {
-		return fromTo+"";
+	public int getNbCustomers(){
+		return closures.length-1; // (the first one is the depot)
 	}
-
-	@Override
-	public Explanation explain(IntVar v, Deduction d) {
-		return null;
+	public int getDepotOpening() {
+		return openings[0];
 	}
-
-	@Override
-	public boolean reactOnPromotion() {
-		return false;
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.VOID.mask;
-	}
-
-	@Override
-	@Deprecated
-	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
-		throw new UnsupportedOperationException();		
+	public int getDepotClosure() {
+		return closures[0];
 	}
 }

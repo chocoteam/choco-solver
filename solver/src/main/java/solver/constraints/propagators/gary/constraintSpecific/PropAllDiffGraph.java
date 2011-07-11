@@ -216,7 +216,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
         BitSet iterable = new BitSet(n + 1);
         IActiveNodes act = this.g.getEnvelopGraph().getActiveNodes();
         for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
-            if (g.getKernelGraph().getNeighborhoodSize(node) == 0 || matching[node] == -1) {// BEWARE should be good but brought mistakes once (before some bug corrections)
+            if (g.getKernelGraph().getNeighborsOf(node).neighborhoodSize() == 0 || matching[node] == -1) {// BEWARE should be good but brought mistakes once (before some bug corrections)
                 iterable.set(node);
             }
         }
@@ -317,7 +317,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
         int j;
         for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
             if (node >= sizeFirstSet) return;
-            if (g.getKernelGraph().getNeighborhoodSize(node) == 0) {
+            if (g.getKernelGraph().getNeighborsOf(node).neighborhoodSize() == 0) {
                 nei = g.getEnvelopGraph().getNeighborsOf(node);
                 for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (nodeSCCref[node].get() != nodeSCCref[j].get()) {
@@ -333,7 +333,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
         act = g.getKernelGraph().getActiveNodes();
         for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
             if (node >= sizeFirstSet) return;
-            if (g.getKernelGraph().getNeighborhoodSize(node) == 1) {
+            if (g.getKernelGraph().getNeighborsOf(node).neighborhoodSize() == 1) {
                 j = g.getKernelGraph().getNeighborsOf(node).getFirstElement();
                 if (matching[node] != j || matching[j] != node) {
                     this.contradiction(g, "");

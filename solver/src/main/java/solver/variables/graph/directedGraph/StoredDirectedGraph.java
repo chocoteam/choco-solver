@@ -27,8 +27,6 @@
 
 package solver.variables.graph.directedGraph;
 
-import java.util.BitSet;
-
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
@@ -77,16 +75,6 @@ public class StoredDirectedGraph extends DirectedGraph implements IStoredGraph{
 		this.activeIdx = new StoredActiveNodes(environment, nb);
 		for (int i = 0; i < nb; i++) {
 			this.activeIdx.activate(i);
-		}
-	}
-
-	public StoredDirectedGraph(IEnvironment env, BitSet[] data, GraphType type) {
-		this(env,data.length,type);
-		for (int i = 0; i < data.length; i++) {
-			for(int j=data[i].nextSetBit(0);j>=0;j=data[i].nextSetBit(j+1)){
-				successors[i].add(j);
-				predecessors[j].add(i);
-			}
 		}
 	}
 

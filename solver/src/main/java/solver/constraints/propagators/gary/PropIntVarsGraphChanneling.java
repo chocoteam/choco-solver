@@ -100,7 +100,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		}
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
-			if (g.getKernelGraph().getNeighborhoodSize(i)==1){
+			if (g.getKernelGraph().getNeighborsOf(i).neighborhoodSize()==1){
 				if(i<intVars.length){
 					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
 				}
@@ -148,11 +148,11 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		for (int vIdx=0; vIdx<intVars.length; vIdx++) {
 			IntVar v = intVars[vIdx];
 			// An IntVar cannot be instantiated to more than one value
-			if(g.getKernelGraph().getNeighborhoodSize(vIdx)>1){ 
+			if(g.getKernelGraph().getNeighborsOf(vIdx).neighborhoodSize()>1){ 
 				return ESat.FALSE;
 			}
 			// the instantiation value of the IntVar must match with the graph
-			if(g.getKernelGraph().getNeighborhoodSize(vIdx)==1 && 
+			if(g.getKernelGraph().getNeighborsOf(vIdx).neighborhoodSize()==1 && 
 					!intVars[vIdx].contains(values[g.getKernelGraph().getNeighborsOf(vIdx).getFirstElement()])){
 				return ESat.FALSE;
 			}

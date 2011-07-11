@@ -61,7 +61,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     // CONSTRUCTORS
     //***********************************************************************************
     public GraphVar(Solver solver) {
-    	super("",solver);
+    	super("G",solver);
         this.environment = solver.getEnvironment();
     }
 
@@ -161,12 +161,6 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         return envelop;
     }
 
-    /**Used for the tree search
-     * TODO Ugly
-     * @return the next arc to enforce (decision)
-     */
-    public abstract int nextArc();
-
     //***********************************************************************************
     // VARIABLE STUFF
     //***********************************************************************************
@@ -182,6 +176,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     }
 
     @Override
+    public String toString() {
+        return getName();
+    }
+
+    @Override
     public void addPropagator(Propagator observer, int idxInProp) {
         modificationEvents |= observer.getPropagationConditions(idxInProp);
         if (!reactOnModification) {
@@ -192,6 +191,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
+//    	System.out.println(message+" : "+cause);
         engine.fails(cause, this, message);
     }
 }

@@ -24,68 +24,65 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.MetaVariable;
+package solver.search.strategy.strategy.graph;
 
-public abstract class MetaRelation extends GraphRelation<MetaVariable> {
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.graph.GraphDecision;
+import solver.search.strategy.selectors.graph.arcs.LexArc;
+import solver.search.strategy.selectors.graph.nodes.LexNode;
+import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.assignments.Assignment;
+import solver.variables.graph.GraphVar;
+
+/**
+ * <br/>
+ *
+ * @author Jean-Guillaume Fages
+ * @since 1 April 2011
+ */
+public class GraphStrategy extends AbstractStrategy<GraphVar> {
+
+	protected GraphVar g;
+	private NodeStrategy nodeStrategy;
+	private ArcStrategy arcStrategy;
 	
-
-	protected int dim;
-	protected GraphRelation[] unidimRelation;
+	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as) {
+		super(new GraphVar[]{g});
+		this.g = g;
+		this.nodeStrategy = ns;
+		this.arcStrategy  = as;
+	}
 	
-	protected MetaRelation(MetaVariable[] vars) {
-		super(vars);
-		dim = vars[0].getComponents().length;
-		unidimRelation = new GraphRelation[dim];
+	public GraphStrategy(GraphVar g) {
+		this(g,new LexNode(g), new LexArc(g));
 	}
 
 	@Override
-	public ESat isEntail(int var1, int var2) {
-		ESat entail = ESat.TRUE;
-		for(int i=0; i<dim; i++){
-			entail = and(entail, unidimRelation[i].isEntail(var1, var2));
-			if(entail == ESat.FALSE){
-				return entail;
+	public void init() {}
+
+	@Override
+	public Decision getDecision() {
+		int fromTo;
+		if(g.getEnvelopOrder()!=g.getKernelOrder()){
+			fromTo = nextNode();
+			if(fromTo==-1){
+				throw new UnsupportedOperationException("error ");
 			}
+		}else{
+			fromTo = nextArc();
 		}
-		return entail;
+		if(fromTo == -1){
+			return null;
+		}
+		return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
 	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, prop);
-		}
+
+	public int nextNode(){
+		return nodeStrategy.nextNode();
 	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, prop);
-			}
-		}
-	}
-	
-	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, prop);
-		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		for(int i=0; i<dim; i++){
-			if(unidimRelation[i].isDirected()){
-				return true;
-			}
-		}
-		return false;
+
+	public int nextArc(){
+		return arcStrategy.nextArc();
 	}
 }

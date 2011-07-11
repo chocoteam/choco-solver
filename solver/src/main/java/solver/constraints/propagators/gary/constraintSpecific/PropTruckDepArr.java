@@ -38,6 +38,7 @@ import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -52,7 +53,8 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	DirectedGraphVar g; 
-	int nbTrucks;
+	int nbMaxTrucks;
+	IntVar nbtrucks;
 	IntProcedure removeProc;
 	IntProcedure enforceProc;
 
@@ -61,13 +63,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropTruckDepArr(
-			DirectedGraphVar graph, int nbt,
+			DirectedGraphVar graph, IntVar nbt,
 			Solver sol,
-			Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph}, sol, constraint, priority, reactOnPromotion);
+			Constraint<V, Propagator<V>> constraint) {
+		super((V[]) new Variable[]{graph}, sol, constraint, PropagatorPriority.UNARY, false);
 		g = graph;
-		nbTrucks = nbt;
+		nbtrucks = nbt;
+		nbMaxTrucks = nbt.getUB();
 		removeProc = new RemProc(this);
 		enforceProc = new EnfLoop(this);
 	}
@@ -77,7 +79,15 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {}
+	public void propagate() throws ContradictionException {
+		for(int i=2*nbMaxTrucks;i<g.getEnvelopGraph().getNbNodes();i++){
+			g.enforceNode(i, this);
+		}
+		int min = 2*nbtrucks.getLB();
+		for(int i=0;i<min;i++){
+			g.enforceNode(i, this);
+		}
+	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
@@ -91,12 +101,25 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 				IntDelta d = (IntDelta) g.getDelta().getNodeRemovalDelta();
 				d.forEach(removeProc, gv.fromNodeRemoval(), gv.toNodeRemoval());
 			}
+		}else{
+			if ((mask & EventType.DECUPP.mask) != 0){
+				int ub = 2*nbtrucks.getUB();
+				for(int i=ub;i<nbMaxTrucks;i++){
+					g.removeNode(i, this);
+				}
+			}
+			if ((mask & EventType.INCLOW.mask) != 0){
+				int lb = 2*nbtrucks.getLB();
+				for(int i=0;i<lb;i++){
+					g.enforceNode(i, this);
+				}
+			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCENODE.mask+EventType.REMOVENODE.mask;
+		return EventType.ENFORCENODE.mask+EventType.REMOVENODE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
 	}
 
 	@Override
@@ -120,11 +143,16 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 		}
 
 		public void execute(int i) throws ContradictionException {
-			if(i<2*p.nbTrucks){
-				if(i/2==0){
+			if(i<2*p.nbMaxTrucks){
+				int j = i+1;
+				if(i%2==0){
 					p.g.removeNode(i+1, p);
+					j++;
 				}else{
 					p.g.removeNode(i-1, p);
+				}
+				for(;j<p.nbMaxTrucks;j++){
+					p.g.removeNode(j, p);
 				}
 			}
 		}
@@ -142,11 +170,16 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 		}
 
 		public void execute(int i) throws ContradictionException {
-			if(i<2*p.nbTrucks){
-				if(i/2==0){
+			if(i<2*p.nbMaxTrucks){
+				int j = i-1;
+				if(i%2==0){
 					p.g.enforceNode(i+1, p);
 				}else{
 					p.g.enforceNode(i-1, p);
+					j--;
+				}
+				for(;j>=0;j--){
+					p.g.enforceNode(j, p);
 				}
 			}
 		}

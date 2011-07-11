@@ -153,15 +153,6 @@ public class DirectedGraph implements IDirectedGraph {
 	@Override
 	/**
 	 * @inheritedDoc
-	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
-	 */
-	public int getNeighborhoodSize(int x) {
-		return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes()).neighborhoodSize();
-	}
-
-	@Override
-	/**
-	 * @inheritedDoc
 	 */
 	public GraphType getType() {
 		return type;
@@ -245,6 +236,10 @@ public class DirectedGraph implements IDirectedGraph {
 	}
 
 	@Override
+	/**
+	 * @inheritedDoc
+	 * WARNING : not in O(1) but in O(nbSuccs[x]+nbPreds[x])
+	 */
 	public INeighbors getNeighborsOf(int x) {
 		return GraphTools.mergeNeighborhoods(successors[x],predecessors[x], getNbNodes());
 	}

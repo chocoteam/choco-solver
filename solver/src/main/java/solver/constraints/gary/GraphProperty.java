@@ -260,7 +260,8 @@ public enum GraphProperty {
 			return new GraphPropagator[]{
 					new PropNSuccs(graph, solver, cons, PropagatorPriority.LINEAR, true, 1),
 					new PropNLoopsTree(graph, k, solver, cons, PropagatorPriority.LINEAR, true),
-					new PropNTree(graph, k,solver,cons, PropagatorPriority.VERY_SLOW,true)};
+					new PropNTree(graph, k,solver,cons, PropagatorPriority.VERY_SLOW,true)
+					};
 		}
 	};
 

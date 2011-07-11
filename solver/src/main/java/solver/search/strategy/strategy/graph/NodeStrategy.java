@@ -24,35 +24,22 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.strategy.graph;
 
-package solver.search.strategy.strategy;
-
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.graph.GraphDecision;
-import solver.search.strategy.assignments.Assignment;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 
-/**
- * <br/>
- *
- * @author Jean-Guillaume Fages
- * @since 1 April 2011
- */
-public class GraphStrategy extends AbstractStrategy<GraphVar> {
+public abstract class NodeStrategy<G extends GraphVar> {
+	
+	protected G g;
+	protected IActiveNodes envNodes;
+	protected IActiveNodes kerNodes;
 
-
-	public GraphStrategy(GraphVar g) {
-		super(new GraphVar[]{g});
+	public NodeStrategy(G g){
+		this.g = g;
+		this.envNodes = g.getEnvelopGraph().getActiveNodes();
+		this.kerNodes = g.getKernelGraph().getActiveNodes();
 	}
-
-	@Override
-	public void init() {}
-
-	@Override
-	public Decision getDecision() {
-		GraphVar g = vars[0];
-		int fromTo = g.nextArc();
-		if(fromTo == -1)return null;
-		return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
-	}
+	
+	public abstract int nextNode();
 }

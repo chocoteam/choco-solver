@@ -50,7 +50,7 @@ public class MetaVarPropagator extends Propagator {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_MASK();
+		return EventType.ALL_MASK(); //TODO if components are not IntVar : add events
 	}
 
 	@Override

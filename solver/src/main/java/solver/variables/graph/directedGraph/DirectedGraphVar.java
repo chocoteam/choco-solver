@@ -33,12 +33,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.INeighbors;
-
-import java.util.BitSet;
-import java.util.LinkedList;
-import java.util.Random;
 
 /**
  * Created by IntelliJ IDEA.
@@ -58,40 +52,16 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraphVar(Solver solver, BitSet[] data, GraphType typeEnv, GraphType typeKer) {
-		super(solver);
-		envelop = new StoredDirectedGraph(environment, data, typeEnv);
-		kernel = new StoredDirectedGraph(environment, data.length, typeKer);
-		kernel.getActiveNodes().clear();
-	}
-	public DirectedGraphVar(Solver solver, BitSet[] data, GraphType type) {
-		this(solver,data,type,type);
-	}
 	public DirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
 		super(solver);
 		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv);
 		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer);
 		kernel.getActiveNodes().clear();
 	}
-	public DirectedGraphVar(Solver solver, int nbNodes, GraphType type) {
-		this(solver,nbNodes,type,type);
-	}
-
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
-
-	public DirectedGraphVar(Solver solver, int n, GraphType dense, String options) {
-		this(solver,n,dense);
-		if(options.equals("clique")){
-			for (int i=0;i<n;i++){
-				for(int j = 0;j<n ; j++){
-					envelop.addArc(i, j);
-				}
-			}
-		}
-	}
 
 	@Override
 	public boolean instantiated() {
@@ -160,117 +130,4 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	public StoredDirectedGraph getEnvelopGraph() {
 		return envelop;
 	} 
-
-	///////////////////////////////////////////////////////////////////////
-
-	/**UGLY
-	 * @return a randomly choosen arc 
-	 */
-	public int nextArc() {
-		return NodesThenArcsLex();
-//		return NodesThenArcsLex();
-	}
-	private int NodesThenArcsLex() {
-		INeighbors nei;
-		int n = getEnvelopGraph().getNbNodes();
-		IActiveNodes env = getEnvelopGraph().getActiveNodes();
-		if(getEnvelopOrder()!=getKernelOrder()){
-			for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-				if(!getKernelGraph().getActiveNodes().isActive(i)){
-					return i;
-				}
-			}
-		}
-		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
-				nei = envelop.getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-					if (!kernel.arcExists(i, j)){
-						return (i+1)*n+j;
-					}
-				}
-			}
-		}
-		return -1;
-	}
-	private int NodesThenArcsRd() {
-		INeighbors nei;
-		int n = getEnvelopGraph().getNbNodes();
-		IActiveNodes env = getEnvelopGraph().getActiveNodes();
-		Random rd = new Random(seed);
-		int delta = getEnvelopOrder()-getKernelOrder();
-		if(delta!=0){
-			delta = rd.nextInt(delta);
-			for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-				if(!getKernelGraph().getActiveNodes().isActive(i)){
-					if(delta == 0){
-						return i;
-					}else{
-						delta--;
-					}
-				}
-			}
-		}
-		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			delta = envelop.successors[i].neighborhoodSize() - kernel.successors[i].neighborhoodSize();
-			if(delta != 0){
-				nei = envelop.getSuccessorsOf(i);
-				delta = rd.nextInt(delta);
-				for (int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(!getKernelGraph().arcExists(i, j)){
-						if(delta == 0){
-							return (i+1)*n+j;
-						}else{
-							delta--;
-						}
-					}
-				}
-			}
-		}
-		return -1;
-	}
-	private int nextArcRandom() {
-		int n = getEnvelopGraph().getNbNodes();
-		LinkedList<Integer> arcs = new LinkedList<Integer>();
-		INeighbors nei;
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
-		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
-				nei = envelop.getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-					if (!kernel.arcExists(i, j)){
-						arcs.addFirst((i+1)*n+j);
-					}
-				}
-			}
-		}
-		if(arcs.size()==0)return -1;
-		Random rd = new Random(seed);
-		return arcs.get(rd.nextInt(arcs.size()));
-	}
-	private int nextArcRandom2() {
-		INeighbors nei;
-		int n = getEnvelopGraph().getNbNodes();
-		LinkedList<Integer> arcs = new LinkedList<Integer>();
-		IActiveNodes act = getEnvelopGraph().getActiveNodes();
-		for (int i=act.getFirstElement();i>=0;i=act.getNextElement()){
-			if(envelop.successors[i].neighborhoodSize() != kernel.successors[i].neighborhoodSize()){
-				if(kernel.successors[i].neighborhoodSize()>0){
-					throw new UnsupportedOperationException("error in 1-succ filtering");
-				}
-				arcs.add(i);
-			}
-		}
-		if(arcs.size()==0)return -1;
-		Random rd = new Random(seed);
-		int node = arcs.get(rd.nextInt(arcs.size()));
-		arcs.clear();
-		nei = envelop.getSuccessorsOf(node);
-		for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-			if (!kernel.arcExists(node, j)){
-				arcs.addFirst((node+1)*n+j);
-			}
-		}
-		return arcs.get(rd.nextInt(arcs.size()));
-	}
 }

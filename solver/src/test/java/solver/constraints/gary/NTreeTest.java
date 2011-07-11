@@ -27,7 +27,6 @@
 
 package solver.constraints.gary;
 
-import choco.kernel.memory.IEnvironment;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -44,22 +43,22 @@ public class NTreeTest {
 	@Test
 	public static void model(int n, int tmin, int tmax) {
 		Solver s = new Solver();
-		IEnvironment env = s.getEnvironment();
-
-		DirectedGraphVar g = VariableFactory.digraph("G",n, GraphType.DENSE,s,"clique");
+		DirectedGraphVar g = new DirectedGraphVar(s, n, GraphType.DENSE, GraphType.DENSE);
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				g.getEnvelopGraph().addArc(i, j);
+			}
+		}
 		IntVar nTree = VariableFactory.enumerated("NTREE ", tmin,tmax, s);
-		
 		Constraint[] cstrs = new Constraint[]{new NTree(g,nTree, s, PropagatorPriority.LINEAR)};
-
-		AbstractStrategy strategy = StrategyFactory.randomArcs(g);
-
+		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		
 		s.post(cstrs);
 		s.set(strategy);
 		s.findSolution();
 		
 		if(s.getMeasures().getBackTrackCount()>0){
-			System.out.println("nice : "+DirectedGraphVar.seed);System.exit(0);
+			throw new UnsupportedOperationException("error (no GAC)");
 		}
 	}
 	
@@ -69,13 +68,11 @@ public class NTreeTest {
 //			for(int n=100;n<500;n*=2){
 //				for(int t1=1;t1<n;t1*=2){
 //					for(int t2=t1;t2<n;t2*=2){
-//						DirectedGraphVar.seed = s;
 //						model(n,t1,t2);
 //					}
 //				}
 //			}
 //		}
-		DirectedGraphVar.seed = 0;
 		model(10,11,12);
 	}
 }

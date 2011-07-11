@@ -40,181 +40,232 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.constraintSpecific.PropTruckDepArr;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.selectors.graph.arcs.RandomArc;
+import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
 import java.util.Random;
-
 import choco.kernel.ResolutionPolicy;
 
 public class VRP extends AbstractProblem {
 
-    private static long seed;
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private DirectedGraphVar g;
-    private int nbVisitedCustomers, nbMaxTrucks;
-    private int n; // number of nodes
-    private CustomerVisitVariable[] nodes;
-    private IntVar nTrucks;
+	private VRPInstance instance;
+	private int nbMaxTrucks;
+	private int n; // number of nodes
+	private CustomerVisitVariable[] nodes;
+	private IntVar nTrucks;
+	private DirectedGraphVar g;
+	private IntVar nbNodes;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public VRP(int nbCustomers, int nbSatisfyedCustomers, int nbMaxTrucks) {
-        solver = new Solver();
-        this.nbVisitedCustomers = nbSatisfyedCustomers;
-        this.nbMaxTrucks = nbMaxTrucks;
-        // number of nodes : one per customer plus deux per truck (departure and arrival points)
-        n = nbCustomers + nbMaxTrucks * 2;
-    }
+	public VRP(VRPInstance inst, int nbMaxTrucks) {
+		solver = new Solver();
+		this.instance    = inst;
+		this.nbMaxTrucks = nbMaxTrucks;
+		// number of nodes : one per customer plus two per truck (departure and arrival points)
+		n = inst.getNbCustomers() + nbMaxTrucks * 2;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public void buildModel() {
-        // create randomly a distance matrix between nodes
-        int[][] distancesMatrix = buildDistances(n, nbMaxTrucks);
-        nodes = new CustomerVisitVariable[n];
-        int tMax = 300;
-        // trucks
-        nTrucks = VariableFactory.bounded("nbTrucks", 1, nbMaxTrucks, solver);
-        String s;
-        for (int i = 0; i < 2 * nbMaxTrucks; i++) {
-            if (i % 2 == 0) {
-                s = " departure";
-            } else {
-                s = " arrival";
-            }
-            IntVar truck = VariableFactory.bounded("truckNumber " + i / 2 + s, i / 2, i / 2, solver);
-            IntVar tstart = VariableFactory.bounded("truckTime " + i / 2 + s, 0, tMax, solver);
-            nodes[i] = new CustomerVisitVariable("truck " + i / 2 + s, truck, tstart, solver);
-        }
-        // customers
-        Random rd = new Random(seed);
-        for (int i = 2 * nbMaxTrucks; i < n; i++) {
-            IntVar truck = VariableFactory.bounded("custoTruck " + i, 0, nbMaxTrucks - 1, solver);
-            int min = rd.nextInt(100);
-            int max = min + 5 + rd.nextInt(tMax - 20 - min - 5);
-            IntVar tstart = VariableFactory.bounded("custoTime " + i, min, max, solver);
-            nodes[i] = new CustomerVisitVariable("custo " + i, truck, tstart, solver);
-        }
-        // relation
-        GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
-        // graph constraint
-        GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
-        g = (DirectedGraphVar) gc.getGraph(); // stores the graph variable
-        // tree partitioning (loop = arrival spot)
-        gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, nTrucks);
-        // redundant
-        gc.addProperty(GraphProperty.K_LOOPS, nTrucks);
-        // enables to get paths
-        gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
-        // controls the number of visited customers
-        gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("nNodes", nbVisitedCustomers + 2 * nTrucks.getLB(), nbVisitedCustomers + 2 * nTrucks.getUB(), solver));
+	@Override
+	public void buildModel() {
+		// create randomly a distance matrix between nodes
+		int[][] distancesMatrix = buildDistances(n, nbMaxTrucks);
+		nodes = new CustomerVisitVariable[n];
+		nbNodes = VariableFactory.bounded("nbNodes", instance.getNbCustomers()+2, n, solver);
+		// trucks
+		nTrucks = VariableFactory.bounded("nbTrucks", 1, nbMaxTrucks, solver);
+		String s;
+		for (int i=0; i<2*nbMaxTrucks; i++) {
+			if (i % 2 == 0) {
+				s = " departure";
+			} else {
+				s = " arrival";
+			}
+			IntVar truck = VariableFactory.bounded("num", i / 2, i / 2, solver);
+			IntVar tstart = VariableFactory.bounded("time", instance.getDepotOpening(), instance.getDepotClosure(), solver);
+			nodes[i] = new CustomerVisitVariable("truck " + i / 2 + s, truck, tstart, solver);
+		}
+		// customers
+		for (int i=2*nbMaxTrucks; i<n; i++) {
+			IntVar truck = VariableFactory.bounded("num", 0, nbMaxTrucks - 1, solver);
+			IntVar tstart = VariableFactory.bounded("time", instance.getOpenings()[i-2*nbMaxTrucks+1], instance.getClosures()[i-2*nbMaxTrucks+1], solver);
+			nodes[i] = new CustomerVisitVariable("custo " + i, truck, tstart, solver);
+		}
+		// relation
+		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
+		// graph constraint
+		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
+		g = (DirectedGraphVar) gc.getGraph(); // stores the graph variable
+		// tree partitioning (loop = arrival spot)
+		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, nTrucks);
+		// redundant
+		gc.addProperty(GraphProperty.K_LOOPS, nTrucks);
+		// enables to get paths
+		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
+		// controls the number of visited customers
+		gc.addProperty(GraphProperty.K_NODES, nbNodes);
 
-        gc.addAdHocProp(new PropTruckDepArr(g, nbMaxTrucks, solver, gc, PropagatorPriority.UNARY, false));
+		gc.addAdHocProp(new PropTruckDepArr(g, nTrucks, solver, gc));
 
-        Constraint[] cstrs = new Constraint[n + 1];
-        for (int i = 0; i < n; i++) { // meta constraints : when a component variable (e.g. time window variable) is modifyed the meta variable to which it belongs is notifyed
-            cstrs[i] = new MetaVarConstraint(nodes[i].getComponents(), nodes[i], solver);
-        }
-        cstrs[n] = gc;
-        solver.post(cstrs);
-    }
+		Constraint[] cstrs = new Constraint[n + 1];
+		for (int i = 0; i < n; i++) { // meta constraints : when a component variable (e.g. time window variable) is modifyed the meta variable to which it belongs is notifyed
+			cstrs[i] = new MetaVarConstraint(nodes[i].getComponents(), nodes[i], solver);
+		}
+		cstrs[n] = gc;
+		solver.post(cstrs);
+	}
 
-    @Override
-    public void configureSolver() {
-        // branch on the graph variable
-        AbstractStrategy strategy = StrategyFactory.randomArcs(g);
-        solver.set(strategy);
-    }
+	@Override
+	public void configureSolver() {
+		SearchMonitorFactory.log(solver, true, false);
+		// branch on the graph variable
+		AbstractStrategy strategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g, 0));
+		solver.set(strategy);
+	}
 
-    @Override
-    public void solve() {
-        solver.getSearchLoop().getLimitsFactory().setTimeLimit(30000);
-        SearchMonitorFactory.log(solver, true, false);
-		solver.findSolution();
-        //solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
-    }
+	@Override
+	public void solve() {
+		solver.getSearchLoop().getLimitsFactory().setTimeLimit(15000);
+		//		solver.findSolution();
+		//        solver.findAllSolutions();
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
+	}
 
-    @Override
-    public void prettyOut() {
-//		System.out.println("env "+g.getEnvelopGraph());
-        for (int i = 0; i < n; i++) {
-//			System.out.println(nodes[i]);
-        }
-//		System.out.println("ker "+g.getKernelGraph());
+	@Override
+	public void prettyOut() {
+		//		System.out.println("env "+g.getEnvelopGraph());
+		for (int i = 0; i < n; i++) {
+			//			System.out.println(nodes[i]);
+		}
+		//		System.out.println("ker "+g.getKernelGraph());
 
-        System.out.println(nTrucks);
-    }
+		System.out.println(nTrucks);
+	}
 
-    /**
-     * Generate an instance input data
-     *
-     * @param n        number of nodes (nbCusto + 2*nbTrucks)
-     * @param nbTrucks number of trucks
-     * @return matrix of distance between each pair of nodes
-     */
-    private int[][] buildDistances(int n, int nbTrucks) {
-        // trucks are at the begining :
-        // startT1 / endT1 / startT2 / endT2 / custo1 / ... / custo n-2*nbTrucks
-        int[][] distancesMatrix = new int[n][n];
-        Random rd = new Random(0);
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                distancesMatrix[i][j] = 10 + rd.nextInt(50); // random distance
-            }
-        }
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < i; j++) {
-                distancesMatrix[i][j] = distancesMatrix[j][i] - 10 + rd.nextInt(20); // Dist(x,y) should be pretty similar to Dist(y,x)
-            }
-            distancesMatrix[i][i] = 1000; // ordinary nodes have no loops
-        }
-        for (int i = 0; i < 2 * nbTrucks; i += 2) {
-            distancesMatrix[i][i + 1] = 1000; // do not use empty trucks
-            for (int j = 0; j < n; j++) {
-                distancesMatrix[j][i] = 1000; // the departure node has no possible predecessor
-                distancesMatrix[i + 1][j] = 1000; // the arrival node has no possible successor (but himself)
-            }
-            distancesMatrix[i + 1][i + 1] = 0; // (only truck arrival nodes have a loop)
-        }
-//		String s = "";
-//		for(int i=0; i<n ; i++){
-//			s+="\n";
-//			for(int j=0;j<n;j++){
-//				s+="\t"+distancesMatrix[i][j];
-//			}
-//		}
-//		System.out.println(s);
-//		System.exit(0);
-        return distancesMatrix;
-    }
+	/**
+	 * Generate an instance input data
+	 *
+	 * @param n        number of nodes (nbCusto + 2*nbTrucks)
+	 * @param nbTrucks number of trucks
+	 * @return matrix of distance between each pair of nodes
+	 */
+	private int[][] buildRandomDistances(int n, int nbTrucks) {
+		// trucks are at the begining :
+		// startT1 / endT1 / startT2 / endT2 / custo1 / ... / custo n-2*nbTrucks
+		int[][] distancesMatrix = new int[n][n];
+		Random rd = new Random(0);
+		for (int i = 0; i < n; i++) {
+			for (int j = i + 1; j < n; j++) {
+				distancesMatrix[i][j] = 10 + rd.nextInt(50); // random distance
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < i; j++) {
+				distancesMatrix[i][j] = distancesMatrix[j][i] - 10 + rd.nextInt(20); // Dist(x,y) should be pretty similar to Dist(y,x)
+			}
+			distancesMatrix[i][i] = 1000; // ordinary nodes have no loops
+		}
+		for (int i=0; i<2*nbTrucks; i++) {
+			for (int j=0; j<2*nbTrucks; j++) {
+				distancesMatrix[i][j] = 1000; // the departure node has no possible predecessor
+			}
+		}
+		for (int i=0; i<2*nbTrucks; i+=2) {
+			for (int j=2*nbTrucks; j<n; j++) {
+				distancesMatrix[j][i] = 1000; // the departure node has no possible predecessor
+				distancesMatrix[i + 1][j] = 1000; // the arrival node has no possible successor (but himself)
+			}
+		}
+		for (int i = 0; i < 2 * nbTrucks; i += 2) {
+			distancesMatrix[i + 1][i + 1] = 0; // (only truck arrival nodes have a loop)
+		}
+		String s = "";
+		for(int i=0; i<n ; i++){
+			s+="\n";
+			for(int j=0;j<n;j++){
+				s+="\t"+distancesMatrix[i][j];
+			}
+		}
+		System.out.println(s);
+		System.exit(0);
+		return distancesMatrix;
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	/**
+	 * Generate an instance input data
+	 *
+	 * @param n        number of nodes (nbCusto + 2*nbTrucks)
+	 * @param nbTrucks number of trucks
+	 * @return matrix of distance between each pair of nodes
+	 */
+	private int[][] buildDistances(int n, int nbTrucks) {
+		// trucks are at the begining :
+		// startT1 / endT1 / startT2 / endT2 / custo1 / ... / custo n-2*nbTrucks
+		int[][] distancesMatrix = new int[n][n];
+		int nt = 2*nbTrucks;
+		int max = instance.getDepotClosure()+1;
+		for (int i = nt; i < n; i++) {
+			for (int j = nt; j < n; j++) {
+				distancesMatrix[i][j] = instance.getDistMatrix()[i-nt+1][j-nt+1]; // random distance
+			}
+		}
+		for (int i = 0; i<nt; i++) {
+			for (int j = nt; j < n; j++) {
+				distancesMatrix[i][j] = instance.getDistMatrix()[0][j-nt+1]; // random distance
+				distancesMatrix[j][i] = instance.getDistMatrix()[j-nt+1][0]; // random distance
+			}
+		}
+		for (int i=0; i<2*nbTrucks; i++) {
+			for (int j=0; j<2*nbTrucks; j++) {
+				distancesMatrix[i][j] = max; // the departure node has no possible predecessor
+			}
+		}
+		for (int i=0; i<2*nbTrucks; i+=2) {
+			for (int j=2*nbTrucks; j<n; j++) {
+				distancesMatrix[j][i] = max; // the departure node has no possible predecessor
+				distancesMatrix[i + 1][j] = max; // the arrival node has no possible successor (but himself)
+			}
+		}
+		for (int i = 0; i < 2 * nbTrucks; i += 2) {
+			distancesMatrix[i + 1][i + 1] = 0; // (only truck arrival nodes have a loop)
+		}
 
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            int nbCustomers = 20;
-            int nbSatisfyedCustomers = 20;
-            int nbTrucks = 3;
-            seed = System.currentTimeMillis();
-            DirectedGraphVar.seed = seed;
-            System.out.println("seed = " + seed);
-            VRP sample = new VRP(nbCustomers, nbSatisfyedCustomers, nbTrucks);
-            sample.execute();
-            System.out.println("********************************\n");
-        }
-    }
+		//		String s = "";
+		//		for(int i=0; i<n ; i++){
+		//			s+="\n";
+		//			for(int j=0;j<n;j++){
+		//				s+="\t"+distancesMatrix[i][j];
+		//			}
+		//		}
+		//		System.out.println(s);
+		//		System.exit(0);
+		return distancesMatrix;
+	}
+
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public static void main(String[] args) {
+		DirectedGraphVar.seed = 0;
+		VRPInstance instance = new VRPInstance("/Users/info/Documents/worktest/galak/trunk/solver/src/main/resources/files/SolomonPotvinBengio/rc_201.1.txt");
+		VRP sample = new VRP(instance, 14);
+		sample.execute();
+		System.out.println("********************************\n");
+	}
 }
