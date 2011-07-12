@@ -32,37 +32,46 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 
-/**Propagator that ensures that each node of the final graph has a loop
+/**Propagator that ensures that each node of the given subset of nodes has a loop
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
+public class PropEachNodeHasLoop extends GraphPropagator<GraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private GraphVar g;
-	private IntProcedure enfNodeProc;
+	private IntProcedure enfNode,remArc;
+	private INeighbors concernedNodes;
+	private int n;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEachNodeHasLoop(V graph, Solver sol, Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.VERY_SLOW, false);
-		g = graph;
-		enfNodeProc = new NodeEnf(this);
+	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
+		super((GraphVar[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY, false);
+		this.g = graph;
+		this.enfNode = new NodeEnf(this);
+		this.remArc  = new ArcRem(this);
+		this.concernedNodes = concernedNodes;
+		this.n = g.getEnvelopGraph().getNbNodes();
+	}
+
+	public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
+		this(graph, graph.getEnvelopGraph().getActiveNodes(), sol, constraint);
 	}
 
 	//***********************************************************************************
@@ -73,15 +82,25 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 	public void propagate() throws ContradictionException {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
-			g.enforceArc(i, i, this);
+			if(concernedNodes.contain(i)){
+				g.enforceArc(i, i, this);
+			}
 		}
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		GraphRequest gr = (GraphRequest) request;
-		IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-		d.forEach(enfNodeProc, gr.fromNodeEnforcing(), gr.toNodeEnforcing());
+	public void propagateOnRequest(IRequest<GraphVar> request, int idxVarInProp, int mask) throws ContradictionException {
+		if (request instanceof GraphRequest) {
+			GraphRequest gr = (GraphRequest) request;
+			if ((mask & EventType.REMOVEARC.mask)!=0){
+				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+				d.forEach(remArc, gr.fromArcRemoval(), gr.toArcRemoval());
+			}
+			if ((mask & EventType.ENFORCENODE.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
+				d.forEach(enfNode, gr.fromNodeEnforcing(), gr.toNodeEnforcing());
+			}
+		}
 	}
 
 	//***********************************************************************************
@@ -90,14 +109,14 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCENODE.mask;
+		return EventType.ENFORCENODE.mask+EventType.REMOVEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
-			if(!g.getKernelGraph().getNeighborsOf(i).contain(i)){
+			if(concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)){
 				return ESat.FALSE;
 			}
 		}
@@ -106,19 +125,36 @@ public class PropEachNodeHasLoop<V extends GraphVar> extends GraphPropagator<V>{
 		}
 		return ESat.TRUE;
 	}
-	
+
 	//***********************************************************************************
 	// PROCEDURE
 	//***********************************************************************************
 
 	private class NodeEnf implements IntProcedure{
-		private Propagator p;
-		private NodeEnf(Propagator p){
+		private PropEachNodeHasLoop p;
+		private NodeEnf(PropEachNodeHasLoop p){
 			this.p = p;
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			g.enforceArc(i, i, p);
+			if(p.concernedNodes.contain(i)){
+				g.enforceArc(i, i, p);
+			}
+		}
+	}
+
+	private class ArcRem implements IntProcedure{
+		private PropEachNodeHasLoop p;
+		private ArcRem(PropEachNodeHasLoop p){
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from   = i/p.n+1;
+			int to   = i%p.n;
+			if(from == to && p.concernedNodes.contain(to)){
+				p.g.removeNode(i, p);
+			}
 		}
 	}
 }

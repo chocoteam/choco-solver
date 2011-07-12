@@ -332,4 +332,9 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 	public void contradiction(ICause cause, String message) throws ContradictionException {
 		engine.fails(cause, this, message);
 	}
+
+	@Override
+	public int getType() {
+		return Variable.INTEGER;
+	}
 }

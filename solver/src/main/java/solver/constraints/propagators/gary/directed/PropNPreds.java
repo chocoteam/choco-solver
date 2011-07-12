@@ -32,14 +32,13 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -47,36 +46,35 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 /**
  * @author Jean-Guillaume Fages
  * 
- * Ensures that each node in the kernel has exactly NPreds predecessors
- *A VERIFIER
- * @param <V>
+ * Ensures that each node in the given set of nodes has exactly NPreds predecessors
  */
-public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
+public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	DirectedGraphVar g;
-	IntVar nPreds;
-	RemProc rem;
-	EnfProc enf;
+	int nPreds;
+	RemArc remArc;
+	EnfArc enfArc;
+	EnfNode enfNode;
 	int n;
+	private INeighbors concernedNodes;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNPreds(
-			V graph,
-			Solver solver,
-			Constraint<V, Propagator<V>> constraint, IntVar nbPreds) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
-		g = graph;
-		nPreds = nbPreds;
-		rem = new RemProc(this);
-		enf = new EnfProc(this);
-		n = g.getEnvelopGraph().getNbNodes();
+	public PropNPreds(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds, INeighbors concernedNodes) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		this.g = graph;
+		this.concernedNodes = concernedNodes;
+		this.nPreds = nbPreds;
+		this.remArc = new RemArc(this);
+		this.enfArc = new EnfArc(this);
+		this.enfNode= new EnfNode(this);
+		this.n = g.getEnvelopGraph().getNbNodes();
 	}
 
 	//***********************************************************************************
@@ -85,40 +83,44 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-//		check();
-		for(int i=0; i<n ; i++){
-			INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);
-			if(preds.neighborhoodSize()==nPreds.getLB()){
-				for(int j=preds.getFirstElement(); j>=0; j=preds.getNextElement()){
-					g.enforceArc(j,i, this);
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for(int i=env.getFirstElement(); i>=0; i=env.getNextElement()){
+			if(concernedNodes.contain(i)){
+				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);
+				if(preds.neighborhoodSize()==nPreds && ker.isActive(i)){
+					for(int j=preds.getFirstElement(); j>=0; j=preds.getNextElement()){
+						g.enforceArc(j,i, this);
+					}
+				}else if(preds.neighborhoodSize()<nPreds){
+					g.removeNode(i, this);
 				}
 			}
-			if(preds.neighborhoodSize()<nPreds.getLB()){
-				this.contradiction(g, "no predecessor");
-			}
 		}
-		//TODO
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagateOnRequest(IRequest<DirectedGraphVar> request, int idxVarInProp, int mask) throws ContradictionException {
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
 			if ((mask & EventType.REMOVEARC.mask)!=0){
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(rem, gv.fromArcRemoval(), gv.toArcRemoval());
-			}else if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
+				d.forEach(remArc, gv.fromArcRemoval(), gv.toArcRemoval());
 			}
-		}else{
-			
+			if ((mask & EventType.ENFORCEARC.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+				d.forEach(enfArc, gv.fromArcEnforcing(), gv.toArcEnforcing());
+			}
+			if ((mask & EventType.ENFORCENODE.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
+				d.forEach(enfNode, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
+			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask + EventType.ALL_MASK();
+		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask + EventType.ENFORCENODE.mask;
 	}
 
 	@Override
@@ -130,56 +132,24 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	// PROCEDURES
 	//***********************************************************************************
 
-	/** Enable to add arcs to the kernel when only NSUCCS arcs remain in the envelop */
-	private static class RemProc implements IntProcedure {
-
+	/** Enable to add arcs to the kernel when only nPreds arcs remain in the envelop */
+	private static class RemArc implements IntProcedure {
 		private final PropNPreds p;
-
-		public RemProc(PropNPreds p) {
+		public RemArc(PropNPreds p) {
 			this.p = p;
 		}
-
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int np = p.nPreds.getLB();
 			if (i>=p.n){
 				int to   = i%p.n;
-				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
-				if(prds.neighborhoodSize()<np){
-					p.contradiction(p.g, "no predecessor");
-				}
-				if(prds.neighborhoodSize()==np && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()!= np){
-					for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
-						p.g.enforceArc(j,to, p);
+				if(p.concernedNodes.contain(to)){
+					INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
+					if(prds.neighborhoodSize()<p.nPreds){
+						p.g.removeNode(to, p);
 					}
-				}
-			}
-		}
-	}
-
-	/** Enable to remove useless outgoing arcs of a node when the kernel contains NSUCCS outgoing arcs */
-	private static class EnfProc implements IntProcedure {
-
-		private final PropNPreds p;
-
-		public EnfProc(PropNPreds p) {
-			this.p = p;
-		}
-
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int np = p.nPreds.getUB();
-            if (i>p.n){
-                int from = i/p.n-1;
-                int to   = i%p.n;
-				INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
-				if(p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()>np){
-					p.contradiction(p.g, "too many predecessors");
-				}
-				if(prds.neighborhoodSize()>np && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==np){
-					for(from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
-						if (!p.g.getKernelGraph().arcExists(from, to)){
-							p.g.removeArc(from,to, p);
+					if(prds.neighborhoodSize()==p.nPreds && p.g.getKernelGraph().getActiveNodes().isActive(to) && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()!= p.nPreds){
+						for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
+							p.g.enforceArc(j,to, p);
 						}
 					}
 				}
@@ -187,30 +157,53 @@ public class PropNPreds<V extends DirectedGraphVar> extends GraphPropagator<V>{
 		}
 	}
 
-//	private void check() throws ContradictionException {
-//		int n = g.getEnvelopGraph().getNbNodes();
-//		int k;
-//		INeighbors nei;
-//		LinkedList<Integer> arcs = new LinkedList<Integer>();
-//		for (int i=g.getEnvelopGraph().getActiveNodes().nextValue(0);i>=0;i=g.getEnvelopGraph().getActiveNodes().nextValue(i+1)){
-//			k = g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize();
-//			if(k>nPreds){
-//				this.contradiction(g, "more than one predecessors");
-//			}
-//			if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<nPreds){
-//				this.contradiction(g, "not enough potential predecessors");
-//			}
-//			if(k==nPreds && g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize() != k){
-//				nei = g.getEnvelopGraph().getPredecessorsOf(i);
-//				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-//					if (!g.getKernelGraph().arcExists(j,i)){
-//						arcs.addFirst((j+1)*n+i);
-//					}
-//				}
-//			}
-//		}
-//		for(int next:arcs){
-//			g.removeArc(next/n-1, next%n, this);
-//		}
-//	}
+	/** Enable to remove useless outgoing arcs of a node when the kernel contains nPreds outgoing arcs */
+	private static class EnfArc implements IntProcedure {
+		private final PropNPreds p;
+		public EnfArc(PropNPreds p) {
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			if (i>p.n){
+				int to   = i%p.n;
+				if(p.concernedNodes.contain(to)){
+					INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
+					if(p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()>p.nPreds){
+						p.contradiction(p.g, "too many predecessors");
+					}
+					if(prds.neighborhoodSize()>p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==p.nPreds){
+						for(int from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
+							if (!p.g.getKernelGraph().arcExists(from, to)){
+								p.g.removeArc(from,to, p);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static class EnfNode implements IntProcedure {
+		private final PropNPreds p;
+		public EnfNode(PropNPreds p) {
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			if (i<=p.n && p.concernedNodes.contain(i)){
+				INeighbors envPrds = p.g.getEnvelopGraph().getPredecessorsOf(i);
+				INeighbors kerPrds = p.g.getKernelGraph().getPredecessorsOf(i);
+				if(envPrds.neighborhoodSize()<p.nPreds){
+					p.contradiction(p.g, "not enough predecessors");
+				}else if(kerPrds.neighborhoodSize()>p.nPreds){
+					p.contradiction(p.g, "too many predecessors");
+				}else if(envPrds.neighborhoodSize()==p.nPreds && kerPrds.neighborhoodSize()<p.nPreds){
+					for(int from=envPrds.getFirstElement(); from>=0; from=envPrds.getNextElement()){
+						p.g.enforceArc(from, i, p);
+					}
+				}
+			}
+		}
+	}
 }

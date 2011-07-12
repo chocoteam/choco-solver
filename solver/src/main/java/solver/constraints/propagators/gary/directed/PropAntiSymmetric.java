@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.constraintSpecific;
+package solver.constraints.propagators.gary.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -38,38 +38,38 @@ import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
  * @author Jean-Guillaume Fages
+ * 
+ * Ensures that the final graph is antisymmetric
+ *
+ * @param <V>
  */
-public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
+public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	DirectedGraphVar g; 
-	int nbMaxTrucks;
-	IntVar nbtrucks;
-	IntProcedure removeProc;
-	IntProcedure enforceProc;
+	DirectedGraphVar g;
+	EnfProc enf;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTruckDepArr(DirectedGraphVar graph, IntVar nbt,
-			Solver sol,	Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new Variable[]{graph,nbt}, sol, constraint, PropagatorPriority.UNARY, false);
+	public PropAntiSymmetric(
+			V graph,
+			Solver solver,
+			Constraint<V, Propagator<V>> constraint) {
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, false);
 		g = graph;
-		nbtrucks = nbt;
-		nbMaxTrucks = nbt.getUB();
-		removeProc = new RemNode(this);
-		enforceProc = new EnfNode(this);
+		enf = new EnfProc(this);
 	}
 
 	//***********************************************************************************
@@ -78,12 +78,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate() throws ContradictionException {
-		for(int i=2*nbMaxTrucks;i<g.getEnvelopGraph().getNbNodes();i++){
-			g.enforceNode(i, this);
-		}
-		int min = 2*nbtrucks.getLB();
-		for(int i=0;i<min;i++){
-			g.enforceNode(i, this);
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		INeighbors succ;
+		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
+			succ = g.getKernelGraph().getSuccessorsOf(i);
+			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
+				g.removeArc(j, i, this);
+			}
 		}
 	}
 
@@ -91,37 +92,30 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		if (request instanceof GraphRequest) {
 			GraphRequest gv = (GraphRequest) request;
-			if ((mask & EventType.ENFORCENODE.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-				d.forEach(enforceProc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
-			}
-			if ((mask & EventType.REMOVENODE.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeRemovalDelta();
-				d.forEach(removeProc, gv.fromNodeRemoval(), gv.toNodeRemoval());
-			}
-		}else{
-			if ((mask & EventType.DECUPP.mask) != 0){
-				int ub = 2*nbtrucks.getUB();
-				for(int i=ub;i<nbMaxTrucks;i++){
-					g.removeNode(i, this);
-				}
-			}
-			if ((mask & EventType.INCLOW.mask) != 0){
-				int lb = 2*nbtrucks.getLB();
-				for(int i=0;i<lb;i++){
-					g.enforceNode(i, this);
-				}
+			if ((mask & EventType.ENFORCEARC.mask) != 0){
+				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
 			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCENODE.mask+EventType.REMOVENODE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
+		return EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		INeighbors succ;
+		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
+			succ = g.getKernelGraph().getSuccessorsOf(i);
+			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
+				if(g.getKernelGraph().arcExists(j, i)){
+					return ESat.FALSE;
+				}
+			}
+		}
 		return ESat.UNDEFINED;
 	}
 
@@ -129,56 +123,26 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	// PROCEDURES
 	//***********************************************************************************
 
-	/**
-	 * @author Jean-Guillaume Fages
-	 */
-	private static class RemNode implements IntProcedure {
+	/** Enable to remove the opposite arc */
+	private static class EnfProc implements IntProcedure {
 
-		private final PropTruckDepArr p;
+		private final PropAntiSymmetric p;
 
-		public RemNode(PropTruckDepArr p) {
+		public EnfProc(PropAntiSymmetric p) {
 			this.p = p;
 		}
 
+		@Override
 		public void execute(int i) throws ContradictionException {
-			if(i<2*p.nbMaxTrucks){
-				int j = i+1;
-				if(i%2==0){
-					p.g.removeNode(i+1, p);
-					j++;
-				}else{
-					p.g.removeNode(i-1, p);
+			int n = p.g.getEnvelopGraph().getNbNodes();
+			if (i>=n){
+				int from = i/n-1;
+				int to   = i%n;
+				if(from!=to){
+					p.g.removeArc(to, from, p);
 				}
-				for(;j<p.nbMaxTrucks;j++){
-					p.g.removeNode(j, p);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @author Jean-Guillaume Fages
-	 */
-	private static class EnfNode implements IntProcedure {
-
-		private final PropTruckDepArr p;
-
-		public EnfNode(PropTruckDepArr p) {
-			this.p = p;
-		}
-
-		public void execute(int i) throws ContradictionException {
-			if(i<2*p.nbMaxTrucks){
-				int j = i-1;
-				if(i%2==0){
-					p.g.enforceNode(i+1, p);
-				}else{
-					p.g.enforceNode(i-1, p);
-					j--;
-				}
-				for(;j>=0;j--){
-					p.g.enforceNode(j, p);
-				}
+			}else{
+				throw new UnsupportedOperationException();
 			}
 		}
 	}

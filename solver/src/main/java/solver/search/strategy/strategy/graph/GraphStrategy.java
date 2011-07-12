@@ -27,6 +27,7 @@
 
 package solver.search.strategy.strategy.graph;
 
+import java.util.Random;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.selectors.graph.arcs.LexArc;
@@ -44,18 +45,52 @@ import solver.variables.graph.GraphVar;
 public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
 	protected GraphVar g;
-	private NodeStrategy nodeStrategy;
-	private ArcStrategy arcStrategy;
-	
-	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as) {
+	protected NodeStrategy nodeStrategy;
+	protected ArcStrategy arcStrategy;
+	protected NodeArcPriority priority;
+
+	public enum NodeArcPriority{
+		NODES_THEN_ARCS{
+			@Override
+			protected int getNext(GraphStrategy gs){
+				int fromTo = gs.nextNode();
+				if(fromTo==-1){
+					fromTo = gs.nextArc();
+				}
+				return fromTo;
+			}
+		},
+		ARCS{
+			@Override
+			protected int getNext(GraphStrategy gs){
+				return gs.nextArc();
+			}
+		},
+		RANDOM{
+			@Override
+			protected int getNext(GraphStrategy gs){
+				Random rd = new Random();
+				if(rd.nextBoolean()){
+					return NODES_THEN_ARCS.getNext(gs);
+				}else{
+					return ARCS.getNext(gs);
+				}
+			}
+		};
+
+		protected abstract int getNext(GraphStrategy gs);
+	}
+
+	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as, NodeArcPriority priority) {
 		super(new GraphVar[]{g});
 		this.g = g;
 		this.nodeStrategy = ns;
 		this.arcStrategy  = as;
+		this.priority 	  = priority;
 	}
-	
+
 	public GraphStrategy(GraphVar g) {
-		this(g,new LexNode(g), new LexArc(g));
+		this(g,new LexNode(g), new LexArc(g), NodeArcPriority.NODES_THEN_ARCS);
 	}
 
 	@Override
@@ -63,15 +98,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
 	@Override
 	public Decision getDecision() {
-		int fromTo;
-		if(g.getEnvelopOrder()!=g.getKernelOrder()){
-			fromTo = nextNode();
-			if(fromTo==-1){
-				throw new UnsupportedOperationException("error ");
-			}
-		}else{
-			fromTo = nextArc();
-		}
+		int fromTo = priority.getNext(this);
 		if(fromTo == -1){
 			return null;
 		}

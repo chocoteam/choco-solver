@@ -43,6 +43,13 @@ import java.io.Serializable;
  * User: xlorca
  */
 public interface Variable<D extends IDelta> extends Serializable {
+	
+
+	public final static int INTEGER = 0;
+	public final static int SET = 1;
+	public final static int META = 2;
+	public final static int GRAPH = 3;
+	
 
     //todo: to complete
     void updateEntailment(IRequest request);
@@ -137,4 +144,9 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @return a Solver object
      */
     Solver getSolver();
+
+	/**
+	 * @return an int representing the type of the variable
+	 */
+	int getType();
 }

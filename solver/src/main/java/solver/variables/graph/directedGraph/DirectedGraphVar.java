@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -62,21 +63,6 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
-
-	@Override
-	public boolean instantiated() {
-		for(int i=envelop.activeIdx.getFirstElement(); i>=0; i=envelop.activeIdx.getNextElement()){
-			if(!kernel.activeIdx.isActive(i)){
-				return false;
-			}
-			for(int j=envelop.getSuccessorsOf(i).getFirstElement();j>=0; j=envelop.getSuccessorsOf(i).getNextElement()){
-				if(!kernel.arcExists(i, j)){
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 
 	@Override
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
@@ -130,4 +116,14 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	public StoredDirectedGraph getEnvelopGraph() {
 		return envelop;
 	} 
+
+	@Override
+	public int getType() {
+		return Variable.GRAPH;
+	}
+	
+	@Override
+	public boolean isDirected(){
+		return true;
+	}
 }

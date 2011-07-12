@@ -39,6 +39,7 @@ import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.search.strategy.strategy.graph.NodeStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -160,8 +161,8 @@ public final class StrategyFactory {
     }
 
 
-    public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat) {
-        return new GraphStrategy(g,nodeStrat,arcStrat);
+    public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
+        return new GraphStrategy(g,nodeStrat,arcStrat,priority);
     }
     
     public static <G extends GraphVar> AbstractStrategy graphLexico(G g) {
@@ -169,6 +170,6 @@ public final class StrategyFactory {
     }
     
     public static <G extends GraphVar> AbstractStrategy graphRandom(G g, long seed) {
-        return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed));
+        return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.RANDOM);
     }
 }

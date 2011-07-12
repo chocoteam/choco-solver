@@ -40,4 +40,5 @@ public class SameTruck extends Eq_Int {
 
 	@Override
 	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {} // it is not because x is not the successor of y that they do not both belong to the same tour
+	
 }

@@ -409,4 +409,10 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
 	public void contradiction(ICause cause, String message) throws ContradictionException {
 		engine.fails(cause, this, message);
 	}
+	
+
+	@Override
+	public int getType() {
+		return Variable.INTEGER;
+	}
 }

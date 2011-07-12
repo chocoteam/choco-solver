@@ -32,6 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.delta.image.DeltaTimeCste;
 
@@ -123,4 +124,9 @@ public final class IntVarTimesPosCste extends ImageIntVar<IntVar> {
     public IntDelta getDelta() {
         return delta;
     }
+    
+	@Override
+	public int getType() {
+		return Variable.INTEGER;
+	}
 }

@@ -42,13 +42,13 @@ public class LexArc extends ArcStrategy<GraphVar>{
 		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
 			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
 			kerSuc = g.getKernelGraph().getSuccessorsOf(i);
-//			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
+			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
 				for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
 					if(!kerSuc.contain(j)){
 						return (i+1)*n+j;
 					}
 				}
-//			}
+			}
 		}
 		return -1;
 	}

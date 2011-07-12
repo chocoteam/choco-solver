@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -112,5 +113,15 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	@Override
 	public StoredUndirectedGraph getEnvelopGraph() {
 		return envelop;
+	}
+	
+	@Override
+	public int getType() {
+		return Variable.GRAPH;
+	}
+
+	@Override
+	public boolean isDirected(){
+		return true;
 	}
 }

@@ -250,4 +250,9 @@ public class IntCste implements IntVar {
     public Solver getSolver() {
         return solver;
     }
+
+	@Override
+	public int getType() {
+		return Variable.INTEGER;
+	}
 }

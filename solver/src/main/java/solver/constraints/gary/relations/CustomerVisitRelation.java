@@ -26,6 +26,7 @@
  */
 package solver.constraints.gary.relations;
 
+import choco.kernel.ESat;
 import solver.constraints.gary.GraphProperty;
 import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
@@ -43,8 +44,15 @@ public class CustomerVisitRelation extends MetaRelation {
 			times[i] = vars[i].getTime();
 		}
 		unidimRelation[0] = new SameTruck(trucks);
-		unidimRelation[1] = GraphRelationFactory.distance(times, distancesMatrix);
+//		unidimRelation[1] = GraphRelationFactory.distanceEq(times, distancesMatrix);
+		unidimRelation[1] = GraphRelationFactory.distanceLeq(times, distancesMatrix);
 	}
+	
+//	@Override
+//	public ESat isEntail(int var1, int var2) {
+//		ESat sat = super.isEntail(var1, var2);
+//		return and(sat, ESat.UNDEFINED);
+//	}
 	
 	@Override
 	public GraphProperty[] getGraphProperties() {

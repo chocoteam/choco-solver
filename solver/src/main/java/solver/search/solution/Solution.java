@@ -27,12 +27,15 @@
 
 package solver.search.solution;
 
+import java.util.LinkedList;
+
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
 
 /**
  * <br/>
@@ -50,9 +53,11 @@ public class Solution {
     /* Values of integer variables, in Solver internal order */
     private int[] intvalues;
 
+    /* Values of graph variables, in Solver internal order */
+    private LinkedList<boolean[][]> graphValues;
+
     /* Statistics of the current solution (time, nodes, etc.) */
     private long[] measures;
-
 
     public static Solution empty() {
         return new Solution();
@@ -69,9 +74,20 @@ public class Solution {
         this.solver = solver;
         Variable[] vars = solver.getVars();
         intvalues = new int[vars.length];
+        graphValues = new LinkedList<boolean[][]>();
         for (int i = 0; i < vars.length; i++) {
-            assert (vars[i].instantiated());
-            intvalues[i] = ((IntVar) vars[i]).getValue();
+            assert (vars[i].instantiated()); // BEWARE only decision variables should be instantiated
+            switch(vars[i].getType()){
+            case Variable.INTEGER : 
+            	intvalues[i] = ((IntVar) vars[i]).getValue();break;
+            case Variable.GRAPH : 
+            	if(!((GraphVar) vars[i]).instantiated()){
+            		System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
+            		System.out.println(((GraphVar) vars[i]).getKernelGraph());
+            		throw new UnsupportedOperationException("error ");
+            	}
+            	graphValues.add(((GraphVar) vars[i]).getValue());break;
+            }
         }
 //        measures = solver.getSearchLoop().getMeasures().
     }
@@ -80,8 +96,15 @@ public class Solution {
     public void restore() {
         try {
             Variable[] vars = solver.getVars();
+            int nbGV = 0;
             for (int i = 0; i < vars.length; i++) {
-                ((IntVar) vars[i]).instantiateTo(intvalues[i], null);
+            	switch(vars[i].getType()){
+                case Variable.INTEGER : 
+                	((IntVar) vars[i]).instantiateTo(intvalues[i], null);break;
+                case Variable.GRAPH : 
+                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), null);break;
+                }
+                
             }
         } catch (ContradictionException ex) {
             LoggerFactory.getLogger("solver").error("BUG in restoring solution !!");

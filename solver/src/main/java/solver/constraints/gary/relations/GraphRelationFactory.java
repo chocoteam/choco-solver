@@ -81,7 +81,10 @@ public class GraphRelationFactory {
 	public static GraphRelation customerVisit(CustomerVisitVariable[] vars, int[][] distancesMatrix){
 		return new CustomerVisitRelation(vars, distancesMatrix);
 	}
-	public static GraphRelation distance(IntVar[] vars, int[][] distancesMatrix){
+	public static GraphRelation distanceEq(IntVar[] vars, int[][] distancesMatrix){
 		return new Dist_Int(vars, distancesMatrix);
+	}
+	public static GraphRelation distanceLeq(IntVar[] vars, int[][] distancesMatrix){
+		return new XplusC_Leq_Y_Int(vars, distancesMatrix);
 	}
 }

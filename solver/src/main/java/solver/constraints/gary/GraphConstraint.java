@@ -75,6 +75,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		this.relation   = relation;
 		this.graph = relation.generateInitialGraph(vars, solver);
 		this.properties = new LinkedList<GraphProperty>();
+		solver.associates(graph);
 		Propagator pr = new PropRelation(vars, graph, solver, this, relation);
 		setPropagators(new Propagator[]{pr});
 		for(GraphProperty gp:relation.getGraphProperties()){

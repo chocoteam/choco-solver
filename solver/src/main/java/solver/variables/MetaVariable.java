@@ -80,4 +80,9 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 	public void contradiction(ICause cause, String message) throws ContradictionException {
 		engine.fails(cause, this, message);
 	}
+
+	@Override
+	public int getType() {
+		return Variable.META;
+	}
 }
