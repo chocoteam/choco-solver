@@ -37,7 +37,7 @@ import choco.kernel.memory.IEnvironment;
  */
 public abstract class Operation {
 
-    IEnvironment environment;
+    protected IEnvironment environment;
 
     protected Operation(IEnvironment environment) {
         this.environment = environment;

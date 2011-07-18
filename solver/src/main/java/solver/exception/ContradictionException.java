@@ -54,7 +54,7 @@ public final class ContradictionException extends Exception {
     public String s;
 
     public ContradictionException() {
-        super();
+//        super();
     }
 
     /**

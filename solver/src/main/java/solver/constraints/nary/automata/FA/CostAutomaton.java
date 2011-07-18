@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA;
+package solver.constraints.nary.automata.FA;
 
-import solver.constraints.nary.automaton.FA.utils.Counter;
-import solver.constraints.nary.automaton.FA.utils.CounterState;
-import solver.constraints.nary.automaton.FA.utils.ICounter;
+import solver.constraints.nary.automata.FA.utils.Counter;
+import solver.constraints.nary.automata.FA.utils.CounterState;
+import solver.constraints.nary.automata.FA.utils.ICounter;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;

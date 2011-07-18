@@ -25,38 +25,32 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.penalty;
-
-import solver.variables.IntVar;
+package solver.constraints.nary.automata.penalty;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Apr 30, 2010
- * Time: 1:57:07 PM
+ * Date: Apr 27, 2010
+ * Time: 11:31:07 AM
  */
-public abstract class AbstractPenaltyFunction implements IPenaltyFunction {
-    @Override
-    public abstract int penalty(int value);
+public class IsoPenaltyFunction extends AbstractPenaltyFunction {
+    int factor;
 
-    @Override
-    public double minGHat(double lambda, IntVar var) {
 
-        double ghat = Double.POSITIVE_INFINITY;
-        int ub = var.getUB();
-        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-            ghat = Math.min(ghat, penalty(i) - lambda * i);
-        }
-        return ghat;
+    public IsoPenaltyFunction() {
+        this(1);
+    }
+
+    public IsoPenaltyFunction(int factor) {
+        this.factor = factor;
     }
 
     @Override
-    public double maxGHat(double lambda, IntVar var) {
-        double ghat = Double.NEGATIVE_INFINITY;
-        int ub = var.getUB();
-        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-            ghat = Math.max(ghat, penalty(i) - lambda * i);
-        }
-        return ghat;
+    public final int penalty(int value) {
+        return value * factor;
+    }
+
+    public final int getFactor() {
+        return factor;
     }
 }

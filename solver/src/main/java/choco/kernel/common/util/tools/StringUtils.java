@@ -27,7 +27,7 @@
 
 package choco.kernel.common.util.tools;
 
-import solver.constraints.nary.automaton.FA.FiniteAutomaton;
+import solver.constraints.nary.automata.FA.FiniteAutomaton;
 
 /*
 * User : charles

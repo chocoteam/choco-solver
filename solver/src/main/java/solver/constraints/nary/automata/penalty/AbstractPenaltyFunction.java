@@ -25,30 +25,38 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.penalty;
+package solver.constraints.nary.automata.penalty;
 
 import solver.variables.IntVar;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: May 3, 2010
- * Time: 6:50:02 PM
+ * Date: Apr 30, 2010
+ * Time: 1:57:07 PM
  */
-public class NullPenaltyFunction extends AbstractPenaltyFunction {
+public abstract class AbstractPenaltyFunction implements IPenaltyFunction {
     @Override
-    public int penalty(int value) {
-        return 0;
-    }
+    public abstract int penalty(int value);
 
     @Override
     public double minGHat(double lambda, IntVar var) {
-        return -lambda * ((lambda > 0) ? var.getUB() : var.getLB());
+
+        double ghat = Double.POSITIVE_INFINITY;
+        int ub = var.getUB();
+        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+            ghat = Math.min(ghat, penalty(i) - lambda * i);
+        }
+        return ghat;
     }
 
     @Override
     public double maxGHat(double lambda, IntVar var) {
-        return -lambda * ((lambda < 0) ? var.getUB() : var.getLB());
+        double ghat = Double.NEGATIVE_INFINITY;
+        int ub = var.getUB();
+        for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+            ghat = Math.max(ghat, penalty(i) - lambda * i);
+        }
+        return ghat;
     }
-
 }

@@ -25,21 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA.utils;
+package solver.constraints.nary.automata.penalty;
+
+import solver.variables.IntVar;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Nov 23, 2010
- * Time: 11:09:07 AM
+ * Date: May 3, 2010
+ * Time: 6:50:02 PM
  */
-public interface ICounter {
+public class NullPenaltyFunction extends AbstractPenaltyFunction {
+    @Override
+    public int penalty(int value) {
+        return 0;
+    }
 
-    Bounds bounds();
+    @Override
+    public double minGHat(double lambda, IntVar var) {
+        return -lambda * ((lambda > 0) ? var.getUB() : var.getLB());
+    }
 
-    double cost(int layer, int value);
-
-    double cost(int layer, int value, int state);
-
+    @Override
+    public double maxGHat(double lambda, IntVar var) {
+        return -lambda * ((lambda < 0) ? var.getUB() : var.getLB());
+    }
 
 }

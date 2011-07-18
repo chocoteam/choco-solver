@@ -25,55 +25,21 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA;
-
-import gnu.trove.TIntHashSet;
+package solver.constraints.nary.automata.FA.utils;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Nov 19, 2010
- * Time: 2:06:37 PM
+ * Date: Nov 23, 2010
+ * Time: 11:09:07 AM
  */
-public interface IAutomaton {
+public interface ICounter {
+
+    Bounds bounds();
+
+    double cost(int layer, int value);
+
+    double cost(int layer, int value, int state);
 
 
-    IAutomaton clone() throws CloneNotSupportedException;
-
-    int getInitialState();
-
-    int delta(int k, int j) throws NonDeterministicOperationException;
-
-    void delta(int k, int j, TIntHashSet nexts);
-
-    boolean isFinal(int k);
-
-    int getNbStates();
-
-    boolean run(int[] str);
-
-
-    public static class StateNotInAutomatonException extends Exception {
-        public StateNotInAutomatonException(int state) {
-            super("State " + state + " is not in the automaton, please add it using addState");
-        }
-    }
-
-    public static class NonDeterministicOperationException extends Exception {
-        public NonDeterministicOperationException() {
-            super("This operation can oly be called on a determinitic automaton, please use determinize()");
-        }
-    }
-
-    public static class Triple {
-        int a;
-        int b;
-        int c;
-
-        public Triple(int a, int b, int c) {
-            this.a = a;
-            this.b = b;
-            this.c = c;
-        }
-    }
 }

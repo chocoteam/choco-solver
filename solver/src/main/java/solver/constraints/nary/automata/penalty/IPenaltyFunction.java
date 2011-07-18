@@ -25,30 +25,23 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA;
+package solver.constraints.nary.automata.penalty;
 
-import solver.constraints.nary.automaton.FA.utils.ICounter;
-
-import java.util.List;
+import solver.variables.IntVar;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Nov 19, 2010
- * Time: 3:25:16 PM
+ * Date: Apr 27, 2010
+ * Time: 11:30:01 AM
  */
-public interface ICostAutomaton extends IAutomaton {
+public interface IPenaltyFunction {
 
-    double getCost(int i, int j);
+    public int penalty(int value);
 
-    double getCostByState(int layer, int counter, int state);
+    public double minGHat(double lambda, IntVar var);
 
-    double getCostByResource(int layer, int value, int counter);
+    public double maxGHat(double lambda, IntVar var);
 
-    int getNbResources();
-
-    double getCostByResourceAndState(int layer, int value, int counter, int state);
-
-    List<ICounter> getCounters();
 
 }

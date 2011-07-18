@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.nary.automaton;
+package solver.constraints.nary.automata;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
@@ -36,9 +36,9 @@ import gnu.trove.TIntIterator;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.nary.automaton.FA.CostAutomaton;
-import solver.constraints.nary.automaton.FA.IAutomaton;
-import solver.constraints.nary.automaton.FA.ICostAutomaton;
+import solver.constraints.nary.automata.FA.CostAutomaton;
+import solver.constraints.nary.automata.FA.IAutomaton;
+import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.automaton.PropCostRegular;
 import solver.exception.SolverException;

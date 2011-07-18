@@ -25,37 +25,75 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA.utils;
+package solver.constraints.nary.automata.penalty;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Nov 24, 2010
- * Time: 10:37:53 AM
+ * Date: May 3, 2010
+ * Time: 5:49:24 PM
  */
-public class CounterState implements ICounter {
-    int[][][] costs;
-    Bounds bounds;
+public class LinearPenaltyFunction extends AbstractPenaltyFunction {
 
-    public CounterState(int[][][] layer_value_state, int min, int max) {
-        this.costs = layer_value_state;
-        this.bounds = Bounds.makeBounds(min, min, null, max, max, null);
+    /**
+     * minimum bound
+     */
+    private int min;
+
+    /**
+     * soft minimum bound (= min if not soft).
+     */
+    private int minPref;
+
+    /**
+     * unit violation cost of the soft minimum bound (= 0 if not soft).
+     */
+    private int minPenalty;
+
+    /**
+     * maximum value
+     */
+    private int max;
+
+    /**
+     * soft maximum value (= max if not soft).
+     */
+    private int maxPref;
+
+    /**
+     * unit violation cost of the soft maximum value (= 0 if not soft).
+     */
+    private int maxPenalty;
+
+
+    public LinearPenaltyFunction(int min, int minPref, int minPenalty, int max, int maxPref, int maxPenalty) {
+        this.min = min;
+        this.max = max;
+        this.minPref = minPref;
+        this.maxPref = maxPref;
+        this.minPenalty = minPenalty;
+        this.maxPenalty = maxPenalty;
+
     }
 
 
     @Override
-    public Bounds bounds() {
-        return bounds;
-    }
+    public int penalty(int value) {
+        if (value < minPref) {
+            if (value >= min) {
+                return (minPref - value) * minPenalty;
+            } else {
+                return Integer.MAX_VALUE;
+            }
+        } else if (value > maxPref) {
+            if (value <= max) {
+                return (value - maxPref) * maxPenalty;
+            } else {
+                return Integer.MAX_VALUE;
+            }
 
-    @Override
-    public double cost(int layer, int value) {
-        return cost(layer, value, 0);
+        } else {
+            return 0;
+        }
     }
-
-    @Override
-    public double cost(int layer, int value, int state) {
-        return this.costs[layer][value][state];
-    }
-
 }

@@ -15,7 +15,7 @@ CP+=':'+m2_repo+'org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar'
 CP+=':'+m2_repo+'gnu/trove/2.1.0/trove-2.1.0.jar'
 #CP+=':'+m2_repo+'jparsec/jparsec/2.0.1/jparsec-2.0.1.jar'
 #CP+=':'+m2_repo+'cglib/cglib-nodep/2.2/cglib-nodep-2.2.jar'
-CMD='java -Xmx256m -Xms256m -XX:+AggressiveOpts'
+CMD='java -Xmx256m -Xms256m -XX:+AggressiveOpts -XX:+UseConcMarkSweepGC'
 
 ## Number of time a problem is run
 loop = 1 # can be override
@@ -156,6 +156,7 @@ for line in f:
     if line[0] != '#' and line != '\n':
         out.write(line)
         command = CMD+' '+ CP+' '+line + ' -quiet'
+        #print command
         args = shlex.split(command)
         results = [[]for k in range(_SIZE)]
         size = _SIZE

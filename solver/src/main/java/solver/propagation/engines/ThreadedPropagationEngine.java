@@ -190,8 +190,6 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
 
     @Override
     public void fixPoint() throws ContradictionException {
-//        LoggerFactory.getLogger("solver").info("start...");
-//        exception.set(null, null, "");
         sequencer.fixpoint();
         try {
             synchronized (this) {
@@ -200,7 +198,6 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-//        LoggerFactory.getLogger("solver").info("...end");
         if (sequencer.hasFailed()) {
             throw exception;
         }

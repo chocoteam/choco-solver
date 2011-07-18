@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.FA;
+package solver.constraints.nary.automata.FA;
 
 import choco.kernel.common.util.tools.StringUtils;
 import dk.brics.automaton.*;

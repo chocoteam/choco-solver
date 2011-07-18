@@ -25,23 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton.penalty;
-
-import solver.variables.IntVar;
+package solver.constraints.nary.automata.FA.utils;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Apr 27, 2010
- * Time: 11:30:01 AM
+ * Date: Nov 24, 2010
+ * Time: 10:24:53 AM
  */
-public interface IPenaltyFunction {
-
-    public int penalty(int value);
-
-    public double minGHat(double lambda, IntVar var);
-
-    public double maxGHat(double lambda, IntVar var);
+public class Counter implements ICounter {
 
 
+    int[][] costs;
+    Bounds bounds;
+
+    public Counter(int[][] layer_value, int min, int max) {
+        this.costs = layer_value;
+        this.bounds = Bounds.makeBounds(min, min, null, max, max, null);
+
+
+    }
+
+    public Counter(int[][][] layer_value_state, int inf, int sup) {
+        this.costs = new int[layer_value_state.length][];
+        for (int i = 0; i < layer_value_state.length; i++) {
+            this.costs[i] = new int[layer_value_state[i].length];
+            for (int j = 0; j < this.costs[i].length; j++) {
+                this.costs[i][j] = layer_value_state[i][j][0];
+            }
+        }
+    }
+
+
+    @Override
+    public Bounds bounds() {
+        return bounds;
+    }
+
+    @Override
+    public double cost(int layer, int value) {
+        return this.costs[layer][value];
+    }
+
+    @Override
+    public double cost(int layer, int value, int state) {
+        return cost(layer, value);
+    }
 }

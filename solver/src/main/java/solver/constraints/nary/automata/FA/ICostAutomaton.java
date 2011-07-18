@@ -25,63 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automaton;
+package solver.constraints.nary.automata.FA;
 
-import choco.kernel.memory.structure.IndexedObject;
-import org.jgrapht.EdgeFactory;
-import org.jgrapht.graph.DefaultWeightedEdge;
+import solver.constraints.nary.automata.FA.utils.ICounter;
+
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Oct 30, 2009
- * Time: 3:48:11 PM
+ * Date: Nov 19, 2010
+ * Time: 3:25:16 PM
  */
-public class Arc extends DefaultWeightedEdge implements IndexedObject {
+public interface ICostAutomaton extends IAutomaton {
 
-    public int id;
-    public Node orig;
-    public Node dest;
-    public int value;
-    public double cost;
+    double getCost(int i, int j);
 
+    double getCostByState(int layer, int counter, int state);
 
-    public Arc(Node orig, Node dest, int value, int id, double cost) {
-        this.id = id;
-        this.orig = orig;
-        this.dest = dest;
-        this.value = value;
-        this.cost = cost;
-    }
+    double getCostByResource(int layer, int value, int counter);
 
-    public Arc(Node orig, Node dest, int value) {
-        this(orig, dest, value, Integer.MIN_VALUE, Double.POSITIVE_INFINITY);
-    }
+    int getNbResources();
 
-    public double getWeight() {
-        return this.cost;
-    }
+    double getCostByResourceAndState(int layer, int value, int counter, int state);
 
-
-    public String toString() {
-        return value + "";
-    }
-
-    public final void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
-    public int getObjectIdx() {
-        return orig.state;
-    }
-
-
-    public static class ArcFacroty implements EdgeFactory<Node, Arc> {
-
-        public Arc createEdge(Node node, Node node1) {
-            return new Arc(node, node1, 0, 0, 0.0);
-        }
-    }
+    List<ICounter> getCounters();
 
 }

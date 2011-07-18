@@ -38,7 +38,7 @@ public class Random<E> extends AbstractSorter<E> {
 
     final java.util.Random rand;
 
-    protected Random() {
+    public Random() {
         this.rand = new java.util.Random();
     }
 

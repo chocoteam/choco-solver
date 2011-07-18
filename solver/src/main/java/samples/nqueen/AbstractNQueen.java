@@ -51,8 +51,8 @@ import java.util.List;
  */
 public abstract class AbstractNQueen extends AbstractProblem {
 
-    @Option(name = "-q", usage = "Number of queens.", required = true)
-    int n;
+    @Option(name = "-q", usage = "Number of queens.", required = false)
+    int n = 12;
     IntVar[] vars;
 
     @Override

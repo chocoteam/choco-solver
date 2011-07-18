@@ -55,8 +55,8 @@ import java.util.Arrays;
  */
 public class MagicSquare extends AbstractProblem {
 
-    @Option(name = "-s", usage = "Magic square size.", required = true)
-    int n;
+    @Option(name = "-s", usage = "Magic square size.", required = false)
+    int n = 6;
     IntVar[] vars;
 
     @Override
