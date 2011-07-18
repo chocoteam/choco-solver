@@ -351,7 +351,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    protected void contradiction(Variable variable, String message) throws ContradictionException {
+    public void contradiction(Variable variable, String message) throws ContradictionException {
         engine.fails(this, variable, message);
     }
 }

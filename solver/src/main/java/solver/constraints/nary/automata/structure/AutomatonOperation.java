@@ -25,63 +25,45 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata;
+package solver.constraints.nary.automata.structure;
 
-import choco.kernel.memory.structure.IndexedObject;
-import org.jgrapht.EdgeFactory;
-import org.jgrapht.graph.DefaultWeightedEdge;
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.State;
+import dk.brics.automaton.Transition;
+import solver.constraints.nary.automata.FA.FiniteAutomaton;
 
 /**
  * Created by IntelliJ IDEA.
  * User: julien
- * Date: Oct 30, 2009
- * Time: 3:48:11 PM
+ * Mail: julien.menana{at}emn.fr
+ * Date: Dec 3, 2009
+ * Time: 4:26:07 PM
  */
-public class Arc extends DefaultWeightedEdge implements IndexedObject {
-
-    public int id;
-    public Node orig;
-    public Node dest;
-    public int value;
-    public double cost;
+public class AutomatonOperation {
 
 
-    public Arc(Node orig, Node dest, int value, int id, double cost) {
-        this.id = id;
-        this.orig = orig;
-        this.dest = dest;
-        this.value = value;
-        this.cost = cost;
-    }
+    public static Automaton makeAcceptAllOfLength(int length, int[] alphabet)
+    {
+        Automaton auto = new Automaton();
+        State start = new State();
+        State tmp = start;
+        State last =start;
 
-    public Arc(Node orig, Node dest, int value) {
-        this(orig, dest, value, Integer.MIN_VALUE, Double.POSITIVE_INFINITY);
-    }
+        for (int i = 0 ; i < length ; i++)
+        {
+            last = new State();
+            for (int k : alphabet)
+            {
+                tmp.addTransition(new Transition(FiniteAutomaton.getCharFromInt(k),last));
+            }
+            tmp = last;
 
-    public double getWeight() {
-        return this.cost;
-    }
-
-
-    public String toString() {
-        return value + "";
-    }
-
-    public final void setId(int id) {
-        this.id = id;
-    }
-
-    @Override
-    public int getObjectIdx() {
-        return orig.state;
-    }
-
-
-    public static class ArcFacroty implements EdgeFactory<Node, Arc> {
-
-        public Arc createEdge(Node node, Node node1) {
-            return new Arc(node, node1, 0, 0, 0.0);
         }
+        last.setAccept(true);
+        auto.setInitialState(start);
+        return auto;
     }
+
+
 
 }

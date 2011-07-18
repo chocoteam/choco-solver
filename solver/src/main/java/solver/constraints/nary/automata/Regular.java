@@ -34,6 +34,9 @@ import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
+import solver.constraints.nary.automata.structure.Node;
+import solver.constraints.nary.automata.structure.regular.Arc;
+import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.automaton.PropRegular;
 import solver.variables.IntVar;
@@ -199,7 +202,7 @@ public class Regular extends IntConstraint<IntVar> {
                                 }
 
                                 // BEWARE<CPRU>: cost is not required, 0.0 is a default value
-                                Arc arc = new Arc(a, b, j, aid++, 0.0);
+                                Arc arc = new Arc(a, b, j, aid++);
                                 graph.addEdge(a, b, arc);
                                 tmp.get(idx).add(arc);
 

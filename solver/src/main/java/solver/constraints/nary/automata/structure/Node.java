@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata;
+package solver.constraints.nary.automata.structure;
 
 /**
  * Created by IntelliJ IDEA.
@@ -40,13 +40,15 @@ public class Node {
     public int state;
     public int layer;
 
-    public Node(int state, int layer, int id) {
+    public Node(int state, int layer, int id)
+    {
         this.id = id;
         this.state = state;
         this.layer = layer;
     }
 
-    public boolean equals(Object n) {
+    public boolean equals(Object n)
+    {
         return n instanceof Node && ((Node) n).state == state && ((Node) n).layer == layer;
 
     }

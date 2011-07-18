@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary.automata;
+package solver.constraints.nary.automata.structure.regular;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
@@ -33,6 +33,7 @@ import choco.kernel.memory.structure.StoredIndexedBipartiteSetWithOffset;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntStack;
 import org.jgrapht.graph.DirectedMultigraph;
+import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;

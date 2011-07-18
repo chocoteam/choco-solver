@@ -36,7 +36,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
-import solver.constraints.nary.automata.StoredValuedDirectedMultiGraph;
+import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;

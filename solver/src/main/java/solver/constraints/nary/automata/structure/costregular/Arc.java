@@ -1,5 +1,5 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  Copyright (c) 1999-2010, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
@@ -25,30 +25,64 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver;
+package solver.constraints.nary.automata.structure.costregular;
+
+import choco.kernel.memory.structure.IndexedObject;
+import org.jgrapht.EdgeFactory;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import solver.constraints.nary.automata.structure.Node;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 28 juil. 2010
+ * Created by IntelliJ IDEA.
+ * User: julien
+ * Date: Oct 30, 2009
+ * Time: 3:48:11 PM
  */
-public class Constant {
+public class Arc extends DefaultWeightedEdge implements IndexedObject {
 
-    protected Constant() {}
+    public int id;
+    public Node orig;
+    public Node dest;
+    public int value;
+    public double cost;
 
-    public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
-    public static final String WELCOME_VERSION = "** CHOCO v{} (May, 2011), Copyleft (c) 2010-2011";
-    public static final String CALLER = "** Solve : {}";
 
-    /**
-     * Defines the rounding precision for multicostregular algorithm
-     */
-    public static final int MCR_PRECISION = 4; // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
+    public Arc(Node orig, Node dest, int value, int id, double cost) {
+        this.id = id;
+        this.orig = orig;
+        this.dest = dest;
+        this.value = value;
+        this.cost = cost;
+    }
 
-      /**
-     * Defines the smallest used double for multicostregular
-     */
-    public static final double MCR_DECIMAL_PREC = Math.pow(10.0,-MCR_PRECISION);
+    public Arc(Node orig, Node dest, int value) {
+        this(orig, dest, value, Integer.MIN_VALUE, Double.POSITIVE_INFINITY);
+    }
+
+    public double getWeight() {
+        return this.cost;
+    }
+
+
+    public String toString() {
+        return value + "";
+    }
+
+    public final void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public int getObjectIdx() {
+        return orig.state;
+    }
+
+
+    public static class ArcFacroty implements EdgeFactory<Node, Arc> {
+
+        public Arc createEdge(Node node, Node node1) {
+            return new Arc(node, node1, 0, 0, 0.0);
+        }
+    }
 
 }

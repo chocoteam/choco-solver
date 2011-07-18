@@ -34,7 +34,7 @@ import gnu.trove.TIntStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
-import solver.constraints.nary.automata.StoredDirectedMultiGraph;
+import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
