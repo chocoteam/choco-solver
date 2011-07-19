@@ -32,6 +32,7 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
 import gnu.trove.TLongObjectHashMap;
 import org.slf4j.LoggerFactory;
+import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.enumerations.SortConductor;
@@ -61,18 +62,33 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
 
     final PoolManager<FastDecision> decisionPool;
 
+    solver.search.strategy.assignments.Assignment assignment;
+
     public static StrategyVarValAssign dyn(IntVar[] vars, AbstractSorter<IntVar> varComp,
                                            IValid<IntVar> varV, IEnvironment env) {
-        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.DYN);
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.DYN, Assignment.int_eq);
+    }
+
+    public static StrategyVarValAssign dyn(IntVar[] vars, AbstractSorter<IntVar> varComp,
+                                           IValid<IntVar> varV, solver.search.strategy.assignments.Assignment assignment,
+                                           IEnvironment env) {
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.DYN, assignment);
     }
 
     public static StrategyVarValAssign sta(IntVar[] vars, AbstractSorter<IntVar> varComp,
                                            IValid<IntVar> varV, IEnvironment env) {
-        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.STA);
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.STA, Assignment.int_eq);
+    }
+
+    public static StrategyVarValAssign sta(IntVar[] vars, AbstractSorter<IntVar> varComp,
+                                           IValid<IntVar> varV, solver.search.strategy.assignments.Assignment assignment,
+                                           IEnvironment env) {
+        return new StrategyVarValAssign(vars, varComp, varV, env, SortConductor.Type.STA, assignment);
     }
 
     private StrategyVarValAssign(IntVar[] vars, AbstractSorter<IntVar> varComp,
-                                 IValid<IntVar> varV, IEnvironment env, SortConductor.Type type) {
+                                 IValid<IntVar> varV, IEnvironment env, SortConductor.Type type,
+                                 Assignment assignment) {
         super(vars);
         switch (type) {
             case STA:
@@ -89,6 +105,7 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             firstSelection.put(vars[i].getUniqueID(), env.makeBool(false));
         }
+        this.assignment = assignment;
         decisionPool = new PoolManager<FastDecision>();
     }
 
@@ -116,7 +133,7 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
                 if (d == null) {
                     d = new FastDecision(decisionPool);
                 }
-                d.set(var, value, solver.search.strategy.assignments.Assignment.int_eq);
+                d.set(var, value, assignment);
                 return d;
             } else {
                 LoggerFactory.getLogger("solver").warn("StrategyVarValAssign : no value for var {}", var.toString());

@@ -27,8 +27,7 @@
 
 package samples.graph;
 
-import gnu.trove.THashMap;
-import java.util.Random;
+import choco.kernel.ResolutionPolicy;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,21 +37,23 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.basic.PropEachNodeHasLoop;
 import solver.constraints.propagators.gary.constraintSpecific.PropTruckDepArr;
 import solver.constraints.propagators.gary.directed.PropNPreds;
-import solver.constraints.propagators.gary.directed.PropNSuccs;
-import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.search.strategy.enumerations.values.heuristics.nary.SeqN;
+import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
+import solver.search.strategy.enumerations.values.heuristics.unary.FirstN;
+import solver.search.strategy.enumerations.values.metrics.Median;
+import solver.search.strategy.enumerations.values.metrics.Metric;
 import solver.search.strategy.selectors.graph.arcs.RandomArc;
 import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -61,18 +62,13 @@ import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
 import solver.variables.CustomerVisitVariable;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import choco.kernel.ESat;
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateInt;
+
+import java.util.Random;
 
 public class VRP extends AbstractProblem {
 
@@ -268,7 +264,7 @@ public class VRP extends AbstractProblem {
 		SearchMonitorFactory.log(solver, true, false);
 		solver.getSearchLoop().getLimitsFactory().setTimeLimit(30000);
 		// approche dichotomique pour l'objectif
-		nTrucks.setHeuristicVal(new HeuristicVal() {
+		/*nTrucks.setHeuristicVal(new HeuristicVal() {
 			private IStateInt idx = solver.getEnvironment().makeInt(nTrucks.getLB());
 			@Override
 			public void remove() {
@@ -288,12 +284,23 @@ public class VRP extends AbstractProblem {
 			public HeuristicVal duplicate(THashMap<HeuristicVal, HeuristicVal> map) {return null;}
 			@Override
 			protected void doUpdate(Action action) {}
-		});
+		});*/
+
+        Metric metric = new Median(nTrucks);
+        HeuristicVal hval1 = HeuristicValFactory.enumVal(nTrucks);
+        HeuristicVal hval2 = HeuristicValFactory.enumVal(nTrucks);
+        nTrucks.setHeuristicVal(
+                new SeqN(
+                        new DropN(hval1, metric, Action.open_node),
+                        new FirstN(hval2, metric, Action.open_node))
+        );
 		IntVar[] objs = new IntVar[]{nTrucks};
-		AbstractStrategy objStrat =  StrategyVarValAssign.sta(objs,
+		AbstractStrategy objStrat =  StrategyVarValAssign.dyn(objs,
                 SorterFactory.inputOrder(objs),
                 ValidatorFactory.instanciated,
+                Assignment.int_split,
                 solver.getEnvironment());
+
 		AbstractStrategy graphStrategy;
 		if(pathGraph){
 			graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new HomogeniousTour(g,false), NodeArcPriority.ARCS);
