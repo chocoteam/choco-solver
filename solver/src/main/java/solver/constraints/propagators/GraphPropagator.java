@@ -51,7 +51,7 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V>{
 
 	@SuppressWarnings({"unchecked"})
 	@Override
-	protected void linkToVariables() {
+	public void linkToVariables() {
 		requests = new IRequest[vars.length];
 		for (int i = 0; i < vars.length; i++) {
 			vars[i].addPropagator(this, i);

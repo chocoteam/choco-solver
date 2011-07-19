@@ -137,9 +137,10 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
                 ordered[k][i] = new int[layer_value_resource_state[i].length][];
                 for (int j = 0; j < layer_value_resource_state[i].length; j++) {
                     ordered[k][i][j] = new int[layer_value_resource_state[i][j][k].length];
-                    for (int q = 0; q < layer_value_resource_state[i][j][k].length; q++) {
-                        ordered[k][i][j][q] = layer_value_resource_state[i][j][k][q];
-                    }
+//                    for (int q = 0; q < layer_value_resource_state[i][j][k].length; q++) {
+//                        ordered[k][i][j][q] = layer_value_resource_state[i][j][k][q];
+//                    }
+                    System.arraycopy(layer_value_resource_state[i][j][k], 0, ordered[k][i][j], 0, layer_value_resource_state[i][j][k].length);
                     if (ordered[k][i][j].length == 1) stateDependant = false;
                 }
             }
@@ -167,7 +168,7 @@ public class CostAutomaton extends FiniteAutomaton implements ICostAutomaton {
         int[][] bounds = new int[2][cr.length];
         for (int i = 0; i < cr.length; i++) {
             bounds[0][i] = cr[i].getLB();
-            bounds[1][i] = cr[i].getLB();
+            bounds[1][i] = cr[i].getUB();
         }
         return bounds;
     }

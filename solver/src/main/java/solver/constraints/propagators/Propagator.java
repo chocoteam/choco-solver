@@ -145,7 +145,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             }
         }
         arity = environment.makeInt(nbNi);
-        linkToVariables();
+//        linkToVariables();
         fails = 0;
     }
 
@@ -239,7 +239,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     @SuppressWarnings({"unchecked"})
-    protected void linkToVariables() {
+    public void linkToVariables() {
         requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
             vars[i].addPropagator(this, i);
@@ -253,7 +253,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * It is called by reflection within ReifiedConstraint
      */
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
-    protected void unlinkVariables() {
+    public void unlinkVariables() {
         for (int v = 0; v < requests.length; v++) {
             IRequest request = requests[v];
             request.getVariable().deleteRequest(request);

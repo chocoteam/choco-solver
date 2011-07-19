@@ -33,8 +33,10 @@ import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
 import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIterator;
 import gnu.trove.TIntStack;
 import gnu.trove.TObjectIntHashMap;
+import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Constant;
 import solver.Solver;
@@ -42,6 +44,9 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.FA.utils.Bounds;
 import solver.constraints.nary.automata.FA.utils.ICounter;
+import solver.constraints.nary.automata.MultiCostRegular;
+import solver.constraints.nary.automata.structure.Node;
+import solver.constraints.nary.automata.structure.multicostregular.Arc;
 import solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.Propagator;
@@ -52,6 +57,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
 
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -122,6 +130,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      */
     protected final IntVar[] vs;
 
+    protected final int offset;
+
     /**
      * Cost variables
      */
@@ -140,7 +150,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     /**
      * Layered graph of the unfolded automaton
      */
-    protected final StoredDirectedMultiGraph graph;
+    protected StoredDirectedMultiGraph graph;
 
     /**
      * Boolean array which record whether a bound has been modified by the propagator
@@ -204,16 +214,16 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param vars        decision variables
      * @param counterVars cost variables
      * @param cauto       finite automaton with costs
-     * @param graph       Layered graph of the unfolded automaton
      * @param solver      solver
      * @param constraint  constraint
      */
     public PropMultiCostRegular(IntVar[] vars, final IntVar[] counterVars, ICostAutomaton cauto,
-                                StoredDirectedMultiGraph graph, Solver solver,
+                                Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(ArrayUtils.<IntVar>append(vars, counterVars), solver, constraint, PropagatorPriority.CUBIC, false);
         this.solver = solver;
         this.vs = vars;
+        this.offset = vars.length;
         this.z = counterVars;
         this.nbR = this.z.length - 1;
         this.modifiedBound = new boolean[]{true, true};
@@ -235,23 +245,24 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         this.boundUpdate = new TIntHashSet();
         this.pi = cauto;
-        this.graph = graph;
         rem_proc = new RemProc(this);
     }
 
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
+//TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
+        return EventType.ALL_MASK();
     }
 
 
     @Override
     public void propagate() throws ContradictionException {
         checkBounds();
+        initGraph();
         this.slp = graph.getPathFinder();
         int left, right;
-        for (int i = 0; i < vs.length; i++) {
+        for (int i = 0; i < offset; i++) {
             left = right = Integer.MIN_VALUE;
             for (int j = vs[i].getLB(); j <= vs[i].getUB(); j = vs[i].nextValue(j)) {
                 StoredIndexedBipartiteSet sup = graph.getUBport(i, j);
@@ -273,24 +284,202 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> request, int vIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-            boundUpdate.add(vIdx - vs.length);
-            computed = false;
-        }
-        if (EventType.isRemove(mask)) {
+        if (vIdx < offset) {
             checkWorld();
             IntVar var = request.getVariable();
             IntDelta delta = var.getDelta();
             int f = request.fromDelta();
             int l = request.toDelta();
             delta.forEach(rem_proc.set(vIdx), f, l);
+        } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
+            boundUpdate.add(vIdx - offset);
+            computed = false;
         }
         if (getNbRequestEnqued() == 0 && toRemove.size() > 0) {
             filter();
         }
+//        propagate();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void initGraph() {
+        int aid = 0;
+        int nid = 0;
+
+
+        int[] offsets = new int[offset];
+        int[] sizes = new int[offset];
+        int[] starts = new int[offset];
+
+        int totalSizes = 0;
+
+        starts[0] = 0;
+        for (int i = 0; i < offset; i++) {
+            offsets[i] = vs[i].getLB();
+            sizes[i] = vs[i].getUB() - vs[i].getLB() + 1;
+            if (i > 0) starts[i] = sizes[i - 1] + starts[i - 1];
+            totalSizes += sizes[i];
+        }
+
+
+        DirectedMultigraph<Node, Arc> graph;
+
+        int n = offset;
+        graph = new DirectedMultigraph<Node, Arc>(new Arc.ArcFacroty());
+        ArrayList<HashSet<Arc>> tmp = new ArrayList<HashSet<Arc>>(totalSizes);
+        for (int i = 0; i < totalSizes; i++)
+            tmp.add(new HashSet<Arc>());
+
+
+        int i, j, k;
+        TIntIterator layerIter;
+        TIntIterator qijIter;
+
+        ArrayList<TIntHashSet> layer = new ArrayList<TIntHashSet>();
+        TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
+        // DLList[vars.length+1];
+
+        for (i = 0; i <= n; i++) {
+            layer.add(new TIntHashSet());// = new DLList(nbNodes);
+        }
+
+        //forward pass, construct all paths described by the automaton for word of length nbVars.
+
+        layer.get(0).add(pi.getInitialState());
+        TIntHashSet nexts = new TIntHashSet();
+
+        for (i = 0; i < n; i++) {
+            int UB = vs[i].getUB();
+            for (j = vs[i].getLB(); j <= UB; j = vs[i].nextValue(j)) {
+                layerIter = layer.get(i).iterator();//getIterator();
+                while (layerIter.hasNext()) {
+                    k = layerIter.next();
+                    nexts.clear();
+                    pi.delta(k, j, nexts);
+                    TIntIterator it = nexts.iterator();
+                    for (; it.hasNext(); ) {
+                        int succ = it.next();
+                        layer.get(i + 1).add(succ);
+                    }
+                    if (!nexts.isEmpty()) {
+                        int idx = starts[i] + j - offsets[i];
+                        if (tmpQ[idx] == null)
+                            tmpQ[idx] = new TIntHashSet();
+
+                        tmpQ[idx].add(k);
+
+                    }
+                }
+            }
+        }
+
+        //removing reachable non accepting states
+
+        layerIter = layer.get(n).iterator();
+        while (layerIter.hasNext()) {
+            k = layerIter.next();
+            if (!pi.isFinal(k)) {
+                layerIter.remove();
+            }
+
+        }
+
+
+        //backward pass, removing arcs that does not lead to an accepting state
+        int nbNodes = pi.getNbStates();
+        BitSet mark = new BitSet(nbNodes);
+
+        Node[] in = new Node[pi.getNbStates() * (n + 1)];
+        Node tink = new Node(pi.getNbStates() + 1, n + 1, nid++);
+        graph.addVertex(tink);
+
+        for (i = n - 1; i >= 0; i--) {
+            mark.clear(0, nbNodes);
+            int UB = vs[i].getUB();
+            for (j = vs[i].getLB(); j <= UB; j = vs[i].nextValue(j)) {
+                int idx = starts[i] + j - offsets[i];
+                TIntHashSet l = tmpQ[idx];
+                if (l != null) {
+                    qijIter = l.iterator();
+                    while (qijIter.hasNext()) {
+                        k = qijIter.next();
+                        nexts.clear();
+                        pi.delta(k, j, nexts);
+                        if (nexts.size() > 1)
+                            System.err.println("STOP");
+                        boolean added = false;
+                        for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
+                            int qn = it.next();
+
+                            if (layer.get(i + 1).contains(qn)) {
+                                added = true;
+                                Node a = in[i * pi.getNbStates() + k];
+                                if (a == null) {
+                                    a = new Node(k, i, nid++);
+                                    in[i * pi.getNbStates() + k] = a;
+                                    graph.addVertex(a);
+                                }
+
+                                Node b = in[(i + 1) * pi.getNbStates() + qn];
+                                if (b == null) {
+                                    b = new Node(qn, i + 1, nid++);
+                                    in[(i + 1) * pi.getNbStates() + qn] = b;
+                                    graph.addVertex(b);
+                                }
+
+
+                                Arc arc = new Arc(a, b, j, aid++);
+                                graph.addEdge(a, b, arc);
+                                tmp.get(idx).add(arc);
+
+                                mark.set(k);
+                            }
+                        }
+                        if (!added)
+                            qijIter.remove();
+                    }
+                }
+            }
+            layerIter = layer.get(i).iterator();
+
+            // If no more arcs go out of a given state in the layer, then we remove the state from that layer
+            while (layerIter.hasNext())
+                if (!mark.get(layerIter.next()))
+                    layerIter.remove();
+        }
+
+        TIntHashSet th = new TIntHashSet();
+        int[][] intLayer = new int[n + 2][];
+        for (k = 0; k < pi.getNbStates(); k++) {
+            Node o = in[n * pi.getNbStates() + k];
+            {
+                if (o != null) {
+                    Arc a = new Arc(o, tink, 0, aid++);
+                    graph.addEdge(o, tink, a);
+                }
+            }
+        }
+
+
+        for (i = 0; i <= n; i++) {
+            th.clear();
+            for (k = 0; k < pi.getNbStates(); k++) {
+                Node o = in[i * pi.getNbStates() + k];
+                if (o != null) {
+                    th.add(o.id);
+                }
+            }
+            intLayer[i] = th.toArray();
+        }
+        intLayer[n + 1] = new int[]{tink.id};
+
+        if (intLayer[0].length > 0) {
+            this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
+            this.graph.makePathFinder();
+            ((MultiCostRegular) this.constraint).setGraph(this.graph);
+        }
+    }
 
     private void filter() throws ContradictionException {
         checkWorld();
@@ -364,7 +553,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                 for (int e : P) {
                     int i = graph.GNodes.layers[graph.GArcs.origs[e]];//  e.getOrigin().getLayer();
                     //int j = graph.GArcs.values[e];//e.getLabel();
-                    if (i < vs.length)
+                    if (i < offset)
                         axu += graph.GArcs.originalCost[e][l + 1];//costs[i][j][l+1];
                 }
                 newLB = Math.max(uUb[l] - uk * (z[l + 1].getUB() - axu), 0);
@@ -410,7 +599,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         int nbNSig = 0;
         int nbNSig2 = 0;
         //  Arrays.fill(uLb,0.0);
-        int[] bestPath = new int[vs.length + 1];
+        int[] bestPath = new int[offset + 1];
         do {
             coeff = 0.0;
             for (int i = 0; i < nbR; i++) {
@@ -452,7 +641,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                 axu = 0.0;
                 for (int e : P) {
                     int i = graph.GNodes.layers[graph.GArcs.origs[e]];
-                    if (i < vs.length)
+                    if (i < offset)
                         axu += graph.GArcs.originalCost[e][l + 1];
                 }
 
@@ -669,7 +858,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     public boolean isGraphConsistent() {
         boolean ret = true;
-        for (int i = 0; i < vs.length; i++) {
+        for (int i = 0; i < offset; i++) {
             DisposableIntIterator iter = this.graph.layers[i].getIterator();
             while (iter.hasNext()) {
                 int n = iter.next();
@@ -702,7 +891,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (isCompletelyInstantiated()) {
             return ESat.eval(isSatisfied());
         } else {
-            return null;
+            return ESat.UNDEFINED;
         }
     }
 
@@ -716,7 +905,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     public boolean isSatisfied(int[] word) {
-        int first[] = new int[vs.length];
+        int first[] = new int[offset];
         System.arraycopy(word, 0, first, 0, first.length);
         return check(first);
     }
@@ -767,8 +956,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @return true if the constraint is not violated
      */
     public boolean check() {
-        int[] word = new int[vs.length];
-        for (int i = 0; i < vs.length; i++) {
+        int[] word = new int[offset];
+        for (int i = 0; i < offset; i++) {
             if (!vs[i].instantiated())
                 return true;
             word[i] = vs[i].getValue();

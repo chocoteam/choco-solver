@@ -73,7 +73,7 @@ public class Prop_Y_NotEqualX_YC extends Propagator<IntVar> {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    protected void linkToVariables() {
+    public void linkToVariables() {
         requests = new IRequest[1];
         vars[1].addPropagator(this, 0);
         requests[0] = new PropRequest<IntVar, Propagator<IntVar>>(this, vars[1], 0);

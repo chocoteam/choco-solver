@@ -57,7 +57,7 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     }
 
     @Override
-    protected void linkToVariables() {
+    public void linkToVariables() {
         //noinspection unchecked
         AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length / 2);
         requests = new IRequest[vars.length];

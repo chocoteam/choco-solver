@@ -29,26 +29,16 @@ package solver.constraints.nary.automata;
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IEnvironment;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
-import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.nary.automata.FA.CostAutomaton;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
-import solver.constraints.nary.automata.structure.Node;
-import solver.constraints.nary.automata.structure.multicostregular.Arc;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.automaton.PropMultiCostRegular;
 import solver.variables.IntVar;
-
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashSet;
 
 /**
  * <br/>
@@ -74,7 +64,6 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
     private MultiCostRegular(final IntVar[] vars, final IntVar[] counterVars, final Solver solver) {
         super(ArrayUtils.<IntVar>append(vars, counterVars), solver, PropagatorPriority.CUBIC);
         this.offset = vars.length;
-        initGraph(vars, counterVars, solver.getEnvironment());
     }
 
 
@@ -90,7 +79,7 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][] costs, Solver solver) {
         this(vars, CR, solver);
         this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, graph, solver, this));
+        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
     }
 
     /**
@@ -105,13 +94,13 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final IAutomaton auto, final int[][][][] costs, final Solver solver) {
         this(vars, CR, solver);
         this.pi = CostAutomaton.makeMultiResources(auto, costs, CR);
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, graph, solver, this));
+        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
     }
 
     public MultiCostRegular(final IntVar[] vars, final IntVar[] CR, final ICostAutomaton pi, final Solver solver) {
         this(vars, CR, solver);
         this.pi = pi;
-        setPropagators(new PropMultiCostRegular(vars, CR, pi, graph, solver, this));
+        setPropagators(new PropMultiCostRegular(vars, CR, pi, solver, this));
     }
 
     @Override
@@ -157,181 +146,8 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
         return ESat.TRUE;
     }
 
-
-    public void initGraph(IntVar[] vs, IntVar[] z, IEnvironment environment) {
-        int aid = 0;
-        int nid = 0;
-
-
-        int[] offsets = new int[vs.length];
-        int[] sizes = new int[vs.length];
-        int[] starts = new int[vs.length];
-
-        int totalSizes = 0;
-
-        starts[0] = 0;
-        for (int i = 0; i < vs.length; i++) {
-            offsets[i] = vs[i].getLB();
-            sizes[i] = vs[i].getUB() - vs[i].getLB() + 1;
-            if (i > 0) starts[i] = sizes[i - 1] + starts[i - 1];
-            totalSizes += sizes[i];
-        }
-
-
-        DirectedMultigraph<Node, Arc> graph;
-
-        int n = vs.length;
-        graph = new DirectedMultigraph<Node, Arc>(new Arc.ArcFacroty());
-        ArrayList<HashSet<Arc>> tmp = new ArrayList<HashSet<Arc>>(totalSizes);
-        for (int i = 0; i < totalSizes; i++)
-            tmp.add(new HashSet<Arc>());
-
-
-        int i, j, k;
-        TIntIterator layerIter;
-        TIntIterator qijIter;
-
-        ArrayList<TIntHashSet> layer = new ArrayList<TIntHashSet>();
-        TIntHashSet[] tmpQ = new TIntHashSet[totalSizes];
-        // DLList[vars.length+1];
-
-        for (i = 0; i <= n; i++) {
-            layer.add(new TIntHashSet());// = new DLList(nbNodes);
-        }
-
-        //forward pass, construct all paths described by the automaton for word of length nbVars.
-
-        layer.get(0).add(pi.getInitialState());
-        TIntHashSet nexts = new TIntHashSet();
-
-        for (i = 0; i < n; i++) {
-            int ub = vs[i].getUB();
-            for (j = vs[i].getLB(); j <= ub; j = vs[i].nextValue(j)) {
-                layerIter = layer.get(i).iterator();//getIterator();
-                while (layerIter.hasNext()) {
-                    k = layerIter.next();
-                    nexts.clear();
-                    pi.delta(k, j, nexts);
-                    TIntIterator it = nexts.iterator();
-                    for (; it.hasNext(); ) {
-                        int succ = it.next();
-                        layer.get(i + 1).add(succ);
-                    }
-                    if (!nexts.isEmpty()) {
-                        int idx = starts[i] + j - offsets[i];
-                        if (tmpQ[idx] == null)
-                            tmpQ[idx] = new TIntHashSet();
-
-                        tmpQ[idx].add(k);
-
-                    }
-                }
-            }
-        }
-
-        //removing reachable non accepting states
-
-        layerIter = layer.get(n).iterator();
-        while (layerIter.hasNext()) {
-            k = layerIter.next();
-            if (!pi.isFinal(k)) {
-                layerIter.remove();
-            }
-
-        }
-
-
-        //backward pass, removing arcs that does not lead to an accepting state
-        int nbNodes = pi.getNbStates();
-        BitSet mark = new BitSet(nbNodes);
-
-        Node[] in = new Node[pi.getNbStates() * (n + 1)];
-        Node tink = new Node(pi.getNbStates() + 1, n + 1, nid++);
-        graph.addVertex(tink);
-
-        for (i = n - 1; i >= 0; i--) {
-            mark.clear(0, nbNodes);
-            int ub = vs[i].getUB();
-            for (j = vs[i].getLB(); j <= ub; j = vs[i].nextValue(j)) {
-                int idx = starts[i] + j - offsets[i];
-                TIntHashSet l = tmpQ[idx];
-                if (l != null) {
-                    qijIter = l.iterator();
-                    while (qijIter.hasNext()) {
-                        k = qijIter.next();
-                        nexts.clear();
-                        pi.delta(k, j, nexts);
-                        if (nexts.size() > 1)
-                            System.err.println("STOP");
-                        boolean added = false;
-                        for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
-                            int qn = it.next();
-
-                            if (layer.get(i + 1).contains(qn)) {
-                                added = true;
-                                Node a = in[i * pi.getNbStates() + k];
-                                if (a == null) {
-                                    a = new Node(k, i, nid++);
-                                    in[i * pi.getNbStates() + k] = a;
-                                    graph.addVertex(a);
-                                }
-
-                                Node b = in[(i + 1) * pi.getNbStates() + qn];
-                                if (b == null) {
-                                    b = new Node(qn, i + 1, nid++);
-                                    in[(i + 1) * pi.getNbStates() + qn] = b;
-                                    graph.addVertex(b);
-                                }
-
-
-                                Arc arc = new Arc(a, b, j, aid++);
-                                graph.addEdge(a, b, arc);
-                                tmp.get(idx).add(arc);
-
-                                mark.set(k);
-                            }
-                        }
-                        if (!added)
-                            qijIter.remove();
-                    }
-                }
-            }
-            layerIter = layer.get(i).iterator();
-
-            // If no more arcs go out of a given state in the layer, then we remove the state from that layer
-            while (layerIter.hasNext())
-                if (!mark.get(layerIter.next()))
-                    layerIter.remove();
-        }
-
-        TIntHashSet th = new TIntHashSet();
-        int[][] intLayer = new int[n + 2][];
-        for (k = 0; k < pi.getNbStates(); k++) {
-            Node o = in[n * pi.getNbStates() + k];
-            {
-                if (o != null) {
-                    Arc a = new Arc(o, tink, 0, aid++);
-                    graph.addEdge(o, tink, a);
-                }
-            }
-        }
-
-
-        for (i = 0; i <= n; i++) {
-            th.clear();
-            for (k = 0; k < pi.getNbStates(); k++) {
-                Node o = in[i * pi.getNbStates() + k];
-                if (o != null) {
-                    th.add(o.id);
-                }
-            }
-            intLayer[i] = th.toArray();
-        }
-        intLayer[n + 1] = new int[]{tink.id};
-
-        if (intLayer[0].length > 0) {
-            this.graph = new StoredDirectedMultiGraph(environment, graph, intLayer, starts, offsets, totalSizes, pi, z);
-            this.graph.makePathFinder();
-        }
+    public void setGraph(StoredDirectedMultiGraph graph){
+        this.graph = graph;
     }
+
 }

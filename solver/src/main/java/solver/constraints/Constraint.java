@@ -220,6 +220,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         this.lastPropagatorActive.set(propagators.length);
         for (int p = 0; p < propagators.length; p++) {
             Propagator prop = propagators[p];
+            prop.linkToVariables();
             staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
         }
 
