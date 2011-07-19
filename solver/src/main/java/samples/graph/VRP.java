@@ -298,7 +298,7 @@ public class VRP extends AbstractProblem {
 		AbstractStrategy objStrat =  StrategyVarValAssign.dyn(objs,
                 SorterFactory.inputOrder(objs),
                 ValidatorFactory.instanciated,
-                Assignment.int_split,
+                Assignment.int_eq,
                 solver.getEnvironment());
 
 		AbstractStrategy graphStrategy;

@@ -116,7 +116,11 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 					//				this.vars = (V[])ArrayUtils.append(vars,parameters);
 				}
 			}
-			setPropagators(ArrayUtils.append(propagators, prop.getPropagators(this, parameters)));
+			if(propagators==null){
+				setPropagators(prop.getPropagators(this, parameters));
+			}else{
+				addPropagators(prop.getPropagators(this, parameters));
+			}
 		}
 	}
 
@@ -124,7 +128,12 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	 * @param p
 	 */
 	public void addAdHocProp(GraphPropagator p){
-			setPropagators(ArrayUtils.append(propagators, new Propagator[]{p}));
+		if(propagators==null){
+			setPropagators(p);
+		}else{
+			addPropagators(p);
+		}
+//			setPropagators(ArrayUtils.append(propagators, new Propagator[]{p}));
 	}
 
 	//***********************************************************************************
