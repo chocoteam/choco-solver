@@ -159,7 +159,6 @@ public class Tree extends AbstractProblem{
 //						boolean success = false;
 						for(i=0;i<1;i++){
 							seed = i;
-							DirectedGraphVar.seed = i;
 							DataGenerator.seed = i;
 							System.out.println(n+" : "+d);
 							if(performOneTest(n, d)){

@@ -145,7 +145,6 @@ public class NPaths extends AbstractProblem{
 	private static void smallTest(int n, int d){
 		int i = 0;
 		seed = i;
-		DirectedGraphVar.seed = i;
 		DataGenerator.seed = i;
 		System.out.println(n+" : "+d);
 		performOneTest(n, d);
@@ -169,7 +168,6 @@ public class NPaths extends AbstractProblem{
 						//						boolean success = false;
 						for(i=0;i<1;i++){
 							seed = i;
-							DirectedGraphVar.seed = i;
 							DataGenerator.seed = i;
 							System.out.println(n+" : "+d);
 							if(performOneTest(n, d)){

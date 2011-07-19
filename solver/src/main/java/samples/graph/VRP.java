@@ -27,6 +27,9 @@
 
 package samples.graph;
 
+import java.io.File;
+import java.io.FileWriter;
+import org.kohsuke.args4j.Option;
 import choco.kernel.ResolutionPolicy;
 import samples.AbstractProblem;
 import solver.Solver;
@@ -59,16 +62,12 @@ import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.StrategyVarValAssign;
-import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
 import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-
-import java.util.Random;
 
 public class VRP extends AbstractProblem {
 
@@ -76,27 +75,36 @@ public class VRP extends AbstractProblem {
 	// VARIABLES
 	//***********************************************************************************
 
-	private VRPInstance instance;
+	//settable params
+	@Option(name = "-f", usage = "File name.", required = true)
+    private String instanceFile;
+	@Option(name = "-t", usage = "Time limit.", required = false)
+	public static long TIME_LIMIT = 5000;
+	@Option(name = "-p", usage = "path model (=/= transitiv model).", required = false)
+	private boolean pathGraph = false; // the transitive model is much better
+	
+	//params
 	private int nbMaxTrucks;
-	private int n; // number of nodes
-	private CustomerVisitVariable[] nodes;
-	private IntVar nTrucks;
-	private DirectedGraphVar g;
-	private IntVar nbNodes;
+	private long solvingTime;
 	private int[][] distancesMatrix;
-	private boolean pathGraph = true;
+	private VRPInstance instance;
+	//variables and graph
+	private CustomerVisitVariable[] nodes; 
+	private IntVar nbNodes;
+	private DirectedGraphVar g; // graph of the main constraint
+	private int n; // number of nodes in the graph of the main constraint
+	//results
+	private long objVal;
+	private IntVar nTrucks;
+	
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public VRP(VRPInstance inst) {
+	public VRP(boolean pathModel) {
 		solver = new Solver();
-		this.instance    = inst;
-		this.nbMaxTrucks = inst.getNbCustomers();
-		// number of nodes : one per customer plus two per truck (departure and arrival points)
-		n = inst.getNbCustomers() + nbMaxTrucks * 2;
-		pathGraph = true; // the transitive closure method is not operational yet
+		pathGraph = pathModel; // the transitive closure method is not operational yet
 	}
 
 	//***********************************************************************************
@@ -105,7 +113,11 @@ public class VRP extends AbstractProblem {
 
 	@Override
 	public void buildModel() {
-		// create randomly a distance matrix between nodes
+		this.instance    = new VRPInstance(instanceFile);
+		this.nbMaxTrucks = instance.getNbCustomers();
+		// number of nodes : one per customer plus two per truck (departure and arrival points)
+		n = instance.getNbCustomers() + nbMaxTrucks * 2;
+		// create a distance matrix between nodes
 		distancesMatrix = buildDistances(n, nbMaxTrucks);
 		nodes = new CustomerVisitVariable[n];
 		nbNodes = VariableFactory.bounded("nbNodes", instance.getNbCustomers()+2, n, solver);
@@ -151,6 +163,11 @@ public class VRP extends AbstractProblem {
 		return gc; 
 	}
 
+	/**create a graph constraint such that the corresponding graph should lead to a path partition :
+	 * branch on "xi's successor in the tour is xj"
+	 * @param distancesMatrix
+	 * @return a graph constraint
+	 */
 	private GraphConstraint graphSuccs(int[][] distancesMatrix){
 		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
@@ -170,7 +187,12 @@ public class VRP extends AbstractProblem {
 		gc.addAdHocProp(new PropNPreds(g, solver, gc, 1, custos));
 		return gc;
 	}
-	
+
+	/**create a graph constraint such that the corresponding graph should lead to the transitive closure of a path partition :
+	 * branch on "xi and xj belong to the same truck tour and xi is visited before xj"
+	 * @param distancesMatrix
+	 * @return a graph constraint
+	 */
 	private GraphConstraint graphTransClos(int[][] distancesMatrix){
 		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
@@ -182,156 +204,59 @@ public class VRP extends AbstractProblem {
 			ends.set(i+1);
 		}
 		gc.addAdHocProp(new PropEachNodeHasLoop(g, ends, solver, gc));
-		
-//		gc.addAdHocProp(new GraphPropagator<DirectedGraphVar>(new DirectedGraphVar[]{g}, solver, gc, PropagatorPriority.BINARY, false) {
-//
-//			private IntProcedure remArc = new IntProcedure() {
-//				
-//				@Override
-//				public void execute(int i) throws ContradictionException {
-//					int from = i/n-1;
-//					int to   = i%n;
-//					INeighbors suc = g.getEnvelopGraph().getSuccessorsOf(from);
-//					if(suc.neighborhoodSize()<1){
-//						g.removeNode(from, null);
-//					}else{
-//						if(suc.neighborhoodSize()==1 && g.getKernelGraph().getActiveNodes().isActive(from)){
-//							g.enforceArc(from, g.getEnvelopGraph().getSuccessorsOf(from).getFirstElement(), null);
-//						}
-//					}
-//				}
-//			};
-//			private IntProcedure enforceNodeProc = new IntProcedure() {
-//				
-//				@Override
-//				public void execute(int i) throws ContradictionException {
-//					INeighbors suc = g.getEnvelopGraph().getSuccessorsOf(i);
-//					if(suc.neighborhoodSize()<1){
-//						g.removeNode(i, null);
-//					}else{
-//						if(suc.neighborhoodSize()==1){
-//							g.enforceArc(i, g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement(), null);
-//						}
-//					}
-//				}
-//			};
-//
-//			@Override
-//			public int getPropagationConditions(int vIdx) {
-//				return EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask;
-//			}
-//
-//			@Override
-//			public void propagate() throws ContradictionException {
-//				IActiveNodes envNodes = g.getEnvelopGraph().getActiveNodes();
-//				IActiveNodes kerNodes = g.getKernelGraph().getActiveNodes();
-//				for(int i=envNodes.getFirstElement(); i<=0; i=envNodes.getNextElement()){
-//					if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<1){
-//						g.removeNode(i, this);
-//					}
-//					if(kerNodes.isActive(i) && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==1){
-//						g.enforceArc(i, g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement(), this);
-//					}
-//				}
-//			}
-//
-//			@Override
-//			public void propagateOnRequest(IRequest request, int idxVarInProp,int mask) throws ContradictionException {
-//				if (request instanceof GraphRequest) {
-//					GraphRequest gv = (GraphRequest) request;
-//					if ((mask & EventType.REMOVEARC.mask)!=0){
-//						IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-//						d.forEach(remArc, gv.fromArcRemoval(), gv.toArcRemoval());
-//					}if ((mask & EventType.ENFORCENODE.mask) != 0){
-//						IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-//						d.forEach(enforceNodeProc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
-//					}
-//				}
-//			}
-//
-//			@Override
-//			public ESat isEntailed() {
-//				return ESat.UNDEFINED;
-//			}
-//		});
-		
-		
 		return gc;
 	}
 
 	@Override
 	public void configureSolver() {
 		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().getLimitsFactory().setTimeLimit(30000);
+		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIME_LIMIT);
 		// approche dichotomique pour l'objectif
-		/*nTrucks.setHeuristicVal(new HeuristicVal() {
-			private IStateInt idx = solver.getEnvironment().makeInt(nTrucks.getLB());
-			@Override
-			public void remove() {
-			}
-			@Override
-			public int next() {
-				if(idx.get() == nTrucks.getUB()+1){
-					idx.set((int)Math.ceil((double)((nTrucks.getLB()+nTrucks.getUB()))/2));
-				}else{
-					idx.set((int)Math.ceil((double)((idx.get()+nTrucks.getUB()))/2));
-				}
-				return idx.get();
-			}
-			@Override
-			public boolean hasNext() {return !nTrucks.instantiated();}
-			@Override
-			public HeuristicVal duplicate(THashMap<HeuristicVal, HeuristicVal> map) {return null;}
-			@Override
-			protected void doUpdate(Action action) {}
-		});*/
-
-        Metric metric = new Median(nTrucks);
-        HeuristicVal hval1 = HeuristicValFactory.enumVal(nTrucks);
-        HeuristicVal hval2 = HeuristicValFactory.enumVal(nTrucks);
-        nTrucks.setHeuristicVal(
-                new SeqN(
-                        new DropN(hval1, metric, Action.open_node),
-                        new FirstN(hval2, metric, Action.open_node))
-        );
+		Metric metric = new Median(nTrucks);
+		HeuristicVal hval1 = HeuristicValFactory.enumVal(nTrucks);
+		HeuristicVal hval2 = HeuristicValFactory.enumVal(nTrucks);
+		nTrucks.setHeuristicVal(new SeqN(new DropN(hval1, metric, Action.open_node),new FirstN(hval2, metric, Action.open_node)));
 		IntVar[] objs = new IntVar[]{nTrucks};
-		AbstractStrategy objStrat =  StrategyVarValAssign.dyn(objs,
-                SorterFactory.inputOrder(objs),
-                ValidatorFactory.instanciated,
-                Assignment.int_eq,
-                solver.getEnvironment());
-
-		AbstractStrategy graphStrategy;
-		if(pathGraph){
-			graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new HomogeniousTour(g,false), NodeArcPriority.ARCS);
-		}else{
-			objStrat = StrategyFactory.inputOrderMaxVal(objs, solver.getEnvironment());
-			graphStrategy = StrategyFactory.graphLexico(g);
-			graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g,0), NodeArcPriority.NODES_THEN_ARCS);
-		}
+		AbstractStrategy objStrat =  StrategyVarValAssign.dyn(objs,SorterFactory.inputOrder(objs),ValidatorFactory.instanciated,Assignment.int_eq,solver.getEnvironment());
+		AbstractStrategy graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g,0), NodeArcPriority.NODES_THEN_ARCS);
 		AbstractStrategy strategy = new StrategiesSequencer(solver.getEnvironment(), objStrat, graphStrategy);
 		solver.set(strategy); // branch on the graph variable
 	}
 
 	@Override
 	public void solve() {
-//				solver.findSolution();
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
+		solvingTime = solver.getMeasures().getTimeCount();
+		objVal = solver.getMeasures().getObjectiveValue();
 	}
 
 	@Override
 	public void prettyOut() {
-		//	System.out.println("env "+g.getEnvelopGraph());
+		if(true)return;
+		String s = "\n*******************************\nDETAILS:";
 		for(int i=0;i<n; i++){
-			//System.out.println(nodes[i]);
+			s += nodes[i]+"\n";
 		}
-		//	System.out.println("ker "+g.getKernelGraph());
-		System.out.println("\n"+nTrucks);
+		s += "\n*******************************\nTOUR:";
+		for(int t=0; t<nbMaxTrucks; t++){
+			if(g.getKernelGraph().getActiveNodes().isActive(2*t)){
+				s += "\ntruck["+t+"] : ";
+				for(int i=1;i<=instance.getNbCustomers();i++){
+					for(int j=2*nbMaxTrucks; j<n; j++){
+						if(i == g.getKernelGraph().getPredecessorsOf(j).neighborhoodSize() && nodes[j].getTruck().getValue()==t){
+							s+= (j-2*nbMaxTrucks+1)+", ";
+						}
+					}
+				}
+			}
+		}
+		s += "\n*******************************";
+		System.out.println(s);
+		System.out.println(""+nTrucks);
 	}
 
 	/**
-	 * Generate an instance input data
-	 *
+	 * transforms the input instance to match with the model
 	 * @param n        number of nodes (nbCusto + 2*nbTrucks)
 	 * @param nbTrucks number of trucks
 	 * @return matrix of distance between each pair of nodes
@@ -355,7 +280,7 @@ public class VRP extends AbstractProblem {
 		}
 		for (int i=0; i<2*nbTrucks; i++) {
 			for (int j=0; j<2*nbTrucks; j++) {
-				distancesMatrix[i][j] = max; // the departure node has no possible predecessor
+				distancesMatrix[i][j] = max; 
 			}
 		}
 		for (int i=0; i<2*nbTrucks; i+=2) {
@@ -366,142 +291,107 @@ public class VRP extends AbstractProblem {
 		}
 		for (int i = 0; i < 2 * nbTrucks; i += 2) {
 			distancesMatrix[i + 1][i + 1] = 0; // (only truck arrival nodes have a loop)
+			distancesMatrix[i][i + 1] = 0; // allow to reach the arrival
 		}
-
-		//		String s = "";
-		//		for(int i=0; i<n ; i++){
-		//			s+="\n";
-		//			for(int j=0;j<n;j++){
-		//				s+="\t"+distancesMatrix[i][j];
-		//			}
-		//		}
-		//		System.out.println(s);
-		//		System.exit(0);
 		return distancesMatrix;
 	}
 
-
 	//***********************************************************************************
-	// HEURISTIC
+	// BENCHMARK
 	//***********************************************************************************
 
-	private class HomogeniousTour extends ArcStrategy<DirectedGraphVar>{
-
-		Random rd;
-
-		public HomogeniousTour(DirectedGraphVar g, boolean random) {
-			super(g);
-			if(random){
-				rd = new Random(0);
-			}
+	public static void benchCompare(String folderURL, String outputFile) {
+		if (folderURL == null){
+			folderURL = "/Users/info/Documents/worktest/galak/trunk/solver/src/main/resources/files/SolomonPotvinBengio";
 		}
-
-		@Override
-		public int nextArc() {
-			int lowestVal = -1;
-			int[] dec;
-			int index = -1;
-			for(int i=envNodes.getFirstElement(); i>=0 && i<2*nbMaxTrucks; i=envNodes.getNextElement()){
-				if(i%2==0){
-					dec = calcVal(i,i,0);
-					if(dec!=null && (lowestVal==-1 || dec[0]<lowestVal)){
-						index = dec[1];
-						lowestVal = dec[0];
-					}
-				}
-			}
-			if(index==-1){
-				if(!g.instantiated()){
-					throw new UnsupportedOperationException("error ");
-				}
-				return -1;
-			}else{
-				INeighbors envSuc = g.getEnvelopGraph().getSuccessorsOf(index);
-				INeighbors kerSuc = g.getKernelGraph().getSuccessorsOf(index);
-				int delta = envSuc.neighborhoodSize() - g.getKernelGraph().getSuccessorsOf(index).neighborhoodSize();
-				if(rd!=null){
-					delta = rd.nextInt(delta);
-					for(int i=envSuc.getFirstElement(); i>=0; i=envSuc.getNextElement()){
-						if(!kerSuc.contain(i)){
-							if(delta==0){
-								return (index+1)*n+i;
-							}else{
-								delta--;
-							}
-						}
-					}
-				}else{
-					int minVal = -1;
-					int minIndex = 0;
-					int valTmp;
-					for(int i=envSuc.getFirstElement(); i>=0; i=envSuc.getNextElement()){
-						if(i<2*nbMaxTrucks){
-							minIndex = i;
-						}else if(!kerSuc.contain(i)){
-							valTmp = distancesMatrix[index][i];
-							if(minVal == -1 || valTmp<minVal){
-								minVal = valTmp;
-								minIndex = i;
-							}
-						}
-					}
-					return (index+1)*n+minIndex;
-				}
-
-
-			}
-			throw new UnsupportedOperationException("error ");
+		if (outputFile==null){
+			outputFile = "VRP_results_modelCompared.csv";
 		}
-
-		private int[] calcVal(int start, int node, int nbNodes) {
-			INeighbors suc = g.getKernelGraph().getSuccessorsOf(node);
-			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()==0){
-				throw new UnsupportedOperationException("error ");
-			}
-			if(suc.neighborhoodSize()==0){
-				return new int[]{nbNodes, node};
-			}
-			int next = suc.getFirstElement();
-			if(next==start+1){
-				return null;
-			}else{
-				return calcVal(start, next, nbNodes+1);
-			}
+		clearFile(outputFile);
+		File folder = new File(folderURL);
+		File[] instances = folder.listFiles();
+		String[] params = new String[]{"-f",""};
+		long timePath, nbTrucksPath, timeTrans, nbTrucksTrans;
+		String results = "timePAth;nbTPath;timeTrans;nbTTrans\n";
+		writeTextInto(results, outputFile);
+		for(int i=0; i<instances.length; i++){
+			params[1] = instances[i].getAbsolutePath();
+			//
+			System.out.println(true+" : "+instances[i].getName());
+			VRP sample = new VRP(true);
+			sample.execute(params);
+			timePath = sample.solvingTime;
+			nbTrucksPath = sample.objVal;
+			//
+			System.out.println(false+" : "+instances[i].getName());
+			sample = new VRP(false);
+			sample.execute(params);
+			timeTrans = sample.solvingTime;
+			nbTrucksTrans = sample.objVal;
+			results = timePath+";"+nbTrucksPath+";"+timeTrans+";"+nbTrucksTrans+"\n";
+			writeTextInto(results, outputFile);
 		}
-//		private int[] calcVal(int start, int node, int nbNodes) {
-//			INeighbors suc = g.getKernelGraph().getSuccessorsOf(node);
-//			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()==0){
-//				System.out.println(start+" : "+node+" :" +nbNodes);
-//				throw new UnsupportedOperationException("error ");
-//			}
-//			if(suc.neighborhoodSize()==0){
-//				return new int[]{nbNodes, node};
-//			}
-//			int next = suc.getFirstElement();
-//			if(suc.contain(start+1)){
-//				if(suc.neighborhoodSize()==1){
-//					return null;
-//				}else{
-//					next = suc.getNextElement();
-//				}
-//			}
-//			if(next==start+1){
-//				return null;
-//			}else{
-//				return calcVal(start, next, nbNodes+1);
-//			}
-//		}
 	}
-
+	
+	public static void benchTransModel(String folderURL, String outputFile) {
+		if (folderURL == null){
+			folderURL = "/Users/info/Documents/worktest/galak/trunk/solver/src/main/resources/files/SolomonPotvinBengio";
+		}
+		if (outputFile==null){
+			outputFile = "VRP_results_transitivModel.csv";
+		}
+		clearFile(outputFile);
+		File folder = new File(folderURL);
+		File[] instances = folder.listFiles();
+		String[] params = new String[]{"-f",""};
+		long timeTrans, nbTrucksTrans;
+		String results = "timePAth;nbTPath;timeTrans;nbTTrans\n";
+		writeTextInto(results, outputFile);
+		for(int i=0; i<instances.length; i++){
+			params[1] = instances[i].getAbsolutePath();
+			System.out.println(instances[i].getName());
+			VRP sample = new VRP(false);
+			sample.execute(params);
+			timeTrans = sample.solvingTime;
+			nbTrucksTrans = sample.objVal;
+			results = timeTrans+";"+nbTrucksTrans+"\n";
+			writeTextInto(results, outputFile);
+		}
+	}
+	
 	//***********************************************************************************
 	// MAIN
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		DirectedGraphVar.seed = 0;
-		VRPInstance instance = new VRPInstance("/Users/info/Documents/worktest/galak/trunk/solver/src/main/resources/files/SolomonPotvinBengio/rc_201.1.txt");
-		VRP sample = new VRP(instance);
-		sample.execute();
-		System.out.println("********************************\n");
+		//VRP sample = new VRP(false);
+		//sample.execute(args);
+		benchTransModel(null,null);
+	}
+	
+	//***********************************************************************************
+	// RECORDING RESULTS
+	//***********************************************************************************
+
+	private static void writeTextInto(String text, String file) {
+		try{
+			FileWriter out  = new FileWriter(file,true);
+			out.write(text);
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	private static void clearFile(String file) {
+		try{
+			FileWriter out  = new FileWriter(file,false);
+			out.write("");
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 }

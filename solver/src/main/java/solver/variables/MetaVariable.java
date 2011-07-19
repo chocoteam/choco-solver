@@ -65,10 +65,11 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 	}
 	
 	public String toString() {
-        String s = this.name +"\n";
-        for(int i=0; i<dim; i++){
-        	s+=components[i].toString();
+        String s = this.name +" : {";
+        for(int i=0; i<dim-1; i++){
+        	s+=components[i].toString()+", ";
         }
+        s+=components[dim-1].toString()+"}";
         return s;
     }
 
