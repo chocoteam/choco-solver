@@ -218,12 +218,32 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
         this.lastPropagatorActive.set(propagators.length);
+        setUpPropagator(propagators);
+    }
+
+    /**
+     * Add new <code>Propagator</code> objects of this <code>Constraint</code> object.
+     *
+     * @param mPropagators list of <code>Propagator</code> objects to add.
+     */
+    @SuppressWarnings({"unchecked"})
+    public final void addPropagators(P... mPropagators) {
+        // add the new propagators at the end of the current array
+        P[] tmp = this.propagators;
+        this.propagators = (P[])new Propagator[tmp.length + mPropagators.length];
+        System.arraycopy(tmp, 0, propagators, 0, tmp.length);
+        System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
+
+        this.lastPropagatorActive.add(mPropagators.length);
+        setUpPropagator(mPropagators);
+    }
+
+    private void setUpPropagator(P... propagators){
         for (int p = 0; p < propagators.length; p++) {
             Propagator prop = propagators[p];
             prop.linkToVariables();
             staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
         }
-
         slowPropagation = (staticPropagationPriority < storeThreshold.priority);
     }
 
