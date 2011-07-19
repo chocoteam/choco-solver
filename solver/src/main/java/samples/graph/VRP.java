@@ -81,7 +81,7 @@ public class VRP extends AbstractProblem {
 	@Option(name = "-t", usage = "Time limit.", required = false)
 	public static long TIME_LIMIT = 5000;
 	@Option(name = "-p", usage = "path model (=/= transitiv model).", required = false)
-	private boolean pathGraph = false; // the transitive model is much better
+	private static boolean pathGraph = false; // the transitive model is much better
 	
 	//params
 	private int nbMaxTrucks;
@@ -102,9 +102,8 @@ public class VRP extends AbstractProblem {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public VRP(boolean pathModel) {
+	public VRP() {
 		solver = new Solver();
-		pathGraph = pathModel; // the transitive closure method is not operational yet
 	}
 
 	//***********************************************************************************
@@ -211,16 +210,22 @@ public class VRP extends AbstractProblem {
 	public void configureSolver() {
 		SearchMonitorFactory.log(solver, true, false);
 		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIME_LIMIT);
-		// approche dichotomique pour l'objectif
+		AbstractStrategy objStrat =  StrategyFactory.inputOrderMinVal(new IntVar[]{nTrucks}, solver.getEnvironment()); //AbstractStrategy objStrat =  setDichotomicSearch();
+		AbstractStrategy graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g,0), NodeArcPriority.NODES_THEN_ARCS);
+		AbstractStrategy strategy = new StrategiesSequencer(solver.getEnvironment(), objStrat, graphStrategy);
+		solver.set(strategy); // branch on the graph variable
+	}
+	
+	/** 
+	 * @return dichotomic strategy for the objectif variable
+	 */
+	private StrategyVarValAssign setDichotomicSearch(){
 		Metric metric = new Median(nTrucks);
 		HeuristicVal hval1 = HeuristicValFactory.enumVal(nTrucks);
 		HeuristicVal hval2 = HeuristicValFactory.enumVal(nTrucks);
 		nTrucks.setHeuristicVal(new SeqN(new DropN(hval1, metric, Action.open_node),new FirstN(hval2, metric, Action.open_node)));
 		IntVar[] objs = new IntVar[]{nTrucks};
-		AbstractStrategy objStrat =  StrategyVarValAssign.dyn(objs,SorterFactory.inputOrder(objs),ValidatorFactory.instanciated,Assignment.int_eq,solver.getEnvironment());
-		AbstractStrategy graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g,0), NodeArcPriority.NODES_THEN_ARCS);
-		AbstractStrategy strategy = new StrategiesSequencer(solver.getEnvironment(), objStrat, graphStrategy);
-		solver.set(strategy); // branch on the graph variable
+		return  StrategyVarValAssign.dyn(objs,SorterFactory.inputOrder(objs),ValidatorFactory.instanciated,Assignment.int_eq,solver.getEnvironment());
 	}
 
 	@Override
@@ -317,14 +322,16 @@ public class VRP extends AbstractProblem {
 		for(int i=0; i<instances.length; i++){
 			params[1] = instances[i].getAbsolutePath();
 			//
-			System.out.println(true+" : "+instances[i].getName());
-			VRP sample = new VRP(true);
+			System.out.println(pathGraph+" : "+instances[i].getName());
+			pathGraph = true;
+			VRP sample = new VRP();
 			sample.execute(params);
 			timePath = sample.solvingTime;
 			nbTrucksPath = sample.objVal;
 			//
-			System.out.println(false+" : "+instances[i].getName());
-			sample = new VRP(false);
+			pathGraph = false;
+			System.out.println(pathGraph+" : "+instances[i].getName());
+			sample = new VRP();
 			sample.execute(params);
 			timeTrans = sample.solvingTime;
 			nbTrucksTrans = sample.objVal;
@@ -334,6 +341,7 @@ public class VRP extends AbstractProblem {
 	}
 	
 	public static void benchTransModel(String folderURL, String outputFile) {
+		pathGraph = false;
 		if (folderURL == null){
 			folderURL = "/Users/info/Documents/worktest/galak/trunk/solver/src/main/resources/files/SolomonPotvinBengio";
 		}
@@ -350,7 +358,7 @@ public class VRP extends AbstractProblem {
 		for(int i=0; i<instances.length; i++){
 			params[1] = instances[i].getAbsolutePath();
 			System.out.println(instances[i].getName());
-			VRP sample = new VRP(false);
+			VRP sample = new VRP();
 			sample.execute(params);
 			timeTrans = sample.solvingTime;
 			nbTrucksTrans = sample.objVal;
