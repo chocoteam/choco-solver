@@ -117,12 +117,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     }
 
 
-    /**
-     * BEWARE : ONLY FOR GRAPH CONSTRAINTS
-     *
-     * @param solver
-     * @param storeThreshold
-     */
+    //BEWARE : ONLY FOR GRAPH CONSTRAINTS
     public Constraint(Solver solver, PropagatorPriority storeThreshold) {
         this.solver = solver;
         this.storeThreshold = storeThreshold;
@@ -250,7 +245,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     /**
      * Initial propagation of the constraint
      *
-     * @throws ContradictionException
+     * @throws ContradictionException when a contradiction occurs during filtering
      */
     public void filter() throws ContradictionException {
         int last = lastPropagatorActive.get();
@@ -296,6 +291,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      * @param name name of comparator (if overrides the default one)
      * @return a comparator
      */
+    @SuppressWarnings({"unchecked"})
     public AbstractSorter<V> getComparator(String name) {
         if (name.equals(VAR_DEFAULT)) {
             return new Incr<V>(Belong.build(this));
@@ -305,6 +301,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     public abstract HeuristicVal getIterator(String name, V var);
 
+    @SuppressWarnings({"unchecked"})
     public IMetric<V> getMetric(String name) {
         if (name.equals(METRIC_DEFAULT)) {
             return Belong.build(this);
