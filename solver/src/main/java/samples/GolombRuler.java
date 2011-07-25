@@ -51,8 +51,11 @@ import java.util.HashSet;
  */
 public class GolombRuler extends AbstractProblem {
 
-    @Option(name = "-o", usage = "Golomb ruler order.", required = true)
-    int m;
+    @Option(name = "-o", usage = "Golomb ruler order.", required = false)
+    private int m = 10;
+    @Option(name = "-allDiff", usage = "Use allDifferent constraint", required = false)
+    private boolean useAllDiff = false;
+
     IntVar[] ticks;
 
     @Override
@@ -86,8 +89,16 @@ public class GolombRuler extends AbstractProblem {
                 solver.post(Sum.leq(new IntVar[]{diff[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
             }
         }
-
-        solver.post(new AllDifferent(diff, solver));
+        if (useAllDiff) {
+            solver.post(new AllDifferent(diff, solver));
+        } else {
+            // d_ij != d_kl
+            for (int i = 0; i < diff.length; i++) {
+                for (int j = i + 1; j < diff.length; j++) {
+                    solver.post(ConstraintFactory.neq(diff[i], diff[j], solver));
+                }
+            }
+        }
         // break symetries
         if (m > 2) {
             solver.post(ConstraintFactory.lt(diff[0], diff[diff.length - 1], solver));
