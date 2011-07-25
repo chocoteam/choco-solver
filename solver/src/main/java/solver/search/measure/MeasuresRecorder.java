@@ -205,6 +205,7 @@ public final class MeasuresRecorder implements IMeasures {
         if (cstrs == null || cstrs.length != solver.getNbCstrs()) {
             cstrs = solver.getCstrs();
         }
+        propagationCount = 0;
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] propagators = cstrs[i].propagators;
             for (int j = 0; j < propagators.length; j++) {
