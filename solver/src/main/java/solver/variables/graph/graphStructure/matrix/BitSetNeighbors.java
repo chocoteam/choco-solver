@@ -27,8 +27,8 @@
 
 package solver.variables.graph.graphStructure.matrix;
 
-import solver.variables.graph.INeighbors;
 import java.util.BitSet;
+import solver.variables.graph.INeighbors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -77,7 +77,6 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
     @Override
     public int neighborhoodSize() {
         return this.card;
-//        return this.cardinality();
     }
 
 	@Override

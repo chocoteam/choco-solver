@@ -47,8 +47,8 @@ public class UndirectedGraphTest {
                                 {true,false,true,false}    };
 
         System.out.println("creation");
-        UndirectedGraph g1 = new UndirectedGraph(order, GraphType.SPARSE);
-        UndirectedGraph g2 = new UndirectedGraph(order, GraphType.DENSE);
+        UndirectedGraph g1 = new UndirectedGraph(order, GraphType.LINKED_LIST);
+        UndirectedGraph g2 = new UndirectedGraph(order, GraphType.MATRIX);
         for(int i=0;i<order; i++){
         	for(int j=0;j<order;j++){
         		if(data[i][j]){

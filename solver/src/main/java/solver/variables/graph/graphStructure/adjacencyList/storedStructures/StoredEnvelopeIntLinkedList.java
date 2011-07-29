@@ -25,28 +25,41 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
 
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import solver.variables.graph.INeighbors;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+/**LinkedList designed for envelope of graphVar : 
+ * perform 
+ * contain in O(1)
+ * add in O(1)
+ * remove in O(1)
+ * iteration in O(m)
+ * 
+ * BUT elements can only be inserted at world 0 (which fit with the envelope context)
+ * 
+ * BEWARE : it is beautiful on paper but pretty heavy in practice...
+ * 
+ * @author Jean-Guillaume 
  */
-public class IntLinkedList implements INeighbors {
+public class StoredEnvelopeIntLinkedList implements INeighbors {
 
-    /**
-     * The first cell of the linked list
-     */
-    protected IntCell first;
-    protected int size;
-    protected IntCell nextCell; // enables to iterate
+	IStateInt first;
+	IStateInt size;
+	IStateInt[] next; 
+	IStateInt[] prev; 
+	private int nextElement; // enables to iterate
+	private IEnvironment environment;
 
-    public IntLinkedList() {
-        this.first  = null;
-        nextCell    = null;
-        this.size 	= 0;
+    public StoredEnvelopeIntLinkedList(int n, IEnvironment env) {
+        this.first = env.makeInt(-1);
+        next    = new IStateInt[n];
+        prev    = new IStateInt[n];
+        this.environment = env;
+        this.size = env.makeInt(0);
+        this.nextElement = -1;
     }
 
     @Override
@@ -55,7 +68,7 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the list is empty
      */
     public boolean isEmpty() {
-        return this.first == null;
+        return this.size.get() == 0;
     }
 
     @Override
@@ -64,7 +77,7 @@ public class IntLinkedList implements INeighbors {
      * @return the number of cells
      */
     public int neighborhoodSize() {
-        return this.size;
+        return this.size.get();
     }
 
     @Override
@@ -74,15 +87,7 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the linked list contain the value element
      */
     public boolean contain(int element) {
-        boolean res = false;
-        IntCell current = first;
-        while (!res && current != null) {
-            if (current.contains(element)) {
-                res = true;
-            }
-            current = current.getNext();
-        }
-        return res;
+        return prev[element]!=null && (prev[element].get()!=-1 || first.get()==element);
     }
 
     @Override
@@ -92,8 +97,26 @@ public class IntLinkedList implements INeighbors {
      * @param element an int
      */
     public void add(int element) {
-        this.first = new IntCell(element, first);
-        this.size++;
+    	if(environment.getWorldIndex()!=0){
+    		throw new UnsupportedOperationException("for efficiency reasons, element insertion in "+this.getClass().getName()+" is only possible at world 0.\n" +
+    				"please use another datastructure");
+    	}
+    	if(prev[element]==null){
+    		prev[element] = environment.makeInt(-1);
+    	}
+    	if(next[element]==null){
+    		next[element] = environment.makeInt(-1);
+    	}
+    	int f = first.get();
+    	if(f == -1){
+    		first.set(element);
+    		size.set(1);
+    	}else{
+	    	next[element].set(f);
+	    	prev[f].set(element);
+	        this.first.set(element);
+	        this.size.add(1);
+    	}
     }
 
     @Override
@@ -103,65 +126,77 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the element has been effectively removed
      */
     public boolean remove(int element) {
-        IntCell current = first;
-        IntCell previous = null;
-        boolean removed = false;
-        while ((!removed) && current != null) {
-            if (current.contains(element)) {
-            	if(current == nextCell){
-            		nextCell = nextCell.next;
-            	}
-                if (previous == null) {
-                    this.first = current.getNext();
-                } else {
-                    previous.setNext(current.getNext());
-                }
-                removed = true;
-            }
-            previous = current;
-            current = current.getNext();
-        }
-        if (removed) {
-            this.size--;
-        }
-        return removed;
+    	if(!contain(element)){
+    		return false;
+    	}
+		int p = prev[element].get();
+    	int s = next[element].get();
+    	prev[element].set(-1);
+    	next[element].set(-1);
+    	if(nextElement == element){
+    		nextElement = s;
+    	}
+		if(first.get() == element){ // first
+    		first.set(s);
+    		if (s != -1){
+    			prev[s].set(-1);
+    		}
+    		size.add(-1);
+    		return true;
+    	}else {
+    		if(s!=-1){
+    			prev[s].set(p);
+    		}
+    		next[p].set(s);
+    		size.add(-1);
+    		return true;
+    	}
     }
 
     @Override
     public String toString() {
         String res = "";
-        IntCell current = first;
-        while (current != null) {
-            res += current;
-            current = current.getNext();
+        int current = first.get();
+        while (current != -1) {
+            res += current+", ";
+            current = next[current].get();
         }
         return res;
     }
 
 	@Override
 	public void clear() {
-		first = null;
-		nextCell = null;
-		size = 0;
+		int current = first.get();
+		int idx;
+        while (current != -1) {
+        	prev[current].set(-1);
+        	idx = next[current].get();
+        	next[current].set(-1);
+        	current = idx;
+        }
+		nextElement = -1;
+		first.set(-1);
+		size.set(0);
 	}
 	
 	// --- Iterations	
 	@Override
 	public int getFirstElement() {
-		if(first==null){
-			return -1;
+		int f = first.get();
+		if(f != -1){
+			nextElement = next[f].get();
+		}else{
+			nextElement = -1;
 		}
-		nextCell = first.next;
-		return first.getElement();
+		return f;
 	}
 	
 	@Override
 	public int getNextElement() {
-		if(nextCell==null){
-			return -1;
+		int elem = nextElement;
+		if(elem !=-1) {
+			nextElement = next[elem].get();
 		}
-		int el = nextCell.element;
-		nextCell = nextCell.next;
-		return el;
+		return elem;
 	}
 }

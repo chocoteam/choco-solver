@@ -31,6 +31,8 @@ import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
+import solver.variables.graph.graphStructure.adjacencyList.EnvelopeIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
@@ -59,30 +61,46 @@ public class DirectedGraph implements IDirectedGraph {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraph(int order, GraphType type) {
+	public DirectedGraph(int nbits, GraphType type) {
 		this.type = type;
 		switch (type) {
-		case SPARSE:
-			this.successors = new IntLinkedList[order];
-			this.predecessors = new IntLinkedList[order];
-			for (int i = 0; i < order; i++) {
+		case COMPOSITE:
+			this.successors = new CompositeList[nbits];
+			this.predecessors = new CompositeList[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.successors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
+				this.predecessors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
+			}
+			break;
+		case ENVELOPE_LINKEDLIST: // Not efficient
+//			this.successors = new EnvelopeIntLinkedList[nbits];
+//			this.predecessors = new EnvelopeIntLinkedList[nbits];
+//			for (int i = 0; i < nbits; i++) {
+//				this.successors[i] = new EnvelopeIntLinkedList(nbits);
+//				this.predecessors[i] = new EnvelopeIntLinkedList(nbits);
+//			}
+//			break;
+		case LINKED_LIST:
+			this.successors = new IntLinkedList[nbits];
+			this.predecessors = new IntLinkedList[nbits];
+			for (int i = 0; i < nbits; i++) {
 				this.successors[i] = new IntLinkedList();
 				this.predecessors[i] = new IntLinkedList();
 			}
 			break;
-		case DENSE:
-			this.successors = new BitSetNeighbors[order];
-			this.predecessors = new BitSetNeighbors[order];
-			for (int i = 0; i < order; i++) {
-				this.successors[i] = new BitSetNeighbors(order);
-				this.predecessors[i] = new BitSetNeighbors(order);
+		case MATRIX:
+			this.successors = new BitSetNeighbors[nbits];
+			this.predecessors = new BitSetNeighbors[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.successors[i] = new BitSetNeighbors(nbits);
+				this.predecessors[i] = new BitSetNeighbors(nbits);
 			}
 			break;
 		default:
 			throw new UnsupportedOperationException();
 		}
-		this.activeIdx = new ActiveNodes(order);
-		for (int i = 0; i < order; i++) {
+		this.activeIdx = new ActiveNodes(nbits);
+		for (int i = 0; i < nbits; i++) {
 			this.activeIdx.activate(i);
 		}
 	}

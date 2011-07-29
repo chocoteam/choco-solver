@@ -139,7 +139,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			 values[i] = valuesList.get(i-vars.length);
 			 valuesHash.put(values[i], i);
 		 }
-		 UndirectedGraphVar graph = new UndirectedGraphVar(solver, n, GraphType.SPARSE, GraphType.SPARSE);
+		 UndirectedGraphVar graph = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		 for(int v=0; v<vars.length; v++){
 			 ub = vars[v].getUB();
 			 for(val=vars[v].getLB(); val<=ub; val = vars[v].nextValue(val)){

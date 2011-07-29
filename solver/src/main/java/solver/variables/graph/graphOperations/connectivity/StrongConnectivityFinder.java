@@ -204,7 +204,7 @@ public class StrongConnectivityFinder {
 	
 	
 	public static void main(String[] args) {
-		DirectedGraph dig = new DirectedGraph(5, GraphType.SPARSE);
+		DirectedGraph dig = new DirectedGraph(5, GraphType.LINKED_LIST);
 		dig.addArc(0, 1);
 		dig.addArc(2, 3);
 		dig.addArc(1, 0);

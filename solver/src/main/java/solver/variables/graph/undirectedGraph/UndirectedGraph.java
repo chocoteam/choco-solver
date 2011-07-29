@@ -31,6 +31,7 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
@@ -59,26 +60,42 @@ public class UndirectedGraph implements IGraph {
 
 	protected UndirectedGraph() {}
 
-	public UndirectedGraph(int order, GraphType type) {
+	public UndirectedGraph(int nbits, GraphType type) {
 		this.type = type;
 		switch (type) {
-		case SPARSE:
-			this.neighbors = new IntLinkedList[order];
-			for (int i = 0; i < order; i++) {
+		case COMPOSITE:
+			this.neighbors = new CompositeList[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
+			}
+			break;
+		case ENVELOPE_LINKEDLIST: // not efficient
+//			neighbors = new EnvelopeIntLinkedList[nbits];
+//			for (int i = 0; i < nbits; i++) {
+//				neighbors[i] = new EnvelopeIntLinkedList(nbits);
+//			}
+//			break;
+		case LINKED_LIST:
+			this.neighbors = new IntLinkedList[nbits];
+			for (int i = 0; i < nbits; i++) {
 				this.neighbors[i] = new IntLinkedList();
 			}
 			break;
-		case DENSE:
-			this.neighbors = new BitSetNeighbors[order];
-			for (int i = 0; i < order; i++) {
-				this.neighbors[i] = new BitSetNeighbors(order);
+		case MATRIX:
+			this.neighbors = new BitSetNeighbors[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new BitSetNeighbors(nbits);
 			}
 			break;
 		default:
-			throw new UnsupportedOperationException();
+			this.neighbors = new BitSetNeighbors[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new BitSetNeighbors(nbits);
+			}
+			break;
 		}
-		this.activeIdx = new ActiveNodes(order);
-		for (int i = 0; i < order; i++) {
+		this.activeIdx = new ActiveNodes(nbits);
+		for (int i = 0; i < nbits; i++) {
 			this.activeIdx.activate(i);
 		}
 	}

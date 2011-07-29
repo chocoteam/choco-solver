@@ -48,8 +48,8 @@ public class DirectedGraphTest {
                                 {true,false,false,false}    };
 
         System.out.println("creation");
-        DirectedGraph g1 = new DirectedGraph(order,data, GraphType.SPARSE);
-        DirectedGraph g2 = new DirectedGraph(order,data,GraphType.DENSE);
+        DirectedGraph g1 = new DirectedGraph(order,data, GraphType.LINKED_LIST);
+        DirectedGraph g2 = new DirectedGraph(order,data,GraphType.MATRIX);
 
         System.out.println(g1);
         System.out.println(g2);

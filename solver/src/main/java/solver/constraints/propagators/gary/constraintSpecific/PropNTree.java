@@ -186,7 +186,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 		FlowGraphManager flowGM = new FlowGraphManager(n, Grs); 
 		
 		//LCA preprocessing
-		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.SPARSE);
+		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST);
 		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 			dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
 		}

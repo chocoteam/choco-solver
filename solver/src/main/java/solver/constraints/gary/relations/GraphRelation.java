@@ -113,7 +113,7 @@ public abstract class GraphRelation<V extends Variable> {
 	public GraphVar generateInitialGraph(Variable[] inputVars, Solver solver){
 		int n = vars.length;
 		if (isDirected()){
-			DirectedGraphVar g = new DirectedGraphVar(solver, n, GraphType.DENSE, GraphType.SPARSE);
+			DirectedGraphVar g = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
 			for(int i=0;i<n;i++){
 				for(int j=0;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){
@@ -123,7 +123,7 @@ public abstract class GraphRelation<V extends Variable> {
 			}
 			return g;
 		}else{
-			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, GraphType.DENSE, GraphType.SPARSE);
+			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
 			for(int i=0;i<n;i++){
 				for(int j=i;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){

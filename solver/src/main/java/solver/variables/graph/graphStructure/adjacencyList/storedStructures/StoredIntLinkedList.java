@@ -28,7 +28,6 @@
 package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
 
 import choco.kernel.memory.IEnvironment;
-import solver.variables.graph.graphStructure.adjacencyList.IntCell;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 
 /**
@@ -38,16 +37,11 @@ import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
  */
 public class StoredIntLinkedList extends IntLinkedList {
 
-    /**
-     * The first cell of the linked list
-     */
-    IntCell first;
-
     final IEnvironment environment;
 
     public StoredIntLinkedList(IEnvironment environment) {
+    	super();
         this.environment = environment;
-        this.first = null;
     }
 
     @Override
@@ -59,7 +53,6 @@ public class StoredIntLinkedList extends IntLinkedList {
     protected void _add(int element) {
         super.add(element);
     }
-
 
     @Override
     public boolean remove(int element) {
@@ -74,7 +67,6 @@ public class StoredIntLinkedList extends IntLinkedList {
         return super.remove(element);
     }
     
-
     @Override
     public void clear() {
         for(int i=getFirstElement(); i>=0; i=getNextElement()){

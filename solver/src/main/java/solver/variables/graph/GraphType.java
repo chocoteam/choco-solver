@@ -34,6 +34,7 @@ package solver.variables.graph;
  */
 public enum GraphType {
 
-    SPARSE, DENSE
+	// ENVELOPE_LINKEDLIST might be removed
+    COMPOSITE, ENVELOPE_LINKEDLIST, LINKED_LIST, MATRIX
 
 }

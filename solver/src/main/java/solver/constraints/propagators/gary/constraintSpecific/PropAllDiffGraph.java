@@ -108,7 +108,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
             nodeSCCref[i] = environment.makeInt(-1);
             nodeSCCnext[i] = environment.makeInt(-1);
         }
-        digraph = new StoredDirectedGraph(solver.getEnvironment(), n + 1, GraphType.SPARSE);
+        digraph = new StoredDirectedGraph(solver.getEnvironment(), n + 1, GraphType.LINKED_LIST);
         maintain_matching = new IntProcedure() {
             public void execute(int i) throws ContradictionException {
                 int from = i / n - 1;

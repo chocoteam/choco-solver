@@ -29,24 +29,37 @@ package solver.variables.graph.graphStructure.adjacencyList;
 
 import solver.variables.graph.INeighbors;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+/**LinkedList designed for envelope of graphVar : 
+ * perform 
+ * contain in O(1)
+ * add in O(1)
+ * remove in O(1)
+ * iteration in O(m)
+ * 
+ * BUT elements can only be inserted at world 0 (which fit with the envelope context)
+ * 
+ * BEWARE : it is beautiful on paper but pretty heavy in practice...
+ * 
+ * @author Jean-Guillaume 
  */
-public class IntLinkedList implements INeighbors {
+public class EnvelopeIntLinkedList implements INeighbors {
 
-    /**
-     * The first cell of the linked list
-     */
-    protected IntCell first;
-    protected int size;
-    protected IntCell nextCell; // enables to iterate
+	int first;
+	int size;
+	int[] next; 
+	int[] prev; 
+	private int nextElement; // enables to iterate
 
-    public IntLinkedList() {
-        this.first  = null;
-        nextCell    = null;
-        this.size 	= 0;
+    public EnvelopeIntLinkedList(int n) {
+        this.first = -1;
+        next    = new int[n];
+        prev    = new int[n];
+        for(int i=0;i<n;i++){
+        	next[i] = -1;
+        	prev[i] = -1;
+        }
+        this.size = 0;
+        this.nextElement = -1;
     }
 
     @Override
@@ -55,7 +68,7 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the list is empty
      */
     public boolean isEmpty() {
-        return this.first == null;
+        return this.size == 0;
     }
 
     @Override
@@ -74,15 +87,7 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the linked list contain the value element
      */
     public boolean contain(int element) {
-        boolean res = false;
-        IntCell current = first;
-        while (!res && current != null) {
-            if (current.contains(element)) {
-                res = true;
-            }
-            current = current.getNext();
-        }
-        return res;
+        return prev[element]!=-1 || first ==element ;
     }
 
     @Override
@@ -92,8 +97,16 @@ public class IntLinkedList implements INeighbors {
      * @param element an int
      */
     public void add(int element) {
-        this.first = new IntCell(element, first);
-        this.size++;
+    	int f = first;
+    	if(f == -1){
+    		first = element;
+    		size  = 1;
+    	}else{
+	    	next[element] = f;
+	    	prev[f] = element;
+	        this.first = element;
+	        this.size++;
+    	}
     }
 
     @Override
@@ -103,65 +116,77 @@ public class IntLinkedList implements INeighbors {
      * @return true iff the element has been effectively removed
      */
     public boolean remove(int element) {
-        IntCell current = first;
-        IntCell previous = null;
-        boolean removed = false;
-        while ((!removed) && current != null) {
-            if (current.contains(element)) {
-            	if(current == nextCell){
-            		nextCell = nextCell.next;
-            	}
-                if (previous == null) {
-                    this.first = current.getNext();
-                } else {
-                    previous.setNext(current.getNext());
-                }
-                removed = true;
-            }
-            previous = current;
-            current = current.getNext();
-        }
-        if (removed) {
-            this.size--;
-        }
-        return removed;
+    	if(!contain(element)){
+    		return false;
+    	}
+		int p = prev[element];
+    	int s = next[element];
+    	prev[element] = -1;
+    	next[element] = -1;
+    	if(nextElement == element){
+    		nextElement = s;
+    	}
+		if(first == element){ // first
+    		first = s;
+    		if (s != -1){
+    			prev[s] = -1;
+    		}
+    		size--;
+    		return true;
+    	}else {
+    		if(s!=-1){
+    			prev[s] = p;
+    		}
+    		next[p] = s;
+    		size--;
+    		return true;
+    	}
     }
 
     @Override
     public String toString() {
         String res = "";
-        IntCell current = first;
-        while (current != null) {
-            res += current;
-            current = current.getNext();
+        int current = first;
+        while (current != -1) {
+            res += current+", ";
+            current = next[current];
         }
         return res;
     }
 
 	@Override
 	public void clear() {
-		first = null;
-		nextCell = null;
-		size = 0;
+		int current = first;
+		int idx;
+        while (current != -1) {
+        	prev[current] = -1;
+        	idx = next[current];
+        	next[current] = -1;
+        	current = idx;
+        }
+		nextElement = -1;
+		first = -1;
+		size  =  0;
 	}
 	
 	// --- Iterations	
 	@Override
 	public int getFirstElement() {
-		if(first==null){
-			return -1;
+		int f = first;
+		if(f != -1){
+			nextElement = next[f];
+		}else{
+			nextElement = -1;
 		}
-		nextCell = first.next;
-		return first.getElement();
+		return f;
 	}
 	
 	@Override
 	public int getNextElement() {
-		if(nextCell==null){
-			return -1;
+		int elem = nextElement;
+		if(elem !=-1) {
+			nextElement = next[elem];
 		}
-		int el = nextCell.element;
-		nextCell = nextCell.next;
-		return el;
+		return elem;
 	}
 }

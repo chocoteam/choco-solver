@@ -24,55 +24,69 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables.graph.graphStructure.adjacencyList;
 
-package solver.constraints.gary;
+import solver.variables.graph.INeighbors;
 
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+/**
+ * @author Jean-Guillaume Fages
+ * 
+ * Composite collection composed of a matrix and a list representation to get the benefit of each
+ *
+ */
+public class CompositeList implements INeighbors{
 
-public class NTreeTest {
+	private INeighbors listLike;
+	private INeighbors matrixLike;
 
-	@Test
-	public static void model(int n, int tmin, int tmax) {
-		Solver s = new Solver();
-		DirectedGraphVar g = new DirectedGraphVar(s, n, GraphType.MATRIX, GraphType.MATRIX);
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				g.getEnvelopGraph().addArc(i, j);
-			}
-		}
-		IntVar nTree = VariableFactory.enumerated("NTREE ", tmin,tmax, s);
-		Constraint[] cstrs = new Constraint[]{new NTree(g,nTree, s, PropagatorPriority.LINEAR)};
-		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
-		
-		s.post(cstrs);
-		s.set(strategy);
-		s.findSolution();
-		
-		if(s.getMeasures().getBackTrackCount()>0){
-			throw new UnsupportedOperationException("error (no GAC)");
-		}
+	public CompositeList(INeighbors iterator, INeighbors presenceChecker){
+		this.listLike = iterator;
+		this.matrixLike = presenceChecker;
 	}
-	
-	@Test
-	public static void debug() {
-//		for(int s=0;s<3;s++){
-//			for(int n=100;n<500;n*=2){
-//				for(int t1=1;t1<n;t1*=2){
-//					for(int t2=t1;t2<n;t2*=2){
-//						model(n,t1,t2);
-//					}
-//				}
-//			}
-//		}
-		model(10,11,12);
+
+	@Override
+	public void add(int element) {
+		listLike.add(element);
+		matrixLike.add(element);
+	}
+
+	@Override
+	public boolean remove(int element) {
+		if(!matrixLike.remove(element)){
+			return false;
+		}
+		listLike.remove(element);
+		return true;
+	}
+
+	@Override
+	public boolean contain(int element) {
+		return matrixLike.contain(element);
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return matrixLike.isEmpty();
+	}
+
+	@Override
+	public int neighborhoodSize() {
+		return matrixLike.neighborhoodSize();
+	}
+
+	@Override
+	public void clear() {
+		listLike.clear();
+		matrixLike.clear();
+	}
+
+	@Override
+	public int getFirstElement() {
+		return listLike.getFirstElement();
+	}
+
+	@Override
+	public int getNextElement() {
+		return listLike.getNextElement();
 	}
 }

@@ -41,6 +41,8 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
+import java.io.FileWriter;
 import java.util.BitSet;
 
 public class Tree extends AbstractProblem{
@@ -136,7 +138,7 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		gtype = GraphType.DENSE;
+		gtype = GraphType.MATRIX;
 		testN();
 	}
 	
@@ -145,8 +147,10 @@ public class Tree extends AbstractProblem{
 		clearFile(file);
 		writeTextInto("n;d;nodes;bks;time;solved;\n", file);
 		int i = 0;
-		int[] ns = new int[]{10,600,700,800};
-		int[] ds = new int[]{30000};
+//		int[] ns = new int[]{10,50,100,150,300,450,600,800,2000,3000,4000,5000};
+//		int[] ds = new int[]{5,20,50,5000};
+		int[] ns = new int[]{10,50,100,300,1500};
+		int[] ds = new int[]{5,20,300}; 
 		int dMax = 50000;
 		int nMax = 50000;
 		for(int n:ns){
@@ -156,30 +160,29 @@ public class Tree extends AbstractProblem{
 						if(d>n){
 							d=n;
 						}
-//						boolean success = false;
+						boolean success = false;
 						for(i=0;i<1;i++){
 							seed = i;
 							DataGenerator.seed = i;
 							System.out.println(n+" : "+d);
 							if(performOneTest(n, d)){
-//								success = true;
+								success = true;
 							}
 							for(int k=0;k<5;k++){
 								System.gc();
 							}
 						}
-//						if(!success){
-//							dMax = d;
-//							if (dMax == 5){
-//								nMax = n;
-//							}
-//						}
-//						if(d==n){
-//							break;
-//						}
+						if(!success){
+							dMax = d;
+							if (dMax == 5){
+								nMax = n;
+							}
+						}
+						if(d==n){
+							break;
+						}
 					}
 				}
-			
 			}else{
 				break;
 			}
@@ -191,24 +194,24 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	private static void writeTextInto(String text, String file) {
-//		try{
-//			FileWriter out  = new FileWriter(file,true);
-//			out.write(text);
-//			out.close();
-//		}
-//		catch(Exception e){
-//			e.printStackTrace();
-//		}
+		try{
+			FileWriter out  = new FileWriter(file,true);
+			out.write(text);
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	private static void clearFile(String file) {
-//		try{
-//			FileWriter out  = new FileWriter(file,false);
-//			out.write("");
-//			out.close();
-//		}
-//		catch(Exception e){
-//			e.printStackTrace();
-//		}
+		try{
+			FileWriter out  = new FileWriter(file,false);
+			out.write("");
+			out.close();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 }

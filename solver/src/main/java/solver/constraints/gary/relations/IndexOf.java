@@ -32,6 +32,10 @@ import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+import solver.variables.Variable;
+import solver.variables.graph.GraphType;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 public class IndexOf extends GraphRelation<IntVar> {
 	
@@ -70,5 +74,25 @@ public class IndexOf extends GraphRelation<IntVar> {
 	public GraphProperty[] getGraphProperties() {
 		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};
 //		return new GraphProperty[]{};
+	}
+	
+	/**create the initial graph representing the relation between input variables 
+	 * @param inputVars
+	 * @param solver
+	 * @return the initial relational graph 
+	 */
+	public GraphVar generateInitialGraph(Variable[] inputVars, Solver solver){
+		int n = vars.length;
+		if (isDirected()){
+			DirectedGraphVar g = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+			for(int i=0;i<n;i++){
+				for(int j=0;j<n;j++){
+					if(isEntail(i,j) != ESat.FALSE){
+						g.getEnvelopGraph().addArc(i, j);
+					}
+				}
+			}
+			return g;
+		}throw new UnsupportedOperationException("error ");
 	}
 }

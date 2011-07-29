@@ -219,7 +219,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
         	if (i<n){
         		INeighbors suc = p.g.getEnvelopGraph().getSuccessorsOf(i);
         		if(suc.neighborhoodSize() == p.nSuccs){
-        			for(int j=suc.getFirstElement(); j<=0;j=suc.getNextElement()){
+        			for(int j=suc.getFirstElement(); j>=0;j=suc.getNextElement()){
         				p.g.enforceArc(i, j, p);
         			}
         		}

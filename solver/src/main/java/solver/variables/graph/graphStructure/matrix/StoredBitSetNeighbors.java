@@ -74,7 +74,6 @@ public class StoredBitSetNeighbors extends S64BitSet implements INeighbors {
     @Override
     public int neighborhoodSize() {
         return this.card.get();
-//        return this.cardinality();
     }
 
     @Override

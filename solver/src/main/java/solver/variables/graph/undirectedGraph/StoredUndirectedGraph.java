@@ -30,6 +30,8 @@ package solver.variables.graph.undirectedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
+import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
+import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredEnvelopeIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
@@ -49,31 +51,47 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public StoredUndirectedGraph(IEnvironment env, int order, GraphType type) {
-    	this.type = type;
-    	environment = env;
-    	switch (type) {
-            case SPARSE:
-                this.neighbors = new StoredIntLinkedList[order];
-                for (int i = 0; i < order; i++) {
-                    this.neighbors[i] = new StoredIntLinkedList(environment);
-                }
-                break;
-            case DENSE:
-                this.neighbors = new StoredBitSetNeighbors[order];
-                for (int i = 0; i < order; i++) {
-                    this.neighbors[i] = new StoredBitSetNeighbors(environment,order);
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException();
-        }
-        this.activeIdx = new StoredActiveNodes(environment, order);
-        for (int i = 0; i < order; i++) {
-            this.activeIdx.activate(i);
-        }
-    }
-	
+	public StoredUndirectedGraph(IEnvironment env, int nbits, GraphType type) {
+		this.type = type;
+		environment = env;
+		switch (type) {
+		case COMPOSITE:
+			this.neighbors = new CompositeList[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new CompositeList(new StoredIntLinkedList(env),new StoredBitSetNeighbors(env, nbits));
+			}
+			break;
+		case ENVELOPE_LINKEDLIST:
+			this.neighbors = new StoredEnvelopeIntLinkedList[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new StoredEnvelopeIntLinkedList(nbits,environment);
+			}
+			break;
+		case LINKED_LIST:
+			this.neighbors = new StoredIntLinkedList[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new StoredIntLinkedList(environment);
+			}
+			break;
+		case MATRIX:
+			this.neighbors = new StoredBitSetNeighbors[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new StoredBitSetNeighbors(environment,nbits);
+			}
+			break;
+		default:
+			this.neighbors = new StoredBitSetNeighbors[nbits];
+			for (int i = 0; i < nbits; i++) {
+				this.neighbors[i] = new StoredBitSetNeighbors(environment,nbits);
+			}
+			break;
+		}
+		this.activeIdx = new StoredActiveNodes(environment, nbits);
+		for (int i = 0; i < nbits; i++) {
+			this.activeIdx.activate(i);
+		}
+	}
+
 	@Override
 	public IEnvironment getEnvironment() {
 		return environment;
