@@ -32,7 +32,6 @@ import solver.constraints.nary.GlobalCardinality;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.group.Group;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -48,8 +47,8 @@ import java.util.HashSet;
  */
 public class LatinSquare extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Latin square size.", required = true)
-    int m;
+    @Option(name = "-n", usage = "Latin square size.", required = false)
+    int m = 5;
     IntVar[] vars;
 
     @Override
@@ -75,15 +74,15 @@ public class LatinSquare extends AbstractProblem {
                 low[x] = 0;
                 up[x] = 1;
             }
-            solver.post(new GlobalCardinality(row, low, up, 0, GlobalCardinality.Consistency.AC, solver));
-            solver.post(new GlobalCardinality(col, low, up, 0, GlobalCardinality.Consistency.AC, solver));
+            solver.post(new GlobalCardinality(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
+            solver.post(new GlobalCardinality(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
         }
     }
 
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
-        SearchMonitorFactory.log(solver, true, true);
+        //SearchMonitorFactory.log(solver, true, true);
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(Group.buildQueue(
                 new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(vars)))

@@ -26,12 +26,10 @@
  */
 package samples;
 
-import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.Count;
+import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -40,63 +38,64 @@ import solver.variables.VariableFactory;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 08/06/11
+ * @since 03/08/11
  */
-public class MagicSeries extends AbstractProblem {
+public class Donald extends AbstractProblem {
 
-    @Option(name = "-s", usage = "Magic series size.", required = false)
-    int n = 500;
-    IntVar[] vars;
+    IntVar d, o, n, a, l, g, e, r, b, t;
+    IntVar[] letters;
 
     @Override
     public void buildModel() {
         solver = new Solver();
-        vars = new IntVar[n];
+        d = VariableFactory.bounded("d", 1, 9, solver);
+        o = VariableFactory.bounded("o", 0, 9, solver);
+        n = VariableFactory.bounded("n", 0, 9, solver);
+        a = VariableFactory.bounded("a", 0, 9, solver);
+        l = VariableFactory.bounded("l", 0, 9, solver);
+        g = VariableFactory.bounded("g", 1, 9, solver);
+        e = VariableFactory.bounded("e", 0, 9, solver);
+        r = VariableFactory.bounded("r", 1, 9, solver);
+        b = VariableFactory.bounded("b", 0, 9, solver);
+        t = VariableFactory.bounded("t", 0, 9, solver);
+        letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        vars = VariableFactory.enumeratedArray("var", n, 0, n - 1, solver);
+        solver.post(new AllDifferent(letters, solver));
+        solver.post(Sum.eq(
+                new IntVar[]{d, o, n, a, l, d,
+                        g, e, r, a, l, d,
+                        r, o, b, e, r, t},
+                new int[]{100000, 10000, 1000, 100, 10, 1,
+                        100000, 10000, 1000, 100, 10, 1,
+                        -100000, -10000, -1000, -100, -10, -1,
+                }, 0, solver
+        ));
 
-        for (int i = 0; i < n; i++) {
-            solver.post(new Count(i, vars, Count.Relop.EQ, vars[i], solver));
-        }
-        solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1
-        int[] coeff2 = new int[n - 1];
-        IntVar[] vs2 = new IntVar[n - 1];
-        for (int i = 1; i < n; i++) {
-            coeff2[i - 1] = i;
-            vs2[i - 1] = vars[i];
-        }
-        solver.post(Sum.eq(vs2, coeff2, n, solver)); // cstr redundant 1
+
     }
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
-        // default group
-        //TODO: trouver un propagation appropriŽe
+        solver.set(StrategyFactory.minDomMaxVal(letters, solver.getEnvironment()));
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
     }
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Magic series({})", n);
+        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
         StringBuilder st = new StringBuilder();
         st.append("\t");
-        for (int i = 0; i < n; i++) {
-            st.append(vars[i].getValue()).append(" ");
-            if (i % 10 == 9) {
-                st.append("\n\t");
-            }
+        for (int i = 0; i < letters.length; i++) {
+            st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
         }
         LoggerFactory.getLogger("bench").info(st.toString());
-
     }
 
     public static void main(String[] args) {
-        new MagicSeries().execute(args);
+        new Donald().execute(args);
     }
 }

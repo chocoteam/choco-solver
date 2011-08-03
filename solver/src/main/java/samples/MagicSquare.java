@@ -40,7 +40,10 @@ import solver.propagation.engines.comparators.IncrOrderV;
 import solver.propagation.engines.comparators.Seq;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -56,7 +59,9 @@ import java.util.Arrays;
 public class MagicSquare extends AbstractProblem {
 
     @Option(name = "-s", usage = "Magic square size.", required = false)
-    int n = 6;
+    int n = 5;
+    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
+    int cons = 1;
     IntVar[] vars;
 
     @Override
@@ -84,7 +89,13 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        solver.post(new AllDifferent(vars, solver));
+        AllDifferent.Type type = AllDifferent.Type.BC;
+        if(cons == 0){
+            type = AllDifferent.Type.CLIQUE;
+        }else if(cons == 2){
+            type = AllDifferent.Type.AC;
+        }
+        solver.post(new AllDifferent(vars, solver, type));
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {
@@ -105,8 +116,15 @@ public class MagicSquare extends AbstractProblem {
     public void configureSolver() {
 
 
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        //solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        HeuristicValFactory.indomainMiddle(vars);
+        solver.set(StrategyVarValAssign.dyn(vars,
+                SorterFactory.minDomain(),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment()));
 
+
+        //TODO: choisir une meilleure stratŽgie
         // default group
         solver.getEngine().addGroup(
                 Group.buildGroup(
@@ -145,9 +163,7 @@ public class MagicSquare extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        LoggerFactory.getLogger("bench").info(st.toString());
-        st = null;
-    }
+        LoggerFactory.getLogger("bench").info(st.toString());    }
 
     public static void main(String[] args) {
         new MagicSquare().execute(args);
