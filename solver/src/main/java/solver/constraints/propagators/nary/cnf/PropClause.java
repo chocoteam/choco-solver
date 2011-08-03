@@ -66,24 +66,28 @@ public class PropClause extends Propagator<BoolVar> {
     }
 
     void awakeOnInst(int index) throws ContradictionException {
-        if (index < firstNotPosLit) {
-            if (vars[index].getValue() == 1) {
-                setPassive();
-                return;
-            }
-        } else if (vars[index].getValue() == 0) {
+        int val = vars[index].getValue();
+        if ((index < firstNotPosLit && val == 1)
+                || (index >= firstNotPosLit && val == 0)) {
             setPassive();
             return;
         }
-
         if (watchLit1 == index) {
-            setWatchLiteral(watchLit2);
-        } else if (watchLit2 == index) {
             setWatchLiteral(watchLit1);
+        } else if (watchLit2 == index) {
+            setWatchLiteral(watchLit2);
         }
     }
 
-    private boolean setWatchLiteral(int otherWL) throws ContradictionException {
+    /**
+     * Search a watchLiteral. A watchLiteral (or wL) is pointing out one variable not yet instantiated.
+     * If every variables are instantiated, get out.
+     * Otherwise, set the new not yet instantiated wL.
+     *
+     * @param otherWL previous known wL
+     * @throws ContradictionException if a contradiction occurs
+     */
+    private void setWatchLiteral(int otherWL) throws ContradictionException {
         int i = 0;
         while (i < vars.length && (vars[i].instantiated() || otherWL == i)) {
             i++;
@@ -95,11 +99,9 @@ public class PropClause extends Propagator<BoolVar> {
                 vars[otherWL].instantiateTo(0, this);
             }
             setPassive();
-            return true;
         } else {
             watchLit1 = i;
             watchLit2 = otherWL;
-            return false;
         }
     }
 
@@ -123,14 +125,14 @@ public class PropClause extends Propagator<BoolVar> {
                         if (bv.getValue() == 1) {
                             setPassive();
                             return;
-                        }else{
+                        } else {
                             cnt++;
                         }
                     } else {
                         if (bv.getValue() == 0) {
                             setPassive();
                             return;
-                        }else{
+                        } else {
                             cnt++;
                         }
                     }
@@ -141,9 +143,9 @@ public class PropClause extends Propagator<BoolVar> {
                 }
                 i++;
             }
-            if(cnt == n){
+            if (cnt == n) {
                 this.contradiction(null, "Inconsistent");
-            }else if(cnt == n-1){
+            } else if (cnt == n - 1) {
                 setWatchLiteral(watchLit1);
             }
         }

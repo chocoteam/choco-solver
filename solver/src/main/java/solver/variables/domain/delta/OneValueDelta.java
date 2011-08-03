@@ -76,8 +76,8 @@ public final class OneValueDelta implements IntDelta {
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
         if (to == 1) {
-            //proc.execute(value);
+            proc.execute(value);
         }
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
     }
 }

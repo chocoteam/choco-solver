@@ -104,9 +104,6 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
                 }
             }
             setPropagators(propClauses);
-            // the propagator does not react on bound events, but the constraint has to simulate them.
-            // (convertion from bound events to remaval events).
-            //setPropagationConditions(EventType.ALL_MASK());
         }
     }
 

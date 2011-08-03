@@ -84,10 +84,11 @@ public class Sum extends IntConstraint {
             }
         }
         int b = 0, e = map.size();
+        IntVar[] keys = map.keys(new IntVar[e]);
         IntVar[] tmpV = new IntVar[e];
         int[] tmpC = new int[e];
-        for (int i = 0; i < vars.length; i++) {
-            IntVar key = vars[i];
+        for (int i = 0; i < keys.length; i++) {
+            IntVar key = keys[i];
             if (map.contains(key)) {
                 int coeff = map.get(key);
                 if (coeff > 0) {

@@ -35,6 +35,7 @@ import solver.explanations.Explanation;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
+
 import java.util.BitSet;
 
 /**
@@ -322,7 +323,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
      * @return the current value (or lower bound if not yet instantiated).
      */
     public int getValue() {
-        assert instantiated(): "not instantiated";
+        assert instantiated(): name+" not instantiated";
         return this.domain.getLB();
     }
 
