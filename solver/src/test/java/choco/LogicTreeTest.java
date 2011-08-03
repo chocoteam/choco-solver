@@ -30,10 +30,11 @@ package choco;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.LogicTreeToolBox;
-import solver.constraints.nary.cnf.Node;
+import solver.constraints.nary.Sum;
+import solver.constraints.nary.cnf.*;
+import solver.constraints.reified.ReifiedConstraint;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
 /**
@@ -207,6 +208,34 @@ public class LogicTreeTest {
         root = LogicTreeToolBox.toCNF(root);
 
         Assert.assertEquals(root.toString(), "false");
+    }
+
+    @Test(groups = "1s")
+    public void test10(){
+        Solver sCNF = new Solver();
+        BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
+        ALogicTree tree = Node.ifOnlyIf(
+                Literal.pos(rCNF[0]),
+                Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
+        );
+        sCNF.post(new ConjunctiveNormalForm(tree, sCNF));
+
+        Solver solver = new Solver();
+        BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
+
+        solver.post(new ReifiedConstraint(rows[0],
+                Sum.eq(new BoolVar[]{rows[1], rows[2]}, 2, solver),
+                Sum.leq(new BoolVar[]{rows[1], rows[2]}, 1, solver),
+                solver)
+        );
+        SearchMonitorFactory.log(sCNF, true, true);
+        SearchMonitorFactory.log(solver, true, true);
+
+
+        sCNF.findAllSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+
     }
 
 }
