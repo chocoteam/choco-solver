@@ -28,8 +28,10 @@
 package solver.search.strategy.enumerations.values;
 
 import gnu.trove.THashMap;
+import solver.search.strategy.enumerations.values.comparators.Distance;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.search.strategy.enumerations.values.heuristics.nary.Join;
 import solver.search.strategy.enumerations.values.heuristics.nary.SeqN;
 import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
 import solver.search.strategy.enumerations.values.heuristics.unary.Filter;
@@ -37,6 +39,7 @@ import solver.search.strategy.enumerations.values.heuristics.unary.FirstN;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.FastEnumVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.UnsafeEnum;
+import solver.search.strategy.enumerations.values.metrics.Const;
 import solver.search.strategy.enumerations.values.metrics.Metric;
 import solver.search.strategy.enumerations.values.predicates.Member;
 import solver.variables.IntVar;
@@ -81,13 +84,17 @@ public class HeuristicValFactory {
      * Sets the <b>inDomainMiddle</b> value iterator to the list of variable in parameter.
      * This iterator chooses the closest value to the mean between the variable's domain current bounds
      *
-     * @param var list of variables declaring this value iterator
+     * @param vars list of variables declaring this value iterator
      */
-    public static void indomainMiddle(IntVar... var) {
-        throw new UnsupportedOperationException("not yet implemented");
-//        for(Variable v : var){
-//            v.setHeuristicVal(new InDomainMiddle(v));
-//        }
+    public static void indomainMiddle(IntVar... vars) {
+        for (IntVar var : vars) {
+            int middle = (var.getLB() + var.getUB()) / 2;
+            var.setHeuristicVal(
+                    new Join(new Distance(new Const(middle)),
+                            HeuristicValFactory.enumVal(var, middle, -1, var.getLB()),
+                            HeuristicValFactory.enumVal(var, middle + 1, 1, var.getUB()))
+            );
+        }
     }
 
     /**
@@ -170,7 +177,7 @@ public class HeuristicValFactory {
      * Build an UnsafeEnum heuristic val from a domain
      * TODO : mieux commenter
      *
-     * @param ivar        variable to enumerate
+     * @param ivar variable to enumerate
      * @return {@link UnsafeEnum}
      */
     public static UnsafeEnum unsafeEnum(IntVar ivar) {
@@ -181,7 +188,7 @@ public class HeuristicValFactory {
      * Build an UnsafeEnum heuristic val from a domain and an action
      * TODO : mieux commenter
      *
-     * @param ivar variable to enumerate
+     * @param ivar   variable to enumerate
      * @param action action
      * @return {@link UnsafeEnum}
      */
@@ -251,6 +258,7 @@ public class HeuristicValFactory {
      * Build the following heuristic val: FastEnumVal(ivar)
      *
      * @param ivar variable to enumerate
+     * @param action action to apply to FastEnumVal
      * @return a {@link Filter}
      */
     public static HeuristicVal fastenumVal(IntVar ivar, Action action) {

@@ -50,6 +50,15 @@ import java.io.Serializable;
 public abstract class AbstractVariable implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    protected static final String
+            MSG_REMOVE = "remove last value",
+            MSG_EMPTY = "empty domain",
+            MSG_INST = "already instantiated",
+            MSG_UNKNOWN = "unknown value",
+            MSG_UPP = "new lower bound is greater than upper bound",
+            MSG_LOW = "new upper bound is lesser than lower bound";
+
     /**
      * Reference to the solver containing this variable.
      */
@@ -76,7 +85,7 @@ public abstract class AbstractVariable implements Serializable {
         this.engine = solver.getEngine();
         this.requests = RequestListBuilder.preset(solver.getEnvironment());
     }
-    
+
     public abstract IDelta getDelta();
 
     public int getUniqueID() {
@@ -121,7 +130,7 @@ public abstract class AbstractVariable implements Serializable {
         requests.deleteRequest(request);
     }
 
-    public IRequestList getRequests() { 
+    public IRequestList getRequests() {
         return requests;
     }
 

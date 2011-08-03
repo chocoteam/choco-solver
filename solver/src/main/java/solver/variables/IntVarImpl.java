@@ -60,7 +60,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected IntVarImpl(String name, Solver solver) {
-        super(name,solver);
+        super(name, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
         int sup = domain.getUB();
         if (value == inf && value == sup) {
             solver.explainer.removeValue(this, value, cause);
-            this.contradiction(cause, "remove last value :"+value);
+            this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
@@ -136,7 +136,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 } else {
                     if (this.domain.empty()) {
                         solver.explainer.removeValue(this, value, cause);
-                        this.contradiction(cause, "empty domain");
+                        this.contradiction(cause, MSG_EMPTY);
                     }
                 }
             }
@@ -188,7 +188,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 solver.explainer.instantiateTo(this, value, cause);
-                this.contradiction(cause, "already instantiated");
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -200,14 +200,14 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
             }
             if (this.domain.empty()) {
                 solver.explainer.removeValue(this, value, cause);
-                this.contradiction(cause, "empty domain");
+                this.contradiction(cause, MSG_EMPTY);
             }
             this.notifyPropagators(e, cause);
             solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
             solver.explainer.instantiateTo(this, value, cause);
-            this.contradiction(cause, "unknown value");
+            this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
     }
@@ -236,7 +236,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
         if (old < value) {
             if (this.getUB() < value) {
                 solver.explainer.updateLowerBound(this, old, value, cause);
-                this.contradiction(cause, "new lower bound is greater than upper bound ");
+                this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
                 if (reactOnRemoval) {
@@ -283,7 +283,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
         if (old > value) {
             if (this.getLB() > value) {
                 solver.explainer.updateUpperBound(this, old, value, cause);
-                this.contradiction(cause, "new upper bound is lesser than lower bound ");
+                this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
                 if (reactOnRemoval) {
@@ -323,7 +323,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
      * @return the current value (or lower bound if not yet instantiated).
      */
     public int getValue() {
-        assert instantiated(): name+" not instantiated";
+        assert instantiated() : name + " not instantiated";
         return this.domain.getLB();
     }
 
@@ -406,14 +406,14 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
         return expl;
     }
 
-	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
-		engine.fails(cause, this, message);
-	}
-	
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        engine.fails(cause, this, message);
+    }
 
-	@Override
-	public int getType() {
-		return Variable.INTEGER;
-	}
+
+    @Override
+    public int getType() {
+        return Variable.INTEGER;
+    }
 }

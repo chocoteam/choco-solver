@@ -48,6 +48,8 @@ import solver.variables.domain.delta.IntDelta;
  */
 public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
+    private static final String MSG_INCONSISTENT = "inconsistent";
+
     private final int[] maxOccurrences;
     private final int[] minOccurrences;
 
@@ -87,7 +89,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             }
         }
         if (directInconsistentCount())
-            engine.fails(this, null, "inconsistent");
+            engine.fails(this, null, MSG_INCONSISTENT);
         filter();
 
     }
@@ -156,7 +158,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
         if ((l.sum(l.minValue(), minsorted[0].var.getLB() - 1) > 0) ||
                 (l.sum(maxsorted[getNbVars() - 1].var.getUB() + 1, l.maxValue()) > 0)) {
-            engine.fails(this, null, "inconsistent");
+            engine.fails(this, null, MSG_INCONSISTENT);
         }
         filterLowerMax();
         filterLowerMin();

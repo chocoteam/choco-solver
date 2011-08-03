@@ -27,8 +27,6 @@
 
 package solver.search.solution;
 
-import java.util.LinkedList;
-
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -36,6 +34,8 @@ import solver.exception.SolverException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
+
+import java.util.LinkedList;
 
 /**
  * <br/>
@@ -81,7 +81,7 @@ public class Solution {
             case Variable.INTEGER : 
             	intvalues[i] = ((IntVar) vars[i]).getValue();break;
             case Variable.GRAPH : 
-            	if(!((GraphVar) vars[i]).instantiated()){
+            	if(!vars[i].instantiated()){
             		System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
             		System.out.println(((GraphVar) vars[i]).getKernelGraph());
             		throw new UnsupportedOperationException("error ");

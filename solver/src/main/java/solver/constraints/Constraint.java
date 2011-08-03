@@ -91,6 +91,8 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public static final String VAL_DEFAULT = "val_default";
     public static final String METRIC_DEFAULT = "met_default";
 
+    public static final String MSG_ENTAILED = "Entailed false";
+
     protected final Solver solver;
 
     public V[] vars;
@@ -255,7 +257,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
             ESat entailed = prop.isEntailed();
             switch (entailed) {
                 case FALSE:
-                    this.contradiction(prop, null, "Entailed false");
+                    this.contradiction(prop, null, MSG_ENTAILED);
                     break;
                 case TRUE:
                     prop.setPassive();

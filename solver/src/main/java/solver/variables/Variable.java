@@ -99,7 +99,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      * Adds an observers to the set of observers for this object,
      * provided that it is not the same as some observer already in the set.
      * @param observer an observer to add
-     * @param idxInProp
+     * @param idxInProp index of the variable in the propagator
      */
     public void addPropagator(Propagator observer, int idxInProp);
 
@@ -116,25 +116,26 @@ public interface Variable<D extends IDelta> extends Serializable {
      *
      * @param e event on this object
      * @param o object which leads to the modification of this object
-     * @throws solver.exception.ContradictionException
+     * @throws solver.exception.ContradictionException if a contradiction occurs during notification
      */
     public void notifyPropagators(EventType e, ICause o) throws ContradictionException;
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)
+     * @param id unique ID
      */
     void setUniqueID(int id);
 
     /**
      * Returns the ID of the variable
-     * @return
+     * @return the ID
      */
     int getUniqueID();
 
     /**
      * Throws a contradiction exception based on <cause, message>
      * @param cause ICause causing the exception
-     * @param message detailed message
+     * @param message the detailed message
      * @throws ContradictionException expected behavior
      */
     void contradiction(ICause cause, String message) throws ContradictionException;

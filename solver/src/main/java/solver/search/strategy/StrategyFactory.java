@@ -38,8 +38,8 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
-import solver.search.strategy.strategy.graph.NodeStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
+import solver.search.strategy.strategy.graph.NodeStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -127,6 +127,21 @@ public final class StrategyFactory {
      */
     public static AbstractStrategy<IntVar> minDomMinVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMin(variables);
+        return StrategyVarValAssign.dyn(variables,
+                SorterFactory.minDomain(),
+                ValidatorFactory.instanciated,
+                environment);
+    }
+
+    /**
+     * Assignment strategy combining <code>MinDom</code> and <code>MaxVal</code>
+     *
+     * @param variables   list of variables
+     * @param environment environment
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> minDomMaxVal(IntVar[] variables, IEnvironment environment) {
+        HeuristicValFactory.indomainMax(variables);
         return StrategyVarValAssign.dyn(variables,
                 SorterFactory.minDomain(),
                 ValidatorFactory.instanciated,

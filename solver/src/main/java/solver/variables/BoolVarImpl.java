@@ -36,6 +36,7 @@ import solver.explanations.Explanation;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.IntDelta;
+
 import java.util.BitSet;
 
 /**
@@ -142,7 +143,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 solver.explainer.instantiateTo(this, value, cause);
-                this.contradiction(cause, "already instantiated");
+                this.contradiction(cause, MSG_INST);
             }
             return false;
         } else {
@@ -158,7 +159,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                 return true;
             } else {
                 solver.explainer.instantiateTo(this, value, cause);
-                this.contradiction(cause, "value out of domain");
+                this.contradiction(cause, MSG_UNKNOWN);
                 return false;
             }
         }
