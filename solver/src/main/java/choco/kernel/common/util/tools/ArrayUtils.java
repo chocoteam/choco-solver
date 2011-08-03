@@ -75,7 +75,7 @@ public final class ArrayUtils {
                 && column >= 0 && array[0].length > column) {
             T[] res = (T[]) java.lang.reflect.Array.newInstance(array[0][column].getClass(), array.length);
             for (int i = 0; i < array.length; i++) {
-                res[i] = (T)array[i][column];
+                res[i] = (T) array[i][column];
             }
             return res;
         }
@@ -88,7 +88,7 @@ public final class ArrayUtils {
                 && column >= 0 && array[0].length > column) {
             T[] res = (T[]) java.lang.reflect.Array.newInstance(clazz, array.length);
             for (int i = 0; i < array.length; i++) {
-                res[i] = (T)array[i][column];
+                res[i] = (T) array[i][column];
             }
             return res;
         }
@@ -230,6 +230,20 @@ public final class ArrayUtils {
 
     }
 
+    public static int[][] transpose(int[][] matrix) {
+        int[][] ret = (int[][]) java.lang.reflect.Array.newInstance(matrix.getClass().getComponentType(), matrix[0].length);
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = (int[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), matrix.length);
+        }
+
+        for (int i = 0; i < matrix.length; i++)
+            for (int j = 0; j < matrix[i].length; j++)
+                ret[j][i] = matrix[i][j];
+
+        return ret;
+
+    }
+
     public static <T> T[] flatten(T[][] matrix) {
         int sz = 0;
         for (T[] t : matrix) sz += t.length;
@@ -344,26 +358,24 @@ public final class ArrayUtils {
 
     }
 
-public static int[] zeroToNShuffle(int nb)
-{
-        return zeroToNShuffle(nb,System.nanoTime());
-}
-public static int[] zeroToNShuffle(int nb, long seed)
-{
+    public static int[] zeroToNShuffle(int nb) {
+        return zeroToNShuffle(nb, System.nanoTime());
+    }
+
+    public static int[] zeroToNShuffle(int nb, long seed) {
         Random r = new Random(seed);
         int[] ret = new int[nb];
         ArrayList<Integer> tmp = new ArrayList<Integer>();
-        for (int i =  0; i < nb ; i++) tmp.add(i);
+        for (int i = 0; i < nb; i++) tmp.add(i);
 
-        for (int i = 0 ; i < nb ; i++)
-        {
-                int idx = r.nextInt(tmp.size());
-                ret[i] = tmp.get(idx);
-                System.err.println(ret[i]);
-                System.err.println(tmp.remove(idx));
+        for (int i = 0; i < nb; i++) {
+            int idx = r.nextInt(tmp.size());
+            ret[i] = tmp.get(idx);
+            System.err.println(ret[i]);
+            System.err.println(tmp.remove(idx));
         }
 
         return ret;
 
-}
+    }
 }

@@ -59,7 +59,7 @@ public class GlobalCardinalityTest {
 
         IntVar[] vars = new IntVar[]{peter, paul, mary, john, bob, mike, julia};
 
-        Constraint gcc = new GlobalCardinality(vars,
+        Constraint gcc = GlobalCardinality.make(vars,
                 new int[]{1, 1, 1, 0, 0}, new int[]{2, 2, 1, 2, 2}, 0,
                 GlobalCardinality.Consistency.AC, solver);
 

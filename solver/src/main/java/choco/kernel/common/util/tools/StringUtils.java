@@ -100,4 +100,15 @@ public class StringUtils {
 
     }
 
+    private static long next;
+
+    /**
+     * Return a generated short, random string
+     *
+     * @return String
+     */
+    public static String randomName() {
+        return "TMP_" + next++;
+    }
+
 }

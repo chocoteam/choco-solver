@@ -74,8 +74,8 @@ public class LatinSquare extends AbstractProblem {
                 low[x] = 0;
                 up[x] = 1;
             }
-            solver.post(new GlobalCardinality(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
-            solver.post(new GlobalCardinality(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
+            solver.post(GlobalCardinality.make(row, low, up, 0, GlobalCardinality.Consistency.BC, solver));
+            solver.post(GlobalCardinality.make(col, low, up, 0, GlobalCardinality.Consistency.BC, solver));
         }
     }
 

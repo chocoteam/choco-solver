@@ -28,6 +28,7 @@ package solver.constraints.nary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
@@ -50,7 +51,7 @@ import java.util.List;
  * <br/>- GCC(VARS, CARDS, OFFSET) ensures CARDS[i] counts the number of occurrences of the value (i+offset) in VARS
  * <br/>- GCC(VARS, MINS, MAXS, OFFSET) ensures the number of occurrences of the values (i+OFFSET) is btween MINS[i] and MAX[i]
  * <br/>This last version is available ensuring BC or AC.
- *
+ * <p/>
  * <p/>
  * The BC propagators are based on:
  * <br/>
@@ -74,7 +75,17 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
 
     public static enum Consistency {AC, BC}
 
-    public GlobalCardinality(IntVar[] vars, IntVar[] card, int offset, Solver solver) {
+
+    public static GlobalCardinality make(IntVar[] vars, IntVar[] card, int offset, Solver solver) {
+        return new GlobalCardinality(vars, card, offset, solver);
+    }
+
+    public static GlobalCardinality make(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences, int offset,
+                                         Consistency cons, Solver solver) {
+        return new GlobalCardinality(vars, minOccurrences, maxOccurrences, offset, cons, solver);
+    }
+
+    private GlobalCardinality(IntVar[] vars, IntVar[] card, int offset, Solver solver) {
         super(ArrayUtils.append(vars, card), solver, _DEFAULT_THRESHOLD);
         this.nbvars = vars.length;
         this.offset = offset;
@@ -83,7 +94,34 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
         setPropagators(new PropBoundGlobalCardinality(vars, card, offset, card.length - 1 + offset, solver, this));
     }
 
-    public GlobalCardinality(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences, int offset, Consistency cons, Solver solver) {
+    public static GlobalCardinality make(IntVar[] vars, int[] values, IntVar[] card, Solver solver) {
+        int n = vars.length;
+        int min = values[0];
+        int max = values[values.length - 1];
+
+        for (int v = 0; v < vars.length; v++) {
+            IntVar var = vars[v];
+            if (min > var.getLB()) {
+                min = var.getLB();
+            }
+            if (max < var.getUB()) {
+                max = var.getUB();
+            }
+        }
+        IntVar[] ncards = new IntVar[max - min + 1];
+        int k = 0;
+        for (int i = min; i <= max; i++) {
+            if (k < values.length && i == values[k]) {
+                ncards[i - min] = card[k];
+                k++;
+            } else {
+                ncards[i - min] = VariableFactory.bounded(StringUtils.randomName(), 0, n, solver);
+            }
+        }
+        return make(vars, ncards, 0, solver);
+    }
+
+    private GlobalCardinality(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences, int offset, Consistency cons, Solver solver) {
         super(vars, solver, _DEFAULT_THRESHOLD);
         checker(vars, minOccurrences, maxOccurrences);
         this.nbvars = vars.length;
