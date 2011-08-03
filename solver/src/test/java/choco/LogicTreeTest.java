@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.*;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -46,7 +46,7 @@ import solver.variables.VariableFactory;
 public class LogicTreeTest {
 
     @Test(groups = "1s")
-    public void test1(){
+    public void test1() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -63,7 +63,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test12(){
+    public void test12() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -73,7 +73,7 @@ public class LogicTreeTest {
         Literal e = Literal.pos(VariableFactory.bool("e", solver));
 
 
-        ALogicTree root = Node.and(Node.nand(Node.nor(a, b), Node.or(c, d)),e);
+        ALogicTree root = Node.and(Node.nand(Node.nor(a, b), Node.or(c, d)), e);
 
         root = LogicTreeToolBox.toCNF(root);
 
@@ -82,7 +82,7 @@ public class LogicTreeTest {
 
 
     @Test(groups = "1s")
-    public void test2(){
+    public void test2() {
         Solver solver = new Solver();
 
         Literal a = Literal.neg(VariableFactory.bool("a", solver));
@@ -98,7 +98,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test3(){
+    public void test3() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -112,7 +112,7 @@ public class LogicTreeTest {
 
 
     @Test(groups = "1s")
-    public void test4(){
+    public void test4() {
         Solver solver = new Solver();
 
         Literal a = Literal.neg(VariableFactory.bool("a", solver));
@@ -129,7 +129,7 @@ public class LogicTreeTest {
 
 
     @Test(groups = "1s")
-    public void test5(){
+    public void test5() {
         Solver solver = new Solver();
 
         Literal a = Literal.neg(VariableFactory.bool("a", solver));
@@ -146,7 +146,7 @@ public class LogicTreeTest {
 
 
     @Test(groups = "1s")
-    public void test6(){
+    public void test6() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -160,7 +160,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test7(){
+    public void test7() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -176,7 +176,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test8(){
+    public void test8() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -194,7 +194,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test9(){
+    public void test9() {
         Solver solver = new Solver();
 
         Literal a = Literal.pos(VariableFactory.bool("a", solver));
@@ -211,14 +211,7 @@ public class LogicTreeTest {
     }
 
     @Test(groups = "1s")
-    public void test10(){
-        Solver sCNF = new Solver();
-        BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
-        ALogicTree tree = Node.ifOnlyIf(
-                Literal.pos(rCNF[0]),
-                Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
-        );
-        sCNF.post(new ConjunctiveNormalForm(tree, sCNF));
+    public void test10() {
 
         Solver solver = new Solver();
         BoolVar[] rows = VariableFactory.boolArray("b", 3, solver);
@@ -228,14 +221,24 @@ public class LogicTreeTest {
                 Sum.leq(new BoolVar[]{rows[1], rows[2]}, 1, solver),
                 solver)
         );
-        SearchMonitorFactory.log(sCNF, true, true);
-        SearchMonitorFactory.log(solver, true, true);
-
-
-        sCNF.findAllSolutions();
+        //SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
-        Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+        long nbSol = solver.getMeasures().getSolutionCount();
 
+        for (int seed = 0; seed < 2000; seed++) {
+            Solver sCNF = new Solver();
+            BoolVar[] rCNF = VariableFactory.boolArray("b", 3, sCNF);
+            ALogicTree tree = Node.ifOnlyIf(
+                    Literal.pos(rCNF[0]),
+                    Node.and(Literal.pos(rCNF[1]), Literal.pos(rCNF[2]))
+            );
+            sCNF.post(new ConjunctiveNormalForm(tree, sCNF));
+            sCNF.set(StrategyFactory.random(rCNF, sCNF.getEnvironment(), seed));
+
+            //SearchMonitorFactory.log(sCNF, true, true);
+            sCNF.findAllSolutions();
+            Assert.assertEquals(sCNF.getMeasures().getSolutionCount(), nbSol);
+        }
     }
 
 }
