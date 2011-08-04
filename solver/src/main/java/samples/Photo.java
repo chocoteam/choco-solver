@@ -48,57 +48,27 @@ import solver.variables.VariableFactory;
  */
 public class Photo extends AbstractProblem {
 
-    @Option(name = "-l", aliases = "--large", usage = "enable Photo large preferences .", required = false)
-    private boolean isLarge = false;
-
-    // Preferences for small example
-    private static final int[] small = {
-            0, 2,
-            1, 4,
-            2, 3,
-            2, 4,
-            3, 0,
-            4, 3,
-            4, 0,
-            4, 1
-    };
-
-
-    // Preferences for large example
-    private static final int[] large = {
-            0, 2, 0, 4, 0, 7, 1, 4, 1, 8, 2, 3, 2, 4, 3, 0, 3, 4,
-            4, 5, 4, 0, 5, 0, 5, 8, 6, 2, 6, 7, 7, 8, 7, 6
-    };
-
-    int[] preferences = small;
-
-    int nbPeople = 5, nbPrefsPerP = 8, nbPref = small.length;
+    @Option(name = "-d", aliases = "--data", usage = "Photo preferences .", required = false)
+    Data data = Data.small;
 
     IntVar[] positions;
     IntVar violations;
 
     @Override
     public void buildModel() {
-        if (isLarge) {
-            nbPeople = 9;
-            nbPrefsPerP = 17;
-            nbPref = large.length;
-            preferences = large;
-        }
-
         solver = new Solver();
-        positions = VariableFactory.boundedArray("pos", nbPeople, 0, nbPeople - 1, solver);
-        violations = VariableFactory.bounded("viol", 0, nbPref, solver);
+        positions = VariableFactory.boundedArray("pos", data.people(), 0, data.people() - 1, solver);
+        violations = VariableFactory.bounded("viol", 0, data.preferences().length, solver);
 
-        BoolVar[] viol = VariableFactory.boolArray("b", nbPrefsPerP, solver);
-        for (int i = 0; i < nbPrefsPerP; i++) {
-            int pa = preferences[(2 * i)];
-            int pb = preferences[2 * i + 1];
-            IntVar tmp = VariableFactory.bounded("tmp" + nbPref, -50, 50, solver);
+        BoolVar[] viol = VariableFactory.boolArray("b", data.prefPerPeople(), solver);
+        for (int i = 0; i < data.prefPerPeople(); i++) {
+            int pa = data.preferences()[(2 * i)];
+            int pb = data.preferences()[2 * i + 1];
+            IntVar tmp = VariableFactory.bounded("tmp" + data.preferences().length, -50, 50, solver);
             solver.post(Sum.eq(
                     new IntVar[]{positions[pa], positions[pb], tmp},
                     new int[]{1, -1, -1}, 0, solver));
-            IntVar abst = VariableFactory.bounded("abst" + nbPref, 0, 50, solver);
+            IntVar abst = VariableFactory.bounded("abst" + data.preferences().length, 0, 50, solver);
             solver.post(new Absolute(abst, tmp, solver));
             solver.post(new ReifiedConstraint(
                     viol[i],
@@ -123,10 +93,10 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Photo -- {}", isLarge ? "large" : "small");
+        LoggerFactory.getLogger("bench").info("Photo -- {}", data.name());
         StringBuilder st = new StringBuilder();
         st.append("\tPositions: ");
-        for (int i = 0; i < nbPeople; i++) {
+        for (int i = 0; i < data.people(); i++) {
             st.append(String.format("%d ", positions[i].getValue()));
         }
         st.append(String.format("\n\tViolations: %d", violations.getValue()));
@@ -136,4 +106,59 @@ public class Photo extends AbstractProblem {
     public static void main(String[] args) {
         new Photo().execute(args);
     }
+
+    /////////////////////////////////// DATA //////////////////////////////////////////////////
+    static enum Data {
+        small {
+            @Override
+            int[] preferences() {
+                return new int[]{
+                        0, 2,
+                        1, 4,
+                        2, 3,
+                        2, 4,
+                        3, 0,
+                        4, 3,
+                        4, 0,
+                        4, 1
+                };
+            }
+
+            @Override
+            int people() {
+                return 5;
+            }
+
+            @Override
+            int prefPerPeople() {
+                return 8;
+            }
+        },
+        large {
+            @Override
+            int[] preferences() {
+                return new int[]{
+                        0, 2, 0, 4, 0, 7, 1, 4, 1, 8, 2, 3, 2, 4, 3, 0, 3, 4,
+                        4, 5, 4, 0, 5, 0, 5, 8, 6, 2, 6, 7, 7, 8, 7, 6
+                };
+            }
+
+            @Override
+            int people() {
+                return 9;
+            }
+
+            @Override
+            int prefPerPeople() {
+                return 17;
+            }
+        };
+
+        abstract int[] preferences();
+
+        abstract int people();
+
+        abstract int prefPerPeople();
+    }
+
 }

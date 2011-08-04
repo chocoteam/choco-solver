@@ -28,6 +28,8 @@
 package samples;
 
 import choco.kernel.common.util.tools.ArrayUtils;
+import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.search.strategy.StrategyFactory;
@@ -42,33 +44,10 @@ import solver.variables.VariableFactory;
  */
 public class Sudoku extends AbstractProblem {
 
-    /*
-    int[][] grid = {
-            {0, 0, 0, 0, 0, 3, 0, 6, 0},
-            {0, 0, 0, 0, 0, 0, 0, 1, 0},
-            {0, 9, 7, 5, 0, 0, 0, 8, 0},
-            {0, 0, 0, 0, 9, 0, 2, 0, 0},
-            {0, 0, 8, 0, 7, 0, 4, 0, 0},
-            {0, 0, 3, 0, 6, 0, 0, 0, 0},
-            {0, 1, 0, 0, 0, 2, 8, 9, 0},
-            {0, 4, 0, 0, 0, 0, 0, 0, 0},
-            {0, 5, 0, 1, 0, 0, 0, 0, 0}
-    };*/
-    int[][] grid = {
-            {0, 0, 0, 2, 0, 5, 0, 0, 0},
-            {0, 9, 0, 0, 0, 0, 7, 3, 0},
-            {0, 0, 2, 0, 0, 9, 0, 6, 0},
-            {2, 0, 0, 0, 0, 0, 4, 0, 9},
-            {0, 0, 0, 0, 7, 0, 0, 0, 0},
-            {6, 0, 9, 0, 0, 0, 0, 0, 1},
-            {0, 8, 0, 4, 0, 0, 1, 0, 0},
-            {0, 6, 3, 0, 0, 0, 0, 8, 0},
-            {0, 0, 0, 6, 0, 8, 0, 0, 0}
-    };
+    @Option(name = "-g", aliases = "--grid", usage = "Sudoku grid ID.", required = false)
+    Data data = Data.level1;
 
-
-    int n = 9;
-
+    private final int n = 9;
     IntVar[][] rows, cols, carres;
 
     @Override
@@ -80,8 +59,8 @@ public class Sudoku extends AbstractProblem {
         carres = new IntVar[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                if (grid[i][j] > 0) {
-                    rows[i][j] = VariableFactory.fixed(grid[i][j], solver);
+                if (data.grid(i, j) > 0) {
+                    rows[i][j] = VariableFactory.fixed(data.grid(i, j), solver);
                 } else {
                     rows[i][j] = VariableFactory.enumerated("c_" + i + "_" + j, 1, n, solver);
                 }
@@ -122,10 +101,111 @@ public class Sudoku extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        //To change body of implemented methods use File | Settings | File Templates.
+        LoggerFactory.getLogger("bench").info("Sudoku -- {}", data.name());
+        StringBuilder st = new StringBuilder();
+        st.append("\t");
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                st.append(rows[i][j].getValue()).append(" ");
+            }
+            st.append("\n\t");
+        }
+
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
         new Sudoku().execute();
+    }
+
+    /////////////////////////////////// DATA //////////////////////////////////////////////////
+    static enum Data {
+        level1(
+                new int[][]{
+                        {0, 0, 0, 2, 0, 0, 0, 0, 0},
+                        {0, 8, 0, 0, 3, 0, 0, 7, 0},
+                        {3, 0, 0, 5, 0, 4, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 2, 8},
+                        {8, 3, 0, 0, 1, 0, 0, 0, 0},
+                        {0, 4, 0, 7, 2, 0, 3, 5, 1},
+                        {0, 7, 0, 0, 5, 6, 0, 0, 4},
+                        {0, 0, 3, 0, 0, 0, 0, 0, 0},
+                        {2, 0, 5, 4, 0, 1, 6, 0, 3}
+                }
+        ),
+        level2(
+                new int[][]{
+                        {3, 0, 4, 0, 2, 0, 0, 7, 0},
+                        {1, 5, 0, 0, 0, 0, 0, 4, 0},
+                        {0, 0, 0, 0, 0, 1, 0, 8, 3},
+                        {0, 0, 0, 0, 0, 6, 1, 0, 0},
+                        {2, 0, 5, 0, 3, 0, 0, 0, 8},
+                        {7, 0, 0, 1, 0, 0, 3, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 6, 0, 0},
+                        {5, 6, 0, 0, 0, 7, 0, 0, 0},
+                        {0, 0, 0, 8, 0, 0, 0, 1, 4}
+                }
+        ),
+        level3(
+                new int[][]{
+                        {0, 1, 0, 0, 0, 0, 0, 0, 0},
+                        {8, 0, 0, 0, 0, 2, 1, 7, 0},
+                        {0, 0, 4, 0, 0, 0, 0, 0, 0},
+                        {0, 2, 0, 0, 0, 6, 0, 1, 3},
+                        {0, 5, 3, 0, 7, 0, 6, 0, 2},
+                        {1, 0, 0, 8, 0, 0, 5, 4, 0},
+                        {0, 0, 0, 3, 1, 5, 0, 2, 6},
+                        {0, 4, 0, 2, 0, 0, 0, 0, 7},
+                        {0, 0, 0, 4, 8, 0, 3, 0, 0}
+                }
+        ),
+        level4(
+                new int[][]{
+                        {0, 4, 0, 8, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 7, 2, 0, 5, 0, 4},
+                        {8, 0, 0, 4, 0, 0, 0, 0, 0},
+                        {1, 0, 5, 3, 0, 0, 4, 2, 0},
+                        {0, 3, 0, 0, 0, 0, 0, 0, 0},
+                        {4, 0, 0, 0, 5, 0, 7, 0, 1},
+                        {6, 0, 0, 0, 0, 0, 1, 7, 0},
+                        {0, 0, 0, 2, 1, 0, 8, 6, 0},
+                        {2, 0, 0, 0, 3, 7, 0, 0, 0}
+                }
+        ),
+        level5(
+                new int[][]{
+                        {0, 0, 0, 2, 0, 0, 0, 1, 5},
+                        {3, 0, 0, 0, 0, 0, 7, 8, 0},
+                        {0, 0, 0, 7, 0, 0, 0, 0, 0},
+                        {1, 0, 0, 0, 0, 0, 0, 5, 7},
+                        {7, 2, 0, 0, 4, 0, 0, 0, 0},
+                        {8, 6, 0, 1, 0, 3, 0, 4, 0},
+                        {4, 0, 0, 0, 1, 0, 0, 0, 0},
+                        {2, 1, 0, 0, 0, 7, 8, 3, 0},
+                        {0, 5, 0, 3, 0, 0, 0, 0, 0}
+                }
+        ),
+        level6(
+                new int[][]{
+                        {0, 0, 0, 1, 0, 5, 4, 0, 0},
+                        {0, 6, 0, 2, 0, 8, 0, 0, 7},
+                        {0, 5, 2, 0, 0, 0, 1, 0, 0},
+                        {0, 1, 5, 6, 0, 2, 0, 0, 0},
+                        {2, 0, 0, 0, 0, 7, 5, 1, 0},
+                        {0, 7, 8, 4, 0, 0, 0, 3, 2},
+                        {0, 0, 3, 0, 1, 4, 7, 0, 6},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0},
+                        {6, 0, 0, 5, 0, 0, 0, 8, 0}
+                }
+        ),;
+        final int[][] grid;
+
+        Data(int[][] grid) {
+            this.grid = grid;
+        }
+
+        int grid(int i, int j) {
+            return grid[i][j];
+        }
     }
 }
