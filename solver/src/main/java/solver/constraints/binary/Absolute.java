@@ -30,7 +30,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropAbsolute;
 import solver.variables.IntVar;
 
@@ -44,11 +43,7 @@ import solver.variables.IntVar;
 public class Absolute extends IntConstraint<IntVar> {
 
     public Absolute(IntVar X, IntVar Y, Solver solver) {
-        this(X, Y, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public Absolute(IntVar X, IntVar Y, Solver solver, PropagatorPriority storeThreshold) {
-        super(ArrayUtils.toArray(X, Y), solver, storeThreshold);
+        super(ArrayUtils.toArray(X, Y), solver);
         setPropagators(new PropAbsolute(X, Y, solver, this));
     }
 

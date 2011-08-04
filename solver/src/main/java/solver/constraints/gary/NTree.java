@@ -45,6 +45,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -77,9 +78,10 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	 * @param nTree the expected number of trees (IntVar)
 	 * @param solver 
 	 * @param storeThreshold
+     * TODO CPRU: il sert ˆ quoi le storeThreshold? Je pense qu'il n'est pas utilise correctement...
 	 */
 	public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver, PropagatorPriority storeThreshold) {
-		super((V[]) new Variable[]{graph,nTree}, solver, storeThreshold);
+		super((V[]) new Variable[]{graph,nTree}, solver);
 		setPropagators(
 				new PropNSuccs(graph, solver, this, storeThreshold, true, 1),
 				new PropNLoopsTree(graph, nTree, solver, this, storeThreshold, true),

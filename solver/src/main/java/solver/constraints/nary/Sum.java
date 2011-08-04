@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import gnu.trove.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.constraints.propagators.nary.sum.PropSumGeq;
 import solver.constraints.propagators.nary.sum.PropSumLeq;
@@ -104,7 +103,7 @@ public class Sum extends IntConstraint {
     }
 
     protected Sum(IntVar[] vars, int[] coeffs, int pos, Type type, int b, Solver solver) {
-        super(vars, solver, PropagatorPriority.LINEAR);
+        super(vars, solver);
         this.coeffs = coeffs.clone();
         this.b = b;
         this.op = type;

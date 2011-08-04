@@ -47,7 +47,7 @@ public class NotEqualXC extends IntConstraint<IntVar> {
     private final int constant;
 
     public NotEqualXC(IntVar var, int cste, Solver solver) {
-        super(new IntVar[]{var}, solver, _DEFAULT_THRESHOLD);
+        super(new IntVar[]{var}, solver);
         this.constant = cste;
         setPropagators(new PropNotEqualXC(var, constant, solver, this));
     }

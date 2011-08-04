@@ -68,7 +68,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
 
 
     public ConjunctiveNormalForm(ALogicTree tree, Solver solver, PropagatorPriority storeThreshold) {
-        super(nonReundantBoolVars(tree), solver, storeThreshold);
+        super(nonReundantBoolVars(tree), solver);
 
         tree = LogicTreeToolBox.toCNF(tree);
 

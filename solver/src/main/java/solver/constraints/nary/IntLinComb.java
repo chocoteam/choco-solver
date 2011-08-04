@@ -30,7 +30,6 @@ package solver.constraints.nary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.intlincomb.PropIntLinCombEq;
 import solver.constraints.propagators.nary.intlincomb.PropIntLinCombGeq;
 import solver.constraints.propagators.nary.intlincomb.PropIntLinCombLeq;
@@ -57,13 +56,7 @@ public class IntLinComb extends IntConstraint<IntVar> {
 
     public IntLinComb(IntVar[] vars, final int[] coeffs, final int nbPos, final Operator operator, final int c,
                       Solver solver) {
-        this(vars, coeffs, nbPos, operator, c, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public IntLinComb(IntVar[] vars, final int[] coeffs, final int nbPos, final Operator operator, final int c,
-                      Solver solver,
-                      PropagatorPriority threshold) {
-        super(vars, solver, threshold);
+        super(vars, solver);
         this.operator = operator;
         this.coefficients = coeffs;
         this.constant = c;

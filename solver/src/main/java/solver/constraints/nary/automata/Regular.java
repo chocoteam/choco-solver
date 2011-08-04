@@ -37,7 +37,6 @@ import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.regular.Arc;
 import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGraph;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.automaton.PropRegular;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -58,7 +57,7 @@ public class Regular extends IntConstraint<IntVar> {
     final IAutomaton automaton;
 
     public Regular(IntVar[] vars, IAutomaton automaton, Solver solver) {
-        super(vars, solver, PropagatorPriority.CUBIC);
+        super(vars, solver);
         this.automaton = automaton;
         graph = initGraph(solver.getEnvironment(), vars, automaton);
         setPropagators(new PropRegular(vars, automaton, graph, solver, this));

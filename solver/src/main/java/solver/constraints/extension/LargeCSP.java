@@ -50,7 +50,7 @@ public class LargeCSP extends IntConstraint<IntVar> {
     protected final LargeRelation relation;
 
     public LargeCSP(IntVar[] vars, LargeRelation relation, Type type, Solver solver) {
-        super(vars, solver, _DEFAULT_THRESHOLD);
+        super(vars, solver);
         this.relation = relation;
         switch (type) {
             case FC:

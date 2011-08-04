@@ -86,7 +86,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
     }
 
     private GlobalCardinality(IntVar[] vars, IntVar[] card, int offset, Solver solver) {
-        super(ArrayUtils.append(vars, card), solver, _DEFAULT_THRESHOLD);
+        super(ArrayUtils.append(vars, card), solver);
         this.nbvars = vars.length;
         this.offset = offset;
         this.range = card.length + offset;
@@ -122,7 +122,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
     }
 
     private GlobalCardinality(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences, int offset, Consistency cons, Solver solver) {
-        super(vars, solver, _DEFAULT_THRESHOLD);
+        super(vars, solver);
         checker(vars, minOccurrences, maxOccurrences);
         this.nbvars = vars.length;
         this.offset = offset;

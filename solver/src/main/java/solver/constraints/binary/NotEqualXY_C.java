@@ -30,7 +30,6 @@ package solver.constraints.binary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropNotEqualXY_C;
 import solver.variables.IntVar;
 
@@ -47,12 +46,7 @@ public final class NotEqualXY_C extends IntConstraint<IntVar> {
     int c;
 
     public NotEqualXY_C(IntVar x, IntVar y, int c, Solver solver) {
-        this(x, y, c, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public NotEqualXY_C(IntVar x, IntVar y, int c, Solver solver,
-                        PropagatorPriority threshold) {
-        super(new IntVar[]{x, y}, solver, threshold);
+        super(new IntVar[]{x, y}, solver);
         this.x = x;
         this.y = y;
         this.c = c;

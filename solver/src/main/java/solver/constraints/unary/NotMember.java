@@ -54,7 +54,7 @@ public class NotMember extends IntConstraint<IntVar> {
     }
 
     public NotMember(IntVar var, int[] values, Solver solver, PropagatorPriority storeThreshold) {
-        super(new IntVar[]{var}, solver, storeThreshold);
+        super(new IntVar[]{var}, solver);
         this.values = new TIntHashSet(values);
         lb = 0;
         ub = 0;
@@ -66,7 +66,7 @@ public class NotMember extends IntConstraint<IntVar> {
     }
 
     public NotMember(IntVar var, int lowerbound, int upperbound, Solver solver, PropagatorPriority storeThreshold) {
-        super(new IntVar[]{var}, solver, storeThreshold);
+        super(new IntVar[]{var}, solver);
         this.values = null;
         this.lb = lowerbound;
         this.ub = upperbound;

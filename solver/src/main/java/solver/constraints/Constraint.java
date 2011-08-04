@@ -105,7 +105,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     protected final IPropagationEngine engine;
 
-    public Constraint(V[] vars, Solver solver, PropagatorPriority storeThreshold) {
+    public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();

@@ -56,7 +56,7 @@ public class Count extends IntConstraint<IntVar> {
     private final int occval;
 
     public Count(int value, IntVar[] vars, Relop relop, IntVar limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{limit}), solver, _DEFAULT_THRESHOLD);
+        super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
         this.occval = value;
         switch (relop) {
             case GEQ:

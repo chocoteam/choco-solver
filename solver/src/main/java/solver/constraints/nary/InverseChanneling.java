@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropInverseChanneling;
 import solver.variables.IntVar;
@@ -52,13 +51,8 @@ public class InverseChanneling extends IntConstraint<IntVar> {
 
     protected final int nbX, nbY;
 
-
     public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver) {
-        this(X, Y, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver, PropagatorPriority threshold) {
-        super(ArrayUtils.append(X, Y), solver, threshold);
+        super(ArrayUtils.append(X, Y), solver);
         this.X = X.clone();
         this.Y = Y.clone();
         nbX = X.length;

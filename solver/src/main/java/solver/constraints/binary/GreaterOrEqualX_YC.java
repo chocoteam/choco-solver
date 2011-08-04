@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropGreaterOrEqualX_YC;
 import solver.variables.IntVar;
 
@@ -48,14 +47,8 @@ public class GreaterOrEqualX_YC extends IntConstraint<IntVar> {
     final IntVar y;
     final int cste;
 
-
     public GreaterOrEqualX_YC(IntVar x, IntVar y, int c, Solver solver) {
-        this(x, y, c, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public GreaterOrEqualX_YC(IntVar x, IntVar y, int c, Solver solver,
-                              PropagatorPriority storeThreshold) {
-        super(ArrayUtils.toArray(x, y), solver, storeThreshold);
+        super(ArrayUtils.toArray(x, y), solver);
         this.x = x;
         this.y = y;
         this.cste = c;

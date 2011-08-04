@@ -30,7 +30,6 @@ package solver.constraints;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.SolverException;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -44,8 +43,8 @@ import solver.variables.IntVar;
  */
 public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Propagator<I>> {
 
-    public IntConstraint(I[] vars, Solver solver, PropagatorPriority storeThreshold) {
-        super(vars, solver, storeThreshold);
+    public IntConstraint(I[] vars, Solver solver) {
+        super(vars, solver);
     }
 
     public ESat isSatisfied() {

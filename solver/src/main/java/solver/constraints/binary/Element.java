@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropElement;
 import solver.constraints.propagators.nary.channeling.PropElementV;
 import solver.variables.IntVar;
@@ -50,12 +49,7 @@ public class Element extends IntConstraint<IntVar> {
     final int offset;
 
     public Element(IntVar value, int[] values, IntVar index, int offset, Solver solver) {
-        this(value, values, index, offset, solver, _DEFAULT_THRESHOLD);
-    }
-
-    public Element(IntVar value, int[] values, IntVar index, int offset, Solver solver,
-                   PropagatorPriority threshold) {
-        super(ArrayUtils.toArray(value, index), solver, threshold);
+        super(ArrayUtils.toArray(value, index), solver);
         this.values = values;
         this.offset = offset;
         setPropagators(new PropElement(vars[1], values, vars[0], offset, solver, this));
@@ -66,7 +60,7 @@ public class Element extends IntConstraint<IntVar> {
     }
 
     public Element(IntVar value, IntVar[] values, IntVar index, int offset, Solver solver) {
-        super(ArrayUtils.append(new IntVar[]{value, index}, values), solver, _DEFAULT_THRESHOLD);
+        super(ArrayUtils.append(new IntVar[]{value, index}, values), solver);
         this.values = new int[0];
         this.offset = offset;
         setPropagators(new PropElementV(value, values, index, offset, solver, this));

@@ -42,7 +42,6 @@ import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.nary.automata.structure.costregular.Arc;
 import solver.constraints.nary.automata.structure.costregular.StoredValuedDirectedMultiGraph;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.automaton.PropCostRegular;
 import solver.exception.SolverException;
 import solver.variables.IntVar;
@@ -67,7 +66,7 @@ public class CostRegular extends IntConstraint<IntVar> {
 //    }
 
     public CostRegular(IntVar[] vars, IAutomaton automaton, int[][][] costs, Solver solver) {
-        super(vars, solver, PropagatorPriority.CUBIC);
+        super(vars, solver);
         int zIdx = vars.length - 1;
         cautomaton =
                 CostAutomaton.makeSingleResource(automaton, costs, vars[zIdx].getLB(), vars[zIdx].getUB());
@@ -76,7 +75,7 @@ public class CostRegular extends IntConstraint<IntVar> {
     }
 
     public CostRegular(IntVar[] vars, IAutomaton automaton, int[][] costs, Solver solver) {
-        super(vars, solver, PropagatorPriority.CUBIC);
+        super(vars, solver);
         int zIdx = vars.length - 1;
         cautomaton =
                 CostAutomaton.makeSingleResource(automaton, costs, vars[zIdx].getLB(), vars[zIdx].getUB());
@@ -85,7 +84,7 @@ public class CostRegular extends IntConstraint<IntVar> {
     }
 
     public CostRegular(IntVar[] vars, ICostAutomaton cautomaton, Solver solver) {
-        super(vars, solver, PropagatorPriority.CUBIC);
+        super(vars, solver);
         this.cautomaton = cautomaton;
         graph = initGraph(vars, cautomaton, solver.getEnvironment());
         setPropagators(new PropCostRegular(vars, cautomaton, graph, solver, this));

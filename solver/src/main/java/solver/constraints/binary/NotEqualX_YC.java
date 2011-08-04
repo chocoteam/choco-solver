@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.binary.Prop_X_NotEqualX_YC;
 import solver.constraints.propagators.binary.Prop_Y_NotEqualX_YC;
@@ -52,14 +51,9 @@ public final class NotEqualX_YC extends IntConstraint<IntVar> {
     IntVar y;
     int c;
 
-    public NotEqualX_YC(IntVar x, IntVar y, int c, Solver solver) {
-        this(x, y, c, solver, _DEFAULT_THRESHOLD);
-    }
-
     @SuppressWarnings({"unchecked"})
-    public NotEqualX_YC(IntVar x, IntVar y, int c, Solver solver,
-                        PropagatorPriority threshold) {
-        super(new IntVar[]{x, y}, solver, threshold);
+    public NotEqualX_YC(IntVar x, IntVar y, int c, Solver solver) {
+        super(new IntVar[]{x, y}, solver);
         this.x = x;
         this.y = y;
         this.c = c;

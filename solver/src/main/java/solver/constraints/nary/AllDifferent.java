@@ -59,23 +59,12 @@ public class AllDifferent extends IntConstraint<IntVar> {
 		AC, PROBABILISTIC, BC, CLIQUE, GRAPH
 	}
 
-
 	public AllDifferent(IntVar[] vars, Solver solver) {
-		this(vars, solver, _DEFAULT_THRESHOLD, Type.BC);
-	}
-
-	public AllDifferent(IntVar[] vars, Solver solver,
-			PropagatorPriority threshold) {
-		this(vars, solver, threshold, Type.BC);
+		this(vars, solver, Type.BC);
 	}
 
 	public AllDifferent(IntVar[] vars, Solver solver, Type type) {
-		this(vars, solver, _DEFAULT_THRESHOLD, type);
-	}
-
-	public AllDifferent(IntVar[] vars, Solver solver,
-			PropagatorPriority threshold, Type type) {
-		super(vars, solver, threshold);
+		super(vars, solver);
 		switch (type) {
 		case CLIQUE:
 			int s = vars.length;

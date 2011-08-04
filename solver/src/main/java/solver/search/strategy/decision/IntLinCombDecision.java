@@ -51,7 +51,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     long fails;
 
     public IntLinCombDecision(Solver solver) {
-        super(new IntVar[0], new int[0], 0, Operator.EQ, 0, solver, null);
+        super(new IntVar[0], new int[0], 0, Operator.EQ, 0, solver);
     }
 
     public IntLinCombDecision set(IntVar[] vars, final int[] coeffs, final Operator operator, final int c) {

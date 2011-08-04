@@ -47,7 +47,7 @@ public class EqualXC extends IntConstraint<IntVar> {
     private final int constant;
 
     public EqualXC(IntVar var, int cste, Solver solver) {
-        super(new IntVar[]{var}, solver, _DEFAULT_THRESHOLD);
+        super(new IntVar[]{var}, solver);
         this.constant = cste;
         setPropagators(new PropEqualXC(var, constant, solver, this));
     }

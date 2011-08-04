@@ -46,7 +46,7 @@ public class MaxXYZ extends IntConstraint<IntVar> {
     IntVar X, Y, Z;
 
     public MaxXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver, PropagatorPriority storeThreshold) {
-        super(new IntVar[]{X, Y, Z}, solver, storeThreshold);
+        super(new IntVar[]{X, Y, Z}, solver);
         this.X = X;
         this.Y = Y;
         this.Z = Z;
@@ -54,7 +54,7 @@ public class MaxXYZ extends IntConstraint<IntVar> {
     }
 
     public MaxXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver, PropagatorPriority.TERNARY);
+        super(new IntVar[]{X, Y, Z}, solver);
         this.X = X;
         this.Y = Y;
         this.Z = Z;
