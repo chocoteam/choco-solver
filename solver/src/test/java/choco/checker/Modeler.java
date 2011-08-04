@@ -275,10 +275,10 @@ public interface Modeler {
                     ro = Count.Relop.EQ;
                     break;
                 case 1:
-                    ro = Count.Relop.GEQ;
+                    ro = Count.Relop.LEQ;
                     break;
                 case 2:
-                    ro = Count.Relop.LEQ;
+                    ro = Count.Relop.GEQ;
                     break;
             }
             Constraint ctr = new Count(params[1], vars, ro, occVar, s);
@@ -311,10 +311,10 @@ public interface Modeler {
                     ro = Count.Relop.EQ;
                     break;
                 case 1:
-                    ro = Count.Relop.GEQ;
+                    ro = Count.Relop.LEQ;
                     break;
                 case 2:
-                    ro = Count.Relop.LEQ;
+                    ro = Count.Relop.GEQ;
                     break;
             }
             Constraint ctr = new Count(params[1], vars, ro, occVar, s);

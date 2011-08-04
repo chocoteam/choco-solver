@@ -24,31 +24,60 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.nary.channeling;
 
-package parser.flatzinc.ast.constraints;
-
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
+import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
+import solver.constraints.IntConstraint;
+import solver.constraints.propagators.nary.channeling.PropDomainChanneling;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
-import java.util.List;
-
 /**
+ * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
+ * var = i -> bvars[i] = 1
  * <br/>
  *
+ * @author Xavier Lorca
+ * @author Hadrien Cambazard
+ * @author Fabien Hermenier
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 04/08/11
  */
-public class ArrayElementBuilder implements IBuilder {
+public class DomainChanneling extends IntConstraint<IntVar> {
+
+    public DomainChanneling(BoolVar[] bs, IntVar x, Solver solver) {
+        super(ArrayUtils.append(bs, new IntVar[]{x}), solver, _DEFAULT_THRESHOLD);
+        setPropagators(new PropDomainChanneling(bs, x, solver, this));
+
+    }
 
     @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar index = exps.get(0).intVarValue(solver);
-        int[] values = exps.get(1).toIntArray();
-        IntVar val = exps.get(2).intVarValue(solver);
-        return new Element(val, values, index, 1, solver);
+    public ESat isSatisfied(int[] tuple) {
+        int val = tuple[tuple.length - 1];
+        for (int i = 0; i < tuple.length - 1; i++) {
+            if (i != val && tuple[i] != 0) {
+                return ESat.FALSE;
+            } else if (i == val && tuple[i] != 1) {
+                return ESat.FALSE;
+            }
+        }
+        return ESat.eval(!(val < 0 || val > tuple.length - 1));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append(vars[vars.length - 1].getName()).append(" = i => <");
+        int i = 0;
+        for (; i < Math.min(3, vars.length - 2); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < vars.length - 2) {
+            st.append("..., ");
+        }
+        st.append(vars[vars.length - 2].getName()).append(">[i] = 1");
+        return st.toString();
     }
 }

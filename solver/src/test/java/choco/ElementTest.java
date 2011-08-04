@@ -56,7 +56,7 @@ public class ElementTest {
 
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(1);
-        lcstrs.add(new Element(index, values, var, offset, s));
+        lcstrs.add(new Element(var, values, index, offset, s));
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(allvars, env);

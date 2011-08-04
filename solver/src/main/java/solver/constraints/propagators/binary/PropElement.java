@@ -51,9 +51,9 @@ public class PropElement extends Propagator<IntVar> {
     final int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropElement(IntVar v0, int[] values, IntVar v1, int offset, Solver solver,
+    public PropElement(IntVar value, int[] values, IntVar index, int offset, Solver solver,
                        IntConstraint constraint) {
-        super(ArrayUtils.toArray(v0, v1), solver, constraint, PropagatorPriority.BINARY, false);
+        super(ArrayUtils.toArray(value, index), solver, constraint, PropagatorPriority.BINARY, false);
         this.lval = values;
         this.cste = offset;
     }

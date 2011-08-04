@@ -47,7 +47,7 @@ import solver.variables.IntVar;
 public class Count extends IntConstraint<IntVar> {
 
     public static enum Relop {
-        EQ, LEQ, GEQ
+        EQ, GEQ, LEQ
     }
 
 
@@ -59,11 +59,11 @@ public class Count extends IntConstraint<IntVar> {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver, _DEFAULT_THRESHOLD);
         this.occval = value;
         switch (relop) {
-            case LEQ:
+            case GEQ:
                 leq = true;
                 geq = false;
                 break;
-            case GEQ:
+            case LEQ:
                 leq = false;
                 geq = true;
                 break;

@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropElement;
+import solver.constraints.propagators.nary.channeling.PropElementV;
 import solver.variables.IntVar;
 
 /**
@@ -48,28 +49,63 @@ public class Element extends IntConstraint<IntVar> {
     final int[] values;
     final int offset;
 
-    public Element(IntVar v0, int[] values, IntVar v1, int offset, Solver solver) {
-        this(v0, values, v1, offset, solver, _DEFAULT_THRESHOLD);
+    public Element(IntVar value, int[] values, IntVar index, int offset, Solver solver) {
+        this(value, values, index, offset, solver, _DEFAULT_THRESHOLD);
     }
 
-    public Element(IntVar v0, int[] values, IntVar v1, int offset, Solver solver,
+    public Element(IntVar value, int[] values, IntVar index, int offset, Solver solver,
                    PropagatorPriority threshold) {
-        super(ArrayUtils.toArray(v0, v1), solver, threshold);
+        super(ArrayUtils.toArray(value, index), solver, threshold);
         this.values = values;
         this.offset = offset;
-        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver, this));
+        setPropagators(new PropElement(vars[1], values, vars[0], offset, solver, this));
     }
 
-    public Element(IntVar v0, int[] values, IntVar v1, Solver solver) {
-        this(v0, values, v1, 0, solver);
+    public Element(IntVar value, int[] values, IntVar index, Solver solver) {
+        this(value, values, index, 0, solver);
+    }
+
+    public Element(IntVar value, IntVar[] values, IntVar index, int offset, Solver solver) {
+        super(ArrayUtils.append(new IntVar[]{value, index}, values), solver, _DEFAULT_THRESHOLD);
+        this.values = new int[0];
+        this.offset = offset;
+        setPropagators(new PropElementV(value, values, index, offset, solver, this));
     }
 
 
     @Override
     public ESat isSatisfied(int[] tuple) {
+        if (values.length == 0) {
+            return ESat.eval(tuple[tuple[1] + offset] == tuple[0]);
+        }
         return ESat.eval(
-                !(tuple[0] - this.offset >= values.length || tuple[0] - this.offset < 0)
-                        && this.values[tuple[0] - this.offset] == tuple[1]
+                !(tuple[1] - this.offset >= values.length || tuple[1] - this.offset < 0)
+                        && this.values[tuple[1] - this.offset] == tuple[0]
         );
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(this.vars[0]).append(" = ");
+        sb.append("<");
+        if (values.length == 0) {
+            int i = 2;
+            for (; i < Math.min(this.vars.length - 1, 5); i++) {
+                sb.append(this.vars[i]).append(", ");
+            }
+            if (i < this.vars.length - 1) {
+                sb.append("..., ");
+            }
+            sb.append(this.vars[vars.length - 1]);
+        } else {
+            int i = 0;
+            for (; i < Math.min(this.values.length - 1, 5); i++) {
+                sb.append(this.values[i]).append(", ");
+            }
+            if (i == 5 && this.values.length - 1 > 5) sb.append("..., ");
+            sb.append(this.values[values.length - 1]);
+        }
+        sb.append(">[").append(this.vars[1]).append(']');
+        return sb.toString();
     }
 }

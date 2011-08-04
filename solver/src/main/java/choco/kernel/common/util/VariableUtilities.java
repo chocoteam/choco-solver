@@ -24,31 +24,35 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.kernel.common.util;
 
-package parser.flatzinc.ast.constraints;
-
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.Expression;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.binary.Element;
 import solver.variables.IntVar;
-
-import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/01/11
+ * @since 04/08/11
  */
-public class ArrayElementBuilder implements IBuilder {
+public enum VariableUtilities {
+    ;
 
-    @Override
-    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar index = exps.get(0).intVarValue(solver);
-        int[] values = exps.get(1).toIntArray();
-        IntVar val = exps.get(2).intVarValue(solver);
-        return new Element(val, values, index, 1, solver);
+    public static boolean emptyUnion(IntVar x, IntVar y) {
+        if (x.getLB() <= y.getUB()
+                && (y.getLB() <= x.getUB())) {
+            if (!y.hasEnumeratedDomain() || !x.hasEnumeratedDomain()) {
+                return false;
+            } else {
+                int ub = y.getUB();
+                for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
+                    if (x.contains(val)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        } else {
+            return true;
+        }
     }
 }

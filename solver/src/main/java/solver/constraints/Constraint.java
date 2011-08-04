@@ -101,10 +101,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     protected int staticPropagationPriority;
 
-    protected final PropagatorPriority storeThreshold; // exclusive
-
-    protected boolean slowPropagation = true;
-
     protected transient boolean initialize = false;
 
     protected final IPropagationEngine engine;
@@ -112,7 +108,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public Constraint(V[] vars, Solver solver, PropagatorPriority storeThreshold) {
         this.vars = vars.clone();
         this.solver = solver;
-        this.storeThreshold = storeThreshold;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
         this.initialize = false;
         this.engine = solver.getEngine();
@@ -122,7 +117,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     //BEWARE : ONLY FOR GRAPH CONSTRAINTS
     public Constraint(Solver solver, PropagatorPriority storeThreshold) {
         this.solver = solver;
-        this.storeThreshold = storeThreshold;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
         initialize = false;
         this.engine = solver.getEngine();
@@ -241,7 +235,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
             prop.linkToVariables();
             staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
         }
-        slowPropagation = (staticPropagationPriority < storeThreshold.priority);
     }
 
     /**

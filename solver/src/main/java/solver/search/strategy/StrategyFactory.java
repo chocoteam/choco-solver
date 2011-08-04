@@ -148,6 +148,14 @@ public final class StrategyFactory {
                 environment);
     }
 
+    public static AbstractStrategy<IntVar> maxRegMinVal(IntVar[] variables, IEnvironment environment) {
+        HeuristicValFactory.indomainMin(variables);
+        return StrategyVarValAssign.dyn(variables,
+                SorterFactory.maxRegret(),
+                ValidatorFactory.instanciated,
+                environment);
+    }
+
 
     public static AbstractStrategy<IntVar> random(IntVar[] vars, IEnvironment environment) {
         HeuristicValFactory.random(vars);
@@ -177,13 +185,13 @@ public final class StrategyFactory {
 
 
     public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
-        return new GraphStrategy(g,nodeStrat,arcStrat,priority);
+        return new GraphStrategy(g, nodeStrat, arcStrat, priority);
     }
-    
+
     public static <G extends GraphVar> AbstractStrategy graphLexico(G g) {
         return new GraphStrategy(g);
     }
-    
+
     public static <G extends GraphVar> AbstractStrategy graphRandom(G g, long seed) {
         return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.RANDOM);
     }

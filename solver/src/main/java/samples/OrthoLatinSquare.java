@@ -70,8 +70,8 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
         }
         for (int i = 0; i < mm; i++) {
-            solver.post(new Element(vars[i], mod, square1[i], solver));
-            solver.post(new Element(vars[i], div, square2[i], solver));
+            solver.post(new Element(square1[i], mod, vars[i], solver));
+            solver.post(new Element(square2[i], div, vars[i], solver));
         }
 
 
