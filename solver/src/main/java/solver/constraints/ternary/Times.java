@@ -30,11 +30,12 @@ package solver.constraints.ternary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.ternary.PropTimes;
+import solver.constraints.propagators.ternary.PropTimesWithLong;
 import solver.variables.IntVar;
 
 /**
+ * X*Y = Z
  * <br/>
  *
  * @author Charles Prud'homme
@@ -44,20 +45,28 @@ public class Times extends IntConstraint<IntVar> {
 
     IntVar X, Y, Z;
 
-    public Times(IntVar X, IntVar Y, IntVar Z, Solver solver, PropagatorPriority storeThreshold) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-        setPropagators(new PropTimes(X, Y, Z, solver, this, storeThreshold, false));
+    private static boolean inIntBounds(IntVar x, IntVar y) {
+        boolean l1 = inIntBounds((long) x.getLB() * (long) y.getLB());
+        boolean l2 = inIntBounds((long) x.getUB() * (long) y.getLB());
+        boolean l3 = inIntBounds((long) x.getLB() * (long) y.getUB());
+        boolean l4 = inIntBounds((long) x.getUB() * (long) y.getUB());
+        return l1 && l2 && l3 && l4;
     }
 
-    public Times(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-        setPropagators(new PropTimes(X, Y, Z, solver, this, PropagatorPriority.TERNARY, false));
+    private static boolean inIntBounds(long l1) {
+        return l1 > Integer.MIN_VALUE && l1 < Integer.MAX_VALUE;
+    }
+
+    public Times(IntVar v1, IntVar v2, IntVar result, Solver solver) {
+        super(new IntVar[]{v1, v2, result}, solver);
+        this.X = v1;
+        this.Y = v2;
+        this.Z = result;
+        if (inIntBounds(X, Y)) {
+            setPropagators(new PropTimes(v1, v2, result, solver, this));
+        } else {
+            setPropagators(new PropTimesWithLong(v1, v2, result, solver, this));
+        }
     }
 
     @Override

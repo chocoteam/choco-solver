@@ -27,16 +27,12 @@
 
 package solver.constraints.propagators.ternary;
 
-import choco.kernel.ESat;
 import choco.kernel.common.util.tools.MathUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.requests.IRequest;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
@@ -46,126 +42,23 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class PropTimes extends Propagator<IntVar> {
+public class PropTimesWithLong extends PropTimes {
 
-    protected static final int MAX = Integer.MAX_VALUE - 1, MIN = Integer.MIN_VALUE + 1;
-
-    IntVar v0, v1, v2;
-
-    public PropTimes(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
+    public PropTimesWithLong(IntVar v1, IntVar v2, IntVar result, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{v1, v2, result}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, false);
-        this.v0 = v1;
-        this.v1 = v2;
-        this.v2 = result;
-    }
-
-    @Override
-    public final int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
-    }
-
-    @Override
-    public final void propagate() throws ContradictionException {
-        filter(0);
-        filter(1);
-        filter(2);
-    }
-
-    @Override
-    public final void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else {
-            if (EventType.isInclow(mask)) {
-                this.awakeOnLow(varIdx);
-            }
-            if (EventType.isDecupp(mask)) {
-                this.awakeOnUpp(varIdx);
-            }
-        }
-    }
-
-    @Override
-    public final ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            return ESat.eval(v0.getValue() * v1.getValue() == v2.getValue());
-        } else if (v2.instantiatedTo(0)) {
-            if (v0.instantiatedTo(0) || v1.instantiatedTo(0)) {
-                return ESat.TRUE;
-            } else if (!(v0.contains(0)) && !(v1.contains(0))) {
-                return ESat.FALSE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else if (!(v2.contains(0))) {
-            if (v0.getUB() < getXminIfNonZero()) {
-                return ESat.FALSE;
-            } else if (v0.getLB() > getXmaxIfNonZero()) {
-                return ESat.FALSE;
-            } else if (v1.getUB() < getYminIfNonZero()) {
-                return ESat.FALSE;
-            } else if (v1.getLB() > getYmaxIfNonZero()) {
-                return ESat.FALSE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else {
-            return ESat.UNDEFINED;
-        }
+        super(v1, v2, result, solver, intVarPropagatorConstraint);
     }
 
     //****************************************************************************************************************//
     //****************************************************************************************************************//
     //****************************************************************************************************************//
-
-    protected final void awakeOnUpp(int idx) throws ContradictionException {
-        if (idx == 0) {
-            awakeOnX();
-        } else if (idx == 1) {
-            awakeOnY();
-        } else if (idx == 2) {
-            awakeOnZ();
-            if (!(v2.contains(0))) {
-                int r = Math.min(getZmax(), MAX);
-                v2.updateUpperBound(r, this);
-            }
-        }
-    }
-
-    protected final void awakeOnLow(int idx) throws ContradictionException {
-        if (idx == 0) {
-            awakeOnX();
-        } else if (idx == 1) {
-            awakeOnY();
-        } else if (idx == 2) {
-            awakeOnZ();
-            if (!(v2.contains(0))) {
-                int r = Math.max(getZmin(), MIN);
-                v2.updateLowerBound(r, this);
-            }
-        }
-    }
-
-    protected final void awakeOnInst(int vIdx) throws ContradictionException {
-        filter(vIdx);
-    }
-
-    protected final void filter(int idx) throws ContradictionException {
-        if (idx == 0) {
-            awakeOnX();
-        } else if (idx == 1) {
-            awakeOnY();
-        } else if (idx == 2) {
-            awakeOnZ();
-        }
-    }
 
     /**
      * reaction when X (v0) is updated
      *
-     * @throws ContradictionException
+     * @throws solver.exception.ContradictionException
      */
+    @Override
     protected void awakeOnX() throws ContradictionException {
         if (v0.instantiatedTo(0)) {
             v2.instantiateTo(0, this);
@@ -178,13 +71,14 @@ public class PropTimes extends Propagator<IntVar> {
             shaveOnYandX();
         }
         if (!(v2.instantiatedTo(0))) {
-            int r = Math.max(getZmin(), MIN);
+            int r = (int) Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, this);
-            r = Math.min(getZmax(), MAX);
+            r = (int) Math.min(getZmax(), MAX);
             v2.updateUpperBound(r, this);
         }
     }
 
+    @Override
     protected void awakeOnY() throws ContradictionException {
         if (v1.instantiatedTo(0)) {
             v2.instantiateTo(0, this);
@@ -197,13 +91,14 @@ public class PropTimes extends Propagator<IntVar> {
             shaveOnXandY();
         }
         if (!(v2.instantiatedTo(0))) {
-            int r = Math.max(getZmin(), MIN);
+            int r = (int) Math.max(getZmin(), MIN);
             v2.updateLowerBound(r, this);
-            r = Math.min(getZmax(), MAX);
+            r = (int) Math.min(getZmax(), MAX);
             v2.updateUpperBound(r, this);
         }
     }
 
+    @Override
     protected void awakeOnZ() throws ContradictionException {
         if (!(v2.contains(0))) {
             updateX();
@@ -222,7 +117,7 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
 
-    private int getXminIfNonZero() {
+    private long getXminIfNonZero() {
         if ((v2.getLB() >= 0) && (v1.getLB() >= 0)) {
             return infCeilmM(v2, v1);
         } else if ((v2.getUB() <= 0) && (v1.getUB() <= 0)) {
@@ -246,7 +141,7 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int getXmaxIfNonZero() {
+    protected long getXmaxIfNonZero() {
         if ((v2.getLB() >= 0) && (v1.getLB() >= 0)) {
             return supCeilMm(v2, v1);
         } else if ((v2.getUB() <= 0) && (v1.getUB() <= 0)) {
@@ -270,7 +165,7 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int getYminIfNonZero() {
+    protected long getYminIfNonZero() {
         if ((v2.getLB() >= 0) && (v0.getLB() >= 0)) {
             return infCeilmM(v2, v0);
         } else if ((v2.getUB() <= 0) && (v0.getUB() <= 0)) {
@@ -294,7 +189,7 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int getYmaxIfNonZero() {
+    protected long getYmaxIfNonZero() {
         if ((v2.getLB() >= 0) && (v0.getLB() >= 0)) {
             return supCeilMm(v2, v0);
         } else if ((v2.getUB() <= 0) && (v0.getUB() <= 0)) {
@@ -318,7 +213,7 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int getZmin() {
+    protected long getZmin() {
         if ((v0.getLB() >= 0) && (v1.getLB() >= 0)) {
             return infFloormm(v0, v1);
         } else if ((v0.getUB() <= 0) && (v1.getUB() <= 0)) {
@@ -342,7 +237,7 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int getZmax() {
+    protected long getZmax() {
         if ((v0.getLB() >= 0) && (v1.getLB() >= 0)) {
             return supFloorMM(v0, v1);
         } else if ((v0.getUB() <= 0) && (v1.getUB() <= 0)) {
@@ -366,36 +261,36 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int infFloormm(IntVar b, IntVar c) {
-        return b.getLB() * c.getLB();
+    private long infFloormm(IntVar b, IntVar c) {
+        return (long) b.getLB() * (long) c.getLB();
     }
 
-    private int infFloormM(IntVar b, IntVar c) {
-        return b.getLB() * c.getUB();
+    private long infFloormM(IntVar b, IntVar c) {
+        return (long) b.getLB() * (long) c.getUB();
     }
 
-    private int infFloorMm(IntVar b, IntVar c) {
-        return b.getUB() * c.getLB();
+    private long infFloorMm(IntVar b, IntVar c) {
+        return (long) b.getUB() * (long) c.getLB();
     }
 
-    private int infFloorMM(IntVar b, IntVar c) {
-        return b.getUB() * c.getUB();
+    private long infFloorMM(IntVar b, IntVar c) {
+        return (long) b.getUB() * (long) c.getUB();
     }
 
-    private int supFloormm(IntVar b, IntVar c) {
-        return b.getLB() * c.getLB();
+    private long supFloormm(IntVar b, IntVar c) {
+        return (long) b.getLB() * (long) c.getLB();
     }
 
-    private int supFloormM(IntVar b, IntVar c) {
-        return b.getLB() * c.getUB();
+    private long supFloormM(IntVar b, IntVar c) {
+        return (long) b.getLB() * (long) c.getUB();
     }
 
-    private int supFloorMm(IntVar b, IntVar c) {
-        return b.getUB() * c.getLB();
+    private long supFloorMm(IntVar b, IntVar c) {
+        return (long) b.getUB() * (long) c.getLB();
     }
 
-    private int supFloorMM(IntVar b, IntVar c) {
-        return b.getUB() * c.getUB();
+    private long supFloorMM(IntVar b, IntVar c) {
+        return (long) b.getUB() * (long) c.getUB();
     }
 
     private int getNonZeroSup(IntVar v) {
@@ -406,57 +301,57 @@ public class PropTimes extends Propagator<IntVar> {
         return Math.max(v.getLB(), 1);
     }
 
-    private int infCeilmm(IntVar b, IntVar c) {
+    private long infCeilmm(IntVar b, IntVar c) {
         return MathUtils.divCeil(b.getLB(), getNonZeroInf(c));
     }
 
-    private int infCeilmM(IntVar b, IntVar c) {
+    private long infCeilmM(IntVar b, IntVar c) {
         return MathUtils.divCeil(getNonZeroInf(b), c.getUB());
     }
 
-    private int infCeilMm(IntVar b, IntVar c) {
+    private long infCeilMm(IntVar b, IntVar c) {
         return MathUtils.divCeil(getNonZeroSup(b), c.getLB());
     }
 
-    private int infCeilMM(IntVar b, IntVar c) {
+    private long infCeilMM(IntVar b, IntVar c) {
         return MathUtils.divCeil(b.getUB(), getNonZeroSup(c));
     }
 
-    private int infCeilmP(IntVar b) {
+    private long infCeilmP(IntVar b) {
         return MathUtils.divCeil(b.getLB(), 1);
     }
 
-    private int infCeilMN(IntVar b) {
+    private long infCeilMN(IntVar b) {
         return MathUtils.divCeil(b.getUB(), -1);
     }
 
-    private int supCeilmm(IntVar b, IntVar c) {
+    private long supCeilmm(IntVar b, IntVar c) {
         return MathUtils.divFloor(getNonZeroInf(b), c.getLB());
     }
 
-    private int supCeilmM(IntVar b, IntVar c) {
+    private long supCeilmM(IntVar b, IntVar c) {
         return MathUtils.divFloor(b.getLB(), getNonZeroSup(c));
     }
 
-    private int supCeilMm(IntVar b, IntVar c) {
+    private long supCeilMm(IntVar b, IntVar c) {
         return MathUtils.divFloor(b.getUB(), getNonZeroInf(c));
     }
 
-    private int supCeilMM(IntVar b, IntVar c) {
+    private long supCeilMM(IntVar b, IntVar c) {
         return MathUtils.divFloor(getNonZeroSup(b), c.getUB());
     }
 
-    private int supCeilmN(IntVar b) {
+    private long supCeilmN(IntVar b) {
         return MathUtils.divFloor(b.getLB(), -1);
     }
 
-    private int supCeilMP(IntVar b) {
+    private long supCeilMP(IntVar b) {
         return MathUtils.divFloor(b.getUB(), 1);
     }
 
-    private int infFloorxx(IntVar b, IntVar c) {
-        int s1 = b.getLB() * c.getUB();
-        int s2 = b.getUB() * c.getLB();
+    private long infFloorxx(IntVar b, IntVar c) {
+        long s1 = (long) b.getLB() * (long) c.getUB();
+        long s2 = (long) b.getUB() * (long) c.getLB();
         if (s1 < s2) {
             return s1;
         } else {
@@ -464,9 +359,9 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int supFloorEq(IntVar b, IntVar c) {
-        int l1 = b.getLB() * c.getLB();
-        int l2 = b.getUB() * c.getUB();
+    private long supFloorEq(IntVar b, IntVar c) {
+        long l1 = (long) b.getLB() * (long) c.getLB();
+        long l2 = (long) b.getUB() * (long) c.getUB();
         if (l1 > l2) {
             return l1;
         } else {
@@ -474,66 +369,36 @@ public class PropTimes extends Propagator<IntVar> {
         }
     }
 
-    private int infCeilxx(IntVar b) {
+    private long infCeilxx(IntVar b) {
         return Math.min(MathUtils.divCeil(b.getLB(), 1), MathUtils.divCeil(b.getUB(), -1));
     }  //v0.18
 
-    private int supCeilEq(IntVar b) {
+    private long supCeilEq(IntVar b) {
         return Math.max(MathUtils.divFloor(b.getLB(), -1), MathUtils.divFloor(b.getUB(), 1));
     }   //v0.18
-
-
-    /**
-     * propagate the fact that v2 (Z) is instantiateTod to 0
-     *
-     * @throws ContradictionException
-     */
-    protected final void propagateZero() throws ContradictionException {
-        if (!(v1.contains(0))) {
-            v0.instantiateTo(0, this);
-        }
-        if (!(v0.contains(0))) {
-            v1.instantiateTo(0, this);
-        }
-    }
 
     /**
      * Updating X and Y when Z cannot be 0
      */
     protected boolean updateX() throws ContradictionException {
-        int r = Math.max(getXminIfNonZero(), MIN);
+        int r = (int) Math.max(getXminIfNonZero(), MIN);
         boolean infChange = v0.updateLowerBound(r, this);
-        r = Math.min(getXmaxIfNonZero(), MAX);
+        r = (int) Math.min(getXmaxIfNonZero(), MAX);
         boolean supChange = v0.updateUpperBound(r, this);
         return (infChange || supChange);
     }
 
     protected boolean updateY() throws ContradictionException {
-        int r = Math.max(getYminIfNonZero(), MIN);
+        int r = (int) Math.max(getYminIfNonZero(), MIN);
         boolean infChange = v1.updateLowerBound(r, this);
-        r = Math.min(getYmaxIfNonZero(), MAX);
+        r = (int) Math.min(getYmaxIfNonZero(), MAX);
         boolean supChange = v1.updateUpperBound(r, this);
         return (infChange || supChange);
     }
 
-    /**
-     * loop until a fix point is reach (see testProd14)
-     */
-    protected final void updateXandY() throws ContradictionException {
-        while (updateX() && updateY()) ;
-    }
-
-    protected final void updateYandX() throws ContradictionException {
-        while (updateY() && updateX()) ;
-    }
-
-    /**
-     * Updating X and Y when Z can  be 0
-     */
-
     protected boolean shaveOnX() throws ContradictionException {
-        int xmin = Math.max(getXminIfNonZero(), MIN);
-        int xmax = Math.min(getXmaxIfNonZero(), MAX);
+        int xmin = (int)Math.max(getXminIfNonZero(), MIN);
+        int xmax = (int)Math.min(getXmaxIfNonZero(), MAX);
         if ((xmin > v0.getUB()) || (xmax < v0.getLB())) {
             v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
@@ -546,8 +411,8 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     protected boolean shaveOnY() throws ContradictionException {
-        int ymin = Math.max(getYminIfNonZero(), MIN);
-        int ymax = Math.min(getYmaxIfNonZero(), MAX);
+        int ymin = (int)Math.max(getYminIfNonZero(), MIN);
+        int ymax = (int)Math.min(getYmaxIfNonZero(), MAX);
         if ((ymin > v1.getUB()) || (ymax < v1.getLB())) {
             v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
@@ -556,16 +421,6 @@ public class PropTimes extends Propagator<IntVar> {
             boolean infChange = (!(v0.contains(0)) && v1.updateLowerBound(Math.min(0, ymin), this));
             boolean supChange = (!(v0.contains(0)) && v1.updateUpperBound(Math.max(0, ymax), this));
             return (infChange || supChange);
-        }
-    }
-
-    protected final void shaveOnXandY() throws ContradictionException {
-        while (shaveOnX() && shaveOnY()) {
-        }
-    }
-
-    protected final void shaveOnYandX() throws ContradictionException {
-        while (shaveOnY() && shaveOnX()) {
         }
     }
 

@@ -30,6 +30,7 @@ package solver.constraints.ternary;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -56,6 +57,7 @@ public class TimesTest {
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(new IntVar[]{X,Y,Z}, s.getEnvironment());
         s.set(strategy);
+        SearchMonitorFactory.log(s, true, false);
         s.findAllSolutions();
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 3);
         Assert.assertEquals(s.getMeasures().getNodeCount(), 5);
