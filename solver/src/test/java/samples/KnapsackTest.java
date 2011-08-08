@@ -31,7 +31,6 @@ import choco.kernel.ResolutionPolicy;
 import gnu.trove.TLongArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import samples.knapsack.Knapsack;
 import solver.Solver;
 import solver.variables.IntVar;
 
@@ -49,9 +48,9 @@ public class KnapsackTest {
     public IntVar power;
 
 
-    public Solver modelIt(String file, int n) throws IOException {
+    public Solver modelIt(String data, int n) throws IOException {
         Knapsack pb = new Knapsack();
-        pb.readArgs("-f", this.getClass().getResource(file).getFile(), "-n", Integer.toString(n));
+        pb.readArgs("-d", data, "-n", ""+n);
         pb.buildModel();
         pb.configureSolver();
         power = pb.power;
@@ -70,8 +69,8 @@ public class KnapsackTest {
     @Test(groups = "10m")
     public void testMain() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        ks.solveIt(ks.modelIt("../files/knapsack/knapsack.10-1.txt", 10), true);
-        ks.solveIt(ks.modelIt("../files/knapsack/knapsack.20-1.txt", 13), true);
+        ks.solveIt(ks.modelIt("k10", 10), true);
+        ks.solveIt(ks.modelIt("k20", 13), true);
     }
 
     @Test(groups = {"1m"})
@@ -79,7 +78,7 @@ public class KnapsackTest {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
-            Solver s = ks.modelIt("../files/knapsack/knapsack.10-1.txt", 3);
+            Solver s = ks.modelIt("k10", 3);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
@@ -92,7 +91,7 @@ public class KnapsackTest {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
-            Solver s = ks.modelIt("../files/knapsack/knapsack.10-1.txt", 10);
+            Solver s = ks.modelIt("k10", 10);
             ks.solveIt(s, true);
             Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
             Assert.assertEquals(s.getMeasures().getSolutionCount(), 144, "nb sol");
@@ -103,7 +102,7 @@ public class KnapsackTest {
     @Test(groups = {"10m"})
     public void testOPT13() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("../files/knapsack/knapsack.13-1.txt", 13);
+        Solver s = ks.modelIt("k20", 13);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 214, "nb sol");
@@ -113,7 +112,7 @@ public class KnapsackTest {
     @Test(groups = {"10m"})
     public void testOPT14() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("../files/knapsack/knapsack.20-1.txt", 14);
+        Solver s = ks.modelIt("k20", 14);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
         Assert.assertEquals(s.getMeasures().getSolutionCount(), 305, "nb sol");
@@ -123,7 +122,7 @@ public class KnapsackTest {
     @Test(groups = {"10m"})
     public void testOPT15() throws IOException {
         KnapsackTest ks = new KnapsackTest();
-        Solver s = ks.modelIt("../files/knapsack/knapsack.20-1.txt", 15);
+        Solver s = ks.modelIt("k20", 15);
 //        SearchMonitorFactory.log(s, false, false);
         ks.solveIt(s, true);
         Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
