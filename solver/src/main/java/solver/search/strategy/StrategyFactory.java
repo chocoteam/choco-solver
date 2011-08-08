@@ -183,6 +183,23 @@ public final class StrategyFactory {
                 solver.getEnvironment());
     }
 
+    public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver) {
+        HeuristicValFactory.indomainMiddle(vars);
+        return StrategyVarValAssign.dyn(vars,
+                SorterFactory.domOverWDeg(solver),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment());
+    }
+
+
+    public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver) {
+        HeuristicValFactory.indomainMax(vars);
+        return StrategyVarValAssign.dyn(vars,
+                SorterFactory.domOverWDeg(solver),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment());
+    }
+
 
     public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
         return new GraphStrategy(g, nodeStrat, arcStrat, priority);
