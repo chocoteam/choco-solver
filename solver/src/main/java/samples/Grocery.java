@@ -28,11 +28,23 @@ package samples;
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.ternary.Times;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.IncrOrderC;
+import solver.propagation.engines.comparators.IncrOrderV;
+import solver.propagation.engines.comparators.predicate.MemberC;
+import solver.propagation.engines.comparators.predicate.MemberV;
+import solver.propagation.engines.comparators.predicate.Not;
+import solver.propagation.engines.group.Group;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * A kid goes into a grocery store and buys four items. The cashier
@@ -56,6 +68,8 @@ public class Grocery extends AbstractProblem {
 
     IntVar[] vars;
 
+    Constraint[] LEQ, TMP;
+
     @Override
     public void buildModel() {
         solver = new Solver();
@@ -63,22 +77,47 @@ public class Grocery extends AbstractProblem {
         solver.post(Sum.eq(vars, 711, solver));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
-        solver.post(new Times(vars[0], vars[1], tmp[0], solver));
-        solver.post(new Times(vars[2], vars[3], tmp[1], solver));
-
         IntVar _711 = VariableFactory.fixed(711 * 100 * 100 * 100, solver);
-        solver.post(new Times(tmp[0], tmp[1], _711, solver));
+
+        TMP = new Constraint[3];
+        TMP[0] = (new Times(vars[0], vars[1], tmp[0], solver));
+        TMP[1] = (new Times(vars[2], vars[3], tmp[1], solver));
+        TMP[2] = (new Times(tmp[0], tmp[1], _711, solver));
+        solver.post(TMP);
 
         // symetries
-        solver.post(ConstraintFactory.leq(vars[0], vars[1], solver));
-        solver.post(ConstraintFactory.leq(vars[1], vars[2], solver));
-        solver.post(ConstraintFactory.leq(vars[2], vars[3], solver));
+        LEQ = new Constraint[3];
+        LEQ[0] = (ConstraintFactory.leq(vars[0], vars[1], solver));
+        LEQ[1] = (ConstraintFactory.leq(vars[1], vars[2], solver));
+        LEQ[2] = (ConstraintFactory.leq(vars[2], vars[3], solver));
+        solver.post(LEQ);
 
     }
 
     @Override
     public void configureSolver() {
-        //TODO : find propagation ordering
+        solver.set(StrategyFactory.domwdegMindom(vars, solver));
+        //FIRST propagators on tmp, natural order
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        new Not(new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(vars)))),
+                        new IncrOrderC(TMP),
+                        Policy.FIXPOINT
+                ));
+        // THEN, LEQ constraints
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        new MemberC(new HashSet<Constraint>(Arrays.<Constraint>asList(LEQ))),
+                        new IncrOrderV(vars),
+                        Policy.ITERATE
+                )
+        );
+        // AND, constraints on VARS, oldest first
+        solver.getEngine().addGroup(
+                Group.buildQueue(
+                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.<IntVar>asList(vars)))
+                )
+        );
     }
 
     @Override
