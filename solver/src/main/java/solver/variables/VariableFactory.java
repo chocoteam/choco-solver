@@ -43,12 +43,9 @@ import solver.variables.image.IntVarTimesPosCste;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public class VariableFactory {
+public enum VariableFactory {;
 
     //TODO : build domain in Variable
-
-    protected VariableFactory() {
-    }
 
     private static void checkIntVar(String name, int min, int max) {
         if (min - Integer.MIN_VALUE == 0 || max - Integer.MAX_VALUE == 0) {
