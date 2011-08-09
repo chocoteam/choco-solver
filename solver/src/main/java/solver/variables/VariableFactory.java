@@ -33,6 +33,7 @@ import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.domain.BitSetIntDomain;
 import solver.variables.domain.BooleanDomain;
 import solver.variables.domain.IntervalIntDomain;
+import solver.variables.image.IntVarAbs;
 import solver.variables.image.IntVarAddCste;
 import solver.variables.image.IntVarTimesPosCste;
 
@@ -161,13 +162,11 @@ public class VariableFactory {
 
     public static IntVar fixed(String name, int value, Solver solver) {
         if (value == 0 || value == 1) {
-            BoolCste var = new BoolCste(name, value, solver);
-//            solver.associates(var);
-            return var;
+            //            solver.associates(var);
+            return new BoolCste(name, value, solver);
         } else {
-            IntCste var = new IntCste("cste -- " + value, value, solver);
-//            solver.associates(var);
-            return var;
+            //            solver.associates(var);
+            return new IntCste("cste -- " + value, value, solver);
         }
     }
 
@@ -186,6 +185,9 @@ public class VariableFactory {
         return var;
     }
 
+    public static IntVar abs(IntVar ivar) {
+        return new IntVarAbs(ivar, ivar.getSolver());
+    }
 
     public static IntVar[] toIntVar(Variable... variables) {
         IntVar[] ivars = new IntVar[variables.length];
