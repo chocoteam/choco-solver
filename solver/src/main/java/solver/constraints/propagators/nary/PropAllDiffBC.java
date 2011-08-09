@@ -127,10 +127,16 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
-        } else if (EventType.isInclow(mask)) {
-            awakeOnInf(varIdx);
-        } else if (EventType.isDecupp(mask)) {
-            awakeOnSup(varIdx);
+        } else {
+            if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
+                awakeOnBound(varIdx);
+            }else
+            if (EventType.isInclow(mask)) {
+                awakeOnInf(varIdx);
+            }else
+            if (EventType.isDecupp(mask)) {
+                awakeOnSup(varIdx);
+            }
         }
         if(getNbRequestEnqued() == 0){
             filter();
@@ -152,16 +158,47 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append("PropAllDiffBC(");
+        int i = 0;
+        for(; i < Math.min(4, vars.length); i++){
+            st.append(vars[i].getName()).append(", ");
+        }
+        if(i < vars.length-2){
+            st.append("...,");
+        }
+        st.append(vars[vars.length-1].getName());
+        return st.toString();
+    }
+
     //****************************************************************************************************************//
     //****************************************************************************************************************//
     //****************************************************************************************************************//
+
+    protected void awakeOnBound(int i) throws ContradictionException {
+        infBoundModified = supBoundModified = true;
+        for (int j = 0; j < vars.length; j++) {
+            if (j != i && vars[j].instantiated()) {
+                int val = vars[j].getValue();
+                if (val == vars[i].getLB()) {
+                    vars[i].updateLowerBound(val + 1, this);
+                }
+                if (val == vars[i].getUB()) {
+                    vars[i].updateUpperBound(val - 1, this);
+                }
+            }
+        }
+    }
 
     protected void awakeOnInf(int i) throws ContradictionException {
         infBoundModified = true;
         for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
-                if (vars[j].getValue() == vars[i].getLB()) {
-                    vars[i].updateLowerBound(vars[j].getValue() + 1, this);
+                int val = vars[j].getValue();
+                if (val == vars[i].getLB()) {
+                    vars[i].updateLowerBound(val + 1, this);
                 }
             }
         }
@@ -171,8 +208,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         supBoundModified = true;
         for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
-                if (vars[j].getValue() == vars[i].getUB()) {
-                    vars[i].updateUpperBound(vars[j].getValue() - 1, this);
+                int val = vars[j].getValue();
+                if (val == vars[i].getUB()) {
+                    vars[i].updateUpperBound(val - 1, this);
                 }
             }
         }

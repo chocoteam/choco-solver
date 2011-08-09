@@ -26,21 +26,32 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.unary.Relation;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
+import solver.propagation.engines.comparators.*;
+import solver.propagation.engines.comparators.predicate.MemberC;
+import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * <br/>
@@ -52,26 +63,54 @@ public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
     private int m = 500;
 
+    @Option(name = "-a", aliases = "--abs", usage = "Force ABSOLUTE constraint declaration.", required = false)
+    private boolean abs = false;
+
     IntVar[] vars;
     IntVar[] dist;
+    IntVar[] tmp;
+
+    Constraint[] ALLDIFF;
+    Constraint[] DISTANCE;
+    Constraint[] OTHERS;
 
     @Override
     public void buildModel() {
+
         solver = new Solver();
-        vars = VariableFactory.boundedArray("v", m, 0, m - 1, solver);
-        dist = VariableFactory.boundedArray("d", m - 1, 1, m - 1, solver);
-        for (int i = 0; i < m - 1; i++) {
-            IntVar tmp = VariableFactory.bounded("tmp_" + i, -(m - 1), m - 1, solver);
-            //d[i] = expr( * this, abs(x[i + 1] - x[i]), opt.icl());
-            solver.post(Sum.eq(new IntVar[]{vars[i + 1], vars[i], tmp}, new int[]{1, -1, -1}, 0, solver));
-            solver.post(new Absolute(dist[i], tmp, solver));
+        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
+        if (abs) {
+            dist = VariableFactory.enumeratedArray("d", m - 1, 1, m - 1, solver);
+        } else {
+            dist = new IntVar[m - 1];
         }
-        solver.post(new AllDifferent(vars, solver));
-        solver.post(new AllDifferent(dist, solver));
-        //System.out.printf("%s\n", solver.toString());
+
+        tmp = VariableFactory.enumeratedArray("tmp", m - 1, -(m - 1), m - 1, solver);
+
+        List<Constraint> distance = new ArrayList<Constraint>();
+        for (int i = 0; i < m - 1; i++) {
+            distance.add(Sum.eq(new IntVar[]{vars[i + 1], vars[i], tmp[i]}, new int[]{1, -1, -1}, 0, solver));
+            if (abs) {
+                distance.add(new Absolute(dist[i], tmp[i], solver));
+            } else {
+                dist[i] = VariableFactory.abs(tmp[i]);
+                solver.post(new Relation(dist[i], Relation.R.GT,0, solver));
+                solver.post(new Relation(dist[i], Relation.R.LT,m, solver));
+            }
+        }
+        DISTANCE = distance.toArray(new Constraint[distance.size()]);
+        solver.post(DISTANCE);
+
+        ALLDIFF = new Constraint[2];
+        ALLDIFF[0] = (new AllDifferent(vars, solver));
+        ALLDIFF[1] = (new AllDifferent(dist, solver));
+        solver.post(ALLDIFF);
+
         // break symetries
-        solver.post(new GreaterOrEqualX_YC(vars[1], vars[0], 1, solver));
-        solver.post(new GreaterOrEqualX_YC(dist[0], dist[m - 2], 1, solver));
+        OTHERS = new Constraint[2];
+        OTHERS[0] = (new GreaterOrEqualX_YC(vars[1], vars[0], 1, solver));
+        OTHERS[1] = (new GreaterOrEqualX_YC(dist[0], dist[m - 2], 1, solver));
+        solver.post(OTHERS);
     }
 
     @Override
@@ -80,17 +119,39 @@ public class AllIntervalSeries extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         // TODO chercher un meilleur ordre de propagation
+        // la clŽ semble se trouver dans la contrainte AllDiff sur les distances
+        //EngineStrategyFactory.constraintOriented(solver);
+        //EngineStrategyFactory.variableOriented(solver);
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ArrayUtils.append(ALLDIFF, DISTANCE))))),
+                        IncrArityP.get(),
+                        Policy.ITERATE
+                ));
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ALLDIFF)))),
+                        new Seq(
+                                new IncrOrderC(DISTANCE),
+                                new Decr(IncrPosP.get())
+                                ),
+                        Policy.ONE
+                ));
         solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicate.TRUE,
-                        EngineStrategyFactory.comparator(solver, EngineStrategyFactory.SHUFFLE),
-                        Policy.FIXPOINT
+                        new Seq(
+                                new Decr(new IncrOrderC(ALLDIFF)),
+                                new IncrOrderV(vars)
+                                ),
+                        Policy.ONE
                 ));
+
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, false, false);
+        SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
     }
 
@@ -99,14 +160,22 @@ public class AllIntervalSeries extends AbstractProblem {
         LoggerFactory.getLogger("bench").info("All interval series({})", m);
         StringBuilder st = new StringBuilder();
         st.append("\t");
-        for (int i = 0; i < m-1; i++) {
-            st.append(String.format("%d <%d> ",vars[i].getValue(), dist[i].getValue()));
-            if(i%10 == 9){
+        for (int i = 0; i < m - 1; i++) {
+            st.append(String.format("%d <%d> ", vars[i].getValue(), dist[i].getValue()));
+            if (i % 10 == 9) {
                 st.append("\n\t");
             }
         }
-        st.append(String.format("%d",vars[m-1].getValue()));
+        st.append(String.format("%d", vars[m - 1].getValue()));
         LoggerFactory.getLogger("bench").info(st.toString());
+
+        Constraint[] cstrs = solver.getCstrs();
+        for (int i = 0; i < cstrs.length; i++) {
+            Propagator[] propagators = cstrs[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                System.out.printf("%s: %d\n", propagators[j].toString(), propagators[j].filterCall);
+            }
+        }
     }
 
     public static void main(String[] args) {

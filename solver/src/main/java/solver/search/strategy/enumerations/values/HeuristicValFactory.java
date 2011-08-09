@@ -98,6 +98,19 @@ public class HeuristicValFactory {
     }
 
     /**
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void indomainSplit(IntVar... vars) {
+        for (IntVar var : vars) {
+            int middle = (var.getLB() + var.getUB()) / 2;
+            var.setHeuristicVal(
+                    new SeqN(HeuristicValFactory.enumVal(var, middle, -1, var.getLB()),
+                            HeuristicValFactory.enumVal(var, middle + 1, 1, var.getUB()))
+            );
+        }
+    }
+
+    /**
      * Sets the <b>inDomainRandom</b> value iterator to the list of variable in parameter.
      * This iterator chooses a random value in the variable's domain
      *
@@ -257,7 +270,7 @@ public class HeuristicValFactory {
     /**
      * Build the following heuristic val: FastEnumVal(ivar)
      *
-     * @param ivar variable to enumerate
+     * @param ivar   variable to enumerate
      * @param action action to apply to FastEnumVal
      * @return a {@link Filter}
      */

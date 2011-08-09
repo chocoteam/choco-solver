@@ -36,6 +36,7 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import sun.jvm.hotspot.utilities.UnsupportedPlatformException;
 
 /**
  * X >= Y + C
@@ -61,7 +62,11 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        if(vIdx == 0){
+            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
+        }else{
+            return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
+        }
     }
 
     private void updateInfX() throws ContradictionException {
@@ -88,14 +93,16 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
             this.awakeOnInst(varIdx);
         } else {
             if (EventType.isInclow(mask)) {
-                this.awakeOnLow(varIdx);
+                updateInfX();
             }
             if (EventType.isDecupp(mask)) {
-                this.awakeOnUpp(varIdx);
+                updateSupY();
             }
         }
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
+        }else{
+            throw  new UnsupportedPlatformException();
         }
     }
 
@@ -104,19 +111,6 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
             updateSupY();
         } else {
             updateInfX();
-        }
-
-    }
-
-    void awakeOnLow(int idx) throws ContradictionException {
-        if (idx == 1) {
-            updateInfX();
-        }
-    }
-
-    void awakeOnUpp(int idx) throws ContradictionException {
-        if (idx == 0) {
-            updateSupY();
         }
 
     }
@@ -131,4 +125,10 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
             return ESat.UNDEFINED;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append(x.getName()).append(" >= ").append(y.getName()).append(" + ").append(cste);
+        return st.toString();
+    }
 }

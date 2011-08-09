@@ -51,13 +51,13 @@ public abstract class AbstractVariable implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    protected static final String
-            MSG_REMOVE = "remove last value",
-            MSG_EMPTY = "empty domain",
-            MSG_INST = "already instantiated",
-            MSG_UNKNOWN = "unknown value",
-            MSG_UPP = "new lower bound is greater than upper bound",
-            MSG_LOW = "new upper bound is lesser than lower bound";
+    public static final String
+            MSG_REMOVE = "remove last value";
+    public static final String MSG_EMPTY = "empty domain";
+    public static final String MSG_INST = "already instantiated";
+    public static final String MSG_UNKNOWN = "unknown value";
+    public static final String MSG_UPP = "new lower bound is greater than upper bound";
+    public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
     /**
      * Reference to the solver containing this variable.

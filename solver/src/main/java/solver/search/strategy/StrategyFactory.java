@@ -134,6 +134,21 @@ public final class StrategyFactory {
     }
 
     /**
+     * Assignment strategy combining <code>MinDom</code> and <code>MidVal</code>
+     *
+     * @param variables   list of variables
+     * @param environment environment
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> minDomMidVal(IntVar[] variables, IEnvironment environment) {
+        HeuristicValFactory.indomainSplit(variables);
+        return StrategyVarValAssign.dyn(variables,
+                SorterFactory.minDomain(),
+                ValidatorFactory.instanciated,
+                environment);
+    }
+
+    /**
      * Assignment strategy combining <code>MinDom</code> and <code>MaxVal</code>
      *
      * @param variables   list of variables
