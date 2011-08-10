@@ -30,9 +30,9 @@ package solver.variables;
 import solver.Solver;
 import solver.exception.SolverException;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.variables.domain.BitSetIntDomain;
-import solver.variables.domain.BooleanDomain;
-import solver.variables.domain.IntervalIntDomain;
+import solver.variables.fast.BitsetIntVarImpl;
+import solver.variables.fast.BooleanBoolVarImpl;
+import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.image.IntVarAbs;
 import solver.variables.image.IntVarAddCste;
 import solver.variables.image.IntVarTimesPosCste;
@@ -43,7 +43,8 @@ import solver.variables.image.IntVarTimesPosCste;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public enum VariableFactory {;
+public enum VariableFactory {
+    ;
 
     //TODO : build domain in Variable
 
@@ -64,9 +65,10 @@ public enum VariableFactory {;
      * @return a BoolVar
      */
     public static BoolVar bool(String name, Solver solver) {
-        BoolVarImpl var = new BoolVarImpl(name, solver);
-        var.domain = new BooleanDomain(solver.getEnvironment());
-        var.heuristicVal = HeuristicValFactory.presetI(var);
+        //BoolVarImpl var = new BoolVarImpl(name, solver);
+        //var.domain = new BooleanDomain(solver.getEnvironment());
+        BooleanBoolVarImpl var = new BooleanBoolVarImpl(name, solver);
+        var.setHeuristicVal(HeuristicValFactory.presetI(var));
         solver.associates(var);
         return var;
     }
@@ -84,9 +86,10 @@ public enum VariableFactory {;
         if (min == max) {
             return fixed(name, min, solver);
         } else {
-            IntVarImpl var = new IntVarImpl(name, solver);
-            var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.presetI(var);
+            //IntVarImpl var = new IntVarImpl(name, solver);
+            //var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
+            IntVar var = new IntervalIntVarImpl(name, min, max, solver);
+            var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);
             return var;
         }
@@ -105,9 +108,10 @@ public enum VariableFactory {;
         if (min == max) {
             return fixed(name, min, solver);
         } else {
-            IntVarImpl var = new IntVarImpl(name, solver);
-            var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.presetI(var);
+            //IntVarImpl var = new IntVarImpl(name, solver);
+            //var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
+            BitsetIntVarImpl var = new BitsetIntVarImpl(name, min, max, solver);
+            var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);
             return var;
         }
@@ -136,9 +140,10 @@ public enum VariableFactory {;
         if (values.length == 1) {
             return fixed(name, values[0], solver);
         } else {
-            IntVarImpl var = new IntVarImpl(name, solver);
-            var.domain = new BitSetIntDomain(values, solver.getEnvironment());
-            var.heuristicVal = HeuristicValFactory.presetI(var);
+            //IntVarImpl var = new IntVarImpl(name, solver);
+            //var.domain = new BitSetIntDomain(values, solver.getEnvironment());
+            BitsetIntVarImpl var = new BitsetIntVarImpl(name, values, solver);
+            var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);
             return var;
         }

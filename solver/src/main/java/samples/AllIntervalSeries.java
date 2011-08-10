@@ -35,7 +35,6 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
@@ -63,6 +62,7 @@ public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
     private int m = 500;
 
+    @SuppressWarnings({"FieldCanBeLocal"})
     @Option(name = "-a", aliases = "--abs", usage = "Force ABSOLUTE constraint declaration.", required = false)
     private boolean abs = false;
 
@@ -151,7 +151,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, true);
+        SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
     }
 
@@ -168,14 +168,6 @@ public class AllIntervalSeries extends AbstractProblem {
         }
         st.append(String.format("%d", vars[m - 1].getValue()));
         LoggerFactory.getLogger("bench").info(st.toString());
-
-        Constraint[] cstrs = solver.getCstrs();
-        for (int i = 0; i < cstrs.length; i++) {
-            Propagator[] propagators = cstrs[i].propagators;
-            for (int j = 0; j < propagators.length; j++) {
-                System.out.printf("%s: %d\n", propagators[j].toString(), propagators[j].filterCall);
-            }
-        }
     }
 
     public static void main(String[] args) {
