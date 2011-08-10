@@ -37,8 +37,8 @@ import solver.variables.BoolVar;
  */
 public class Singleton extends ALogicTree {
 
-    static final Singleton TRUE = new Singleton(Type.POSITIVE);
-    static final Singleton FALSE = new Singleton(Type.NEGATIVE);
+    public static final Singleton TRUE = new Singleton(Type.POSITIVE);
+    public static final Singleton FALSE = new Singleton(Type.NEGATIVE);
 
     protected Singleton(Type type) {
         super(type);

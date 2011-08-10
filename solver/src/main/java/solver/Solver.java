@@ -45,9 +45,11 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.VariableFactory;
 import sun.reflect.Reflection;
 
 import java.io.*;
@@ -104,7 +106,7 @@ public class Solver implements Serializable {
     /**
      * Environment, based of the search tree (trailing or copying)
      */
-    IEnvironment env;
+    IEnvironment environment;
 
     /**
      * Search loop of the solver
@@ -148,16 +150,17 @@ public class Solver implements Serializable {
         cIdx = 0;
         switch (_DEFAULT_ENV) {
             case 1:
-                this.env = new EnvironmentCopying();
+                this.environment = new EnvironmentCopying();
                 break;
             default:
-                this.env = new EnvironmentTrailing();
+                this.environment = new EnvironmentTrailing();
         }
         this.explainer = new ExplanationEngine();
         this.measures = new MeasuresRecorder(this);
         this.creationTime -= System.currentTimeMillis();
         this.engine = new PropagationEngine();
-//        this.engine = new ThreadedPropagationEngine(this, 2);
+//        this.engine = new ThreadedPropagationEngine(this, 1);
+        //this.engine = new FastPropagationEngine();
         this.search = SearchLoops.preset(this, engine);
         /*new RecorderExplanationEngine(); // TODO faire un builder*/
     }
@@ -233,8 +236,24 @@ public class Solver implements Serializable {
         }
     }
 
+    public void post(Constraint c, Constraint... cs) {
+        while (cIdx + cs.length + 1 >= cstrs.length) {
+            Constraint[] tmp = cstrs;
+            cstrs = new Constraint[tmp.length * 2];
+            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
+        }
+        cstrs[cIdx++] = c;
+        engine.addConstraint(c);
+
+        System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
+        cIdx += cs.length;
+        for (int i = 0; i < cs.length; i++) {
+            engine.addConstraint(cs[i]);
+        }
+    }
+
     public IEnvironment getEnvironment() {
-        return env;
+        return environment;
     }
 
     public IMeasures getMeasures() {
@@ -313,6 +332,10 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
+        if (search.getStrategy() == null) {
+            LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
+            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(getVars()), this));
+        }
         measures.setReadingTimeCount(creationTime + System.currentTimeMillis());
         search.setup();
         return search.launch();

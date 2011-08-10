@@ -30,7 +30,6 @@ package solver.constraints.nary.cnf;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.cnf.PropClause;
 import solver.constraints.propagators.nary.cnf.PropFalse;
 import solver.constraints.propagators.nary.cnf.PropTrue;
@@ -61,21 +60,25 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
         return nonRedundantBs.toArray(new BoolVar[nonRedundantBs.size()]);
     }
 
+    public ConjunctiveNormalForm(BoolVar[] nonRedundantVars, ALogicTree tree, Solver solver) {
+        super(nonRedundantVars, solver);
+        setPropagators(build(tree));
 
-    public ConjunctiveNormalForm(ALogicTree tree, Solver solver) {
-        this(tree, solver, PropagatorPriority.LINEAR);
     }
 
-
-    public ConjunctiveNormalForm(ALogicTree tree, Solver solver, PropagatorPriority storeThreshold) {
+    public ConjunctiveNormalForm(ALogicTree tree, Solver solver) {
         super(nonReundantBoolVars(tree), solver);
+        setPropagators(build(tree));
 
+    }
+
+    private PropClause[] build(ALogicTree tree) {
         tree = LogicTreeToolBox.toCNF(tree);
 
         if (Singleton.TRUE.equals(tree)) {
-            setPropagators(new PropTrue(solver, this));
+            return new PropClause[]{new PropTrue(solver, this)};
         } else if (Singleton.FALSE.equals(tree)) {
-            setPropagators(new PropFalse(solver, this));
+            return new PropClause[]{new PropFalse(solver, this)};
         } else {
 
             ALogicTree[] clauses;
@@ -103,9 +106,10 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
                     indices.add(propClauses[i]);
                 }
             }
-            setPropagators(propClauses);
+            return propClauses;
         }
     }
+
 
     @Override
     public ESat isSatisfied(int[] tuple) {
@@ -115,9 +119,9 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
     @Override
     public ESat isSatisfied() {
         ESat so = ESat.UNDEFINED;
-        for(int i = 0 ; i < propagators.length; i++){
+        for (int i = 0; i < propagators.length; i++) {
             so = propagators[i].isEntailed();
-            if(!so.equals(ESat.TRUE)){
+            if (!so.equals(ESat.TRUE)) {
                 return so;
             }
         }

@@ -82,12 +82,6 @@ public class WarehouseLocation extends AbstractProblem {
         IntVar ONE = VariableFactory.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
             solver.post(new Element(ONE, open, suppliers[s], 0, solver));
-            /*for (int w = 0; w < nWH; w++) {
-                BoolVar b1 = VariableFactory.bool("b1", solver);
-                solver.post(new ReifiedConstraint(b1, new EqualXC(suppliers[s], w, solver),
-                        new NotEqualXC(suppliers[s], w, solver), solver));
-                solver.post(ConstraintFactory.leq(b1, open[w], solver));
-            }*/
         }
         // Compute cost for each warehouse
         for (int s = 0; s < nS; s++) {
@@ -114,6 +108,7 @@ public class WarehouseLocation extends AbstractProblem {
         solver.set(strat);
 
         //TODO: find a propagation strat
+
     }
 
     @Override

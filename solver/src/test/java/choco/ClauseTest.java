@@ -37,9 +37,13 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
+import solver.constraints.ternary.Times;
+import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -63,9 +67,9 @@ public class ClauseTest {
                 Literal[] lits = new Literal[n];
                 for (int j = 0; j < n; j++) {
                     bs[j] = VariableFactory.bool("b" + j, s);
-                    if(j < i){
+                    if (j < i) {
                         lits[j] = Literal.pos(bs[j]);
-                    }else{
+                    } else {
                         lits[j] = Literal.neg(bs[j]);
                     }
                 }
@@ -128,6 +132,169 @@ public class ClauseTest {
         Assert.assertEquals(sol, 2);
     }
 
-    
+
+    @Test
+    public void test2() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
+        solver.post(new ConjunctiveNormalForm(tree, solver));
+
+        try {
+            solver.propagate();
+            bvars[1].instantiateTo(0, null);
+            bvars[0].instantiateTo(1, null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void test30() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
+        solver.post(new ConjunctiveNormalForm(tree, solver));
+
+        try {
+            solver.propagate();
+            bvars[1].instantiateTo(1, null);
+            bvars[0].instantiateTo(0, null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+    }
+
+    @Test
+    public void test31() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
+        solver.post(new ConjunctiveNormalForm(tree, solver));
+
+        try {
+            solver.propagate();
+            bvars[0].instantiateTo(0, null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertTrue(bvars[1].instantiatedTo(0));
+    }
+
+    @Test
+    public void test32() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
+        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]));
+        solver.post(new ConjunctiveNormalForm(tree, solver));
+
+        try {
+            solver.propagate();
+            bvars[1].instantiateTo(1, null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        Assert.assertTrue(bvars[0].instantiatedTo(1));
+    }
+
+    @Test
+    public void test33() {
+        Solver solver = new Solver();
+        BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
+        ALogicTree tree = Node.or(Literal.pos(bvars[0]), Literal.neg(bvars[1]), Literal.neg(bvars[2]));
+        solver.post(new ConjunctiveNormalForm(tree, solver));
+
+        try {
+            solver.propagate();
+            bvars[0].instantiateTo(0, null);
+            bvars[2].instantiateTo(0, null);
+            bvars[1].instantiateTo(1, null);
+            solver.propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test4() {
+        for (int seed = 0; seed < 2000; seed++) {
+            long n1, n2;
+            {
+                Solver solver = new Solver();
+                BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
+                ALogicTree tree = Node.ifOnlyIf(
+                        Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
+                        Literal.pos(bvars[0]));
+                solver.post(new ConjunctiveNormalForm(tree, solver));
+
+                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.findAllSolutions();
+                n1 = solver.getMeasures().getSolutionCount();
+            }
+            {
+                Solver solver = new Solver();
+                BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
+                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+
+                solver.set(StrategyFactory.random(bvars, solver.getEnvironment(), seed));
+                solver.findAllSolutions();
+                n2 = solver.getMeasures().getSolutionCount();
+            }
+            Assert.assertEquals(n2, n1, String.format("seed: %d", seed));
+        }
+
+    }
+
+    @Test(groups = "10s")
+    public void test5() {
+        Random rand = new Random();
+        for (int seed = 0; seed < 20000; seed++) {
+            rand.setSeed(seed);
+            int n1 = rand.nextInt(3);
+            int n2 = rand.nextInt(3);
+            while (n1 == n2) {
+                n2 = rand.nextInt(3);
+            }
+            boolean b1 = rand.nextBoolean();
+            boolean b2 = rand.nextBoolean();
+            boolean s1, s2;
+            {
+                Solver solver = new Solver();
+                BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
+                ALogicTree tree = Node.ifOnlyIf(
+                        Node.and(Literal.pos(bvars[1]), Literal.pos(bvars[2])),
+                        Literal.pos(bvars[0]));
+                solver.post(new ConjunctiveNormalForm(tree, solver));
+                try {
+                    solver.propagate();
+                    bvars[n1].instantiateTo(b1 ? 1 : 0, null);
+                    bvars[n2].instantiateTo(b2 ? 1 : 0, null);
+                    s1 = true;
+                } catch (ContradictionException cex) {
+                    s1 = false;
+                }
+            }
+            {
+                Solver solver = new Solver();
+                BoolVar[] bvars = VariableFactory.boolArray("b", 3, solver);
+                solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
+                try {
+                    solver.propagate();
+                    bvars[n1].instantiateTo(b1 ? 1 : 0, null);
+                    bvars[n2].instantiateTo(b2 ? 1 : 0, null);
+                    s2 = true;
+                } catch (ContradictionException cex) {
+                    s2 = false;
+                }
+            }
+            Assert.assertEquals(s2, s1, String.format("seed: %d", seed));
+        }
+
+    }
+
 
 }

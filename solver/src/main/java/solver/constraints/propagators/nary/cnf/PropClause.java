@@ -73,10 +73,12 @@ public class PropClause extends Propagator<BoolVar> {
             return;
         }
         if (watchLit1 == index) {
-            setWatchLiteral(watchLit1);
-        } else if (watchLit2 == index) {
             setWatchLiteral(watchLit2);
+        } else if (watchLit2 == index) {
+            setWatchLiteral(watchLit1);
         }
+        //HACK
+        //propagate();
     }
 
     /**
@@ -89,8 +91,41 @@ public class PropClause extends Propagator<BoolVar> {
      */
     private void setWatchLiteral(int otherWL) throws ContradictionException {
         int i = 0;
-        while (i < vars.length && (vars[i].instantiated() || otherWL == i)) {
-            i++;
+        int cnt = 0;
+
+        BoolVar bv;
+        for (; i < firstNotPosLit; i++) {
+            bv = vars[i];
+            if (bv.instantiated()) {
+                if (bv.getValue() == 1) {
+                    setPassive();
+                    return;
+                } else {
+                    cnt++;
+                }
+            } else if (i != otherWL) {
+                watchLit1 = i;
+                watchLit2 = otherWL;
+                return;
+            }
+        }
+        for (; i < vars.length; i++) {
+            bv = vars[i];
+            if (bv.instantiated()) {
+                if (bv.getValue() == 0) {
+                    setPassive();
+                    return;
+                } else {
+                    cnt++;
+                }
+            } else if (i != otherWL) {
+                watchLit1 = i;
+                watchLit2 = otherWL;
+                return;
+            }
+        }
+        if (cnt == vars.length) {
+            this.contradiction(null, "Inconsistent");
         }
         if (i == vars.length) {
             if (otherWL < firstNotPosLit) {
@@ -99,9 +134,6 @@ public class PropClause extends Propagator<BoolVar> {
                 vars[otherWL].instantiateTo(0, this);
             }
             setPassive();
-        } else {
-            watchLit1 = i;
-            watchLit2 = otherWL;
         }
     }
 
