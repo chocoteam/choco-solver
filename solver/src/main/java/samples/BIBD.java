@@ -31,19 +31,24 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.Count;
+import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.constraints.nary.lex.LexChain;
+import solver.constraints.ternary.Times;
+import solver.propagation.engines.comparators.predicate.MemberV;
+import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * <br/>
@@ -94,23 +99,34 @@ public class BIBD extends AbstractProblem {
         IntVar R = VariableFactory.fixed(r, solver);
         for (int i = 0; i < v; i++) {
             solver.post(new Count(1, vars[i], Count.Relop.EQ, R, solver));
+            //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
         IntVar K = VariableFactory.fixed(k, solver);
         for (int j = 0; j < b; j++) {
             solver.post(new Count(1, _vars[j], Count.Relop.EQ, K, solver));
+            //solver.post(Sum.eq(_vars[j], K, solver));
         }
 
         // Exactly l ones in scalar product between two different rows
         IntVar L = VariableFactory.fixed(l, solver);
-        for (int i1 = 0; i1 < v - 1; i1++) {
+        for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
-                BoolVar[] row = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
+                BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
                 for (int j = 0; j < b; j++) {
-                    iff(row[j], vars[i1][j], vars[i2][j]);
+                    //iff(score[j], vars[i1][j], vars[i2][j]);
+                    solver.post(new Times(_vars[j][i1], _vars[j][i2], score[j], solver));
                 }
-                solver.post(new Count(1, row, Count.Relop.EQ, L, solver));
+                //solver.post(new Count(1, score, Count.Relop.EQ, L, solver));
+                solver.post(Sum.eq(score, L, solver));
             }
+        }
+        // Symmetry breaking
+        for (int i = 1; i < v; i++) {
+            solver.post(new LexChain(false, solver, vars[i], vars[i - 1]));
+        }
+        for (int j = 1; j < b; j++) {
+            solver.post(new LexChain(false, solver, _vars[j], _vars[j - 1]));
         }
     }
 
@@ -127,21 +143,27 @@ public class BIBD extends AbstractProblem {
     public void configureSolver() {
         //TODO: changer la strategie pour une plus efficace
         solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
-        //solver.set(StrategyFactory.domwdegMindom(ArrayUtils.flatten(vars), solver));
 
-        // TODO chercher un meilleur ordre de propagation
+        // BEWARE: le nombre de propagation reste stable, ce qui change, c'est le temps d'exec.
+        // etrangement, gecode effectue presque 2 fois moins de propagations...
+        // les OCCURR peuvent tre remplacees par des SUM, mais plus lent (bien que nb prop < )
+        HashSet<BoolVar> hs = new HashSet<BoolVar>(Arrays.asList(ArrayUtils.flatten(vars)));
         solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicate.TRUE,
-                        EngineStrategyFactory.comparator(solver, EngineStrategyFactory.ARITY_CSTR),
-                        Policy.ITERATE
+                Group.buildQueue(
+                        new Not(new MemberV<BoolVar>(hs))
                 ));
+        solver.getEngine().addGroup(
+                Group.buildQueue(
+                        new MemberV<BoolVar>(hs)
+                ));
+        //EngineStrategyFactory.constraintOriented(solver);
 
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, false, false);
+        SearchMonitorFactory.log(solver, true, false);
+        //System.out.printf("%s\n", solver.toString());
         solver.findSolution();
     }
 
@@ -149,12 +171,16 @@ public class BIBD extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("BIBD({},{},{},{},{})", new Object[]{v, b, r, k, l});
         StringBuilder st = new StringBuilder();
-        for (int i = 0; i < v; i++) {
-            st.append("\t");
-            for (int j = 0; j < b; j++) {
-                st.append(vars[i][j].getValue()).append(" ");
+        if (solver.isFeasible() == Boolean.TRUE) {
+            for (int i = 0; i < v; i++) {
+                st.append("\t");
+                for (int j = 0; j < b; j++) {
+                    st.append(_vars[j][i].getValue()).append(" ");
+                }
+                st.append("\n");
             }
-            st.append("\n");
+        } else {
+            st.append("\tINFEASIBLE");
         }
         LoggerFactory.getLogger("bench").info(st.toString());
     }

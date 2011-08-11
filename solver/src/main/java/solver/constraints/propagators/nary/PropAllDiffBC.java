@@ -38,6 +38,8 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Based on: </br>
@@ -127,18 +129,18 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
-        } else {
-            if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
-                awakeOnBound(varIdx);
-            }else
-            if (EventType.isInclow(mask)) {
-                awakeOnInf(varIdx);
-            }else
-            if (EventType.isDecupp(mask)) {
-                awakeOnSup(varIdx);
+        } else
+            //HACK for enumerated domain variables
+            if (!vars[varIdx].hasEnumeratedDomain()) {
+                if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
+                    awakeOnBound(varIdx);
+                } else if (EventType.isInclow(mask)) {
+                    awakeOnInf(varIdx);
+                } else if (EventType.isDecupp(mask)) {
+                    awakeOnSup(varIdx);
+                }
             }
-        }
-        if(getNbRequestEnqued() == 0){
+        if (getNbRequestEnqued() == 0) {
             filter();
         }
     }
@@ -163,13 +165,13 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         StringBuilder st = new StringBuilder();
         st.append("PropAllDiffBC(");
         int i = 0;
-        for(; i < Math.min(4, vars.length); i++){
+        for (; i < Math.min(4, vars.length); i++) {
             st.append(vars[i].getName()).append(", ");
         }
-        if(i < vars.length-2){
+        if (i < vars.length - 2) {
             st.append("...,");
         }
-        st.append(vars[vars.length-1].getName());
+        st.append(vars[vars.length - 1].getName());
         return st.toString();
     }
 
@@ -228,7 +230,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     private void filter() throws ContradictionException {
-        while(infBoundModified || supBoundModified) {
+        while (infBoundModified || supBoundModified) {
             sortIt();
             infBoundModified = filterLower();
             supBoundModified = filterUpper();
@@ -254,7 +256,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void sortmax() {
-        boolean sorted = false;
+        /*boolean sorted = false;
         int current = 0;
         while (!sorted) {
             sorted = true;
@@ -267,6 +269,15 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
             current++;
+        }*/
+        Arrays.sort(maxsorted, SORT.MAX);
+    }
+
+    static enum SORT implements Comparator<Interval> {
+        MAX;
+        @Override
+        public int compare(Interval o1, Interval o2) {
+            return o1.var.getUB() - o2.var.getUB();
         }
     }
 

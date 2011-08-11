@@ -87,7 +87,10 @@ public class PropLexChain extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        filter();
+        if (getNbRequestEnqued() == 0) {
+            filter();
+        }
+//        filter();
     }
 
     @Override
@@ -186,7 +189,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public int computeAlpha(IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         int alpha = -1;
-        while (i < n && x[i].getLB() <= b[i] && x[i].getUB() >= b[i] && x[i].contains(b[i])) {
+        while (i < n && x[i].contains(b[i])) {
             if (b[i] > x[i].getLB()) {
                 alpha = i;
             }
@@ -217,7 +220,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public int computeBeta(IntVar[] x, int[] a) throws ContradictionException {
         int i = 0;
         int beta = -1;
-        while (i < n && x[i].getLB() <= a[i] && x[i].getUB() >= a[i] && x[i].contains(a[i])) {
+        while (i < n &&  x[i].contains(a[i])) {
             if (a[i] < x[i].getUB()) {
                 beta = i;
             }

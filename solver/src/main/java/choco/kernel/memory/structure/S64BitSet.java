@@ -421,14 +421,15 @@ public class S64BitSet implements IStateBitSet {
         if (fromIndex == toIndex)
             return;
 
+        int wiu = wordsInUse.get();
         int startWordIndex = wordIndex(fromIndex);
-        if (startWordIndex >= wordsInUse.get())
+        if (startWordIndex >= wiu)
             return;
 
         int endWordIndex = wordIndex(toIndex - 1);
-        if (endWordIndex >= wordsInUse.get()) {
+        if (endWordIndex >= wiu) {
             toIndex = length();
-            endWordIndex = wordsInUse.get() - 1;
+            endWordIndex = wiu - 1;
         }
 
         long firstWordMask = WORD_MASK << fromIndex;
@@ -569,8 +570,9 @@ public class S64BitSet implements IStateBitSet {
             fromIndex = 0;
         }
 
+        int wiu = wordsInUse.get();
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse.get())
+        if (u >= wiu)
             return -1;
 
         long word = words[u].get() & (WORD_MASK << fromIndex);
@@ -578,7 +580,7 @@ public class S64BitSet implements IStateBitSet {
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
-            if (++u == wordsInUse.get())
+            if (++u == wiu)
                 return -1;
             word = words[u].get();
         }
@@ -600,8 +602,9 @@ public class S64BitSet implements IStateBitSet {
             fromIndex = 0;
         }
 
+        int wiu = wordsInUse.get();
         int u = wordIndex(fromIndex);
-        if (u >= wordsInUse.get())
+        if (u >= wiu)
             return fromIndex;
 
         long word = ~words[u].get() & (WORD_MASK << fromIndex);
@@ -609,8 +612,8 @@ public class S64BitSet implements IStateBitSet {
         while (true) {
             if (word != 0)
                 return (u * BITS_PER_WORD) + Long.numberOfTrailingZeros(word);
-            if (++u == wordsInUse.get())
-                return wordsInUse.get() * BITS_PER_WORD;
+            if (++u == wiu)
+                return wiu * BITS_PER_WORD;
             word = ~words[u].get();
         }
     }
@@ -702,11 +705,12 @@ public class S64BitSet implements IStateBitSet {
      * @since 1.2
      */
     public int length() {
-        if (wordsInUse.get() == 0)
+        int wiu = wordsInUse.get();
+        if (wiu == 0)
             return 0;
 
-        return BITS_PER_WORD * (wordsInUse.get() - 1) +
-                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[wordsInUse.get() - 1].get()));
+        return BITS_PER_WORD * (wiu - 1) +
+                (BITS_PER_WORD - Long.numberOfLeadingZeros(words[wiu - 1].get()));
     }
 
     /**
@@ -747,7 +751,7 @@ public class S64BitSet implements IStateBitSet {
      */
     public int cardinality() {
         int sum = 0;
-        for (int i = 0; i < wordsInUse.get(); i++)
+        for (int i = wordsInUse.get()-1; i >=0 ; i--)
             sum += Long.bitCount(words[i].get());
         return sum;
     }

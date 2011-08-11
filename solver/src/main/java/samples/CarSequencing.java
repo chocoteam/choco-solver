@@ -32,6 +32,12 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.IncrArityP;
+import solver.propagation.engines.comparators.IncrDomDeg;
+import solver.propagation.engines.comparators.Seq;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -64,7 +70,7 @@ public class CarSequencing extends AbstractProblem {
         prepare();
         solver = new Solver();
         int max = nClasses - 1;
-        cars = VariableFactory.boundedArray("cars", nCars, 0, max, solver);
+        cars = VariableFactory.enumeratedArray("cars", nCars, 0, max, solver);
 
         IntVar[] expArray = new IntVar[nClasses];
 
@@ -89,7 +95,7 @@ public class CarSequencing extends AbstractProblem {
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = VariableFactory.bounded("var", 0, demands[i], solver);
+            expArray[i] = VariableFactory.enumerated("var", 0, demands[i], solver);
             values[i] = i;
         }
         solver.post(GlobalCardinality.make(cars, values, expArray, solver));
@@ -107,6 +113,13 @@ public class CarSequencing extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.domwdegMindom(cars, solver));
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        //new MemberV<IntVar>(hs)
+                        Predicate.TRUE,
+                        new Seq(IncrArityP.get(),
+                                IncrDomDeg.get()),
+                        Policy.FIXPOINT));
     }
 
     @Override
