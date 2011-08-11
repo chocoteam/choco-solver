@@ -215,7 +215,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         IntVar[][] cards = ArrayUtils.transpose(covers);
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (int t = 0; t < vars.length; t++) {
-            solver.post(new GlobalCardinality(vars[t], cards[t], 0, solver));
+            solver.post(GlobalCardinality.make(vars[t], cards[t], 0, solver));
         }
     }
 
@@ -229,7 +229,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
         }
         IntVar[][] vars = ArrayUtils.transpose(shifts);
         for (IntVar[] var : vars) {
-            solver.post(new GlobalCardinality(var, coverLB, coverUB, 0, GlobalCardinality.Consistency.BC, solver));
+            solver.post(GlobalCardinality.make(var, coverLB, coverUB, 0, GlobalCardinality.Consistency.BC, solver));
         }
     }
 
@@ -305,7 +305,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
     private void makeMonthlyCountersWithGCC(Solver solver) {
         description += "countM[gcc] ";
         for (int e = 0; e < data.nbEmployees(); e++) {
-            solver.post(new GlobalCardinality(shifts[e], occurrences[e], 0, solver));
+            solver.post(GlobalCardinality.make(shifts[e], occurrences[e], 0, solver));
         }
 
     }
@@ -373,7 +373,7 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
             }
             for (int t = 0; t < data.nbWeeks(); t++) {
                 System.arraycopy(shifts[e], t * 7, vars, 0, 7);
-                solver.post(new GlobalCardinality(vars, lb, ub, 0, GlobalCardinality.Consistency.BC, solver));
+                solver.post(GlobalCardinality.make(vars, lb, ub, 0, GlobalCardinality.Consistency.BC, solver));
             }
         }
 
