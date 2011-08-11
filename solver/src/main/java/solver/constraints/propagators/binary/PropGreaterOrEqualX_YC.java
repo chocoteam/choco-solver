@@ -36,7 +36,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import sun.jvm.hotspot.utilities.UnsupportedPlatformException;
 
 /**
  * X >= Y + C
@@ -101,8 +100,6 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
         }
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
-        }else{
-            throw  new UnsupportedPlatformException();
         }
     }
 
