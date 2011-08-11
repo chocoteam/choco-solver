@@ -123,7 +123,7 @@ public class LexChainTest {
         }
 
         solver.post(new LexChain(X, true, solver));
-        SearchMonitorFactory.log(solver, true, true);
+        //SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         //solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(X), solver.getEnvironment()));
         return solver;
