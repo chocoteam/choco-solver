@@ -51,6 +51,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * <br/>
@@ -60,13 +61,33 @@ import java.util.*;
  */
 public class AirPlaneLanding extends AbstractProblem {
 
-    @Option(name = "-f", usage = "File name.", required = true)
-    String filename;
+    private static final String groupSeparator = "\\,";
+    private static final String decimalSeparator = "\\.";
+    private static final String non0Digit = "[\\p{javaDigit}&&[^0]]";
+    private static Pattern decimalPattern;
 
-    int n;
+    static {
+        // \\p{javaDigit} may not be perfect, see above
+        String digit = "([0-9])";
+        String groupedNumeral = "(" + non0Digit + digit + "?" + digit + "?(" +
+                groupSeparator + digit + digit + digit + ")+)";
+        // Once again digit++ is used for performance, as above
+        String numeral = "((" + digit + "++)|" + groupedNumeral + ")";
+        String decimalNumeral = "(" + numeral + "|" + numeral +
+                decimalSeparator + digit + "*+|" + decimalSeparator +
+                digit + "++)";
+        String decimal = "([-+]?" + decimalNumeral + ")";
+        decimalPattern = Pattern.compile(decimal);
+    }
+
+
+    @Option(name = "-d", usage = "Airplan landing Data.", required = false)
+    Data mData = Data.airland1;
 
     //DATA
     private int[][] data;
+    int n;
+
     //    private static final int AT = 0;
     private static final int ELT = 1;
     private static final int TT = 2;
@@ -85,15 +106,12 @@ public class AirPlaneLanding extends AbstractProblem {
 
     IntVar objective;
 
-    public void setUp() {
-        ParserAL parser = new ParserAL();
-        data = parser.parse(filename);
-        n = data.length;
-    }
 
     @Override
     public void buildModel() {
-        setUp();
+        data = parse(mData.source());
+        n = data.length;
+
         solver = new Solver("Air plane landing");
         planes = new IntVar[n];
         tardiness = new IntVar[n];
@@ -173,6 +191,11 @@ public class AirPlaneLanding extends AbstractProblem {
             }
         });
         solver.set(StrategyFactory.domwdegMindom(planes, solver));
+//        solver.set(new StrategiesSequencer(solver.getEnvironment(),
+//                StrategyFactory.inputOrderMinVal(bVars, solver.getEnvironment()),
+//                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+//        ));
+
         solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);
 
         IPropagationEngine engine = solver.getEngine();
@@ -211,5 +234,200 @@ public class AirPlaneLanding extends AbstractProblem {
 
     public static void main(String[] args) {
         new AirPlaneLanding().execute(args);
+    }
+
+    private int[][] parse(String source) {
+        Scanner sc = new Scanner(source);
+        int nb = sc.nextInt();
+        data = new int[nb][6 + nb];
+        sc.nextLine();
+        for (int i = 0; i < nb; i++) {
+            data[i][0] = sc.nextInt(); // appearance time
+            data[i][1] = sc.nextInt(); // earliest landing time
+            data[i][2] = sc.nextInt(); // target landing time
+            data[i][3] = sc.nextInt(); // latest landing time
+            Double tt = Double.parseDouble(sc.next(decimalPattern));
+            data[i][4] = (int) Math.ceil(tt); // penalty cost per unit of time for landing before target
+            tt = Double.parseDouble(sc.next(decimalPattern));
+            data[i][5] = (int) Math.ceil(tt); // penalty cost per unit of time for landing after target
+            for (int j = 0; j < nb; j++) {
+                data[i][6 + j] = sc.nextInt();
+            }
+        }
+        sc.close();
+        return data;
+    }
+
+    /////////////////////////////////////////
+
+    static enum Data {
+        airland1(" 10 10 \n" +
+                " 54 129 155 559 10.00 10.00\n" +
+                " 99999 3 15 15 15 15 15 15 \n" +
+                " 15 15 \n" +
+                " 120 195 258 744 10.00 10.00 \n" +
+                " 3 99999 15 15 15 15 15 15 \n" +
+                " 15 15 \n" +
+                " 14 89 98 510 30.00 30.00 \n" +
+                " 15 15 99999 8 8 8 8 8 \n" +
+                " 8 8 \n" +
+                " 21 96 106 521 30.00 30.00 \n" +
+                " 15 15 8 99999 8 8 8 8 \n" +
+                " 8 8 \n" +
+                " 35 110 123 555 30.00 30.00 \n" +
+                " 15 15 8 8 99999 8 8 8 \n" +
+                " 8 8 \n" +
+                " 45 120 135 576 30.00 30.00 \n" +
+                " 15 15 8 8 8 99999 8 8 \n" +
+                " 8 8 \n" +
+                " 49 124 138 577 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 99999 8 \n" +
+                " 8 8 \n" +
+                " 51 126 140 573 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 99999 \n" +
+                " 8 8 \n" +
+                " 60 135 150 591 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 99999 8 \n" +
+                " 85 160 180 657 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 8 99999"
+        ),
+        airland2(" 15 10 \n" +
+                " 54 129 155 559 10.00 10.00 \n" +
+                " 99999 3 15 15 15 15 15 15 \n" +
+                " 15 15 3 3 15 15 3 \n" +
+                " 115 190 250 732 10.00 10.00 \n" +
+                " 3 99999 15 15 15 15 15 15 \n" +
+                " 15 15 3 3 15 15 3 \n" +
+                " 9 84 93 501 30.00 30.00 \n" +
+                " 15 15 99999 8 8 8 8 8 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 14 89 98 509 30.00 30.00 \n" +
+                " 15 15 8 99999 8 8 8 8 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 25 100 111 536 30.00 30.00 \n" +
+                " 15 15 8 8 99999 8 8 8 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 32 107 120 552 30.00 30.00 \n" +
+                " 15 15 8 8 8 99999 8 8 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 34 109 121 550 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 99999 8 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 34 109 120 544 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 99999 \n" +
+                " 8 8 15 15 8 8 15 \n" +
+                " 40 115 128 557 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 99999 8 15 15 8 8 15 \n" +
+                " 59 134 151 610 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 8 99999 15 15 8 8 15 \n" +
+                " 191 266 341 837 10.00 10.00 \n" +
+                " 3 3 15 15 15 15 15 15 \n" +
+                " 15 15 99999 3 15 15 3 \n" +
+                " 176 251 313 778 10.00 10.00 \n" +
+                " 3 3 15 15 15 15 15 15 \n" +
+                " 15 15 3 99999 15 15 3 \n" +
+                " 85 160 181 674 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 8 8 15 15 99999 8 15 \n" +
+                " 77 152 171 637 30.00 30.00 \n" +
+                " 15 15 8 8 8 8 8 8 \n" +
+                " 8 8 15 15 8 99999 15 \n" +
+                " 201 276 342 815 10.00 10.00 \n" +
+                " 3 3 15 15 15 15 15 15 \n" +
+                " 15 15 3 3 15 15 99999"),
+        airland3(" 20 10\n" +
+                " 0 75 82 486 30.00 30.00 \n" +
+                " 99999 15 15 8 15 8 15 8 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 82 157 197 628 10.00 10.00 \n" +
+                " 15 99999 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 59 134 160 561 10.00 10.00 \n" +
+                " 15 3 99999 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 28 103 117 565 30.00 30.00 \n" +
+                " 8 15 15 99999 15 8 15 8 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 126 201 261 735 10.00 10.00 \n" +
+                " 15 3 3 15 99999 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 20 95 106 524 30.00 30.00 \n" +
+                " 8 15 15 8 15 99999 15 8 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 110 185 229 664 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 99999 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 23 98 108 523 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 99999 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 42 117 132 578 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 99999 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 42 117 130 569 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 8 99999 8 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 57 132 149 615 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 8 8 99999 8 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 39 114 126 551 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 8 8 8 99999 15 15 15 15 \n" +
+                " 15 15 8 8 \n" +
+                " 186 261 336 834 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 99999 3 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 175 250 316 790 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 99999 3 3 \n" +
+                " 3 3 15 15 \n" +
+                " 139 214 258 688 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 99999 3 \n" +
+                " 3 3 15 15 \n" +
+                " 235 310 409 967 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 99999 \n" +
+                " 3 3 15 15 \n" +
+                " 194 269 338 818 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 99999 3 15 15 \n" +
+                " 162 237 287 726 10.00 10.00 \n" +
+                " 15 3 3 15 3 15 3 15 \n" +
+                " 15 15 15 15 3 3 3 3 \n" +
+                " 3 99999 15 15 \n" +
+                " 69 144 160 607 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 99999 8 \n" +
+                " 76 151 169 624 30.00 30.00 \n" +
+                " 8 15 15 8 15 8 15 8 \n" +
+                " 8 8 8 8 15 15 15 15 \n" +
+                " 15 15 8 99999");
+        final String source;
+
+        Data(String source) {
+            this.source = source;
+        }
+
+        String source() {
+            return source;
+        }
     }
 }
