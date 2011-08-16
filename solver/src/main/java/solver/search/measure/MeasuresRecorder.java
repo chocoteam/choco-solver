@@ -330,9 +330,12 @@ public final class MeasuresRecorder implements IMeasures {
     @Override
     public String toOneLineString() {
         StringBuilder st = new StringBuilder(256);
-        st.append(String.format("%d Solutions, %sResolution %dms, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
-                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", " : "", timeCount, nodeCount, backtrackCount, failCount, restartCount,
-                propagationCount));
+        st.append(String.format("%,d Solutions, ", solutionCount));
+        if (hasObjective) {
+            st.append(String.format("Objective: %,d, ", objectiveIntValue));
+        }
+        st.append(String.format("Resolution %,dms, %,d Nodes, %,d Backtracks, %,d Fails, %,d Restarts, %,d Propagations",
+                timeCount, nodeCount, backtrackCount, failCount, restartCount, propagationCount));
         return st.toString();
     }
 
@@ -340,12 +343,15 @@ public final class MeasuresRecorder implements IMeasures {
     public String toString() {
         StringBuilder st = new StringBuilder(256);
         st.append("- Search statistics\n");
-        st.append(String.format("\tSolutions: %d\n\t%sBuilding time : %dms\n\tInitial propagation : %dms" +
-                "\n\tResolution : %dms\n\tNodes: %d\n\tBacktracks: %d\n\tFails: %d\n\t" +
-                "Restarts: %d\n\tPropagations: %d\n\tMemory: %dmb\n\tVariables: %d\n\tConstraints: %d\n\tRequests: %d",
-                solutionCount, hasObjective() ? "Objective: " + objectiveIntValue + ", \n\t" : "", readingTimeCount,
-                initialPropagationTimeCount, timeCount, nodeCount, backtrackCount, failCount, restartCount, propagationCount,
-                usedMemory,
+        st.append(String.format("\tSolutions: %,d\n", solutionCount));
+        if (hasObjective()) {
+            st.append(String.format("\tObjective: %,d\n", objectiveIntValue));
+        }
+        st.append(String.format("\tBuilding time : %,dms\n\tInitial propagation : %d,ms" +
+                "\n\tResolution : %d,ms\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                "Restarts: %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
+                readingTimeCount, initialPropagationTimeCount, timeCount, nodeCount,
+                backtrackCount, failCount, restartCount, propagationCount, usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();
     }
