@@ -53,10 +53,12 @@ public class GolombRuler extends AbstractProblem {
 
     @Option(name = "-o", usage = "Golomb ruler order.", required = false)
     private int m = 10;
-    @Option(name = "-allDiff", usage = "Use allDifferent constraint", required = false)
-    private boolean useAllDiff = false;
+
+    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
+    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar[] ticks;
+    IntVar[] diffs;
 
     @Override
     public void buildModel() {
@@ -64,7 +66,7 @@ public class GolombRuler extends AbstractProblem {
 
         ticks = new IntVar[m];
         for (int i = 0; i < ticks.length; i++) {
-            ticks[i] = VariableFactory.bounded("a_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+            ticks[i] = VariableFactory.enumerated("a_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
         }
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
@@ -72,43 +74,34 @@ public class GolombRuler extends AbstractProblem {
             solver.post(ConstraintFactory.lt(ticks[i], ticks[i + 1], solver));
         }
 
-        IntVar[] diff = new IntVar[(m * m - m) / 2];
+        diffs = new IntVar[(m * m - m) / 2];
 //        IntVar[][] diff_ = new IntVar[m][m];
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
-                diff[k] = VariableFactory.bounded("d_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-//                diff_[i][j] = diff[k];
+                diffs[k] = VariableFactory.enumerated("d_" + k, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+//                diff_[i][j] = diffs[k];
             }
         }
 
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diff[k]}, new int[]{1, -1, -1}, 0, solver));
-                solver.post(Sum.geq(new IntVar[]{diff[k]}, new int[]{1}, (j - i) * (j - i + 1) / 2, solver));
-                solver.post(Sum.leq(new IntVar[]{diff[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
+                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
+                solver.post(Sum.geq(new IntVar[]{diffs[k]}, new int[]{1}, (j - i) * (j - i + 1) / 2, solver));
+                solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
             }
         }
-        if (useAllDiff) {
-            solver.post(new AllDifferent(diff, solver));
-        } else {
-            // d_ij != d_kl
-            for (int i = 0; i < diff.length; i++) {
-                for (int j = i + 1; j < diff.length; j++) {
-                    solver.post(ConstraintFactory.neq(diff[i], diff[j], solver));
-                }
-            }
-        }
+        solver.post(new AllDifferent(diffs, solver, type));
+
         // break symetries
         if (m > 2) {
-            solver.post(ConstraintFactory.lt(diff[0], diff[diff.length - 1], solver));
+            solver.post(ConstraintFactory.lt(diffs[0], diffs[diffs.length - 1], solver));
         }
     }
 
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
-//        SearchMonitorFactory.log(solver, false, true);
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(Group.buildQueue(
                         new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks)))

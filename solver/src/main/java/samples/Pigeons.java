@@ -42,8 +42,8 @@ import solver.variables.VariableFactory;
  */
 public class Pigeons extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Number of nests.", required = true)
-    int n;
+    @Option(name = "-n", usage = "Number of nests.", required = false)
+    int n = 5;
     IntVar[] vars;
 
     @Override

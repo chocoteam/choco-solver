@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -77,7 +76,6 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
     }
 

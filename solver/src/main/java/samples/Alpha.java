@@ -34,7 +34,6 @@ import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategyFactory;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -104,7 +103,6 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
     }
 

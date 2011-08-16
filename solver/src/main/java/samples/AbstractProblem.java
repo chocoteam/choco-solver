@@ -32,7 +32,6 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.Constant;
 import solver.Solver;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
@@ -41,6 +40,7 @@ import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.Shuffle;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
+import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
  * <br/>
@@ -50,8 +50,24 @@ import solver.propagation.engines.group.Group;
  */
 public abstract class AbstractProblem {
 
-    @Option(name = "-quiet", usage = "Quiet resolution", required = false)
-    boolean quiet = false;
+    enum Level {
+        QUIET(0), VERBOSE(10), SOLUTIONS(20), SEARCH(30);
+
+        int level;
+
+        Level(int level) {
+            this.level = level;
+        }
+
+
+        public int getLevel() {
+            return level;
+        }
+    }
+
+
+    @Option(name = "-log", usage = "Quiet resolution", required = false)
+    Level level = Level.VERBOSE;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
     String policy = "";
@@ -95,7 +111,7 @@ public abstract class AbstractProblem {
             engine.addGroup(Group.buildGroup(Predicate.TRUE, new Shuffle(), Policy.FIXPOINT));
         } else if (policy.equals("oldest")) {
             engine.deleteGroups();
-          engine.addGroup(Group.buildQueue(Predicate.TRUE));
+            engine.addGroup(Group.buildQueue(Predicate.TRUE));
         } else if (policy.equals("priorityC")) {
             engine.deleteGroups();
             engine.addGroup(Group.buildGroup(Predicate.TRUE, IncrPriorityP.get(), Policy.FIXPOINT));
@@ -112,23 +128,23 @@ public abstract class AbstractProblem {
     public final void execute(String... args) {
         this.readArgs(args);
         Logger log = LoggerFactory.getLogger("bench");
-        
+
         this.printDescription();
         this.buildModel();
         this.configureSolver();
-
-        if (!quiet) {
-            log.info(Constant.WELCOME_TITLE);
-            log.info(Constant.WELCOME_VERSION, solver.properties.get("solver.version"));
-            log.info("* Sample library: executing {}.java ... \n", getClass().getName());
-        }
 
         if (policy.length() > 0) {
             overridePolicy();
         }
 
+        if (level.getLevel() > Level.QUIET.getLevel()) {
+            SearchMonitorFactory.log(solver,
+                    level.getLevel() > Level.VERBOSE.getLevel(),
+                    level.getLevel() > Level.SOLUTIONS.getLevel());
+        }
+
         this.solve();
-        if (!quiet) {
+        if (level.getLevel() > Level.QUIET.getLevel()) {
             this.prettyOut();
         }
 

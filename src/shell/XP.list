@@ -1,0 +1,36 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+##
+samples.AllIntervalSeries -o 500
+samples.Alpha
+samples.BIBD -v 7 -k  3 -l 60
+samples.CarSequencing -d myPb
+# crowded-chess
+samples.Donald -c BC
+samples.Donald -c AC
+samples.Donald -c CLIQUE
+samples.GolombRuler -o 10 -c BC
+#samples.GolombRuler -o 10 -c AC
+# graph color
+samples.Grocery
+# knights
+# minsort
+samples.LatinSquare -n 7
+samples.Partition -s 32
+samples.Photo -d large
+samples.Pigeons -n 1000
+samples.Nonogram -d p200
+samples.nqueen.NQueenBinary -q 400
+samples.nqueen.NQueenGlobal -q 400
+samples.MagicSeries -s 500
+samples.MagicSquare -s 5 -c AC
+samples.MagicSquare -s 7 -c BC
+samples.MagicSquare -s 7 -c CLIQUE
+samples.WarehouseLocation

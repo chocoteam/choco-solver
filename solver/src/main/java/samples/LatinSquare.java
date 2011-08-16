@@ -91,7 +91,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findAllSolutions();
+        solver.findSolution();
     }
 
     @Override

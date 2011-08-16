@@ -1,0 +1,5 @@
+#samples.BIBD -v 7 -k  3 -l 2
+#samples.BIBD -v 7 -k  3 -l 5
+samples.BIBD -v 7 -k  3 -l 10
+samples.BIBD -v 7 -k  3 -l 20
+samples.BIBD -v 7 -k  3 -l 60

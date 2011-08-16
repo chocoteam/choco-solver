@@ -26,6 +26,7 @@
  */
 package samples;
 
+import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
@@ -41,6 +42,9 @@ import solver.variables.VariableFactory;
  * @since 03/08/11
  */
 public class Donald extends AbstractProblem {
+
+    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
+    AllDifferent.Type type = AllDifferent.Type.BC;
 
     IntVar d, o, n, a, l, g, e, r, b, t;
     IntVar[] letters;
@@ -60,7 +64,7 @@ public class Donald extends AbstractProblem {
         t = VariableFactory.bounded("t", 0, 9, solver);
         letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
 
-        solver.post(new AllDifferent(letters, solver));
+        solver.post(new AllDifferent(letters, solver, type));
         solver.post(Sum.eq(
                 new IntVar[]{d, o, n, a, l, d,
                         g, e, r, a, l, d,

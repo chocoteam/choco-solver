@@ -41,7 +41,6 @@ import solver.constraints.ternary.Times;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.group.Group;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -162,8 +161,7 @@ public class BIBD extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
-        //System.out.printf("%s\n", solver.toString());
+//        SearchMonitorFactory.statEveryXXms(solver, 1000);
         solver.findSolution();
     }
 

@@ -117,8 +117,6 @@ public class OrthoLatinSquare extends AbstractProblem {
                 SorterFactory.minDomain(),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
-
-        //SearchMonitorFactory.log(solver, true, true);
         //TODO: propagation
     }
 

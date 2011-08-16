@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -113,7 +112,6 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totCost);
     }
 

@@ -60,8 +60,10 @@ public class MagicSquare extends AbstractProblem {
 
     @Option(name = "-s", usage = "Magic square size.", required = false)
     int n = 5;
+
     @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    int cons = 1;
+    AllDifferent.Type type = AllDifferent.Type.BC;
+
     IntVar[] vars;
 
     @Override
@@ -89,13 +91,8 @@ public class MagicSquare extends AbstractProblem {
             diag2[i] = matrix[(n - 1) - i][i];
         }
 
-        AllDifferent.Type type = AllDifferent.Type.BC;
-        if(cons == 0){
-            type = AllDifferent.Type.CLIQUE;
-        }else if(cons == 2){
-            type = AllDifferent.Type.AC;
-        }
         solver.post(new AllDifferent(vars, solver, type));
+
         int[] coeffs = new int[n];
         Arrays.fill(coeffs, 1);
         for (int i = 0; i < n; i++) {

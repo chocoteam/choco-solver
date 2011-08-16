@@ -42,7 +42,6 @@ import solver.propagation.engines.comparators.predicate.MemberC;
 import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -151,7 +150,6 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
         solver.findSolution();
     }
 
