@@ -50,7 +50,6 @@ import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -111,7 +110,7 @@ public class LexChainTest {
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
         //solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(X), solver.getEnvironment()));
         //System.out.printf("%s\n", refor);
-        SearchMonitorFactory.log(solver, true, true);
+//        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
 
