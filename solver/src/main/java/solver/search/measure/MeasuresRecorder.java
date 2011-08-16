@@ -219,7 +219,8 @@ public final class MeasuresRecorder implements IMeasures {
      * Updates the time recorder
      */
     public void updateTimeCount() {
-        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
+//        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
+        timeCount = TimeCacheThread.currentTimeNanos- startingTime;
     }
 
     //****************************************************************************************************************//
@@ -230,14 +231,17 @@ public final class MeasuresRecorder implements IMeasures {
     public void beforeInitialize() {
         reset();
         startingMemory = memoryUsedInMB();
-        startingTime = System.currentTimeMillis();
-        TimeCacheThread.currentTimeMillis = startingTime;
+//        startingTime = System.currentTimeMillis();
+        startingTime = System.nanoTime();
+//        TimeCacheThread.currentTimeMillis = startingTime;
+        TimeCacheThread.currentTimeNanos = startingTime;
     }
 
     @Override
     public void afterInitialize() {
         updateTimeCount();
-        initialisationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
+//        initialisationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
+        initialisationTimeCount = TimeCacheThread.currentTimeNanos- startingTime;
     }
 
     @Override
@@ -246,7 +250,8 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void afterInitialPropagation() {
-        initialPropagationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
+//        initialPropagationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
+        initialPropagationTimeCount = TimeCacheThread.currentTimeNanos - startingTime;
         updateTimeCount();
     }
 
@@ -334,8 +339,8 @@ public final class MeasuresRecorder implements IMeasures {
         if (hasObjective) {
             st.append(String.format("Objective: %,d, ", objectiveIntValue));
         }
-        st.append(String.format("Resolution %,dms, %,d Nodes, %,d Backtracks, %,d Fails, %,d Restarts, %,d Propagations",
-                timeCount, nodeCount, backtrackCount, failCount, restartCount, propagationCount));
+        st.append(String.format("Resolution %,.3fms, %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
+                timeCount/1000/1000f, nodeCount, backtrackCount, failCount, restartCount, propagationCount));
         return st.toString();
     }
 
@@ -347,10 +352,10 @@ public final class MeasuresRecorder implements IMeasures {
         if (hasObjective()) {
             st.append(String.format("\tObjective: %,d\n", objectiveIntValue));
         }
-        st.append(String.format("\tBuilding time : %,dms\n\tInitial propagation : %d,ms" +
-                "\n\tResolution : %d,ms\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+        st.append(String.format("\tBuilding time : %,.3fms\n\tInitial propagation : %,.3fms" +
+                "\n\tResolution : %,.3fms\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
                 "Restarts: %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
-                readingTimeCount, initialPropagationTimeCount, timeCount, nodeCount,
+                readingTimeCount/1000/1000f, initialPropagationTimeCount/1000/1000f, timeCount/1000/1000f, nodeCount,
                 backtrackCount, failCount, restartCount, propagationCount, usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();

@@ -21,12 +21,12 @@ TROVE = join(M2_REPO, 'gnu', 'trove', '2.1.0', 'trove-2.1.0.jar')
 JPARSEC = join(M2_REPO, 'jparsec', 'jparsec', '2.0.1', 'jparsec-2.0.1.jar')
 CGLIB = join(M2_REPO, 'cglib', 'cglib-nodep', '2.2', 'cglib-nodep-2.2.jar')
 DKBRICS = join(M2_REPO, 'dk', 'brics', 'automaton', '1.11-2', 'automaton-1.11-2.jar')
-dk.brics.automaton.Automaton
+
 
 CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT.jar')
 
 ## correct class-path
-CP = '-cp .:'+ ARGS+':'+LOGBACK_CL+':'+LOGBACK_CO+':'+SLF4J+':'+TROVE+':'+JPARSEC+':'+CGLIB+':'+DKBRICS':'+CHOCO_SOLVER
+CP = '-cp .:'+ ARGS+':'+LOGBACK_CL+':'+LOGBACK_CO+':'+SLF4J+':'+TROVE+':'+JPARSEC+':'+CGLIB+':'+DKBRICS+':'+CHOCO_SOLVER
 
 ## java command
 CMD='java -Xmx1024m -Xms1024m -XX:+AggressiveOpts -XX:+UseConcMarkSweepGC'
@@ -43,7 +43,7 @@ name = 'runner'
 ## [STATISTICS S Solutions, Objective: O, Resolution Tms, N Nodes, B Backtracks, F Fails, R Restarts]
 ## len is 7 or 8
 _SIZE = 9
-pattern = re.compile('\d+')
+pattern = re.compile('[ \d+]+\,?\d+')
 _STAT = '[STATISTICS'
 _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROPAGATIONS','SCRIPT_TIME'
 
@@ -109,7 +109,7 @@ def compute(result, size):
             result[i] = result[i][1:s-1]
         for j in range(len(result[i])):
             sum += result[i][j]
-        moy = sum/len(result[i])
+        moy = round(sum/len(result[i]),2)
         stdev = max(result[i]) - min(result[i])
         info = "\t"+b[i] + ": "+ str(moy)
         if stdev > 0:
@@ -161,7 +161,7 @@ class runit(Thread):
 
             m = pattern.findall(statitics)
             for j in range(len(m)):
-                self.result.append(int(m[j]))
+                self.result.append(float(m[j].replace(',','.')))
             self.result.append(round((end-start)*1000, 2))
         process.stdout.close()
         process.stderr.close()

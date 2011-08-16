@@ -41,7 +41,7 @@ public final class TimeCacheThread extends Thread {
 
     public final static int MS_TIME_PRECISION = 100;
 
-    public static volatile long currentTimeMillis = System.currentTimeMillis();
+    public static volatile long currentTimeNanos = System.nanoTime();
 
 
     private TimeCacheThread() {
@@ -57,7 +57,7 @@ public final class TimeCacheThread extends Thread {
     @Override
     public void run() {
         while (true) {
-            currentTimeMillis = System.currentTimeMillis();
+            currentTimeNanos = System.nanoTime();
             try {
                 Thread.sleep(MS_TIME_PRECISION);
             } catch (InterruptedException e) {
