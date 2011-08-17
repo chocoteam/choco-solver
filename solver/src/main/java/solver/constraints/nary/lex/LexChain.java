@@ -28,7 +28,6 @@ package solver.constraints.nary.lex;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.lex.PropLexChain;
@@ -45,20 +44,16 @@ public class LexChain extends IntConstraint<IntVar> {
     private final boolean strict;
     private final int n, x;
 
-    //FIXME: BUG, see LexChainTest
     public LexChain(boolean strict, Solver solver, IntVar[]... vars) {
         super(ArrayUtils.flatten(vars), solver);
-        LoggerFactory.getLogger("solver").warn("LexChain contains bugs!");
         this.strict = strict;
         this.n = vars[0].length;
         this.x = vars.length;
         setPropagators(new PropLexChain(vars, strict, solver, this));
     }
 
-    //FIXME: BUG, see LexChainTest
     public LexChain(IntVar[][] vars, boolean strict, Solver solver) {
         super(ArrayUtils.flatten(vars), solver);
-        LoggerFactory.getLogger("solver").warn("LexChain contains bugs!");
         this.strict = strict;
         this.n = vars[0].length;
         this.x = vars.length;

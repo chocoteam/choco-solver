@@ -50,6 +50,7 @@ import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -94,11 +95,13 @@ public class LexChainTest {
         }
     }
 
-    private Solver reformulate(int n, int m, int k, int seed) {
+    private Solver reformulate(int n, int m, int k, int seed, boolean bounded) {
         Solver solver = new Solver();
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
-            X[i] = VariableFactory.boundedArray("X_" + i, m, 0, k, solver);
+            X[i] = bounded ?
+                    VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
+                    VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
         }
         ALogicTree[] trees = new ALogicTree[n - 1];
         for (int i = 0; i < n - 1; i++) {
@@ -108,54 +111,94 @@ public class LexChainTest {
 
         solver.post(new ConjunctiveNormalForm(Node.and(trees), solver));
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
-        //solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(X), solver.getEnvironment()));
-        //System.out.printf("%s\n", refor);
-//        SearchMonitorFactory.log(solver, true, true);
         return solver;
     }
 
-    private Solver lex(int n, int m, int k, int seed) {
+    private Solver lex(int n, int m, int k, int seed, boolean bounded) {
         Solver solver = new Solver();
         IntVar[][] X = new IntVar[n][m];
         for (int i = 0; i < n; i++) {
-            X[i] = VariableFactory.boundedArray("X_" + i, m, 0, k, solver);
+            X[i] = bounded ?
+                    VariableFactory.boundedArray("X_" + i, m, 0, k, solver) :
+                    VariableFactory.enumeratedArray("X_" + i, m, 0, k, solver);
         }
 
         solver.post(new LexChain(X, true, solver));
-        //SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(ArrayUtils.flatten(X), solver.getEnvironment(), seed));
-        //solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(X), solver.getEnvironment()));
         return solver;
     }
 
-    @Test(groups = "10m")
-    public void test1() {
+    @Test(groups = "10s")
+    public void testE() {
         Random random = new Random();
-        for (int seed = 47; seed < 2000; seed++) {
+        for (int seed = 0; seed < 1000; seed++) {
             random.setSeed(seed);
             int n = 2 + random.nextInt(2);
             int m = 2 + random.nextInt(2);
             int k = 1 + random.nextInt(2);
-            Solver refor = reformulate(n, m, k, seed);
-            Solver lex = lex(n, m, k, seed);
+
+            Solver refor = reformulate(n, m, k, seed, false);
+            Solver lex = lex(n, m, k, seed, false);
 
             refor.findAllSolutions();
             lex.findAllSolutions();
 
-            //Assert.assertEquals(String.format("seed:%d", seed), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
-            if(refor.getMeasures().getSolutionCount()!= lex.getMeasures().getSolutionCount())
-                System.out.printf("%d : %d vs. %d\n", seed, refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+            Assert.assertEquals(String.format("seed:%d", seed), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+        }
+    }
+
+    @Test(groups = "10m")
+    public void testB() {
+        Random random = new Random();
+        for (int seed = 0; seed < 1000; seed++) {
+            random.setSeed(seed);
+            int n = 2 + random.nextInt(2);
+            int m = 2 + random.nextInt(2);
+            int k = 1 + random.nextInt(2);
+
+            Solver refor = reformulate(n, m, k, seed, true);
+            Solver lex = lex(n, m, k, seed, true);
+
+            refor.findAllSolutions();
+            lex.findAllSolutions();
+
+            Assert.assertEquals(String.format("seed:%d", seed), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
         }
     }
 
     @Test(groups = "10m")
     public void testB1() {
         int n = 3, m = 2, k = 2, seed = 47;
-        Solver refor = reformulate(n, m, k, seed);
-        Solver lex = lex(n, m, k, seed);
+        Solver refor = reformulate(n, m, k, seed, true);
+        Solver lex = lex(n, m, k, seed, true);
         refor.findAllSolutions();
         lex.findAllSolutions();
         Assert.assertEquals(String.format("seed:%d", 0), refor.getMeasures().getSolutionCount(), lex.getMeasures().getSolutionCount());
+    }
+
+    @Test(groups = "10m")
+    public void testB2() {
+        Solver solver = new Solver();
+        IntVar[][] X = new IntVar[3][2];
+        for (int i = 0; i < 3; i++) {
+            X[i] = VariableFactory.boundedArray("X_" + i, 2, 0, 2, solver);
+        }
+
+        solver.post(new LexChain(X, true, solver));
+
+
+        try {
+            solver.propagate();
+            X[0][0].updateLowerBound(1, null);
+            X[0][1].updateLowerBound(1, null);
+            X[1][0].updateLowerBound(1, null);
+            X[2][1].updateLowerBound(1, null);
+            solver.propagate();
+            X[2][1].instantiateTo(1, null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
     }
 
 }

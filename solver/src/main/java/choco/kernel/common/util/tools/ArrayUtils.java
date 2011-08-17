@@ -37,11 +37,8 @@ import java.util.*;
  * @author Charles Prud'homme
  * @since 17 sept. 2010
  */
-public final class ArrayUtils {
-
-    private ArrayUtils() {
-        super();
-    }
+public enum ArrayUtils {
+    ;
 
     public static int[] zeroToN(int n) {
         final int[] r = new int[n];
@@ -377,5 +374,35 @@ public final class ArrayUtils {
 
         return ret;
 
+    }
+
+    public static int[] randomPermutations(int[] tab, Random r) {
+        int l = tab.length;
+        for (int i = 0; i < l; i++) {
+            int j = r.nextInt(l);
+            int tmp = tab[i];
+            tab[i] = tab[j];
+            tab[j] = tmp;
+        }
+        return tab;
+    }
+
+    public static int[] randomPermutations(int[] tab, long seed) {
+        return randomPermutations(tab, new Random(seed));
+    }
+
+    public static <E> E[] randomPermutations(E[] tab, Random r) {
+        int l = tab.length;
+        for (int i = 0; i < l; i++) {
+            int j = r.nextInt(l);
+            E tmp = tab[i];
+            tab[i] = tab[j];
+            tab[j] = tmp;
+        }
+        return tab;
+    }
+
+    public static <E> E[] randomPermutations(E[] tab, long seed) {
+        return randomPermutations(tab, new Random(seed));
     }
 }

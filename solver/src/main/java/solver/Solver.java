@@ -375,6 +375,10 @@ public class Solver implements Serializable {
         return vIdx;
     }
 
+    public Variable getVar(int i){
+        return vars[i];
+    }
+
     /**
      * Returns the array of declared <code>Constraint</code> objects defined in this <code>Solver</code>.
      *

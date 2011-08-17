@@ -41,6 +41,7 @@ import solver.variables.IntVar;
  * Solver constraint of the LexChain constraint.
  * Allows to sort lexical chain with strict lexicographic ordering or not.
  * <br/>
+ *
  * @author Ashish
  * @author Charles Prud'homme
  * @since 09/08/11
@@ -48,31 +49,31 @@ import solver.variables.IntVar;
 public class PropLexChain extends Propagator<IntVar> {
 
     // the number of variables in each vector of the chain - v1 <= lexChainEq/lexChain <= v2 .....
-    public int n;
+    public int N;
 
-    // array of vectors in the lex chain constraint
-    public IntVar[][] x;
+    // total number of vector in the  lex chain constraint
+    public int M;
 
     // array for holding lexicographically largest feasible  upper bound of each vector
-    public int[][] upperBoundVector;
+    public int[][] UB;
 
     // array for holding lexicographically smallest  feasible  lower bound of each vector
-    public int[][] lowerBoundVector;
+    public int[][] LB;
 
     // If strict's value is true then  lexChain  is implemented  , if false lexChainEq
     public boolean strict;
 
-    // total number of vector in the  lex chain constraint
-    public int numOfVectors;
+    // array of vectors in the lex chain constraint
+    public IntVar[][] x;
 
     public PropLexChain(IntVar[][] vars, boolean strict, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(ArrayUtils.flatten(vars), solver, constraint, PropagatorPriority.LINEAR, false);
         this.x = vars.clone();
         this.strict = strict;
-        this.n = vars[0].length;
-        numOfVectors = vars.length;
-        upperBoundVector = new int[numOfVectors][n];
-        lowerBoundVector = new int[numOfVectors][n];
+        this.N = vars[0].length;
+        M = vars.length;
+        UB = new int[M][N];
+        LB = new int[M][N];
     }
 
     @Override
@@ -111,11 +112,11 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     private boolean checkTuple(int i) {
         if (i == x.length - 1) return true;
-        int index = n * i;
-        for (int j = 0; j < n; j++, index++) {
-            if (vars[index].getValue() > vars[index + n].getValue())
+        int index = N * i;
+        for (int j = 0; j < N;j++, index++) {
+            if (vars[index].getValue() > vars[index + N].getValue())
                 return false;
-            if (vars[index].getValue() < vars[index + n].getValue())
+            if (vars[index].getValue() < vars[index + N].getValue())
                 return checkTuple(i + 1);
         }
         return (!strict) && checkTuple(i + 1);
@@ -137,41 +138,28 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void boundsLex(int[] a, IntVar[] x, int[] b, int j) throws ContradictionException {
         int i = 0;
-        while (i < n && a[i] == b[i]) {
-            if ((x[i].getLB() == a[i] || x[i].updateLowerBound(a[i], this)) &&
-                    (x[i].getUB() == b[i] || x[i].updateUpperBound(b[i], this))) {
-                i++;
-            } else {
-                this.contradiction(null, "");
-            }
-
+        while (i < N && a[i] == b[i]) {
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
+            i++;
         }
-        if (i < n) {
-            if ((x[i].getLB() == a[i] || x[i].updateLowerBound(a[i], this)) &&
-                    (x[i].getUB() == b[i] || x[i].updateUpperBound(b[i], this))) {
-            } else {
-                this.contradiction(null, "");
-            }
+        if (i < N) {
+            x[i].updateLowerBound(a[i], this);
+            x[i].updateUpperBound(b[i], this);
         }
-        if (i == n || x[i].nextValue(a[i]) < b[i]) {
+        if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;
         }
-
         i += 1;
-        while (i < n && (b[i] + 1 <= a[i] - 1) && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
-            if (x[i].removeInterval(b[i] + 1, a[i] - 1, this)) {
-                i++;
-            } else {
-                this.contradiction(null, "");
-
+        while (i < N && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
+            if (x[i].hasEnumeratedDomain()) {
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
+            i++;
         }
-        if (i < n) {
-            if (b[i] + 1 <= a[i] - 1 && x[i].getLB() <= b[i] &&
-                    b[i] <= x[i].getUB() && x[i].getUB() >= a[i] && a[i] >= x[i].getLB()) {
-                if (!x[i].removeInterval(b[i] + 1, a[i] - 1, this)) {
-                    this.contradiction(null, "");
-                }
+        if (i < N) {
+            if (x[i].hasEnumeratedDomain()) {
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
         }
     }
@@ -189,18 +177,18 @@ public class PropLexChain extends Propagator<IntVar> {
     public int computeAlpha(IntVar[] x, int[] b) throws ContradictionException {
         int i = 0;
         int alpha = -1;
-        while (i < n && x[i].contains(b[i])) {
+        while (i < N && x[i].contains(b[i])) {
             if (b[i] > x[i].getLB()) {
                 alpha = i;
             }
             i++;
         }
         if (!strict) {
-            if (i == n || b[i] > x[i].getLB()) {
+            if (i == N || b[i] > x[i].getLB()) {
                 alpha = i;
             }
         } else {
-            if (i < n && b[i] > x[i].getLB()) {
+            if (i < N && b[i] > x[i].getLB()) {
                 alpha = i;
             }
         }
@@ -220,7 +208,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public int computeBeta(IntVar[] x, int[] a) throws ContradictionException {
         int i = 0;
         int beta = -1;
-        while (i < n &&  x[i].contains(a[i])) {
+        while (i < N && x[i].contains(a[i])) {
             if (a[i] < x[i].getUB()) {
                 beta = i;
             }
@@ -228,11 +216,11 @@ public class PropLexChain extends Propagator<IntVar> {
 
         }
         if (!strict) {
-            if (i == n || a[i] < x[i].getUB()) {
+            if (i == N || a[i] < x[i].getUB()) {
                 beta = i;
             }
         } else {
-            if (i < n && a[i] < x[i].getUB()) {
+            if (i < N && a[i] < x[i].getUB()) {
                 beta = i;
             }
         }
@@ -253,7 +241,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public void computeUB(IntVar[] x, int[] b, int[] u) throws ContradictionException {
         int alpha = computeAlpha(x, b);
         if (alpha == -1) this.contradiction(null, "");
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < N;i++) {
             if (i < alpha) {
                 u[i] = b[i];
             } else if (i == alpha) {
@@ -280,7 +268,7 @@ public class PropLexChain extends Propagator<IntVar> {
     public void computeLB(IntVar[] x, int[] a, int[] lower) throws ContradictionException {
         int beta = computeBeta(x, a);
         if (beta == -1) this.contradiction(null, "");
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < N;i++) {
             if (i < beta) {
                 lower[i] = a[i];
             } else if (i == beta) {
@@ -303,24 +291,24 @@ public class PropLexChain extends Propagator<IntVar> {
      */
     public void filter() throws ContradictionException {
 
-        for (int i = 0; i < n; i++) {
-            upperBoundVector[numOfVectors - 1][i] = x[numOfVectors - 1][i].getUB();
+        for (int i = 0; i < N;i++) {
+            UB[M - 1][i] = x[M - 1][i].getUB();
         }
 
-        for (int i = numOfVectors - 2; i >= 0; i--) {
-            computeUB(x[i], upperBoundVector[i + 1], upperBoundVector[i]);
+        for (int i = M - 2; i >= 0; i--) {
+            computeUB(x[i], UB[i + 1], UB[i]);
         }
 
-        for (int i = 0; i < n; i++) {
-            lowerBoundVector[0][i] = x[0][i].getLB();
+        for (int i = 0; i < N;i++) {
+            LB[0][i] = x[0][i].getLB();
         }
 
-        for (int i = 1; i < numOfVectors; i++) {
-            computeLB(x[i], lowerBoundVector[i - 1], lowerBoundVector[i]);
+        for (int i = 1; i < M; i++) {
+            computeLB(x[i], LB[i - 1], LB[i]);
         }
 
-        for (int i = 0; i < numOfVectors; i++) {
-            boundsLex(lowerBoundVector[i], x[i], upperBoundVector[i], i);
+        for (int i = 0; i < M; i++) {
+            boundsLex(LB[i], x[i], UB[i], i);
         }
     }
 }

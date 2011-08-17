@@ -141,12 +141,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public long getTimeCount() {
-        return timeCount;
+        return timeCount/1000/1000;
     }
 
     @Override
     public long getReadingTimeCount() {
-        return readingTimeCount;
+        return readingTimeCount/1000/1000;
     }
 
     @Override
@@ -156,12 +156,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public long getInitialisationTimeCount() {
-        return initialisationTimeCount;
+        return initialisationTimeCount/1000/1000;
     }
 
     @Override
     public long getInitialPropagationTimeCount() {
-        return initialPropagationTimeCount;
+        return initialPropagationTimeCount/1000/1000;
     }
 
     @Override
