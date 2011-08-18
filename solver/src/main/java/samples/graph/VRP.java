@@ -27,10 +27,8 @@
 
 package samples.graph;
 
-import java.io.File;
-import java.io.FileWriter;
-import org.kohsuke.args4j.Option;
 import choco.kernel.ResolutionPolicy;
+import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -68,6 +66,9 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
+
+import java.io.File;
+import java.io.FileWriter;
 
 public class VRP extends AbstractProblem {
 
@@ -209,7 +210,7 @@ public class VRP extends AbstractProblem {
 	@Override
 	public void configureSolver() {
 		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIME_LIMIT);
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 		AbstractStrategy objStrat =  StrategyFactory.inputOrderMinVal(new IntVar[]{nTrucks}, solver.getEnvironment()); //AbstractStrategy objStrat =  setDichotomicSearch();
 		AbstractStrategy graphStrategy = StrategyFactory.graphStrategy(g, new LexNode(g), new RandomArc(g,0), NodeArcPriority.NODES_THEN_ARCS);
 		AbstractStrategy strategy = new StrategiesSequencer(solver.getEnvironment(), objStrat, graphStrategy);

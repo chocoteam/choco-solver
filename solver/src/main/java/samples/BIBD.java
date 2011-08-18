@@ -32,10 +32,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.cnf.ALogicTree;
-import solver.constraints.nary.cnf.ConjunctiveNormalForm;
-import solver.constraints.nary.cnf.Literal;
-import solver.constraints.nary.cnf.Node;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.ternary.Times;
 import solver.propagation.engines.comparators.predicate.MemberV;
@@ -89,7 +85,7 @@ public class BIBD extends AbstractProblem {
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {
             for (int j = 0; j < b; j++) {
-                vars[i][j] = VariableFactory.bool(String.format("V(%d,%d)", i, j), solver);
+                vars[i][j] = VariableFactory.bool("V("+i+","+j+")", solver);
                 _vars[j][i] = vars[i][j];
             }
 
@@ -113,7 +109,6 @@ public class BIBD extends AbstractProblem {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);
                 for (int j = 0; j < b; j++) {
-                    //iff(score[j], vars[i1][j], vars[i2][j]);
                     solver.post(new Times(_vars[j][i1], _vars[j][i2], score[j], solver));
                 }
                 //solver.post(new Count(1, score, Count.Relop.EQ, L, solver));
@@ -129,23 +124,14 @@ public class BIBD extends AbstractProblem {
         }
     }
 
-    private void iff(BoolVar row, BoolVar row1, BoolVar row2) {
-        ALogicTree tree = Node.ifOnlyIf(
-                Node.and(Literal.pos(row1), Literal.pos(row2)),
-                Literal.pos(row)
-        );
-        solver.post(new ConjunctiveNormalForm(tree, solver));
-    }
-
 
     @Override
     public void configureSolver() {
         //TODO: changer la strategie pour une plus efficace
         solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
 
-        // BEWARE: le nombre de propagation reste stable, ce qui change, c'est le temps d'exec.
-        // etrangement, gecode effectue presque 2 fois moins de propagations...
-        // les OCCURR peuvent tre remplacees par des SUM, mais plus lent (bien que nb prop < )
+        // BEWARE: etrangement, gecode effectue presque 2 fois moins de propagations...
+        // BEWARE: les OCCURR peuvent tre remplacees par des SUM, mais plus lent (bien que nb prop < )
         HashSet<BoolVar> hs = new HashSet<BoolVar>(Arrays.asList(ArrayUtils.flatten(vars)));
         solver.getEngine().addGroup(
                 Group.buildQueue(

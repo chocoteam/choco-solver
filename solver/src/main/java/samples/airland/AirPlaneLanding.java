@@ -196,7 +196,7 @@ public class AirPlaneLanding extends AbstractProblem {
 //                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
 //        ));
 
-        solver.getSearchLoop().getLimitsFactory().setNodeLimit(500000);
+        solver.getSearchLoop().getLimitsBox().setNodeLimit(500000);
 
         IPropagationEngine engine = solver.getEngine();
         // default group

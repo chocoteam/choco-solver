@@ -26,10 +26,6 @@
  */
 package samples.graph;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.tools.ArrayUtils;
 import samples.AbstractProblem;
@@ -51,6 +47,10 @@ import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 public class NVector extends AbstractProblem{
 
@@ -122,7 +122,7 @@ public class NVector extends AbstractProblem{
 	@Override
 	public void solve() {
 		System.out.println("resolution");
-		solver.getSearchLoop().getLimitsFactory().setTimeLimit(100000);
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
 		SearchMonitorFactory.log(solver, false, false);
 //		Boolean status = solver.findSolution();
 		Boolean status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nVect);

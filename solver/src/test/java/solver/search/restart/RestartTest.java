@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.nqueen.NQueenBinary;
 import solver.Solver;
-import solver.search.limits.LimitFactory;
+import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -53,7 +53,7 @@ public class RestartTest {
     public void testGeometricalRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.restart(solver, RestartFactory.geometrical(2, 1.2),
-                LimitFactory.nodeLimit(solver, 2), 2);
+                LimitBox.nodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -65,7 +65,7 @@ public class RestartTest {
     public void testLubyRestart1() {
         Solver solver = buildQ(4);
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
-                LimitFactory.nodeLimit(solver, 2), 2);
+                LimitBox.nodeLimit(solver, 2), 2);
         solver.findAllSolutions();
         // not 2, because of restart, that found twice the same solution
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);

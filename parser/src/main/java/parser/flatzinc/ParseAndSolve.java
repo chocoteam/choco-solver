@@ -79,7 +79,7 @@ public class ParseAndSolve {
         Solver solver = parser.solver;
         parser = null;
         if(tl > -1){
-            solver.getSearchLoop().getLimitsFactory().setTimeLimit(tl);
+            solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         }
         solver.solve();
     }

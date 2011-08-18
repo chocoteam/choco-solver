@@ -44,14 +44,14 @@ import java.io.Serializable;
  * @see ILimit
  * @since 15 juil. 2010
  */
-public class LimitFactory implements Serializable {
+public class LimitBox implements Serializable {
 
     int index;
     ILimit[] limits;
     final AbstractSearchLoop searchloop;
 
 
-    public LimitFactory(AbstractSearchLoop searchloop) {
+    public LimitBox(AbstractSearchLoop searchloop) {
         this.index = 0;
         this.limits = new ILimit[8];
         this.searchloop = searchloop;

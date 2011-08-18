@@ -33,9 +33,8 @@ package solver;
  * @author Charles Prud'homme
  * @since 28 juil. 2010
  */
-public class Constant {
-
-    protected Constant() {}
+public enum Constant {
+    ;
 
     public static final String WELCOME_TITLE = "** CHOCO : Constraint Programming Solver";
     public static final String WELCOME_VERSION = "** CHOCO v{} (May, 2011), Copyleft (c) 2010-2011";
@@ -46,9 +45,9 @@ public class Constant {
      */
     public static final int MCR_PRECISION = 4; // MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005)
 
-      /**
+    /**
      * Defines the smallest used double for multicostregular
      */
-    public static final double MCR_DECIMAL_PREC = Math.pow(10.0,-MCR_PRECISION);
+    public static final double MCR_DECIMAL_PREC = Math.pow(10.0, -MCR_PRECISION);
 
 }

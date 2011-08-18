@@ -134,7 +134,7 @@ public class MagicSquare extends AbstractProblem {
                 ));
         if (n > 4) {
             long nl = (long) Math.pow(10, n);
-            solver.getSearchLoop().getLimitsFactory().setNodeLimit(nl);
+            solver.getSearchLoop().getLimitsBox().setNodeLimit(nl);
         }
     }
 

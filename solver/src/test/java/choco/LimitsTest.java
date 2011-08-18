@@ -53,7 +53,7 @@ public class LimitsTest {
     public void testTime() {
         Solver s = modelit();
         long tl = 500;
-        s.getSearchLoop().getLimitsFactory().setTimeLimit(tl);
+        s.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         s.findAllSolutions();
         long tc = s.getMeasures().getTimeCount();
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl+" vs. "+ tc);
@@ -63,7 +63,7 @@ public class LimitsTest {
     public void testThreadTime() {
         Solver s = modelit();
         long tl = 500;
-        s.getSearchLoop().getLimitsFactory().setThreadTimeLimit(tl);
+        s.getSearchLoop().getLimitsBox().setThreadTimeLimit(tl);
         s.findAllSolutions();
         long tc = s.getMeasures().getTimeCount();
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl+" vs. "+ tc);
@@ -73,7 +73,7 @@ public class LimitsTest {
     public void testNode() {
         Solver s = modelit();
         long nl = 50;
-        s.getSearchLoop().getLimitsFactory().setNodeLimit(nl);
+        s.getSearchLoop().getLimitsBox().setNodeLimit(nl);
         s.findAllSolutions();
         long nc = s.getMeasures().getNodeCount();
         Assert.assertEquals(nc, nl);
@@ -83,7 +83,7 @@ public class LimitsTest {
     public void testBacktrack() {
         Solver s = modelit();
         long bl = 50;
-        s.getSearchLoop().getLimitsFactory().setBacktrackLimit(bl);
+        s.getSearchLoop().getLimitsBox().setBacktrackLimit(bl);
         s.findAllSolutions();
         long bc = s.getMeasures().getBackTrackCount();
         Assert.assertEquals(bc, bl);
@@ -93,7 +93,7 @@ public class LimitsTest {
     public void testFail() {
         Solver s = modelit();
         long fl = 50;
-        s.getSearchLoop().getLimitsFactory().setFailLimit(fl);
+        s.getSearchLoop().getLimitsBox().setFailLimit(fl);
         s.findAllSolutions();
         long fc = s.getMeasures().getFailCount();
         Assert.assertEquals(fc, fl);
@@ -103,7 +103,7 @@ public class LimitsTest {
     public void testSolution() {
         Solver s = modelit();
         long sl = 50;
-        s.getSearchLoop().getLimitsFactory().setSolutionLimit(sl);
+        s.getSearchLoop().getLimitsBox().setSolutionLimit(sl);
         s.findAllSolutions();
         long sc = s.getMeasures().getSolutionCount();
         Assert.assertEquals(sc, sl);

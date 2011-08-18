@@ -37,7 +37,8 @@ import solver.search.restart.IRestartStrategy;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public class SearchMonitorFactory {
+public enum SearchMonitorFactory {
+    ;
 
     /**
      * Print statistics

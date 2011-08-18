@@ -33,7 +33,7 @@ import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
 import solver.objective.NoObjectiveManager;
 import solver.propagation.engines.IPropagationEngine;
-import solver.search.limits.LimitFactory;
+import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
@@ -127,7 +127,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     long previousSolutionCount = 0;
 
     /* factory for limits management */
-    LimitFactory limitsfactory;
+    LimitBox limitsfactory;
 
 
     protected int solutionPoolCapacity;
@@ -153,7 +153,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         smList = new SearchMonitorList();
         smList.add(this.measures);
         this.nextState = INIT;
-        this.limitsfactory = new LimitFactory(this);
+        this.limitsfactory = new LimitBox(this);
         this.propEngine = propEngine;
         loadProperties(solver.properties);
     }
@@ -348,7 +348,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      *
      * @return the limit factory
      */
-    public LimitFactory getLimitsFactory() {
+    public LimitBox getLimitsBox() {
         return limitsfactory;
     }
 

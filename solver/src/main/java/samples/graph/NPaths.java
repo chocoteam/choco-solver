@@ -40,6 +40,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.BitSet;
 
 public class NPaths extends AbstractProblem{
@@ -110,7 +111,7 @@ public class NPaths extends AbstractProblem{
 
 	@Override
 	public void solve() {
-		solver.getSearchLoop().getLimitsFactory().setTimeLimit(TIMELIMIT);
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, false, false);
 		sat = solver.findSolution();
 		writeTextInto(n+";"+d+";"+solver.getMeasures().getNodeCount()+";"+solver.getMeasures().getBackTrackCount()+";"+solver.getMeasures().getTimeCount()+";"+sat+";\n", file);

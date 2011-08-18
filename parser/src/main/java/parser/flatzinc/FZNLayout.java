@@ -92,13 +92,13 @@ public final class FZNLayout implements ISearchMonitor {
     public void beforeClose () {
         if (LOGGER.isInfoEnabled()) {
             if (searchLoop.getMeasures().getSolutionCount() == 0) {
-                if (searchLoop.getLimitsFactory().isReached()) {
+                if (searchLoop.getLimitsBox().isReached()) {
                     LOGGER.info("=====UNKNOWN=====");
                 } else {
                     LOGGER.info("=====UNSATISFIABLE=====");
                 }
             } else {
-                if (searchLoop.getLimitsFactory().isReached()
+                if (searchLoop.getLimitsBox().isReached()
                         && !(searchLoop.getObjectivemanager() instanceof NoObjectiveManager)) {
                     LOGGER.info("=====UNBOUDNED=====");
                 } else {
