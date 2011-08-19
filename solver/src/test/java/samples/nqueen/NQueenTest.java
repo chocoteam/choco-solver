@@ -35,10 +35,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.group.Group;
+import solver.propagation.engines.comparators.EngineStrategies;
 import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -163,14 +160,9 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < 9; t++) {
+            for (int t = 0; t < EngineStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                sol.getEngine().addGroup(
-                        Group.buildGroup(
-                                Predicate.TRUE,
-                                EngineStrategyFactory.comparator(sol, t),
-                                Policy.FIXPOINT
-                        ));
+                EngineStrategies.values()[t].defineIn(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -187,15 +179,10 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < 9; t++) {
+            for (int t = 0; t < EngineStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
-                sol.getEngine().addGroup(
-                        Group.buildGroup(
-                                Predicate.TRUE,
-                                EngineStrategyFactory.comparator(sol, t),
-                                Policy.FIXPOINT
-                        ));
+                EngineStrategies.values()[t].defineIn(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

@@ -34,12 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.IncrPriorityP;
-import solver.propagation.engines.comparators.Shuffle;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.group.Group;
+import solver.propagation.engines.comparators.EngineStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -70,7 +65,7 @@ public abstract class AbstractProblem {
     Level level = Level.VERBOSE;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
-    String policy = "";
+    EngineStrategies policy = EngineStrategies.OLDEST;
 
 
     protected Solver solver;
@@ -106,23 +101,14 @@ public abstract class AbstractProblem {
 
     protected void overridePolicy() {
         IPropagationEngine engine = solver.getEngine();
-        if (policy.equals("shuffle")) {
-            engine.deleteGroups();
-            engine.addGroup(Group.buildGroup(Predicate.TRUE, new Shuffle(), Policy.FIXPOINT));
-        } else if (policy.equals("oldest")) {
-            engine.deleteGroups();
-            engine.addGroup(Group.buildQueue(Predicate.TRUE));
-        } else if (policy.equals("priorityC")) {
-            engine.deleteGroups();
-            engine.addGroup(Group.buildGroup(Predicate.TRUE, IncrPriorityP.get(), Policy.FIXPOINT));
-        } else if (policy.equals("var-oriented")) {
-            engine.deleteGroups();
-            EngineStrategyFactory.variableOriented(solver);
-        } else if (policy.equals("cstr-oriented")) {
-            engine.deleteGroups();
-            EngineStrategyFactory.constraintOriented(solver);
-        }/*else if(policy.equals("specific")){
-        }*/
+        switch (policy) {
+            case DEFAULT:
+                break;
+            default:
+                engine.deleteGroups();
+                policy.defineIn(solver);
+                break;
+        }
     }
 
     public final void execute(String... args) {
@@ -133,9 +119,7 @@ public abstract class AbstractProblem {
         this.buildModel();
         this.configureSolver();
 
-        if (policy.length() > 0) {
-            overridePolicy();
-        }
+        overridePolicy();
 
         if (level.getLevel() > Level.QUIET.getLevel()) {
             SearchMonitorFactory.log(solver,

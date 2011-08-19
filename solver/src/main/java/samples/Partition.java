@@ -52,19 +52,31 @@ import java.util.Arrays;
 import static solver.constraints.ConstraintFactory.lt;
 
 /**
+ * CSPLib prob049:<br/>
+ * "This problem consists in finding a partition of numbers 1..N into two sets A and B such that:
+ * <ul>
+ * <li>A and B have the same cardinality</li>
+ * <li>sum of numbers in A = sum of numbers in B</li>
+ * <li>sum of squares of numbers in A = sum of squares of numbers in B</li>
+ * </ul>
+ *
+ * More constraints can thus be added, e.g also impose the equality on the sum of cubes.
+ * There is no solution for N < 8."
+ *
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 31/03/11
  */
 public class Partition extends AbstractProblem {
-    @Option(name = "-s", usage = "Partition size.", required = true)
-    int size;
+    @Option(name = "-n", usage = "Partition size.", required = true)
+    int N = 64;
 
     IntVar[] vars;
 
     @Override
     public void buildModel() {
+        int size =this.N / 2;
         solver = new Solver();
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
@@ -121,7 +133,7 @@ public class Partition extends AbstractProblem {
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
-                        new PriorityP(PropagatorPriority.TERNARY.priority),
+                        new PriorityP(PropagatorPriority.TERNARY),
                         new Cond(
                                 new LeftHandSide(),
                                 new IncrOrderV(vars),
@@ -154,7 +166,7 @@ public class Partition extends AbstractProblem {
         st.append(vars[i].getValue());
         sum1 += vars[i].getValue();
         sum2 += vars[i].getValue() * vars[i++].getValue();
-        for (; i < size; i++) {
+        for (; i < N /2; i++) {
             st.append(", ").append(vars[i].getValue());
             sum1 += vars[i].getValue();
             sum2 += vars[i].getValue() * vars[i].getValue();
@@ -164,14 +176,13 @@ public class Partition extends AbstractProblem {
         st.append(vars[i].getValue());
         sum1 += vars[i].getValue();
         sum2 += vars[i].getValue() * vars[i++].getValue();
-        for (; i < 2 * size; i++) {
+        for (; i < N; i++) {
             st.append(", ").append(vars[i].getValue());
             sum1 += vars[i].getValue();
             sum2 += vars[i].getValue() * vars[i].getValue();
         }
         st.append(": (").append(sum1).append(")~(").append(sum2).append(")\n");
         LoggerFactory.getLogger("bench").info(st.toString());
-        st = null;
     }
 
     public static void main(String[] args) {

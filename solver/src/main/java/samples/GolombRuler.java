@@ -44,6 +44,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
+ * CSPLib prob006:<br/>
+ * A Golomb ruler may be defined as a set of m integers 0 = a_1 < a_2 < ... < a_m such that
+ * the m(m-1)/2 differences a_j - a_i, 1 <= i < j <= m are distinct.
+ * Such a ruler is said to contain m marks and is of length a_m.
+ * <br/>
+ * The objective is to find optimal (minimum length) or near optimal rulers.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -51,7 +57,7 @@ import java.util.HashSet;
  */
 public class GolombRuler extends AbstractProblem {
 
-    @Option(name = "-o", usage = "Golomb ruler order.", required = false)
+    @Option(name = "-m", usage = "Golomb ruler order.", required = false)
     private int m = 10;
 
     @Option(name = "-c", usage = "Alldifferent consistency.", required = false)

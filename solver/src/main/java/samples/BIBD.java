@@ -46,6 +46,19 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
+ * CSPLib prob028:<br/>
+ * "A Balanced Incomplete Block Design (BIBD) is defined as an arrangement of
+ * v distinct objects into b blocks such that
+ * each block contains exactly k distinct objects,
+ * each object occurs in exactly r different blocks,
+ * and every two distinct objects occur together in exactly lambda blocks.
+ * <br/>
+ * Another way of defining a BIBD is in terms of its incidence matrix,
+ * which is a v by b binary matrix with exactly r ones per row,
+ * k ones per column,
+ * and with a scalar product of lambda between any pair of distinct rows.
+ * <br/>
+ * A BIBD is therefore specified by its parameters (v,b,r,k,lambda)."
  * <br/>
  *
  * @author Charles Prud'homme
@@ -141,7 +154,7 @@ public class BIBD extends AbstractProblem {
                 Group.buildQueue(
                         new MemberV<BoolVar>(hs)
                 ));
-        //EngineStrategyFactory.constraintOriented(solver);
+        //EngineStrategies.constraintOriented(solver);
 
     }
 

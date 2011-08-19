@@ -77,7 +77,7 @@ public class NurseSchedulingProblem {
     }
 
     private void makeVariables(Solver solver) {
-        this.shifts = VariableFactory.enumeratedArray("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, solver);
+        this.shifts = VariableFactory.enumeratedMatrix("S", data.nbEmployees(), data.nbDays(), 0, data.nbActivities() - 1, solver);
 
         this.occurrences = new IntVar[data.nbEmployees()][data.nbActivities()];
         for (int e = 0; e < data.nbEmployees(); e++) {

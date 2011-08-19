@@ -39,6 +39,13 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * <a href="http://en.wikipedia.org/wiki/Knapsack_problem">wikipedia</a>:<br/>
+ * "Given a set of items, each with a weight and a value,
+ * determine the count of each item to include in a collection so that
+ * the total weight is less than or equal to a given limit and the total value is as large as possible.
+ * It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack
+ * and must fill it with the most useful items."
+ *
  * <br/>
  *
  * @author Charles Prud'homme

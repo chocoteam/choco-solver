@@ -39,7 +39,10 @@ import solver.propagation.engines.comparators.predicate.MemberC;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.group.Group;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -47,17 +50,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * A kid goes into a grocery store and buys four items. The cashier
+ * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
+ * "A kid goes into a grocery store and buys four items. The cashier
  * charges $7.11, the kid pays and is about to leave when the cashier
  * calls the kid back, and says ''Hold on, I multiplied the four items
  * instead of adding them; I'll try again; Hah, with adding them the
  * price still comes to $7.11''. What were the prices of the four items?
  * <p/>
  * The model is taken from: Christian Schulte, Gert Smolka, Finite Domain
- * Constraint Programming in Oz. A Tutorial. 2001.
- * Available from: <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">
- * Grocery
- * </a>
+ * Constraint Programming in Oz. A Tutorial. 2001."
  * <br/>
  *
  * @author Charles Prud'homme
@@ -73,7 +74,7 @@ public class Grocery extends AbstractProblem {
     @Override
     public void buildModel() {
         solver = new Solver();
-        vars = VariableFactory.boundedArray("item", 4, 0, 711, solver);
+        vars = VariableFactory.enumeratedArray("item", 4, 0, 711, solver);
         solver.post(Sum.eq(vars, 711, solver));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
@@ -96,7 +97,13 @@ public class Grocery extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.domwdegMindom(vars, solver));
+        //AVOID dom/wdeg: it can change the tree search
+        //solver.set(StrategyFactory.domwdegMindom(vars, solver));
+        HeuristicValFactory.indomainSplitMax(vars);
+        solver.set(StrategyVarValAssign.sta(vars,
+                SorterFactory.inputOrder(vars),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment()));
         //FIRST propagators on tmp, natural order
         solver.getEngine().addGroup(
                 Group.buildGroup(

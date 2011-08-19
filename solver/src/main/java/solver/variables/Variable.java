@@ -61,9 +61,6 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
     boolean instantiated();
 
-    @Override
-    String toString();
-
     /**
      * Returns the name of <code>this</code>
      *

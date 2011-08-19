@@ -52,6 +52,15 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
+ * CSPLib prob007:<br/>
+ * "Given n in N, find a vector s = (s_1, ..., s_n), such that
+ * <ul>
+ * <li>s is a permutation of Z_n = {0,1,...,n-1};</li>
+ * <li>the interval vector v = (|s_2-s_1|, |s_3-s_2|, ... |s_n-s_{n-1}|) is a permutation of Z_n-{0} = {1,2,...,n-1}.</li>
+ * </ul>
+ * <br/>
+ * A vector v satisfying these conditions is called an all-interval series of size n;
+ * the problem of finding such a series is the all-interval series problem of size n."
  * <br/>
  *
  * @author Charles Prud'homme
@@ -119,8 +128,8 @@ public class AllIntervalSeries extends AbstractProblem {
 
         // TODO chercher un meilleur ordre de propagation
         // la clé semble se trouver dans la contrainte AllDiff sur les distances
-        //EngineStrategyFactory.constraintOriented(solver);
-        //EngineStrategyFactory.variableOriented(solver);
+        //EngineStrategies.constraintOriented(solver);
+        //EngineStrategies.variableOriented(solver);
         solver.getEngine().addGroup(
                 Group.buildGroup(
                         new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ArrayUtils.append(ALLDIFF, DISTANCE))))),

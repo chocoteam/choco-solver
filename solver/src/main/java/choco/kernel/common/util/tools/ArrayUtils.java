@@ -253,6 +253,17 @@ public enum ArrayUtils {
         return ret;
     }
 
+    public static <T> T[] flatten(T[][][] matrix) {
+        List<T> elt = new ArrayList<T>();
+        for (T[][] t : matrix) {
+            for (T[] tt : t) {
+                elt.addAll(Arrays.asList(tt));
+            }
+        }
+        T[] ret = (T[]) java.lang.reflect.Array.newInstance(matrix[0][0].getClass().getComponentType(), elt.size());
+        return elt.toArray(ret);
+    }
+
     public static <T> T[] flattenSubMatrix(int iMin, int iLength, int jMin, int jLength, T[][] matrix) {
         T[] ret = (T[]) java.lang.reflect.Array.newInstance(matrix[0].getClass().getComponentType(), iLength * jLength);
         for (int i = 0, k = 0; i < iLength; i++, k += jLength)

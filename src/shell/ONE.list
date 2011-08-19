@@ -1,2 +1,16 @@
-samples.BIBD -v 7 -k  3 -l 2
-samples.BIBD -v 7 -k  3 -l 5
+samples.Alpha
+samples.Alpha
+samples.Alpha -policy OLDEST
+samples.Alpha -policy VARIABLE_LEX
+samples.Alpha -policy CONSTRAINT_LEX
+samples.Alpha -policy VARIABLE_ORIENTED
+samples.Alpha -policy CONSTRAINT_ORIENTED
+samples.Alpha -policy PRIORITY_PROP
+samples.Grocery
+samples.Grocery
+samples.Grocery -policy OLDEST
+samples.Grocery -policy VARIABLE_LEX
+samples.Grocery -policy CONSTRAINT_LEX
+samples.Grocery -policy VARIABLE_ORIENTED
+samples.Grocery -policy CONSTRAINT_ORIENTED
+samples.Grocery -policy PRIORITY_PROP

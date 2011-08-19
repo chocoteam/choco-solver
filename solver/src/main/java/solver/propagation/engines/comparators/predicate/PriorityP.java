@@ -27,9 +27,11 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import solver.constraints.propagators.PropagatorPriority;
 import solver.requests.IRequest;
 
 /**
+ * Prop.priority <= threshold (inclusive)
  * <br/>
  *
  * @author Charles Prud'homme
@@ -37,14 +39,14 @@ import solver.requests.IRequest;
  */
 public class PriorityP implements Predicate {
 
-    final int threshold;
+    final PropagatorPriority threshold;
 
-    public PriorityP(int threshold) {
+    public PriorityP(PropagatorPriority threshold) {
         this.threshold = threshold;
     }
 
     @Override
     public boolean eval(IRequest request) {
-        return request.getPropagator().getPriority().priority > threshold;
+        return request.getPropagator().getPriority().priority >= threshold.priority;
     }
 }

@@ -100,12 +100,25 @@ public class HeuristicValFactory {
     /**
      * @param vars list of variables declaring this value iterator
      */
-    public static void indomainSplit(IntVar... vars) {
+    public static void indomainSplitMin(IntVar... vars) {
         for (IntVar var : vars) {
             int middle = (var.getLB() + var.getUB()) / 2;
             var.setHeuristicVal(
                     new SeqN(HeuristicValFactory.enumVal(var, middle, -1, var.getLB()),
                             HeuristicValFactory.enumVal(var, middle + 1, 1, var.getUB()))
+            );
+        }
+    }
+
+    /**
+     * @param vars list of variables declaring this value iterator
+     */
+    public static void indomainSplitMax(IntVar... vars) {
+        for (IntVar var : vars) {
+            int middle = (var.getLB() + var.getUB()) / 2;
+            var.setHeuristicVal(
+                    new SeqN(HeuristicValFactory.enumVal(var, middle, 1, var.getUB()),
+                            HeuristicValFactory.enumVal(var, middle-1, -1, var.getLB()))
             );
         }
     }

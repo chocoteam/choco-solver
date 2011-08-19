@@ -46,6 +46,20 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 /**
+ * CSPLib prob001:<br/>
+ * "A number of cars are to be produced;
+ * they are not identical, because different options are available as variants on the basic model.
+ * <br/>
+ * The assembly line has different stations which install the various options (air-conditioning, sun-roof, etc.).
+ * These stations have been designed to handle at most a certain percentage of the cars passing along the assembly line.
+ * Furthermore, the cars requiring a certain option must not be bunched together,
+ * otherwise the station will not be able to cope.
+ * Consequently, the cars must be arranged in a sequence so that the capacity of each station is never exceeded.
+ * <br/>
+ * For instance, if a particular station can only cope with at most half of the cars passing along the line,
+ * the sequence must be built so that at most 1 car in any 2 requires that option.
+ * <br/>
+ * The problem has been shown to be NP-complete (Gent 1999)"
  * <br/>
  *
  * @author Charles Prud'homme

@@ -141,7 +141,7 @@ public class PertReified extends Pert {
                 ));
         engine.addGroup(
                 Group.buildGroup(
-                        new PriorityP(PropagatorPriority.TERNARY.priority),
+                        new PriorityP(PropagatorPriority.TERNARY),
                         new Cond(
                                 new LeftHandSide(),
                                 new MappingV(vars, rank),

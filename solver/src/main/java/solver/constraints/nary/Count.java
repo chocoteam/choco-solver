@@ -32,11 +32,12 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropCount;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * count(VALUE,VARIABLES,RELOP,LIMIT)
  * <br/>syn.: occurencemax, occurencemin, occurrence
- *
+ * <p/>
  * <br/>Let N be the number of variables of the VARIABLES collection assigned to value VALUE;
  * <br/>Enforce condition NRELOPLIMIT to hold.
  * <br/><a href="http://www.emn.fr/z-info/sdemasse/gccat/Ccount.html">count in GCCAT</a>
@@ -57,6 +58,27 @@ public class Count extends IntConstraint<IntVar> {
 
     public Count(int value, IntVar[] vars, Relop relop, IntVar limit, Solver solver) {
         super(ArrayUtils.append(vars, new IntVar[]{limit}), solver);
+        this.occval = value;
+        switch (relop) {
+            case GEQ:
+                leq = true;
+                geq = false;
+                break;
+            case LEQ:
+                leq = false;
+                geq = true;
+                break;
+            default:
+            case EQ:
+                leq = true;
+                geq = true;
+                break;
+        }
+        setPropagators(new PropCount(value, this.vars, leq, geq, solver, this));
+    }
+
+    public Count(int value, IntVar[] vars, Relop relop, int limit, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{VariableFactory.fixed(limit, solver)}), solver);
         this.occval = value;
         switch (relop) {
             case GEQ:
@@ -104,7 +126,7 @@ public class Count extends IntConstraint<IntVar> {
             s.append(" >= ");
         else
             s.append(" <= ");
-        s.append(vars[vars.length-1]);
+        s.append(vars[vars.length - 1]);
         return s.toString();
     }
 }

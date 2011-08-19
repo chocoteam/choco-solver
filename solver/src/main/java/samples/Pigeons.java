@@ -35,6 +35,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * N pigeons nest in N-1 nests.
  * <br/>
  *
  * @author Charles Prud'homme

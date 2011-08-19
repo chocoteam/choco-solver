@@ -36,6 +36,9 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * CSPLib prob019:<br/>
+ * "A magic sequence of length n is a sequence of integers x0 . . xn-1 between 0 and n-1, such that
+ * for all i in 0 to n-1, the number i occurs exactly xi times in the sequence."
  * <br/>
  *
  * @author Charles Prud'homme
@@ -43,7 +46,7 @@ import solver.variables.VariableFactory;
  */
 public class MagicSeries extends AbstractProblem {
 
-    @Option(name = "-s", usage = "Magic series size.", required = false)
+    @Option(name = "-n", usage = "Magic series size.", required = false)
     int n = 500;
     IntVar[] vars;
 

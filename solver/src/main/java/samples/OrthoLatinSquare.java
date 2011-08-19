@@ -39,6 +39,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * Orthogonal latin square
  * <br/>
  *
  * @author Charles Prud'homme

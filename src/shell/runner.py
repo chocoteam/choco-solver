@@ -21,15 +21,16 @@ TROVE = join(M2_REPO, 'gnu', 'trove', '2.1.0', 'trove-2.1.0.jar')
 JPARSEC = join(M2_REPO, 'jparsec', 'jparsec', '2.0.1', 'jparsec-2.0.1.jar')
 CGLIB = join(M2_REPO, 'cglib', 'cglib-nodep', '2.2', 'cglib-nodep-2.2.jar')
 DKBRICS = join(M2_REPO, 'dk', 'brics', 'automaton', '1.11-2', 'automaton-1.11-2.jar')
+ASPECT = join(M2_REPO, 'org','aspectj', 'aspectjrt', '1.6.10', 'aspectjrt-1.6.10.jar')
 
 
 CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT.jar')
 
 ## correct class-path
-CP = '-cp .:'+ ARGS+':'+LOGBACK_CL+':'+LOGBACK_CO+':'+SLF4J+':'+TROVE+':'+JPARSEC+':'+CGLIB+':'+DKBRICS+':'+CHOCO_SOLVER
+CP = '-cp .:'+ ARGS+':'+LOGBACK_CL+':'+LOGBACK_CO+':'+SLF4J+':'+TROVE+':'+JPARSEC+':'+CGLIB+':'+DKBRICS+':'+ASPECT+':'+CHOCO_SOLVER
 
 ## java command
-CMD='java -Xmx1024m -Xms1024m -XX:+AggressiveOpts -XX:+UseConcMarkSweepGC'
+CMD='java -Xmx1024m -Xms1024m'# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
 
 ## Number of time a problem is run
 loop = 1 # can be override
@@ -40,10 +41,10 @@ thread = 1
 name = 'runner'
 
 ## regexp for statisctics
-## [STATISTICS S Solutions, Objective: O, Resolution Tms, N Nodes, B Backtracks, F Fails, R Restarts]
-## len is 7 or 8
-_SIZE = 9
-pattern = re.compile('[ \d+]+\,?\d+')
+## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P propagations]
+## len is 8 or 9
+_SIZE = 10
+pattern = re.compile('[\d+]+\,?\d+')
 _STAT = '[STATISTICS'
 _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROPAGATIONS','SCRIPT_TIME'
 
@@ -94,13 +95,14 @@ def limit( process, cutoff ):
     t.start()
     return t
 
-def compute(result, size):
+def compute(line, result, size):
     b = []
     if size == _SIZE:
         b = _NAMES
     else:
         b = [_NAMES[0]]
         b+= _NAMES[2:_SIZE]
+    out.write(line+"\n")
     for i in range(size):
         sum = 0.0
         s = len(result[i])
@@ -115,6 +117,25 @@ def compute(result, size):
         if stdev > 0:
             info += " ("+str(stdev)+")"
         out.write(info+'\n')
+
+def computeXLS(line, result, size):
+    line = line.rstrip("\n")
+    out.write(line+";")
+    for i in range(size):
+        sum = 0.0
+        s = len(result[i])
+        result[i].sort()
+        if s > 2 :
+            result[i] = result[i][1:s-1]
+        for j in range(len(result[i])):
+            sum += result[i][j]
+        moy = round(sum/len(result[i]),2)
+        stdev = max(result[i]) - min(result[i])
+        info = ""+ str(moy)+";"
+        if stdev > 0:
+            info += ""+str(stdev)+";;"
+        out.write(info)
+
 
 f = open(join('.', name+'.list'),'r')
 
@@ -160,6 +181,7 @@ class runit(Thread):
                     line +=char
 
             m = pattern.findall(statitics)
+            print statitics
             for j in range(len(m)):
                 self.result.append(float(m[j].replace(',','.')))
             self.result.append(round((end-start)*1000, 2))
@@ -170,7 +192,6 @@ class runit(Thread):
 
 for line in f:
     if line[0] != '#' and line != '\n':
-        out.write(line)
         command = CMD+' '+ CP+' '+line + ' -log QUIET'
         # print command
         args = shlex.split(command)
@@ -192,7 +213,8 @@ for line in f:
                     results[k].append(run.result[k])
 
         # end loop
-        compute(results, size)
+        #compute(line, results, size)
+        computeXLS(line, results, size)
         out.write('\n')
         out.flush()
 out.close()

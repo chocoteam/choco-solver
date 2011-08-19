@@ -40,6 +40,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
+ * <a href="http://en.wikipedia.org/wiki/Latin_square">wikipedia</a>:<br/>
+ * "A Latin square is an n ? n array filled with n different Latin letters,
+ * each occurring exactly once in each row and exactly once in each column"
  * <br/>
  *
  * @author Charles Prud'homme

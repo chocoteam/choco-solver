@@ -41,6 +41,11 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * <a href="http://www.gecode.org">gecode</a>:<br/>
+ * "A group of people wants to take a group photo. Each person can give
+ * preferences next to whom he or she wants to be placed on the
+ * photo. The problem to be solved is to find a placement that
+ * violates as few preferences as possible."
  * <br/>
  *
  * @author Charles Prud'homme

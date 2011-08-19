@@ -31,7 +31,8 @@ import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
+import solver.propagation.engines.comparators.Decr;
+import solver.propagation.engines.comparators.IncrDomDeg;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -39,6 +40,10 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
+ * A verbal arithmetic puzzle:
+ * <br/> <br/>
+ * Attribute a value to each letter, such that the equations are correct.
+ *
  * <br/>
  *
  * @author Charles Prud'homme
@@ -96,7 +101,7 @@ public class Alpha extends AbstractProblem {
         solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicate.TRUE,
-                        EngineStrategyFactory.comparator(solver, EngineStrategyFactory.DECR_DOM_DEG),
+                        new Decr(IncrDomDeg.get()),
                         Policy.FIXPOINT
                 ));
     }

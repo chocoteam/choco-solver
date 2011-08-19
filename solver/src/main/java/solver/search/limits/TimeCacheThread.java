@@ -27,8 +27,6 @@
 
 package solver.search.limits;
 
-import solver.exception.SolverException;
-
 /**
  * fast time limit computation inspired from: http://dow.ngra.de/2008/10/27/when-systemcurrenttimemillis-is-too-slow/.
  * cant use the heartbeat counter because it lascks of precision.
@@ -58,11 +56,11 @@ public final class TimeCacheThread extends Thread {
     public void run() {
         while (true) {
             currentTimeNanos = System.nanoTime();
-            try {
+            /*try {
                 Thread.sleep(MS_TIME_PRECISION);
             } catch (InterruptedException e) {
                 throw new SolverException("Time Limit Thread was interrupted");
-            }
+            }*/
         }
     }
 

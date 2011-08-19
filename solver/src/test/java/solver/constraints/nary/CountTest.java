@@ -59,7 +59,7 @@ public class CountTest {
     @Test
     public void testMS4() {
         MagicSeries pb = new MagicSeries();
-        pb.readArgs("-s", Integer.toString(4));
+        pb.readArgs("-n", Integer.toString(4));
         pb.buildModel();
         pb.configureSolver();
         Solver solver = pb.getSolver();
@@ -70,7 +70,7 @@ public class CountTest {
     @Test
     public void testMS6() {
         MagicSeries pb = new MagicSeries();
-        pb.readArgs("-s", Integer.toString(8));
+        pb.readArgs("-n", Integer.toString(8));
         pb.buildModel();
         pb.configureSolver();
         Solver solver = pb.getSolver();

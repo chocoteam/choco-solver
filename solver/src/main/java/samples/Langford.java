@@ -36,57 +36,57 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * A verbal arithmetic puzzle:
+ * CSPLib prob024:<br/>
+ * "Consider two sets of the numbers from 1 to 4.
+ * The problem is to arrange the eight numbers in the two sets into a single sequence in which
+ * the two 1's appear one number apart,
+ * the two 2's appear two numbers apart,
+ * the two 3's appear three numbers apart,
+ * and the two 4's appear four numbers apart.
+ * <p/>
+ * The problem generalizes to the L(k,n) problem,
+ * which is to arrange k sets of numbers 1 to n,
+ * so that each appearance of the number m is m numbers on from the last.
  * <br/>
- * &#32;&#32;&#32;D&#32;O&#32;N&#32;A&#32;L&#32;D<br/>
- * +&#32;G&#32;E&#32;R&#32;A&#32;L&#32;D<br/>
- * ========<br/>
- * &#32;&#32;&#32;R&#32;O&#32;B&#32;E&#32;R&#32;T<br/>
+ * For example, the L(3,9) problem is to arrange 3 sets of the numbers 1 to 9 so that
+ * the first two 1's and the second two 1's appear one number apart,
+ * the first two 2's and the second two 2's appear two numbers apart, etc."
+ * <p/>
  * <br/>
- * Attribute a different value to each letter, such that the equation is correct.
+ *
  * @author Charles Prud'homme
- * @since 03/08/11
+ * @since 19/08/11
  */
-public class Donald extends AbstractProblem {
+public class Langford extends AbstractProblem {
 
-    @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
-    AllDifferent.Type type = AllDifferent.Type.BC;
+    @Option(name = "-k", usage = "Number of sets.", required = false)
+    private int k = 3;
 
-    IntVar d, o, n, a, l, g, e, r, b, t;
-    IntVar[] letters;
+    @Option(name = "-n", usage = "Upper bound.", required = false)
+    private int n = 17;
+
+    IntVar[] position;
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-        d = VariableFactory.bounded("d", 1, 9, solver);
-        o = VariableFactory.bounded("o", 0, 9, solver);
-        n = VariableFactory.bounded("n", 0, 9, solver);
-        a = VariableFactory.bounded("a", 0, 9, solver);
-        l = VariableFactory.bounded("l", 0, 9, solver);
-        g = VariableFactory.bounded("g", 1, 9, solver);
-        e = VariableFactory.bounded("e", 0, 9, solver);
-        r = VariableFactory.bounded("r", 1, 9, solver);
-        b = VariableFactory.bounded("b", 0, 9, solver);
-        t = VariableFactory.bounded("t", 0, 9, solver);
-        letters = new IntVar[]{d, o, n, a, l, g, e, r, b, t};
-
-        solver.post(new AllDifferent(letters, solver, type));
-        solver.post(Sum.eq(
-                new IntVar[]{d, o, n, a, l, d,
-                        g, e, r, a, l, d,
-                        r, o, b, e, r, t},
-                new int[]{100000, 10000, 1000, 100, 10, 1,
-                        100000, 10000, 1000, 100, 10, 1,
-                        -100000, -10000, -1000, -100, -10, -1,
-                }, 0, solver
-        ));
-
-
+        solver = new Solver("Langford's number");
+        // position of the colors
+        // position[i], position[i+k], position[i+2*k]... occurrence of the same color
+        position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
+        for (int i = 0; i < k - 1; i++) {
+            for (int j = 0; j < n; j++) {
+                solver.post(
+                        Sum.eq(new IntVar[]{position[j + (i + 1) * n], position[j + i * n]},
+                                new int[]{1, -1}, j + 2, solver)
+                );
+            }
+        }
+        solver.post(new AllDifferent(position, solver));
     }
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.minDomMaxVal(letters, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
     }
 
     @Override
@@ -96,16 +96,28 @@ public class Donald extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("donald + gerald = robert ");
+        LoggerFactory.getLogger("bench").info("Langford's number ({},{})", k, n);
         StringBuilder st = new StringBuilder();
-        st.append("\t");
-        for (int i = 0; i < letters.length; i++) {
-            st.append(String.format("%s : %d\n\t", letters[i].getName(), letters[i].getValue()));
+        if (solver.isFeasible() == Boolean.TRUE) {
+            int[] values = new int[k * n];
+            for (int i = 0; i < k; i++) {
+                for (int j = 0; j < n; j++) {
+                    values[position[i * n + j].getValue()] = j + 1;
+                }
+            }
+            st.append("\t");
+            for (int i = 0; i < values.length; i++) {
+                st.append(values[i]).append(" ");
+            }
+            st.append("\n");
+        } else {
+            st.append("\tINFEASIBLE");
         }
         LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new Donald().execute(args);
+        new Langford().execute(args);
     }
+
 }

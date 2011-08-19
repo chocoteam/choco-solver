@@ -42,6 +42,14 @@ import solver.variables.VariableFactory;
 import java.util.Arrays;
 
 /**
+ * CSPLib prob034:<br/>
+ * "In the Warehouse Location problem (WLP), a company considers opening warehouses
+ * at some candidate locations in order to supply its existing stores. Each possible warehouse
+ * has the same maintenance cost, and a capacity designating the maximum number of stores
+ * that it can supply. Each store must be supplied by exactly one open warehouse.
+ * The supply cost to a store depends on the warehouse. The objective is to determine which
+ * warehouses to open, and which of these warehouses should supply the various stores, such
+ * that the sum of the maintenance and supply costs is minimized."
  * <br/>
  *
  * @author Charles Prud'homme

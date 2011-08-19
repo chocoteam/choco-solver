@@ -31,10 +31,7 @@ import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.group.Group;
+import solver.propagation.engines.comparators.EngineStrategies;
 import solver.variables.IntVar;
 
 /**
@@ -51,7 +48,7 @@ public class GolombRulerTest {
 
     protected Solver modeler(int m) {
         GolombRuler pb = new GolombRuler();
-        pb.readArgs("-o", Integer.toString(m));
+        pb.readArgs("-m", Integer.toString(m));
         pb.buildModel();
         pb.configureSolver();
         return pb.getSolver();
@@ -65,14 +62,9 @@ public class GolombRulerTest {
             sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
             long sols = sol.getMeasures().getSolutionCount();
             long nodes = sol.getMeasures().getNodeCount();
-            for (int k = 0; k < 9; k++) {
+            for (int k = 1; k < EngineStrategies.values().length; k++) {
                 sol = modeler(OPTIMAL_RULER[j][0]);
-                 sol.getEngine().addGroup(
-                         Group.buildGroup(
-                                 Predicate.TRUE,
-                                 EngineStrategyFactory.comparator(sol, k),
-                                 Policy.FIXPOINT
-                         ));
+                EngineStrategies.values()[k].defineIn(sol);
                 sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes);

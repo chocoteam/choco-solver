@@ -81,6 +81,14 @@ public enum VariableFactory {
         return vars;
     }
 
+    public static BoolVar[][] boolMatrix(String name, int dim1, int dim2, Solver solver) {
+        BoolVar[][] vars = new BoolVar[dim1][];
+        for (int i = 0; i < dim1; i++) {
+            vars[i] = boolArray(name + "_" + i, dim2, solver);
+        }
+        return vars;
+    }
+
     public static IntVar bounded(String name, int min, int max, Solver solver) {
         checkIntVar(name, min, max);
         if (min == max) {
@@ -99,6 +107,14 @@ public enum VariableFactory {
         IntVar[] vars = new IntVar[size];
         for (int i = 0; i < size; i++) {
             vars[i] = bounded(name + "_" + i, min, max, solver);
+        }
+        return vars;
+    }
+
+    public static IntVar[][] boundedMatrix(String name, int dim1, int dim2, int min, int max, Solver solver) {
+        IntVar[][] vars = new IntVar[dim1][dim2];
+        for (int i = 0; i < dim1; i++) {
+            vars[i] = boundedArray(name + "_" + i, dim2, min, max, solver);
         }
         return vars;
     }
@@ -125,7 +141,7 @@ public enum VariableFactory {
         return vars;
     }
 
-    public static IntVar[][] enumeratedArray(String name, int size1, int size2, int min, int max, Solver solver) {
+    public static IntVar[][] enumeratedMatrix(String name, int size1, int size2, int min, int max, Solver solver) {
         IntVar[][] vars = new IntVar[size1][size2];
         for (int i = 0; i < size1; i++) {
             for (int j = 0; j < size2; j++) {

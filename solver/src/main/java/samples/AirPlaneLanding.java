@@ -25,14 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.airland;
+package samples;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
-import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
@@ -54,6 +53,14 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
+ * OR-LIBRARY:<br/>
+ * "Given a set of planes and runways, the objective is to minimize the total (weighted) deviation from
+ * the target landing time for each plane.
+ * There are costs associated with landing either earlier or later than a target landing time for each plane.
+ * Each plane has to land on one of the runways within its predetermined time windows such that
+ * separation criteria between all pairs of planes are satisfied.
+ * This type of problem is a large-scale optimization problem, which occurs at busy airports where
+ * making optimal use of the bottleneck resource (the runways) is crucial to keep the airport operating smoothly."
  * <br/>
  *
  * @author Charles Prud'homme

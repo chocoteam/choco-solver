@@ -51,6 +51,10 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 
 /**
+ * CSPLib prob019:<br/>
+ * "An order n magic square is a n by n matrix containing the numbers 1 to n^2, with each row,
+ * column and main diagonal equal the same sum.
+ * As well as finding magic squares, we are interested in the number of a given size that exist."
  * <br/>
  *
  * @author Charles Prud'homme

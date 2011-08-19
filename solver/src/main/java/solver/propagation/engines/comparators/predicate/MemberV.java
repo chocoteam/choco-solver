@@ -27,21 +27,30 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import solver.variables.Variable;
 import solver.requests.IRequest;
+import solver.variables.Variable;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 
 public class MemberV<V extends Variable> implements Predicate {
-	Set<V> vars;
-	public MemberV(Set<V> vars) {
-		this.vars = vars;
-	}
-	public boolean eval(IRequest request) {
-		return this.vars.contains(request.getVariable());
-	}
-	public String toString() {
-		return "MemberV" + vars;
-	}
+    Set<V> vars;
+
+    public MemberV(Set<V> vars) {
+        this.vars = vars;
+    }
+
+    public MemberV(V[] vars) {
+        this.vars = new HashSet<V>(Arrays.asList(vars));
+    }
+
+    public boolean eval(IRequest request) {
+        return this.vars.contains(request.getVariable());
+    }
+
+    public String toString() {
+        return "MemberV" + vars;
+    }
 }

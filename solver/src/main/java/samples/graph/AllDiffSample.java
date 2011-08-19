@@ -26,7 +26,6 @@
  */
 package samples.graph;
 
-import java.io.FileWriter;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -69,7 +68,7 @@ public class AllDiffSample extends AbstractProblem{
 	public void buildModel() {
 		solver = new Solver();
 		vars = VariableFactory.boundedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
-//		vars = VariableFactory.enumeratedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
+//		vars = VariableFactory.enumeratedMatrix("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
 		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
 		solver.post(cstrs);
 	}

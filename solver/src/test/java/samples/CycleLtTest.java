@@ -34,10 +34,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.EngineStrategyFactory;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.group.Group;
+import solver.propagation.engines.comparators.EngineStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -90,18 +87,13 @@ public class CycleLtTest {
         st.append(StringUtils.pad("POPPED ", -15, " "));
         st.append(StringUtils.pad("(DIFF)", -15, " "));
         long[] times = new long[nbIt];
-        for (int j = 0; j < 9; j++) {
+        for (int j = 0; j < EngineStrategies.values().length; j++) {
             log.info(st.toString());
             st.setLength(0);
             st.append("-- " + j + " ------------------------------------------------------------------------------------\n");
             for (int i = 0; i < nbIt; i++) {
                 Solver rand = modeler(n);
-                 rand.getEngine().addGroup(
-                         Group.buildGroup(
-                                 Predicate.TRUE,
-                                 EngineStrategyFactory.comparator(rand, j),
-                                 Policy.FIXPOINT
-                         ));
+                EngineStrategies.values()[j].defineIn(rand);
                 rand.findAllSolutions();
                 st.append(StringUtils.pad(String.format("%d ", rand.getMeasures().getInitialPropagationTimeCount()), -7, " "));
                 times[i] = rand.getMeasures().getInitialPropagationTimeCount();
