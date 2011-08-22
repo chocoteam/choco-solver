@@ -62,7 +62,7 @@ import java.util.Arrays;
  */
 public class MagicSquare extends AbstractProblem {
 
-    @Option(name = "-s", usage = "Magic square size.", required = false)
+    @Option(name = "-n", usage = "Magic square size.", required = false)
     int n = 5;
 
     @Option(name = "-c", usage = "Alldifferent consistency.", required = false)
