@@ -55,7 +55,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class Sum extends IntConstraint {
+public class Sum extends IntConstraint<IntVar> {
 
     public static final String
             VAR_DECRCOEFFS = "var_decrcoeffs",
@@ -294,7 +294,7 @@ public class Sum extends IntConstraint {
             if (sum.shared_map == null) {
                 sum.shared_map = new TObjectIntHashMap<IntVar>(sum.coeffs.length);
                 for (int i = 0; i < sum.vars.length; i++) {
-                    sum.shared_map.put((IntVar) sum.vars[i], sum.coeffs[i]);
+                    sum.shared_map.put(sum.vars[i], sum.coeffs[i]);
                 }
             }
             map = sum.shared_map;
