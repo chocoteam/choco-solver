@@ -27,6 +27,7 @@
 
 package solver.explanations;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.variables.IntVar;
 
@@ -44,10 +45,10 @@ import java.util.BitSet;
 public class ExplanationEngine implements Serializable {
 
 
-    public void removeValue(IntVar var, int val, ICause cause) {}
-    public void updateLowerBound(IntVar intVar, int old, int value, ICause cause) {}
-    public void updateUpperBound(IntVar intVar, int old, int value, ICause cause) {}
-    public void instantiateTo(IntVar var, int val, ICause cause) {}
+    public void removeValue(IntVar var, int val, @NotNull ICause cause) {}
+    public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
+    public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
+    public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {}
 
     public BitSet getRemovedValues(IntVar v) { return null; }
 

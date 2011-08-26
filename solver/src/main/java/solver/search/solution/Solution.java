@@ -28,6 +28,7 @@
 package solver.search.solution;
 
 import org.slf4j.LoggerFactory;
+import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -100,9 +101,9 @@ public class Solution {
             for (int i = 0; i < vars.length; i++) {
             	switch(vars[i].getType()){
                 case Variable.INTEGER : 
-                	((IntVar) vars[i]).instantiateTo(intvalues[i], null);break;
+                	((IntVar) vars[i]).instantiateTo(intvalues[i], Cause.Null);break;
                 case Variable.GRAPH : 
-                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), null);break;
+                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), Cause.Null);break;
                 }
                 
             }

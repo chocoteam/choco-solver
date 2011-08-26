@@ -30,6 +30,7 @@ import choco.checker.DomainBuilder;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.binary.Absolute;
 import solver.constraints.unary.Member;
@@ -52,8 +53,8 @@ public class IntVarAbsTest {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
         IntVar X = Views.abs(Y);
-        X.updateLowerBound(xl, null);
-        X.updateUpperBound(xu, null);
+        X.updateLowerBound(xl, Cause.Null);
+        X.updateUpperBound(xu, Cause.Null);
         solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
     }

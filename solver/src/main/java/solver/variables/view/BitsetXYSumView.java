@@ -93,18 +93,18 @@ public final class BitsetXYSumView extends AbstractSumView {
                     LB.set(inf);
                     e = EventType.INCLOW;
                     filterOnGeq(cause, inf);
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 } else if (value == sup) {
                     sup = VALUES.prevSetBit(aValue) + OFFSET;
                     UB.set(sup);
                     e = EventType.DECUPP;
                     filterOnLeq(cause, sup);
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 if (change && !VALUES.isEmpty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                        cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                     }
                     this.notifyPropagators(e, cause);
                 } else {
@@ -205,7 +205,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
 
@@ -242,7 +242,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
                 solver.explainer.updateUpperBound(this, ub, value, cause);
@@ -349,7 +349,7 @@ public final class BitsetXYSumView extends AbstractSumView {
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
                 if (iub == OFFSET - 1) {
                     solver.explainer.updateUpperBound(this, UB.get(), eub, Cause.Null);
-                    this.contradiction(null, MSG_EMPTY);
+                    this.contradiction(Cause.Null, MSG_EMPTY);
                 }
                 UB.set(iub);
                 if (e != EventType.VOID) {
@@ -365,10 +365,10 @@ public final class BitsetXYSumView extends AbstractSumView {
                 this.contradiction(Cause.Null, MSG_EMPTY);
             }
             if (down) {
-                filterOnLeq(null, iub);
+                filterOnLeq(Cause.Null, iub);
             }
             if (up) {
-                filterOnGeq(null, ilb);
+                filterOnGeq(Cause.Null, ilb);
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, Cause.Null);

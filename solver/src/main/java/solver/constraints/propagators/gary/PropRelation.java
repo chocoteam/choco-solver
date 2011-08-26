@@ -30,6 +30,7 @@ package solver.constraints.propagators.gary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.relations.GraphRelation;
@@ -97,9 +98,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(i) && ker.isActive(j)){
-								g.enforceArc(i, j, null);
+								g.enforceArc(i, j, Cause.Null);
 							}break;
-						case FALSE: g.removeArc(i, j, null);break;
+						case FALSE: g.removeArc(i, j, Cause.Null);break;
 						}
 					}else{
 						if(ker.isActive(i) && ker.isActive(j)){
@@ -176,9 +177,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 					switch(relation.isEntail(i,j)){
 					case TRUE: 
 						if(ker.isActive(i) && ker.isActive(j)){
-							g.enforceArc(i, j, null);
+							g.enforceArc(i, j, Cause.Null);
 						}break;
-					case FALSE: g.removeArc(i, j, null);break;
+					case FALSE: g.removeArc(i, j, Cause.Null);break;
 					}
 				}else{
 					if(ker.isActive(i) && ker.isActive(j)){
@@ -211,9 +212,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(j)){
-								g.enforceArc(i, j, null);
+								g.enforceArc(i, j, Cause.Null);
 							}break;
-						case FALSE: g.removeArc(i, j, null);break;
+						case FALSE: g.removeArc(i, j, Cause.Null);break;
 						}
 					}else{
 						if(ker.isActive(j)){

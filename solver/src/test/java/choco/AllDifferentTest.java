@@ -33,6 +33,7 @@ import choco.kernel.memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
@@ -301,14 +302,14 @@ public class AllDifferentTest {
 
         try{
             solver.propagate();
-            ts[0].removeValue(2, null);
-            ts[1].removeValue(2, null);
-            ts[0].removeValue(3, null);
-            ts[1].removeValue(1, null);
-            ts[2].removeValue(-3, null);
-            ts[2].removeValue(3, null);
-            ts[3].removeValue(-3, null);
-            ts[3].removeValue(3, null);
+            ts[0].removeValue(2, Cause.Null);
+            ts[1].removeValue(2, Cause.Null);
+            ts[0].removeValue(3, Cause.Null);
+            ts[1].removeValue(1, Cause.Null);
+            ts[2].removeValue(-3, Cause.Null);
+            ts[2].removeValue(3, Cause.Null);
+            ts[3].removeValue(-3, Cause.Null);
+            ts[3].removeValue(3, Cause.Null);
             solver.propagate();
         }catch (ContradictionException ex){
 

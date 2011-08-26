@@ -31,6 +31,7 @@ import choco.kernel.common.util.VariableUtilities;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateBool;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -297,7 +298,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, null);
+                    idxVar.removeValue(idx - offset, Cause.Null);
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getLB() > valVar.getLB()) {
@@ -308,7 +309,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         minval = Math.min(minval, vars[feasibleIndex].getLB());
                     }
-                    valVar.updateLowerBound(minval, null);
+                    valVar.updateLowerBound(minval, Cause.Null);
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -340,7 +341,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, null);
+                    idxVar.removeValue(idx - offset, Cause.Null);
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getUB() < valVar.getUB()) {
@@ -351,7 +352,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         maxval = Math.max(maxval, vars[feasibleIndex].getUB());
                     }
-                    valVar.updateUpperBound(maxval, null);
+                    valVar.updateUpperBound(maxval, Cause.Null);
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -379,7 +380,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, null);
+                    idxVar.removeValue(idx - offset, Cause.Null);
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else {
@@ -417,7 +418,7 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!existsSupport) {
-                    valVar.removeValue(x, null);
+                    valVar.removeValue(x, Cause.Null);
                 }
             }
         }

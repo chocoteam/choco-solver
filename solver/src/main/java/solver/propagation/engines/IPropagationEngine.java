@@ -27,6 +27,7 @@
 
 package solver.propagation.engines;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -91,7 +92,7 @@ public interface IPropagationEngine extends Serializable {
      * @param message detailed message of the exception reason
      * @throws ContradictionException expected behavior
      */
-    void fails(ICause cause, Variable variable, String message) throws ContradictionException;
+    void fails(@NotNull ICause cause, Variable variable, String message) throws ContradictionException;
 
     ContradictionException getContradictionException();
 }

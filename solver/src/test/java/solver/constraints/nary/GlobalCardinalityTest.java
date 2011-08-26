@@ -28,6 +28,7 @@ package solver.constraints.nary;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -68,7 +69,7 @@ public class GlobalCardinalityTest {
             solver.propagate();
             assertEquals(bob.getLB(), 2);
             assertEquals(bob.getUB(), 2);
-            julia.removeValue(3, null);
+            julia.removeValue(3, Cause.Null);
             solver.propagate();
         } catch (ContradictionException e) {
             Assert.fail();

@@ -29,6 +29,7 @@ package choco;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.exception.ContradictionException;
@@ -97,11 +98,11 @@ public class NotEqualX_YCTest {
             s.getSearchLoop().propEngine.init();
             s.getSearchLoop().propEngine.initialPropagation();
             s.getSearchLoop().propEngine.fixPoint();
-            vars[0].instantiateTo(1, null);
+            vars[0].instantiateTo(1, Cause.Null);
             s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 2);
-            vars[1].removeValue(2, null);
+            vars[1].removeValue(2, Cause.Null);
             s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 0);

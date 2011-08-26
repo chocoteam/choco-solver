@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -118,7 +119,7 @@ public abstract class AbstractVariable implements Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType e, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, getDelta());
         }

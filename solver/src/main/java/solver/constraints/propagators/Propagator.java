@@ -31,6 +31,7 @@ import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
+import com.sun.istack.internal.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -360,7 +361,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    public void contradiction(Variable variable, String message) throws ContradictionException {
+    public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
         engine.fails(this, variable, message);
     }
 }

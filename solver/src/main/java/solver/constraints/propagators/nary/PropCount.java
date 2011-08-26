@@ -29,6 +29,7 @@ package solver.constraints.propagators.nary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IStateInt;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -229,14 +230,14 @@ public class PropCount extends Propagator<IntVar> {
 
     public void checkNbPossible() throws ContradictionException {
         if (constrainOnInfNumber) {
-            vars[nbListVars].updateUpperBound(nbPossible.get(), null);
+            vars[nbListVars].updateUpperBound(nbPossible.get(), Cause.Null);
             if (vars[nbListVars].instantiatedTo(nbPossible.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
                     //for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
                         //nbSure.add(1); // must be dealed by the event listener not here !!
-                        aRelevantVar.instantiateTo(occval,  /*cIndices[i]*/null);
+                        aRelevantVar.instantiateTo(occval,  /*cIndices[i]*/Cause.Null);
                     }
                 }
             }
@@ -245,14 +246,14 @@ public class PropCount extends Propagator<IntVar> {
 
     public void checkNbSure() throws ContradictionException {
         if (constrainOnSupNumber) {
-            vars[nbListVars].updateLowerBound(nbSure.get(), null);
+            vars[nbListVars].updateLowerBound(nbSure.get(), Cause.Null);
             if (vars[nbListVars].instantiatedTo(nbSure.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
 //                for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
                         //nbPossible.add(-1);
-                        aRelevantVar.removeValue(occval,  /*cIndices[i]*/null);
+                        aRelevantVar.removeValue(occval,  /*cIndices[i]*/Cause.Null);
                     }
                 }
             }

@@ -32,6 +32,7 @@ import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.OneWordS32BitSet;
 import choco.kernel.memory.structure.OneWordS64BitSet;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -172,16 +173,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (value == inf) {
                     LB.set(VALUES.nextSetBit(aValue));
                     e = EventType.INCLOW;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 } else if (value == sup) {
                     UB.set(VALUES.prevSetBit(aValue));
                     e = EventType.DECUPP;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 if (change && !VALUES.isEmpty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                        cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                     }
                     this.notifyPropagators(e, cause);
                 } else {
@@ -318,7 +319,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
@@ -374,7 +375,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);

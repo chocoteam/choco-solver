@@ -27,6 +27,7 @@
 package solver.constraints.propagators.nary.globalcardinality;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -173,7 +174,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
         } else if (nbpos == getMinOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (vars[j].contains(val)) {
-                    vars[j].instantiateTo(val, null/*this, true*/);// not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].instantiateTo(val, Cause.Null/*this, true*/);// not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }

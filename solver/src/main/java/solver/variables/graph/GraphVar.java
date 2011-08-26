@@ -28,6 +28,7 @@
 package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -128,10 +129,10 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                 notifyPropagators(e, cause);
                 INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
                 if (neig.neighborhoodSize() == 1) {
-                    enforceArc(x, neig.getFirstElement(), null);
+                    enforceArc(x, neig.getFirstElement(), Cause.Null);
                 }
                 if (neig.neighborhoodSize() == 0) {
-                    this.contradiction(null, "cannot enforce nodes with no arcs");
+                    this.contradiction(Cause.Null, "cannot enforce nodes with no arcs");
                 }
                 return true;
             }

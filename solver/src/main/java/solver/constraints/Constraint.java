@@ -29,6 +29,7 @@ package solver.constraints;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;
+import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -312,7 +313,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
      * @param message  detailed message
      * @throws ContradictionException expected behavior
      */
-    protected void contradiction(ICause cause, Variable variable, String message) throws ContradictionException {
+    protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
         engine.fails(cause, variable, message);
     }
 }

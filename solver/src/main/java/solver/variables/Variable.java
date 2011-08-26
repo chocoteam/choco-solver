@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -125,7 +126,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @param o object which leads to the modification of this object
      * @throws solver.exception.ContradictionException if a contradiction occurs during notification
      */
-    void notifyPropagators(EventType e, ICause o) throws ContradictionException;
+    void notifyPropagators(EventType e, @NotNull ICause o) throws ContradictionException;
 
 
     void notifyViews(EventType e) throws ContradictionException;
@@ -148,7 +149,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @param message the detailed message
      * @throws ContradictionException expected behavior
      */
-    void contradiction(ICause cause, String message) throws ContradictionException;
+    void contradiction(@NotNull ICause cause, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

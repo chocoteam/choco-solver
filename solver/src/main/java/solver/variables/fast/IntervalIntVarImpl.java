@@ -29,6 +29,7 @@ package solver.variables.fast;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -119,7 +120,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(-1);
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
             } else {
                 if (reactOnRemoval) {
                     delta.add(value);
@@ -127,12 +128,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(-1);
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
@@ -248,7 +249,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 LB.set(value);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
 
@@ -297,7 +298,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
                 solver.explainer.updateUpperBound(this, old, value, cause);

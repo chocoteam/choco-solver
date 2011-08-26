@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -112,7 +113,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                         change = this.domain.updateLowerBound(value + 1);
                     }
                     e = EventType.INCLOW;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 } else if (value == sup) {
                     if (reactOnRemoval) {
                         change = this.domain.updateUpperBoundAndDelta(value - 1);
@@ -120,7 +121,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                         change = this.domain.updateUpperBound(value - 1);
                     }
                     e = EventType.DECUPP;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 } else {
                     if (reactOnRemoval) {
                         change = this.domain.removeAndUpdateDelta(value);
@@ -131,7 +132,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 if (change && !this.domain.empty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                        cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                     }
                     this.notifyPropagators(e, cause);
                 } else {
@@ -247,7 +248,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 }
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
@@ -294,7 +295,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 }
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);

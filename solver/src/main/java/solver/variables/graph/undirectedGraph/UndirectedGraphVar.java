@@ -27,6 +27,7 @@
 
 package solver.variables.graph.undirectedGraph;
 
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -76,10 +77,10 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         	notifyPropagators(e, cause);
         	// A node has at least one arc/edge otherwise it is meaningless
         	if(getEnvelopGraph().getNeighborsOf(x).neighborhoodSize()==0){
-        		removeNode(x, null);
+        		removeNode(x, Cause.Null);
         	}
         	if(getEnvelopGraph().getNeighborsOf(y).neighborhoodSize()==0){
-        		removeNode(y, null);
+        		removeNode(y, Cause.Null);
         	}
         	return true;
         }return false;

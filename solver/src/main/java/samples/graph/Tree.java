@@ -28,6 +28,7 @@
 package samples.graph;
 
 import samples.AbstractProblem;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
@@ -85,7 +86,7 @@ public class Tree extends AbstractProblem{
 		for(int i=0; i<n; i++){
 			for(int j=0; j<n ;j++){
 				if(!data[i].get(j)){
-					vars[i].removeValue(j, null);
+					vars[i].removeValue(j, Cause.Null);
 				}
 			}
 		}

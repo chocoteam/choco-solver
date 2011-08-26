@@ -31,6 +31,7 @@ import choco.checker.DomainBuilder;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
@@ -189,12 +190,12 @@ public class IntLinCombTest {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
         sum.getSearchLoop().propEngine.init();
         Variable[] vars = sum.getVars();
-        ((IntVar) vars[0]).instantiateTo(-2, null);
-        ((IntVar) vars[1]).instantiateTo(-1, null);
+        ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
+        ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
         sum.getSearchLoop().propEngine.initialPropagation();
         sum.getSearchLoop().propEngine.fixPoint();
         AbstractSearchLoop.timeStamp++;
-        ((IntVar) vars[2]).removeValue(-2, null);
+        ((IntVar) vars[2]).removeValue(-2, Cause.Null);
         sum.getSearchLoop().propEngine.fixPoint();
         Assert.assertTrue(vars[2].instantiated());
     }

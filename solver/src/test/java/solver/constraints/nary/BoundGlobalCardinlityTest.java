@@ -29,6 +29,7 @@ package solver.constraints.nary;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
@@ -55,12 +56,12 @@ public class BoundGlobalCardinlityTest {
 
         solver.post(GlobalCardinality.make(vars, card, 0, solver));
 
-        vars[0].instantiateTo(0, null);
-        vars[1].instantiateTo(1, null);
-        vars[2].instantiateTo(3, null);
-        vars[3].instantiateTo(2, null);
-        vars[4].instantiateTo(0, null);
-        vars[5].instantiateTo(0, null);
+        vars[0].instantiateTo(0, Cause.Null);
+        vars[1].instantiateTo(1, Cause.Null);
+        vars[2].instantiateTo(3, Cause.Null);
+        vars[3].instantiateTo(2, Cause.Null);
+        vars[4].instantiateTo(0, Cause.Null);
+        vars[5].instantiateTo(0, Cause.Null);
 
         solver.set(StrategyFactory.presetI(ArrayUtils.append(vars, card), solver.getEnvironment()));
         solver.findAllSolutions();

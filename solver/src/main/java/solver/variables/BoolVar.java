@@ -28,6 +28,7 @@
 package solver.variables;
 
 import choco.kernel.ESat;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 
@@ -41,7 +42,7 @@ public interface BoolVar extends IntVar {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(ICause cause) throws ContradictionException;
+    boolean setToTrue(@NotNull ICause cause) throws ContradictionException;
 
-    boolean setToFalse(ICause cause) throws ContradictionException;
+    boolean setToFalse(@NotNull ICause cause) throws ContradictionException;
 }

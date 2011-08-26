@@ -27,6 +27,7 @@
 
 package solver.variables.graph;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 
@@ -42,7 +43,7 @@ public interface IVariableGraph {
      * @param cause algorithm which is related to the removal
      * @return true iff the removal has an effect
      */
-    boolean removeNode(int x, ICause cause) throws ContradictionException;
+    boolean removeNode(int x, @NotNull ICause cause) throws ContradictionException;
     
     /**
      * Enforce the node x to belong to any partial subgraph
@@ -50,7 +51,7 @@ public interface IVariableGraph {
      * @param cause algorithm which is related to the modification
      * @return true iff the node is effectively added to the mandatory structure
      */
-    boolean enforceNode(int x, ICause cause) throws ContradictionException;
+    boolean enforceNode(int x, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Remove node y from the neighborhood of node x from the maximal partial subgraph
@@ -60,7 +61,7 @@ public interface IVariableGraph {
      * @return true iff the removal has an effect
      * @throws ContradictionException 
      */
-    boolean removeArc(int x, int y, ICause cause) throws ContradictionException;
+    boolean removeArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Enforce the node y into the neighborhood of node x in any partial subgraph
@@ -69,7 +70,7 @@ public interface IVariableGraph {
      * @param cause algorithm which is related to the removal
      * @return true iff the node y is effectively added in the neighborhooh of node x
      */
-    boolean enforceArc(int x, int y, ICause cause) throws ContradictionException;
+    boolean enforceArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
 
 
     /**

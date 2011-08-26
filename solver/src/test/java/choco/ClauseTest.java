@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.cnf.ALogicTree;
@@ -142,8 +143,8 @@ public class ClauseTest {
 
         try {
             solver.propagate();
-            bvars[1].instantiateTo(0, null);
-            bvars[0].instantiateTo(1, null);
+            bvars[1].instantiateTo(0, Cause.Null);
+            bvars[0].instantiateTo(1, Cause.Null);
             solver.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
@@ -159,8 +160,8 @@ public class ClauseTest {
 
         try {
             solver.propagate();
-            bvars[1].instantiateTo(1, null);
-            bvars[0].instantiateTo(0, null);
+            bvars[1].instantiateTo(1, Cause.Null);
+            bvars[0].instantiateTo(0, Cause.Null);
             solver.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
@@ -176,7 +177,7 @@ public class ClauseTest {
 
         try {
             solver.propagate();
-            bvars[0].instantiateTo(0, null);
+            bvars[0].instantiateTo(0, Cause.Null);
             solver.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
@@ -193,7 +194,7 @@ public class ClauseTest {
 
         try {
             solver.propagate();
-            bvars[1].instantiateTo(1, null);
+            bvars[1].instantiateTo(1, Cause.Null);
             solver.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
@@ -210,9 +211,9 @@ public class ClauseTest {
 
         try {
             solver.propagate();
-            bvars[0].instantiateTo(0, null);
-            bvars[2].instantiateTo(0, null);
-            bvars[1].instantiateTo(1, null);
+            bvars[0].instantiateTo(0, Cause.Null);
+            bvars[2].instantiateTo(0, Cause.Null);
+            bvars[1].instantiateTo(1, Cause.Null);
             solver.propagate();
         } catch (ContradictionException ex) {
             Assert.fail();
@@ -271,8 +272,8 @@ public class ClauseTest {
                 solver.post(new ConjunctiveNormalForm(tree, solver));
                 try {
                     solver.propagate();
-                    bvars[n1].instantiateTo(b1 ? 1 : 0, null);
-                    bvars[n2].instantiateTo(b2 ? 1 : 0, null);
+                    bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
+                    bvars[n2].instantiateTo(b2 ? 1 : 0, Cause.Null);
                     s1 = true;
                 } catch (ContradictionException cex) {
                     s1 = false;
@@ -284,8 +285,8 @@ public class ClauseTest {
                 solver.post(new Times(bvars[1], bvars[2], bvars[0], solver));
                 try {
                     solver.propagate();
-                    bvars[n1].instantiateTo(b1 ? 1 : 0, null);
-                    bvars[n2].instantiateTo(b2 ? 1 : 0, null);
+                    bvars[n1].instantiateTo(b1 ? 1 : 0, Cause.Null);
+                    bvars[n2].instantiateTo(b2 ? 1 : 0, Cause.Null);
                     s2 = true;
                 } catch (ContradictionException cex) {
                     s2 = false;

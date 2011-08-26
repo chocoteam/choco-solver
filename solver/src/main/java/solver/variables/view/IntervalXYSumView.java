@@ -65,19 +65,19 @@ public final class IntervalXYSumView extends AbstractSumView {
                 // todo: delta...
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 filterOnGeq(cause, value + 1);
             } else {
                 // todo: delta...
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 filterOnLeq(cause, value - 1);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
@@ -144,7 +144,7 @@ public final class IntervalXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
 
@@ -173,7 +173,7 @@ public final class IntervalXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != null && cause.reactOnPromotion() ? null : cause);
+                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
                 solver.explainer.updateUpperBound(this, old, aValue, cause);

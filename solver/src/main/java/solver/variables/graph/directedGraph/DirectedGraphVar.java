@@ -27,6 +27,7 @@
 
 package solver.variables.graph.directedGraph;
 
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -75,10 +76,10 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			EventType e = EventType.REMOVEARC;
 			notifyPropagators(e, cause);
 			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
-				removeNode(x, null);
+				removeNode(x, Cause.Null);
 			}
 			if(getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize()==0){
-				removeNode(y, null);
+				removeNode(y, Cause.Null);
 			}
 			return true;
 		}return false;

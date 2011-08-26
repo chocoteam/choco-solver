@@ -28,6 +28,7 @@ package solver.variables;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.EqualX_YC;
@@ -307,7 +308,7 @@ public class ViewsTest {
             long t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (y.getLB() == x.getUB()) {
-                    y.updateLowerBound(0, null);
+                    y.updateLowerBound(0, Cause.Null);
                 }
             }
             t += System.nanoTime();
@@ -315,7 +316,7 @@ public class ViewsTest {
             t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (z.getLB() == x.getUB()) {
-                    z.updateLowerBound(0, null);
+                    z.updateLowerBound(0, Cause.Null);
                 }
             }
             t += System.nanoTime();

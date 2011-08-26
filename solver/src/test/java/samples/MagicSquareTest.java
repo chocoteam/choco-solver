@@ -30,6 +30,7 @@ package samples;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.comparators.EngineStrategies;
@@ -84,16 +85,16 @@ public class MagicSquareTest {
         Variable[] vars = solver.getVars();
         solver.getSearchLoop().propEngine.init();
         solver.getSearchLoop().propEngine.initialPropagation();
-        ((IntVar) vars[0]).instantiateTo(3, null);
-        ((IntVar) vars[15]).instantiateTo(4, null);
-        ((IntVar) vars[5]).removeInterval(11, 15, null);
-        ((IntVar) vars[1]).removeValue(2, null);
-        ((IntVar) vars[9]).removeInterval(1, 2, null);
-        ((IntVar) vars[13]).removeInterval(1, 2, null);
-        ((IntVar) vars[1]).instantiateTo(6, null);
+        ((IntVar) vars[0]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[15]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null);
+        ((IntVar) vars[1]).removeValue(2, Cause.Null);
+        ((IntVar) vars[9]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[13]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[1]).instantiateTo(6, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
         LoggerFactory.getLogger("test").error("************************");
-        ((IntVar) vars[2]).instantiateTo(12, null);
+        ((IntVar) vars[2]).instantiateTo(12, Cause.Null);
         try {
             solver.getSearchLoop().propEngine.fixPoint();
             LoggerFactory.getLogger("test").error("************************");
@@ -114,18 +115,18 @@ public class MagicSquareTest {
         solver.getSearchLoop().propEngine.init();
         solver.getSearchLoop().propEngine.initialPropagation();
         Variable[] vars = solver.getVars();
-        ((IntVar) vars[0]).instantiateTo(2, null);
+        ((IntVar) vars[0]).instantiateTo(2, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
-        ((IntVar) vars[3]).instantiateTo(3, null);
+        ((IntVar) vars[3]).instantiateTo(3, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
-        ((IntVar) vars[1]).instantiateTo(13, null);
+        ((IntVar) vars[1]).instantiateTo(13, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
 
-        ((IntVar) vars[6]).removeValue(1, null);
+        ((IntVar) vars[6]).removeValue(1, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
-        ((IntVar) vars[14]).removeValue(1, null);
+        ((IntVar) vars[14]).removeValue(1, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
-        ((IntVar) vars[12]).removeInterval(9, 14, null);
+        ((IntVar) vars[12]).removeInterval(9, 14, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();
         Assert.assertTrue(((IntVar) vars[13]).instantiatedTo(1));
 

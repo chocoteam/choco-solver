@@ -28,6 +28,7 @@ package solver.variables;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
@@ -66,21 +67,21 @@ public class ViewSumXYTest {
             Assert.assertEquals(Z.previousValue(10), 9);
             Assert.assertEquals(Z.previousValue(4), Integer.MIN_VALUE);
 
-            Z.updateLowerBound(12, null);
+            Z.updateLowerBound(12, Cause.Null);
             Assert.assertEquals(X.getLB(), 4);
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(Y.getLB(), 3);
             Assert.assertEquals(Y.getUB(), 8);
 
-            Y.updateUpperBound(-2, null);
+            Y.updateUpperBound(-2, Cause.Null);
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
-            Y.removeValue(-4, null);
+            Y.removeValue(-4, Cause.Null);
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
-            Y.removeInterval(-8, -6, null);
+            Y.removeInterval(-8, -6, Cause.Null);
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -91,7 +92,7 @@ public class ViewSumXYTest {
             Assert.assertEquals(X.getDomainSize(), 4);
             Assert.assertEquals(Y.getDomainSize(), 4);
 
-            Y.instantiateTo(-5, null);
+            Y.instantiateTo(-5, Cause.Null);
             Assert.assertTrue(X.instantiated());
             Assert.assertTrue(Y.instantiated());
             Assert.assertEquals(X.getValue(), 5);
