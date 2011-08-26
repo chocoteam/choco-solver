@@ -24,7 +24,6 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.variables.delta.view;
 
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -35,23 +34,15 @@ import solver.variables.delta.IntDelta;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/04/11
+ * @since 26/08/11
  */
-public class DeltaTimeCste implements IntDelta {
+public abstract class ViewDelta implements IntDelta {
 
     final IntDelta original;
-    final int cste;
 
-    public DeltaTimeCste(IntDelta original, int cste) {
+    public ViewDelta(IntDelta original) {
         this.original = original;
-        this.cste = cste;
     }
-
-    @Override
-    public void add(int value) {
-        original.add(value / cste);
-    }
-
     @Override
     public int get(int idx) throws IndexOutOfBoundsException {
         return original.get(idx);
@@ -59,7 +50,7 @@ public class DeltaTimeCste implements IntDelta {
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        throw new UnsupportedOperationException();
+        original.forEach(proc, from, to);
     }
 
     @Override

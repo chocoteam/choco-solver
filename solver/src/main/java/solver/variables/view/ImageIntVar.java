@@ -52,12 +52,9 @@ public abstract class ImageIntVar<IV extends IntVar> extends AbstractVariable im
 
     protected int uniqueID;
 
-    protected final Solver solver;
-
     public ImageIntVar(String name, IV var, Solver solver) {
         super(name, solver);
         this.var = var;
-        this.solver = solver;
     }
 
     public int getUniqueID() {

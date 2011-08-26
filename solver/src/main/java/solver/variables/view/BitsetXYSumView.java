@@ -334,23 +334,23 @@ public final class BitsetXYSumView extends AbstractSumView {
             boolean up = false, down = false;
             EventType e = EventType.VOID;
             if (elb > ilb) {
+                if(elb > iub){
+                    solver.explainer.updateLowerBound(this, ilb, elb, Cause.Null);
+                    this.contradiction(Cause.Null, MSG_LOW);
+                }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
                 ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
-                if (ilb == OFFSET - 1) {
-                    solver.explainer.updateLowerBound(this, LB.get(), elb, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_EMPTY);
-                }
                 LB.set(ilb);
                 e = EventType.INCLOW;
                 down = true;
             }
             if (eub < iub) {
+                if(eub < ilb){
+                    solver.explainer.updateUpperBound(this, iub, eub, Cause.Null);
+                    this.contradiction(Cause.Null, MSG_LOW);
+                }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
-                if (iub == OFFSET - 1) {
-                    solver.explainer.updateUpperBound(this, UB.get(), eub, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_EMPTY);
-                }
                 UB.set(iub);
                 if (e != EventType.VOID) {
                     e = EventType.BOUND;
@@ -359,16 +359,17 @@ public final class BitsetXYSumView extends AbstractSumView {
                 }
                 up = true;
             }
+            SIZE.set(VALUES.cardinality());
             if (ilb > iub) {
                 solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
                 solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
                 this.contradiction(Cause.Null, MSG_EMPTY);
             }
             if (down) {
-                filterOnLeq(Cause.Null, iub);
+                filterOnGeq(Cause.Null, ilb);
             }
             if (up) {
-                filterOnGeq(Cause.Null, ilb);
+                filterOnLeq(Cause.Null, iub);
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, Cause.Null);

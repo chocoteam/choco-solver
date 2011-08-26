@@ -33,7 +33,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaTimeCste;
+import solver.variables.delta.view.ViewDelta;
 
 /**
  * declare an IntVar based on X and C, such as X * C
@@ -47,12 +47,18 @@ import solver.variables.delta.image.DeltaTimeCste;
 public final class ScaleView extends ImageIntVar<IntVar> {
 
     final int cste;
-    final DeltaTimeCste delta;
+    final IntDelta delta;
 
-    public ScaleView(IntVar var, int cste, Solver solver) {
+    public ScaleView(final IntVar var, final int cste, Solver solver) {
         super("("+var.getName()+"*"+cste+")", var, solver);
         this.cste = cste;
-        this.delta = new DeltaTimeCste(var.getDelta(), cste);
+        delta = new ViewDelta(var.getDelta()){
+
+            @Override
+            public void add(int value) {
+                var.getDelta().add(value / cste);
+            }
+        };
     }
 
     @Override

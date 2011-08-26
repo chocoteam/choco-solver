@@ -250,34 +250,50 @@ public final class IntervalXYSumView extends AbstractSumView {
             int eub = A.getUB() + B.getUB();
             int ilb = LB.get();
             int iub = UB.get();
+            boolean up = false, down = false;
             EventType e = EventType.VOID;
             if (elb > ilb) {
-                LB.set(elb);
-                ilb = elb;
+                if(elb > iub){
+                    solver.explainer.updateLowerBound(this, ilb, elb, Cause.Null);
+                    this.contradiction(Cause.Null, MSG_LOW);
+                }
+                SIZE.add(elb -ilb);
+                LB.set(ilb);
                 e = EventType.INCLOW;
+                down = true;
             }
             if (eub < iub) {
-                UB.set(eub);
-                iub = eub;
+                if(eub < ilb){
+                    solver.explainer.updateUpperBound(this, iub, eub, Cause.Null);
+                    this.contradiction(Cause.Null, MSG_LOW);
+                }
+                SIZE.add(eub -iub);
+                UB.set(iub);
                 if (e != EventType.VOID) {
                     e = EventType.BOUND;
                 } else {
                     e = EventType.DECUPP;
                 }
+                up = true;
             }
             if (ilb > iub) {
-                this.contradiction(null, MSG_EMPTY);
+                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
+                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
+                this.contradiction(Cause.Null, MSG_EMPTY);
             }
-            if (e == EventType.INCLOW) {
-                filterOnLeq(null, iub);
+            if (down) {
+                filterOnGeq(Cause.Null, ilb);
             }
-            if (e == EventType.DECUPP) {
-                filterOnGeq(null, ilb);
+            if (up) {
+                filterOnLeq(Cause.Null, iub);
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, Cause.Null);
+                solver.explainer.instantiateTo(this, ilb, Cause.Null);
             } else {
                 notifyPropagators(e, Cause.Null);
+                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
+                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
             }
         }
     }

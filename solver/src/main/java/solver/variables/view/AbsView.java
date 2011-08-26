@@ -36,7 +36,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaAbs;
+import solver.variables.delta.view.ViewDelta;
 
 
 /**
@@ -52,9 +52,16 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     protected HeuristicVal heuristicVal;
 
-    public AbsView(IntVar var, Solver solver) {
+    public AbsView(final IntVar var, Solver solver) {
         super("|"+var.getName()+"|", var, solver);
-        delta = new DeltaAbs(var.getDelta());
+        delta = new ViewDelta(var.getDelta()){
+
+            @Override
+            public void add(int value) {
+                var.getDelta().add(value);
+                var.getDelta().add(-value);
+            }
+        };
     }
 
     @Override

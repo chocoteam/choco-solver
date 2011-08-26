@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaAddCste;
+import solver.variables.delta.view.ViewDelta;
 
 
 /**
@@ -50,10 +50,16 @@ public final class OffsetView extends ImageIntVar<IntVar> {
     final int cste;
     final IntDelta delta;
 
-    public OffsetView(IntVar var, int cste, Solver solver) {
+    public OffsetView(final IntVar var, final int cste, Solver solver) {
         super("("+var.getName()+"+"+cste+")", var, solver);
         this.cste = cste;
-        delta = new DeltaAddCste(var.getDelta(), cste);
+        delta = new ViewDelta(var.getDelta()){
+
+            @Override
+            public void add(int value) {
+                var.getDelta().add(value - cste);
+            }
+        };
     }
 
     @Override

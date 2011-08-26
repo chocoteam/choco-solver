@@ -33,7 +33,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaMinus;
+import solver.variables.delta.view.ViewDelta;
 
 /**
  * View for -V, where V is a IntVar or view
@@ -46,11 +46,17 @@ import solver.variables.delta.image.DeltaMinus;
  */
 public class MinusView extends ImageIntVar<IntVar> {
 
-    final DeltaMinus delta;
+    final IntDelta delta;
 
-    public MinusView(IntVar var, Solver solver) {
+    public MinusView(final IntVar var, Solver solver) {
         super("-(" + var.getName() + ")", var, solver);
-        delta = new DeltaMinus(var.getDelta());
+        delta = new ViewDelta(var.getDelta()){
+
+            @Override
+            public void add(int value) {
+                var.getDelta().add(-value);
+            }
+        };
     }
 
     @Override
