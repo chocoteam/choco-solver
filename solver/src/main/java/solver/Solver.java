@@ -157,7 +157,7 @@ public class Solver implements Serializable {
         }
         this.explainer = new ExplanationEngine();
         this.measures = new MeasuresRecorder(this);
-        this.creationTime -= System.currentTimeMillis();
+        this.creationTime -= System.nanoTime();
         this.engine = new PropagationEngine();
 //        this.engine = new ThreadedPropagationEngine(this, 1);
         //this.engine = new FastPropagationEngine();
@@ -336,7 +336,7 @@ public class Solver implements Serializable {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
             set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(getVars()), this));
         }
-        measures.setReadingTimeCount(creationTime + System.currentTimeMillis());
+        measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.setup();
         return search.launch();
     }
