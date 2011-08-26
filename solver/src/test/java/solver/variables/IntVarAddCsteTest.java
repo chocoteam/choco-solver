@@ -36,6 +36,7 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.EqualX_YC;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -53,7 +54,7 @@ public class IntVarAddCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = VariableFactory.addCste(X, 2);
+        IntVar Y = Views.offset(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -76,7 +77,7 @@ public class IntVarAddCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = VariableFactory.addCste(X, 3);
+        IntVar Y = Views.offset(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -97,7 +98,7 @@ public class IntVarAddCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = VariableFactory.addCste(X, coeff);
+        IntVar Y = Views.offset(X, coeff);
 
         IntVar[] vars = {X, Y};
 

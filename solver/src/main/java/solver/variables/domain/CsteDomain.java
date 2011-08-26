@@ -28,8 +28,8 @@
 package solver.variables.domain;
 
 import solver.exception.SolverException;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * <br/>

@@ -28,6 +28,7 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -52,6 +53,9 @@ import java.util.Comparator;
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
+    //TODO: minsorted et maxsorted => LinkedList
+    //TODO: maintenir sortIt incrementalement
+
     int[] t; // Tree links
     int[] d; // Diffs between critical capacities
     int[] h; // Hall interval links
@@ -61,6 +65,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     Interval[] minsorted;
     Interval[] maxsorted;
+
+    int[] instantiatedValues;
+    IStateInt ivIdx;
 
     boolean infBoundModified = true;
     boolean supBoundModified = true;
@@ -78,12 +85,18 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         minsorted = new Interval[n];
         maxsorted = new Interval[n];
 
+        int idx = 0;
+        instantiatedValues = new int[n];
         for (int i = 0; i < vars.length; i++) {
             intervals[i] = new Interval();
             intervals[i].var = vars[i];
             intervals[i].idx = i;
             minsorted[i] = intervals[i];
             maxsorted[i] = intervals[i];
+            if (vars[i].instantiated()) {
+                instantiatedValues[idx++] = vars[i].getValue();
+            }
+            ivIdx = environment.makeInt(idx);
         }
     }
 
@@ -129,17 +142,22 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
-        } else
-            //HACK for enumerated domain variables
+        } else if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
+            infBoundModified = supBoundModified = true;
             if (!vars[varIdx].hasEnumeratedDomain()) {
-                if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
-                    awakeOnBound(varIdx);
-                } else if (EventType.isInclow(mask)) {
-                    awakeOnInf(varIdx);
-                } else if (EventType.isDecupp(mask)) {
-                    awakeOnSup(varIdx);
-                }
+                awakeOnBound(varIdx);
             }
+        } else if (EventType.isInclow(mask)) {
+            infBoundModified = true;
+            if (!vars[varIdx].hasEnumeratedDomain()) {
+                awakeOnInf(varIdx);
+            }
+        } else if (EventType.isDecupp(mask)) {
+            supBoundModified = true;
+            if (!vars[varIdx].hasEnumeratedDomain()) {
+                awakeOnSup(varIdx);
+            }
+        }
         if (getNbRequestEnqued() == 0) {
             filter();
         }
@@ -171,7 +189,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         if (i < vars.length - 2) {
             st.append("...,");
         }
-        st.append(vars[vars.length - 1].getName());
+        st.append(vars[vars.length - 1].getName()).append(")");
         return st.toString();
     }
 
@@ -181,7 +199,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     protected void awakeOnBound(int i) throws ContradictionException {
         infBoundModified = supBoundModified = true;
-        for (int j = 0; j < vars.length; j++) {
+        /*for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
@@ -190,30 +208,51 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 if (val == vars[i].getUB()) {
                     vars[i].updateUpperBound(val - 1, this);
                 }
+            }
+        }*/
+        int idx = ivIdx.get();
+        for (int j = 0; j < idx; j++) {
+            if (instantiatedValues[j] == vars[i].getLB()) {
+                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
+            }
+            if (instantiatedValues[j] == vars[i].getUB()) {
+                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
             }
         }
     }
 
     protected void awakeOnInf(int i) throws ContradictionException {
         infBoundModified = true;
-        for (int j = 0; j < vars.length; j++) {
+        /*for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
                     vars[i].updateLowerBound(val + 1, this);
                 }
             }
+        }*/
+        int idx = ivIdx.get();
+        for (int j = 0; j < idx; j++) {
+            if (instantiatedValues[j] == vars[i].getLB()) {
+                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
+            }
         }
     }
 
     protected void awakeOnSup(int i) throws ContradictionException {
         supBoundModified = true;
-        for (int j = 0; j < vars.length; j++) {
+        /*for (int j = 0; j < vars.length; j++) {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getUB()) {
                     vars[i].updateUpperBound(val - 1, this);
                 }
+            }
+        }*/
+        int idx = ivIdx.get();
+        for (int j = 0; j < idx; j++) {
+            if (instantiatedValues[j] == vars[i].getUB()) {
+                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
             }
         }
     }
@@ -227,6 +266,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 vars[j].removeValue(val, this);
             }
         }
+        int idx = ivIdx.get();
+        instantiatedValues[idx++] = val;
+        ivIdx.set(idx);
     }
 
     private void filter() throws ContradictionException {
@@ -239,7 +281,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
 
     protected void sortmin() {
-        boolean sorted = false;
+        /*boolean sorted = false;
         int current = this.vars.length - 1;
         while (!sorted) {
             sorted = true;
@@ -252,7 +294,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
             current--;
-        }
+        }*/
+        Arrays.sort(minsorted, SORT.MIN);
     }
 
     protected void sortmax() {
@@ -274,11 +317,19 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     static enum SORT implements Comparator<Interval> {
-        MAX;
-        @Override
-        public int compare(Interval o1, Interval o2) {
-            return o1.var.getUB() - o2.var.getUB();
-        }
+        MAX {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                return o1.var.getUB() - o2.var.getUB();
+            }
+        },
+        MIN {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                return o1.var.getLB() - o2.var.getLB();
+            }
+        },
+        ;
     }
 
     protected void sortIt() {

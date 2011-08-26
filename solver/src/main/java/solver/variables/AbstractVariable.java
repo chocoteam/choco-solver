@@ -35,7 +35,8 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
-import solver.variables.domain.delta.IDelta;
+import solver.variables.delta.IDelta;
+import solver.variables.view.IView;
 
 import java.io.Serializable;
 
@@ -71,6 +72,10 @@ public abstract class AbstractVariable implements Serializable {
      */
     protected final IRequestList<IRequest> requests;
 
+    protected IView[] views; // views to inform of domain modification
+    protected int vIdx; // index of the last view not null in views -- not backtrable
+
+
     protected int modificationEvents;
 
     protected int uniqueID;
@@ -84,6 +89,7 @@ public abstract class AbstractVariable implements Serializable {
         this.solver = solver;
         this.engine = solver.getEngine();
         this.requests = RequestListBuilder.preset(solver.getEnvironment());
+        views = new IView[2];
     }
 
     public abstract IDelta getDelta();
@@ -108,10 +114,6 @@ public abstract class AbstractVariable implements Serializable {
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
-    public void addPropagator(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
-    }
-
     public void deletePropagator(Propagator observer) {
         throw new UnsupportedOperationException();
     }
@@ -119,6 +121,13 @@ public abstract class AbstractVariable implements Serializable {
     public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, getDelta());
+        }
+        notifyViews(e);
+    }
+
+    public void notifyViews(EventType e) throws ContradictionException {
+        for (int i = vIdx - 1; i >= 0; i--) {
+            views[i].backPropagate(e.mask);
         }
     }
 
@@ -128,6 +137,15 @@ public abstract class AbstractVariable implements Serializable {
 
     public void deleteRequest(IRequest request) {
         requests.deleteRequest(request);
+    }
+
+    public void subscribeView(IView view) {
+        if (vIdx == views.length) {
+            IView[] tmp = views;
+            views = new IView[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, views, 0, vIdx);
+        }
+        views[vIdx++] = view;
     }
 
     public IRequestList getRequests() {

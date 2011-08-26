@@ -9,25 +9,12 @@ from os.path import join
 ## HOME
 CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/'
 
-## maven local repository
-M2_REPO = '/Users/cprudhom/.m2/repository/'
-
 ## java class-path for rocs
-ARGS = join(M2_REPO, 'args4j', 'args4j', '2.0.12', 'args4j-2.0.12.jar')
-LOGBACK_CL = join(M2_REPO, 'ch', 'qos', 'logback', 'logback-classic', '0.9.24', 'logback-classic-0.9.24.jar')
-LOGBACK_CO = join(M2_REPO, 'ch', 'qos', 'logback', 'logback-core', '0.9.24', 'logback-core-0.9.24.jar')
-SLF4J = join(M2_REPO, 'org', 'slf4j', 'slf4j-api', '1.6.1', 'slf4j-api-1.6.1.jar')
-TROVE = join(M2_REPO, 'gnu', 'trove', '2.1.0', 'trove-2.1.0.jar')
-JPARSEC = join(M2_REPO, 'jparsec', 'jparsec', '2.0.1', 'jparsec-2.0.1.jar')
-CGLIB = join(M2_REPO, 'cglib', 'cglib-nodep', '2.2', 'cglib-nodep-2.2.jar')
-DKBRICS = join(M2_REPO, 'dk', 'brics', 'automaton', '1.11-2', 'automaton-1.11-2.jar')
-ASPECT = join(M2_REPO, 'org','aspectj', 'aspectjrt', '1.6.10', 'aspectjrt-1.6.10.jar')
-
-
-CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT.jar')
+#if CHOCO_SOLVER == '':
+CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
 
 ## correct class-path
-CP = '-cp .:'+ ARGS+':'+LOGBACK_CL+':'+LOGBACK_CO+':'+SLF4J+':'+TROVE+':'+JPARSEC+':'+CGLIB+':'+DKBRICS+':'+ASPECT+':'+CHOCO_SOLVER
+CP = '-cp .:'+CHOCO_SOLVER
 
 ## java command
 CMD='java -Xmx1024m -Xms1024m'# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
@@ -44,7 +31,7 @@ name = 'runner'
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P propagations]
 ## len is 8 or 9
 _SIZE = 10
-pattern = re.compile('[\d+]+\,?\d+')
+pattern = re.compile('\d+\,?\d*')
 _STAT = '[STATISTICS'
 _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROPAGATIONS','SCRIPT_TIME'
 

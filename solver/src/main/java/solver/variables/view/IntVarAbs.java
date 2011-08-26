@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.image;
+package solver.variables.view;
 
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -35,8 +35,9 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.image.DeltaAbs;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.image.DeltaAbs;
+
 
 /**
  * declare an IntVar based on X, such |X|
@@ -53,7 +54,7 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
     protected HeuristicVal heuristicVal;
 
     public IntVarAbs(IntVar var, Solver solver) {
-        super(var, solver);
+        super("|"+var.getName()+"|", var, solver);
         delta = new DeltaAbs(var.getDelta());
     }
 
@@ -85,10 +86,10 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
 
     @Override
     public boolean instantiated() {
-        if(var.instantiated()){
+        if (var.instantiated()) {
             return true;
-        }else{
-            if(var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB()){
+        } else {
+            if (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB()) {
                 return true;
             }
         }
@@ -134,7 +135,7 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value >= 0 && var.removeInterval(-value + 1, value - 1, cause);
+        return value > 0 && var.removeInterval(-value + 1, value - 1, cause);
     }
 
     @Override
@@ -167,20 +168,32 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
         if (var.contains(0)) {
             return 0;
         }
-        int l = var.previousValue(0);
-        //
-        if (l == Integer.MIN_VALUE) {
-            l = Integer.MAX_VALUE;
-        } else {
-            l = Math.abs(l);
+        int elb = var.getLB();
+        if (elb > 0) {
+            return elb;
         }
+        int eub = var.getUB();
+        if (eub < 0) {
+            return -eub;
+        }
+        int l = var.previousValue(0);
         int u = var.nextValue(0);
-        return Math.min(l, u);
+        return Math.min(-l, u);
     }
 
     @Override
     public int getUB() {
-        return Math.max(Math.abs(var.getLB()), Math.abs(var.getUB()));
+        int elb = var.getLB();
+        int eub = var.getUB();
+        int mm = -elb;
+        if (elb < 0) {
+            if (eub > 0 && eub > mm) {
+                mm = eub;
+            }
+        } else {
+            mm = eub;
+        }
+        return mm;
     }
 
     @Override
@@ -213,10 +226,9 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
         return Math.max(Math.abs(l), Math.abs(u));
     }
 
-
     @Override
     public String toString() {
-        return "|" + this.var.getName() + "|";
+        return "|" + this.var.getName() + "| = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override

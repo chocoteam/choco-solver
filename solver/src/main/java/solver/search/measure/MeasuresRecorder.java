@@ -31,7 +31,6 @@ package solver.search.measure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.search.limits.TimeCacheThread;
 
 public final class MeasuresRecorder implements IMeasures {
 
@@ -224,7 +223,7 @@ public final class MeasuresRecorder implements IMeasures {
      */
     public void updateTimeCount() {
 //        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
-        timeCount = TimeCacheThread.currentTimeNanos- startingTime;
+        timeCount = System.nanoTime()- startingTime;
     }
 
     //****************************************************************************************************************//
@@ -235,17 +234,12 @@ public final class MeasuresRecorder implements IMeasures {
     public void beforeInitialize() {
         reset();
         startingMemory = memoryUsedInMB();
-//        startingTime = System.currentTimeMillis();
         startingTime = System.nanoTime();
-//        TimeCacheThread.currentTimeMillis = startingTime;
-        TimeCacheThread.currentTimeNanos = startingTime;
     }
 
     @Override
     public void afterInitialize() {
-        updateTimeCount();
-//        initialisationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
-        initialisationTimeCount = TimeCacheThread.currentTimeNanos- startingTime;
+        initialisationTimeCount = System.nanoTime() - startingTime;
     }
 
     @Override
@@ -254,14 +248,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public void afterInitialPropagation() {
-//        initialPropagationTimeCount = TimeCacheThread.currentTimeMillis - startingTime;
-        initialPropagationTimeCount = TimeCacheThread.currentTimeNanos - startingTime;
-        updateTimeCount();
+        initialPropagationTimeCount = System.nanoTime() - startingTime;
     }
 
     @Override
     public void beforeOpenNode() {
-        updateTimeCount();
+//        updateTimeCount();
         nodeCount++;
     }
 

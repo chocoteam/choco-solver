@@ -48,6 +48,7 @@ import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -139,9 +140,9 @@ public class AirPlaneLanding extends AbstractProblem {
             IntVar e = VariableFactory.bounded(i + "_e", -9999, 9999, solver);
             IntVar t = VariableFactory.bounded(i + "_t", -9999, 9999, solver);
             solver.post(Sum.eq(new IntVar[]{e, planes[i]}, new int[]{1, 1}, data[i][TT], solver));
-            solver.post(new MaxXYZ(earliness[i], VariableFactory.fixed(0, solver), e, solver));
+            solver.post(new MaxXYZ(earliness[i], Views.fixed(0, solver), e, solver));
             solver.post(Sum.eq(new IntVar[]{t, planes[i]}, new int[]{1, -1}, -data[i][TT], solver));
-            solver.post(new MaxXYZ(tardiness[i], VariableFactory.fixed(0, solver), t, solver));
+            solver.post(new MaxXYZ(tardiness[i], Views.fixed(0, solver), t, solver));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();

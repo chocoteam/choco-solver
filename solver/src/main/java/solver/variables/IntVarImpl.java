@@ -32,9 +32,10 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.PropRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.delta.IntDelta;
 import solver.variables.domain.IIntDomain;
-import solver.variables.domain.delta.IntDelta;
 
 import java.util.BitSet;
 
@@ -385,12 +386,19 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
+    public void updatePropagationConditions(Propagator observer, int idxInProp) {
         modificationEvents |= observer.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             domain.recordRemoveValues();
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        PropRequest<IntVar, Propagator<IntVar>> request = new PropRequest<IntVar, Propagator<IntVar>>(propagator, this, idxInProp);
+        propagator.addRequest(request);
+        this.addRequest(request);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

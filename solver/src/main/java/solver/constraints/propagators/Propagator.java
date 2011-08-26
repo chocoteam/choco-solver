@@ -42,7 +42,6 @@ import solver.explanations.Explanation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.InitializeRequest;
-import solver.requests.PropRequest;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -96,6 +95,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected IRequest<V>[] requests;
 
+    protected int lastRequest;
+
     protected InitializeRequest initializeRequest;
 
     /**
@@ -147,6 +148,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         arity = environment.makeInt(nbNi);
 //        linkToVariables();
         fails = 0;
+        requests = new IRequest[vars.length];
+        lastRequest = 0;
     }
 
     /**
@@ -188,8 +191,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
         isActive.set(false);
         this.constraint.updateActivity(this);
-        // then notify the linked variables
-        for (int i = 0; i < requests.length; i++) {
+        //then notify the linked variables
+        for (int i = 0; i < lastRequest; i++) {
             requests[i].desactivate();
         }
     }
@@ -226,11 +229,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public int nbRequests() {
-        return requests.length;
+        return lastRequest;
     }
 
     public IRequest getRequest(int i) {
-        if (i >= 0 && i < requests.length) {
+        if (i >= 0 && i < lastRequest) {
             return requests[i];
         } else if (i == -1) {
             return initializeRequest;
@@ -238,13 +241,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         throw new IndexOutOfBoundsException();
     }
 
+    public void addRequest(IRequest<V> request){
+        if(lastRequest >= requests.length){
+            IRequest<V>[] tmp = requests;
+            requests = new IRequest[tmp.length*3/2+1];
+            System.arraycopy(tmp, 0, requests, 0, tmp.length);
+        }
+        requests[lastRequest++] = request;
+    }
+
     @SuppressWarnings({"unchecked"})
     public void linkToVariables() {
-        requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            vars[i].addPropagator(this, i);
-            requests[i] = new PropRequest<V, Propagator<V>>(this, vars[i], i);
-            vars[i].addRequest(requests[i]);
+            vars[i].updatePropagationConditions(this, i);
+            vars[i].attachPropagator(this, i);
         }
     }
 
@@ -254,12 +264,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     public void unlinkVariables() {
-        for (int v = 0; v < requests.length; v++) {
-            IRequest request = requests[v];
+        for (lastRequest--;lastRequest>=0; lastRequest--) {
+            IRequest request = requests[lastRequest];
             request.getVariable().deleteRequest(request);
-            requests[v] = null;
+            requests[lastRequest] = null;
         }
-        requests = new IRequest[0];
     }
 
     /**
@@ -332,7 +341,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void decArity() {
-        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
+//        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
         arity.add(-1);
     }
 

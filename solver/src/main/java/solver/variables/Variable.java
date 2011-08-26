@@ -34,7 +34,8 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
-import solver.variables.domain.delta.IDelta;
+import solver.variables.delta.IDelta;
+import solver.variables.view.IView;
 
 import java.io.Serializable;
 
@@ -80,6 +81,8 @@ public interface Variable<D extends IDelta> extends Serializable {
 
     int nbRequests();
 
+    void subscribeView(IView view);
+
     /**
      * Returns the number of constraints involving <code>this</code>
      * TODO: MostConstrained: count requests instead of constraints
@@ -93,29 +96,39 @@ public interface Variable<D extends IDelta> extends Serializable {
     D getDelta();
 
     /**
-     * Adds an observers to the set of observers for this object,
-     * provided that it is not the same as some observer already in the set.
-     * @param observer an observer to add
+     * Regarding the propagator in parameter, update the propagation conditions of the variable
+     * @param propagator a newly added propagator
      * @param idxInProp index of the variable in the propagator
      */
-    public void addPropagator(Propagator observer, int idxInProp);
+    void updatePropagationConditions(Propagator propagator, int idxInProp);
 
     /**
      * Deletes an observers from the set of observers for this object.
      * @param observer the observer to delete
      */
-    public void deletePropagator(Propagator observer);
+    void deletePropagator(Propagator observer);
+
+    /**
+     * attach a propagator to the variable
+     * @param propagator a propagator
+     * @param idxInProp index of the variable within the propagator
+     */
+    void attachPropagator(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *
      *
+     *
      * @param e event on this object
      * @param o object which leads to the modification of this object
      * @throws solver.exception.ContradictionException if a contradiction occurs during notification
      */
-    public void notifyPropagators(EventType e, ICause o) throws ContradictionException;
+    void notifyPropagators(EventType e, ICause o) throws ContradictionException;
+
+
+    void notifyViews(EventType e) throws ContradictionException;
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)

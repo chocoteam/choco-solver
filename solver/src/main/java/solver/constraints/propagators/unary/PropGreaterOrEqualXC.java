@@ -55,18 +55,23 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
     public void propagate() throws ContradictionException {
-        vars[0].updateLowerBound(constant, this);
-        this.setPassive();
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateLowerBound(constant, this)|| vars[0].getLB()>=constant){
+            this.setPassive();
+        }
     }
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        throw new UnsupportedOperationException();
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateLowerBound(constant, this)|| vars[0].getLB()>=constant){
+            this.setPassive();
+        }
     }
 
     @Override

@@ -45,7 +45,7 @@ import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -114,14 +114,14 @@ public class Sum extends IntConstraint<IntVar> {
         int i = 0;
         for (; i < pos; i++) {
             if (coeffs[i] != 1) {
-                x[s++] = VariableFactory.timesPosCste(vars[i], coeffs[i]);
+                x[s++] = Views.scale(vars[i], coeffs[i]);
             } else {
                 x[s++] = vars[i];
             }
         }
         for (int e = l; i < l; i++) {
             if (coeffs[i] != -1) {
-                x[--e] = VariableFactory.timesPosCste(vars[i], -coeffs[i]);
+                x[--e] = Views.scale(vars[i], -coeffs[i]);
             } else {
                 x[--e] = vars[i];
             }

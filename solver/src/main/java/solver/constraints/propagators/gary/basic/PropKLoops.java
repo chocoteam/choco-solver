@@ -36,14 +36,12 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K loops belong to the final graph
  * 

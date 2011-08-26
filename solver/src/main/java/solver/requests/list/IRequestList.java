@@ -28,9 +28,9 @@
 package solver.requests.list;
 
 import solver.ICause;
-import solver.variables.EventType;
-import solver.variables.domain.delta.IDelta;
 import solver.requests.IRequest;
+import solver.variables.EventType;
+import solver.variables.delta.IDelta;
 
 import java.io.Serializable;
 

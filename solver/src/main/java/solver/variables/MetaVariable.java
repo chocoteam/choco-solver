@@ -28,9 +28,10 @@ package solver.variables;
 
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.NoDelta;
 
 public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
 
@@ -52,8 +53,15 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 		}return true;
 	}
 
+    public void updatePropagationConditions(Propagator observer, int idxInProp) {
+        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    }
 
-	@Override
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+    }
+
+    @Override
 	public Explanation explain() {
 		// TODO Auto-generated method stub
 		return null;

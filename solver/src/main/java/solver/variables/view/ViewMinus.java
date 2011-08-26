@@ -24,109 +24,118 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables.view;
 
-package solver.variables.image;
-
-import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.image.DeltaTimeCste;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.image.DeltaMinus;
 
 /**
- * declare an IntVar based on X and C, such as X * C
- * <p/>
+ * View for -V, where V is a IntVar or view
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/02/11
+ * @since 23/08/11
  */
-public final class IntVarTimesPosCste extends ImageIntVar<IntVar> {
+public class ViewMinus extends ImageIntVar<IntVar> {
 
-    final int cste;
-    final DeltaTimeCste delta;
+    final DeltaMinus delta;
 
-    public IntVarTimesPosCste(IntVar var, int cste, Solver solver) {
-        super(var, solver);
-        this.cste = cste;
-        this.delta = new DeltaTimeCste(var.getDelta(), cste);
-    }
-
-    @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return value % cste == 0 && var.removeValue(value / cste, cause);
-    }
-
-    @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
-    }
-
-    @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return value % cste == 0 && var.instantiateTo(value / cste, cause);
-    }
-
-    @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound(MathUtils.divCeil(value, cste), cause);
-    }
-
-    @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause);
-    }
-
-    @Override
-    public boolean contains(int value) {
-        return value % cste == 0 && var.contains(value / cste);
-    }
-
-    @Override
-    public boolean instantiatedTo(int value) {
-        return value % cste == 0 && var.instantiatedTo(value / cste);
-    }
-
-    @Override
-    public int getValue() {
-        return var.getValue() * cste;
-    }
-
-    @Override
-    public int getLB() {
-        return var.getLB() * cste;
-    }
-
-    @Override
-    public int getUB() {
-        return var.getUB() * cste;
-    }
-
-    @Override
-    public int nextValue(int v) {
-        return var.nextValue(v / cste);
-    }
-
-    @Override
-    public int previousValue(int v) {
-        return var.previousValue(v / cste);
-    }
-
-    @Override
-    public String toString() {
-        return "("+this.var.getName() +" * " + this.cste+")";
+    public ViewMinus(IntVar var, Solver solver) {
+        super("-(" + var.getName() + ")", var, solver);
+        delta = new DeltaMinus(var.getDelta());
     }
 
     @Override
     public IntDelta getDelta() {
         return delta;
     }
-    
-	@Override
-	public int getType() {
-		return Variable.INTEGER;
-	}
+
+    @Override
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        return var.removeValue(-value, cause);
+    }
+
+    @Override
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+        return var.removeInterval(-to, -from, cause);
+    }
+
+    @Override
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        return var.instantiateTo(-value, cause);
+    }
+
+    @Override
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        return var.updateUpperBound(-value, cause);
+    }
+
+    @Override
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        return var.updateLowerBound(-value, cause);
+    }
+
+    @Override
+    public boolean contains(int value) {
+        return var.contains(-value);
+    }
+
+    @Override
+    public boolean instantiatedTo(int value) {
+        return var.instantiatedTo(-value);
+    }
+
+    @Override
+    public int getValue() {
+        return -var.getValue();
+    }
+
+    @Override
+    public int getLB() {
+        return -var.getUB();
+    }
+
+    @Override
+    public int getUB() {
+        return -var.getLB();
+    }
+
+    @Override
+    public int nextValue(int v) {
+        int value = var.previousValue(-v);
+        if (value == Integer.MIN_VALUE) return Integer.MAX_VALUE;
+        return -value;
+    }
+
+    @Override
+    public int previousValue(int v) {
+        int value = var.nextValue(-v);
+        if (value == Integer.MAX_VALUE) return Integer.MIN_VALUE;
+        return -value;
+    }
+
+    @Override
+    public int getType() {
+        return Variable.INTEGER;
+    }
+
+    @Override
+    public String toString() {
+        return "-(" + this.var.getName() + ") = [" + getLB() + "," + getUB() + "]";
+    }
+
+    @Override
+    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
+        if (eventType.mask == 4 || eventType.mask == 8) {
+            var.notifyPropagators(eventType.mask == 4 ? EventType.DECUPP : EventType.INCLOW, o);
+        } else {
+            var.notifyPropagators(eventType, o);
+        }
+    }
 }

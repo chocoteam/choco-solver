@@ -25,12 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package solver.variables.view;
 
 import choco.kernel.ESat;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.variables.BoolVar;
+import solver.variables.IntCste;
 
 /**
  * <br/>

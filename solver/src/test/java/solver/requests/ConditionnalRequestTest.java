@@ -75,7 +75,7 @@ public class ConditionnalRequestTest {
                     AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
                     ConditionnalRequest[] requests = new ConditionnalRequest[ivars.length];
                     for (int i = 0; i < ivars.length; i++) {
-                        ivars[i].addPropagator(prop, i);
+                        ivars[i].updatePropagationConditions(prop, i);
                         requests[i] = new ConditionnalRequest(prop, ivars[i], i, cond, environment);
                         ivars[i].addRequest(requests[i]);
                         cond.linkRequest(requests[i]);

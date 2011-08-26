@@ -29,12 +29,13 @@ package solver.requests.list;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.Cause;
 import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.delta.IDelta;
+import solver.variables.delta.IDelta;
 
 /**
  * <br/>
@@ -57,7 +58,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     public void setPassive(R request) {
         int last = this.firstPassive.get();
         int i = request.getIdxInVar();
-        if (last  > i) {
+        if (last > i) {
             R tmp1 = requests[--last];
             requests[last] = requests[i];
             requests[last].setIdxInVar(last);
@@ -114,13 +115,25 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         IRequest request;
         int last = firstPassive.get();
         int mask = event.mask;
-        for (int a = 0; a < last; a++) {
-            request = requests[a];
-            Propagator<IntVar> o = request.getPropagator();
-            if (o != cause) {
+        if (cause == Cause.Null) {
+            for (int a = 0; a < last; a++) {
+                request = requests[a];
+                Propagator<IntVar> o = request.getPropagator();
                 // Only notify constraints that filter on the specific event received
                 if ((mask & o.getPropagationConditions(request.getIdxVarInProp())) != 0) {
                     request.update(event);
+                }
+            }
+        } else {
+            //TODO: get the id of the cause, to avoid testing it at each iteration
+            for (int a = 0; a < last; a++) {
+                request = requests[a];
+                Propagator<IntVar> o = request.getPropagator();
+                if (o != cause) {
+                    // Only notify constraints that filter on the specific event received
+                    if ((mask & o.getPropagationConditions(request.getIdxVarInProp())) != 0) {
+                        request.update(event);
+                    }
                 }
             }
         }

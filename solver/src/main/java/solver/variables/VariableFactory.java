@@ -33,9 +33,7 @@ import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
-import solver.variables.image.IntVarAbs;
-import solver.variables.image.IntVarAddCste;
-import solver.variables.image.IntVarTimesPosCste;
+import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -92,7 +90,7 @@ public enum VariableFactory {
     public static IntVar bounded(String name, int min, int max, Solver solver) {
         checkIntVar(name, min, max);
         if (min == max) {
-            return fixed(name, min, solver);
+            return Views.fixed(name, min, solver);
         } else {
             //IntVarImpl var = new IntVarImpl(name, solver);
             //var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
@@ -122,7 +120,7 @@ public enum VariableFactory {
     public static IntVar enumerated(String name, int min, int max, Solver solver) {
         checkIntVar(name, min, max);
         if (min == max) {
-            return fixed(name, min, solver);
+            return Views.fixed(name, min, solver);
         } else {
             //IntVarImpl var = new IntVarImpl(name, solver);
             //var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
@@ -154,7 +152,7 @@ public enum VariableFactory {
     public static IntVar enumerated(String name, int[] values, Solver solver) {
         checkIntVar(name, values[0], values[values.length - 1]);
         if (values.length == 1) {
-            return fixed(name, values[0], solver);
+            return Views.fixed(name, values[0], solver);
         } else {
             //IntVarImpl var = new IntVarImpl(name, solver);
             //var.domain = new BitSetIntDomain(values, solver.getEnvironment());
@@ -173,39 +171,6 @@ public enum VariableFactory {
         return vars;
     }
 
-
-    public static IntVar fixed(int value, Solver solver) {
-        return fixed("cste -- " + value, value, solver);
-    }
-
-    public static IntVar fixed(String name, int value, Solver solver) {
-        if (value == 0 || value == 1) {
-            //            solver.associates(var);
-            return new BoolCste(name, value, solver);
-        } else {
-            //            solver.associates(var);
-            return new IntCste("cste -- " + value, value, solver);
-        }
-    }
-
-    public static IntVar addCste(IntVar ivar, int cste) {
-        return new IntVarAddCste(ivar, cste, ivar.getSolver());
-    }
-
-    public static IntVar timesPosCste(IntVar ivar, int cste) {
-        IntVar var;
-        if (cste < 0) {
-            throw new UnsupportedOperationException("timesPosCste required positive coefficient! " +
-                    "(due to opposite var bug...)");
-        } else {
-            var = new IntVarTimesPosCste(ivar, cste, ivar.getSolver());
-        }
-        return var;
-    }
-
-    public static IntVar abs(IntVar ivar) {
-        return new IntVarAbs(ivar, ivar.getSolver());
-    }
 
     public static IntVar[] toIntVar(Variable... variables) {
         IntVar[] ivars = new IntVar[variables.length];

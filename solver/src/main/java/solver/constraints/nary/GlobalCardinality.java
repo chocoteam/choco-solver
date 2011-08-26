@@ -41,6 +41,7 @@ import solver.exception.SolverException;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +161,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
     public static Constraint[] reformulate(IntVar[] vars, IntVar[] card, int offset, Solver solver) {
         List<Constraint> cstrs = new ArrayList<Constraint>();
         for (int i = 0; i < card.length; i++) {
-            IntVar cste = VariableFactory.fixed(i + offset, solver);
+            IntVar cste = Views.fixed(i + offset, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(new ReifiedConstraint(
@@ -175,7 +176,7 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
     public static Constraint[] reformulate(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences, int offset, Solver solver) {
         List<Constraint> cstrs = new ArrayList<Constraint>();
         for (int i = 0; i < minOccurrences.length; i++) {
-            IntVar cste = VariableFactory.fixed(i + offset, solver);
+            IntVar cste = Views.fixed(i + offset, solver);
             BoolVar[] bs = VariableFactory.boolArray("b_" + i, vars.length, solver);
             for (int j = 0; j < vars.length; j++) {
                 cstrs.add(new ReifiedConstraint(

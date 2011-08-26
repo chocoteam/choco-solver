@@ -30,7 +30,7 @@ package parser.flatzinc.ast.expression;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /*
 * User : CPRUDHOM
@@ -69,7 +69,7 @@ public final class EBool extends Expression {
 
     @Override
     public BoolVar boolVarValue(Solver solver) {
-        return (BoolVar) VariableFactory.fixed(intValue(), solver);
+        return (BoolVar) Views.fixed(intValue(), solver);
     }
 
     @Override
@@ -79,7 +79,7 @@ public final class EBool extends Expression {
 
     @Override
     public IntVar intVarValue(Solver solver) {
-        return VariableFactory.fixed(intValue(), solver);
+        return Views.fixed(intValue(), solver);
     }
 
     @Override

@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,13 +35,13 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphVar;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K arcs belong to the final graph
  * 

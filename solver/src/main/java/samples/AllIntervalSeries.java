@@ -26,7 +26,6 @@
  */
 package samples;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -45,11 +44,10 @@ import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * CSPLib prob007:<br/>
@@ -70,16 +68,10 @@ public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
     private int m = 500;
 
-    @SuppressWarnings({"FieldCanBeLocal"})
-    @Option(name = "-a", aliases = "--abs", usage = "Force ABSOLUTE constraint declaration.", required = false)
-    private boolean abs = false;
-
     IntVar[] vars;
     IntVar[] dist;
-    IntVar[] tmp;
 
     Constraint[] ALLDIFF;
-    Constraint[] DISTANCE;
     Constraint[] OTHERS;
 
     @Override
@@ -87,27 +79,23 @@ public class AllIntervalSeries extends AbstractProblem {
 
         solver = new Solver();
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
-        if (abs) {
-            dist = VariableFactory.enumeratedArray("d", m - 1, 1, m - 1, solver);
+        dist = new IntVar[m - 1];
+
+
+        if (false) {
+            dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
+            IntVar[] tmp = VariableFactory.enumeratedArray("tmp", m - 1, -(m - 1), m - 1, solver);
+            for (int i = 0; i < m - 1; i++) {
+                solver.post(Sum.eq(new IntVar[]{vars[i + 1], Views.minus(vars[i]), Views.minus(tmp[i])}, 0, solver));
+                solver.post(new Absolute(dist[i], tmp[i], solver));
+            }
         } else {
-            dist = new IntVar[m - 1];
-        }
-
-        tmp = VariableFactory.enumeratedArray("tmp", m - 1, -(m - 1), m - 1, solver);
-
-        List<Constraint> distance = new ArrayList<Constraint>();
-        for (int i = 0; i < m - 1; i++) {
-            distance.add(Sum.eq(new IntVar[]{vars[i + 1], vars[i], tmp[i]}, new int[]{1, -1, -1}, 0, solver));
-            if (abs) {
-                distance.add(new Absolute(dist[i], tmp[i], solver));
-            } else {
-                dist[i] = VariableFactory.abs(tmp[i]);
-                solver.post(new Relation(dist[i], Relation.R.GT,0, solver));
-                solver.post(new Relation(dist[i], Relation.R.LT,m, solver));
+            for (int i = 0; i < m - 1; i++) {
+                dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
+                solver.post(new Relation(dist[i], Relation.R.GT, 0, solver));
+                solver.post(new Relation(dist[i], Relation.R.LT, m, solver));
             }
         }
-        DISTANCE = distance.toArray(new Constraint[distance.size()]);
-        solver.post(DISTANCE);
 
         ALLDIFF = new Constraint[2];
         ALLDIFF[0] = (new AllDifferent(vars, solver));
@@ -132,18 +120,9 @@ public class AllIntervalSeries extends AbstractProblem {
         //EngineStrategies.variableOriented(solver);
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ArrayUtils.append(ALLDIFF, DISTANCE))))),
+                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ALLDIFF)))),
                         IncrArityP.get(),
                         Policy.ITERATE
-                ));
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ALLDIFF)))),
-                        new Seq(
-                                new IncrOrderC(DISTANCE),
-                                new Decr(IncrPosP.get())
-                                ),
-                        Policy.ONE
                 ));
         solver.getEngine().addGroup(
                 Group.buildGroup(
@@ -151,7 +130,7 @@ public class AllIntervalSeries extends AbstractProblem {
                         new Seq(
                                 new Decr(new IncrOrderC(ALLDIFF)),
                                 new IncrOrderV(vars)
-                                ),
+                        ),
                         Policy.ONE
                 ));
 

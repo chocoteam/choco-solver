@@ -36,6 +36,7 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -53,7 +54,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = VariableFactory.timesPosCste(X, 2);
+        IntVar Y = Views.scale(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -76,7 +77,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = VariableFactory.timesPosCste(X, 3);
+        IntVar Y = Views.scale(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -97,7 +98,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = VariableFactory.timesPosCste(X, coeff);
+        IntVar Y = Views.scale(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -118,7 +119,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = VariableFactory.fixed("C", coeff, s);
+        IntVar C = Views.fixed("C", coeff, s);
         IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
 
         IntVar[] vars = {X, Y};

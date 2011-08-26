@@ -34,14 +34,15 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.PropRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.Delta;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.Delta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 import java.util.BitSet;
 
@@ -153,15 +154,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause);
-        else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
-            boolean anyChange = false;
-            for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
-            }
-            return anyChange;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     /**
@@ -404,13 +397,20 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             //TODO:  LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
             delta = new Delta();
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        PropRequest<IntVar, Propagator<IntVar>> request = new PropRequest<IntVar, Propagator<IntVar>>(propagator, this, idxInProp);
+        propagator.addRequest(request);
+        this.addRequest(request);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

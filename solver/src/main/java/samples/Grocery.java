@@ -45,6 +45,7 @@ import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -78,7 +79,7 @@ public class Grocery extends AbstractProblem {
         solver.post(Sum.eq(vars, 711, solver));
 
         IntVar[] tmp = VariableFactory.boundedArray("tmp", 2, 1, 711 * 100 * 100, solver);
-        IntVar _711 = VariableFactory.fixed(711 * 100 * 100 * 100, solver);
+        IntVar _711 = Views.fixed(711 * 100 * 100 * 100, solver);
 
         TMP = new Constraint[3];
         TMP[0] = (new Times(vars[0], vars[1], tmp[0], solver));

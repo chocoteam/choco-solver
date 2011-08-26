@@ -48,6 +48,8 @@ import solver.variables.IntVar;
  */
 public class PropSumEq extends Propagator<IntVar> {
 
+    public static int filter = 0;
+
     final IntVar[] x; // list of variable -- probably IntVarTimePosCste
     final int k; // number of positive coefficients -- k first elements are positive ones
     final int l; // number of variables
@@ -131,6 +133,7 @@ public class PropSumEq extends Propagator<IntVar> {
 
 
     boolean filterOnLeq() throws ContradictionException {
+        filter++;
         boolean doIt;
         boolean anychange = false;
         if (b - sumLB < 0) {
@@ -171,6 +174,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     boolean filterOnGeq() throws ContradictionException {
+        filter++;
         boolean doIt;
         boolean anychange = false;
         if (b - sumUB > 0) {

@@ -88,4 +88,5 @@ public interface ICause extends Serializable {
      * @return number of fails
      */
     public long getFails();
+
 }

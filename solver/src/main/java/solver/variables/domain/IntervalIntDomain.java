@@ -30,9 +30,9 @@ package solver.variables.domain;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.variables.domain.delta.Delta;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.Delta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * <br/>

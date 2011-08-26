@@ -41,6 +41,7 @@ import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -104,20 +105,20 @@ public class BIBD extends AbstractProblem {
 
         }
         // r ones per row
-        IntVar R = VariableFactory.fixed(r, solver);
+        IntVar R = Views.fixed(r, solver);
         for (int i = 0; i < v; i++) {
             solver.post(new Count(1, vars[i], Count.Relop.EQ, R, solver));
             //solver.post(Sum.eq(vars[i], R, solver));
         }
         // k ones per column
-        IntVar K = VariableFactory.fixed(k, solver);
+        IntVar K = Views.fixed(k, solver);
         for (int j = 0; j < b; j++) {
             solver.post(new Count(1, _vars[j], Count.Relop.EQ, K, solver));
             //solver.post(Sum.eq(_vars[j], K, solver));
         }
 
         // Exactly l ones in scalar product between two different rows
-        IntVar L = VariableFactory.fixed(l, solver);
+        IntVar L = Views.fixed(l, solver);
         for (int i1 = 0; i1 < v; i1++) {
             for (int i2 = i1 + 1; i2 < v; i2++) {
                 BoolVar[] score = VariableFactory.boolArray(String.format("row(%d,%d)", i1, i2), b, solver);

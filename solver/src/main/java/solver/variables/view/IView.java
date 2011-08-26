@@ -24,48 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables.view;
 
-package solver.search.limits;
+import solver.exception.ContradictionException;
 
 /**
- * fast time limit computation inspired from: http://dow.ngra.de/2008/10/27/when-systemcurrenttimemillis-is-too-slow/.
- * cant use the heartbeat counter because it lascks of precision.
+ * <br/>
  *
- * @author Arnaud Malapert</br>
- * @version 2.1.1</br>
- * @since 23 juil. 2009 version 2.1.1</br>
+ * @author Charles Prud'homme
+ * @since 26/08/11
  */
-public final class TimeCacheThread extends Thread {
+public interface IView {
 
-    public final static int MS_TIME_PRECISION = 100;
+    void backPropagate(int mask) throws ContradictionException;
 
-    public static volatile long currentTimeNanos = System.nanoTime();
-
-
-    private TimeCacheThread() {
-        super("TimeCachedThread");
-        setDaemon(true);
-    }
-
-
-    static {
-        new TimeCacheThread().start();
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            currentTimeNanos = System.nanoTime();
-            /*try {
-                Thread.sleep(MS_TIME_PRECISION);
-            } catch (InterruptedException e) {
-                throw new SolverException("Time Limit Thread was interrupted");
-            }*/
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "TimeCacheThread";
-    }
 }

@@ -29,11 +29,7 @@ package solver.constraints.propagators;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
-import solver.requests.PropRequest;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
 
 public abstract class GraphPropagator<V extends Variable> extends Propagator<V>{
 
@@ -43,24 +39,5 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V>{
 
 	protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint,	PropagatorPriority priority, boolean reactOnPromotion) {
 		super(vars, solver, constraint, priority, reactOnPromotion);
-	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@SuppressWarnings({"unchecked"})
-	@Override
-	public void linkToVariables() {
-		requests = new IRequest[vars.length];
-		for (int i = 0; i < vars.length; i++) {
-			vars[i].addPropagator(this, i);
-			if (vars[i] instanceof GraphVar) {
-				requests[i] = new GraphRequest(this, (GraphVar) vars[i], i);
-			}else{
-				requests[i] = new PropRequest<V, Propagator<V>>(this, vars[i], i);
-			}
-			vars[i].addRequest(requests[i]);
-		}
 	}
 }

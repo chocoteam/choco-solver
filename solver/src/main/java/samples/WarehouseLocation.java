@@ -38,6 +38,7 @@ import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -86,7 +87,7 @@ public class WarehouseLocation extends AbstractProblem {
         totCost = VariableFactory.bounded("cost", 0, 99999, solver);
 
         // A warehouse is open, if it supplies to a store
-        IntVar ONE = VariableFactory.fixed(1, solver);
+        IntVar ONE = Views.fixed(1, solver);
         for (int s = 0; s < nS; s++) {
             solver.post(new Element(ONE, open, suppliers[s], 0, solver));
         }
@@ -96,7 +97,7 @@ public class WarehouseLocation extends AbstractProblem {
         }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
-            IntVar counter = VariableFactory.fixed(capacity[w], solver);
+            IntVar counter = Views.fixed(capacity[w], solver);
             solver.post(new Count(w, suppliers, Count.Relop.LEQ, counter, solver));
         }
 

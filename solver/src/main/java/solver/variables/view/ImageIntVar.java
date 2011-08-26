@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.image;
+package solver.variables.view;
 
 import solver.ICause;
 import solver.Solver;
@@ -35,9 +35,10 @@ import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -45,7 +46,7 @@ import solver.variables.domain.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
+public abstract class ImageIntVar<IV extends IntVar> extends AbstractVariable implements IntVar {
 
     protected final IV var;
 
@@ -53,7 +54,8 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
 
     protected final Solver solver;
 
-    public ImageIntVar(IV var, Solver solver) {
+    public ImageIntVar(String name, IV var, Solver solver) {
+        super(name, solver);
         this.var = var;
         this.solver = solver;
     }
@@ -112,6 +114,11 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
+    public void subscribeView(IView view) {
+        var.subscribeView(view);
+    }
+
+    @Override
     public IRequestList getRequests() {
         return var.getRequests();
     }
@@ -132,8 +139,8 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
-        var.addPropagator(observer, idxInProp);
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        var.updatePropagationConditions(propagator, idxInProp);
     }
 
     @Override
@@ -147,8 +154,13 @@ public abstract class ImageIntVar<IV extends IntVar> implements IntVar {
     }
 
     @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        var.attachPropagator(propagator, idxInProp);
+    }
+
+    @Override
     public String getName() {
-        return toString();
+        return name;
     }
 
     @Override

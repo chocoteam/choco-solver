@@ -30,7 +30,7 @@ package solver.variables;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 /**
  * Interface for integer variables. Provides every required services.
@@ -72,7 +72,7 @@ public interface IntVar extends Variable<IntDelta>{
      * </ul>
      *
      * @param from lower bound of the interval to remove (int)
-     * @param to upper bound of the intervak to remove(int)
+     * @param to upper bound of the interval to remove(int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException

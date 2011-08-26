@@ -37,10 +37,12 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,8 +178,8 @@ public class AllDifferentTest {
 
 		int n = 5;
 		IntVar[] vars = new IntVar[n];
-		vars[0] = VariableFactory.fixed("v_0", 5, s);
-		vars[1] = VariableFactory.fixed("v_1", 3, s);
+		vars[0] = Views.fixed("v_0", 5, s);
+		vars[1] = Views.fixed("v_1", 3, s);
 		vars[2] = VariableFactory.bounded("v_2", 3, 4, s);
 		vars[3] = VariableFactory.bounded("v_3", 2, 6, s);
 		vars[4] = VariableFactory.bounded("v_4", 2, 6, s);
@@ -287,5 +289,34 @@ public class AllDifferentTest {
 		s.set(StrategyFactory.inputOrderMinVal(vars, s.getEnvironment()));
 		return s;
 	}
+
+    @Test
+    public void testXX(){
+        Solver solver = new Solver();
+        IntVar[] ts = new IntVar[4];
+        ts[0] = VariableFactory.enumerated("t0", new int[]{2,3,4}, solver);
+        ts[1] = VariableFactory.enumerated("t1", new int[]{-3,-2,-1,1,2}, solver);
+        ts[2] = VariableFactory.enumerated("t2", new int[]{-3,-2,-1,1,2,3}, solver);
+        ts[3] = VariableFactory.enumerated("t3", new int[]{-3,-2,-1,1,2,3}, solver);
+
+        try{
+            solver.propagate();
+            ts[0].removeValue(2, null);
+            ts[1].removeValue(2, null);
+            ts[0].removeValue(3, null);
+            ts[1].removeValue(1, null);
+            ts[2].removeValue(-3, null);
+            ts[2].removeValue(3, null);
+            ts[3].removeValue(-3, null);
+            ts[3].removeValue(3, null);
+            solver.propagate();
+        }catch (ContradictionException ex){
+
+        }
+        System.out.printf("%s\n", solver.toString());
+
+
+
+    }
 
 }

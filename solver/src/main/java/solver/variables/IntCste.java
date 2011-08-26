@@ -36,9 +36,9 @@ import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
+import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
-import solver.variables.domain.delta.NoDelta;
 
 /**
  * <br/>
@@ -46,7 +46,7 @@ import solver.variables.domain.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class IntCste implements IntVar {
+public class IntCste extends AbstractVariable implements IntVar {
 
     protected final int constante;
     protected final String name;
@@ -56,6 +56,7 @@ public class IntCste implements IntVar {
     protected int uniqueID;
 
     public IntCste(String name, int constante, Solver solver) {
+        super(name, solver);
         this.name = name;
         this.solver = solver;
         this.constante = constante;
@@ -225,7 +226,7 @@ public class IntCste implements IntVar {
     }
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
     }
 
     @Override
@@ -234,6 +235,10 @@ public class IntCste implements IntVar {
 
     @Override
     public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
     }
 
     @Override
@@ -251,8 +256,8 @@ public class IntCste implements IntVar {
         return solver;
     }
 
-	@Override
-	public int getType() {
-		return Variable.INTEGER;
-	}
+    @Override
+    public int getType() {
+        return Variable.INTEGER;
+    }
 }

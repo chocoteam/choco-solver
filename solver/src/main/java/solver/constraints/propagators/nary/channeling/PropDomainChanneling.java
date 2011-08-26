@@ -39,7 +39,7 @@ import solver.requests.IRequest;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).

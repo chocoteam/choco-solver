@@ -35,6 +35,7 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.unary.Member;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -50,7 +51,7 @@ public class IntVarAbsTest {
     private int[][] bounded(int xl, int xu, int yl, int yu) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
-        IntVar X = VariableFactory.abs(Y);
+        IntVar X = Views.abs(Y);
         X.updateLowerBound(xl, null);
         X.updateUpperBound(xu, null);
         solver.propagate();
@@ -60,7 +61,7 @@ public class IntVarAbsTest {
     private int[][] enumerated(int[] x, int[] y) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", y, solver);
-        IntVar X = VariableFactory.abs(Y);
+        IntVar X = Views.abs(Y);
 
         solver.post(new Member(X, x, solver));
         solver.propagate();
@@ -235,7 +236,7 @@ public class IntVarAbsTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", minY, maxY, solver);
-        IntVar X = VariableFactory.abs(Y);
+        IntVar X = Views.abs(Y);
 
         solver.post(new Member(X, minX, maxX, solver));
         //SearchMonitorFactory.log(solver, true, false);
@@ -277,7 +278,7 @@ public class IntVarAbsTest {
 
         Solver solver = new Solver();
         IntVar Y = VariableFactory.enumerated("Y", domains[1], solver);
-        IntVar X = VariableFactory.abs(Y);
+        IntVar X = Views.abs(Y);
         solver.post(new Member(X, domains[0], solver));
         //SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));

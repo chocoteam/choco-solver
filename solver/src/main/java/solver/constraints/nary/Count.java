@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropCount;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * count(VALUE,VARIABLES,RELOP,LIMIT)
@@ -78,7 +78,7 @@ public class Count extends IntConstraint<IntVar> {
     }
 
     public Count(int value, IntVar[] vars, Relop relop, int limit, Solver solver) {
-        super(ArrayUtils.append(vars, new IntVar[]{VariableFactory.fixed(limit, solver)}), solver);
+        super(ArrayUtils.append(vars, new IntVar[]{Views.fixed(limit, solver)}), solver);
         this.occval = value;
         switch (relop) {
             case GEQ:

@@ -105,6 +105,7 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
 
     @Override
     public void update(EventType e) {
+//        LoggerFactory.getLogger("solver").info("\tfilter on {}", this.toString());
         lazyClear();
         if (EventType.anInstantiationEvent(e.mask)) {
             propagator.decArity();

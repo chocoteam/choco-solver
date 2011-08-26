@@ -34,14 +34,15 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.PropRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
-import solver.variables.domain.delta.OneValueDelta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
+import solver.variables.delta.OneValueDelta;
 
 import java.util.BitSet;
 
@@ -348,13 +349,20 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             delta = new OneValueDelta();
             reactOnRemoval = true;
         }
 //        reactOnRemoval |= ((modificationEvents & EventType.REMOVE.mask) != 0);
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        PropRequest<BoolVar, Propagator<BoolVar>> request = new PropRequest<BoolVar, Propagator<BoolVar>>(propagator, this, idxInProp);
+        propagator.addRequest(request);
+        this.addRequest(request);
     }
 
     /**

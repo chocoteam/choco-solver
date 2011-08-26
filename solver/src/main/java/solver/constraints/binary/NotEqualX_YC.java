@@ -30,10 +30,7 @@ package solver.constraints.binary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
-import solver.constraints.propagators.binary.Prop_X_NotEqualX_YC;
-import solver.constraints.propagators.binary.Prop_Y_NotEqualX_YC;
 import solver.variables.IntVar;
 
 /**
@@ -43,9 +40,6 @@ import solver.variables.IntVar;
  * state x =/= y + c
  */
 public final class NotEqualX_YC extends IntConstraint<IntVar> {
-
-    public static final boolean _DEFAULT = true;
-
 
     IntVar x;
     IntVar y;
@@ -57,25 +51,7 @@ public final class NotEqualX_YC extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.c = c;
-        if (_DEFAULT) {
-            setPropagators(new PropNotEqualX_YC(new IntVar[]{x, y}, c, solver, this));
-        } else {
-            Propagator<IntVar>[] propagators = new Propagator[2];
-            propagators[0] = new Prop_X_NotEqualX_YC(x, y, c, solver, this);
-            propagators[1] = new Prop_Y_NotEqualX_YC(x, y, c, solver, this);
-            setPropagators(propagators);
-        }
-    }
-
-    @Override
-    public void updateActivity(Propagator<IntVar> prop) {
-        if (_DEFAULT) {
-            super.updateActivity(prop);
-        } else {
-            propagators[0].setPassive();
-            propagators[1].setPassive();
-            lastPropagatorActive.add(-2);
-        }
+        setPropagators(new PropNotEqualX_YC(new IntVar[]{x, y}, c, solver, this));
     }
 
     @Override

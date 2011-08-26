@@ -33,9 +33,10 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.requests.PropRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.delta.IntDelta;
 import solver.variables.domain.IIntDomain;
-import solver.variables.domain.delta.IntDelta;
 
 import java.util.BitSet;
 
@@ -61,7 +62,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     //////////////////////////////////////////////////////////////////////////////////////
 
     public BoolVarImpl(String name, Solver solver) {
-    	super(name,solver);
+        super(name, solver);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,13 +306,20 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void addPropagator(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             domain.recordRemoveValues();
             reactOnRemoval = true;
         }
 //        reactOnRemoval |= ((modificationEvents & EventType.REMOVE.mask) != 0);
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        PropRequest<BoolVar, Propagator<BoolVar>> request = new PropRequest<BoolVar, Propagator<BoolVar>>(propagator, this, idxInProp);
+        propagator.addRequest(request);
+        this.addRequest(request);
     }
 
     /**
@@ -329,13 +337,13 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
         return expl;
     }
 
-	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
-		engine.fails(cause, this, message);
-	}
+    @Override
+    public void contradiction(ICause cause, String message) throws ContradictionException {
+        engine.fails(cause, this, message);
+    }
 
-	@Override
-	public int getType() {
-		return Variable.INTEGER;
-	}
+    @Override
+    public int getType() {
+        return Variable.INTEGER;
+    }
 }

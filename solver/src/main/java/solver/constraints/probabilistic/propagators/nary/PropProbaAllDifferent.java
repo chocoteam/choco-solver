@@ -32,7 +32,6 @@ import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDifferent;
 import solver.requests.ConditionnalRequest;
-import solver.requests.IRequest;
 import solver.requests.conditions.AbstractCondition;
 import solver.requests.conditions.CompletlyInstantiated;
 import solver.variables.IntVar;
@@ -60,12 +59,11 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     public void linkToVariables() {
         //noinspection unchecked
         AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length / 2);
-        requests = new IRequest[vars.length];
         for (int i = 0; i < vars.length; i++) {
-            vars[i].addPropagator(this, i);
+            vars[i].updatePropagationConditions(this, i);
             ConditionnalRequest crequest =
                     new ConditionnalRequest<PropProbaAllDifferent>(this, vars[i], i, condition, this.environment);
-            requests[i] = crequest;
+            this.addRequest(crequest);
             vars[i].addRequest(requests[i]);
             condition.linkRequest(crequest);
         }

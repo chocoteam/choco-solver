@@ -34,13 +34,13 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that each node of the given subset of nodes has a loop
  * 
