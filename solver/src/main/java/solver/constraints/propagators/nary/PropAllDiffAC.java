@@ -38,7 +38,7 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 /**
  * Created by IntelliJ IDEA.

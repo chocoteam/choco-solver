@@ -24,44 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.domain.delta.image;
+
+package solver.variables.delta;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.variables.domain.delta.IntDelta;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/08/11
+ * @since 23/03/11
  */
-public class DeltaMinus implements IntDelta {
+public interface IntDelta extends IDelta{
 
-    final IntDelta original;
+    /**
+     * Adds a new value to the delta
+     * @param value value to add
+     */
+    void add(int value);
 
-    public DeltaMinus(IntDelta original) {
-        this.original = original;
-    }
+    /**
+     * Return the idx^th value stored in the delta, if any
+     * @param idx rank of the value
+     * @return idx^th value
+     * @throws IndexOutOfBoundsException if idx is out of the bounds
+     */
+    int get(int idx) throws IndexOutOfBoundsException;
 
-    @Override
-    public void add(int value) {
-        original.add(-value);
-    }
-
-    @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        return original.get(idx);
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        original.forEach(proc, from, to);
-    }
-
-    @Override
-    public int size() {
-        return original.size();
-    }
+    /**
+     * Iterates over the values and apply <code>proc</code> for each value
+     * @param proc procedure to apply
+     * @param from (included)
+     * @param to (excluded)
+     * @throws solver.exception.ContradictionException  if a contradiction occurs
+     */
+    void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
 }
-

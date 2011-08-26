@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta;
+package solver.variables.delta;
 
 
 public interface IGraphDelta extends IDelta{

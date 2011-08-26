@@ -40,7 +40,7 @@ import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 
 /**Propagator that ensures that K arcs belong to the final graph

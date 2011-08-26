@@ -41,8 +41,8 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 import java.io.Serializable;
 

@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta.image;
+package solver.variables.delta.image;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>

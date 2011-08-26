@@ -31,7 +31,7 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.domain.delta.IntDelta;
+import solver.variables.delta.IntDelta;
 
 
 /**

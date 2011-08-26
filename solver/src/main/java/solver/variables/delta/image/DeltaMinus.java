@@ -24,40 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.variables.domain.delta;
+package solver.variables.delta.image;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 10/02/11
+ * @since 26/08/11
  */
-public final class NoDelta implements IntDelta {
+public class DeltaMinus implements IntDelta {
 
-    public static NoDelta singleton = new NoDelta();
+    final IntDelta original;
 
-    protected NoDelta() {
+    public DeltaMinus(IntDelta original) {
+        this.original = original;
     }
 
     @Override
     public void add(int value) {
+        original.add(-value);
     }
 
     @Override
-    public int get(int idx){
-        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
-    }
-
-    @Override
-    public int size() {
-        return 0;
+    public int get(int idx) throws IndexOutOfBoundsException {
+        return original.get(idx);
     }
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        original.forEach(proc, from, to);
+    }
+
+    @Override
+    public int size() {
+        return original.size();
     }
 }
+

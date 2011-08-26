@@ -32,9 +32,9 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.OneWordS32BitSet;
 import choco.kernel.memory.structure.OneWordS64BitSet;
-import solver.variables.domain.delta.Delta;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.Delta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * TODO: complete when Domain interface will be created!

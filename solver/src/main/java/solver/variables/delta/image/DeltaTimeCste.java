@@ -25,59 +25,45 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta;
+package solver.variables.delta.image;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @since 04/04/11
  */
-public final class OneValueDelta implements IntDelta {
+public class DeltaTimeCste implements IntDelta {
 
+    final IntDelta original;
+    final int cste;
 
-    int value;
-    boolean set;
-    int timestamp = -1;
-
-
-    protected void lazyClear(){
-        if(timestamp - AbstractSearchLoop.timeStamp != 0){
-            set = false;
-            timestamp = AbstractSearchLoop.timeStamp;
-        }
+    public DeltaTimeCste(IntDelta original, int cste) {
+        this.original = original;
+        this.cste = cste;
     }
 
     @Override
     public void add(int value) {
-        lazyClear();
-        this.value = value;
-        set = true;
+        original.add(value / cste);
     }
 
     @Override
-    public int get(int idx){
-        if(idx < 1){
-            return value;
-        }else{
-            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
-        }
-    }
-
-    @Override
-    public int size() {
-        return set ? 1 : 0;
+    public int get(int idx) throws IndexOutOfBoundsException {
+        return original.get(idx);
     }
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        if (to == 1) {
-            proc.execute(value);
-        }
-        //throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int size() {
+        return original.size();
     }
 }

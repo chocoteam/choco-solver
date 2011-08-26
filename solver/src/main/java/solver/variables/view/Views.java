@@ -27,7 +27,6 @@
 package solver.variables.view;
 
 import solver.Solver;
-import solver.variables.ConstantView;
 import solver.variables.IntVar;
 
 /**

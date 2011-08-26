@@ -25,57 +25,22 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta;
+package solver.variables.delta;
 
-public class GraphDelta implements IGraphDelta{
+import java.io.Serializable;
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 18 oct. 2010
+ */
+public interface IDelta extends Serializable{
 
-	private IntDelta nodeEnf,nodeRem,arcEnf,arcRem;
-	
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    /**
+     * Returns the number of element
+     * @return number of element
+     */
+    int size();
 
-	public GraphDelta(){
-		nodeEnf = new Delta();
-		nodeRem = new Delta();
-		arcEnf = new Delta();
-		arcRem = new Delta();
-	}
-	
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	@Override
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	@Override
-	public IntDelta getNodeRemovalDelta() {
-		return nodeRem;
-	}
-
-	@Override
-	public IntDelta getNodeEnforcingDelta() {
-		return nodeEnf;
-	}
-
-	@Override
-	public IntDelta getArcRemovalDelta() {
-		return arcRem;
-	}
-
-	@Override
-	public IntDelta getArcEnforcingDelta() {
-		return arcEnf;
-	}
 }

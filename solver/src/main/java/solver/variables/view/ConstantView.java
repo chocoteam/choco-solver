@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables;
+package solver.variables.view;
 
 import solver.ICause;
 import solver.Solver;
@@ -36,9 +36,13 @@ import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
+import solver.variables.AbstractVariable;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * A IntVar with one domain value.

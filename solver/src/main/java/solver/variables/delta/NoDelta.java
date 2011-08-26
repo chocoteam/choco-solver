@@ -25,45 +25,39 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta.image;
+package solver.variables.delta;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.variables.domain.delta.IntDelta;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/04/11
+ * @since 10/02/11
  */
-public class DeltaTimeCste implements IntDelta {
+public final class NoDelta implements IntDelta {
 
-    final IntDelta original;
-    final int cste;
+    public static NoDelta singleton = new NoDelta();
 
-    public DeltaTimeCste(IntDelta original, int cste) {
-        this.original = original;
-        this.cste = cste;
+    protected NoDelta() {
     }
 
     @Override
     public void add(int value) {
-        original.add(value / cste);
     }
 
     @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        return original.get(idx);
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        throw new UnsupportedOperationException();
+    public int get(int idx){
+        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
 
     @Override
     public int size() {
-        return original.size();
+        return 0;
+    }
+
+    @Override
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
     }
 }

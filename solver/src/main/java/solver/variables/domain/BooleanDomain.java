@@ -30,9 +30,9 @@ package solver.variables.domain;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.exception.SolverException;
-import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.NoDelta;
-import solver.variables.domain.delta.OneValueDelta;
+import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
+import solver.variables.delta.OneValueDelta;
 
 
 /**

@@ -25,22 +25,59 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta;
+package solver.variables.delta;
 
-import java.io.Serializable;
+import choco.kernel.common.util.procedure.IntProcedure;
+import solver.exception.ContradictionException;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 oct. 2010
+ * @since 18 nov. 2010
  */
-public interface IDelta extends Serializable{
+public final class OneValueDelta implements IntDelta {
 
-    /**
-     * Returns the number of element
-     * @return number of element
-     */
-    int size();
 
+    int value;
+    boolean set;
+    int timestamp = -1;
+
+
+    protected void lazyClear(){
+        if(timestamp - AbstractSearchLoop.timeStamp != 0){
+            set = false;
+            timestamp = AbstractSearchLoop.timeStamp;
+        }
+    }
+
+    @Override
+    public void add(int value) {
+        lazyClear();
+        this.value = value;
+        set = true;
+    }
+
+    @Override
+    public int get(int idx){
+        if(idx < 1){
+            return value;
+        }else{
+            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
+        }
+    }
+
+    @Override
+    public int size() {
+        return set ? 1 : 0;
+    }
+
+    @Override
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        if (to == 1) {
+            proc.execute(value);
+        }
+        //throw new UnsupportedOperationException();
+    }
 }

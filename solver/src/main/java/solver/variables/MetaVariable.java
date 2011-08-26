@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.delta.NoDelta;
 
 public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
 

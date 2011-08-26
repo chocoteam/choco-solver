@@ -36,7 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.domain.delta.IDelta;
+import solver.variables.delta.IDelta;
 
 /**
  * <br/>

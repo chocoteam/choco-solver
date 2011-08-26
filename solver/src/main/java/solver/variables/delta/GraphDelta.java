@@ -25,39 +25,57 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.domain.delta;
+package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
+public class GraphDelta implements IGraphDelta{
 
-/**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 23/03/11
- */
-public interface IntDelta extends IDelta{
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    /**
-     * Adds a new value to the delta
-     * @param value value to add
-     */
-    void add(int value);
+	private IntDelta nodeEnf,nodeRem,arcEnf,arcRem;
+	
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    /**
-     * Return the idx^th value stored in the delta, if any
-     * @param idx rank of the value
-     * @return idx^th value
-     * @throws IndexOutOfBoundsException if idx is out of the bounds
-     */
-    int get(int idx) throws IndexOutOfBoundsException;
+	public GraphDelta(){
+		nodeEnf = new Delta();
+		nodeRem = new Delta();
+		arcEnf = new Delta();
+		arcRem = new Delta();
+	}
+	
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    /**
-     * Iterates over the values and apply <code>proc</code> for each value
-     * @param proc procedure to apply
-     * @param from (included)
-     * @param to (excluded)
-     * @throws solver.exception.ContradictionException  if a contradiction occurs
-     */
-    void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
+	@Override
+	public int size() {
+		throw new UnsupportedOperationException();
+	}
+
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
+
+	@Override
+	public IntDelta getNodeRemovalDelta() {
+		return nodeRem;
+	}
+
+	@Override
+	public IntDelta getNodeEnforcingDelta() {
+		return nodeEnf;
+	}
+
+	@Override
+	public IntDelta getArcRemovalDelta() {
+		return arcRem;
+	}
+
+	@Override
+	public IntDelta getArcEnforcingDelta() {
+		return arcEnf;
+	}
 }

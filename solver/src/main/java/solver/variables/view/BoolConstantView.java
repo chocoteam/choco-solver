@@ -32,7 +32,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.ConstantView;
 
 /**
  * A constant view specific to boolean variable
