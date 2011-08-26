@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.delta.image;
+package solver.variables.delta.view;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
@@ -37,18 +37,19 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 04/04/11
  */
-public class DeltaAbs implements IntDelta {
+public class DeltaTimeCste implements IntDelta {
 
     final IntDelta original;
+    final int cste;
 
-    public DeltaAbs(IntDelta original) {
+    public DeltaTimeCste(IntDelta original, int cste) {
         this.original = original;
+        this.cste = cste;
     }
 
     @Override
     public void add(int value) {
-        original.add(value);
-        original.add(-value);
+        original.add(value / cste);
     }
 
     @Override
