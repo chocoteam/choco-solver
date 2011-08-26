@@ -38,7 +38,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 
 /**
  * <br/>

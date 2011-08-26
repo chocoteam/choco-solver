@@ -41,7 +41,7 @@ import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 

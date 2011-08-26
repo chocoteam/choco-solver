@@ -27,7 +27,7 @@
 
 package solver.variables.domain;
 
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 
 import java.io.Serializable;
 

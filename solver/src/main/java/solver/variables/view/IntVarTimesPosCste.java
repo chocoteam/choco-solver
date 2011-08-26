@@ -32,8 +32,8 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaTimeCste;
+import solver.variables.domain.delta.IntDelta;
+import solver.variables.domain.delta.image.DeltaTimeCste;
 
 /**
  * declare an IntVar based on X and C, such as X * C

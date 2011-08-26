@@ -40,9 +40,9 @@ import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
-import solver.variables.delta.NoDelta;
-import solver.variables.delta.OneValueDelta;
+import solver.variables.domain.delta.IntDelta;
+import solver.variables.domain.delta.NoDelta;
+import solver.variables.domain.delta.OneValueDelta;
 
 import java.util.BitSet;
 

@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 
 /**
  * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinalities, the constraint ensures that the number of occurences

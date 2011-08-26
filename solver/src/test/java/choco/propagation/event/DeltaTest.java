@@ -29,7 +29,7 @@ package choco.propagation.event;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.variables.delta.Delta;
+import solver.variables.domain.delta.Delta;
 
 /**
  * <br/>

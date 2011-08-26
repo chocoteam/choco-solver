@@ -35,7 +35,7 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
-import solver.variables.delta.IDelta;
+import solver.variables.domain.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;

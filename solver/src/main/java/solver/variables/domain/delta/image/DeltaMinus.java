@@ -24,74 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package solver.variables.domain.delta.image;
 
-import solver.ICause;
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.variables.domain.delta.NoDelta;
+import solver.variables.domain.delta.IntDelta;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 26/08/11
+ */
+public class DeltaMinus implements IntDelta {
 
-	protected V[] components;
-	protected int dim;
-	
-	public MetaVariable(String name, Solver sol, V[] vars){
-		super(name, sol);
-		components = vars;
-		dim = vars.length;
-	}
+    final IntDelta original;
 
-	@Override
-	public boolean instantiated() {
-		for(int i=0;i<dim;i++){
-			if (!components[i].instantiated()){
-				return false;
-			}
-		}return true;
-	}
-
-    public void updatePropagationConditions(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    public DeltaMinus(IntDelta original) {
+        this.original = original;
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
+    public void add(int value) {
+        original.add(-value);
     }
 
     @Override
-	public Explanation explain() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public NoDelta getDelta() {
-		return NoDelta.singleton;
-	}
-	
-	public String toString() {
-        String s = this.name +" : {";
-        for(int i=0; i<dim-1; i++){
-        	s+=components[i].toString()+", ";
-        }
-        s+=components[dim-1].toString()+"}";
-        return s;
+    public int get(int idx) throws IndexOutOfBoundsException {
+        return original.get(idx);
     }
 
-	public V[] getComponents() {
-		return components;
-	}
+    @Override
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        original.forEach(proc, from, to);
+    }
 
-	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
-		engine.fails(cause, this, message);
-	}
-
-	@Override
-	public int getType() {
-		return Variable.META;
-	}
+    @Override
+    public int size() {
+        return original.size();
+    }
 }
+

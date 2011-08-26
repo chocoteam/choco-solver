@@ -37,8 +37,9 @@ import solver.requests.PropRequest;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
-import solver.variables.delta.IGraphDelta;
+import solver.variables.domain.delta.GraphDelta;
+import solver.variables.domain.delta.IGraphDelta;
+
 
 /**
  * Created by IntelliJ IDEA.

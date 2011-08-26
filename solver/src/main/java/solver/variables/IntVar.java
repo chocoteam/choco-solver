@@ -30,7 +30,8 @@ package solver.variables;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
+
 
 /**
  * Interface for integer variables. Provides every required services.

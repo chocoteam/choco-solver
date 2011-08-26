@@ -32,8 +32,8 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
-import solver.variables.delta.image.DeltaMinus;
+import solver.variables.domain.delta.IntDelta;
+import solver.variables.domain.delta.image.DeltaMinus;
 
 /**
  * View for -V, where V is a IntVar or view

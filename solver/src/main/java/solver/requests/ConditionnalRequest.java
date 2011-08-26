@@ -35,7 +35,7 @@ import solver.requests.conditions.AbstractCondition;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 
 /**
  * A conditionnal request that call run filter under conditions.

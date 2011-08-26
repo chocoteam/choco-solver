@@ -34,7 +34,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.requests.PropRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 import solver.variables.domain.IIntDomain;
 
 import java.util.BitSet;

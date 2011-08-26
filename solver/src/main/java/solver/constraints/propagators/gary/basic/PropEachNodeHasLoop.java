@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
+import solver.variables.domain.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;

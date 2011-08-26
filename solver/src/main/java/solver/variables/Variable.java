@@ -34,7 +34,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
-import solver.variables.delta.IDelta;
+import solver.variables.domain.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
