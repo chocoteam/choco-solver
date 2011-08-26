@@ -49,7 +49,7 @@ import java.io.Serializable;
 import static solver.variables.AbstractVariable.MSG_EMPTY;
 
 /**
- * An abstract view for SumView, to avoid duplicate method
+ * An abstract view for SumView, to avoid duplicate methods
  * <br/>
  *
  * @author Charles Prud'homme
@@ -211,7 +211,7 @@ public abstract class AbstractSumView implements IntVar, IView, Serializable {
 
     public void setHeuristicVal(HeuristicVal heuristicVal) {
         //TODO: allow branching
-        throw new UnsupportedOperationException("IntVarAbs#setHeuristicVal: wrong usage");
+        throw new UnsupportedOperationException("AbsView#setHeuristicVal: wrong usage");
     }
 
     public HeuristicVal getHeuristicVal() {

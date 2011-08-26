@@ -27,10 +27,14 @@
 package solver.variables.view;
 
 import solver.Solver;
-import solver.variables.IntCste;
+import solver.variables.ConstantView;
 import solver.variables.IntVar;
 
 /**
+ * Factory to build views.
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations",
+ * C. Schulte and G. Tack
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,19 +50,19 @@ public enum Views {
     public static IntVar fixed(String name, int value, Solver solver) {
         if (value == 0 || value == 1) {
             //            solver.associates(var);
-            return new BoolCste(name, value, solver);
+            return new BoolConstantView(name, value, solver);
         } else {
             //            solver.associates(var);
-            return new IntCste("cste -- " + value, value, solver);
+            return new ConstantView("cste -- " + value, value, solver);
         }
     }
 
     public static IntVar offset(IntVar ivar, int cste) {
-        return new IntVarAddCste(ivar, cste, ivar.getSolver());
+        return new OffsetView(ivar, cste, ivar.getSolver());
     }
 
     public static IntVar minus(IntVar ivar) {
-        return new ViewMinus(ivar, ivar.getSolver());
+        return new MinusView(ivar, ivar.getSolver());
     }
 
     public static IntVar scale(IntVar ivar, int cste) {
@@ -66,13 +70,13 @@ public enum Views {
         if (cste < 0) {
             throw new UnsupportedOperationException("scale required positive coefficient!");
         } else {
-            var = new IntVarTimesPosCste(ivar, cste, ivar.getSolver());
+            var = new ScaleView(ivar, cste, ivar.getSolver());
         }
         return var;
     }
 
     public static IntVar abs(IntVar ivar) {
-        return new IntVarAbs(ivar, ivar.getSolver());
+        return new AbsView(ivar, ivar.getSolver());
     }
 
     public static IntVar sum(IntVar a, IntVar b) {

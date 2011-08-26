@@ -32,17 +32,20 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
-import solver.variables.IntCste;
+import solver.variables.ConstantView;
 
 /**
- * <br/>
+ * A constant view specific to boolean variable
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations",
+ * C. Schulte and G. Tack
  *
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class BoolCste extends IntCste implements BoolVar {
+public class BoolConstantView extends ConstantView implements BoolVar {
 
-    protected BoolCste(String name, int constante, Solver solver) {
+    protected BoolConstantView(String name, int constante, Solver solver) {
         super(name, constante, solver);
     }
 

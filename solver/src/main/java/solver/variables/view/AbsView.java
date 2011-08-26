@@ -42,25 +42,24 @@ import solver.variables.domain.delta.image.DeltaAbs;
 /**
  * declare an IntVar based on X, such |X|
  * <p/>
- * <br/>
  *
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class IntVarAbs extends ImageIntVar<IntVar> {
+public final class AbsView extends ImageIntVar<IntVar> {
 
     final IntDelta delta;
 
     protected HeuristicVal heuristicVal;
 
-    public IntVarAbs(IntVar var, Solver solver) {
+    public AbsView(IntVar var, Solver solver) {
         super("|"+var.getName()+"|", var, solver);
         delta = new DeltaAbs(var.getDelta());
     }
 
     @Override
     public void setHeuristicVal(HeuristicVal heuristicVal) {
-        LoggerFactory.getLogger("solver").warn("IntVarAbs#setHeuristicVal: wrong usage");
+        LoggerFactory.getLogger("solver").warn("AbsView#setHeuristicVal: wrong usage");
         this.heuristicVal = heuristicVal;
     }
 
@@ -68,21 +67,6 @@ public final class IntVarAbs extends ImageIntVar<IntVar> {
     public HeuristicVal getHeuristicVal() {
         return heuristicVal;
     }
-
-//    /**
-//     * Check wether this contains values >= 0
-//     * @param cause
-//     * @param done
-//     * @return
-//     * @throws ContradictionException
-//     */
-//    private boolean CHECK(ICause cause, boolean done) throws ContradictionException {
-//        if (var.getUB() < 0) {
-//            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
-//        }
-//        return done;
-//    }
-
 
     @Override
     public boolean instantiated() {

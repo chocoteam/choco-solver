@@ -27,103 +27,104 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.domain.delta.IntDelta;
-import solver.variables.domain.delta.image.DeltaAddCste;
-
+import solver.variables.domain.delta.image.DeltaTimeCste;
 
 /**
- * declare an IntVar based on X and C, such as X + C
- *
- * <br/>
+ * declare an IntVar based on X and C, such as X * C
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations",
+ * C. Schulte and G. Tack
  *
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class IntVarAddCste extends ImageIntVar<IntVar> {
+public final class ScaleView extends ImageIntVar<IntVar> {
 
     final int cste;
-    final IntDelta delta;
+    final DeltaTimeCste delta;
 
-    public IntVarAddCste(IntVar var, int cste, Solver solver) {
-        super("("+var.getName()+"+"+cste+")", var, solver);
+    public ScaleView(IntVar var, int cste, Solver solver) {
+        super("("+var.getName()+"*"+cste+")", var, solver);
         this.cste = cste;
-        delta = new DeltaAddCste(var.getDelta(), cste);
+        this.delta = new DeltaTimeCste(var.getDelta(), cste);
     }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return var.removeValue(value - cste, cause);
+        return value % cste == 0 && var.removeValue(value / cste, cause);
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        return var.removeInterval(from - cste, to - cste, cause);
+        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
     }
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return var.instantiateTo(value - cste, cause);
+        return value % cste == 0 && var.instantiateTo(value / cste, cause);
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound(value - cste, cause);
+        return var.updateLowerBound(MathUtils.divCeil(value, cste), cause);
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound(value - cste, cause);
+        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause);
     }
 
     @Override
     public boolean contains(int value) {
-        return var.contains(value - cste);
+        return value % cste == 0 && var.contains(value / cste);
     }
 
     @Override
     public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value - cste);
+        return value % cste == 0 && var.instantiatedTo(value / cste);
     }
 
     @Override
     public int getValue() {
-        return var.getValue() + cste;
+        return var.getValue() * cste;
     }
 
     @Override
     public int getLB() {
-        return var.getLB() + cste;
+        return var.getLB() * cste;
     }
 
     @Override
     public int getUB() {
-        return var.getUB() + cste;
+        return var.getUB() * cste;
     }
 
     @Override
     public int nextValue(int v) {
-        return var.nextValue(v - cste);
+        return var.nextValue(v / cste);
     }
 
     @Override
     public int previousValue(int v) {
-        return var.previousValue(v - cste);
+        return var.previousValue(v / cste);
     }
 
     @Override
     public String toString() {
-        return "("+this.var.getName() + " + " + this.cste+") = [" + getLB() + "," + getUB() + "]";
+        return "("+this.var.getName() +" * " + this.cste+") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
     public IntDelta getDelta() {
-       return delta;
+        return delta;
     }
-
+    
 	@Override
 	public int getType() {
 		return INTEGER;

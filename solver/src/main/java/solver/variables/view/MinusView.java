@@ -37,16 +37,18 @@ import solver.variables.domain.delta.image.DeltaMinus;
 
 /**
  * View for -V, where V is a IntVar or view
- * <br/>
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations",
+ * C. Schulte and G. Tack
  *
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class ViewMinus extends ImageIntVar<IntVar> {
+public class MinusView extends ImageIntVar<IntVar> {
 
     final DeltaMinus delta;
 
-    public ViewMinus(IntVar var, Solver solver) {
+    public MinusView(IntVar var, Solver solver) {
         super("-(" + var.getName() + ")", var, solver);
         delta = new DeltaMinus(var.getDelta());
     }

@@ -41,12 +41,16 @@ import solver.variables.domain.IIntDomain;
 import solver.variables.domain.delta.NoDelta;
 
 /**
+ * A IntVar with one domain value.
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations",
+ * C. Schulte and G. Tack
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class IntCste extends AbstractVariable implements IntVar {
+public class ConstantView extends AbstractVariable implements IntVar {
 
     protected final int constante;
     protected final String name;
@@ -55,7 +59,7 @@ public class IntCste extends AbstractVariable implements IntVar {
 
     protected int uniqueID;
 
-    public IntCste(String name, int constante, Solver solver) {
+    public ConstantView(String name, int constante, Solver solver) {
         super(name, solver);
         this.name = name;
         this.solver = solver;
