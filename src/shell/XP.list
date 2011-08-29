@@ -28,14 +28,14 @@ samples.Alpha -policy CONSTRAINT_ORIENTED
 samples.Alpha -policy PRIORITY_PROP
 ##
 ## BALANCED INCOMPLETE BLOCK DESIGNS
-samples.BIBD -v 7 -k  3 -l 60
-samples.BIBD -v 7 -k  3 -l 60
-samples.BIBD -v 7 -k  3 -l 60 -policy OLDEST
-samples.BIBD -v 7 -k  3 -l 60 -policy VARIABLE_LEX
-samples.BIBD -v 7 -k  3 -l 60 -policy CONSTRAINT_LEX
-samples.BIBD -v 7 -k  3 -l 60 -policy VARIABLE_ORIENTED
-samples.BIBD -v 7 -k  3 -l 60 -policy CONSTRAINT_ORIENTED
-samples.BIBD -v 7 -k  3 -l 60 -policy PRIORITY_PROP
+samples.BIBD -v 7 -k 3 -l 60
+samples.BIBD -v 7 -k 3 -l 60
+samples.BIBD -v 7 -k 3 -l 60 -policy OLDEST
+samples.BIBD -v 7 -k 3 -l 60 -policy VARIABLE_LEX
+samples.BIBD -v 7 -k 3 -l 60 -policy CONSTRAINT_LEX
+samples.BIBD -v 7 -k 3 -l 60 -policy VARIABLE_ORIENTED
+samples.BIBD -v 7 -k 3 -l 60 -policy CONSTRAINT_ORIENTED
+samples.BIBD -v 7 -k 3 -l 60 -policy PRIORITY_PROP
 ##
 ## CAR SEQUENCING
 samples.CarSequencing -d myPb

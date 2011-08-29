@@ -29,6 +29,7 @@ package solver.constraints.propagators.nary.globalcardinality;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -64,6 +65,8 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     private final int[] potentialStableSets;
     private final int[] newMin;
 
+    private final int[] minOccurrences, maxOccurrences;
+
     int offset = 0;
 
     private int nbBounds;
@@ -73,10 +76,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     final Interval[] minsorted;
     final Interval[] maxsorted;
 
-    PartialSum l;
-    PartialSum u;
+    final PartialSum l;
+    final PartialSum u;
 
-    private int firstValue;
+    private final int firstValue;
     final int range;
 
     //desynchornized copy of domains to make sure we properly counting
@@ -133,6 +136,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         }
 
         rem_proc = new RemProc(this);
+        l = new PartialSum(firstValue, range);
+        u = new PartialSum(firstValue, range);
+        minOccurrences = new int[range];
+        maxOccurrences = new int[range];
     }
 
     int getMaxOcc(int i) {
@@ -151,11 +158,11 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     @Override
     public void propagate() throws ContradictionException {
         int j = 0;
-        for(; j < nbVars; j++){
+        for (; j < nbVars; j++) {
             vars[j].updateLowerBound(offset, this);
             vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this);
         }
-        for(;j < vars.length; j++){
+        for (; j < vars.length; j++) {
             vars[j].updateLowerBound(0, this);
             vars[j].updateUpperBound(nbVars, this);
         }
@@ -256,7 +263,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if(isCompletelyInstantiated()){
+        if (isCompletelyInstantiated()) {
             return this.constraint.isSatisfied();
         }
         return ESat.UNDEFINED;
@@ -277,23 +284,29 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     static final class PartialSum {
         private int[] sum;
         private int[] ds;
-        private int firstValue, lastValue;
+        private int firstValue, lastValue, range;
 
-        public PartialSum(int firstValue, int count, int[] elt) {
+
+        public PartialSum(int firstValue, int count) {
+            this.range = count;
             this.sum = new int[count + 5];
+            this.ds = new int[count + 5];
             this.firstValue = firstValue - 3;
             this.lastValue = firstValue + count + 1;
+        }
+
+        public void compute(int[] elt) {
             sum[0] = 0;
             sum[1] = 1;
             sum[2] = 2;
             int i, j;
-            for (i = 2; i < count + 2; i++) {
+            for (i = 2; i < range + 2; i++) {
                 sum[i + 1] = sum[i] + elt[i - 2];
             }
             sum[i + 1] = sum[i] + 1;
             sum[i + 2] = sum[i + 1] + 1;
-            ds = new int[count + 5];
-            i = count + 3;
+
+            i = range + 3;
             for (j = i + 1; i > 0; ) {
                 while (sum[i] == sum[i - 1]) {
                     ds[i--] = j;
@@ -453,7 +466,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] > x) {
                 w = pathmax(h, h[x]);
 //                updateLowerBound(maxsorted[i].var, bounds[w], maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(bounds[w], null/*this, true*/);
+                maxsorted[i].var.updateLowerBound(bounds[w], Cause.Null/*this, true*/);
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[y], bounds[z] - 1)) {
@@ -707,15 +720,12 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     final void dynamicInitOfPartialSum() {
-        int[] minOccurrences = new int[range];//todo: maintain an accurate range
-        int[] maxOccurrences = new int[range];
-
         for (int i = 0; i < range; i++) {
             maxOccurrences[i] = card[i].getUB();
             minOccurrences[i] = card[i].getLB();
         }
-        l = new PartialSum(firstValue, range, minOccurrences);
-        u = new PartialSum(firstValue, range, maxOccurrences);
+        l.compute(minOccurrences);
+        u.compute(maxOccurrences);
     }
 
     //in case of bound variables, the bound has to be checked
@@ -726,7 +736,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbInf--;
         }
         if (nbInf == getMaxOcc(inf - offset)) {
-            vars[i].updateLowerBound(inf + 1, null/*this, true*/);
+            vars[i].updateLowerBound(inf + 1, Cause.Null/*this, true*/);
         }
     }
 
@@ -738,7 +748,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbSup--;
         }
         if (nbSup == getMaxOcc(sup - offset)) {
-            vars[i].updateUpperBound(sup - 1, null/*this, true*/);
+            vars[i].updateUpperBound(sup - 1, Cause.Null/*this, true*/);
         }
     }
 
@@ -757,7 +767,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         } else if (nbvalsure == getMaxOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (!vars[j].instantiatedTo(val)) {
-                    vars[j].removeValue(val, null/*this, true*/);// not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].removeValue(val, Cause.Null/*this, true*/);// not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }
@@ -798,7 +808,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         public void execute(int i) throws ContradictionException {
             int o = p.offset;
             p.val_maxOcc[i - o].add(-1);
-            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), null/*this, true*/);
+            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), Cause.Null/*this, true*/);
         }
     }
 

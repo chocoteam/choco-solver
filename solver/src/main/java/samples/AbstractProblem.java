@@ -46,7 +46,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 public abstract class AbstractProblem {
 
     enum Level {
-        QUIET(0), VERBOSE(10), SOLUTIONS(20), SEARCH(30);
+        SILENT(-10), QUIET(0), VERBOSE(10), SOLUTIONS(20), SEARCH(30);
 
         int level;
 
@@ -65,8 +65,7 @@ public abstract class AbstractProblem {
     Level level = Level.VERBOSE;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
-    EngineStrategies policy = EngineStrategies.OLDEST;
-
+    EngineStrategies policy = EngineStrategies.DEFAULT;
 
     protected Solver solver;
 
@@ -114,7 +113,6 @@ public abstract class AbstractProblem {
     public final void execute(String... args) {
         this.readArgs(args);
         Logger log = LoggerFactory.getLogger("bench");
-
         this.printDescription();
         this.buildModel();
         this.configureSolver();
@@ -131,8 +129,9 @@ public abstract class AbstractProblem {
         if (level.getLevel() > Level.QUIET.getLevel()) {
             this.prettyOut();
         }
-
-        log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+        if (level.getLevel() > Level.SILENT.getLevel()) {
+            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+        }
     }
 
 }

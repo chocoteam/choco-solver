@@ -7,7 +7,7 @@ from os.path import join
 
 ## ENVIRONMENT VARIABLES
 ## HOME
-CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/'
+CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/fi/'
 
 ## java class-path for rocs
 #if CHOCO_SOLVER == '':
@@ -17,14 +17,13 @@ CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-wi
 CP = '-cp .:'+CHOCO_SOLVER
 
 ## java command
-CMD='java -Xmx1024m -Xms1024m'# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
+JAVA='java -Xmx1024m -Xms1024m '# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
+CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
 
 ## Number of time a problem is run
 loop = 1 # can be override
 ## time limit for a process
 timelimit = 180 #in seconds
-## number threads used
-thread = 1
 name = 'runner'
 
 ## regexp for statisctics
@@ -39,15 +38,12 @@ _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROP
 def readParameters(paramlist):
     global loop
     global timelimit
-    global thread
     global name
     if len(paramlist)>0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
         elif paramlist[0] == "-t":
             timelimit = int(paramlist[1]) # time limit before killing a process
-        elif paramlist[0] == "-j": # number of thread to use in a loop
-            thread = int(paramlist[1])
         elif paramlist[0] == "-n": # subname of output files
             name = paramlist[1]
         readParameters(paramlist[2:])
@@ -130,9 +126,10 @@ class runit(Thread):
     def __init__ (self,args, i, j):
       Thread.__init__(self)
       self.args = args
-      self.result = []
+      self.results = [[]for k in range(_SIZE)]
       self.i = i
       self.j = j
+      self.s = _SIZE
 
     def run(self):
         # print str(self.i)+'_'+str(self.j)
@@ -155,23 +152,20 @@ class runit(Thread):
                     line+= char
             err.error('\n')
         else:
-            statitics = ''
             for char in output:
                 if char =='\n':
                     data_line = line.split()
                     s = len(data_line)
                     if s>0 and data_line[0] == '[STATISTICS':
-                        statitics = line
-                        break
+                        m = pattern.findall(line)
+                        self.s = len(m)
+                        for j in range(self.s):
+                            self.results[j].append(float(m[j].replace(',','.')))
+                        self.results[len(m)].append(round((end-start)*1000, 2))
                     line =''
                 else:
                     line +=char
 
-            m = pattern.findall(statitics)
-            print statitics
-            for j in range(len(m)):
-                self.result.append(float(m[j].replace(',','.')))
-            self.result.append(round((end-start)*1000, 2))
         process.stdout.close()
         process.stderr.close()
 
@@ -179,29 +173,17 @@ class runit(Thread):
 
 for line in f:
     if line[0] != '#' and line != '\n':
-        command = CMD+' '+ CP+' '+line + ' -log QUIET'
-        # print command
+        line = line.rstrip("\n")
+        print line
+        command = CMD+' -loop '+ str(loop) +' -args "'+line + ' -log QUIET"'
         args = shlex.split(command)
-        results = [[]for k in range(_SIZE)]
-        size = _SIZE
-        spec = [thread] * (loop/thread)
-        spec.append(loop%thread)
-        for i in range(len(spec)):
-            runlist = []
-            for t in range(spec[i]):
-                current  = runit(command, i, t)
-                runlist.append(current)
-                current.start()
 
-            for run in runlist:
-                run.join()
-                size = len(run.result)
-                for k in range(len(run.result)):
-                    results[k].append(run.result[k])
+        current  = runit(command, 0, 0)
+        current.start()
+        current.join()
 
-        # end loop
-        #compute(line, results, size)
-        computeXLS(line, results, size)
+        #compute(line, current.results, current.s)
+        computeXLS(line, current.results, current.s)
         out.write('\n')
         out.flush()
 out.close()

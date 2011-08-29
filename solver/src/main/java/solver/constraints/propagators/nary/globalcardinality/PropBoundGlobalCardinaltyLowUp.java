@@ -60,8 +60,8 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
         super(vars, null, firstCardValue, lastCardValue, solver, intVarPropagatorConstraint);
         this.minOccurrences = minOccurrences;
         this.maxOccurrences = maxOccurrences;
-        l = new PartialSum(firstCardValue, this.range, minOccurrences);
-        u = new PartialSum(firstCardValue, this.range, maxOccurrences);
+//        l = new PartialSum(firstCardValue, range);
+//        u = new PartialSum(firstCardValue, range);
         rem_proc = new RemProc(this);
     }
 
