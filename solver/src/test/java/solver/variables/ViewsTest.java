@@ -50,10 +50,10 @@ import solver.variables.view.Views;
 public class ViewsTest {
 
 
-    @Test
+    @Test(groups = "10m")
     public void test1() {
         // Z = X + Y
-        for (int seed = 2; seed < 1001; seed += 100) {
+        for (int seed = 1; seed < 1001; seed += 100) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             PropSumEq.filter = 0;
@@ -84,7 +84,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
     public void test1b() {
         // Z = |X|
         for (int seed = 100; seed < 10011; seed += 2000) {
@@ -115,7 +115,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
     public void test1c() {
         // Z = -X
         for (int seed = 1; seed < 10001; seed += 1000) {
@@ -146,7 +146,41 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
+    public void test1d() {
+        // Z = X + Y + ...
+        for (int seed = 2; seed < 9; seed += 1) {
+            Solver ref = new Solver();
+            Solver solver = new Solver();
+            PropSumEq.filter = 0;
+            int n = seed * 2;
+            {
+                IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
+                ref.post(Sum.eq(x, n, ref));
+                ref.set(StrategyFactory.minDomMinVal(x, ref.getEnvironment()));
+            }
+            {
+                IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
+                IntVar[] y = new IntVar[seed];
+                for (int i = 0; i < seed; i++) {
+                    y[i] = Views.sum(x[i], x[i + seed]);
+                }
+                solver.post(Sum.eq(y, n, solver));
+
+                solver.set(StrategyFactory.minDomMinVal(x, solver.getEnvironment()));
+
+            }
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(),
+                    ref.getMeasures().getSolutionCount(), seed + "");
+            System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getMeasures().getTimeCount(),
+                    solver.getMeasures().getTimeCount(),
+                    ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
+        }
+    }
+
+    @Test(groups = "10m")
     public void test2() {
         // Z = X - Y
         for (int seed = 100; seed < 1101; seed += 200) {
@@ -180,7 +214,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
     public void test3() {
         // Z = |X - Y|
         for (int seed = 100; seed < 1001; seed += 200) {
@@ -214,7 +248,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
     public void test4() {
         // Z = |X - Y| + AllDiff
         for (int seed = 100; seed < 1001; seed += 200) {
@@ -250,7 +284,7 @@ public class ViewsTest {
         }
     }
 
-    @Test
+    @Test(groups = "10m")
     public void test5() {
         // ~all-interval series
         for (int seed = 4; seed < 501; seed += 10) {
@@ -297,7 +331,7 @@ public class ViewsTest {
     }
 
 
-    @Test
+    @Test(groups = "10m")
     public void test6() throws ContradictionException {
         Solver solver = new Solver();
         IntVar x = VariableFactory.enumerated("x", 0, 10, solver);
@@ -312,7 +346,7 @@ public class ViewsTest {
                 }
             }
             t += System.nanoTime();
-            System.out.printf("%.2fms vs. ", t/1000/1000f);
+            System.out.printf("%.2fms vs. ", t / 1000 / 1000f);
             t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (z.getLB() == x.getUB()) {
@@ -320,7 +354,7 @@ public class ViewsTest {
                 }
             }
             t += System.nanoTime();
-            System.out.printf("%.2fms\n", t/1000/1000f);
+            System.out.printf("%.2fms\n", t / 1000 / 1000f);
         }
     }
 }
