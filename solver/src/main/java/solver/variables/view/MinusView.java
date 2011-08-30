@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -48,9 +49,11 @@ public class MinusView extends ImageIntVar<IntVar> {
 
     final IntDelta delta;
 
+    MinusIt _iterator;
+
     public MinusView(final IntVar var, Solver solver) {
         super("-(" + var.getName() + ")", var, solver);
-        delta = new ViewDelta(var.getDelta()){
+        delta = new ViewDelta(var.getDelta()) {
 
             @Override
             public void add(int value) {
@@ -144,6 +147,48 @@ public class MinusView extends ImageIntVar<IntVar> {
             var.notifyPropagators(eventType.mask == 4 ? EventType.DECUPP : EventType.INCLOW, o);
         } else {
             var.notifyPropagators(eventType, o);
+        }
+    }
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new MinusIt();
+        }
+        _iterator.init(var.getUppLowIterator());
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new MinusIt();
+        }
+        _iterator.init(var.getLowUppIterator());
+        return _iterator;
+    }
+
+    private static class MinusIt extends DisposableIntIterator {
+        DisposableIntIterator oIterator;
+
+        public void init(DisposableIntIterator oIterator) {
+            this.oIterator = oIterator;
+        }
+
+        @Override
+        public void dispose() {
+            this.oIterator.dispose();
+            super.dispose();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.oIterator.hasNext();
+        }
+
+        @Override
+        public int next() {
+            return -this.oIterator.next();
         }
     }
 }

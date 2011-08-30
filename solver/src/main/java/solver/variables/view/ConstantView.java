@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -62,6 +63,8 @@ public class ConstantView extends AbstractVariable implements IntVar {
     protected final Solver solver;
 
     protected int uniqueID;
+
+    private DisposableIntIterator _iterator;
 
     public ConstantView(String name, int constante, Solver solver) {
         super(name, solver);
@@ -267,5 +270,49 @@ public class ConstantView extends AbstractVariable implements IntVar {
     @Override
     public int getType() {
         return Variable.INTEGER;
+    }
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new CsteIt(constante);
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new CsteIt(constante);
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    private static class CsteIt extends DisposableIntIterator {
+        boolean next;
+        final int constante;
+
+        private CsteIt(int constante) {
+            this.constante = constante;
+        }
+
+        @Override
+        public void init() {
+            super.init();
+            this.next = true;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next;
+        }
+
+        @Override
+        public int next() {
+            this.next = false;
+            return constante;
+        }
     }
 }

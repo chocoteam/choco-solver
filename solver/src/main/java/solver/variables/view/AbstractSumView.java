@@ -26,11 +26,14 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
@@ -55,7 +58,7 @@ import static solver.variables.AbstractVariable.MSG_EMPTY;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public abstract class AbstractSumView implements IntVar, IView, Serializable {
+public abstract class AbstractSumView implements IntVar, IView, Serializable, ICause {
 
     final IntVar A, B;
 
@@ -68,6 +71,8 @@ public abstract class AbstractSumView implements IntVar, IView, Serializable {
     protected final IRequestList<IRequest> requests;
 
     protected final IPropagationEngine engine;
+
+    protected DisposableIntIterator _iterator;
 
     public AbstractSumView(IntVar a, IntVar b, Solver solver) {
         this.A = a;
@@ -197,7 +202,7 @@ public abstract class AbstractSumView implements IntVar, IView, Serializable {
     }
 
     @Override
-    public void notifyViews(EventType e) throws ContradictionException {
+    public void notifyViews(EventType e, ICause o) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 
@@ -246,6 +251,36 @@ public abstract class AbstractSumView implements IntVar, IView, Serializable {
             B.updateLowerBound(-sumUB + ubB, cause);
         }
         //TODO: back propager?
+    }
+
+    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
+    @Override
+    public Constraint getConstraint() {
+        return null;
+    }
+
+    @Override
+    public Explanation explain(IntVar v, Deduction d) {
+        return null;
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
+    public void incFail() {
+    }
+
+    @Override
+    public long getFails() {
+        return 0;
     }
 
 }

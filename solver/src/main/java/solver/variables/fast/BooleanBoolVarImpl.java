@@ -28,6 +28,7 @@
 package solver.variables.fast;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.ICause;
 import solver.Solver;
@@ -80,6 +81,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
     protected boolean reactOnRemoval = false;
 
     protected HeuristicVal heuristicVal;
+
+    private DisposableIntIterator _iterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -388,5 +391,67 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
     @Override
     public int getType() {
         return Variable.INTEGER;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+                int ub;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = getLB();
+                    this.ub = getUB();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value < ub;
+                }
+
+                @Override
+                public int next() {
+                    return this.value++;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+                int lb;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = getUB();
+                    this.lb = getLB();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value > lb;
+                }
+
+                @Override
+                public int next() {
+                    return this.value--;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
     }
 }

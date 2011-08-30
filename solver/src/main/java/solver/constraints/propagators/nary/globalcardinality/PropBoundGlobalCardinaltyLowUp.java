@@ -60,8 +60,8 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
         super(vars, null, firstCardValue, lastCardValue, solver, intVarPropagatorConstraint);
         this.minOccurrences = minOccurrences;
         this.maxOccurrences = maxOccurrences;
-//        l = new PartialSum(firstCardValue, range);
-//        u = new PartialSum(firstCardValue, range);
+//        l = new PartialSum(firstCardValue, this.range, minOccurrences);
+//        u = new PartialSum(firstCardValue, this.range, maxOccurrences);
         rem_proc = new RemProc(this);
     }
 
@@ -91,6 +91,9 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
         }
         if (directInconsistentCount())
             engine.fails(this, null, MSG_INCONSISTENT);
+
+        l.compute(minOccurrences);
+        u.compute(maxOccurrences);
         filter();
 
     }

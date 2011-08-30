@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -52,9 +53,11 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     protected HeuristicVal heuristicVal;
 
+    private AbsIt _iterator;
+
     public AbsView(final IntVar var, Solver solver) {
-        super("|"+var.getName()+"|", var, solver);
-        delta = new ViewDelta(var.getDelta()){
+        super("|" + var.getName() + "|", var, solver);
+        delta = new ViewDelta(var.getDelta()) {
 
             @Override
             public void add(int value) {
@@ -240,5 +243,114 @@ public final class AbsView extends ImageIntVar<IntVar> {
             d++;
         }
         return d;
+    }
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new AbsItL2U();
+        }
+        _iterator.init(var);
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new AbsItU2L();
+        }
+        _iterator.init(var);
+        return _iterator;
+    }
+
+    private static abstract class AbsIt extends DisposableIntIterator {
+
+        DisposableIntIterator u2l, l2u;
+        int vl2u, vu2l;
+
+        public void init(IntVar var) {
+            super.init();
+            l2u = var.getLowUppIterator();
+            u2l = var.getUppLowIterator();
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
+            l2u.dispose();
+            u2l.dispose();
+        }
+    }
+
+    private static class AbsItL2U extends AbsIt {
+
+        public void init(IntVar var) {
+            super.init(var);
+            while (l2u.hasNext()) {
+                this.vl2u = l2u.next();
+                if (this.vl2u >= 0) break;
+            }
+            while (u2l.hasNext()) {
+                this.vu2l = u2l.next();
+                if (this.vu2l <= 0) break;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.vl2u < Integer.MAX_VALUE || this.vu2l > -Integer.MAX_VALUE;
+        }
+
+        @Override
+        public int next() {
+            int min = this.vl2u > -this.vu2l ? this.vl2u : -this.vu2l;
+            if (this.vl2u == min) {
+                if (this.l2u.hasNext()) {
+                    this.vl2u = l2u.next();
+                } else {
+                    this.vl2u = Integer.MAX_VALUE;
+                }
+            }
+            if (-this.vu2l == min) {
+                if (this.u2l.hasNext()) {
+                    this.vu2l = u2l.next();
+                } else {
+                    this.vu2l = -Integer.MAX_VALUE;
+                }
+            }
+            return min;
+        }
+
+    }
+
+    private static class AbsItU2L extends AbsIt {
+
+        public void init(IntVar var) {
+            super.init(var);
+            if (l2u.hasNext()) {
+                this.vl2u = l2u.next();
+            }
+            if (u2l.hasNext()) {
+                this.vu2l = u2l.next();
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.vl2u <= 0 && this.vu2l >= 0;
+        }
+
+        @Override
+        public int next() {
+            int max = -this.vl2u > this.vu2l ? -this.vl2u : this.vu2l;
+            if (-this.vl2u == max && this.l2u.hasNext()) {
+                this.vl2u = this.l2u.next();
+            }
+            if (this.vu2l == max && this.u2l.hasNext()) {
+                this.vu2l = u2l.next();
+            }
+            return max;
+        }
+
     }
 }

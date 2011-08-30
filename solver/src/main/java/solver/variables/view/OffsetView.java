@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -37,7 +38,7 @@ import solver.variables.delta.view.ViewDelta;
 
 /**
  * declare an IntVar based on X and C, such as X + C
- *
+ * <p/>
  * <p/>
  * Based on "Views and Iterators for Generic Constraint Implementations",
  * C. Schulte and G. Tack
@@ -49,11 +50,12 @@ public final class OffsetView extends ImageIntVar<IntVar> {
 
     final int cste;
     final IntDelta delta;
+    OffIt _iterator;
 
     public OffsetView(final IntVar var, final int cste, Solver solver) {
-        super("("+var.getName()+"+"+cste+")", var, solver);
+        super("(" + var.getName() + "+" + cste + ")", var, solver);
         this.cste = cste;
-        delta = new ViewDelta(var.getDelta()){
+        delta = new ViewDelta(var.getDelta()) {
 
             @Override
             public void add(int value) {
@@ -124,16 +126,65 @@ public final class OffsetView extends ImageIntVar<IntVar> {
 
     @Override
     public String toString() {
-        return "("+this.var.getName() + " + " + this.cste+") = [" + getLB() + "," + getUB() + "]";
+        return "(" + this.var.getName() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
     public IntDelta getDelta() {
-       return delta;
+        return delta;
     }
 
-	@Override
-	public int getType() {
-		return INTEGER;
-	}
+    @Override
+    public int getType() {
+        return INTEGER;
+    }
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new OffIt(cste);
+        }
+        _iterator.init(var.getLowUppIterator());
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new OffIt(cste);
+        }
+        _iterator.init(var.getUppLowIterator());
+        return _iterator;
+    }
+
+    private static class OffIt extends DisposableIntIterator {
+        DisposableIntIterator oIterator;
+        final int cste;
+
+        public OffIt(int cste) {
+            this.cste = cste;
+        }
+
+        public void init(DisposableIntIterator oIterator) {
+            this.oIterator = oIterator;
+        }
+
+        @Override
+        public void dispose() {
+            this.oIterator.dispose();
+            super.dispose();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.oIterator.hasNext();
+        }
+
+        @Override
+        public int next() {
+            return this.oIterator.next() + cste;
+        }
+    }
+
+
 }

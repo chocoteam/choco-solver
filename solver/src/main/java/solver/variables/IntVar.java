@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -218,6 +219,10 @@ public interface IntVar extends Variable<IntDelta>{
      * @return the previous value in the domain
      */
     int previousValue(int v);
+
+    DisposableIntIterator getLowUppIterator();
+
+    DisposableIntIterator getUppLowIterator();
 
     /**
      * Defines the value iterator, ie the way to iterate over the domain's values, for <code>this</code>

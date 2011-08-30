@@ -27,6 +27,7 @@
 
 package solver.variables.fast;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
@@ -75,6 +76,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     private IntDelta delta = NoDelta.singleton;
 
     protected HeuristicVal heuristicVal;
+
+    private DisposableIntIterator _iterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -523,5 +526,65 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public int getType() {
         return Variable.INTEGER;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = LB.get();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value != -1;
+                }
+
+                @Override
+                public int next() {
+                    int old = this.value;
+                    this.value = VALUES.nextSetBit(this.value - OFFSET + 1) + OFFSET;
+                    return old;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = UB.get();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value != -1;
+                }
+
+                @Override
+                public int next() {
+                    int old = this.value;
+                    this.value = VALUES.prevSetBit(this.value - OFFSET - 1) + OFFSET;
+                    return old;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
     }
 }

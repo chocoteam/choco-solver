@@ -40,6 +40,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 /**
  * Bound Global cardinality : Given an array of variables vars, an array of variables card to represent the cardinalities, the constraint ensures that the number of occurences
  * of the value i among the variables is equal to card[i].
@@ -158,11 +161,11 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     @Override
     public void propagate() throws ContradictionException {
         int j = 0;
-        for (; j < nbVars; j++) {
+        for(; j < nbVars; j++){
             vars[j].updateLowerBound(offset, this);
             vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this);
         }
-        for (; j < vars.length; j++) {
+        for(;j < vars.length; j++){
             vars[j].updateLowerBound(0, this);
             vars[j].updateUpperBound(nbVars, this);
         }
@@ -263,7 +266,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
+        if(isCompletelyInstantiated()){
             return this.constraint.isSatisfied();
         }
         return ESat.UNDEFINED;
@@ -343,44 +346,26 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         }
     }
 
-    void sortmin() {
-        boolean sorted = false;
-        int current = nbVars - 1;
-        while (!sorted) {
-            sorted = true;
-            for (int i = 0; i < current; i++) {
-                if (minsorted[i].var.getLB() > minsorted[i + 1].var.getLB()) {
-                    Interval t = minsorted[i];
-                    minsorted[i] = minsorted[i + 1];
-                    minsorted[i + 1] = t;
-                    sorted = false;
-                }
-            }
-            current--;
-        }
-    }
 
-    //factorize this code with the boundalldiff
-    void sortmax() {
-        boolean sorted = false;
-        int current = 0;
-        while (!sorted) {
-            sorted = true;
-            for (int i = nbVars - 1; i > current; i--) {
-                if (maxsorted[i].var.getUB() < maxsorted[i - 1].var.getUB()) {
-                    Interval t = maxsorted[i];
-                    maxsorted[i] = maxsorted[i - 1];
-                    maxsorted[i - 1] = t;
-                    sorted = false;
-                }
+    static enum SORT implements Comparator<Interval> {
+        MAX {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                return o1.var.getUB() - o2.var.getUB();
             }
-            current++;
-        }
+        },
+        MIN {
+            @Override
+            public int compare(Interval o1, Interval o2) {
+                return o1.var.getLB() - o2.var.getLB();
+            }
+        },
+        ;
     }
 
     void sortIt() {
-        this.sortmin();
-        this.sortmax();
+        Arrays.sort(minsorted, SORT.MIN);
+        Arrays.sort(maxsorted, SORT.MAX);
 
         int min = minsorted[0].var.getLB();
         int max = maxsorted[0].var.getUB() + 1;

@@ -129,7 +129,7 @@ public interface Variable<D extends IDelta> extends Serializable {
     void notifyPropagators(EventType e, @NotNull ICause o) throws ContradictionException;
 
 
-    void notifyViews(EventType e) throws ContradictionException;
+    void notifyViews(EventType e, @NotNull ICause o) throws ContradictionException;
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)

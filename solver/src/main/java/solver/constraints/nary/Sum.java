@@ -83,21 +83,20 @@ public class Sum extends IntConstraint<IntVar> {
             }
         }
         int b = 0, e = map.size();
-        IntVar[] keys = map.keys(new IntVar[e]);
         IntVar[] tmpV = new IntVar[e];
         int[] tmpC = new int[e];
-        for (int i = 0; i < keys.length; i++) {
-            IntVar key = keys[i];
-            if (map.contains(key)) {
-                int coeff = map.get(key);
-                if (coeff > 0) {
-                    tmpV[b] = key;
-                    tmpC[b++] = coeff;
-                } else if (coeff < 0) {
-                    tmpV[--e] = key;
-                    tmpC[e] = coeff;
-                }
+        // to fix determinism in the construction, we iterate over the original array of variables
+        for (int i = 0; i < vars.length; i++) {
+            IntVar key = vars[i];
+            int coeff = map.get(key);
+            if (coeff > 0) {
+                tmpV[b] = key;
+                tmpC[b++] = coeff;
+            } else if (coeff < 0) {
+                tmpV[--e] = key;
+                tmpC[e] = coeff;
             }
+            map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
         }
         return new Sum(tmpV, tmpC, b, type, r, solver);
     }

@@ -94,7 +94,7 @@ def compute(line, result, size):
             result[i] = result[i][1:s-1]
         for j in range(len(result[i])):
             sum += result[i][j]
-        moy = round(sum/len(result[i]),2)
+        moy = round(sum/len(result[i]),6)
         stdev = max(result[i]) - min(result[i])
         info = "\t"+b[i] + ": "+ str(moy)
         if stdev > 0:
@@ -112,7 +112,7 @@ def computeXLS(line, result, size):
             result[i] = result[i][1:s-1]
         for j in range(len(result[i])):
             sum += result[i][j]
-        moy = round(sum/len(result[i]),2)
+        moy = round(sum/len(result[i]),6)
         stdev = max(result[i]) - min(result[i])
         info = ""+ str(moy)+";"
         if stdev > 0:

@@ -335,7 +335,7 @@ public final class MeasuresRecorder implements IMeasures {
         if (hasObjective) {
             st.append(String.format("Objective: %d, ", objectiveIntValue));
         }
-        st.append(String.format("Resolution %.3fs (%.2fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
+        st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
                 timeCount/IN_SEC, timeCount/IN_MS, nodeCount, backtrackCount, failCount, restartCount, propagationCount));
         return st.toString();
     }
@@ -349,7 +349,7 @@ public final class MeasuresRecorder implements IMeasures {
             st.append(String.format("\tObjective: %,d\n", objectiveIntValue));
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitial propagation : %,.3fms" +
-                "\n\tResolution : %,.3fs (%,.2fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
                 "Restarts: %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
                 readingTimeCount/IN_SEC, initialPropagationTimeCount/IN_SEC, timeCount/IN_SEC, timeCount/IN_MS,nodeCount,
                 backtrackCount, failCount, restartCount, propagationCount, usedMemory,

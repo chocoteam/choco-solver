@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -240,6 +241,68 @@ public final class IntervalXYSumView extends AbstractSumView {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+                int ub;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = LB.get();
+                    this.ub = UB.get();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value < ub;
+                }
+
+                @Override
+                public int next() {
+                    return this.value++;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+                int lb;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = UB.get();
+                    this.lb = LB.get();
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value > lb;
+                }
+
+                @Override
+                public int next() {
+                    return this.value--;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
     /////////////// SERVICES REQUIRED FROM SUM //////////////////////////
 
     @Override
@@ -254,8 +317,8 @@ public final class IntervalXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if(elb > iub){
-                    solver.explainer.updateLowerBound(this, ilb, elb, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_LOW);
+                    solver.explainer.updateLowerBound(this, ilb, elb, this);
+                    this.contradiction(this, MSG_LOW);
                 }
                 SIZE.add(elb -ilb);
                 LB.set(ilb);
@@ -264,8 +327,8 @@ public final class IntervalXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if(eub < ilb){
-                    solver.explainer.updateUpperBound(this, iub, eub, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_LOW);
+                    solver.explainer.updateUpperBound(this, iub, eub, this);
+                    this.contradiction(this, MSG_LOW);
                 }
                 SIZE.add(eub -iub);
                 UB.set(iub);
@@ -277,23 +340,23 @@ public final class IntervalXYSumView extends AbstractSumView {
                 up = true;
             }
             if (ilb > iub) {
-                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
-                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
-                this.contradiction(Cause.Null, MSG_EMPTY);
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
+                this.contradiction(this, MSG_EMPTY);
             }
-            if (down) {
-                filterOnGeq(Cause.Null, ilb);
+            if (down || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
+                filterOnGeq(this, ilb);
             }
-            if (up) {
-                filterOnLeq(Cause.Null, iub);
+            if (up|| ilb == iub) { // ilb == iub means instantiation, then force filtering algo
+                filterOnLeq(this, iub);
             }
             if (ilb == iub) {
-                notifyPropagators(EventType.INSTANTIATE, Cause.Null);
-                solver.explainer.instantiateTo(this, ilb, Cause.Null);
+                notifyPropagators(EventType.INSTANTIATE, this);
+                solver.explainer.instantiateTo(this, ilb, this);
             } else {
-                notifyPropagators(e, Cause.Null);
-                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
-                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
+                notifyPropagators(e, this);
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
             }
         }
     }

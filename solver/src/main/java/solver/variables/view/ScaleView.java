@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
 import solver.Solver;
@@ -48,11 +49,12 @@ public final class ScaleView extends ImageIntVar<IntVar> {
 
     final int cste;
     final IntDelta delta;
+    ScaleIt _iterator;
 
     public ScaleView(final IntVar var, final int cste, Solver solver) {
-        super("("+var.getName()+"*"+cste+")", var, solver);
+        super("(" + var.getName() + "*" + cste + ")", var, solver);
         this.cste = cste;
-        delta = new ViewDelta(var.getDelta()){
+        delta = new ViewDelta(var.getDelta()) {
 
             @Override
             public void add(int value) {
@@ -123,16 +125,63 @@ public final class ScaleView extends ImageIntVar<IntVar> {
 
     @Override
     public String toString() {
-        return "("+this.var.getName() +" * " + this.cste+") = [" + getLB() + "," + getUB() + "]";
+        return "(" + this.var.getName() + " * " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
     public IntDelta getDelta() {
         return delta;
     }
-    
-	@Override
-	public int getType() {
-		return INTEGER;
-	}
+
+    @Override
+    public int getType() {
+        return INTEGER;
+    }
+
+    @Override
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new ScaleIt(cste);
+        }
+        _iterator.init(var.getLowUppIterator());
+        return _iterator;
+    }
+
+    @Override
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new ScaleIt(cste);
+        }
+        _iterator.init(var.getUppLowIterator());
+        return _iterator;
+    }
+
+    private static class ScaleIt extends DisposableIntIterator {
+        DisposableIntIterator oIterator;
+        final int cste;
+
+        public ScaleIt(int cste) {
+            this.cste = cste;
+        }
+
+        public void init(DisposableIntIterator oIterator) {
+            this.oIterator = oIterator;
+        }
+
+        @Override
+        public void dispose() {
+            this.oIterator.dispose();
+            super.dispose();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.oIterator.hasNext();
+        }
+
+        @Override
+        public int next() {
+            return this.oIterator.next() * cste;
+        }
+    }
 }

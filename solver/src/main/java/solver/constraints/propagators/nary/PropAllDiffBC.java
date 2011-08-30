@@ -96,8 +96,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (vars[i].instantiated()) {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
-            ivIdx = environment.makeInt(idx);
         }
+        ivIdx = environment.makeInt(idx);
     }
 
     @Override
@@ -279,43 +279,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         }
     }
 
-
-    protected void sortmin() {
-        /*boolean sorted = false;
-        int current = this.vars.length - 1;
-        while (!sorted) {
-            sorted = true;
-            for (int i = 0; i < current; i++) {
-                if (minsorted[i].var.getLB() > minsorted[i + 1].var.getLB()) {
-                    Interval t = minsorted[i];
-                    minsorted[i] = minsorted[i + 1];
-                    minsorted[i + 1] = t;
-                    sorted = false;
-                }
-            }
-            current--;
-        }*/
-        Arrays.sort(minsorted, SORT.MIN);
-    }
-
-    protected void sortmax() {
-        /*boolean sorted = false;
-        int current = 0;
-        while (!sorted) {
-            sorted = true;
-            for (int i = this.vars.length - 1; i > current; i--) {
-                if (maxsorted[i].var.getUB() < maxsorted[i - 1].var.getUB()) {
-                    Interval t = maxsorted[i];
-                    maxsorted[i] = maxsorted[i - 1];
-                    maxsorted[i - 1] = t;
-                    sorted = false;
-                }
-            }
-            current++;
-        }*/
-        Arrays.sort(maxsorted, SORT.MAX);
-    }
-
     static enum SORT implements Comparator<Interval> {
         MAX {
             @Override
@@ -333,8 +296,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void sortIt() {
-        this.sortmin();
-        this.sortmax();
+        Arrays.sort(minsorted, SORT.MIN);
+        Arrays.sort(maxsorted, SORT.MAX);
 
         int min = minsorted[0].var.getLB();
         int max = maxsorted[0].var.getUB() + 1;

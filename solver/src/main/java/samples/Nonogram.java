@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.nary.automata.FA.FiniteAutomaton;
 import solver.constraints.nary.automata.FA.IAutomaton;
 import solver.constraints.nary.automata.Regular;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -103,6 +104,7 @@ public class Nonogram extends AbstractProblem {
 
     @Override
     public void configureSolver() {
+        solver.set(StrategyFactory.minDomMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
         //TODO: find a propagation policy
     }
 

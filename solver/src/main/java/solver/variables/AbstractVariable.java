@@ -28,6 +28,7 @@
 package solver.variables;
 
 import com.sun.istack.internal.NotNull;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -123,12 +124,20 @@ public abstract class AbstractVariable implements Serializable {
         if ((modificationEvents & e.mask) != 0) {
             requests.notifyButCause(cause, e, getDelta());
         }
-        notifyViews(e);
+        notifyViews(e, cause);
     }
 
-    public void notifyViews(EventType e) throws ContradictionException {
-        for (int i = vIdx - 1; i >= 0; i--) {
-            views[i].backPropagate(e.mask);
+    public void notifyViews(EventType e, ICause cause) throws ContradictionException {
+        if (cause == Cause.Null) {
+            for (int i = vIdx - 1; i >= 0; i--) {
+                views[i].backPropagate(e.mask);
+            }
+        }else{
+            for (int i = vIdx - 1; i >= 0; i--) {
+                if(views[i]!= cause){ // reference is enough
+                    views[i].backPropagate(e.mask);
+                }
+            }
         }
     }
 

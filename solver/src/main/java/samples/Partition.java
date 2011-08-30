@@ -69,7 +69,7 @@ import static solver.constraints.ConstraintFactory.lt;
  * @since 31/03/11
  */
 public class Partition extends AbstractProblem {
-    @Option(name = "-n", usage = "Partition size.", required = true)
+    @Option(name = "-n", usage = "Partition size.", required = false)
     int N = 64;
 
     IntVar[] vars;

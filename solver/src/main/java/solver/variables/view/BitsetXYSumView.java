@@ -26,6 +26,8 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.CacheIntIterator;
+import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IStateBitSet;
 import solver.Cause;
 import solver.ICause;
@@ -57,12 +59,21 @@ public final class BitsetXYSumView extends AbstractSumView {
         int ubB = B.getUB();
         OFFSET = lbA + lbB;
         VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
-        //TODO: improve
-        for (int i = lbA; i <= ubA; i = A.nextValue(i)) {
-            for (int j = lbB; j <= ubB; j = B.nextValue(j)) {
-                VALUES.set(i + j - OFFSET);
+
+        CacheIntIterator itB = new CacheIntIterator(B.getLowUppIterator());
+        DisposableIntIterator itA = A.getLowUppIterator();
+        while (itA.hasNext()) {
+            int i = itA.next();
+            itB.init();
+            while (itB.hasNext()) {
+                int j = itB.next();
+                if (!VALUES.get(i + j - OFFSET)) {
+                    VALUES.set(i + j - OFFSET);
+                }
             }
+            itB.dispose();
         }
+        itA.dispose();
         SIZE = solver.getEnvironment().makeInt(VALUES.cardinality());
     }
 
@@ -321,6 +332,66 @@ public final class BitsetXYSumView extends AbstractSumView {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public DisposableIntIterator getLowUppIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = LB.get() - OFFSET;
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value != -1;
+                }
+
+                @Override
+                public int next() {
+                    int old = this.value;
+                    this.value = VALUES.nextSetBit(this.value + 1);
+                    return old + OFFSET;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
+    public DisposableIntIterator getUppLowIterator() {
+        if (_iterator == null || !_iterator.isReusable()) {
+            _iterator = new DisposableIntIterator() {
+
+                int value;
+
+                @Override
+                public void init() {
+                    super.init();
+                    this.value = UB.get() - OFFSET;
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return this.value != -1;
+                }
+
+                @Override
+                public int next() {
+                    int old = this.value;
+                    this.value = VALUES.prevSetBit(this.value - 1);
+                    return old + OFFSET;
+                }
+            };
+        }
+        _iterator.init();
+        return _iterator;
+    }
+
     /////////////// SERVICES REQUIRED FROM SUM //////////////////////////
 
     @Override
@@ -331,12 +402,13 @@ public final class BitsetXYSumView extends AbstractSumView {
             int eub = A.getUB() + B.getUB();
             int ilb = LB.get();
             int iub = UB.get();
+            int old_size = iub - ilb; // is == 0, then the view is already instantiated
             boolean up = false, down = false;
             EventType e = EventType.VOID;
             if (elb > ilb) {
-                if(elb > iub){
-                    solver.explainer.updateLowerBound(this, ilb, elb, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_LOW);
+                if (elb > iub) {
+                    solver.explainer.updateLowerBound(this, ilb, elb, this);
+                    this.contradiction(this, MSG_LOW);
                 }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
                 ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
@@ -345,9 +417,9 @@ public final class BitsetXYSumView extends AbstractSumView {
                 down = true;
             }
             if (eub < iub) {
-                if(eub < ilb){
-                    solver.explainer.updateUpperBound(this, iub, eub, Cause.Null);
-                    this.contradiction(Cause.Null, MSG_LOW);
+                if (eub < ilb) {
+                    solver.explainer.updateUpperBound(this, iub, eub, this);
+                    this.contradiction(this, MSG_LOW);
                 }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
@@ -359,25 +431,28 @@ public final class BitsetXYSumView extends AbstractSumView {
                 }
                 up = true;
             }
-            SIZE.set(VALUES.cardinality());
+            int size = VALUES.cardinality();
+            SIZE.set(size);
             if (ilb > iub) {
-                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
-                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
-                this.contradiction(Cause.Null, MSG_EMPTY);
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
+                this.contradiction(this, MSG_EMPTY);
             }
-            if (down) {
-                filterOnGeq(Cause.Null, ilb);
+            if (down || size == 1) {
+                filterOnGeq(this, ilb);
             }
-            if (up) {
-                filterOnLeq(Cause.Null, iub);
+            if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
+                filterOnLeq(this, iub);
             }
-            if (ilb == iub) {
-                notifyPropagators(EventType.INSTANTIATE, Cause.Null);
-                solver.explainer.instantiateTo(this, ilb, Cause.Null);
+            if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
+                if (old_size > 0) {
+                    notifyPropagators(EventType.INSTANTIATE, this);
+                    solver.explainer.instantiateTo(this, ilb, this);
+                }
             } else {
-                notifyPropagators(e, Cause.Null);
-                solver.explainer.updateLowerBound(this, ilb, ilb, Cause.Null);
-                solver.explainer.updateUpperBound(this, iub, iub, Cause.Null);
+                notifyPropagators(e, this);
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
             }
         }
     }
