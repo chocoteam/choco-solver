@@ -1,0 +1,259 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+## ALL INTERVAL SERIES
+samples.AllIntervalSeries -o 500 -policy OLDEST
+samples.AllIntervalSeries -o 500 -policy VARIABLE_LEX
+samples.AllIntervalSeries -o 500 -policy CONSTRAINT_LEX
+samples.AllIntervalSeries -o 500 -policy VARIABLE_ORIENTED
+samples.AllIntervalSeries -o 500 -policy CONSTRAINT_ORIENTED
+samples.AllIntervalSeries -o 500 -policy PRIORITY_PROP
+samples.AllIntervalSeries -o 500 -policy DEFAULT
+##
+samples.AllIntervalSeries -o 1000 -policy OLDEST
+samples.AllIntervalSeries -o 1000 -policy VARIABLE_LEX
+samples.AllIntervalSeries -o 1000 -policy CONSTRAINT_LEX
+samples.AllIntervalSeries -o 1000 -policy VARIABLE_ORIENTED
+samples.AllIntervalSeries -o 1000 -policy CONSTRAINT_ORIENTED
+samples.AllIntervalSeries -o 1000 -policy PRIORITY_PROP
+samples.AllIntervalSeries -o 1000 -policy DEFAULT
+##
+## BALANCED INCOMPLETE BLOCK DESIGNS
+samples.BIBD -v 7 -k 3 -l 20 -policy OLDEST
+samples.BIBD -v 7 -k 3 -l 20 -policy VARIABLE_LEX
+samples.BIBD -v 7 -k 3 -l 20 -policy CONSTRAINT_LEX
+samples.BIBD -v 7 -k 3 -l 20 -policy VARIABLE_ORIENTED
+samples.BIBD -v 7 -k 3 -l 20 -policy CONSTRAINT_ORIENTED
+samples.BIBD -v 7 -k 3 -l 20 -policy PRIORITY_PROP
+samples.BIBD -v 7 -k 3 -l 20 -policy DEFAULT
+##
+samples.BIBD -v 7 -k 3 -l 60 -policy OLDEST
+samples.BIBD -v 7 -k 3 -l 60 -policy VARIABLE_LEX
+samples.BIBD -v 7 -k 3 -l 60 -policy CONSTRAINT_LEX
+samples.BIBD -v 7 -k 3 -l 60 -policy VARIABLE_ORIENTED
+samples.BIBD -v 7 -k 3 -l 60 -policy CONSTRAINT_ORIENTED
+samples.BIBD -v 7 -k 3 -l 60 -policy PRIORITY_PROP
+samples.BIBD -v 7 -k 3 -l 60 -policy DEFAULT
+##
+## CAR SEQUENCING
+samples.CarSequencing -d myPb -policy OLDEST
+samples.CarSequencing -d myPb -policy VARIABLE_LEX
+samples.CarSequencing -d myPb -policy CONSTRAINT_LEX
+samples.CarSequencing -d myPb -policy VARIABLE_ORIENTED
+samples.CarSequencing -d myPb -policy CONSTRAINT_ORIENTED
+samples.CarSequencing -d myPb -policy PRIORITY_PROP
+samples.CarSequencing -d myPb -policy DEFAULT
+##
+samples.CarSequencing -d P4_72 -policy OLDEST
+samples.CarSequencing -d P4_72 -policy VARIABLE_LEX
+samples.CarSequencing -d P4_72 -policy CONSTRAINT_LEX
+samples.CarSequencing -d P4_72 -policy VARIABLE_ORIENTED
+samples.CarSequencing -d P4_72 -policy CONSTRAINT_ORIENTED
+samples.CarSequencing -d P4_72 -policy PRIORITY_PROP
+samples.CarSequencing -d P4_72 -policy DEFAULT
+##
+## GOLOMB RULER
+samples.GolombRuler -m 8 -c BC -policy OLDEST
+samples.GolombRuler -m 8 -c BC -policy VARIABLE_LEX
+samples.GolombRuler -m 8 -c BC -policy CONSTRAINT_LEX
+samples.GolombRuler -m 8 -c BC -policy VARIABLE_ORIENTED
+samples.GolombRuler -m 8 -c BC -policy CONSTRAINT_ORIENTED
+samples.GolombRuler -m 8 -c BC -policy PRIORITY_PROP
+samples.GolombRuler -m 8 -c BC -policy DEFAULT
+##
+samples.GolombRuler -m 10 -c BC -policy OLDEST
+samples.GolombRuler -m 10 -c BC -policy VARIABLE_LEX
+samples.GolombRuler -m 10 -c BC -policy CONSTRAINT_LEX
+samples.GolombRuler -m 10 -c BC -policy VARIABLE_ORIENTED
+samples.GolombRuler -m 10 -c BC -policy CONSTRAINT_ORIENTED
+samples.GolombRuler -m 10 -c BC -policy PRIORITY_PROP
+samples.GolombRuler -m 10 -c BC -policy DEFAULT
+##
+## GROCERY
+samples.Grocery -policy OLDEST
+samples.Grocery -policy VARIABLE_LEX
+samples.Grocery -policy CONSTRAINT_LEX
+samples.Grocery -policy VARIABLE_ORIENTED
+samples.Grocery -policy CONSTRAINT_ORIENTED
+samples.Grocery -policy PRIORITY_PROP
+samples.Grocery -policy DEFAULT
+##
+## LATIN SQUARE
+samples.LatinSquare -n 5 -policy OLDEST
+samples.LatinSquare -n 5 -policy VARIABLE_LEX
+samples.LatinSquare -n 5 -policy CONSTRAINT_LEX
+samples.LatinSquare -n 5 -policy VARIABLE_ORIENTED
+samples.LatinSquare -n 5 -policy CONSTRAINT_ORIENTED
+samples.LatinSquare -n 5 -policy PRIORITY_PROP
+samples.LatinSquare -n 5 -policy DEFAULT
+##
+## LATIN SQUARE
+samples.LatinSquare -n 7 -policy OLDEST
+samples.LatinSquare -n 7 -policy VARIABLE_LEX
+samples.LatinSquare -n 7 -policy CONSTRAINT_LEX
+samples.LatinSquare -n 7 -policy VARIABLE_ORIENTED
+samples.LatinSquare -n 7 -policy CONSTRAINT_ORIENTED
+samples.LatinSquare -n 7 -policy PRIORITY_PROP
+samples.LatinSquare -n 7 -policy DEFAULT
+##
+## PARTITION PROBLEM
+samples.Partition -n 48 -policy OLDEST
+samples.Partition -n 48 -policy VARIABLE_LEX
+samples.Partition -n 48 -policy CONSTRAINT_LEX
+samples.Partition -n 48 -policy VARIABLE_ORIENTED
+samples.Partition -n 48 -policy CONSTRAINT_ORIENTED
+samples.Partition -n 48 -policy PRIORITY_PROP
+samples.Partition -n 48 -policy DEFAULT
+##
+samples.Partition -n 64 -policy OLDEST
+samples.Partition -n 64 -policy VARIABLE_LEX
+samples.Partition -n 64 -policy CONSTRAINT_LEX
+samples.Partition -n 64 -policy VARIABLE_ORIENTED
+samples.Partition -n 64 -policy CONSTRAINT_ORIENTED
+samples.Partition -n 64 -policy PRIORITY_PROP
+samples.Partition -n 64 -policy DEFAULT
+##
+## PHOTO
+samples.Photo -d small -policy OLDEST
+samples.Photo -d small -policy VARIABLE_LEX
+samples.Photo -d small -policy CONSTRAINT_LEX
+samples.Photo -d small -policy VARIABLE_ORIENTED
+samples.Photo -d small -policy CONSTRAINT_ORIENTED
+samples.Photo -d small -policy PRIORITY_PROP
+samples.Photo -d small -policy DEFAULT
+##
+samples.Photo -d large -policy OLDEST
+samples.Photo -d large -policy VARIABLE_LEX
+samples.Photo -d large -policy CONSTRAINT_LEX
+samples.Photo -d large -policy VARIABLE_ORIENTED
+samples.Photo -d large -policy CONSTRAINT_ORIENTED
+samples.Photo -d large -policy PRIORITY_PROP
+samples.Photo -d large -policy DEFAULT
+##
+## PICTURE/PICROSS/NONOGRAM...
+samples.Nonogram -d p200 -policy OLDEST
+samples.Nonogram -d p200 -policy VARIABLE_LEX
+samples.Nonogram -d p200 -policy CONSTRAINT_LEX
+samples.Nonogram -d p200 -policy VARIABLE_ORIENTED
+samples.Nonogram -d p200 -policy CONSTRAINT_ORIENTED
+samples.Nonogram -d p200 -policy PRIORITY_PROP
+samples.Nonogram -d p200 -policy DEFAULT
+##
+## FAMOUS NQUEEN, my favourite
+samples.nqueen.NQueenBinary -q 400 -policy OLDEST
+samples.nqueen.NQueenBinary -q 400 -policy VARIABLE_LEX
+samples.nqueen.NQueenBinary -q 400 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenBinary -q 400 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenBinary -q 400 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenBinary -q 400 -policy PRIORITY_PROP
+samples.nqueen.NQueenBinary -q 400 -policy DEFAULT
+##
+##
+samples.nqueen.NQueenGlobal -q 400 -policy OLDEST
+samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_LEX
+samples.nqueen.NQueenGlobal -q 400 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenGlobal -q 400 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenGlobal -q 400 -policy PRIORITY_PROP
+samples.nqueen.NQueenGlobal -q 400 -policy DEFAULT
+##
+## MAGIC SERIES
+samples.MagicSeries -n 400 -policy OLDEST
+samples.MagicSeries -n 400 -policy VARIABLE_LEX
+samples.MagicSeries -n 400 -policy CONSTRAINT_LEX
+samples.MagicSeries -n 400 -policy VARIABLE_ORIENTED
+samples.MagicSeries -n 400 -policy CONSTRAINT_ORIENTED
+samples.MagicSeries -n 400 -policy PRIORITY_PROP
+samples.MagicSeries -n 400 -policy DEFAULT
+##
+samples.MagicSeries -n 500 -policy OLDEST
+samples.MagicSeries -n 500 -policy VARIABLE_LEX
+samples.MagicSeries -n 500 -policy CONSTRAINT_LEX
+samples.MagicSeries -n 500 -policy VARIABLE_ORIENTED
+samples.MagicSeries -n 500 -policy CONSTRAINT_ORIENTED
+samples.MagicSeries -n 500 -policy PRIORITY_PROP
+samples.MagicSeries -n 500 -policy DEFAULT
+##
+## MAGIC SQUARE
+samples.MagicSquare -n 5 -c BC -policy OLDEST
+samples.MagicSquare -n 5 -c BC -policy VARIABLE_LEX
+samples.MagicSquare -n 5 -c BC -policy CONSTRAINT_LEX
+samples.MagicSquare -n 5 -c BC -policy VARIABLE_ORIENTED
+samples.MagicSquare -n 5 -c BC -policy CONSTRAINT_ORIENTED
+samples.MagicSquare -n 5 -c BC -policy PRIORITY_PROP
+samples.MagicSquare -n 5 -c BC -policy DEFAULT
+##
+samples.MagicSquare -n 7 -c BC -policy OLDEST
+samples.MagicSquare -n 7 -c BC -policy VARIABLE_LEX
+samples.MagicSquare -n 7 -c BC -policy CONSTRAINT_LEX
+samples.MagicSquare -n 7 -c BC -policy VARIABLE_ORIENTED
+samples.MagicSquare -n 7 -c BC -policy CONSTRAINT_ORIENTED
+samples.MagicSquare -n 7 -c BC -policy PRIORITY_PROP
+samples.MagicSquare -n 7 -c BC -policy DEFAULT
+##
+## WARE HOUSE LOCATION PROBLEM
+samples.WarehouseLocation -policy OLDEST
+samples.WarehouseLocation -policy VARIABLE_LEX
+samples.WarehouseLocation -policy CONSTRAINT_LEX
+samples.WarehouseLocation -policy VARIABLE_ORIENTED
+samples.WarehouseLocation -policy CONSTRAINT_ORIENTED
+samples.WarehouseLocation -policy PRIORITY_PROP
+samples.WarehouseLocation -policy DEFAULT
+##
+## SOCIAL GOLFER
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy OLDEST
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy VARIABLE_LEX
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy CONSTRAINT_LEX
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy VARIABLE_ORIENTED
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy CONSTRAINT_ORIENTED
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy PRIORITY_PROP
+samples.SocialGolfer -g 3 -w 5 -s 2 -policy DEFAULT
+##
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy OLDEST
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy VARIABLE_LEX
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy CONSTRAINT_LEX
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy VARIABLE_ORIENTED
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy CONSTRAINT_ORIENTED
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy PRIORITY_PROP
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy DEFAULT
+##
+## SPORT SCHEDULING
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy OLDEST
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy VARIABLE_LEX
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy CONSTRAINT_LEX
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy VARIABLE_ORIENTED
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy CONSTRAINT_ORIENTED
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy PRIORITY_PROP
+samples.SocialGolfer -g 8 -w 7 -s 2 -policy DEFAULT
+##
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy OLDEST
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy VARIABLE_LEX
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy CONSTRAINT_LEX
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy VARIABLE_ORIENTED
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy CONSTRAINT_ORIENTED
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy PRIORITY_PROP
+samples.SocialGolfer -g 9 -w 8 -s 2 -policy DEFAULT
+##
+## LANGFORD NUMBER
+samples.Langford -k 3 -n 17 -s 2 -policy OLDEST
+samples.Langford -k 3 -n 17 -s 2 -policy VARIABLE_LEX
+samples.Langford -k 3 -n 17 -s 2 -policy CONSTRAINT_LEX
+samples.Langford -k 3 -n 17 -s 2 -policy VARIABLE_ORIENTED
+samples.Langford -k 3 -n 17 -s 2 -policy CONSTRAINT_ORIENTED
+samples.Langford -k 3 -n 17 -s 2 -policy PRIORITY_PROP
+samples.Langford -k 3 -n 17 -s 2 -policy DEFAULT
+##
+## SCHUR LEMMA
+samples.SchurLemma -k 4 -n 43 -s 2 -policy OLDEST
+samples.SchurLemma -k 4 -n 43 -s 2 -policy VARIABLE_LEX
+samples.SchurLemma -k 4 -n 43 -s 2 -policy CONSTRAINT_LEX
+samples.SchurLemma -k 4 -n 43 -s 2 -policy VARIABLE_ORIENTED
+samples.SchurLemma -k 4 -n 43 -s 2 -policy CONSTRAINT_ORIENTED
+samples.SchurLemma -k 4 -n 43 -s 2 -policy PRIORITY_PROP
+samples.SchurLemma -k 4 -n 43 -s 2 -policy DEFAULT
