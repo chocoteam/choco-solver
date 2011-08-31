@@ -29,6 +29,7 @@ package solver.search.strategy;
 
 import choco.kernel.memory.IEnvironment;
 import solver.Solver;
+import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -128,7 +129,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMinVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                SorterFactory.minDomain(),
+                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -143,7 +144,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMidVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainSplitMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                SorterFactory.minDomain(),
+                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -158,7 +159,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMaxVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMax(variables);
         return StrategyVarValAssign.dyn(variables,
-                SorterFactory.minDomain(),
+                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -166,7 +167,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> maxRegMinVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                SorterFactory.maxRegret(),
+                new Seq<IntVar>(SorterFactory.maxRegret(),SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -193,7 +194,7 @@ public final class StrategyFactory {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -201,7 +202,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver) {
         HeuristicValFactory.indomainMiddle(vars);
         return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -210,7 +211,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver) {
         HeuristicValFactory.indomainMax(vars);
         return StrategyVarValAssign.dyn(vars,
-                SorterFactory.domOverWDeg(solver),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }

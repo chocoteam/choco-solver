@@ -78,6 +78,10 @@ public enum Views {
         return new AbsView(ivar, ivar.getSolver());
     }
 
+    public static IntVar sqr(IntVar ivar) {
+        return new SqrView(ivar, ivar.getSolver());
+    }
+
     public static IntVar sum(IntVar a, IntVar b) {
         if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
             return new BitsetXYSumView(a, b, a.getSolver());

@@ -30,12 +30,10 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.IntLinComb;
 import solver.constraints.nary.Sum;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.ternary.Times;
+import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
@@ -46,6 +44,7 @@ import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.Arrays;
 
@@ -100,17 +99,21 @@ public class Partition extends AbstractProblem {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        solver.post(ConstraintFactory.scalar(xy, coeffs, IntLinComb.Operator.EQ, 0, solver));
+        solver.post(Sum.eq(xy, coeffs, 0, solver));
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
-        sx = VariableFactory.enumeratedArray("sx", size, 1, 4 * size * size, solver);
-        sy = VariableFactory.enumeratedArray("sy", size, 1, 4 * size * size, solver);
+        sx = new IntVar[size];
+        sy = new IntVar[size];
         for (int i = size - 1; i >= 0; i--) {
-            solver.post(new Times(x[i], x[i], sx[i], solver));
+            sx[i] = Views.sqr(x[i]);
             sxy[i] = sx[i];
-            solver.post(new Times(y[i], y[i], sy[i], solver));
+            sy[i] = Views.sqr(y[i]);
             sxy[size + i] = sy[i];
+            solver.post(new Relation(sx[i], Relation.R.GQ, 1, solver));
+            solver.post(new Relation(sy[i], Relation.R.GQ, 1, solver));
+            solver.post(new Relation(sx[i], Relation.R.LQ, 4 * size * size, solver));
+            solver.post(new Relation(sy[i], Relation.R.LQ, 4 * size * size, solver));
         }
         solver.post(Sum.eq(sxy, coeffs, 0, solver));
 
@@ -130,6 +133,7 @@ public class Partition extends AbstractProblem {
     public void configureSolver() {
 
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
@@ -186,7 +190,7 @@ public class Partition extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Partition().execute(args);
+        while(true)new Partition().execute(args);
     }
 
 }

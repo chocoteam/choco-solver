@@ -23,7 +23,7 @@ CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
 ## Number of time a problem is run
 loop = 1 # can be override
 ## time limit for a process
-timelimit = 180 #in seconds
+timelimit = 180 #in seconds => 10min
 name = 'runner'
 
 ## regexp for statisctics
@@ -108,8 +108,11 @@ def computeXLS(line, result, size):
         sum = 0.0
         s = len(result[i])
         result[i].sort()
+        if not s:
+            return
         if s > 2 :
             result[i] = result[i][1:s-1]
+
         for j in range(len(result[i])):
             sum += result[i][j]
         moy = round(sum/len(result[i]),6)
@@ -135,7 +138,7 @@ class runit(Thread):
         # print str(self.i)+'_'+str(self.j)
         process = subprocess.Popen(args, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
         start = time.time()
-        clock = limit( process, timelimit )
+        clock = limit( process, timelimit * loop )
         process.wait()
         end = time.time()
         output, error = process.communicate()

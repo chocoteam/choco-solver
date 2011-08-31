@@ -36,6 +36,7 @@ import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.propagators.nary.sum.PropSumEq;
+import solver.constraints.ternary.Times;
 import solver.constraints.unary.Relation;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
@@ -170,6 +171,47 @@ public class ViewsTest {
                 solver.set(StrategyFactory.minDomMinVal(x, solver.getEnvironment()));
 
             }
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(),
+                    ref.getMeasures().getSolutionCount(), seed + "");
+            System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getMeasures().getTimeCount(),
+                    solver.getMeasures().getTimeCount(),
+                    ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
+        }
+    }
+
+
+    @Test(groups = "10m")
+    public void test1e() {
+        // Z = X^2
+        for (int seed = 10; seed < 10001; seed += 101) {
+            Solver ref = new Solver();
+            Solver solver = new Solver();
+            PropSumEq.filter = 0;
+            {
+                IntVar x = VariableFactory.enumerated("x", 0, seed, ref);
+                IntVar z = VariableFactory.enumerated("z", 0, seed * seed, ref);
+                ref.post(new Times(x, x, z, ref));
+                ref.post(new Relation(z, Relation.R.LQ, seed, ref));
+                ref.set(StrategyFactory.minDomMinVal(new IntVar[]{x}, ref.getEnvironment()));
+            }
+            {
+                IntVar x = VariableFactory.enumerated("x", 0, seed, solver);
+                IntVar z = Views.sqr(x);
+                solver.post(new Relation(z, Relation.R.LQ, seed, solver));
+                solver.set(StrategyFactory.minDomMinVal(new IntVar[]{x}, solver.getEnvironment()));
+//                try {
+//                    solver.propagate();
+//                    x.instantiateTo(33, Cause.Null);
+//                    solver.propagate();
+//                } catch (ContradictionException e) {
+//                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//                }
+
+            }
+//            SearchMonitorFactory.log(ref, true, false);
+//            SearchMonitorFactory.log(solver, true, false);
             ref.findAllSolutions();
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(),

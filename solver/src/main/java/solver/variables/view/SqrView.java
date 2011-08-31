@@ -47,16 +47,16 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends ImageIntVar<IntVar> {
+public final class SqrView extends ImageIntVar<IntVar> {
 
     final IntDelta delta;
 
     protected HeuristicVal heuristicVal;
 
-    private AbsIt _iterator;
+    private SqrIt _iterator;
 
-    public AbsView(final IntVar var, Solver solver) {
-        super("|" + var.getName() + "|", var, solver);
+    public SqrView(final IntVar var, Solver solver) {
+        super("(" + var.getName() + "^2)", var, solver);
         delta = new ViewDelta(var.getDelta()) {
 
             @Override
@@ -90,13 +90,62 @@ public final class AbsView extends ImageIntVar<IntVar> {
         return false;
     }
 
+    // http://stackoverflow.com/questions/295579/fastest-way-to-determine-if-an-integers-square-root-is-an-integer
+    private static int floor_sqrt(int n) {
+        if (n < 0)
+            return 0;
+        return (int) Math.sqrt(n);
+        /*
+        switch (n & 0x3F) {
+            case 0x00:
+            case 0x01:
+            case 0x04:
+            case 0x09:
+            case 0x10:
+            case 0x11:
+            case 0x19:
+            case 0x21:
+            case 0x24:
+            case 0x29:
+            case 0x31:
+            case 0x39:
+                int sqrt;
+                if (n < 410881) {
+                    //John Carmack hack, converted to Java.
+                    // See: http://www.codemaestro.com/reviews/9
+                    int i;
+                    float x2, y;
+
+                    x2 = n * 0.5F;
+                    y = n;
+                    i = Float.floatToRawIntBits(y);
+                    i = 0x5f3759df - (i >> 1);
+                    y = Float.intBitsToFloat(i);
+                    y = y * (1.5F - (x2 * y * y));
+
+                    sqrt = (int) (1.0F / y);
+                } else {
+                    //Carmack hack gives incorrect answer for n >= 410881.
+                    sqrt = (int) Math.sqrt(n);
+                }
+                return sqrt;
+
+            default:
+                return  (int) Math.sqrt(n);
+        }*/
+    }
+
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value < 0) {
             return false;
         }
-        boolean done = var.removeValue(-value, cause);
-        done |= var.removeValue(value, cause);
+        int rootV = floor_sqrt(value);
+        boolean done = false;
+        if (rootV * rootV == value) { // is a perfect square ?
+            done = var.removeValue(-rootV, cause);
+            done |= var.removeValue(rootV, cause);
+        }
         return done;
     }
 
@@ -108,8 +157,10 @@ public final class AbsView extends ImageIntVar<IntVar> {
         if (from < 0) {
             from = 0;
         }
-        boolean done = var.removeInterval(-to, -from, cause);
-        done |= var.removeInterval(from, to, cause);
+        int from_fX = floor_sqrt(from);
+        int to_fX = floor_sqrt(to);
+        boolean done = var.removeInterval(-to_fX, -from_fX, cause);
+        done |= var.removeInterval(from_fX, to_fX, cause);
         return done;
     }
 
@@ -118,18 +169,29 @@ public final class AbsView extends ImageIntVar<IntVar> {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
-        int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, cause);
-        done |= var.updateUpperBound(v, cause);
-        if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, cause);
+        int v = floor_sqrt(value);
+        boolean done = false;
+        if (v * v == value) { // is a perfect square ?
+            done = var.updateLowerBound(-v, cause);
+            done |= var.updateUpperBound(v, cause);
+            if (var.hasEnumeratedDomain()) {
+                done |= var.removeInterval(-v + 1, v - 1, cause);
+            }
+        } else { //otherwise, impossible value for instantiation
+            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
+
         return done;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && var.removeInterval(-value + 1, value - 1, cause);
+        boolean done = false;
+        if (value > 0) {
+            int floorV = floor_sqrt(value);
+            done = var.removeInterval(-floorV + 1, floorV - 1, cause);
+        }
+        return done;
     }
 
     @Override
@@ -137,8 +199,9 @@ public final class AbsView extends ImageIntVar<IntVar> {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, cause);
-        done |= var.updateUpperBound(value, cause);
+        int floorV = floor_sqrt(value);
+        boolean done = var.updateLowerBound(-floorV, cause);
+        done |= var.updateUpperBound(floorV, cause);
         return done;
     }
 
@@ -154,7 +217,8 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     @Override
     public int getValue() {
-        return Math.abs(var.getValue());
+        int v = var.getValue();
+        return v * v;
     }
 
     @Override
@@ -164,15 +228,19 @@ public final class AbsView extends ImageIntVar<IntVar> {
         }
         int elb = var.getLB();
         if (elb > 0) {
-            return elb;
+            return elb * elb;
         }
         int eub = var.getUB();
         if (eub < 0) {
-            return -eub;
+            return eub * eub;
         }
         int l = var.previousValue(0);
         int u = var.nextValue(0);
-        return Math.min(-l, u);
+        if (-l < u) {
+            return l * l;
+        } else {
+            return u * u;
+        }
     }
 
     @Override
@@ -187,7 +255,7 @@ public final class AbsView extends ImageIntVar<IntVar> {
         } else {
             mm = eub;
         }
-        return mm;
+        return mm * mm;
     }
 
     @Override
@@ -195,14 +263,19 @@ public final class AbsView extends ImageIntVar<IntVar> {
         if (v < 0 && var.contains(0)) {
             return 0;
         }
-        int l = var.previousValue(-v);
+        int floorV = floor_sqrt(v);
+        int l = var.previousValue(-floorV);
         if (l == Integer.MIN_VALUE) {
             l = Integer.MAX_VALUE;
         } else {
             l = Math.abs(l);
         }
-        int u = var.nextValue(v);
-        return Math.min(l, Math.abs(u));
+        int u = var.nextValue(floorV);
+        int min = Math.min(l, Math.abs(u));
+        if (min == Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+        return min * min;
     }
 
     @Override
@@ -210,24 +283,37 @@ public final class AbsView extends ImageIntVar<IntVar> {
         if (v < 0) {
             return Integer.MIN_VALUE;
         }
-        int l = var.nextValue(-v);
+        int floorV = floor_sqrt(v);
+        if (floorV * floorV != v) {
+            floorV++;
+        }
+        int l = var.nextValue(-floorV);
         if (l == Integer.MIN_VALUE) {
             l = Integer.MAX_VALUE;
         } else {
             l = Math.abs(l);
         }
-        int u = var.previousValue(v);
-        return Math.max(l, Math.abs(u));
+        int u = var.previousValue(floorV);
+        int max = Math.max(l, Math.abs(u));
+        if (max == Integer.MAX_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return max * max;
     }
 
     @Override
     public String toString() {
-        return "|" + this.var.getName() + "| = [" + getLB() + "," + getUB() + "]";
+        return "(" + this.var.getName() + "^2) = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
     public IntDelta getDelta() {
         return delta;
+    }
+
+    @Override
+    public boolean hasEnumeratedDomain() {
+        return true;
     }
 
     @Override
@@ -237,18 +323,13 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     @Override
     public int getDomainSize() {
-        int d = 0;
-        int ub = getUB();
-        for (int val = getLB(); val <= ub; val = nextValue(val)) {
-            d++;
-        }
-        return d;
+        return var.getDomainSize();
     }
 
     @Override
     public DisposableIntIterator getLowUppIterator() {
         if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new AbsItL2U();
+            _iterator = new SqrItL2U();
         }
         _iterator.init(var);
         return _iterator;
@@ -257,13 +338,13 @@ public final class AbsView extends ImageIntVar<IntVar> {
     @Override
     public DisposableIntIterator getUppLowIterator() {
         if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new AbsItU2L();
+            _iterator = new SqrItU2L();
         }
         _iterator.init(var);
         return _iterator;
     }
 
-    private static abstract class AbsIt extends DisposableIntIterator {
+    private static abstract class SqrIt extends DisposableIntIterator {
 
         DisposableIntIterator u2l, l2u;
         int vl2u, vu2l;
@@ -282,7 +363,7 @@ public final class AbsView extends ImageIntVar<IntVar> {
         }
     }
 
-    private static class AbsItL2U extends AbsIt {
+    private static class SqrItL2U extends SqrIt {
 
         public void init(IntVar var) {
             super.init(var);
@@ -318,12 +399,12 @@ public final class AbsView extends ImageIntVar<IntVar> {
                     this.vu2l = -Integer.MAX_VALUE;
                 }
             }
-            return min;
+            return min * min;
         }
 
     }
 
-    private static class AbsItU2L extends AbsIt {
+    private static class SqrItU2L extends SqrIt {
 
         public void init(IntVar var) {
             super.init(var);
@@ -349,7 +430,7 @@ public final class AbsView extends ImageIntVar<IntVar> {
             if (this.vu2l == max && this.u2l.hasNext()) {
                 this.vu2l = u2l.next();
             }
-            return max;
+            return max * max;
         }
 
     }

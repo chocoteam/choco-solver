@@ -30,10 +30,8 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.binary.Absolute;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.Sum;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
@@ -82,14 +80,15 @@ public class AllIntervalSeries extends AbstractProblem {
         dist = new IntVar[m - 1];
 
 
-        if (false) {
+        /*if (false) {
             dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
             IntVar[] tmp = VariableFactory.enumeratedArray("tmp", m - 1, -(m - 1), m - 1, solver);
             for (int i = 0; i < m - 1; i++) {
                 solver.post(Sum.eq(new IntVar[]{vars[i + 1], Views.minus(vars[i]), Views.minus(tmp[i])}, 0, solver));
                 solver.post(new Absolute(dist[i], tmp[i], solver));
             }
-        } else {
+        } else*/
+        {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
                 solver.post(new Relation(dist[i], Relation.R.GT, 0, solver));
