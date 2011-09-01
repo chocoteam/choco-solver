@@ -56,7 +56,7 @@ public class LatinSquare extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver("Latin square" + m);
+        solver = new Solver("Latin square " + m);
 
         vars = new IntVar[m * m];
         for (int i = 0; i < m; i++) {

@@ -126,7 +126,7 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.domwdegMindom(cars, solver));
+        solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
         solver.getEngine().addGroup(
                 Group.buildGroup(
                         //new MemberV<IntVar>(hs)
