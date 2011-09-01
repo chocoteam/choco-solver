@@ -26,10 +26,12 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.Sum;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.VariableFactory;
 
@@ -81,6 +83,7 @@ public class SchurLemma extends AbstractProblem {
 
     @Override
     public void configureSolver() {
+        solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(M), solver.getEnvironment()));
     }
 
     @Override

@@ -49,10 +49,11 @@ import java.util.HashSet;
  */
 public class NQueenBinary extends AbstractNQueen {
 
-    HashSet<Constraint> set = new HashSet<Constraint>();
+    HashSet<Constraint> set;
 
     @Override
     public void buildModel() {
+        set = new HashSet<Constraint>();
         solver = new Solver();
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
