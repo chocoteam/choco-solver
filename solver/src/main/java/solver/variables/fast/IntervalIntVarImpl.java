@@ -27,6 +27,7 @@
 
 package solver.variables.fast;
 
+import choco.kernel.common.util.iterators.BoundedIntIterator;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
@@ -36,7 +37,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.requests.PropRequest;
+import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -66,7 +67,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     protected HeuristicVal heuristicVal;
 
-    private DisposableIntIterator _iterator;
+    private BoundedIntIterator _iterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -412,7 +413,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<IntVar, Propagator<IntVar>> request = new PropRequest<IntVar, Propagator<IntVar>>(propagator, this, idxInProp);
+        IRequest<IntVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }
@@ -446,60 +447,18 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public DisposableIntIterator getLowUppIterator() {
         if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int ub;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = LB.get();
-                    this.ub = UB.get();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value < ub;
-                }
-
-                @Override
-                public int next() {
-                    return this.value++;
-                }
-            };
+            _iterator = new BoundedIntIterator();
         }
-        _iterator.init();
+        _iterator.init(this.LB.get(), this.UB.get());
         return _iterator;
     }
 
     @Override
     public DisposableIntIterator getUppLowIterator() {
         if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int lb;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = UB.get();
-                    this.lb = LB.get();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value > lb;
-                }
-
-                @Override
-                public int next() {
-                    return this.value--;
-                }
-            };
+            _iterator = new BoundedIntIterator();
         }
-        _iterator.init();
+        _iterator.init(this.UB.get(), this.LB.get());
         return _iterator;
     }
 }

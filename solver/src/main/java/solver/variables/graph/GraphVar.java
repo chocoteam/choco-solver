@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.requests.PropRequest;
+import solver.requests.IRequest;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -198,7 +198,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<GraphVar, Propagator<GraphVar>> request = new PropRequest<GraphVar, Propagator<GraphVar>>(propagator, this, idxInProp);
+        IRequest<GraphVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }

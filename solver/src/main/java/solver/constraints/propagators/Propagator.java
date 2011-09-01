@@ -43,6 +43,7 @@ import solver.explanations.Explanation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.InitializeRequest;
+import solver.requests.PropRequest;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -154,6 +155,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     /**
+     * Create the dedicated request
+     * @param var associated variable
+     * @param idx idx of the variable in <code>this</code>
+     * @return a request
+     */
+    public IRequest<V> makeRequest(V var, int idx) {
+        return new PropRequest<V, Propagator<V>>(this, var, idx);
+    }
+
+
+    /**
      * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
      *
@@ -242,10 +254,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         throw new IndexOutOfBoundsException();
     }
 
-    public void addRequest(IRequest<V> request){
-        if(lastRequest >= requests.length){
+    public void addRequest(IRequest<V> request) {
+        if (lastRequest >= requests.length) {
             IRequest<V>[] tmp = requests;
-            requests = new IRequest[tmp.length*3/2+1];
+            requests = new IRequest[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, requests, 0, tmp.length);
         }
         requests[lastRequest++] = request;
@@ -265,7 +277,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     public void unlinkVariables() {
-        for (lastRequest--;lastRequest>=0; lastRequest--) {
+        for (lastRequest--; lastRequest >= 0; lastRequest--) {
             IRequest request = requests[lastRequest];
             request.getVariable().deleteRequest(request);
             requests[lastRequest] = null;

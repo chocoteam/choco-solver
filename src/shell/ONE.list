@@ -1,16 +1,35 @@
-samples.Alpha
-samples.Alpha
-samples.Alpha -policy OLDEST
-samples.Alpha -policy VARIABLE_LEX
-samples.Alpha -policy CONSTRAINT_LEX
-samples.Alpha -policy VARIABLE_ORIENTED
-samples.Alpha -policy CONSTRAINT_ORIENTED
-samples.Alpha -policy PRIORITY_PROP
-samples.Grocery
-samples.Grocery
-samples.Grocery -policy OLDEST
-samples.Grocery -policy VARIABLE_LEX
-samples.Grocery -policy CONSTRAINT_LEX
-samples.Grocery -policy VARIABLE_ORIENTED
-samples.Grocery -policy CONSTRAINT_ORIENTED
-samples.Grocery -policy PRIORITY_PROP
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+## PARTITION PROBLEM
+samples.Partition -n 32 -policy OLDEST
+samples.Partition -n 64 -policy VARIABLE_LEX
+samples.Partition -n 64 -policy CONSTRAINT_LEX
+samples.Partition -n 64 -policy VARIABLE_ORIENTED
+samples.Partition -n 64 -policy CONSTRAINT_ORIENTED
+samples.Partition -n 64 -policy PRIORITY_PROP
+samples.Partition -n 64
+##
+## FAMOUS NQUEEN, my favourite
+samples.nqueen.NQueenBinary -q 400 -policy OLDEST
+samples.nqueen.NQueenBinary -q 400 -policy VARIABLE_LEX
+samples.nqueen.NQueenBinary -q 400 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenBinary -q 400 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenBinary -q 400 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenBinary -q 400 -policy PRIORITY_PROP
+samples.nqueen.NQueenBinary -q 400
+##
+##
+samples.nqueen.NQueenGlobal -q 400 -policy OLDEST
+samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_LEX
+samples.nqueen.NQueenGlobal -q 400 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenGlobal -q 400 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenGlobal -q 400 -policy PRIORITY_PROP
+samples.nqueen.NQueenGlobal -q 400
+##

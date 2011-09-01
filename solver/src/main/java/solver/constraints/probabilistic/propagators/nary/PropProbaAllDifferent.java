@@ -32,6 +32,7 @@ import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDifferent;
 import solver.requests.ConditionnalRequest;
+import solver.requests.IRequest;
 import solver.requests.conditions.AbstractCondition;
 import solver.requests.conditions.CompletlyInstantiated;
 import solver.variables.IntVar;
@@ -53,6 +54,11 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
     public PropProbaAllDifferent(IntVar[] vars, Solver solver, IntConstraint constraint) {
         super(vars, solver, constraint);
         unionset = new Union(vars, environment);
+    }
+
+    @Override
+    public IRequest<IntVar> makeRequest(IntVar var, int idx) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

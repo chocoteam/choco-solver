@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.ternary.Times;
+import solver.constraints.binary.EqualX_YC;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.view.Views;
@@ -46,7 +46,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class IntVarTimesPosCsteTest {
+public class OffsetViewTest {
 
     @Test(groups = "1s")
     public void test1() {
@@ -54,7 +54,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 3, s);
-        IntVar Y = Views.scale(X, 2);
+        IntVar Y = Views.offset(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -77,7 +77,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", 1, 4, s);
-        IntVar Y = Views.scale(X, 3);
+        IntVar Y = Views.offset(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -98,7 +98,7 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar Y = Views.scale(X, coeff);
+        IntVar Y = Views.offset(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -119,15 +119,14 @@ public class IntVarTimesPosCsteTest {
         IEnvironment env = s.getEnvironment();
 
         IntVar X = VariableFactory.enumerated("X", low, upp, s);
-        IntVar C = Views.fixed("C", coeff, s);
-        IntVar Y = VariableFactory.enumerated("Y", low * coeff, upp * coeff, s);
+        IntVar Y = VariableFactory.enumerated("Y", low + coeff, upp + coeff, s);
 
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
                 ConstraintFactory.geq(Y, low + coeff - 1, s),
                 ConstraintFactory.leq(Y, upp - coeff - 1, s),
-                new Times(X, C, Y, s)
+                new EqualX_YC(X, Y, coeff, s)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -137,14 +136,14 @@ public class IntVarTimesPosCsteTest {
         return s;
     }
 
-    @Test(groups = "10s")
+    @Test(groups = "1m")
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
             rand.setSeed(i);
             int low = rand.nextInt(10);
             int upp = low + rand.nextInt(1000);
-            int coeff = rand.nextInt(5);
+            int coeff = rand.nextInt(50);
 
             Solver sb = bijective(low, upp, coeff);
             Solver sc = contraint(low, upp, coeff);
@@ -158,12 +157,26 @@ public class IntVarTimesPosCsteTest {
 
     @Test(groups = "1s")
     public void testRandom2() {
-        Solver sb = bijective(1, 9999, 3);
-        Solver sc = contraint(1, 9999, 3);
+        Solver sb = bijective(1, 1999, 3);
+        Solver sc = contraint(1, 1999, 3);
         sb.findAllSolutions();
         sc.findAllSolutions();
         Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
         Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+
+    }
+
+    @Test(groups = "1m")
+    public void testRandom3() {
+        int N = 9999;
+        for (int i = 1; i < 10; i++) {
+            Solver sb = bijective(1, N, 3);
+            Solver sc = contraint(1, N, 3);
+            sb.findAllSolutions();
+            sc.findAllSolutions();
+            Assert.assertEquals(sc.getMeasures().getSolutionCount(), sb.getMeasures().getSolutionCount());
+            Assert.assertEquals(sc.getMeasures().getNodeCount(), sb.getMeasures().getNodeCount());
+        }
 
     }
 }

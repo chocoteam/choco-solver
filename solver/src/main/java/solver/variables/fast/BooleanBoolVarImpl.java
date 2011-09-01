@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.requests.PropRequest;
+import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
@@ -363,7 +363,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<BoolVar, Propagator<BoolVar>> request = new PropRequest<BoolVar, Propagator<BoolVar>>(propagator, this, idxInProp);
+        IRequest<BoolVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }

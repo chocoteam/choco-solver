@@ -115,12 +115,20 @@ public final class ScaleView extends ImageIntVar<IntVar> {
 
     @Override
     public int nextValue(int v) {
-        return var.nextValue(v / cste);
+        int value = var.nextValue(v / cste);
+        if (value == Integer.MAX_VALUE) {
+            return value;
+        }
+        return value * cste;
     }
 
     @Override
     public int previousValue(int v) {
-        return var.previousValue(v / cste);
+        int value = var.previousValue(v / cste);
+        if (value == Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return value * cste;
     }
 
     @Override

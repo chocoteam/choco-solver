@@ -26,201 +26,36 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
-import solver.requests.PropRequest;
-import solver.requests.list.IRequestList;
-import solver.requests.list.RequestListBuilder;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
-import solver.variables.delta.NoDelta;
-
-import java.io.Serializable;
 
 import static solver.variables.AbstractVariable.MSG_EMPTY;
 
 /**
- * An abstract view for SumView, to avoid duplicate methods
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/08/11
+ * @since 01/09/11
  */
-public abstract class AbstractSumView implements IntVar, IView, Serializable, ICause {
-
-    final IntVar A, B;
-
-    final IStateInt LB, UB;
-
-    IStateInt SIZE;
-
-    protected final Solver solver;
-
-    protected final IRequestList<IRequest> requests;
-
-    protected final IPropagationEngine engine;
-
-    protected DisposableIntIterator _iterator;
+public abstract class AbstractSumView extends AbstractView {
 
     public AbstractSumView(IntVar a, IntVar b, Solver solver) {
-        this.A = a;
-        this.B = b;
-        this.solver = solver;
-        this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment());
+        super(a, b, solver);
         int lbA = A.getLB();
         int ubA = A.getUB();
         int lbB = B.getLB();
         int ubB = B.getUB();
         int min = lbA + lbB;
         int max = ubA + ubB;
-        this.LB = solver.getEnvironment().makeInt(min);
-        this.UB = solver.getEnvironment().makeInt(max);
-        this.SIZE = solver.getEnvironment().makeInt(max - min + 1);
-
-        A.subscribeView(this);
-        B.subscribeView(this);
-    }
-
-    /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
-
-    public int getUniqueID() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUniqueID(int uniqueID) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void updateEntailment(IRequest request) {
-        requests.setPassive(request);
+        this.LB.set(min);
+        this.UB.set(max);
+        this.SIZE.set(max - min + 1);
     }
 
     public String getName() {
         return String.format("(%s + %s)", A, B);
-    }
-
-    public void addRequest(IRequest request) {
-        requests.addRequest(request);
-    }
-
-    public void deleteRequest(IRequest request) {
-        requests.deleteRequest(request);
-    }
-
-    public IRequestList getRequests() {
-        return requests;
-    }
-
-    public void subscribeView(IView view) {
-        A.subscribeView(view);
-        B.subscribeView(view);
-    }
-
-    public int nbRequests() {
-        return requests.cardinality();
-    }
-
-    public int nbConstraints() {
-        return requests.size();
-    }
-
-    public Explanation explain() {
-        throw new UnsupportedOperationException("ViewSumXY::can not be explained");
-    }
-
-    public IntDelta getDelta() {
-        return NoDelta.singleton;
-    }
-
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-    }
-
-    public void deletePropagator(Propagator observer) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<AbstractSumView, Propagator<AbstractSumView>> request =
-                new PropRequest<AbstractSumView, Propagator<AbstractSumView>>(propagator, this, idxInProp);
-        propagator.addRequest(request);
-        this.addRequest(request);
-    }
-
-
-    @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        engine.fails(cause, this, message);
-    }
-
-    @Override
-    public boolean instantiated() {
-        return SIZE.get() == 1;
-    }
-
-    @Override
-    public boolean instantiatedTo(int aValue) {
-        return getLB() == aValue && getUB() == aValue;
-    }
-
-    @Override
-    public int getValue() {
-        return getLB();
-    }
-
-    @Override
-    public int getLB() {
-        return LB.get();
-    }
-
-    @Override
-    public int getUB() {
-        return UB.get();
-    }
-
-    @Override
-    public int getDomainSize() {
-        return SIZE.get();
-    }
-
-
-    public void notifyPropagators(EventType e, ICause o) {
-        requests.notifyButCause(o, e, getDelta());
-    }
-
-    @Override
-    public void notifyViews(EventType e, ICause o) throws ContradictionException {
-        throw new UnsupportedOperationException();
-    }
-
-    public Solver getSolver() {
-        return solver;
-    }
-
-    public int getType() {
-        return Variable.INTEGER;
-    }
-
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        //TODO: allow branching
-        throw new UnsupportedOperationException("AbsView#setHeuristicVal: wrong usage");
-    }
-
-    public HeuristicVal getHeuristicVal() {
-        throw new UnsupportedOperationException();
     }
 
     /////////////// SERVICES REQUIRED FROM SUM //////////////////////////
@@ -252,35 +87,4 @@ public abstract class AbstractSumView implements IntVar, IView, Serializable, IC
         }
         //TODO: back propager?
     }
-
-    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
-    public Explanation explain(IntVar v, Deduction d) {
-        return null;
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
-    }
-
 }

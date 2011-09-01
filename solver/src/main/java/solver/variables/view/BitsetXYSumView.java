@@ -51,6 +51,8 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     final IStateBitSet VALUES;
 
+    protected DisposableIntIterator _iterator;
+
     public BitsetXYSumView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
         int lbA = A.getLB();
@@ -74,7 +76,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             itB.dispose();
         }
         itA.dispose();
-        SIZE = solver.getEnvironment().makeInt(VALUES.cardinality());
+        SIZE.set(VALUES.cardinality());
     }
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
@@ -392,7 +394,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         return _iterator;
     }
 
-    /////////////// SERVICES REQUIRED FROM SUM //////////////////////////
+    /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
 
     @Override
     public void backPropagate(int mask) throws ContradictionException {

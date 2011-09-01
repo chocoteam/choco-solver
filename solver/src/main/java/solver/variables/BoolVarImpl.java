@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.requests.PropRequest;
+import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.delta.IntDelta;
 import solver.variables.domain.IIntDomain;
@@ -320,7 +320,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<BoolVar, Propagator<BoolVar>> request = new PropRequest<BoolVar, Propagator<BoolVar>>(propagator, this, idxInProp);
+        IRequest<BoolVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }

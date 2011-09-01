@@ -37,7 +37,6 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.ternary.MaxXYZ;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
@@ -45,6 +44,7 @@ import solver.propagation.engines.comparators.predicate.MemberC;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -126,6 +126,7 @@ public class AirPlaneLanding extends AbstractProblem {
         earliness = new IntVar[n];
         LLTs = new int[n];
         int obj_ub = 0;
+        IntVar ZERO = Views.fixed(0, solver);
         for (int i = 0; i < n; i++) {
             planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
 
@@ -136,13 +137,8 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-
-            IntVar e = VariableFactory.bounded(i + "_e", -9999, 9999, solver);
-            IntVar t = VariableFactory.bounded(i + "_t", -9999, 9999, solver);
-            solver.post(Sum.eq(new IntVar[]{e, planes[i]}, new int[]{1, 1}, data[i][TT], solver));
-            solver.post(new MaxXYZ(earliness[i], Views.fixed(0, solver), e, solver));
-            solver.post(Sum.eq(new IntVar[]{t, planes[i]}, new int[]{1, -1}, -data[i][TT], solver));
-            solver.post(new MaxXYZ(tardiness[i], Views.fixed(0, solver), t, solver));
+            earliness[i] = Views.max(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
+            tardiness[i] = Views.max(ZERO, Views.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();
@@ -198,11 +194,11 @@ public class AirPlaneLanding extends AbstractProblem {
                 return maxCost.get(o2) - maxCost.get(o1);
             }
         });
-        solver.set(StrategyFactory.domwdegMindom(planes, solver));
-//        solver.set(new StrategiesSequencer(solver.getEnvironment(),
-//                StrategyFactory.inputOrderMinVal(bVars, solver.getEnvironment()),
-//                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
-//        ));
+//        solver.set(StrategyFactory.domwdegMindom(planes, solver));
+        solver.set(new StrategiesSequencer(solver.getEnvironment(),
+                StrategyFactory.inputOrderMinVal(bVars, solver.getEnvironment()),
+                StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
+        ));
 
         solver.getSearchLoop().getLimitsBox().setNodeLimit(500000);
 
@@ -225,6 +221,8 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
+//        SearchMonitorFactory.statEveryXXms(solver, 2000);
+//        solver.getSearchLoop().getLimitsBox().setSolutionLimit(2);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

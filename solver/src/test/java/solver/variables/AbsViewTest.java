@@ -47,7 +47,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-public class IntVarAbsTest {
+public class AbsViewTest {
 
     private int[][] bounded(int xl, int xu, int yl, int yu) throws ContradictionException {
         Solver solver = new Solver();

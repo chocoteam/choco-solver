@@ -89,4 +89,8 @@ public enum Views {
             return new IntervalXYSumView(a, b, a.getSolver());
         }
     }
+
+    public static IntVar max(IntVar a, IntVar b) {
+        return new MaxView(a, b, a.getSolver());
+    }
 }

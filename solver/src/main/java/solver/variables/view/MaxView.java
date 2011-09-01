@@ -39,22 +39,90 @@ import solver.variables.IntVar;
 import static solver.variables.AbstractVariable.*;
 
 /**
- * View for A+B, where A and B are IntVar or views, ensure bound consistency
- * based on "Bounds Consistency Techniques for Long Linear Constraint"
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 23/08/11
+ * @since 01/09/11
  */
-public final class IntervalXYSumView extends AbstractSumView {
+public class MaxView extends AbstractView {
 
     protected BoundedIntIterator _iterator;
 
-    public IntervalXYSumView(IntVar a, IntVar b, Solver solver) {
+
+    public MaxView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
+        int lb = Math.max(A.getLB(), B.getLB());
+        int ub = Math.max(A.getUB(), B.getUB());
+        LB.set(lb);
+        UB.set(ub);
+        SIZE.set(ub - lb + 1);
     }
 
-    /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
+    /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
+
+    @Override
+    public void backPropagate(int mask) throws ContradictionException {
+        // one of the variable as changed externally, this involves a complete update of this
+        // one of the variable as changed externally, this involves a complete update of this
+        if (!EventType.isRemove(mask)) {
+            int lA = A.getLB(), uA = A.getUB();
+            int lB = B.getLB(), uB = B.getUB();
+
+            int elb = Math.max(lA, lB);
+            int eub = Math.max(uA, uB);
+
+            int ilb = LB.get();
+            int iub = UB.get();
+            boolean change = false;
+            EventType e = EventType.VOID;
+            if (elb > ilb) {
+                if (elb > iub) {
+                    solver.explainer.updateLowerBound(this, ilb, elb, this);
+                    this.contradiction(this, MSG_LOW);
+                }
+                SIZE.add(elb - ilb);
+                ilb = elb;
+                LB.set(ilb);
+                e = EventType.INCLOW;
+                change = true;
+            }
+            if (eub < iub) {
+                if (eub < ilb) {
+                    solver.explainer.updateUpperBound(this, iub, eub, this);
+                    this.contradiction(this, MSG_LOW);
+                }
+                SIZE.add(eub - iub);
+                iub = eub;
+                UB.set(iub);
+                if (e != EventType.VOID) {
+                    e = EventType.BOUND;
+                } else {
+                    e = EventType.DECUPP;
+                }
+                change |= true;
+            }
+            if (ilb > iub) {
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
+                this.contradiction(this, MSG_EMPTY);
+            }
+            if (change) {
+                if (ilb == iub) {
+                    notifyPropagators(EventType.INSTANTIATE, this);
+                    solver.explainer.instantiateTo(this, ilb, this);
+                } else {
+                    notifyPropagators(e, this);
+                    solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                    solver.explainer.updateUpperBound(this, iub, iub, this);
+                }
+            }
+        }
+    }
+
+    @Override
+    public String getName() {
+        return String.format("max(%s,%s)", A, B);
+    }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -70,13 +138,19 @@ public final class IntervalXYSumView extends AbstractSumView {
                 LB.set(value + 1);
                 e = EventType.INCLOW;
                 cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
-                filterOnGeq(cause, value + 1);
+                if (A.getLB() > B.getUB()) {
+                    A.updateLowerBound(value + 1, this);
+                }
+                if (B.getLB() > A.getUB()) {
+                    B.updateLowerBound(value + 1, this);
+                }
             } else {
                 // todo: delta...
                 UB.set(value - 1);
                 e = EventType.DECUPP;
                 cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
-                filterOnLeq(cause, value - 1);
+                A.updateUpperBound(value - 1, this);
+                B.updateUpperBound(value - 1, this);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
@@ -118,8 +192,14 @@ public final class IntervalXYSumView extends AbstractSumView {
             this.UB.set(value);
             this.SIZE.set(1);
 
-            filterOnLeq(cause, value);
-            filterOnGeq(cause, value);
+            A.updateUpperBound(value, this);
+            B.updateUpperBound(value, this);
+            if (!A.contains(value)) {
+                B.instantiateTo(value, this);
+            }
+            if (!B.contains(value)) {
+                A.instantiateTo(value, this);
+            }
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
             solver.explainer.instantiateTo(this, value, cause);
@@ -144,7 +224,12 @@ public final class IntervalXYSumView extends AbstractSumView {
                 SIZE.add(old - aValue);
                 LB.set(aValue);
 
-                filterOnGeq(cause, aValue);
+                if (A.getLB() > B.getUB()) {
+                    A.updateLowerBound(aValue, this);
+                }
+                if (B.getLB() > A.getUB()) {
+                    B.updateLowerBound(aValue, this);
+                }
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
@@ -173,7 +258,8 @@ public final class IntervalXYSumView extends AbstractSumView {
                 SIZE.add(aValue - old);
                 UB.set(aValue);
 
-                filterOnLeq(cause, aValue);
+                A.updateUpperBound(aValue, this);
+                B.updateUpperBound(aValue, this);
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
@@ -188,9 +274,8 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean contains(int aValue) {
-        // based on "Bounds Consistency Techniques for Long Linear Constraint"
-        return LB.get() <= aValue && aValue <= UB.get();
+    public boolean contains(int value) {
+        return A.contains(value) || B.contains(value);
     }
 
     @Override
@@ -218,35 +303,6 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean hasEnumeratedDomain() {
-        return false;
-    }
-
-    @Override
-    public String toString() {
-        if (instantiated()) {
-            return String.format("(%s + %s) = %d", A.getName(), B.getName(), getValue());
-        } else {
-            StringBuilder s = new StringBuilder(20);
-            s.append('{').append(getLB());
-            int nb = 5;
-            for (int i = nextValue(getLB()); i < Integer.MAX_VALUE && nb > 0; i = nextValue(i)) {
-                s.append(',').append(i);
-                nb--;
-            }
-            if (nb == 0) {
-                s.append("...,").append(this.getUB());
-            }
-            s.append('}');
-
-            return String.format("(%s + %s) = %s", A.getName(), B.getName(), s.toString());
-//            return String.format("(%s + %s) = [%d, %d]", A, B, getLB(), getUB());
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
     public DisposableIntIterator getLowUppIterator() {
         if (_iterator == null || !_iterator.isReusable()) {
             _iterator = new BoundedIntIterator();
@@ -264,64 +320,8 @@ public final class IntervalXYSumView extends AbstractSumView {
         return _iterator;
     }
 
-    /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
-
     @Override
-    public void backPropagate(int mask) throws ContradictionException {
-        // one of the variable as changed externally, this involves a complete update of this
-        if (!EventType.isRemove(mask)) {
-            int elb = A.getLB() + B.getLB();
-            int eub = A.getUB() + B.getUB();
-            int ilb = LB.get();
-            int iub = UB.get();
-            boolean up = false, down = false;
-            EventType e = EventType.VOID;
-            if (elb > ilb) {
-                if (elb > iub) {
-                    solver.explainer.updateLowerBound(this, ilb, elb, this);
-                    this.contradiction(this, MSG_LOW);
-                }
-                SIZE.add(elb - ilb);
-                ilb = elb;
-                LB.set(ilb);
-                e = EventType.INCLOW;
-                down = true;
-            }
-            if (eub < iub) {
-                if (eub < ilb) {
-                    solver.explainer.updateUpperBound(this, iub, eub, this);
-                    this.contradiction(this, MSG_LOW);
-                }
-                SIZE.add(eub - iub);
-                iub = eub;
-                UB.set(iub);
-                if (e != EventType.VOID) {
-                    e = EventType.BOUND;
-                } else {
-                    e = EventType.DECUPP;
-                }
-                up = true;
-            }
-            if (ilb > iub) {
-                solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                solver.explainer.updateUpperBound(this, iub, iub, this);
-                this.contradiction(this, MSG_EMPTY);
-            }
-            if (down || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnGeq(this, ilb);
-            }
-            if (up || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnLeq(this, iub);
-            }
-            if (ilb == iub) {
-                notifyPropagators(EventType.INSTANTIATE, this);
-                solver.explainer.instantiateTo(this, ilb, this);
-            } else {
-                notifyPropagators(e, this);
-                solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                solver.explainer.updateUpperBound(this, iub, iub, this);
-            }
-        }
+    public boolean hasEnumeratedDomain() {
+        return false;
     }
 }
-

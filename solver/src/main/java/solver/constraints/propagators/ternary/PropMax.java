@@ -147,7 +147,6 @@ public class PropMax extends Propagator<IntVar> {
             if (!v2.contains(val)){
                 v1.instantiateTo(val, this);
             }
-            setPassive();
         } else if (idx == 1) {
             val = v1.getValue();
             if (val > v2.getUB()){

@@ -38,7 +38,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
+public abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
 
     protected final V variable; // Variable of the request
     protected final P propagator; // Propagator of the request

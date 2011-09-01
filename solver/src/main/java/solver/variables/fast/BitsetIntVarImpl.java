@@ -39,7 +39,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
-import solver.requests.PropRequest;
+import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -499,7 +499,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        PropRequest<IntVar, Propagator<IntVar>> request = new PropRequest<IntVar, Propagator<IntVar>>(propagator, this, idxInProp);
+        IRequest<IntVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }

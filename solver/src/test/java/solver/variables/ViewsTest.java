@@ -35,10 +35,11 @@ import solver.constraints.binary.EqualX_YC;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.propagators.nary.sum.PropSumEq;
+import solver.constraints.ternary.MaxXYZ;
 import solver.constraints.ternary.Times;
 import solver.constraints.unary.Relation;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.view.Views;
 
@@ -57,7 +58,6 @@ public class ViewsTest {
         for (int seed = 1; seed < 1001; seed += 100) {
             Solver ref = new Solver();
             Solver solver = new Solver();
-            PropSumEq.filter = 0;
             {
                 IntVar x = VariableFactory.enumerated("x", 0, seed, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, seed, ref);
@@ -91,7 +91,6 @@ public class ViewsTest {
         for (int seed = 100; seed < 10011; seed += 2000) {
             Solver ref = new Solver();
             Solver solver = new Solver();
-            PropSumEq.filter = 0;
             {
                 IntVar x = VariableFactory.enumerated("x", 0, seed, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, seed, ref);
@@ -122,7 +121,6 @@ public class ViewsTest {
         for (int seed = 1; seed < 10001; seed += 1000) {
             Solver ref = new Solver();
             Solver solver = new Solver();
-            PropSumEq.filter = 0;
             {
                 IntVar x = VariableFactory.enumerated("x", 0, seed, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, seed, ref);
@@ -153,7 +151,6 @@ public class ViewsTest {
         for (int seed = 2; seed < 9; seed += 1) {
             Solver ref = new Solver();
             Solver solver = new Solver();
-            PropSumEq.filter = 0;
             int n = seed * 2;
             {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, ref);
@@ -188,7 +185,6 @@ public class ViewsTest {
         for (int seed = 10; seed < 10001; seed += 101) {
             Solver ref = new Solver();
             Solver solver = new Solver();
-            PropSumEq.filter = 0;
             {
                 IntVar x = VariableFactory.enumerated("x", 0, seed, ref);
                 IntVar z = VariableFactory.enumerated("z", 0, seed * seed, ref);
@@ -201,17 +197,7 @@ public class ViewsTest {
                 IntVar z = Views.sqr(x);
                 solver.post(new Relation(z, Relation.R.LQ, seed, solver));
                 solver.set(StrategyFactory.minDomMinVal(new IntVar[]{x}, solver.getEnvironment()));
-//                try {
-//                    solver.propagate();
-//                    x.instantiateTo(33, Cause.Null);
-//                    solver.propagate();
-//                } catch (ContradictionException e) {
-//                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//                }
-
             }
-//            SearchMonitorFactory.log(ref, true, false);
-//            SearchMonitorFactory.log(solver, true, false);
             ref.findAllSolutions();
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(),
@@ -221,6 +207,56 @@ public class ViewsTest {
                     ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
         }
     }
+
+
+    @Test(groups = "10m")
+    public void test1f() {
+        // Z = X^2
+        Solver ref = new Solver();
+        Solver solver = new Solver();
+        {
+            IntVar x = VariableFactory.enumerated("x", 160, 187, ref);
+            IntVar y = VariableFactory.enumerated("y", -999, 999, ref);
+            IntVar z = VariableFactory.enumerated("z", -9999, 9999, ref);
+            ref.post(Sum.eq(new IntVar[]{z, x}, new int[]{1, 1}, 180, ref));
+            ref.post(new MaxXYZ(y, Views.fixed(0, ref), z, ref));
+//            try {
+//                ref.propagate();
+//                x.updateUpperBound(161, Cause.Null);
+//                ref.propagate();
+//            } catch (ContradictionException e) {
+//                Assert.fail();
+//            }
+//            Assert.assertEquals(y.getLB(), 19);
+//            Assert.assertEquals(y.getUB(), 20);
+        }
+        {
+            IntVar x = VariableFactory.enumerated("x", 160, 187, solver);
+            IntVar y = VariableFactory.enumerated("y", -999, 999, solver);
+            IntVar z = Views.offset(Views.minus(x), 180);
+            solver.post(new MaxXYZ(y, Views.fixed(0, solver), z, solver));
+//            try {
+//                solver.propagate();
+//                x.updateUpperBound(161, Cause.Null);
+//                solver.propagate();
+//            } catch (ContradictionException e) {
+//                Assert.fail();
+//            }
+//            Assert.assertEquals(y.getLB(), 19);
+//            Assert.assertEquals(y.getUB(), 20);
+            SearchMonitorFactory.log(ref, false, false);
+            SearchMonitorFactory.log(solver, false, false);
+
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(),
+                    ref.getMeasures().getSolutionCount(), 0 + "");
+            System.out.printf("%d : %d vs. %d (%f)\n", 0, ref.getMeasures().getTimeCount(),
+                    solver.getMeasures().getTimeCount(),
+                    ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
+        }
+    }
+
 
     @Test(groups = "10m")
     public void test2() {
