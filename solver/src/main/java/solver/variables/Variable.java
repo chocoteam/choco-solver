@@ -51,10 +51,7 @@ public interface Variable<D extends IDelta> extends Serializable {
 	public final static int SET = 1;
 	public final static int META = 2;
 	public final static int GRAPH = 3;
-	
 
-    //todo: to complete
-    void updateEntailment(IRequest request);
 
     /**
      * Indicates wether <code>this</code> is instantiated (see implemetations to know what instantiation means).
@@ -70,12 +67,26 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
     String getName();
 
-    //todo : to complete
-
+    /**
+     * Build and add a request to the request list of <code>this</code>.
+     * The request is inactive at the creation and must be activated (by the engine propagation).
+     * @param request
+     */
     void addRequest(IRequest request);
 
-    //todo : to complete
+    /**
+     * Activate a request
+     * @param request
+     */
+    void activate(IRequest request);
 
+    /**
+     * Desactivate a request, the request is reactivate upon backtracking.
+     * @param request
+     */
+    void desactivate(IRequest request);
+
+    //todo : to complete
     void deleteRequest(IRequest request);
 
     IRequestList getRequests();

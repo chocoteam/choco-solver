@@ -91,8 +91,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void updateEntailment(IRequest request) {
-        var.updateEntailment(request);
+    public void desactivate(IRequest request) {
+        var.desactivate(request);
     }
 
     @Override

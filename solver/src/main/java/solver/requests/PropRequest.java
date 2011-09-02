@@ -143,16 +143,12 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public void filter() throws ContradictionException {
-        assert (propagator.isActive());
-        propagator.filterCall++;
-        //todo: to remove
-        // events on that propagator should be removed first
-        // to avoid conflict and useless call
-        for (int i = 0; i < propagator.nbRequests(); i++) {
-            if (propagator.getRequest(i).enqueued()) {
-                engine.remove(propagator.getRequest(i));
-            }
+        if(!propagator.isActive()){
+            // todo call initialize
+            propagator.setActive();
         }
+        propagator.filterCall++;
+
         propagator.propagate();
     }
 
@@ -164,8 +160,14 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
+    public void activate() {
+        // Can not be activated: this is active from its creation
+    }
+
+    @Override
     public void desactivate() {
-        // nothing required, it is not present in any variable
+        // Can not be desactivated: it depends on the event requests of the propagator
+        // when they are all entailed, this can not be call anymore.
     }
 
     @Override

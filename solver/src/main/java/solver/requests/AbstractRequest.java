@@ -138,7 +138,12 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     }
 
     @Override
+    public void activate() {
+        variable.activate(this);
+    }
+
+    @Override
     public void desactivate() {
-        variable.updateEntailment(this);
+        variable.desactivate(this);
     }
 }

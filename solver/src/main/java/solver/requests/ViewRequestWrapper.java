@@ -109,8 +109,13 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
+    public void activate() {
+        original.getVariable().activate(this);
+    }
+
+    @Override
     public void desactivate() {
-        original.desactivate();
+        original.getVariable().desactivate(this);
     }
 
     @Override

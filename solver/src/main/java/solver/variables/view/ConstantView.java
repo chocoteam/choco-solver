@@ -191,7 +191,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void updateEntailment(IRequest request) {
+    public void desactivate(IRequest request) {
         //useless
     }
 

@@ -69,7 +69,10 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
             requests[i] = tmp1;
             requests[i].setIdxInVar(i);
         }
-        firstPassive.add(-1);
+        if(first < i){
+            throw new UnsupportedOperationException("Cannot reactivate a request");
+        }
+        firstActive.add(-1);
     }
 
     @Override
@@ -90,7 +93,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
 
     @Override
     public void addRequest(R request) {
-        if(firstActive.get()>0){
+        if(firstActive.get()!= firstPassive.get()){
             throw new UnsupportedOperationException("Can not add a request: activation has already started");
         }
         R[] tmp = requests;
@@ -98,6 +101,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         System.arraycopy(tmp, 0, requests, 0, tmp.length);
         requests[tmp.length] = request;
         request.setIdxInVar(tmp.length);
+        this.firstActive.add(1);
         this.firstPassive.add(1);
     }
 

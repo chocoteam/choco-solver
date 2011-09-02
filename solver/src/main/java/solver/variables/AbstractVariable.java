@@ -104,7 +104,11 @@ public abstract class AbstractVariable implements Serializable {
         this.uniqueID = uniqueID;
     }
 
-    public void updateEntailment(IRequest request) {
+    public void activate(IRequest request) {
+        requests.setActive(request);
+    }
+
+    public void desactivate(IRequest request) {
         requests.setPassive(request);
     }
 
@@ -132,9 +136,9 @@ public abstract class AbstractVariable implements Serializable {
             for (int i = vIdx - 1; i >= 0; i--) {
                 views[i].backPropagate(e.mask);
             }
-        }else{
+        } else {
             for (int i = vIdx - 1; i >= 0; i--) {
-                if(views[i]!= cause){ // reference is enough
+                if (views[i] != cause) { // reference is enough
                     views[i].backPropagate(e.mask);
                 }
             }

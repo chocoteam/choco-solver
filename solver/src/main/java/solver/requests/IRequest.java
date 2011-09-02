@@ -105,6 +105,11 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
     void update(EventType e);
 
     /**
+     * Activate <code>this</code>
+     */
+    void activate();
+
+    /**
      * Desactivate <code>this</code>
      */
     void desactivate();

@@ -90,12 +90,16 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
         throw new UnsupportedOperationException();
     }
 
-    public void updateEntailment(IRequest request) {
-        requests.setPassive(request);
-    }
-
     public void addRequest(IRequest request) {
         requests.addRequest(request);
+    }
+
+    public void activate(IRequest request) {
+        requests.setActive(request);
+    }
+
+    public void desactivate(IRequest request) {
+        requests.setPassive(request);
     }
 
     public void deleteRequest(IRequest request) {

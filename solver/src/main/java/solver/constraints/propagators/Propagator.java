@@ -207,6 +207,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         propRequest.update(EventType.PROPAGATE);
     }
 
+    public void setActive() {
+        assert !isActive() : "the propagator is already active, it cannot set active";
+        isActive.set(true);
+//        this.constraint.updateActivity(this);
+        //then notify the linked variables
+        for (int i = 0; i < lastRequest; i++) {
+            requests[i].activate();
+        }
+    }
+
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
@@ -216,16 +226,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int i = 0; i < lastRequest; i++) {
             requests[i].desactivate();
         }
-    }
-
-    public void setActive() {
-        assert !isActive() : "the propagator is already active, it cannot set active";
-        isActive.set(true);
-//        this.constraint.updateActivity(this);
-        //then notify the linked variables
-//        for (int i = 0; i < lastRequest; i++) {
-//            requests[i].desactivate();
-//        }
     }
 
     public boolean isActive() {
