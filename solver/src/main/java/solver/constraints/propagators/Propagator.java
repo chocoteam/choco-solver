@@ -44,6 +44,7 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.requests.EventRequest;
 import solver.requests.IRequest;
 import solver.requests.PropRequest;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -136,11 +137,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.vars = vars;
         this.environment = solver.getEnvironment();
         this.engine = solver.getEngine();
-        this.isActive = environment.makeBool(true);
+        this.isActive = environment.makeBool(false);
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        this.propRequest = new PropRequest(this, -1);
+        this.propRequest = new PropRequest(this);
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
             if (!vars[v].instantiated()) {
@@ -148,7 +149,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             }
         }
         arity = environment.makeInt(nbNi);
-//        linkToVariables();
         fails = 0;
         requests = new IRequest[vars.length];
         lastRequest = 0;
@@ -156,6 +156,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Create the dedicated request
+     *
      * @param var associated variable
      * @param idx idx of the variable in <code>this</code>
      * @return a request
@@ -199,6 +200,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public abstract void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException;
 
+    /**
+     * Add the PropRequest to be added into the engine
+     */
+    public final void forcePropagate() {
+        propRequest.update(EventType.PROPAGATE);
+    }
+
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
@@ -208,6 +216,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int i = 0; i < lastRequest; i++) {
             requests[i].desactivate();
         }
+    }
+
+    public void setActive() {
+        assert !isActive() : "the propagator is already active, it cannot set active";
+        isActive.set(true);
+//        this.constraint.updateActivity(this);
+        //then notify the linked variables
+//        for (int i = 0; i < lastRequest; i++) {
+//            requests[i].desactivate();
+//        }
     }
 
     public boolean isActive() {
