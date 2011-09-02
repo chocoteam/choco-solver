@@ -143,12 +143,11 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public void filter() throws ContradictionException {
+        propagator.propCalls++;
         if(!propagator.isActive()){
-            // todo call initialize
+            propagator.initialize();
             propagator.setActive();
         }
-        propagator.filterCall++;
-
         propagator.propagate();
     }
 

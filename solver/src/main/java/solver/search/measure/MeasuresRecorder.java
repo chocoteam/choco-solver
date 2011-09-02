@@ -34,9 +34,9 @@ import solver.constraints.propagators.Propagator;
 
 public final class MeasuresRecorder implements IMeasures {
 
-    private static final float IN_MS = 1000*1000f;
+    private static final float IN_MS = 1000 * 1000f;
 
-    private static final float IN_SEC = 1000*IN_MS;
+    private static final float IN_SEC = 1000 * IN_MS;
 
     public long solutionCount;
 
@@ -62,7 +62,7 @@ public final class MeasuresRecorder implements IMeasures {
 
     public long failCount;
 
-    public long propagationCount;
+    public long propagationCount, eventCount;
 
     public long usedMemory;
 
@@ -144,12 +144,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public long getTimeCount() {
-        return timeCount/1000/1000;
+        return timeCount / 1000 / 1000;
     }
 
     @Override
     public long getReadingTimeCount() {
-        return readingTimeCount/1000/1000;
+        return readingTimeCount / 1000 / 1000;
     }
 
     @Override
@@ -159,12 +159,12 @@ public final class MeasuresRecorder implements IMeasures {
 
     @Override
     public long getInitialisationTimeCount() {
-        return initialisationTimeCount/1000/1000;
+        return initialisationTimeCount / 1000 / 1000;
     }
 
     @Override
     public long getInitialPropagationTimeCount() {
-        return initialPropagationTimeCount/1000/1000;
+        return initialPropagationTimeCount / 1000 / 1000;
     }
 
     @Override
@@ -175,6 +175,11 @@ public final class MeasuresRecorder implements IMeasures {
     @Override
     public long getPropagationsCount() {
         return propagationCount;
+    }
+
+    @Override
+    public long getEventsCount() {
+        return eventCount;
     }
 
     @Override
@@ -209,12 +214,15 @@ public final class MeasuresRecorder implements IMeasures {
             cstrs = solver.getCstrs();
         }
         propagationCount = 0;
+        eventCount = 0;
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] propagators = cstrs[i].propagators;
             for (int j = 0; j < propagators.length; j++) {
-                propagationCount += propagators[j].filterCall;
+                propagationCount += propagators[j].filterCalls;
+                eventCount += propagators[j].propCalls;
             }
         }
+
 
     }
 
@@ -223,7 +231,7 @@ public final class MeasuresRecorder implements IMeasures {
      */
     public void updateTimeCount() {
 //        timeCount = TimeCacheThread.currentTimeMillis - startingTime;
-        timeCount = System.nanoTime()- startingTime;
+        timeCount = System.nanoTime() - startingTime;
     }
 
     //****************************************************************************************************************//
@@ -335,8 +343,8 @@ public final class MeasuresRecorder implements IMeasures {
         if (hasObjective) {
             st.append(String.format("Objective: %d, ", objectiveIntValue));
         }
-        st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d Propagations",
-                timeCount/IN_SEC, timeCount/IN_MS, nodeCount, backtrackCount, failCount, restartCount, propagationCount));
+        st.append(String.format("Resolution %.3fs (%.6fms), %d Nodes, %d Backtracks, %d Fails, %d Restarts, %d + %d Propagations",
+                timeCount / IN_SEC, timeCount / IN_MS, nodeCount, backtrackCount, failCount, restartCount, eventCount, propagationCount));
         return st.toString();
     }
 
@@ -350,9 +358,9 @@ public final class MeasuresRecorder implements IMeasures {
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
-                readingTimeCount/IN_SEC, initialPropagationTimeCount/IN_SEC, timeCount/IN_SEC, timeCount/IN_MS,nodeCount,
-                backtrackCount, failCount, restartCount, propagationCount, usedMemory,
+                "Restarts: %,d + %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
+                readingTimeCount / IN_SEC, initialPropagationTimeCount / IN_SEC, timeCount / IN_SEC, timeCount / IN_MS, nodeCount,
+                backtrackCount, failCount, restartCount, eventCount, propagationCount, usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
         return st.toString();
     }

@@ -115,7 +115,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int nbRequestEnqued = 0; // counter of enqued requests -- usable as trigger for complex algorithm
 
-    public long filterCall;  // statistics of calls to filter
+    public long filterCalls, propCalls;  // statistics of calls to filter
 
     protected final IStateInt arity; // arity of this -- number of uninstantiated variables
 
@@ -175,6 +175,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     public abstract int getPropagationConditions(int vIdx);
+
+    /**
+     * Build internal structure of the propagator, if necessary
+     */
+    public void initialize() throws ContradictionException{}
 
     /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.

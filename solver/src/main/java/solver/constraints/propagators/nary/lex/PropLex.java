@@ -78,7 +78,6 @@ public class PropLex extends Propagator<IntVar> {
 
     @Override
     public void propagate() throws ContradictionException {
-        initialize();
         filter(alpha.get());
     }
 

@@ -82,7 +82,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
             this.frozenFirst = first; // freeze indices
             this.first = this.frozenLast = last;
             this.evtmask = 0; // and clean up mask
-            propagator.filterCall++;
+            propagator.filterCalls++;
             assert (propagator.isActive()) : this + " is not active";
             propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
         }

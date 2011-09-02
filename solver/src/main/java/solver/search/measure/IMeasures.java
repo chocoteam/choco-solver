@@ -82,6 +82,8 @@ public interface IMeasures extends ISearchMonitor, Serializable {
      */
     long getPropagationsCount();
 
+    long getEventsCount();
+
     /**
      * Get the used memory
      *
