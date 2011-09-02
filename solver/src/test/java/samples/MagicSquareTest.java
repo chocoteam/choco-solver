@@ -84,7 +84,7 @@ public class MagicSquareTest {
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
         solver.getSearchLoop().propEngine.init();
-        solver.getSearchLoop().propEngine.initialPropagation();
+        solver.getSearchLoop().propEngine.fixPoint();
         ((IntVar) vars[0]).instantiateTo(3, Cause.Null);
         ((IntVar) vars[15]).instantiateTo(4, Cause.Null);
         ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null);
@@ -113,7 +113,7 @@ public class MagicSquareTest {
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
         solver.getSearchLoop().propEngine.init();
-        solver.getSearchLoop().propEngine.initialPropagation();
+        solver.getSearchLoop().propEngine.fixPoint();
         Variable[] vars = solver.getVars();
         ((IntVar) vars[0]).instantiateTo(2, Cause.Null);
         solver.getSearchLoop().propEngine.fixPoint();

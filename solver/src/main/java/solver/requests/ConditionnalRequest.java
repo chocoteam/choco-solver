@@ -90,7 +90,7 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
             // for concurrent modification..
             first.set(last.get()); // point out current last
             evtmask.set(0); // and clean up current mask
-            propagator.filterCalls++;
+            propagator.eventCalls++;
             propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
         }
     }

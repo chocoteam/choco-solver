@@ -39,7 +39,7 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 24/04/11
  */
-public class WhileEngine implements IEngine{
+public class WhileEngine implements IEngine {
 
     protected final Group[] groups;
 
@@ -57,7 +57,7 @@ public class WhileEngine implements IEngine{
     public void fixPoint() throws ContradictionException {
         int gidx = notEmpty.nextSetBit(0);
         while (gidx > -1) {
-            if (groups[gidx].getReacher().fixpoint()) {
+            if (groups[gidx].fixpoint()) {
                 notEmpty.set(gidx, false);
             }
             gidx = notEmpty.nextSetBit(0);
@@ -67,7 +67,7 @@ public class WhileEngine implements IEngine{
     @Override
     public void update(IRequest request) {
         int gidx = request.getGroup();
-        groups[gidx].getReacher().update(request);
+        groups[gidx].update(request);
         notEmpty.set(gidx, true);
 
     }
@@ -75,15 +75,15 @@ public class WhileEngine implements IEngine{
     @Override
     public void remove(IRequest request) {
         int gidx = request.getGroup();
-        if (groups[gidx].getReacher().remove(request)) {
+        if (groups[gidx].remove(request)) {
             notEmpty.set(gidx, false);
         }
     }
 
     @Override
     public void flushAll() {
-        for (int i = nbGroup-1; i >= 0; i--) {
-            groups[i].getReacher().flushAll();
+        for (int i = nbGroup - 1; i >= 0; i--) {
+            groups[i].flushAll();
         }
         notEmpty.clear();
     }

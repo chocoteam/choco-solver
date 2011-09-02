@@ -123,7 +123,7 @@ public class Grocery extends AbstractProblem {
         // AND, constraints on VARS, oldest first
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.<IntVar>asList(vars)))
+                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.<IntVar>asList(vars))), Policy.FIXPOINT
                 )
         );
     }

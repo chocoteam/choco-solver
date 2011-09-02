@@ -59,9 +59,6 @@ public interface IPropagationEngine extends Serializable {
 
     void deleteGroups();
 
-    void initialPropagation()throws ContradictionException;
-
-
     void fixPoint() throws ContradictionException;
 
     /**

@@ -121,7 +121,6 @@ public class ConsistencyChecker {
         Solver ref = modeler.model(nbVar, domains, map, parameters);
         ref.getSearchLoop().propEngine.init();
         try {
-            ref.getSearchLoop().propEngine.initialPropagation();
             ref.getSearchLoop().propEngine.fixPoint();
         } catch (ContradictionException e) {
             LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");

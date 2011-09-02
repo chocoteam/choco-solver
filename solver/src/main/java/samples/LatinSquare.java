@@ -30,6 +30,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
@@ -88,7 +89,7 @@ public class LatinSquare extends AbstractProblem {
         //SearchMonitorFactory.log(solver, true, true);
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(Group.buildQueue(
-                new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(vars)))
+                new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(vars))), Policy.FIXPOINT
         ));
     }
 

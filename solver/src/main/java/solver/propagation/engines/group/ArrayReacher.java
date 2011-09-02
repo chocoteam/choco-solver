@@ -30,23 +30,51 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
+import java.util.BitSet;
 import java.util.Comparator;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 04/04/11
  */
-class Iterate extends SortedOne {
+public final class ArrayReacher implements IReacher {
 
-    public Iterate(IRequest[] requests, Comparator<IRequest> comparator) {
-        super(requests, comparator);
+    Comparator<IRequest> comparator;
+
+    protected final IRequest[] requests;
+
+    protected final int size;
+
+    protected final BitSet toPropagate;
+
+    protected IRequest lastPoppedRequest;
+
+
+    public ArrayReacher(IRequest[] requests, Comparator<IRequest> comparator) {
+        this.requests = requests;
+        this.comparator = comparator;
+        size = requests.length;
+        this.toPropagate = new BitSet(size);
     }
 
     @Override
-    public boolean fixpoint() throws ContradictionException {
-        for (int index = toPropagate.nextSetBit(0); index > -1; index = toPropagate.nextSetBit(index+1)) {
+    public boolean one() throws ContradictionException {
+        int index = toPropagate.nextSetBit(0);
+        if (index > -1) {
+            lastPoppedRequest = requests[index];
+            toPropagate.set(index, false);
+            lastPoppedRequest.deque();
+            lastPoppedRequest.filter();
+            return toPropagate.isEmpty();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean iterate() throws ContradictionException {
+        for (int index = toPropagate.nextSetBit(0); index > -1; index = toPropagate.nextSetBit(index + 1)) {
             lastPoppedRequest = requests[index];
             toPropagate.set(index, false);
             lastPoppedRequest.deque();
@@ -56,7 +84,43 @@ class Iterate extends SortedOne {
     }
 
     @Override
-    public String toString() {
-        return "ITERATE:"+comparator.toString();
+    public boolean all() throws ContradictionException {
+        int index = toPropagate.nextSetBit(0);
+        while (index > -1) {
+            lastPoppedRequest = requests[index];
+            toPropagate.set(index, false);
+            lastPoppedRequest.deque();
+            lastPoppedRequest.filter();
+            index = toPropagate.nextSetBit(0);
+        }
+        return true;
     }
+
+    @Override
+    public void update(IRequest request) {
+        if (!request.enqueued()) {
+            toPropagate.set(request.getIndex(), true);
+            request.enqueue();
+        }
+    }
+
+    @Override
+    public boolean remove(IRequest request) {
+        request.deque();
+        toPropagate.set(request.getIndex(), false);
+        return toPropagate.isEmpty();
+    }
+
+    @Override
+    public void flushAll() {
+        for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i + 1)) {
+            requests[i].deque();
+            toPropagate.set(i, false);
+        }
+    }
+
+    public String toString() {
+        return "Sorted";
+    }
+
 }

@@ -308,7 +308,6 @@ public class InverseChannelingTest {
 
         try {
             s.getSearchLoop().propEngine.init();
-            s.getSearchLoop().propEngine.initialPropagation();
             s.getSearchLoop().propEngine.fixPoint();
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -350,7 +349,7 @@ public class InverseChannelingTest {
             }
         }
         propagator.init();
-        propagator.initialPropagation();
+        propagator.fixPoint();
 
         Q.get(0).instantiateTo(1, Cause.Null);
         Q.get(2).instantiateTo(5, Cause.Null);
@@ -388,7 +387,7 @@ public class InverseChannelingTest {
             }
         }
         propagator.init();
-        propagator.initialPropagation();
+        propagator.fixPoint();
 
         Q.get(0).instantiateTo(1, Cause.Null);
         Q.get(1).instantiateTo(3, Cause.Null);

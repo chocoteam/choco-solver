@@ -96,7 +96,6 @@ public class NotEqualX_YCTest {
 
         try {
             s.getSearchLoop().propEngine.init();
-            s.getSearchLoop().propEngine.initialPropagation();
             s.getSearchLoop().propEngine.fixPoint();
             vars[0].instantiateTo(1, Cause.Null);
             s.getSearchLoop().propEngine.fixPoint();

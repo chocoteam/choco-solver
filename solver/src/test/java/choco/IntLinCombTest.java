@@ -192,7 +192,6 @@ public class IntLinCombTest {
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);
-        sum.getSearchLoop().propEngine.initialPropagation();
         sum.getSearchLoop().propEngine.fixPoint();
         AbstractSearchLoop.timeStamp++;
         ((IntVar) vars[2]).removeValue(-2, Cause.Null);

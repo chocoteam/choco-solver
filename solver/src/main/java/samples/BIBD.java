@@ -34,6 +34,7 @@ import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.ternary.Times;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.MemberV;
 import solver.propagation.engines.comparators.predicate.Not;
 import solver.propagation.engines.group.Group;
@@ -149,11 +150,11 @@ public class BIBD extends AbstractProblem {
         HashSet<BoolVar> hs = new HashSet<BoolVar>(Arrays.asList(ArrayUtils.flatten(vars)));
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new Not(new MemberV<BoolVar>(hs))
+                        new Not(new MemberV<BoolVar>(hs)), Policy.FIXPOINT
                 ));
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new MemberV<BoolVar>(hs)
+                        new MemberV<BoolVar>(hs), Policy.FIXPOINT
                 ));
         //EngineStrategies.constraintOriented(solver);
 

@@ -27,6 +27,7 @@
 
 package solver.propagation.engines.group;
 
+import solver.exception.ContradictionException;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.requests.IRequest;
@@ -50,18 +51,18 @@ public class Group implements Serializable {
 
     protected Policy policy = Policy.FIXPOINT;
 
-    protected AFixpointReacher reacher;
+    protected IReacher reacher;
 
     protected int index;
 
     protected IRequest[] requests;
     protected int nbRequests;
 
-    public static Group buildQueue(Predicate predicate){
-        return new Group(predicate, null, null);
+    public static Group buildQueue(Predicate predicate, Policy policy) {
+        return new Group(predicate, null, policy);
     }
 
-    public static Group buildGroup(Predicate predicate, Comparator<IRequest> comparator, Policy policy){
+    public static Group buildGroup(Predicate predicate, Comparator<IRequest> comparator, Policy policy) {
         return new Group(predicate, comparator, policy);
     }
 
@@ -77,31 +78,36 @@ public class Group implements Serializable {
         return predicate;
     }
 
-    public final AFixpointReacher getReacher() {
-        return reacher;
+    public boolean fixpoint() throws ContradictionException {
+        return policy.fixpoint(reacher);
     }
+
+    public void update(IRequest request) {
+        reacher.update(request);
+    }
+
+
+    public boolean remove(IRequest request) {
+        return reacher.remove(request);
+    }
+
+    public void flushAll() {
+        reacher.flushAll();
+    }
+
 
     public void make() {
         requests = Arrays.copyOf(requests, nbRequests);
+
         if (comparator == null) {
-            reacher = new Oldest(nbRequests);
+            reacher = new QueueReacher(nbRequests);
         } else {
             Arrays.sort(requests, comparator);
-            switch (policy) {
-                case ONE:
-                    reacher = new One(requests, comparator);
-                    break;
-                case ITERATE:
-                    reacher = new Iterate(requests, comparator);
-                    break;
-                case FIXPOINT:
-                default:
-                    reacher = new Fixpoint(requests, comparator);
-                    break;
-            }
+            reacher = new ArrayReacher(requests, comparator);
         }
         for (int i = 0; i < nbRequests; i++) {
             requests[i].setIndex(i);
+            requests[i].setGroup(index);
         }
     }
 
@@ -114,7 +120,6 @@ public class Group implements Serializable {
             System.arraycopy(tmp, 0, requests, 0, nbRequests);
         }
         requests[nbRequests++] = aRequest;
-        aRequest.setGroup(index);
     }
 
     @Override
@@ -128,5 +133,9 @@ public class Group implements Serializable {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public boolean isEmpty() {
+        return nbRequests == 0;
     }
 }

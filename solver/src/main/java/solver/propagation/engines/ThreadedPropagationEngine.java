@@ -87,6 +87,7 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         this.solver = solver;
         this.exception = new ContradictionException();
         this.nbThreads = nbThreads;
+        throw new UnsupportedOperationException("Do not support PropRequest in a group");
     }
 
     /**
@@ -174,18 +175,6 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     @Override
     public void setDeal(Deal deal) {
         LoggerFactory.getLogger("solver").error("setDeal : empty");
-    }
-
-    @Override
-    public void initialPropagation() throws ContradictionException {
-        for (int i = offset; i < size; i++) {
-            lastPoppedRequest = requests[i];
-            if (lastPoppedRequest.enqueued()) {
-                lastPoppedRequest.deque();
-                lastPoppedRequest.filter();
-            }
-        }
-        fixPoint();
     }
 
     @Override

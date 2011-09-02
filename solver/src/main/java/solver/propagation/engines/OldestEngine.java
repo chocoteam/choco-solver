@@ -64,9 +64,9 @@ public class OldestEngine implements IEngine {
     public void fixPoint() throws ContradictionException {
         while (!queue.isEmpty()) {
             lastGroup = queue.remove();
-            if(!lastGroup.getReacher().fixpoint()){
-               queue.add(lastGroup);
-            }else{
+            if (!lastGroup.fixpoint()) {
+                queue.add(lastGroup);
+            } else {
                 active.set(lastGroup.getIndex(), false);
             }
         }
@@ -76,8 +76,8 @@ public class OldestEngine implements IEngine {
     public void update(IRequest request) {
         int gidx = request.getGroup();
         Group g = groups[gidx];
-        g.getReacher().update(request);
-        if(!active.get(gidx)){
+        g.update(request);
+        if (!active.get(gidx)) {
             queue.add(g);
             active.set(gidx, true);
         }
@@ -87,7 +87,7 @@ public class OldestEngine implements IEngine {
     public void remove(IRequest request) {
         int gidx = request.getGroup();
         Group g = groups[gidx];
-        if(g.getReacher().remove(request)){
+        if (g.remove(request)) {
             queue.remove(g);
             active.set(gidx, false);
         }
@@ -95,8 +95,8 @@ public class OldestEngine implements IEngine {
 
     @Override
     public void flushAll() {
-        for (int i = nbGroup-1; i >= 0; i--) {
-            groups[i].getReacher().flushAll();
+        for (int i = nbGroup - 1; i >= 0; i--) {
+            groups[i].flushAll();
         }
         queue.clear();
         active.clear();

@@ -48,7 +48,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 
     @SuppressWarnings({"unchecked"})
     BinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
-        super(solver,propEngine);
+        super(solver, propEngine);
     }
 
     /**
@@ -57,7 +57,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            propEngine.initialPropagation();
+            propEngine.fixPoint();
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);

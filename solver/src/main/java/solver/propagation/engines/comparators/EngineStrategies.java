@@ -52,7 +52,7 @@ public enum EngineStrategies {
         public void defineIn(Solver solver) {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.SEQUENCE);
-            engine.addGroup(Group.buildQueue(Predicate.TRUE));
+            engine.addGroup(Group.buildQueue(Predicate.TRUE, Policy.FIXPOINT));
         }
     },
     VARIABLE_LEX {

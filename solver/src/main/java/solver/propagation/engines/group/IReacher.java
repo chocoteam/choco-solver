@@ -30,35 +30,33 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
-import java.util.Comparator;
+import java.io.Serializable;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 04/04/11
  */
-final class One extends SortedOne {
+public interface IReacher extends Serializable {
 
-    public One(IRequest[] requests, Comparator<IRequest> comparator) {
-        super(requests, comparator);
-    }
+    /**
+     * Propagate one or more elements (see Policy).
+     *
+     * @return true if has reached fix point
+     * @throws ContradictionException
+     */
+    public abstract boolean one() throws ContradictionException;
 
-    @Override
-    public boolean fixpoint() throws ContradictionException {
-        int index = toPropagate.nextSetBit(0);
-        if (index > -1) {
-            lastPoppedRequest = requests[index];
-            toPropagate.set(index, false);
-            lastPoppedRequest.deque();
-            lastPoppedRequest.filter();
-            return toPropagate.isEmpty();
-        }
-        return true;
-    }
+    public abstract boolean iterate() throws ContradictionException;
 
-    @Override
-    public String toString() {
-        return "ONE/" + comparator.toString();
-    }
+    public abstract boolean all() throws ContradictionException;
+
+    public abstract void update(IRequest request);
+
+    public abstract boolean remove(IRequest request);
+
+    public abstract void flushAll();
+
+
 }

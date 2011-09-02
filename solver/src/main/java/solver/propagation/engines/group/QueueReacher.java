@@ -40,25 +40,42 @@ import solver.requests.IRequest;
  * User: cprudhom
  * Date: 28 oct. 2010
  */
-public final class Youngest extends AFixpointReacher {
+public final class QueueReacher implements IReacher {
 
     protected IRequest lastPoppedRequest;
 
     protected FixSizeCircularQueue<IRequest> toPropagate;
 
-    public Youngest(int nbElement) {
+    public QueueReacher(int nbElement) {
         toPropagate = new FixSizeCircularQueue<IRequest>(nbElement);
     }
 
     @Override
-    public boolean fixpoint() throws ContradictionException {
+    public boolean one() throws ContradictionException {
+        if (!toPropagate.isEmpty()) {
+            lastPoppedRequest = toPropagate.pop();
+            lastPoppedRequest.deque();
+            lastPoppedRequest.filter();
+            return toPropagate.isEmpty();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean iterate() throws ContradictionException {
+        return all();
+    }
+
+    @Override
+    public boolean all() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            lastPoppedRequest = toPropagate.popLast();
+            lastPoppedRequest = toPropagate.pop();
             lastPoppedRequest.deque();
             lastPoppedRequest.filter();
         }
         return true;
     }
+
 
     @Override
     public void update(IRequest request) {

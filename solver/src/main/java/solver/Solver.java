@@ -345,7 +345,7 @@ public class Solver implements Serializable {
         if (!engine.initialized()) {
             engine.init();
         }
-        engine.initialPropagation();
+        engine.fixPoint();
     }
 
     /**

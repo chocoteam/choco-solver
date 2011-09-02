@@ -37,6 +37,7 @@ import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.Arrays;
@@ -92,17 +93,11 @@ public final class PropagationEngine implements IPropagationEngine {
         requests = new IRequest[size];
         System.arraycopy(tmp, 0, requests, 0, size);
 
-        Arrays.sort(requests, offset, size, IncrPriorityP.get()); // first, sort initialization requests
-        IRequest request;
+        // FIRST: sort event requests, give them a group
+        // build a default group
+        addGroup(Group.buildQueue(Predicate.TRUE, Policy.FIXPOINT));
         int i;
-        // initialization requests are also enqued to be treated at initial propagation
-        for (i = offset; i < size; i++) {
-            request = requests[i];
-            request.setIndex(i);
-            request.enqueue();
-        }
-        addGroup(Group.buildQueue(Predicate.TRUE));
-        // first we set request to one group
+        // set a request to one group
         int j;
         for (i = 0; i < offset; i++) {
             lastPoppedRequest = requests[i];
@@ -113,9 +108,29 @@ public final class PropagationEngine implements IPropagationEngine {
             }
             groups[j].addRequest(lastPoppedRequest);
         }
-        // then intialize groups
+
+        // THEN: sort prop requests, and put them in one group
+        addGroup(Group.buildQueue(Predicate.TRUE, Policy.ONE));
+        Arrays.sort(requests, offset, size, IncrPriorityP.get());
+        IRequest request;
+        // initialization requests are also enqued to be treated at initial propagation
+        for (i = offset; i < size; i++) {
+            groups[nbGroup - 1].addRequest(requests[i]);
+        }
+
+        // AND intialize groups
         for (j = 0; j < nbGroup; j++) {
-            groups[j].make();
+            if (groups[j].isEmpty()) {
+                Group g1 = groups[j];
+                groups[j] = groups[nbGroup - 1];
+                groups[j].setIndex(j);
+                groups[nbGroup - 1] = g1;
+                groups[nbGroup - 1].setIndex(nbGroup - 1);
+                nbGroup--;
+                j--;
+            } else {
+                groups[j].make();
+            }
         }
 
         switch (deal) {
@@ -127,7 +142,10 @@ public final class PropagationEngine implements IPropagationEngine {
                 break;
         }
 
-
+        // FINALLY, force prop request to filter at least once
+        for (i = offset; i < size; i++) {
+            requests[i].update(EventType.PROPAGATE);
+        }
     }
 
     @Override
@@ -194,18 +212,6 @@ public final class PropagationEngine implements IPropagationEngine {
         this.deal = deal;
     }
 
-    @Override
-    public void initialPropagation() throws ContradictionException {
-        for (int i = offset; i < size; i++) {
-            lastPoppedRequest = requests[i];
-            if (lastPoppedRequest.enqueued()) {
-                lastPoppedRequest.deque();
-                lastPoppedRequest.filter();
-            }
-        }
-        engine.fixPoint();
-    }
-
 
     @Override
     public void fixPoint() throws ContradictionException {
@@ -215,7 +221,6 @@ public final class PropagationEngine implements IPropagationEngine {
     @Override
     public void update(IRequest request) {
         engine.update(request);
-
     }
 
     @Override

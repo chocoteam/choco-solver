@@ -115,7 +115,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int nbRequestEnqued = 0; // counter of enqued requests -- usable as trigger for complex algorithm
 
-    public long filterCalls, propCalls;  // statistics of calls to filter
+    public long eventCalls, propCalls;  // statistics of calls to filter
 
     protected final IStateInt arity; // arity of this -- number of uninstantiated variables
 

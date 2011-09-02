@@ -27,6 +27,9 @@
 
 package solver.propagation.engines;
 
+import solver.exception.ContradictionException;
+import solver.propagation.engines.group.IReacher;
+
 /**
  * <br/>
  *
@@ -35,5 +38,21 @@ package solver.propagation.engines;
  */
 public enum Policy {
 
-    FIXPOINT, ITERATE, ONE
+    ONE {
+        public boolean fixpoint(IReacher fpr) throws ContradictionException {
+            return fpr.one();
+        }
+    },
+    ITERATE {
+        public boolean fixpoint(IReacher fpr) throws ContradictionException {
+            return fpr.iterate();
+        }
+    },
+    FIXPOINT {
+        public boolean fixpoint(IReacher fpr) throws ContradictionException {
+            return fpr.all();
+        }
+    };
+
+    public abstract boolean fixpoint(IReacher fpr) throws ContradictionException;
 }

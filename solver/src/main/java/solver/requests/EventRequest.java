@@ -75,14 +75,14 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
 
     @Override
     public void filter() throws ContradictionException {
-//        LoggerFactory.getLogger("solver").info("{} filter on {}", this.toString(), evtmask);
+        //LoggerFactory.getLogger("solver").info("{} filter on {}", this.toString(), evtmask);
         if (evtmask > 0) {
             int evtmask_ = evtmask;
             // for concurrent modification..
             this.frozenFirst = first; // freeze indices
             this.first = this.frozenLast = last;
             this.evtmask = 0; // and clean up mask
-            propagator.filterCalls++;
+            propagator.eventCalls++;
             assert (propagator.isActive()) : this + " is not active";
             propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
         }

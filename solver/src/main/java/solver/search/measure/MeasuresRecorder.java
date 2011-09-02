@@ -218,8 +218,8 @@ public final class MeasuresRecorder implements IMeasures {
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] propagators = cstrs[i].propagators;
             for (int j = 0; j < propagators.length; j++) {
-                propagationCount += propagators[j].filterCalls;
-                eventCount += propagators[j].propCalls;
+                propagationCount += propagators[j].propCalls;
+                eventCount += propagators[j].eventCalls;
             }
         }
 
@@ -358,7 +358,7 @@ public final class MeasuresRecorder implements IMeasures {
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d + %,d\n\tPropagations: %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
+                "Restarts: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
                 readingTimeCount / IN_SEC, initialPropagationTimeCount / IN_SEC, timeCount / IN_SEC, timeCount / IN_MS, nodeCount,
                 backtrackCount, failCount, restartCount, eventCount, propagationCount, usedMemory,
                 solver.getVars().length, solver.getCstrs().length, solver.getEngine().getNbRequests()));
