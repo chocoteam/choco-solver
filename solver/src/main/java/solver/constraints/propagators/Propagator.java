@@ -43,7 +43,7 @@ import solver.explanations.Explanation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.EventRequest;
 import solver.requests.IRequest;
-import solver.requests.InitializeRequest;
+import solver.requests.PropRequest;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -99,7 +99,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int lastRequest;
 
-    protected InitializeRequest initializeRequest;
+    protected PropRequest propRequest;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -140,7 +140,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        this.initializeRequest = new InitializeRequest(this, -1);
+        this.propRequest = new PropRequest(this, -1);
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
             if (!vars[v].instantiated()) {
@@ -249,7 +249,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         if (i >= 0 && i < lastRequest) {
             return requests[i];
         } else if (i == -1) {
-            return initializeRequest;
+            return propRequest;
         }
         throw new IndexOutOfBoundsException();
     }

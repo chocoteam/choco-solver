@@ -42,9 +42,9 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 23 sept. 2010
  */
-public class InitializeRequest<V extends Variable, P extends Propagator<V>> extends AbstractRequest<V, P> {
+public class PropRequest<V extends Variable, P extends Propagator<V>> extends AbstractRequest<V, P> {
 
-    public InitializeRequest(P propagator, int idxInProp) {
+    public PropRequest(P propagator, int idxInProp) {
         super(propagator, null, idxInProp);
     }
 
