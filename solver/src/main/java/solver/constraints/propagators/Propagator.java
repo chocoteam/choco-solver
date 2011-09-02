@@ -41,9 +41,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.propagation.engines.IPropagationEngine;
+import solver.requests.EventRequest;
 import solver.requests.IRequest;
 import solver.requests.InitializeRequest;
-import solver.requests.PropRequest;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -161,7 +161,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return a request
      */
     public IRequest<V> makeRequest(V var, int idx) {
-        return new PropRequest<V, Propagator<V>>(this, var, idx);
+        return new EventRequest<V, Propagator<V>>(this, var, idx);
     }
 
 

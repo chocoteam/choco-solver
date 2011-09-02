@@ -35,13 +35,13 @@ package choco.constraints;
  */
 public class RequestTest {
 
-//    private static class Check implements Delta.Procedure2<PropRequest, int[]> {
+//    private static class Check implements Delta.Procedure2<EventRequest, int[]> {
 //        int[] value;
-//        PropRequest ad;
+//        EventRequest ad;
 //
 //
 //        @Override
-//        public Delta.Procedure2 set(PropRequest advisor, int[] ints) {
+//        public Delta.Procedure2 set(EventRequest advisor, int[] ints) {
 //            this.value = ints;
 //            this.ad = advisor;
 //            return this;
@@ -57,7 +57,7 @@ public class RequestTest {
 //
 //    @Test
 //    public void testAddAll() throws ContradictionException {
-//        PropRequest ad = new PropRequest();
+//        EventRequest ad = new EventRequest();
 //        Delta d = new Delta();
 //        EventType e = EventType.REMOVE;
 //        int expectecmask = EventType.REMOVE.mask;
@@ -116,7 +116,7 @@ public class RequestTest {
 //
 //    @Test
 //    public void testFreeze() throws ContradictionException {
-//        PropRequest ad = new PropRequest();
+//        EventRequest ad = new EventRequest();
 //        Delta d = new Delta();
 //        EventType e = EventType.REMOVE;
 //
@@ -130,7 +130,7 @@ public class RequestTest {
 //        check.set(ad, new int[]{1,2,3});
 //        ad.getCurrent().forEach(check);
 //
-//        PropRequest copy = ad.freeze();
+//        EventRequest copy = ad.freeze();
 //
 //        Assert.assertEquals(copy.getEvtmask(), EventType.REMOVE.mask);
 //        Assert.assertEquals(copy.getCurrent().size(), 3);
