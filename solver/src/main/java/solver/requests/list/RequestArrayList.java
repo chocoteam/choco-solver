@@ -115,16 +115,11 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     public void notifyButCause(@NotNull ICause cause, EventType event, IDelta delta) {
         IRequest request;
         int last = firstPassive.get();
-        int mask = event.mask;
         assert cause != null:"should be Cause.Null instead";
         if (cause == Cause.Null) {
             for (int a = 0; a < last; a++) {
                 request = requests[a];
-                Propagator<IntVar> o = request.getPropagator();
-                // Only notify constraints that filter on the specific event received
-                if ((mask & o.getPropagationConditions(request.getIdxVarInProp())) != 0) {
-                    request.update(event);
-                }
+                request.update(event);
             }
         } else {
             //TODO: get the id of the cause, to avoid testing it at each iteration
@@ -132,10 +127,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
                 request = requests[a];
                 Propagator<IntVar> o = request.getPropagator();
                 if (o != cause) {
-                    // Only notify constraints that filter on the specific event received
-                    if ((mask & o.getPropagationConditions(request.getIdxVarInProp())) != 0) {
-                        request.update(event);
-                    }
+                    request.update(event);
                 }
             }
         }

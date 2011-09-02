@@ -46,13 +46,13 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class ImageIntVar<IV extends IntVar> extends AbstractVariable implements IntVar {
+public abstract class View<IV extends IntVar> extends AbstractVariable implements IntVar {
 
     protected final IV var;
 
     protected int uniqueID;
 
-    public ImageIntVar(String name, IV var, Solver solver) {
+    public View(String name, IV var, Solver solver) {
         super(name, solver);
         this.var = var;
     }

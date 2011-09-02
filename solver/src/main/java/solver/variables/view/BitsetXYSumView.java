@@ -316,7 +316,7 @@ public final class BitsetXYSumView extends AbstractSumView {
     @Override
     public String toString() {
         if (instantiated()) {
-            return String.format("(%s + %s) = %d", A.getName(), B.getName(), getValue());
+            return String.format("(%s + %s) = %d", A, B, getValue());
         } else {
             StringBuilder s = new StringBuilder(20);
             s.append('{').append(getLB());
@@ -330,7 +330,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             s.append('}');
 
-            return String.format("(%s + %s) = %s", A.getName(), B.getName(), s.toString());
+            return String.format("(%s + %s) = %s", A, B, s.toString());
         }
     }
 
@@ -446,15 +446,17 @@ public final class BitsetXYSumView extends AbstractSumView {
             if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
                 filterOnLeq(this, iub);
             }
-            if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
-                if (old_size > 0) {
-                    notifyPropagators(EventType.INSTANTIATE, this);
-                    solver.explainer.instantiateTo(this, ilb, this);
+            if (true) {
+                if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
+                    if (old_size > 0) {
+                        notifyPropagators(EventType.INSTANTIATE, this);
+                        solver.explainer.instantiateTo(this, ilb, this);
+                    }
+                } else {
+                    notifyPropagators(e, this);
+                    solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                    solver.explainer.updateUpperBound(this, iub, iub, this);
                 }
-            } else {
-                notifyPropagators(e, this);
-                solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                solver.explainer.updateUpperBound(this, iub, iub, this);
             }
         }
     }

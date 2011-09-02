@@ -76,14 +76,14 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
     @Override
     public void filter() throws ContradictionException {
 //        LoggerFactory.getLogger("solver").info("{} filter on {}", this.toString(), evtmask);
-        if (evtmask>0) {
+        if (evtmask > 0) {
             int evtmask_ = evtmask;
             // for concurrent modification..
             this.frozenFirst = first; // freeze indices
             this.first = this.frozenLast = last;
             this.evtmask = 0; // and clean up mask
             propagator.filterCall++;
-            assert (propagator.isActive()):this+" is not active";
+            assert (propagator.isActive()) : this + " is not active";
             propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
         }
     }
@@ -106,12 +106,15 @@ public class PropRequest<V extends Variable, P extends Propagator<V>> extends Ab
     @Override
     public void update(EventType e) {
 //        LoggerFactory.getLogger("solver").info("\tfilter on {}", this.toString());
-        lazyClear();
-        if (EventType.anInstantiationEvent(e.mask)) {
-            propagator.decArity();
+        // Only notify constraints that filter on the specific event received
+        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+            lazyClear();
+            if (EventType.anInstantiationEvent(e.mask)) {
+                propagator.decArity();
+            }
+            addAll(e);
+            engine.update(this);
         }
-        addAll(e);
-        engine.update(this);
     }
 
     @Override

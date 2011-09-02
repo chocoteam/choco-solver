@@ -46,7 +46,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends ImageIntVar<IntVar> {
+public final class OffsetView extends View<IntVar> {
 
     final int cste;
     final IntDelta delta;
@@ -134,7 +134,7 @@ public final class OffsetView extends ImageIntVar<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + this.var.getName() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
+        return "(" + this.var.toString() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override

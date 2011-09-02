@@ -31,8 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
+import solver.requests.ViewRequestWrapper;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -48,7 +47,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends ImageIntVar<IntVar> {
+public class MinusView extends View<IntVar> {
 
     final IntDelta delta;
 
@@ -67,7 +66,8 @@ public class MinusView extends ImageIntVar<IntVar> {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        MinusRequestWrapper req = new MinusRequestWrapper(propagator.makeRequest(var, idxInProp));
+        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
+                ViewRequestWrapper.Modifier.MINUS);
         propagator.addRequest(req);
         var.addRequest(req);
     }
@@ -148,7 +148,7 @@ public class MinusView extends ImageIntVar<IntVar> {
 
     @Override
     public String toString() {
-        return "-(" + this.var.getName() + ") = [" + getLB() + "," + getUB() + "]";
+        return "-(" + this.var.toString() + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
@@ -204,115 +204,4 @@ public class MinusView extends ImageIntVar<IntVar> {
 
     ///////////////
 
-    private static class MinusRequestWrapper implements IRequest<IntVar> {
-
-        final IRequest<IntVar> original;
-
-        public MinusRequestWrapper(IRequest<IntVar> original) {
-            this.original = original;
-        }
-
-        @Override
-        public Propagator<IntVar> getPropagator() {
-            return original.getPropagator();
-        }
-
-        @Override
-        public IntVar getVariable() {
-            return original.getVariable();
-        }
-
-        @Override
-        public int getIndex() {
-            return original.getIndex();
-        }
-
-        @Override
-        public void setIndex(int idx) {
-            original.setIndex(idx);
-        }
-
-        @Override
-        public int getGroup() {
-            return original.getGroup();
-        }
-
-        @Override
-        public void setGroup(int gidx) {
-            original.setGroup(gidx);
-        }
-
-        @Override
-        public int getIdxInVar() {
-            return original.getIdxInVar();
-        }
-
-        @Override
-        public void setIdxInVar(int idx) {
-            original.setIdxInVar(idx);
-        }
-
-        @Override
-        public int getIdxVarInProp() {
-            return original.getIdxVarInProp();
-        }
-
-        @Override
-        public int getMask() {
-            return original.getMask();
-        }
-
-        @Override
-        public void filter() throws ContradictionException {
-            original.filter();
-        }
-
-        @Override
-        public void update(EventType eventType) {
-            if (eventType == EventType.INCLOW || eventType == EventType.DECUPP) {
-                eventType = (eventType == EventType.INCLOW ? EventType.DECUPP : EventType.INCLOW);
-            }
-            original.update(eventType);
-        }
-
-        @Override
-        public void desactivate() {
-            original.desactivate();
-        }
-
-        @Override
-        public int fromDelta() {
-            return original.fromDelta();
-        }
-
-        @Override
-        public int toDelta() {
-            return original.toDelta();
-        }
-
-        @Override
-        public IPropagationEngine getPropagationEngine() {
-            return original.getPropagationEngine();
-        }
-
-        @Override
-        public void setPropagationEngine(IPropagationEngine engine) {
-            original.setPropagationEngine(engine);
-        }
-
-        @Override
-        public boolean enqueued() {
-            return original.enqueued();
-        }
-
-        @Override
-        public void enqueue() {
-            original.enqueue();
-        }
-
-        @Override
-        public void deque() {
-            original.deque();
-        }
-    }
 }

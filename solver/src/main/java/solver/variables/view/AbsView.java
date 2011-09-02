@@ -31,7 +31,9 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.IntVar;
@@ -47,7 +49,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends ImageIntVar<IntVar> {
+public final class AbsView extends View<IntVar> {
 
     final IntDelta delta;
 
@@ -65,6 +67,14 @@ public final class AbsView extends ImageIntVar<IntVar> {
                 var.getDelta().add(-value);
             }
         };
+    }
+
+    @Override
+    public void attachPropagator(Propagator propagator, int idxInProp) {
+        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
+                ViewRequestWrapper.Modifier.ABS);
+        propagator.addRequest(req);
+        var.addRequest(req);
     }
 
     @Override
@@ -149,7 +159,8 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     @Override
     public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value) || var.instantiatedTo(-value);
+        return var.instantiatedTo(value) || var.instantiatedTo(-value) ||
+                var.getDomainSize() == 2 && var.getLB() == var.getUB();
     }
 
     @Override
@@ -222,7 +233,7 @@ public final class AbsView extends ImageIntVar<IntVar> {
 
     @Override
     public String toString() {
-        return "|" + this.var.getName() + "| = [" + getLB() + "," + getUB() + "]";
+        return "|" + this.var.toString() + "| = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override

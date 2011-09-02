@@ -97,12 +97,15 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     @Override
     public void update(EventType e) {
-        this.lazyClear();
-        if (EventType.anInstantiationEvent(e.mask)) {
-            propagator.decArity();
+        // Only notify constraints that filter on the specific event received
+        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+            this.lazyClear();
+            if (EventType.anInstantiationEvent(e.mask)) {
+                propagator.decArity();
+            }
+            addAll(e);
+            condition.updateAndValid(this, e.mask);
         }
-        addAll(e);
-        condition.updateAndValid(this, e.mask);
     }
 
 

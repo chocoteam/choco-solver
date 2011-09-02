@@ -149,6 +149,26 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
      * It is optimized for removing first and last elements
      * but also allows you to remove in the middle of the list.
      */
+    public E popLast() {
+        int pos = convert(-1, tail);
+        // an interesting application of try/finally is to avoid
+        // having to use local variables
+        E tmp = elementData[pos];
+        // optimized for FIFO access, i.e. adding to back and
+        // removing from front
+        if (pos == tail-1) {
+            tail = pos;
+        }
+        size--;
+        return tmp;
+    }
+
+    /**
+     * {@inheritDoc}
+     * This method is the main reason we re-wrote the class.
+     * It is optimized for removing first and last elements
+     * but also allows you to remove in the middle of the list.
+     */
     public E remove() {
         int pos = convert(0, head);
         // an interesting application of try/finally is to avoid

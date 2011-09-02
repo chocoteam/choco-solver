@@ -35,110 +35,128 @@ import solver.variables.graph.GraphVar;
 
 public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends AbstractRequest<V, P> {
 
-	//NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
-	final static int NR = 0;
-	final static int NE = 1;
-	final static int AR = 2;
-	final static int AE = 3;
+    //NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
+    final static int NR = 0;
+    final static int NE = 1;
+    final static int AR = 2;
+    final static int AE = 3;
 
-	int timestamp; // timestamp of the last clear call -- for lazy clear
-	int[] first, last; // references, in variable delta value to propagate, to un propagated values
-	int[] frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
+    int timestamp; // timestamp of the last clear call -- for lazy clear
+    int[] first, last; // references, in variable delta value to propagate, to un propagated values
+    int[] frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
 
-	int evtmask; // reference to events occuring
+    int evtmask; // reference to events occuring
 
-	public GraphRequest(P propagator, V variable, int idxInProp) {
-		super(propagator, variable, idxInProp);
+    public GraphRequest(P propagator, V variable, int idxInProp) {
+        super(propagator, variable, idxInProp);
 
-		this.evtmask = 0;
+        this.evtmask = 0;
 
-		this.first = new int[4];
-		this.last = new int[4];
-		this.frozenFirst = new int[4];
-		this.frozenLast = new int[4];
-		this.timestamp = -1;
-	}
+        this.first = new int[4];
+        this.last = new int[4];
+        this.frozenFirst = new int[4];
+        this.frozenLast = new int[4];
+        this.timestamp = -1;
+    }
 
-	@Override
-	@Deprecated
-	public int fromDelta() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    @Deprecated
+    public int fromDelta() {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	@Deprecated
-	public int toDelta() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    @Deprecated
+    public int toDelta() {
+        throw new UnsupportedOperationException();
+    }
 
-	public int fromNodeRemoval() {
-		return frozenFirst[NR];
-	}
-	public int toNodeRemoval() {
-		return frozenLast[NR];
-	}
-	public int fromNodeEnforcing() {
-		return frozenFirst[NE];
-	}
-	public int toNodeEnforcing() {
-		return frozenLast[NE];
-	}
-	public int fromArcRemoval() {
-		return frozenFirst[AR];
-	}
-	public int toArcRemoval() {
-		return frozenLast[AR];
-	}
-	public int fromArcEnforcing() {
-		return frozenFirst[AE];
-	}
-	public int toArcEnforcing() {
-		return frozenLast[AE];
-	}
+    public int fromNodeRemoval() {
+        return frozenFirst[NR];
+    }
+
+    public int toNodeRemoval() {
+        return frozenLast[NR];
+    }
+
+    public int fromNodeEnforcing() {
+        return frozenFirst[NE];
+    }
+
+    public int toNodeEnforcing() {
+        return frozenLast[NE];
+    }
+
+    public int fromArcRemoval() {
+        return frozenFirst[AR];
+    }
+
+    public int toArcRemoval() {
+        return frozenLast[AR];
+    }
+
+    public int fromArcEnforcing() {
+        return frozenFirst[AE];
+    }
+
+    public int toArcEnforcing() {
+        return frozenLast[AE];
+    }
 
 
-	public static long calls, filter;
+    public static long calls, filter;
 
-	@Override
-	public void filter() throws ContradictionException {
-		calls++;
-		int evtmask_ = evtmask;
-		// for concurrent modification..
-		for(int i=0;i<4;i++){
-			this.frozenFirst[i] = first[i]; // freeze indices
-			this.first[i] = this.frozenLast[i] = last[i];
-		}
-		this.evtmask = 0; // and clean up mask
-		filter++;
-		assert (propagator.isActive());
-		propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
-	}
+    @Override
+    public void filter() throws ContradictionException {
+        calls++;
+        int evtmask_ = evtmask;
+        // for concurrent modification..
+        for (int i = 0; i < 4; i++) {
+            this.frozenFirst[i] = first[i]; // freeze indices
+            this.first[i] = this.frozenLast[i] = last[i];
+        }
+        this.evtmask = 0; // and clean up mask
+        filter++;
+        assert (propagator.isActive());
+        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+    }
 
-	private void addAll(EventType e) {
-		if ((e.mask & evtmask) == 0) {
-			evtmask += e.mask;
-		}
-		switch(e){//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
-		case REMOVENODE : last[NR] = variable.getDelta().getNodeRemovalDelta().size();break;
-		case ENFORCENODE : last[NE] = variable.getDelta().getNodeEnforcingDelta().size();break;
-		case REMOVEARC : last[AR] = variable.getDelta().getArcRemovalDelta().size();break;
-		case ENFORCEARC : last[AE] = variable.getDelta().getArcEnforcingDelta().size();break;
-		}
-	}
+    private void addAll(EventType e) {
+        if ((e.mask & evtmask) == 0) {
+            evtmask += e.mask;
+        }
+        switch (e) {//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
+            case REMOVENODE:
+                last[NR] = variable.getDelta().getNodeRemovalDelta().size();
+                break;
+            case ENFORCENODE:
+                last[NE] = variable.getDelta().getNodeEnforcingDelta().size();
+                break;
+            case REMOVEARC:
+                last[AR] = variable.getDelta().getArcRemovalDelta().size();
+                break;
+            case ENFORCEARC:
+                last[AE] = variable.getDelta().getArcEnforcingDelta().size();
+                break;
+        }
+    }
 
-	protected void lazyClear() {
-		if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-			timestamp = AbstractSearchLoop.timeStamp;
-			for(int i=0;i<4;i++){
-				this.evtmask = this.first[i] = this.last[i] = 0;
-			}
-		}
-	}
+    protected void lazyClear() {
+        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+            timestamp = AbstractSearchLoop.timeStamp;
+            for (int i = 0; i < 4; i++) {
+                this.evtmask = this.first[i] = this.last[i] = 0;
+            }
+        }
+    }
 
-	@Override
-	public void update(EventType e) {
-		lazyClear();
-		addAll(e);
-		engine.update(this);
-	}
+    @Override
+    public void update(EventType e) {
+        // Only notify constraints that filter on the specific event received
+        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+            lazyClear();
+            addAll(e);
+            engine.update(this);
+        }
+    }
 }
