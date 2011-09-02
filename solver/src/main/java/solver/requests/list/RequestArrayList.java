@@ -39,7 +39,7 @@ import solver.variables.IntVar;
 import solver.variables.delta.IDelta;
 
 /**
- * <br/>
+ * [<--inactive-->|<--active--->|<---entailed-->]<br/>
  *
  * @author Charles Prud'homme
  * @since 23/02/11
@@ -48,11 +48,28 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
 
     protected R[] requests;
 
+    protected IStateInt firstActive;
     protected IStateInt firstPassive;
 
     protected RequestArrayList(IEnvironment environment) {
         requests = (R[]) new IRequest[0];
+        firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
+    }
+
+    @Override
+    public void setActive(R request) {
+        int first = this.firstActive.get();
+        int i = request.getIdxInVar();
+        if (first > i) {
+            // swap element at pos "first" with element at pos "i"
+            R tmp1 = requests[--first];
+            requests[first] = requests[i];
+            requests[first].setIdxInVar(first);
+            requests[i] = tmp1;
+            requests[i].setIdxInVar(i);
+        }
+        firstPassive.add(-1);
     }
 
     @Override
@@ -60,6 +77,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         int last = this.firstPassive.get();
         int i = request.getIdxInVar();
         if (last > i) {
+            // swap element at pos "last" with element at pos "i"
             R tmp1 = requests[--last];
             requests[last] = requests[i];
             requests[last].setIdxInVar(last);
@@ -69,8 +87,12 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         firstPassive.add(-1);
     }
 
+
     @Override
     public void addRequest(R request) {
+        if(firstActive.get()>0){
+            throw new UnsupportedOperationException("Can not add a request: activation has already started");
+        }
         R[] tmp = requests;
         requests = (R[]) new IRequest[tmp.length + 1];
         System.arraycopy(tmp, 0, requests, 0, tmp.length);
@@ -114,16 +136,17 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     @Override
     public void notifyButCause(@NotNull ICause cause, EventType event, IDelta delta) {
         IRequest request;
+        int first = firstActive.get();
         int last = firstPassive.get();
-        assert cause != null:"should be Cause.Null instead";
+        assert cause != null : "should be Cause.Null instead";
         if (cause == Cause.Null) {
-            for (int a = 0; a < last; a++) {
+            for (int a = first; a < last; a++) {
                 request = requests[a];
                 request.update(event);
             }
         } else {
             //TODO: get the id of the cause, to avoid testing it at each iteration
-            for (int a = 0; a < last; a++) {
+            for (int a = first; a < last; a++) {
                 request = requests[a];
                 Propagator<IntVar> o = request.getPropagator();
                 if (o != cause) {

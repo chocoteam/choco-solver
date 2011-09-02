@@ -47,16 +47,22 @@ import java.io.Serializable;
 public interface IRequestList<R extends IRequest> extends Serializable{
 
     /**
-     * Informs the structure of the status modification of <code>request</code>
-     * @param request the modified element
-     */
-    void setPassive(R request);
-
-    /**
      * Add a new <code>request</code>
      * @param request to add
      */
     void addRequest(R request);
+
+    /**
+     * Activate a request
+     * @param request the modified element
+     */
+    void setActive(R request);
+
+    /**
+     * Desactivate a request
+     * @param request the modified element
+     */
+    void setPassive(R request);
 
     /**
      * Permanently delete <code>request</code>
