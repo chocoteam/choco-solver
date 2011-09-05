@@ -69,10 +69,12 @@ public class PropReified extends Propagator<Variable> {
             unlink.setAccessible(true);
             Propagator[] props = constraint.propagators;
             for (int p = 0; p < props.length; p++) {
+                props[p].setActive();
                 unlink.invoke(props[p]);
             }
             props = oppositeConstraint.propagators;
             for (int p = 0; p < props.length; p++) {
+                props[p].setActive();
                 unlink.invoke(props[p]);
             }
             unlink.setAccessible(false);

@@ -179,7 +179,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Build internal structure of the propagator, if necessary
      */
-    public void initialize() throws ContradictionException{}
+    public void initialize() throws ContradictionException {
+    }
 
     /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.
