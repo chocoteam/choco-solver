@@ -41,13 +41,13 @@ import java.util.BitSet;
  */
 public class WhileEngine implements IEngine {
 
-    protected final Group[] groups;
+    protected Group[] groups;
 
-    protected final BitSet notEmpty;
+    protected BitSet notEmpty;
 
-    protected final int nbGroup;
+    protected int nbGroup;
 
-    public WhileEngine(Group[] groups) {
+    public void setGroups(Group[] groups){
         this.groups = groups;
         nbGroup = groups.length;
         notEmpty = new BitSet(nbGroup);

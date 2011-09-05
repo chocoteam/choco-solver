@@ -255,9 +255,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         return EventType.ALL_MASK();
     }
 
-
     @Override
-    public void propagate() throws ContradictionException {
+    public void initialize() throws ContradictionException {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
@@ -278,7 +277,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             vs[i].removeInterval(left, right, this);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
+    }
 
+    @Override
+    public void propagate() throws ContradictionException {
         filter();
     }
 
@@ -295,10 +297,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             boundUpdate.add(vIdx - offset);
             computed = false;
         }
-        if (getNbRequestEnqued() == 0 && toRemove.size() > 0) {
-            filter();
-        }
-//        propagate();
+//        if (getNbRequestEnqued() == 0 && toRemove.size() > 0) {
+//            filter();
+//        }
+        forcePropagate();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

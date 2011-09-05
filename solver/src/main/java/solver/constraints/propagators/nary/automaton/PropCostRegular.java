@@ -87,11 +87,16 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
         vars[zIdx].updateLowerBound(bounds.min.value, this);
         vars[zIdx].updateUpperBound(bounds.max.value, this);
         this.prefilter();
+    }
+
+    @Override
+    public void propagate() throws ContradictionException {
+        filter();
     }
 
     @Override
@@ -107,9 +112,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             int l = intVarIRequest.toDelta();
             delta.forEach(rem_proc.set(idxVarInProp), f, l);
         }
-        if (getNbRequestEnqued() == 0) {
-            filter();
-        }
+        forcePropagate();
     }
 
     @Override

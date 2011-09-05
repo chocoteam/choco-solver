@@ -28,6 +28,7 @@
 package solver.propagation.engines;
 
 import solver.exception.ContradictionException;
+import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
 
 import java.io.Serializable;
@@ -40,6 +41,7 @@ import java.io.Serializable;
  */
 public interface IEngine extends Serializable{
 
+    void setGroups(Group[] groups);
     void fixPoint() throws ContradictionException;
     void update(IRequest request);
     void remove(IRequest request);

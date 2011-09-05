@@ -95,11 +95,15 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void initialize() throws ContradictionException {
         for (int i = 0; i < maxFlow.length; i++) {
             vars[i].updateLowerBound(minValue, this);
             vars[i].updateUpperBound(maxValue, this);
         }
+    }
+
+    @Override
+    public void propagate() throws ContradictionException {
         // On suppose que la structure struct est deja ete initialisee par la contrainte
         // car elle est partagee entre tous les propagateurs
         struct.removeUselessEdges(this);
@@ -117,9 +121,10 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
             int l = request.toDelta();
             delta.forEach(rem_proc.set(varIdx), f, l);
         }
-        if (getNbRequestEnqued() == 0) {
-            struct.removeUselessEdges(this);
-        }
+//        if (getNbRequestEnqued() == 0) {
+//            struct.removeUselessEdges(this);
+//        }
+        forcePropagate();
     }
 
     @Override

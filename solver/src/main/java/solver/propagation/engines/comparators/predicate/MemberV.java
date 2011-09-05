@@ -27,6 +27,7 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.requests.IRequest;
 import solver.variables.Variable;
 
@@ -44,6 +45,10 @@ public class MemberV<V extends Variable> implements Predicate {
 
     public MemberV(V[] vars) {
         this.vars = new HashSet<V>(Arrays.asList(vars));
+    }
+
+    public MemberV(V vars0, V... vars) {
+        this(ArrayUtils.append((V[])new Variable[]{vars0}, vars));
     }
 
     public boolean eval(IRequest request) {

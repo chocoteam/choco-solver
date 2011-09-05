@@ -76,7 +76,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void initialize() throws ContradictionException {
         initBackDataStruct();
         for (int i = 0; i < vars.length; i++) {
             if (vars[i].instantiated()) {
@@ -94,8 +94,11 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
         l.compute(minOccurrences);
         u.compute(maxOccurrences);
-        filter();
+    }
 
+    @Override
+    public void propagate() throws ContradictionException {
+        filter();
     }
 
     @Override
@@ -127,10 +130,10 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
                 }
             }
         }
-        if (getNbRequestEnqued() == 0) {
-            filter();
-        }
-
+//        if (getNbRequestEnqued() == 0) {
+//            filter();
+//        }
+        forcePropagate();
     }
 
     boolean directInconsistentCount() {

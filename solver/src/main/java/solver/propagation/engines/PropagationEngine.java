@@ -33,11 +33,9 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
-import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.Arrays;
@@ -93,13 +91,13 @@ public final class PropagationEngine implements IPropagationEngine {
         requests = new IRequest[size];
         System.arraycopy(tmp, 0, requests, 0, size);
 
-        // FIRST: sort event requests, give them a group
+        // FIRST: sort requests, give them a unique group
         // build a default group
         addGroup(Group.buildQueue(Predicate.TRUE, Policy.FIXPOINT));
         int i;
         // set a request to one group
         int j;
-        for (i = 0; i < offset; i++) {
+        for (i = 0; i < size; i++) {
             lastPoppedRequest = requests[i];
             j = 0;
             // look for the first right group
@@ -109,42 +107,30 @@ public final class PropagationEngine implements IPropagationEngine {
             groups[j].addRequest(lastPoppedRequest);
         }
 
-        // THEN: sort prop requests, and put them in one group
-        addGroup(Group.buildQueue(Predicate.TRUE, Policy.ONE));
-        Arrays.sort(requests, offset, size, IncrPriorityP.get());
-        IRequest request;
-        // initialization requests are also enqued to be treated at initial propagation
-        for (i = offset; i < size; i++) {
-            groups[nbGroup - 1].addRequest(requests[i]);
+        switch (deal) {
+            case SEQUENCE:
+                engine = new WhileEngine();
+                break;
+            case QUEUE:
+                engine = new OldestEngine();
+                break;
         }
 
         // AND intialize groups
         for (j = 0; j < nbGroup; j++) {
             if (groups[j].isEmpty()) {
-                Group g1 = groups[j];
                 groups[j] = groups[nbGroup - 1];
                 groups[j].setIndex(j);
-                groups[nbGroup - 1] = g1;
-                groups[nbGroup - 1].setIndex(nbGroup - 1);
+                groups[nbGroup - 1] = null;
+                //groups[nbGroup - 1].setIndex(nbGroup - 1);
                 nbGroup--;
                 j--;
-            } else {
-                groups[j].make();
             }
         }
+        engine.setGroups(Arrays.copyOfRange(groups, 0, nbGroup));
 
-        switch (deal) {
-            case SEQUENCE:
-                engine = new WhileEngine(Arrays.copyOfRange(groups, 0, nbGroup));
-                break;
-            case QUEUE:
-                engine = new OldestEngine(Arrays.copyOfRange(groups, 0, nbGroup));
-                break;
-        }
-
-        // FINALLY, force prop request to filter at least once
-        for (i = offset; i < size; i++) {
-            requests[i].update(EventType.PROPAGATE);
+        for (j = 0; j < nbGroup; j++) {
+            groups[j].make();
         }
     }
 

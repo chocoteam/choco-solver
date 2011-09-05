@@ -42,18 +42,17 @@ import java.util.BitSet;
  */
 public class OldestEngine implements IEngine {
 
-    protected final Group[] groups;
+    protected Group[] groups;
 
-    protected final int nbGroup;
+    protected int nbGroup;
 
     protected BitSet active;
 
-    //fixme: debug fixsized circular queue!
-    protected final FixSizeCircularQueue<Group> queue;
+    protected FixSizeCircularQueue<Group> queue;
 
     protected Group lastGroup;
 
-    public OldestEngine(Group[] groups) {
+    public void setGroups(Group[] groups) {
         this.groups = groups;
         nbGroup = groups.length;
         this.queue = new FixSizeCircularQueue<Group>(nbGroup);

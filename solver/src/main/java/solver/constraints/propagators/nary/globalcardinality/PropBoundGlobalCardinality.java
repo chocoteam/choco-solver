@@ -159,7 +159,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void initialize() throws ContradictionException {
         int j = 0;
         for(; j < nbVars; j++){
             vars[j].updateLowerBound(offset, this);
@@ -186,7 +186,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         }
         if (directInconsistentCount())
             this.contradiction(null, "inconsistent");
+    }
 
+    @Override
+    public void propagate() throws ContradictionException {
         filter();
     }
 
@@ -258,10 +261,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
                 }
             }
         }
-        if (getNbRequestEnqued() == 0) {
-            filter();
-        }
-
+//        if (getNbRequestEnqued() == 0) {
+//            filter();
+//        }
+        forcePropagate();
     }
 
     @Override

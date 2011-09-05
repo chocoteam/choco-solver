@@ -101,9 +101,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
             int l = request.toDelta();
             delta.forEach(rem_proc.set(varIdx), f, l);
         }
-        if (getNbRequestEnqued() == 0) {
-            struct.removeUselessEdges(this);
-        }
+        forcePropagate();
     }
 
     @Override

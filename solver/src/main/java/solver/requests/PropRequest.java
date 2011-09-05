@@ -98,7 +98,14 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public V getVariable() {
-        throw new UnsupportedOperationException();
+        return null;
+    }
+
+    @Override
+    public void setGroupAndIndex(int gidx, int idx) {
+        index = idx;
+        gIndex = gidx;
+        this.update(EventType.PROPAGATE); // post initial propagation
     }
 
     @Override
@@ -107,18 +114,8 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public void setIndex(int idx) {
-        this.index = idx;
-    }
-
-    @Override
     public int getGroup() {
         return gIndex;
-    }
-
-    @Override
-    public void setGroup(int gidx) {
-        this.gIndex = gidx;
     }
 
     @Override
@@ -143,12 +140,12 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public void filter() throws ContradictionException {
-        //LoggerFactory.getLogger("solver").info("PROP: {}", this.toString());
-        propagator.propCalls++;
+//        LoggerFactory.getLogger("solver").info("PROP: {}", this.toString());
         if(!propagator.isActive()){
             propagator.initialize();
             propagator.setActive();
         }
+        else propagator.propCalls++;
         propagator.propagate();
     }
 

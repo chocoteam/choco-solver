@@ -106,8 +106,7 @@ public class Group implements Serializable {
             reacher = new ArrayReacher(requests, comparator);
         }
         for (int i = 0; i < nbRequests; i++) {
-            requests[i].setIndex(i);
-            requests[i].setGroup(index);
+            requests[i].setGroupAndIndex(index, i);
         }
     }
 

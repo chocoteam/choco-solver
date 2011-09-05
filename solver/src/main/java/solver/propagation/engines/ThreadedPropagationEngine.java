@@ -108,12 +108,12 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         // initialization requests are also enqued to be treated at initial propagation
         for (i = offset; i < size; i++) {
             request = requests[i];
-            request.setIndex(i);
+            requests[i].setGroupAndIndex(0, i);
             request.enqueue();
         }
         for (i = 0; i < offset; i++) {
             request = requests[i];
-            request.setIndex(i);
+            requests[i].setGroupAndIndex(0, i);
         }
         init = false;
         sequencer = new LonelySequencer(this, offset, solver.getNbVars(), nbThreads);

@@ -27,21 +27,35 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.constraints.Constraint;
 import solver.requests.IRequest;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 
 
 public class MemberC implements Predicate {
-	Set<Constraint> props;
-	public MemberC(Set<Constraint> props) {
-		this.props = props;
-	}
-	public boolean eval(IRequest request) {
-		return this.props.contains(request.getPropagator().getConstraint());
-	}
-	public String toString() {
-		return "MemberC";
-	}
+    Set<Constraint> cons;
+
+    public MemberC(Set<Constraint> cons) {
+        this.cons = cons;
+    }
+
+    public MemberC(Constraint... cons) {
+        this.cons = new HashSet<Constraint>(Arrays.asList(cons));
+    }
+
+    public MemberC(Constraint cons0, Constraint... cons) {
+        this(ArrayUtils.append(new Constraint[]{cons0}, cons));
+    }
+
+    public boolean eval(IRequest request) {
+        return this.cons.contains(request.getPropagator().getConstraint());
+    }
+
+    public String toString() {
+        return "MemberC";
+    }
 }

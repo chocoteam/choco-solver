@@ -165,10 +165,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 awakeOnSup(varIdx);
             }
         }
-        if (getNbRequestEnqued() == 0) {
-            heavy++;
-            filter();
-        }
+        forcePropagate();
     }
 
     @Override

@@ -24,38 +24,22 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.propagation.engines.comparators.predicate;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 05/09/11
+ */
+public class VarNotNull implements Predicate {
 
 
-public class MemberP implements Predicate {
-    Set<Propagator> props;
 
-    public MemberP(Set<Propagator> props) {
-        this.props = props;
-    }
-
-    public MemberP(Propagator[] props) {
-        this.props = new HashSet<Propagator>(Arrays.asList(props));
-    }
-
-    public MemberP(Propagator props0, Propagator... props) {
-        this(ArrayUtils.append(new Propagator[]{props0}, props));
-    }
-
+    @Override
     public boolean eval(IRequest request) {
-        return this.props.contains(request.getPropagator());
-    }
-
-    public String toString() {
-        return "MemberP";
+        return request.getVariable() != null;
     }
 }

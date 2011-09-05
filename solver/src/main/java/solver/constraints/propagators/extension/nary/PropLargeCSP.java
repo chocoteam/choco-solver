@@ -71,9 +71,7 @@ public class PropLargeCSP extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        if (getNbRequestEnqued() == 0) {
-            filter();
-        }
+        forcePropagate();
     }
 
     @Override
