@@ -48,7 +48,7 @@ public class ConsoleBenchmarking extends AbstractBenchmarking {
     public void run() {
         boolean quit = false;
         do {
-            System.out.printf("Please indicate the command to execute (or \"quit\"):\n");
+            System.out.printf("Please indicate the command to execute (or \"quit\" or \"loop value\" or \"warmUp value\"):\n");
             try {
                 _strCmd = _in.readLine();
             } catch (IOException e) {
@@ -56,6 +56,14 @@ public class ConsoleBenchmarking extends AbstractBenchmarking {
             }
             if (_strCmd.equalsIgnoreCase("quit")) {
                 quit = true;
+            } else if (_strCmd.contains("loop")) {
+                String[] cmd = _strCmd.split(" ");
+                loop = Integer.parseInt(cmd[1]);
+                System.out.printf("loop is now equal to " + loop);
+            } else if (_strCmd.contains("warmUp")) {
+                String[] cmd = _strCmd.split(" ");
+                warmUp = Integer.parseInt(cmd[1]);
+                System.out.printf("warmUp is now equal to " + warmUp);
             } else {
                 String[] cmd = _strCmd.split(" ");
                 String[] args = new String[cmd.length - 1];

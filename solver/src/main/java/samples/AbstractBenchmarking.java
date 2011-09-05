@@ -44,14 +44,14 @@ public abstract class AbstractBenchmarking {
     @Option(name = "-loop", usage = "Number of time a sample should be run", required = false)
     int loop = 10;
 
-    @Option(name = "-noWarmUp", usage = "Disable JVM warm up", required = false)
-    boolean noWarmUp = false;
+    @Option(name = "-warmUp", usage = "JVM warm up loop", required = false)
+    int warmUp = 5;
 
     @Option(name = "-noJVMclean", usage = "Disable JVM cleaning", required = false)
     boolean noJVMcleaning = false;
 
 
-    public final void execute(String... args){
+    public final void execute(String... args) {
         readArgs(args);
         run();
     }
@@ -99,7 +99,7 @@ public abstract class AbstractBenchmarking {
     protected abstract void run();
 
     protected void run(AbstractProblem pb, String[] args) {
-        if (!noWarmUp) {
+        if (warmUp > 0) {
             System.out.printf("Warm up JVM");
             AbstractProblem.Level level = pb.level;
             String[] _args = args.clone();
@@ -114,7 +114,7 @@ public abstract class AbstractBenchmarking {
             if (!found) {
                 _args = ArrayUtils.append(_args, new String[]{"-log", "SILENT"});
             }
-            for (int i = 5; i >= 0; i--) {
+            for (int i = warmUp; i >= 0; i--) {
                 pb.execute(_args);
                 if (!noJVMcleaning) cleanJVM();
                 System.out.printf(".");
