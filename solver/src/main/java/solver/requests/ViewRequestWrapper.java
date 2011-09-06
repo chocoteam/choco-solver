@@ -105,12 +105,12 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
 
     @Override
     public void activate() {
-        original.getVariable().activate(this);
+        original.activate();
     }
 
     @Override
     public void desactivate() {
-        original.getVariable().desactivate(this);
+        original.desactivate();
     }
 
     @Override

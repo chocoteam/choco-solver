@@ -37,9 +37,7 @@ import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
-import solver.propagation.engines.comparators.predicate.LeftHandSide;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.PriorityP;
+import solver.propagation.engines.comparators.predicate.*;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -58,10 +56,10 @@ import static solver.constraints.ConstraintFactory.lt;
  * <li>sum of numbers in A = sum of numbers in B</li>
  * <li>sum of squares of numbers in A = sum of squares of numbers in B</li>
  * </ul>
- *
+ * <p/>
  * More constraints can thus be added, e.g also impose the equality on the sum of cubes.
  * There is no solution for N < 8."
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -69,13 +67,13 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class Partition extends AbstractProblem {
     @Option(name = "-n", usage = "Partition size.", required = false)
-    int N = 64;
+    int N = 8;
 
     IntVar[] vars;
 
     @Override
     public void buildModel() {
-        int size =this.N / 2;
+        int size = this.N / 2;
         solver = new Solver();
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
@@ -137,7 +135,7 @@ public class Partition extends AbstractProblem {
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
-                        new PriorityP(PropagatorPriority.TERNARY),
+                        new And(new VarNotNull(), new PriorityP(PropagatorPriority.TERNARY)),
                         new Cond(
                                 new LeftHandSide(),
                                 new IncrOrderV(vars),
@@ -147,7 +145,7 @@ public class Partition extends AbstractProblem {
         // set default
         engine.addGroup(
                 Group.buildGroup(
-                        Predicate.TRUE,
+                        new VarNotNull(),
                         new Seq(
                                 IncrArityP.get(),
                                 new Decr(IncrDomDeg.get())
@@ -165,32 +163,36 @@ public class Partition extends AbstractProblem {
     @Override
     public void prettyOut() {
         StringBuilder st = new StringBuilder();
-        int sum1 = 0, sum2 = 0;
-        int i = 0;
-        st.append(vars[i].getValue());
-        sum1 += vars[i].getValue();
-        sum2 += vars[i].getValue() * vars[i++].getValue();
-        for (; i < N /2; i++) {
-            st.append(", ").append(vars[i].getValue());
+        if (Boolean.TRUE == solver.isFeasible()) {
+            int sum1 = 0, sum2 = 0;
+            int i = 0;
+            st.append(vars[i].getValue());
             sum1 += vars[i].getValue();
-            sum2 += vars[i].getValue() * vars[i].getValue();
-        }
-        st.append(": (").append(sum1).append(")~(").append(sum2).append(")\n");
-        sum1 = sum2 = 0;
-        st.append(vars[i].getValue());
-        sum1 += vars[i].getValue();
-        sum2 += vars[i].getValue() * vars[i++].getValue();
-        for (; i < N; i++) {
-            st.append(", ").append(vars[i].getValue());
+            sum2 += vars[i].getValue() * vars[i++].getValue();
+            for (; i < N / 2; i++) {
+                st.append(", ").append(vars[i].getValue());
+                sum1 += vars[i].getValue();
+                sum2 += vars[i].getValue() * vars[i].getValue();
+            }
+            st.append(": (").append(sum1).append(")~(").append(sum2).append(")\n");
+            sum1 = sum2 = 0;
+            st.append(vars[i].getValue());
             sum1 += vars[i].getValue();
-            sum2 += vars[i].getValue() * vars[i].getValue();
+            sum2 += vars[i].getValue() * vars[i++].getValue();
+            for (; i < N; i++) {
+                st.append(", ").append(vars[i].getValue());
+                sum1 += vars[i].getValue();
+                sum2 += vars[i].getValue() * vars[i].getValue();
+            }
+            st.append(": (").append(sum1).append(")~(").append(sum2).append(")\n");
+        } else {
+            st.append("INFEASIBLE");
         }
-        st.append(": (").append(sum1).append(")~(").append(sum2).append(")\n");
         LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        while(true)new Partition().execute(args);
+        while (true) new Partition().execute(args);
     }
 
 }

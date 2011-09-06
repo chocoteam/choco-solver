@@ -81,4 +81,20 @@ public final class PropSumGeq extends PropSumEq {
         }
         return ESat.UNDEFINED;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder linComb = new StringBuilder(20);
+        linComb.append(vars[0].getName());
+        int i = 1;
+        for (; i < k; i++) {
+            linComb.append(" + ").append(vars[i].getName());
+        }
+        for (; i < l; i++) {
+            linComb.append(" - ").append(vars[i].getName());
+        }
+        linComb.append(" >= ");
+        linComb.append(b);
+        return linComb.toString();
+    }
 }

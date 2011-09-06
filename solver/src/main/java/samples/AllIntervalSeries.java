@@ -32,20 +32,21 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.constraints.unary.Relation;
+import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.*;
+import solver.propagation.engines.comparators.Cond;
+import solver.propagation.engines.comparators.IncrArityV;
+import solver.propagation.engines.comparators.IncrOrderV;
+import solver.propagation.engines.comparators.predicate.And;
 import solver.propagation.engines.comparators.predicate.MemberC;
-import solver.propagation.engines.comparators.predicate.Not;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * CSPLib prob007:<br/>
@@ -64,7 +65,7 @@ import java.util.HashSet;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 500;
+    private int m = 5;
 
     IntVar[] vars;
     IntVar[] dist;
@@ -113,31 +114,42 @@ public class AllIntervalSeries extends AbstractProblem {
         //TODO: changer la strategie pour une plus efficace
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
-        // TODO chercher un meilleur ordre de propagation
-        // la clé semble se trouver dans la contrainte AllDiff sur les distances
-        //EngineStrategies.constraintOriented(solver);
-        //EngineStrategies.variableOriented(solver);
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        new Not(new MemberC(new HashSet<Constraint>(Arrays.asList(ALLDIFF)))),
-                        IncrArityP.get(),
-                        Policy.ITERATE
-                ));
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicate.TRUE,
-                        new Seq(
-                                new Decr(new IncrOrderC(ALLDIFF)),
-                                new IncrOrderV(vars)
-                        ),
-                        Policy.ONE
-                ));
+        IntVar[] all = new IntVar[vars.length + dist.length];
+        all[0] = vars[0];
+        for (int i = 1, k = 1; i < vars.length - 1; i++, k++) {
+            all[k++] = vars[i];
+            all[k] = dist[i - 1];
+        }
 
+        // BEWARE:
+        // tout se joue sur le nombre d'appel à la méthode filter des contraitne AllDiff BC
+        // OLDEST n'appelle que m fois le filtrage lourd de AllDiff, les autres l'appellent 2 * m-1
+        // Or, c'est cet algo qui coute.
+        // Il se déclenche lorsque la derniere requete du propagateur est propagee,
+        // il faut donc que celle-ci soit propagee le plus tard possible
+        IPropagationEngine peng = solver.getEngine();
+        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
+        peng.addGroup(Group.buildGroup(
+                new And(new MemberC(ALLDIFF[0], new Constraint[]{}), new VarNotNull()),
+                new IncrOrderV(vars),
+                Policy.ITERATE
+        ));
+        peng.addGroup(Group.buildGroup(
+                new MemberC(ALLDIFF[1], new Constraint[]{}),
+                new Cond(new VarNotNull(), new IncrOrderV(vars), IncrArityV.get()),
+                Policy.ONE
+        ));
+        // + default one
     }
 
     @Override
     public void solve() {
+        PropAllDiffBC.light = 0;
+        PropAllDiffBC.heavy = 0;
+        //SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
+        System.out.printf("%d - %d\n", PropAllDiffBC.light, PropAllDiffBC.heavy);
+
     }
 
     @Override
@@ -156,6 +168,9 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new AllIntervalSeries().execute(args);
+        while (true) {
+            new AllIntervalSeries().execute("-o", "500", "-policy", "DEFAULT", "-log", "QUIET");
+            new AllIntervalSeries().execute("-o", "500", "-policy", "OLDEST", "-log", "QUIET");
+        }
     }
 }
