@@ -30,6 +30,7 @@ package solver.propagation.engines.group;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -57,6 +58,7 @@ public final class ArrayReacher implements IReacher {
         this.comparator = comparator;
         size = requests.length;
         this.toPropagate = new BitSet(size);
+        Arrays.sort(requests, comparator);
     }
 
     @Override

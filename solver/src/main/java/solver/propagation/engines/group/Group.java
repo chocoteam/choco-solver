@@ -102,7 +102,6 @@ public class Group implements Serializable {
         if (comparator == null) {
             reacher = new QueueReacher(nbRequests);
         } else {
-            Arrays.sort(requests, comparator);
             reacher = new ArrayReacher(requests, comparator);
         }
         for (int i = 0; i < nbRequests; i++) {
