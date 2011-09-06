@@ -550,8 +550,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 @Override
                 public int next() {
                     int old = this.value;
-                    this.value = VALUES.nextSetBit(this.value - OFFSET + 1) + OFFSET;
-                    return old;
+                    this.value = VALUES.nextSetBit(this.value+ 1);
+                    return old + OFFSET;
                 }
             };
         }
@@ -579,8 +579,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 @Override
                 public int next() {
                     int old = this.value;
-                    this.value = VALUES.prevSetBit(this.value - OFFSET - 1) + OFFSET;
-                    return old;
+                    this.value = VALUES.prevSetBit(this.value - 1);
+                    return old + OFFSET;
                 }
             };
         }

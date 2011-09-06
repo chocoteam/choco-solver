@@ -59,7 +59,7 @@ public class ScaleViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, -4, s)
+                ConstraintFactory.neq(Y, 4, s)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

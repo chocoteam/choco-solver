@@ -215,6 +215,11 @@ public class AbsViewTest {
         solveB(2, 4, -3, 3);
     }
 
+    @Test(groups = "1s")
+    public void testBUG5() throws ContradictionException {
+        solveB(2, 12, -4, 25);
+    }
+
     @Test(groups = "10s")
     public void testSolveAllB() {
         Random rand;
@@ -232,7 +237,7 @@ public class AbsViewTest {
 
     public void solveB(int minX, int maxX, int minY, int maxY) {
         Solver ref = reformulate(minX, maxX, minY, maxY);
-        //SearchMonitorFactory.log(ref, true, false);
+//        SearchMonitorFactory.log(ref, true, false);
         ref.findAllSolutions();
 
         Solver solver = new Solver();
@@ -240,7 +245,7 @@ public class AbsViewTest {
         IntVar X = Views.abs(Y);
 
         solver.post(new Member(X, minX, maxX, solver));
-        //SearchMonitorFactory.log(solver, true, false);
+//        SearchMonitorFactory.log(solver, true, false);
         solver.set(StrategyFactory.random(ArrayUtils.toArray(Y), solver.getEnvironment()));
         if (Boolean.TRUE == solver.findSolution()) {
             do {

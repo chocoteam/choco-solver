@@ -34,6 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.EqualX_YC;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.view.Views;
@@ -59,7 +60,7 @@ public class OffsetViewTest {
         IntVar[] vars = {X, Y};
 
         Constraint[] cstrs = {
-                ConstraintFactory.neq(Y, -4, s)
+                ConstraintFactory.neq(Y, 4, s)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

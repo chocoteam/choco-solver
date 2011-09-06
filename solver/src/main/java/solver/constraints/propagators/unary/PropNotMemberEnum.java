@@ -81,7 +81,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
-        throw new UnsupportedOperationException();
+        propagate();
     }
 
     @Override
