@@ -30,10 +30,16 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.Sum;
+import solver.constraints.unary.Relation;
+import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * CSPLib prob024:<br/>
@@ -75,10 +81,9 @@ public class Langford extends AbstractProblem {
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
         for (int i = 0; i < k - 1; i++) {
             for (int j = 0; j < n; j++) {
-                solver.post(
-                        Sum.eq(new IntVar[]{position[j + (i + 1) * n], position[j + i * n]},
-                                new int[]{1, -1}, j + 2, solver)
-                );
+                solver.post(new Relation(
+                        Views.sum(position[j + (i + 1) * n], Views.minus(position[j + i * n])),
+                        Relation.R.EQ, j+2, solver));
             }
         }
         solver.post(new AllDifferent(position, solver));
@@ -87,6 +92,16 @@ public class Langford extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
+        IPropagationEngine peng = solver.getEngine();
+        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
+        peng.addGroup(Group.buildQueue(
+                new VarNotNull(),
+                Policy.FIXPOINT
+        ));
+        peng.addGroup(Group.buildQueue(
+                Predicate.TRUE,
+                Policy.ONE
+        ));
     }
 
     @Override

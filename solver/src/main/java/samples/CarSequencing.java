@@ -37,6 +37,7 @@ import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrDomDeg;
 import solver.propagation.engines.comparators.Seq;
 import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -129,11 +130,16 @@ public class CarSequencing extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        //new MemberV<IntVar>(hs)
-                        Predicate.TRUE,
+                        new VarNotNull(),
                         new Seq(IncrArityP.get(),
                                 IncrDomDeg.get()),
                         Policy.FIXPOINT));
+        solver.getEngine().addGroup(
+                Group.buildGroup(
+                        Predicate.TRUE,
+                        IncrArityP.get(),
+                        Policy.ONE));
+
     }
 
     @Override

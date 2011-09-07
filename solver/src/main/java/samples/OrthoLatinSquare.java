@@ -29,14 +29,22 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.lex.Lex;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.predicate.*;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Orthogonal latin square
@@ -50,7 +58,7 @@ public class OrthoLatinSquare extends AbstractProblem {
     @Option(name = "-n", usage = "Ortho latin square size.", required = false)
     int m = 5;
     IntVar[] square1, square2, vars;
-
+    Constraint[] ALLDIFFS;
 
     @Override
     public void buildModel() {
@@ -60,7 +68,12 @@ public class OrthoLatinSquare extends AbstractProblem {
         square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);
         vars = VariableFactory.enumeratedArray("vars", mm, 0, mm - 1, solver);
 
-        solver.post(new AllDifferent(vars, solver));
+        List<Constraint> ADS = new ArrayList<Constraint>();
+
+        Constraint cc = new AllDifferent(vars, solver);
+        solver.post(cc);
+        ADS.add(cc);
+
 
         int[] mod = new int[mm];
         int[] div = new int[mm];
@@ -80,34 +93,43 @@ public class OrthoLatinSquare extends AbstractProblem {
         for (int i = 0; i < m; i++) {
             IntVar[] ry = new IntVar[m];
             System.arraycopy(square1, i * m, ry, 0, m);
-            solver.post(new AllDifferent(ry, solver));
+            cc = new AllDifferent(ry, solver);
+            solver.post(cc);
+            ADS.add(cc);
             ry = new IntVar[m];
             System.arraycopy(square2, i * m, ry, 0, m);
-            solver.post(new AllDifferent(ry, solver));
+            cc = new AllDifferent(ry, solver);
+            solver.post(cc);
+            ADS.add(cc);
         }
         for (int j = 0; j < m; j++) {
             IntVar[] cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square1[i * m + j];
             }
-            solver.post(new AllDifferent(cy, solver));
+            cc = new AllDifferent(cy, solver);
+            solver.post(cc);
+            ADS.add(cc);
             cy = new IntVar[m];
             for (int i = 0; i < m; i++) {
                 cy[i] = square2[i * m + j];
             }
-            solver.post(new AllDifferent(cy, solver));
+            cc = new AllDifferent(cy, solver);
+            solver.post(cc);
+            ADS.add(cc);
         }
-
+        ALLDIFFS = new Constraint[ADS.size()] ;
+        ADS.toArray(ALLDIFFS);
         //TODO: ajouter LEX
-//        for (int i = 1; i < m; i++) {
-//            IntVar[] ry1 = new IntVar[m];
-//            IntVar[] ry2 = new IntVar[m];
-//            for (int j = 0; j < m; j++) {
-//                ry1[j] = square1[(i-1) * m + j];
-//                ry2[j] = square2[i * m + j];
-//            }
-//            solver.post(new Lex(ry1,ry2, solver));
-//        }
+        for (int i = 1; i < m; i++) {
+            IntVar[] ry1 = new IntVar[m];
+            IntVar[] ry2 = new IntVar[m];
+            for (int j = 0; j < m; j++) {
+                ry1[j] = square1[(i-1) * m + j];
+                ry2[j] = square2[i * m + j];
+            }
+            solver.post(new Lex(ry1,ry2, true, solver));
+        }
 
     }
 
@@ -119,6 +141,22 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
         //TODO: propagation
+        solver.getEngine().addGroup(
+                Group.buildQueue(
+                        new And(new VarNotNull(),new Not(new MemberC(ALLDIFFS))),
+                        Policy.FIXPOINT
+                ));
+        solver.getEngine().addGroup(
+                Group.buildQueue(
+                        new And(new VarNotNull(), new MemberC(ALLDIFFS)),
+                        Policy.FIXPOINT
+                ));
+
+        solver.getEngine().addGroup(
+                Group.buildQueue(
+                        Predicate.TRUE,
+                        Policy.ONE
+                ));
     }
 
     @Override

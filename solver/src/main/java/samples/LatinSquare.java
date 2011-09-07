@@ -52,7 +52,7 @@ import java.util.HashSet;
 public class LatinSquare extends AbstractProblem {
 
     @Option(name = "-n", usage = "Latin square size.", required = false)
-    int m = 5;
+    int m = 10;
     IntVar[] vars;
 
     @Override

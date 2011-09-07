@@ -26,7 +26,10 @@
  */
 package choco.kernel.common.util;
 
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
+
+import java.util.LinkedHashSet;
 
 /**
  * <br/>
@@ -36,6 +39,26 @@ import solver.variables.IntVar;
  */
 public enum VariableUtilities {
     ;
+
+    public static BoolVar[] nonReundantVars(BoolVar[] v) {
+        LinkedHashSet<BoolVar> nonRedundantBs = new LinkedHashSet<BoolVar>();
+        for (int j = 0; j < v.length; j++) {
+            if (!nonRedundantBs.contains(v[j])) {
+                nonRedundantBs.add(v[j]);
+            }
+        }
+        return nonRedundantBs.toArray(new BoolVar[nonRedundantBs.size()]);
+    }
+
+    public static IntVar[] nonReundantVars(IntVar[] v) {
+        LinkedHashSet<IntVar> nonRedundantBs = new LinkedHashSet<IntVar>();
+        for (int j = 0; j < v.length; j++) {
+            if (!nonRedundantBs.contains(v[j])) {
+                nonRedundantBs.add(v[j]);
+            }
+        }
+        return nonRedundantBs.toArray(new IntVar[nonRedundantBs.size()]);
+    }
 
     public static boolean emptyUnion(IntVar x, IntVar y) {
         if (x.getLB() <= y.getUB()

@@ -34,7 +34,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategies;
+import solver.propagation.engines.comparators.Shuffle;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -60,7 +64,6 @@ public abstract class AbstractProblem {
         }
     }
 
-
     @Option(name = "-log", usage = "Quiet resolution", required = false)
     Level level = Level.VERBOSE;
 
@@ -68,7 +71,7 @@ public abstract class AbstractProblem {
     EngineStrategies policy = EngineStrategies.DEFAULT;
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
-    private long seed = 29091981;
+    protected long seed = 29091981;
 
     protected Solver solver;
 
@@ -105,6 +108,10 @@ public abstract class AbstractProblem {
         IPropagationEngine engine = solver.getEngine();
         switch (policy) {
             case DEFAULT:
+                break;
+            case SHUFFLE:
+                engine.deleteGroups();
+                solver.getEngine().addGroup(Group.buildGroup(Predicate.TRUE, new Shuffle(seed), Policy.FIXPOINT));
                 break;
             default:
                 engine.deleteGroups();

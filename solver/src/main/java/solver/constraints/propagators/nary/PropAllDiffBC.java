@@ -53,8 +53,6 @@ import java.util.Comparator;
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
-    public static int light, heavy;
-
     //TODO: minsorted et maxsorted => LinkedList
     //TODO: maintenir sortIt incrementalement
 
@@ -140,13 +138,11 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     @Override
     public void propagate() throws ContradictionException {
-        heavy++;
         filter();
     }
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-        light++;
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
         } else if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {

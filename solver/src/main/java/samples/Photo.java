@@ -30,15 +30,22 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.Absolute;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.predicate.And;
+import solver.propagation.engines.comparators.predicate.MemberV;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * <a href="http://www.gecode.org">gecode</a>:<br/>
@@ -57,6 +64,8 @@ public class Photo extends AbstractProblem {
     Data data = Data.small;
 
     IntVar[] positions;
+    IntVar[] dist;
+    BoolVar[] viols;
     IntVar violations;
 
     @Override
@@ -65,23 +74,19 @@ public class Photo extends AbstractProblem {
         positions = VariableFactory.boundedArray("pos", data.people(), 0, data.people() - 1, solver);
         violations = VariableFactory.bounded("viol", 0, data.preferences().length, solver);
 
-        BoolVar[] viol = VariableFactory.boolArray("b", data.prefPerPeople(), solver);
+        viols = VariableFactory.boolArray("b", data.prefPerPeople(), solver);
+        dist = new IntVar[data.prefPerPeople()];
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
-            IntVar tmp = VariableFactory.bounded("tmp" + data.preferences().length, -50, 50, solver);
-            solver.post(Sum.eq(
-                    new IntVar[]{positions[pa], positions[pb], tmp},
-                    new int[]{1, -1, -1}, 0, solver));
-            IntVar abst = VariableFactory.bounded("abst" + data.preferences().length, 0, 50, solver);
-            solver.post(new Absolute(abst, tmp, solver));
+            dist[i] = Views.abs(Views.sum(positions[pa], Views.minus(positions[pb])));
             solver.post(new ReifiedConstraint(
-                    viol[i],
-                    Sum.geq(new IntVar[]{abst}, 2, solver),
-                    Sum.leq(new IntVar[]{abst}, 1, solver),
+                    viols[i],
+                    Sum.geq(new IntVar[]{dist[i]}, 2, solver),
+                    Sum.leq(new IntVar[]{dist[i]}, 1, solver),
                     solver));
         }
-        solver.post(Sum.eq(viol, violations, solver));
+        solver.post(Sum.eq(viols, violations, solver));
         solver.post(new AllDifferent(positions, solver));
         solver.post(new GreaterOrEqualX_YC(positions[1], positions[0], 1, solver));
     }
@@ -89,6 +94,25 @@ public class Photo extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
+        IPropagationEngine engine = solver.getEngine();
+//        engine.addGroup(Group.buildGroup(
+            engine.addGroup(Group.buildQueue(
+                new MemberV<IntVar>(viols),
+//                new IncrOrderV(viols),
+                Policy.FIXPOINT
+        ));
+        engine.addGroup(Group.buildQueue(
+                new And(new VarNotNull(), new MemberV<IntVar>(positions)),
+                Policy.FIXPOINT
+        ));
+        engine.addGroup(Group.buildQueue(
+                new MemberV<IntVar>(dist),
+                Policy.FIXPOINT
+        ));
+        engine.addGroup(Group.buildQueue(
+                Predicate.TRUE,
+                Policy.ONE
+        ));
     }
 
     @Override

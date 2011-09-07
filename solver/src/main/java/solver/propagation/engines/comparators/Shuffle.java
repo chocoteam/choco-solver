@@ -53,7 +53,7 @@ public class Shuffle implements Comparator<IRequest>, Serializable {
 
     @Override
     public int compare(IRequest o1, IRequest o2) {
-        return -1 + random.nextInt(3);
+        return random.nextInt();
     }
 
     @Override

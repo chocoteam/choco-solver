@@ -28,6 +28,7 @@
 package solver.constraints.nary.cnf;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.VariableUtilities;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.cnf.PropClause;
@@ -37,7 +38,6 @@ import solver.variables.BoolVar;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 
 /**
  * <br/>
@@ -49,17 +49,6 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
 
     HashMap<BoolVar, HashSet<PropClause>> v2p = new HashMap<BoolVar, HashSet<PropClause>>();
 
-    static BoolVar[] nonReundantBoolVars(ALogicTree tree) {
-        LinkedHashSet<BoolVar> nonRedundantBs = new LinkedHashSet<BoolVar>();
-        BoolVar[] cvars = tree.flattenBoolVar();
-        for (int j = 0; j < cvars.length; j++) {
-            if (!nonRedundantBs.contains(cvars[j])) {
-                nonRedundantBs.add(cvars[j]);
-            }
-        }
-        return nonRedundantBs.toArray(new BoolVar[nonRedundantBs.size()]);
-    }
-
     public ConjunctiveNormalForm(BoolVar[] nonRedundantVars, ALogicTree tree, Solver solver) {
         super(nonRedundantVars, solver);
         setPropagators(build(tree));
@@ -67,7 +56,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
     }
 
     public ConjunctiveNormalForm(ALogicTree tree, Solver solver) {
-        super(nonReundantBoolVars(tree), solver);
+        super(VariableUtilities.nonReundantVars(tree.flattenBoolVar()), solver);
         setPropagators(build(tree));
 
     }

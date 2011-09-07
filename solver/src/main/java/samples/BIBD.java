@@ -75,7 +75,7 @@ public class BIBD extends AbstractProblem {
     private int k = 3;
 
     @Option(name = "-l", usage = "scalar product.", required = false)
-    private int l = 60;
+    private int l = 20;
 
     @Option(name = "-b", usage = "matrix second dimension.", required = false)
     private int b = -1;

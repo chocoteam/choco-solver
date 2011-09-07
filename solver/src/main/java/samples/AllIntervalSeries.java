@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
@@ -65,7 +64,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 5;
+    private int m = 500;
 
     IntVar[] vars;
     IntVar[] dist;
@@ -144,12 +143,8 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        PropAllDiffBC.light = 0;
-        PropAllDiffBC.heavy = 0;
         //SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
-        System.out.printf("%d - %d\n", PropAllDiffBC.light, PropAllDiffBC.heavy);
-
     }
 
     @Override

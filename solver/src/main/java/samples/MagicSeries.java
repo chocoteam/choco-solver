@@ -29,8 +29,14 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
+import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.engines.Policy;
+import solver.propagation.engines.comparators.IncrArityV;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -47,8 +53,10 @@ import solver.variables.VariableFactory;
 public class MagicSeries extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 500;
+    int n = 50;
     IntVar[] vars;
+
+    Constraint[] counts;
 
     @Override
     public void buildModel() {
@@ -57,8 +65,10 @@ public class MagicSeries extends AbstractProblem {
 
         vars = VariableFactory.enumeratedArray("var", n, 0, n - 1, solver);
 
+        counts = new Count[n];
         for (int i = 0; i < n; i++) {
-            solver.post(new Count(i, vars, Count.Relop.EQ, vars[i], solver));
+            counts[i] = new Count(i, vars, Count.Relop.EQ, vars[i], solver);
+            solver.post(counts[i]);
         }
         solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1
         int[] coeff2 = new int[n - 1];
@@ -74,7 +84,14 @@ public class MagicSeries extends AbstractProblem {
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         // default group
-        //TODO: trouver un propagation appropriŽe
+        //TODO: trouver un propagation appropriŽe : en shuffle, on propage 2 fois moins!
+        IPropagationEngine peng = solver.getEngine();
+        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
+        peng.addGroup(Group.buildGroup(new VarNotNull(),
+                IncrArityV.get(),
+                Policy.ITERATE));
+
+        // + default one
     }
 
     @Override
