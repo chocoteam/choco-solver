@@ -75,6 +75,15 @@ samples.GolombRuler -m 10 -c BC -policy CONSTRAINT_ORIENTED
 samples.GolombRuler -m 10 -c BC -policy PRIORITY_PROP
 samples.GolombRuler -m 10 -c BC -policy DEFAULT
 ##
+## KNAPSACK
+samples.Knapsack -d k20 -n 13 -policy OLDEST
+samples.Knapsack -d k20 -n 13 -policy VARIABLE_LEX
+samples.Knapsack -d k20 -n 13 -policy CONSTRAINT_LEX
+samples.Knapsack -d k20 -n 13 -policy VARIABLE_ORIENTED
+samples.Knapsack -d k20 -n 13 -policy CONSTRAINT_ORIENTED
+samples.Knapsack -d k20 -n 13 -policy PRIORITY_PROP
+samples.Knapsack -d k20 -n 13 -policy DEFAULT
+##
 ## LATIN SQUARE
 samples.LatinSquare -n 10 -policy OLDEST
 samples.LatinSquare -n 10 -policy VARIABLE_LEX
