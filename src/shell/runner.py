@@ -27,9 +27,9 @@ timelimit = 180 #in seconds => 10min
 name = 'runner'
 
 ## regexp for statisctics
-## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P propagations]
+## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
 ## len is 8 or 9
-_SIZE = 10
+_SIZE = 11
 pattern = re.compile('\d+\,?\d*')
 _STAT = '[STATISTICS'
 _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROPAGATIONS','SCRIPT_TIME'
