@@ -33,7 +33,7 @@ import solver.constraints.nary.Sum;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.Decr;
 import solver.propagation.engines.comparators.IncrDomDeg;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.VarNotNull;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -100,7 +100,7 @@ public class Alpha extends AbstractProblem {
         // TODO chercher un meilleur ordre de propagation
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        Predicate.TRUE,
+                        new VarNotNull(),
                         new Decr(IncrDomDeg.get()),
                         Policy.FIXPOINT
                 ));

@@ -67,6 +67,9 @@ public abstract class AbstractProblem {
     @Option(name = "-policy", usage = "Propagation policy", required = false)
     EngineStrategies policy = EngineStrategies.DEFAULT;
 
+    @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
+    private long seed = 29091981;
+
     protected Solver solver;
 
     public void printDescription() {

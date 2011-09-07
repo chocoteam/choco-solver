@@ -168,9 +168,6 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        while (true) {
-            new AllIntervalSeries().execute("-o", "500", "-policy", "DEFAULT", "-log", "QUIET");
-            new AllIntervalSeries().execute("-o", "500", "-policy", "OLDEST", "-log", "QUIET");
-        }
+        new AllIntervalSeries().execute(args);
     }
 }
