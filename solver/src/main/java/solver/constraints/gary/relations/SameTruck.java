@@ -26,8 +26,8 @@
  */
 package solver.constraints.gary.relations;
 
+import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -39,6 +39,6 @@ public class SameTruck extends Eq_Int {
 	}
 
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {} // it is not because x is not the successor of y that they do not both belong to the same tour
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {} // it is not because x is not the successor of y that they do not both belong to the same tour
 	
 }

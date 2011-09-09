@@ -27,9 +27,9 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -73,24 +73,24 @@ public class XplusC_Leq_Y_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], prop);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], prop);
+			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause);
+			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
 		}
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 //		if(var1 != var2){
 //			IntVar y = vars[var1];
 //			IntVar x = vars[var2];
-//			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2]-1, prop);
-//			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2]+1, prop);
+//			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2]-1, cause);
+//			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2]+1, cause);
 //		}else if(distanceMatrix[var1][var2]==0){
-//			vars[var1].contradiction(prop, "x != x"); 
+//			vars[var1].contradiction(cause, "x != x");
 //		}
 	}
 	

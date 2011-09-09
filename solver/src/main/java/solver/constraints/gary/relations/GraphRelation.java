@@ -27,9 +27,9 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.Variable;
@@ -55,35 +55,38 @@ public abstract class GraphRelation<V extends Variable> {
 	public abstract ESat isEntail(int x, int y);
 	
 	/** Apply the filtering defined by xRy
-	 * @param x index of node/var
-	 * @param y index of node/var
-	 * @param solver
-	 * @param prop
-	 * @throws ContradictionException
+	 *
+     * @param x index of node/var
+     * @param y index of node/var
+     * @param solver
+     * @param cause
+     * @throws ContradictionException
 	 */
-	public abstract void applyTrue(int x, int y, Solver solver, Propagator prop) throws ContradictionException;
+	public abstract void applyTrue(int x, int y, Solver solver, ICause cause) throws ContradictionException;
 	
 	/** Apply the filtering defined by !(xRy) so it apply the filtering of the opposite relation : x(!R)y
-	 * @param x index of node/var
-	 * @param y index of node/var
-	 * @param solver
-	 * @param prop
-	 * @throws ContradictionException
+	 *
+     * @param x index of node/var
+     * @param y index of node/var
+     * @param solver
+     * @param cause
+     * @throws ContradictionException
 	 */
-	public abstract void applyFalse(int x, int y, Solver solver, Propagator prop) throws ContradictionException;
+	public abstract void applyFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException;
 	
 
 	/** say !(xRy) AND !(yRx)
 	 * TO USE ONLY WHEN A DIRECTED META RELATION COMPOSED OF AT LEAST ONE UNDIRECTED RELATION IS USED
 	 * Apply the filtering defined by !(xRy) so it apply the filtering of the opposite relation : x(!R)y
-	 * @param x index of node/var
-	 * @param y index of node/var
-	 * @param solver
-	 * @param prop
-	 * @throws ContradictionException
+	 *
+     * @param x index of node/var
+     * @param y index of node/var
+     * @param solver
+     * @param cause
+     * @throws ContradictionException
 	 */
-	public void applySymmetricFalse(int x, int y, Solver solver, Propagator prop) throws ContradictionException {
-		applyFalse(x, y, solver, prop);
+	public void applySymmetricFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException {
+		applyFalse(x, y, solver, cause);
 	}
 
 	/**

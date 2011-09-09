@@ -27,8 +27,8 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.MetaVariable;
 
@@ -57,25 +57,25 @@ public abstract class MetaRelation extends GraphRelation<MetaVariable> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, prop);
+			unidimRelation[i].applyTrue(var1, var2, solver, cause);
 		}
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
 			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, prop);
+				unidimRelation[i].applyFalse(var1, var2, solver, cause);
 			}
 		}
 	}
 	
 	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applySymmetricFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, prop);
+			unidimRelation[i].applyFalse(var1, var2, solver, cause);
 		}
 	}
 	

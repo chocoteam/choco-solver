@@ -27,9 +27,9 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -56,13 +56,13 @@ public class IndexOf extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		vars[var1].instantiateTo(var2,prop);
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+		vars[var1].instantiateTo(var2,cause);
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
-		vars[var1].removeValue(var2, prop);
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+		vars[var1].removeValue(var2, cause);
 	}
 
 	@Override

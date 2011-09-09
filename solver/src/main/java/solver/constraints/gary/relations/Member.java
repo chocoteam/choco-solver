@@ -26,14 +26,14 @@
  */
 package solver.constraints.gary.relations;
 
-import java.util.BitSet;
-
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
+
+import java.util.BitSet;
 
 public class Member extends GraphRelation<IntVar> {
 
@@ -84,29 +84,29 @@ public class Member extends GraphRelation<IntVar> {
 	}
 
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
 		}
 		IntVar x = vars[var1];
 		if(x.getLB()<firstVal){
-			x.removeInterval(x.getLB(), firstVal-1, prop);
+			x.removeInterval(x.getLB(), firstVal-1, cause);
 		}
 		if(x.getUB()>lastVal){
-			x.removeInterval(lastVal+1, x.getUB(), prop);
+			x.removeInterval(lastVal+1, x.getUB(), cause);
 		}
 		if(x.hasEnumeratedDomain()){
 			int up = x.getUB();
 			for(int v=x.getLB(); v<=up; v = x.nextValue(v)){
 				if(!values.get(v-firstVal)){
-					x.removeValue(v, prop);
+					x.removeValue(v, cause);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
 		}
@@ -116,11 +116,11 @@ public class Member extends GraphRelation<IntVar> {
 			int lb = Math.max(firstVal,x.getLB());
 			for(int v=lb; v<=up; v = x.nextValue(v)){
 				if(values.get(v-firstVal)){
-					x.removeValue(v, prop);
+					x.removeValue(v, cause);
 				}
 			}
 		}else{
-			x.removeInterval(firstVal, lastVal, prop);
+			x.removeInterval(firstVal, lastVal, cause);
 		}
 	}
 	

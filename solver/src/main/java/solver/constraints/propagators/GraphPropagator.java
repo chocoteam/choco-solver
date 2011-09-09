@@ -29,15 +29,34 @@ package solver.constraints.propagators;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.requests.EventRequest;
+import solver.requests.GraphRequest;
+import solver.requests.IRequest;
 import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
 
-public abstract class GraphPropagator<V extends Variable> extends Propagator<V>{
+public abstract class GraphPropagator<V extends Variable> extends Propagator<V> {
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint,	PropagatorPriority priority, boolean reactOnPromotion) {
-		super(vars, solver, constraint, priority, reactOnPromotion);
-	}
+    protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
+        super(vars, solver, constraint, priority, reactOnPromotion);
+    }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
+
+
+    @Override
+    public IRequest<V> makeRequest(V var, int idx) {
+        if (var instanceof GraphVar) {
+            return new GraphRequest(this, (GraphVar) var, idx);
+        } else {
+            return new EventRequest<V, Propagator<V>>(this, var, idx);
+        }
+    }
+
 }

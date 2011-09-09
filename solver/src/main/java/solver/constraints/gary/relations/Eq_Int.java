@@ -27,9 +27,9 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -69,26 +69,26 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB(), prop);
-			y.updateLowerBound(x.getLB(), prop);
-			x.updateUpperBound(y.getUB(), prop);
-			y.updateUpperBound(x.getUB(), prop);
+			x.updateLowerBound(y.getLB(), cause);
+			y.updateLowerBound(x.getLB(), cause);
+			x.updateUpperBound(y.getUB(), cause);
+			y.updateUpperBound(x.getUB(), cause);
 			// ensure that, in case of enumerated domains,  holes are also propagated
 			if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
 				int ub = x.getUB();
 				for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
 					if (!(y.contains(val))) {
-						x.removeValue(val, prop);
+						x.removeValue(val, cause);
 					}
 				}
 				ub = y.getUB();
 				for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
 					if (!(x.contains(val))) {
-						y.removeValue(val, prop);
+						y.removeValue(val, cause);
 					}
 				}
 			}
@@ -96,17 +96,17 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue(), prop);
+	            y.removeValue(x.getValue(), cause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue(), prop);
+	        	x.removeValue(y.getValue(), cause);
 	        }
 		}else{
-			vars[var1].contradiction(prop, "x != x");
+			vars[var1].contradiction(cause, "x != x");
 		}
 	}
 	

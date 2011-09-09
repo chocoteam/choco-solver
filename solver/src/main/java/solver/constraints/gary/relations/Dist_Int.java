@@ -27,9 +27,9 @@
 package solver.constraints.gary.relations;
 
 import choco.kernel.ESat;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -73,26 +73,26 @@ public class Dist_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], prop);
-			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], prop);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], prop);
-			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], prop);
+			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause);
+			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause);
+			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
+			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], cause);
 		}
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, Propagator prop) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], prop);
+	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], prop);
+	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause);
 	        }
 		}else if(distanceMatrix[var1][var2]==0){
 //			vars[var1].contradiction(prop, "x != x"); 
