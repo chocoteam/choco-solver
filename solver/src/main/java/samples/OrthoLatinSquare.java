@@ -46,6 +46,8 @@ import solver.variables.VariableFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static solver.propagation.engines.comparators.predicate.Predicates.*;
+
 /**
  * Orthogonal latin square
  * <br/>
@@ -118,17 +120,17 @@ public class OrthoLatinSquare extends AbstractProblem {
             solver.post(cc);
             ADS.add(cc);
         }
-        ALLDIFFS = new Constraint[ADS.size()] ;
+        ALLDIFFS = new Constraint[ADS.size()];
         ADS.toArray(ALLDIFFS);
         //TODO: ajouter LEX
         for (int i = 1; i < m; i++) {
             IntVar[] ry1 = new IntVar[m];
             IntVar[] ry2 = new IntVar[m];
             for (int j = 0; j < m; j++) {
-                ry1[j] = square1[(i-1) * m + j];
+                ry1[j] = square1[(i - 1) * m + j];
                 ry2[j] = square2[i * m + j];
             }
-            solver.post(new Lex(ry1,ry2, true, solver));
+            solver.post(new Lex(ry1, ry2, true, solver));
         }
 
     }
@@ -141,20 +143,21 @@ public class OrthoLatinSquare extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
         //TODO: propagation
+        Predicate light = light();
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new And(new VarNotNull(),new Not(new MemberC(ALLDIFFS))),
+                        but(light, member(ALLDIFFS)),
                         Policy.FIXPOINT
                 ));
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new And(new VarNotNull(), new MemberC(ALLDIFFS)),
+                        member_light(ALLDIFFS),
                         Policy.FIXPOINT
                 ));
 
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        Predicate.TRUE,
+                        all(),
                         Policy.ONE
                 ));
     }

@@ -28,35 +28,42 @@
 package solver.propagation.engines.comparators.predicate;
 
 import gnu.trove.TIntHashSet;
+import solver.constraints.propagators.PropagatorPriority;
 import solver.requests.IRequest;
 
 /**
+ * Prop.priority <= threshold (inclusive)
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 04/04/11
  */
-public class Or implements Predicate {
+public class PriorityPAndLight implements Predicate {
 
     int[] cached;
 
-    final Predicate p1, p2;
+    final PropagatorPriority threshold;
 
-    Or(Predicate p1, Predicate p2) {
-        this.p2 = p2;
-        this.p1 = p1;
+    PriorityPAndLight(PropagatorPriority threshold) {
+        this.threshold = threshold;
     }
 
     @Override
     public boolean eval(IRequest request) {
-        return p1.eval(request) || p2.eval(request);
+        return request.getPropagator().getPriority().priority >= threshold.priority;
     }
 
     @Override
     public int[] extract(IRequest[] all) {
         if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.addAll(p2.extract(all));
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < all.length; i++) {
+                if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
+                    if (all[i].getVariable() == null) {
+                        tmp.add(all[i].getIndex());
+                    }
+                }
+            }
             cached = tmp.toArray();
         }
         return cached;

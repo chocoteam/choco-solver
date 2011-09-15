@@ -133,11 +133,12 @@ public class Partition extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IPropagationEngine engine = solver.getEngine();
+        Predicate light = Predicates.light();
         engine.addGroup(
                 Group.buildGroup(
-                        new And(new VarNotNull(), new PriorityP(PropagatorPriority.TERNARY)),
+                        Predicates.priority_light(PropagatorPriority.TERNARY),
                         new Cond(
-                                new LeftHandSide(),
+                                Predicates.lhs(),
                                 new IncrOrderV(vars),
                                 new Decr(new IncrOrderV(vars))),
                         Policy.ITERATE
@@ -145,7 +146,7 @@ public class Partition extends AbstractProblem {
         // set default
         engine.addGroup(
                 Group.buildGroup(
-                        new VarNotNull(),
+                        light,
                         new Seq(
                                 IncrArityP.get(),
                                 new Decr(IncrDomDeg.get())

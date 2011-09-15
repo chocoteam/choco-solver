@@ -40,8 +40,7 @@ import solver.constraints.reified.ReifiedConstraint;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.*;
-import solver.propagation.engines.comparators.predicate.MemberC;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -206,9 +205,9 @@ public class AirPlaneLanding extends AbstractProblem {
         // default group
         engine.addGroup(
                 Group.buildGroup(
-                        Predicate.TRUE,
+                        Predicates.all(),
                         new Cond(
-                                new MemberC(new HashSet<Constraint>(Arrays.asList(ranking.keys(new Constraint[ranking.size()])))),
+                                Predicates.member(ranking.keys(new Constraint[ranking.size()])),
                                 new Seq(
                                         new MappingC(ranking),
                                         new IncrOrderV(ArrayUtils.append(bVars, planes))),

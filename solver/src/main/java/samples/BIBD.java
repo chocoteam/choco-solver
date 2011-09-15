@@ -35,17 +35,14 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.ternary.Times;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.MemberV;
-import solver.propagation.engines.comparators.predicate.Not;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * CSPLib prob028:<br/>
@@ -100,7 +97,7 @@ public class BIBD extends AbstractProblem {
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {
             for (int j = 0; j < b; j++) {
-                vars[i][j] = VariableFactory.bool("V("+i+","+j+")", solver);
+                vars[i][j] = VariableFactory.bool("V(" + i + "," + j + ")", solver);
                 _vars[j][i] = vars[i][j];
             }
 
@@ -147,14 +144,16 @@ public class BIBD extends AbstractProblem {
 
         // BEWARE: etrangement, gecode effectue presque 2 fois moins de propagations...
         // BEWARE: les OCCURR peuvent tre remplacees par des SUM, mais plus lent (bien que nb prop < )
-        HashSet<BoolVar> hs = new HashSet<BoolVar>(Arrays.asList(ArrayUtils.flatten(vars)));
+        Predicate inVARS = Predicates.member(ArrayUtils.flatten(vars));
+        Predicate ALL = Predicates.all();
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new Not(new MemberV<BoolVar>(hs)), Policy.FIXPOINT
+                        Predicates.but(ALL, inVARS),
+                        Policy.FIXPOINT
                 ));
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new MemberV<BoolVar>(hs), Policy.FIXPOINT
+                        inVARS, Policy.FIXPOINT
                 ));
         //EngineStrategies.constraintOriented(solver);
 

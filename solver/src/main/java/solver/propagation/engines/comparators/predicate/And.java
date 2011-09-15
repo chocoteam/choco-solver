@@ -27,6 +27,7 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
 
 /**
@@ -36,10 +37,11 @@ import solver.requests.IRequest;
  * @since 14/04/11
  */
 public class And implements Predicate {
+    int[] cached;
 
     final Predicate p1, p2;
 
-    public And(Predicate p1, Predicate p2) {
+    And(Predicate p1, Predicate p2) {
         this.p2 = p2;
         this.p1 = p1;
     }
@@ -47,5 +49,21 @@ public class And implements Predicate {
     @Override
     public boolean eval(IRequest request) {
         return p1.eval(request) && p2.eval(request);
+    }
+
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            TIntHashSet tmp2 = new TIntHashSet(p2.extract(all));
+            int[] A = p1.extract(all);
+            for (int i = 0; i < A.length; i++) {
+                if (tmp2.contains(A[i])) {
+                    tmp.add(A[i]);
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
     }
 }

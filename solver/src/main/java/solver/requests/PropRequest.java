@@ -102,8 +102,12 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public void setGroupAndIndex(int gidx, int idx) {
+    public void setIndex(int idx) {
         index = idx;
+    }
+
+    @Override
+    public void setGroup(int gidx) {
         gIndex = gidx;
         this.update(EventType.PROPAGATE); // post initial propagation
     }
@@ -142,7 +146,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     public void filter() throws ContradictionException {
         propagator.propCalls++;
 //        LoggerFactory.getLogger("solver").info("PROP: {}", this.toString());
-        if(!propagator.isActive()){
+        if (!propagator.isActive()) {
             propagator.initialize();
             propagator.setActive();
         }

@@ -27,19 +27,38 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
 import solver.requests.IRequest;
 
 
 public class EqualC implements Predicate {
-	Constraint cstr;
-	public EqualC(Constraint cstr) {
-		this.cstr = cstr;
-	}
-	public boolean eval(IRequest request) {
-		return this.cstr == request.getPropagator().getConstraint();
-	}
-	public String toString() {
-		return "EqualC";
-	}
+    Constraint cstr;
+    int[] cached;
+
+    EqualC(Constraint cstr) {
+        this.cstr = cstr;
+    }
+
+    public boolean eval(IRequest request) {
+        return this.cstr == request.getPropagator().getConstraint();
+    }
+
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int j = 0; j < cstr.propagators.length; j++) {
+                for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
+                    tmp.add(cstr.propagators[j].getRequest(k).getIndex());
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
+    }
+
+    public String toString() {
+        return "EqualC";
+    }
 }

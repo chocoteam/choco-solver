@@ -24,25 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.propagation.engines.comparators.predicate;
 
+import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 01/04/11
+ * @since 14/09/11
  */
 public class LeftHandSide implements Predicate {
+    int[] cached;
+
+    LeftHandSide() {
+    }
+
     @Override
     public boolean eval(IRequest request) {
         return request.getIdxVarInProp() == 0;
     }
 
     @Override
-    public String toString() {
-        return "LHS";
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < all.length; i++) {
+                if (all[i].getIdxVarInProp() == 0) {
+                    int idx = all[i].getIndex();
+                    tmp.add(idx);
+                }
+                cached = tmp.toArray();
+            }
+        }
+        return cached;
     }
 }

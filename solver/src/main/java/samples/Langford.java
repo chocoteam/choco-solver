@@ -33,8 +33,7 @@ import solver.constraints.nary.AllDifferent;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -95,11 +94,11 @@ public class Langford extends AbstractProblem {
         IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
         peng.addGroup(Group.buildQueue(
-                new VarNotNull(),
+                Predicates.light(),
                 Policy.FIXPOINT
         ));
         peng.addGroup(Group.buildQueue(
-                Predicate.TRUE,
+                Predicates.all(),
                 Policy.ONE
         ));
     }

@@ -28,34 +28,50 @@
 package solver.propagation.engines.comparators.predicate;
 
 import choco.kernel.common.util.tools.ArrayUtils;
+import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
+import solver.requests.list.IRequestList;
 import solver.variables.Variable;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 public class MemberV<V extends Variable> implements Predicate {
-    Set<V> vars;
 
-    public MemberV(Set<V> vars) {
-        this.vars = vars;
+    int[] cached;
+
+    V[] vars;
+    Set<V> s_cons;
+
+    MemberV(V[] vars) {
+        this.vars = vars.clone();
     }
 
-    public MemberV(V[] vars) {
-        this.vars = new HashSet<V>(Arrays.asList(vars));
-    }
-
-    public MemberV(V vars0, V... vars) {
-        this(ArrayUtils.append((V[])new Variable[]{vars0}, vars));
+    MemberV(V vars0, V... vars) {
+        this(ArrayUtils.append((V[]) new Variable[]{vars0}, vars));
     }
 
     public boolean eval(IRequest request) {
-        return this.vars.contains(request.getVariable());
+        if (s_cons == null) {
+            s_cons = new HashSet<V>(Arrays.asList(vars));
+        }
+        return this.s_cons.contains(request.getVariable());
     }
 
-    public String toString() {
-        return "MemberV" + vars;
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < vars.length; i++) {
+                IRequestList rlist = vars[i].getRequests();
+                for (int k = 0; k < rlist.cardinality(); k++) {
+                    int idx = rlist.get(k).getIndex();
+                    tmp.add(idx);
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
     }
+
 }

@@ -38,10 +38,7 @@ import solver.propagation.engines.comparators.Cond;
 import solver.propagation.engines.comparators.Decr;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.MappingV;
-import solver.propagation.engines.comparators.predicate.LeftHandSide;
-import solver.propagation.engines.comparators.predicate.MemberP;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.PriorityP;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
@@ -60,7 +57,7 @@ import java.util.*;
 public class PertReified extends Pert {
 
     BoolVar[] bvars;
-    Set<Propagator> reifieds;
+    List<Propagator> reifieds;
 
     @Override
     public void buildModel() {
@@ -68,7 +65,7 @@ public class PertReified extends Pert {
         solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
-        reifieds = new HashSet<Propagator>();
+        reifieds = new ArrayList<Propagator>();
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (graph[i][j] == 1) {
@@ -135,15 +132,15 @@ public class PertReified extends Pert {
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
-                        new MemberP(reifieds),
+                        Predicates.member(reifieds.toArray(new Propagator[reifieds.size()])),
                         IncrArityP.get(),
                         Policy.ITERATE
                 ));
         engine.addGroup(
                 Group.buildGroup(
-                        new PriorityP(PropagatorPriority.TERNARY),
+                        Predicates.priority(PropagatorPriority.TERNARY),
                         new Cond(
-                                new LeftHandSide(),
+                                Predicates.lhs(),
                                 new MappingV(vars, rank),
                                 new Decr(new MappingV(vars, rank))
                         ),
@@ -152,7 +149,7 @@ public class PertReified extends Pert {
         // default group
         engine.addGroup(
                 Group.buildGroup(
-                        Predicate.TRUE,
+                        Predicates.all(),
                         IncrArityP.get(),
                         Policy.FIXPOINT
                 ));

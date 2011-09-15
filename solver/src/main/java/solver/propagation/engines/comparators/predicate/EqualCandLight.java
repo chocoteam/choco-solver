@@ -26,20 +26,47 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
+import gnu.trove.TIntHashSet;
+import solver.constraints.Constraint;
 import solver.requests.IRequest;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 05/09/11
+ * @since 15/09/11
  */
-public class VarNotNull implements Predicate {
+public class EqualCandLight implements Predicate {
 
+    Constraint cstr;
+    int[] cached;
 
+    EqualCandLight(Constraint cstr) {
+        this.cstr = cstr;
+    }
+
+    public boolean eval(IRequest request) {
+        return this.cstr == request.getPropagator().getConstraint();
+    }
 
     @Override
-    public boolean eval(IRequest request) {
-        return request.getVariable() != null;
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int j = 0; j < cstr.propagators.length; j++) {
+                for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
+                    IRequest r = cstr.propagators[j].getRequest(k);
+                    if (r.getVariable() == null) {
+                        tmp.add(r.getIndex());
+                    }
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
+    }
+
+    public String toString() {
+        return "EqualC";
     }
 }

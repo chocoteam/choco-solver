@@ -33,7 +33,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
 import solver.variables.Variable;
@@ -87,16 +87,16 @@ public final class PropagationEngine implements IPropagationEngine {
         if (engine != null) {
             throw new SolverException("PropagationEngine.init() has already been called once");
         }
-        IRequest[] tmp = requests;
+        final IRequest[] tmp = requests;
         requests = new IRequest[size];
         System.arraycopy(tmp, 0, requests, 0, size);
 
         // FIRST: sort requests, give them a unique group
         // build a default group
-        addGroup(Group.buildQueue(Predicate.TRUE, Policy.FIXPOINT));
-        int i;
-        // set a request to one group
-        int j;
+        addGroup(Group.buildQueue(Predicates.all(), Policy.FIXPOINT));
+
+        int i, j;
+        /*
         for (i = 0; i < size; i++) {
             lastPoppedRequest = requests[i];
             j = 0;
@@ -106,7 +106,20 @@ public final class PropagationEngine implements IPropagationEngine {
             }
             groups[j].addRequest(lastPoppedRequest);
         }
+        */
 
+        for (i = 0; i < size; i++) {
+            requests[i].setIndex(i);
+        }
+        for (j = 0; j < nbGroup; j++) {
+            int[] indices = groups[j].getPredicate().extract(requests);
+            Arrays.sort(indices);
+            for (i = 0; i < indices.length; i++) {
+                if (requests[indices[i]].getGroup()<0) {
+                    groups[j].addRequest(requests[indices[i]]);
+                }
+            }
+        }
         switch (deal) {
             case SEQUENCE:
                 engine = new WhileEngine();

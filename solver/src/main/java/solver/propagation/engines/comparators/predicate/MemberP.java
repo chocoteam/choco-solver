@@ -28,32 +28,49 @@
 package solver.propagation.engines.comparators.predicate;
 
 import choco.kernel.common.util.tools.ArrayUtils;
+import gnu.trove.TIntHashSet;
 import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 public class MemberP implements Predicate {
-    Set<Propagator> props;
+    int[] cached;
 
-    public MemberP(Set<Propagator> props) {
-        this.props = props;
+    Propagator[] props;
+    Set<Propagator> s_props;
+
+    MemberP(Propagator[] props) {
+        this.props = props.clone();
     }
 
-    public MemberP(Propagator[] props) {
-        this.props = new HashSet<Propagator>(Arrays.asList(props));
-    }
-
-    public MemberP(Propagator props0, Propagator... props) {
-        this(ArrayUtils.append(new Propagator[]{props0}, props));
+    MemberP(Propagator prop0, Propagator... props) {
+        this(ArrayUtils.append(new Propagator[]{prop0}, props));
     }
 
     public boolean eval(IRequest request) {
-        return this.props.contains(request.getPropagator());
+        if (s_props == null) {
+            s_props = new HashSet<Propagator>(Arrays.asList(props));
+        }
+        return this.s_props.contains(request.getPropagator());
     }
+
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < props.length; i++) {
+                for (int k = 0; k < props[i].nbRequests(); k++) {
+                    int idx = props[i].getRequest(k).getIndex();
+                    tmp.add(idx);
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
+    }
+
 
     public String toString() {
         return "MemberP";

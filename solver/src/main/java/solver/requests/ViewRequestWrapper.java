@@ -59,8 +59,13 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
-    public void setGroupAndIndex(int gidx, int idx) {
-        original.setGroupAndIndex(gidx, idx);
+    public void setIndex(int idx) {
+        original.setIndex(idx);
+    }
+
+    @Override
+    public void setGroup(int gidx) {
+        original.setGroup(gidx);
     }
 
     @Override

@@ -34,7 +34,7 @@ import solver.constraints.nary.AllDifferent;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.MemberV;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -88,14 +88,14 @@ public class Contrived extends AbstractProblem {
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
         engine.addGroup(
                 Group.buildGroup(
-                        new MemberV<IntVar>(w),
+                        Predicates.member(w),
                         new IncrOrderV(w),
                         Policy.FIXPOINT
                 )
         );
         engine.addGroup(
                 Group.buildGroup(
-                        new MemberV<IntVar>(v),
+                        Predicates.member(v),
                         new IncrOrderV(v),
                         Policy.FIXPOINT
                 )

@@ -32,7 +32,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.*;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.variables.Variable;
 
@@ -49,7 +50,7 @@ public enum EngineStrategies {
         public void defineIn(Solver solver) {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.SEQUENCE);
-            engine.addGroup(Group.buildQueue(Predicate.TRUE, Policy.FIXPOINT));
+            engine.addGroup(Group.buildQueue(Predicates.all(), Policy.FIXPOINT));
         }
     },
     BI_OLDEST {
@@ -57,8 +58,8 @@ public enum EngineStrategies {
         public void defineIn(Solver solver) {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.SEQUENCE);
-            engine.addGroup(Group.buildQueue(new VarNotNull(), Policy.FIXPOINT));
-            engine.addGroup(Group.buildQueue(Predicate.TRUE, Policy.ONE));
+            engine.addGroup(Group.buildQueue(Predicates.light(), Policy.FIXPOINT));
+            engine.addGroup(Group.buildQueue(Predicates.all(), Policy.ONE));
         }
     },
     VARIABLE_LEX {
@@ -67,7 +68,7 @@ public enum EngineStrategies {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.SEQUENCE);
             engine.addGroup(Group.buildGroup(
-                    Predicate.TRUE,
+                    Predicates.all(),
                     new IncrOrderV(solver.getVars()),
                     Policy.FIXPOINT));
         }
@@ -78,7 +79,7 @@ public enum EngineStrategies {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.SEQUENCE);
             engine.addGroup(Group.buildGroup(
-                    Predicate.TRUE,
+                    Predicates.all(),
                     new IncrOrderC(solver.getCstrs()),
                     Policy.FIXPOINT));
         }
@@ -92,14 +93,14 @@ public enum EngineStrategies {
             for (Variable var : vars) {
                 engine.addGroup(
                         Group.buildGroup(
-                                new And(new VarNotNull(), new EqualV(var)),
+                                Predicates.member(var),
                                 IncrPriorityP.get(),
                                 Policy.ITERATE
                         )
                 );
             }
             engine.addGroup(Group.buildQueue(
-                    Predicate.TRUE,
+                    Predicates.all(),
                     Policy.ONE
             ));
         }
@@ -109,17 +110,18 @@ public enum EngineStrategies {
             IPropagationEngine engine = solver.getEngine();
             engine.setDeal(IPropagationEngine.Deal.QUEUE);
             Constraint[] cstrs = solver.getCstrs();
-            for (Constraint cstr : cstrs) {
+            Predicate light = Predicates.light();
+            for (final Constraint cstr : cstrs) {
                 engine.addGroup(
                         Group.buildGroup(
-                                new And(new VarNotNull(), new EqualC(cstr)),
-                                IncrPriorityP.get(),
+                                Predicates.member_light(cstr),
+                                new Seq(new IncrOrderV(cstr.getVariables()), IncrPriorityP.get()),
                                 Policy.ITERATE
                         )
                 );
             }
             engine.addGroup(Group.buildQueue(
-                    Predicate.TRUE,
+                    Predicates.all(),
                     Policy.ONE
             ));
         }
@@ -132,7 +134,7 @@ public enum EngineStrategies {
             for (PropagatorPriority p : PropagatorPriority.values()) {
                 engine.addGroup(
                         Group.buildGroup(
-                                new PriorityP(p),
+                                Predicates.priority(p),
                                 IncrArityC.get(),
                                 Policy.ITERATE
                         )

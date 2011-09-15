@@ -27,6 +27,7 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import gnu.trove.TIntHashSet;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.requests.IRequest;
 
@@ -39,14 +40,31 @@ import solver.requests.IRequest;
  */
 public class PriorityP implements Predicate {
 
+    int[] cached;
+
     final PropagatorPriority threshold;
 
-    public PriorityP(PropagatorPriority threshold) {
+    PriorityP(PropagatorPriority threshold) {
         this.threshold = threshold;
     }
 
     @Override
     public boolean eval(IRequest request) {
         return request.getPropagator().getPriority().priority >= threshold.priority;
+    }
+
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < all.length; i++) {
+                if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
+                    int idx = all[i].getIndex();
+                    tmp.add(idx);
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
     }
 }

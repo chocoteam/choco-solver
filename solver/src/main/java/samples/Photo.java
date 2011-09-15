@@ -36,10 +36,7 @@ import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.And;
-import solver.propagation.engines.comparators.predicate.MemberV;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -96,21 +93,21 @@ public class Photo extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
-            engine.addGroup(Group.buildQueue(
-                new MemberV<IntVar>(viols),
+        engine.addGroup(Group.buildQueue(
+                Predicates.member(viols),
 //                new IncrOrderV(viols),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
-                new And(new VarNotNull(), new MemberV<IntVar>(positions)),
+                Predicates.member(positions),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
-                new MemberV<IntVar>(dist),
+                Predicates.member(dist),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
-                Predicate.TRUE,
+                Predicates.all(),
                 Policy.ONE
         ));
     }

@@ -36,17 +36,11 @@ import solver.constraints.nary.Sum;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.And;
-import solver.propagation.engines.comparators.predicate.MemberV;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * CSPLib prob006:<br/>
@@ -109,15 +103,15 @@ public class GolombRuler extends AbstractProblem {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.addGroup(Group.buildQueue(
-                new And(new VarNotNull(), new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(ticks)))),
+                Predicates.member(ticks),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
-                new And(new VarNotNull(), new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(diffs)))),
+                Predicates.member(diffs),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
-                Predicate.TRUE,
+                Predicates.all(),
                 Policy.ONE
         ));
     }

@@ -35,9 +35,8 @@ import solver.constraints.ternary.Times;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrOrderC;
 import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.MemberC;
-import solver.propagation.engines.comparators.predicate.MemberV;
-import solver.propagation.engines.comparators.predicate.Not;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
@@ -46,9 +45,6 @@ import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
-
-import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * <a href="http://www.mozart-oz.org/documentation/fdt/node21.html">mozart-oz</a>:<br/>
@@ -106,16 +102,18 @@ public class Grocery extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
         //FIRST propagators on tmp, natural order
+        Predicate inVARS = Predicates.member(vars);
+        Predicate ALL = Predicates.all();
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        new Not(new MemberV<IntVar>(new HashSet<IntVar>(Arrays.asList(vars)))),
+                        Predicates.but(ALL, inVARS),
                         new IncrOrderC(TMP),
                         Policy.FIXPOINT
                 ));
         // THEN, LEQ constraints
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        new MemberC(new HashSet<Constraint>(Arrays.<Constraint>asList(LEQ))),
+                        Predicates.member(LEQ),
                         new IncrOrderV(vars),
                         Policy.ITERATE
                 )
@@ -123,7 +121,7 @@ public class Grocery extends AbstractProblem {
         // AND, constraints on VARS, oldest first
         solver.getEngine().addGroup(
                 Group.buildQueue(
-                        new MemberV<IntVar>(new HashSet<IntVar>(Arrays.<IntVar>asList(vars))), Policy.FIXPOINT
+                        inVARS, Policy.FIXPOINT
                 )
         );
     }

@@ -35,7 +35,7 @@ import solver.constraints.nary.Sum;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityV;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -87,7 +87,7 @@ public class MagicSeries extends AbstractProblem {
         //TODO: trouver un propagation appropriée : en shuffle, on propage 2 fois moins!
         IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
-        peng.addGroup(Group.buildGroup(new VarNotNull(),
+        peng.addGroup(Group.buildGroup(Predicates.light(),
                 IncrArityV.get(),
                 Policy.ITERATE));
 

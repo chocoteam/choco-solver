@@ -35,8 +35,8 @@ import solver.constraints.nary.lex.Lex;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.MemberV;
-import solver.propagation.engines.comparators.predicate.Not;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -153,16 +153,18 @@ public class SocialGolfer extends AbstractProblem {
         solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
+        Predicate inVARS = Predicates.member(vars);
+        Predicate ALL = Predicates.all();
         engine.addGroup(
                 Group.buildGroup(
-                        new Not(new MemberV<BoolVar>(vars)),
+                        Predicates.but(ALL, inVARS),
                         new IncrOrderV(vars),
                         Policy.FIXPOINT
                 )
         );
         engine.addGroup(
                 Group.buildGroup(
-                        new MemberV<BoolVar>(vars),
+                        inVARS,
                         new IncrOrderV(vars),
                         Policy.FIXPOINT
                 )

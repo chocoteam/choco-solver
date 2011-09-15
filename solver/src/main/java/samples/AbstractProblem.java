@@ -37,7 +37,7 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategies;
 import solver.propagation.engines.comparators.Shuffle;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -111,7 +111,7 @@ public abstract class AbstractProblem {
                 break;
             case SHUFFLE:
                 engine.deleteGroups();
-                solver.getEngine().addGroup(Group.buildGroup(Predicate.TRUE, new Shuffle(seed), Policy.FIXPOINT));
+                solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), new Shuffle(seed), Policy.FIXPOINT));
                 break;
             default:
                 engine.deleteGroups();

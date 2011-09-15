@@ -31,32 +31,33 @@ import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
 
 /**
+ * P1 and not P2
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 07/04/11
  */
-public class Or implements Predicate {
-
+public class But implements Predicate {
     int[] cached;
 
-    final Predicate p1, p2;
+    final Predicate p1;
+    final Predicate p2;
 
-    Or(Predicate p1, Predicate p2) {
-        this.p2 = p2;
+    But(Predicate p1, Predicate p2) {
         this.p1 = p1;
+        this.p2 = p2;
     }
 
     @Override
     public boolean eval(IRequest request) {
-        return p1.eval(request) || p2.eval(request);
+        return p1.eval(request) & !p2.eval(request);
     }
 
     @Override
     public int[] extract(IRequest[] all) {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.addAll(p2.extract(all));
+            tmp.removeAll(p2.extract(all));
             cached = tmp.toArray();
         }
         return cached;

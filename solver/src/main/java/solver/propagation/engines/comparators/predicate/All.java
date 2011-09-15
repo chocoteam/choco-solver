@@ -24,7 +24,6 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.propagation.engines.comparators.predicate;
 
 import gnu.trove.TIntHashSet;
@@ -34,29 +33,28 @@ import solver.requests.IRequest;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 15/09/11
  */
-public class Or implements Predicate {
+public class All implements Predicate {
 
     int[] cached;
 
-    final Predicate p1, p2;
-
-    Or(Predicate p1, Predicate p2) {
-        this.p2 = p2;
-        this.p1 = p1;
+    All() {
     }
 
     @Override
     public boolean eval(IRequest request) {
-        return p1.eval(request) || p2.eval(request);
+        return true;
     }
 
     @Override
     public int[] extract(IRequest[] all) {
         if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.addAll(p2.extract(all));
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < all.length; i++) {
+                int idx = all[i].getIndex();
+                tmp.add(idx);
+            }
             cached = tmp.toArray();
         }
         return cached;

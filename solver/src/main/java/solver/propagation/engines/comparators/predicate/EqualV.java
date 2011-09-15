@@ -27,19 +27,39 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import solver.variables.Variable;
+import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
+import solver.variables.Variable;
 
 
 public class EqualV implements Predicate {
-	Variable var;
-	public EqualV(Variable var) {
-		this.var = var;
-	}
-	public boolean eval(IRequest request) {
-		return this.var == request.getVariable();
-	}
-	public String toString() {
-		return "EqualV";
-	}
+    int[] cached;
+
+    Variable var;
+
+    EqualV(Variable var) {
+        this.var = var;
+    }
+
+    @Override
+    public boolean eval(IRequest request) {
+        return this.var == request.getVariable();
+    }
+
+    @Override
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int j = 0; j < var.getRequests().size(); j++) {
+                int idx = var.getRequests().get(j).getIndex();
+                tmp.add(idx);
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
+    }
+
+    public String toString() {
+        return "EqualV";
+    }
 }

@@ -38,7 +38,7 @@ import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrOrderV;
 import solver.propagation.engines.comparators.Seq;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
@@ -129,7 +129,7 @@ public class MagicSquare extends AbstractProblem {
         // default group
         solver.getEngine().addGroup(
                 Group.buildGroup(
-                        new VarNotNull(),
+                        Predicates.light(),
                         new Seq(
                                 IncrArityP.get(),
                                 new IncrOrderV(vars)

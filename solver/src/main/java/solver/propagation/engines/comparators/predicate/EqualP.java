@@ -28,37 +28,39 @@
 package solver.propagation.engines.comparators.predicate;
 
 import gnu.trove.TIntHashSet;
+import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
-/**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 14/04/11
- */
-public class Or implements Predicate {
 
+public class EqualP implements Predicate {
     int[] cached;
 
-    final Predicate p1, p2;
+    Propagator prop;
 
-    Or(Predicate p1, Predicate p2) {
-        this.p2 = p2;
-        this.p1 = p1;
+    EqualP(Propagator propagator) {
+        this.prop = propagator;
     }
 
     @Override
     public boolean eval(IRequest request) {
-        return p1.eval(request) || p2.eval(request);
+        return this.prop == request.getVariable();
     }
 
     @Override
     public int[] extract(IRequest[] all) {
         if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.addAll(p2.extract(all));
+            TIntHashSet tmp = new TIntHashSet();
+            for (int j = 0; j < prop.nbRequests(); j++) {
+                int idx = prop.getRequest(j).getIndex();
+                tmp.add(idx);
+            }
             cached = tmp.toArray();
         }
+
         return cached;
+    }
+
+    public String toString() {
+        return "EqualP";
     }
 }

@@ -32,13 +32,20 @@ import solver.requests.IRequest;
 import java.io.Serializable;
 
 public interface Predicate extends Serializable {
+
+    /**
+     * Evaluate a request regarding <code>this</code>
+     * @param request a given request
+     * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
+     * false otherwise
+     */
     public boolean eval(IRequest request);
 
-    public static Predicate TRUE = new Predicate() {
-
-        @Override
-        public boolean eval(IRequest request) {
-            return true;
-        }
-    };
+    /**
+     * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
+     * <p/>This allows using cached structures.
+     * @param all arrays of requests
+     * @return list of indices, wihtin <code>all</code>, of requests corresponding to <code>this</code>, unsorted.
+     */
+    public int[] extract(IRequest[] all);
 }

@@ -38,9 +38,8 @@ import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.Cond;
 import solver.propagation.engines.comparators.IncrArityV;
 import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.And;
-import solver.propagation.engines.comparators.predicate.MemberC;
-import solver.propagation.engines.comparators.predicate.VarNotNull;
+import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -128,14 +127,15 @@ public class AllIntervalSeries extends AbstractProblem {
         // il faut donc que celle-ci soit propagee le plus tard possible
         IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
+        Predicate light = Predicates.light();
         peng.addGroup(Group.buildGroup(
-                new And(new MemberC(ALLDIFF[0], new Constraint[]{}), new VarNotNull()),
+                Predicates.member_light(ALLDIFF[0]),
                 new IncrOrderV(vars),
                 Policy.ITERATE
         ));
         peng.addGroup(Group.buildGroup(
-                new MemberC(ALLDIFF[1], new Constraint[]{}),
-                new Cond(new VarNotNull(), new IncrOrderV(vars), IncrArityV.get()),
+                Predicates.member(ALLDIFF[1]),
+                new Cond(light, new IncrOrderV(vars), IncrArityV.get()),
                 Policy.ONE
         ));
         // + default one

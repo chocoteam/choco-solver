@@ -32,7 +32,7 @@ import solver.constraints.nary.AllDifferent;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.Predicate;
+import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -75,7 +75,7 @@ public class NQueenGlobal extends AbstractNQueen {
         // default group
         engine.addGroup(
                 Group.buildGroup(
-                        Predicate.TRUE,
+                        Predicates.all(),
                         new IncrOrderV(orderedVars),
                         Policy.ITERATE
                 ));

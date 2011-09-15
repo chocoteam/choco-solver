@@ -55,6 +55,25 @@ public class GolombRulerTest {
     }
 
     @Test(groups = ">30m")
+    public void testSmall() {
+        Solver sol;
+        for (int j = 0; j < 4; j++) {
+            sol = modeler(OPTIMAL_RULER[j][0]);
+            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
+            long sols = sol.getMeasures().getSolutionCount();
+            long nodes = sol.getMeasures().getNodeCount();
+            for (int k = 1; k < EngineStrategies.values().length; k++) {
+                sol = modeler(OPTIMAL_RULER[j][0]);
+                EngineStrategies.values()[k].defineIn(sol);
+                sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) sol.getVars()[OPTIMAL_RULER[j][0] - 1]);
+                Assert.assertEquals(sol.getMeasures().getSolutionCount(), sols);
+                Assert.assertEquals(sol.getMeasures().getNodeCount(), nodes);
+
+            }
+        }
+    }
+
+    @Test(groups = ">30m")
     public void testAll() {
         Solver sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {

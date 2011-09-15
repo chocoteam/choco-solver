@@ -27,23 +27,59 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import choco.kernel.common.util.tools.ArrayUtils;
+import gnu.trove.TIntHashSet;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
-/**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 07/04/11
- */
-public class Not implements Predicate {
-    final Predicate pred;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-    public Not(Predicate pred) {
-        this.pred = pred;
+
+public class MemberCAndLight implements Predicate {
+
+    int[] cached;
+
+    Constraint[] cons;
+    Set<Constraint> s_cons;
+
+    MemberCAndLight(Constraint[] cons) {
+        this.cons = cons.clone();
+        s_cons = new HashSet<Constraint>(Arrays.asList(cons));
+    }
+
+    MemberCAndLight(Constraint cons0, Constraint... cons) {
+        this(ArrayUtils.append(new Constraint[]{cons0}, cons));
+    }
+
+    public boolean eval(IRequest request) {
+        return this.s_cons.contains(request.getPropagator().getConstraint());
     }
 
     @Override
-    public boolean eval(IRequest request) {
-        return !pred.eval(request);
+    public int[] extract(IRequest[] all) {
+        if (cached == null) {
+            TIntHashSet tmp = new TIntHashSet();
+            for (int i = 0; i < cons.length; i++) {
+                Constraint c = cons[i];
+                for (int j = 0; j < c.propagators.length; j++) {
+                    Propagator p = c.propagators[j];
+                    for (int k = 0; k < p.nbRequests(); k++) {
+                        IRequest r = p.getRequest(k);
+                        if (r.getVariable() == null) {
+                            tmp.add(r.getIndex());
+                        }
+                    }
+                }
+            }
+            cached = tmp.toArray();
+        }
+        return cached;
+    }
+
+    public String toString() {
+        return "MemberC_light";
     }
 }
