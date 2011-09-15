@@ -46,14 +46,14 @@ samples.BIBD -v 7 -k 3 -l 60 -policy PRIORITY_PROP
 samples.BIBD -v 7 -k 3 -l 60 -policy DEFAULT
 ##
 ## CAR SEQUENCING
-samples.CarSequencing -d myPb -policy OLDEST
-samples.CarSequencing -d myPb -policy BI_OLDEST
-samples.CarSequencing -d myPb -policy VARIABLE_LEX
-samples.CarSequencing -d myPb -policy CONSTRAINT_LEX
-samples.CarSequencing -d myPb -policy VARIABLE_ORIENTED
-samples.CarSequencing -d myPb -policy CONSTRAINT_ORIENTED
-samples.CarSequencing -d myPb -policy PRIORITY_PROP
-samples.CarSequencing -d myPb -policy DEFAULT
+#samples.CarSequencing -d myPb -policy OLDEST
+#samples.CarSequencing -d myPb -policy BI_OLDEST
+#samples.CarSequencing -d myPb -policy VARIABLE_LEX
+#samples.CarSequencing -d myPb -policy CONSTRAINT_LEX
+#samples.CarSequencing -d myPb -policy VARIABLE_ORIENTED
+#samples.CarSequencing -d myPb -policy CONSTRAINT_ORIENTED
+#samples.CarSequencing -d myPb -policy PRIORITY_PROP
+#samples.CarSequencing -d myPb -policy DEFAULT
 ##
 samples.CarSequencing -d P4_72 -policy OLDEST
 samples.CarSequencing -d P4_72 -policy BI_OLDEST
@@ -84,16 +84,6 @@ samples.GolombRuler -m 10 -c BC -policy PRIORITY_PROP
 samples.GolombRuler -m 10 -c BC -policy DEFAULT
 ##
 ## LATIN SQUARE
-samples.LatinSquare -n 10 -policy OLDEST
-samples.LatinSquare -n 10 -policy BI_OLDEST
-samples.LatinSquare -n 10 -policy VARIABLE_LEX
-samples.LatinSquare -n 10 -policy CONSTRAINT_LEX
-samples.LatinSquare -n 10 -policy VARIABLE_ORIENTED
-samples.LatinSquare -n 10 -policy CONSTRAINT_ORIENTED
-samples.LatinSquare -n 10 -policy PRIORITY_PROP
-samples.LatinSquare -n 10 -policy DEFAULT
-##
-## LATIN SQUARE
 samples.LatinSquare -n 30 -policy OLDEST
 samples.LatinSquare -n 30 -policy BI_OLDEST
 samples.LatinSquare -n 30 -policy VARIABLE_LEX
@@ -102,6 +92,16 @@ samples.LatinSquare -n 30 -policy VARIABLE_ORIENTED
 samples.LatinSquare -n 30 -policy CONSTRAINT_ORIENTED
 samples.LatinSquare -n 30 -policy PRIORITY_PROP
 samples.LatinSquare -n 30 -policy DEFAULT
+##
+## LATIN SQUARE
+samples.LatinSquare -n 100 -policy OLDEST
+samples.LatinSquare -n 100 -policy BI_OLDEST
+samples.LatinSquare -n 100 -policy VARIABLE_LEX
+samples.LatinSquare -n 100 -policy CONSTRAINT_LEX
+samples.LatinSquare -n 100 -policy VARIABLE_ORIENTED
+samples.LatinSquare -n 100 -policy CONSTRAINT_ORIENTED
+samples.LatinSquare -n 100 -policy PRIORITY_PROP
+samples.LatinSquare -n 100 -policy DEFAULT
 ##
 ## PARTITION PROBLEM
 samples.Partition -n 48 -policy OLDEST
@@ -143,6 +143,16 @@ samples.nqueen.NQueenBinary -q 400 -policy PRIORITY_PROP
 samples.nqueen.NQueenBinary -q 400 -policy DEFAULT
 ##
 ##
+samples.nqueen.NQueenBinary -q 500 -policy OLDEST
+samples.nqueen.NQueenBinary -q 500 -policy BI_OLDEST
+samples.nqueen.NQueenBinary -q 500 -policy VARIABLE_LEX
+samples.nqueen.NQueenBinary -q 500 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenBinary -q 500 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenBinary -q 500 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenBinary -q 500 -policy PRIORITY_PROP
+samples.nqueen.NQueenBinary -q 500 -policy DEFAULT
+##
+##
 samples.nqueen.NQueenGlobal -q 400 -policy OLDEST
 samples.nqueen.NQueenGlobal -q 400 -policy BI_OLDEST
 samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_LEX
@@ -151,6 +161,16 @@ samples.nqueen.NQueenGlobal -q 400 -policy VARIABLE_ORIENTED
 samples.nqueen.NQueenGlobal -q 400 -policy CONSTRAINT_ORIENTED
 samples.nqueen.NQueenGlobal -q 400 -policy PRIORITY_PROP
 samples.nqueen.NQueenGlobal -q 400 -policy DEFAULT
+##
+##
+samples.nqueen.NQueenGlobal -q 500 -policy OLDEST
+samples.nqueen.NQueenGlobal -q 500 -policy BI_OLDEST
+samples.nqueen.NQueenGlobal -q 500 -policy VARIABLE_LEX
+samples.nqueen.NQueenGlobal -q 500 -policy CONSTRAINT_LEX
+samples.nqueen.NQueenGlobal -q 500 -policy VARIABLE_ORIENTED
+samples.nqueen.NQueenGlobal -q 500 -policy CONSTRAINT_ORIENTED
+samples.nqueen.NQueenGlobal -q 500 -policy PRIORITY_PROP
+samples.nqueen.NQueenGlobal -q 500 -policy DEFAULT
 ##
 ## MAGIC SERIES
 samples.MagicSeries -n 400 -policy OLDEST
@@ -172,14 +192,14 @@ samples.MagicSeries -n 500 -policy PRIORITY_PROP
 samples.MagicSeries -n 500 -policy DEFAULT
 ##
 ## MAGIC SQUARE
-samples.MagicSquare -n 5 -c BC -policy OLDEST
-samples.MagicSquare -n 5 -c BC -policy BI_OLDEST
-samples.MagicSquare -n 5 -c BC -policy VARIABLE_LEX
-samples.MagicSquare -n 5 -c BC -policy CONSTRAINT_LEX
-samples.MagicSquare -n 5 -c BC -policy VARIABLE_ORIENTED
-samples.MagicSquare -n 5 -c BC -policy CONSTRAINT_ORIENTED
-samples.MagicSquare -n 5 -c BC -policy PRIORITY_PROP
-samples.MagicSquare -n 5 -c BC -policy DEFAULT
+samples.MagicSquare -n 6 -c BC -policy OLDEST
+samples.MagicSquare -n 6 -c BC -policy BI_OLDEST
+samples.MagicSquare -n 6 -c BC -policy VARIABLE_LEX
+samples.MagicSquare -n 6 -c BC -policy CONSTRAINT_LEX
+samples.MagicSquare -n 6 -c BC -policy VARIABLE_ORIENTED
+samples.MagicSquare -n 6 -c BC -policy CONSTRAINT_ORIENTED
+samples.MagicSquare -n 6 -c BC -policy PRIORITY_PROP
+samples.MagicSquare -n 6 -c BC -policy DEFAULT
 ##
 samples.MagicSquare -n 7 -c BC -policy OLDEST
 samples.MagicSquare -n 7 -c BC -policy BI_OLDEST
