@@ -50,7 +50,7 @@ public class PriorityPAndLight implements Predicate {
 
     @Override
     public boolean eval(IRequest request) {
-        return request.getPropagator().getPriority().priority >= threshold.priority;
+        return request.getPropagator().getPriority().priority >= threshold.priority && request.getVariable() != null;
     }
 
     @Override

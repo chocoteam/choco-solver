@@ -106,7 +106,6 @@ public class Group implements Serializable {
         }
         for (int i = 0; i < nbRequests; i++) {
             requests[i].setIndex(i);
-            requests[i].setGroup(index);
         }
     }
 
@@ -119,6 +118,7 @@ public class Group implements Serializable {
             System.arraycopy(tmp, 0, requests, 0, nbRequests);
         }
         requests[nbRequests++] = aRequest;
+        aRequest.setGroup(index);
     }
 
     @Override

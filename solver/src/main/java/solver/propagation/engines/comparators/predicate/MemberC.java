@@ -30,6 +30,7 @@ package solver.propagation.engines.comparators.predicate;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
 import java.util.*;
@@ -60,11 +61,15 @@ public class MemberC implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < cons.length; i++) {
-                for (int j = 0; j < cons[i].propagators.length; j++) {
-                    for (int k = 0; k < cons[i].propagators[j].nbRequests(); k++) {
-                        int idx = cons[i].propagators[j].getRequest(k).getIndex();
+                Constraint c = cons[i];
+                for (int j = 0; j < c.propagators.length; j++) {
+                    Propagator p = c.propagators[j];
+                    for (int k = 0; k < p.nbRequests(); k++) {
+                        int idx = p.getRequest(k).getIndex();
                         tmp.add(idx);
                     }
+                    //-1 is the PropRequest in a propagator
+                    tmp.add(p.getRequest(-1).getIndex());
                 }
             }
             cached = tmp.toArray();

@@ -109,7 +109,6 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     @Override
     public void setGroup(int gidx) {
         gIndex = gidx;
-        this.update(EventType.PROPAGATE); // post initial propagation
     }
 
     @Override

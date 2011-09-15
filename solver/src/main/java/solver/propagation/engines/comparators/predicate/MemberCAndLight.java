@@ -55,7 +55,7 @@ public class MemberCAndLight implements Predicate {
     }
 
     public boolean eval(IRequest request) {
-        return this.s_cons.contains(request.getPropagator().getConstraint());
+        return this.s_cons.contains(request.getPropagator().getConstraint()) && request.getVariable() != null;
     }
 
     @Override
@@ -66,6 +66,7 @@ public class MemberCAndLight implements Predicate {
                 Constraint c = cons[i];
                 for (int j = 0; j < c.propagators.length; j++) {
                     Propagator p = c.propagators[j];
+                    //-1 is the big request, so we can skip it easily
                     for (int k = 0; k < p.nbRequests(); k++) {
                         IRequest r = p.getRequest(k);
                         if (r.getVariable() == null) {

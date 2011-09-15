@@ -29,6 +29,7 @@ package solver.propagation.engines.comparators.predicate;
 
 import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.requests.IRequest;
 
 
@@ -49,9 +50,12 @@ public class EqualC implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < cstr.propagators.length; j++) {
-                for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
+                Propagator p = cstr.propagators[j];
+                for (int k = 0; k < p.nbRequests(); k++) {
                     tmp.add(cstr.propagators[j].getRequest(k).getIndex());
                 }
+                //-1 is the PropRequest in a propagator
+                tmp.add(p.getRequest(-1).getIndex());
             }
             cached = tmp.toArray();
         }

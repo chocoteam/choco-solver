@@ -36,6 +36,7 @@ import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.requests.IRequest;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.Arrays;
@@ -95,8 +96,29 @@ public final class PropagationEngine implements IPropagationEngine {
         // build a default group
         addGroup(Group.buildQueue(Predicates.all(), Policy.FIXPOINT));
 
+//        eval();
+        extract();
+
+
+        switch (deal) {
+            case SEQUENCE:
+                engine = new WhileEngine();
+                break;
+            case QUEUE:
+                engine = new OldestEngine();
+                break;
+        }
+        engine.setGroups(Arrays.copyOfRange(groups, 0, nbGroup));
+
+        // FINALLY, post initial propagation event for every heavy requests
+        for (int i = offset; i < size; i++) {
+            requests[i].update(EventType.PROPAGATE); // post initial propagation
+        }
+
+    }
+
+    private void eval() {
         int i, j;
-        /*
         for (i = 0; i < size; i++) {
             lastPoppedRequest = requests[i];
             j = 0;
@@ -106,8 +128,22 @@ public final class PropagationEngine implements IPropagationEngine {
             }
             groups[j].addRequest(lastPoppedRequest);
         }
-        */
+        for (j = 0; j < nbGroup; j++) {
+            if (groups[j].isEmpty()) {
+                groups[j] = groups[nbGroup - 1];
+                groups[j].setIndex(j);
+                groups[nbGroup - 1] = null;
+                nbGroup--;
+                j--;
+            } else {
+                groups[j].make();
+            }
+        }
+    }
 
+
+    private void extract() {
+        int i, j;
         for (i = 0; i < size; i++) {
             requests[i].setIndex(i);
         }
@@ -115,37 +151,22 @@ public final class PropagationEngine implements IPropagationEngine {
             int[] indices = groups[j].getPredicate().extract(requests);
             Arrays.sort(indices);
             for (i = 0; i < indices.length; i++) {
-                if (requests[indices[i]].getGroup()<0) {
+                if (requests[indices[i]].getGroup() < 0) {
                     groups[j].addRequest(requests[indices[i]]);
                 }
             }
-        }
-        switch (deal) {
-            case SEQUENCE:
-                engine = new WhileEngine();
-                break;
-            case QUEUE:
-                engine = new OldestEngine();
-                break;
-        }
-
-        // AND intialize groups
-        for (j = 0; j < nbGroup; j++) {
             if (groups[j].isEmpty()) {
                 groups[j] = groups[nbGroup - 1];
                 groups[j].setIndex(j);
                 groups[nbGroup - 1] = null;
-                //groups[nbGroup - 1].setIndex(nbGroup - 1);
                 nbGroup--;
                 j--;
+            } else {
+                groups[j].make();
             }
         }
-        engine.setGroups(Arrays.copyOfRange(groups, 0, nbGroup));
-
-        for (j = 0; j < nbGroup; j++) {
-            groups[j].make();
-        }
     }
+
 
     @Override
     public boolean initialized() {

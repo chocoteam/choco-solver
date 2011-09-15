@@ -46,7 +46,7 @@ public class EqualCandLight implements Predicate {
     }
 
     public boolean eval(IRequest request) {
-        return this.cstr == request.getPropagator().getConstraint();
+        return this.cstr == request.getPropagator().getConstraint() && request.getVariable() != null;
     }
 
     @Override
@@ -54,11 +54,10 @@ public class EqualCandLight implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < cstr.propagators.length; j++) {
+                //-1 is the big request, so we can skip it easily
                 for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
                     IRequest r = cstr.propagators[j].getRequest(k);
-                    if (r.getVariable() == null) {
-                        tmp.add(r.getIndex());
-                    }
+                    tmp.add(r.getIndex());
                 }
             }
             cached = tmp.toArray();
