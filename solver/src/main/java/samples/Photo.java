@@ -93,17 +93,13 @@ public class Photo extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
         IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
-        engine.addGroup(Group.buildQueue(
+            engine.addGroup(Group.buildQueue(
                 Predicates.member(viols),
 //                new IncrOrderV(viols),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
                 Predicates.member(positions),
-                Policy.FIXPOINT
-        ));
-        engine.addGroup(Group.buildQueue(
-                Predicates.member(dist),
                 Policy.FIXPOINT
         ));
         engine.addGroup(Group.buildQueue(
