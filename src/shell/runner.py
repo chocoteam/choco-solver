@@ -118,8 +118,7 @@ def computeXLS(line, result, size):
         moy = round(sum/len(result[i]),6)
         stdev = max(result[i]) - min(result[i])
         info = ""+ str(moy)+";"
-        if stdev > 0:
-            info += ""+str(stdev)+";;"
+        info += ""+str(stdev)+";;"
         out.write(info)
 
 
