@@ -43,7 +43,7 @@ public class LeftHandSide implements Predicate {
 
     @Override
     public boolean eval(IRequest request) {
-        return request.getIdxVarInProp() == 0;
+        return request.getVariable() != null && request.getIdxVarInProp() == 0;
     }
 
     @Override

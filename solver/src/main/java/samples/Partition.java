@@ -193,7 +193,7 @@ public class Partition extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        while (true) new Partition().execute(args);
+        new Partition().execute(args);
     }
 
 }
