@@ -29,7 +29,7 @@ name = 'runner'
 ## regexp for statisctics
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
 ## len is 8 or 9
-_SIZE = 11
+_SIZE = 15
 pattern = re.compile('\d+\,?\d*')
 _STAT = '[STATISTICS'
 _NAMES = 'SOLUTION','OBJECTIVE','TIME','NODE','BACKTRACK','FAIL','RESTART','PROPAGATIONS','SCRIPT_TIME'
