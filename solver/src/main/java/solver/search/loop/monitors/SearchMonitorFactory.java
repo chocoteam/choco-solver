@@ -49,12 +49,12 @@ public enum SearchMonitorFactory {
      */
     public static void log(Solver solver, boolean solution, boolean choices) {
         AbstractSearchLoop sl = solver.getSearchLoop();
-        sl.branchSearchMonitor(new LogBasic(solver));
+        sl.plugSearchMonitor(new LogBasic(solver));
         if (solution) {
-            sl.branchSearchMonitor(new LogSolutions(sl));
+            sl.plugSearchMonitor(new LogSolutions(sl));
         }
         if (choices) {
-            sl.branchSearchMonitor(new LogChoices(solver));
+            sl.plugSearchMonitor(new LogChoices(solver));
         }
     }
 
@@ -67,7 +67,7 @@ public enum SearchMonitorFactory {
     public static void statEveryXXms(Solver solver, long everyXXmms) {
         if (everyXXmms > 0) {
             AbstractSearchLoop sl = solver.getSearchLoop();
-            sl.branchSearchMonitor(new LogStatEveryXXms(solver.getSearchLoop(), everyXXmms));
+            sl.plugSearchMonitor(new LogStatEveryXXms(solver.getSearchLoop(), everyXXmms));
         }
     }
 
@@ -79,7 +79,7 @@ public enum SearchMonitorFactory {
      * @param restartLimit restart limits (limit of number of restarts)
      */
     public static void restart(Solver solver, IRestartStrategy restartStrategy, ILimit restartStrategyLimit, int restartLimit) {
-        solver.getSearchLoop().branchSearchMonitor(new RestartManager(
+        solver.getSearchLoop().plugSearchMonitor(new RestartManager(
                 restartStrategy, restartStrategyLimit, solver.getSearchLoop(), restartLimit
         ));
     }

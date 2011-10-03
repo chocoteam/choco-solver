@@ -164,7 +164,7 @@ public final class FZNLayout implements ISearchMonitor {
 
 
     public void setSearchLoop(AbstractSearchLoop searchLoop) {
-        searchLoop.branchSearchMonitor(this);
+        searchLoop.plugSearchMonitor(this);
         this.searchLoop = searchLoop;
     }
 

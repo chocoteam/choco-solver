@@ -52,5 +52,5 @@ public interface ISearchLoop extends Serializable {
      * Branch a search monitor
      * @param sm
      */
-    void branchSearchMonitor(ISearchMonitor sm);
+    void plugSearchMonitor(ISearchMonitor sm);
 }

@@ -354,7 +354,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
 
     @Override
-    public void branchSearchMonitor(ISearchMonitor sm) {
+    public void plugSearchMonitor(ISearchMonitor sm) {
         smList.add(sm);
     }
 
