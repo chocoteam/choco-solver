@@ -50,6 +50,7 @@ import solver.variables.Variable;
 
 import java.io.Serializable;
 
+
 /**
  * A <code>Propagator</code> class defines methods to react on a <code>Variable</code> objects modifications.
  * It is observed by <code>Constraint</code> objects and can notify them when a <code>Variable</code> event occurs.

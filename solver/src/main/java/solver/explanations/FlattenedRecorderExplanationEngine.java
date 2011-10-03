@@ -27,7 +27,7 @@
 
 package solver.explanations;
 
-import choco.kernel.memory.IEnvironment;
+import solver.Solver;
 import solver.variables.IntVar;
 
 /**
@@ -37,8 +37,8 @@ import solver.variables.IntVar;
  * Time: 09:27:43
  */
 public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngine {
-    public FlattenedRecorderExplanationEngine(IEnvironment env) {
-        super(env);
+    public FlattenedRecorderExplanationEngine(Solver slv) {
+        super(slv);
     }
 
     @Override

@@ -30,6 +30,7 @@ package solver.explanations.samples;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.binary.GreaterOrEqualX_YC;
+import solver.explanations.RecorderExplanationEngine;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,7 +62,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
-//       solver.explainer = new RecorderExplanationEngine(solver.getEnvironment());
+       solver.explainer = new RecorderExplanationEngine(solver);
 //        solver.explainer = new FlattenedRecorderExplanationEngine(solver.getEnvironment());
     }
 

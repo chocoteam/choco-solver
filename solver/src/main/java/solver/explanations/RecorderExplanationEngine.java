@@ -27,9 +27,9 @@
 
 package solver.explanations;
 
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import solver.ICause;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -56,8 +56,8 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     HashMap<Deduction, Explanation> database; // base d'explications
 
 
-    public RecorderExplanationEngine(IEnvironment environment) {
-        super(environment);
+    public RecorderExplanationEngine(Solver solver) {
+        super(solver);
         removedvalues = new HashMap<Variable, IStateBitSet>();
         valueremovals = new HashMap<Variable, HashMap<Integer, ValueRemoval>>();
         database = new HashMap<Deduction, Explanation>();
@@ -67,7 +67,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public IStateBitSet getRemovedValues(IntVar v) {
         IStateBitSet toreturn = removedvalues.get(v);
         if (toreturn == null) {
-            toreturn = env.makeBitSet(v.getUB());
+            toreturn = solver.getEnvironment().makeBitSet(v.getUB());
             removedvalues.put(v, toreturn);
             valueremovals.put(v, new HashMap<Integer, ValueRemoval>());
         }

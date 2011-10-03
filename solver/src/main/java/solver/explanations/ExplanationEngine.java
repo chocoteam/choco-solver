@@ -27,10 +27,11 @@
 
 package solver.explanations;
 
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
+import solver.Solver;
+import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
@@ -43,9 +44,9 @@ import java.io.Serializable;
  *
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine implements Serializable {
+public class ExplanationEngine implements Serializable, ISearchMonitor {
 
-    IEnvironment env;
+    Solver solver;
 
     public void removeValue(IntVar var, int val, @NotNull ICause cause) {}
     public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
@@ -89,12 +90,64 @@ public class ExplanationEngine implements Serializable {
 
     /**
      * Builds an ExplanationEngine
-     * @param env associated solver's environment
+     * @param slv associated solver's environment
      */
-    public ExplanationEngine(IEnvironment env) {
-        this.env = env;
+    public ExplanationEngine(Solver slv) {
+        this.solver = slv;
     }
 
 
+    @Override
+    public void beforeInitialize() { }
 
+    @Override
+    public void afterInitialize() { }
+
+    @Override
+    public void beforeInitialPropagation() { }
+
+    @Override
+    public void afterInitialPropagation() { }
+
+    @Override
+    public void beforeOpenNode() { }
+
+    @Override
+    public void afterOpenNode() { }
+
+    @Override
+    public void onSolution() { }
+
+    @Override
+    public void beforeDownLeftBranch() {  }
+
+    @Override
+    public void afterDownLeftBranch() { }
+
+    @Override
+    public void beforeDownRightBranch() {  }
+
+    @Override
+    public void afterDownRightBranch() { }
+
+    @Override
+    public void beforeUpBranch() { }
+
+    @Override
+    public void afterUpBranch() { }
+
+    @Override
+    public void onContradiction() { }
+
+    @Override
+    public void beforeRestart() { }
+
+    @Override
+    public void afterRestart() { }
+
+    @Override
+    public void beforeClose() {  }
+
+    @Override
+    public void afterClose() { }
 }

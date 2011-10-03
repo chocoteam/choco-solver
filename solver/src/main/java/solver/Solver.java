@@ -155,7 +155,7 @@ public class Solver implements Serializable {
             default:
                 this.environment = new EnvironmentTrailing();
         }
-        this.explainer = new ExplanationEngine(this.environment);
+        this.explainer = new ExplanationEngine(this);
         this.measures = new MeasuresRecorder(this);
         this.creationTime -= System.nanoTime();
         this.engine = new PropagationEngine();
