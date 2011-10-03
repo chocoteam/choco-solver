@@ -49,8 +49,6 @@ import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
-import java.util.BitSet;
-
 /**
  * <br/>
  *
@@ -154,10 +152,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         boolean change = false;
+        ICause antipromo = cause;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
@@ -190,14 +189,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     this.notifyPropagators(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
-                        solver.explainer.removeValue(this, value, cause);
+                        solver.explainer.removeValue(this, value, antipromo);
                         this.contradiction(cause, MSG_EMPTY);
                     }
                 }
             }
         }
         if (change) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
         }
         return change;
     }
@@ -298,10 +297,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         boolean change;
+        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.explainer.updateLowerBound(this, old, value, cause);
+                solver.explainer.updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -327,7 +327,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 assert (change);
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, value, cause);
+                solver.explainer.updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -355,10 +355,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         boolean change;
+        ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.explainer.updateUpperBound(this, old, value, cause);
+                solver.explainer.updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -382,7 +383,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, value, cause);
+                solver.explainer.updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
@@ -506,12 +507,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain() {
+    public Explanation explain(int what) {
         Explanation expl = new Explanation(null, null);
-        BitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            expl.add(solver.explainer.explain(this, val));
+            if ((what == Explanation.LB && val < this.getLB())
+                    || (what == Explanation.UB && val > this.getUB())
+                    || (what == Explanation.DOM)) {
+                expl.add(solver.explainer.explain(this, val));
+            }
             val = invdom.nextSetBit(val + 1);
         }
         return expl;
@@ -550,7 +555,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 @Override
                 public int next() {
                     int old = this.value;
-                    this.value = VALUES.nextSetBit(this.value+ 1);
+                    this.value = VALUES.nextSetBit(this.value + 1);
                     return old + OFFSET;
                 }
             };
