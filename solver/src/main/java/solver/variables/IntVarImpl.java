@@ -28,6 +28,7 @@
 package solver.variables;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.memory.IStateBitSet;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -38,8 +39,6 @@ import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.delta.IntDelta;
 import solver.variables.domain.IIntDomain;
-
-import java.util.BitSet;
 
 /**
  * <br/>
@@ -101,6 +100,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         boolean change = false;
+        ICause antipromotion = cause;
         int inf = domain.getLB();
         int sup = domain.getUB();
         if (value == inf && value == sup) {
@@ -147,7 +147,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
             }
         }
         if (change) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromotion);
         }
         return change;
     }
@@ -237,6 +237,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         boolean change;
+        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
@@ -256,7 +257,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 assert (change);
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, value, cause);
+                solver.explainer.updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -284,6 +285,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         boolean change;
+        ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
@@ -302,7 +304,7 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, value, cause);
+                solver.explainer.updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
@@ -407,12 +409,16 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain() {
+    public Explanation explain(int what) {
         Explanation expl = new Explanation(null, null);
-        BitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            expl.add(solver.explainer.explain(this, val));
+            if ((what == Explanation.LB && val < this.getLB())
+                    || (what == Explanation.UB && val > this.getUB())
+                    || (what == Explanation.DOM)) {
+                expl.add(solver.explainer.explain(this, val));
+            }
             val = invdom.nextSetBit(val + 1);
         }
         return expl;

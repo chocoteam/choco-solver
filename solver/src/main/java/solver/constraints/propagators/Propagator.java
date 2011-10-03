@@ -338,7 +338,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         Explanation expl = new Explanation(null, null);
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain());
+            expl.add(v.explain(Explanation.DOM));
         }
         // and the application of the current propagator
         expl.add(this);

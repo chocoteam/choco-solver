@@ -30,6 +30,7 @@ package solver.variables.fast;
 import choco.kernel.common.util.iterators.BoundedIntIterator;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import solver.Cause;
 import solver.ICause;
@@ -46,8 +47,6 @@ import solver.variables.Variable;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-
-import java.util.BitSet;
 
 /**
  * <br/>
@@ -110,10 +109,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause antipromo = cause;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -141,10 +141,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.explainer.removeValue(this, value, cause);
+                solver.explainer.removeValue(this, value, antipromo);
                 this.contradiction(cause, MSG_EMPTY);
             }
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             return true;
         }
         return false;
@@ -235,10 +235,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.explainer.updateLowerBound(this, old, value, cause);
+                solver.explainer.updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -257,7 +258,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, value, cause);
+                solver.explainer.updateLowerBound(this, old, value, antipromo);
                 return true;
 
             }
@@ -283,10 +284,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.explainer.updateUpperBound(this, old, value, cause);
+                solver.explainer.updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -305,7 +307,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, value, cause);
+                solver.explainer.updateUpperBound(this, old, value, antipromo);
                 return true;
             }
         }
@@ -420,12 +422,16 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain() {
+    public Explanation explain(int what) {
         Explanation expl = new Explanation(null, null);
-        BitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            expl.add(solver.explainer.explain(this, val));
+            if ((what == Explanation.LB && val < this.getLB())
+                    || (what == Explanation.UB && val > this.getUB())
+                    || (what == Explanation.DOM)) {
+                expl.add(solver.explainer.explain(this, val));
+            }
             val = invdom.nextSetBit(val + 1);
         }
         return expl;

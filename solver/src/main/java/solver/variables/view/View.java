@@ -126,8 +126,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public Explanation explain() {
-        return var.explain();
+    public Explanation explain(int what) {
+        return var.explain(what);
     }
 
     @Override

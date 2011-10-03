@@ -40,6 +40,10 @@ import java.util.Set;
  * An explanation
  */
 public class Explanation extends Deduction {
+    public static final int DOM = 1;
+    public static final int LB = 2;
+    public static final int UB = 3;
+
     Set<Deduction> deductions;
     Set<Propagator> contraintes;
 
@@ -63,10 +67,17 @@ public class Explanation extends Deduction {
     }
 
     public void add(Deduction d) {
-        if (this.deductions == null) {
-            this.deductions = new HashSet<Deduction>();
+        if (d instanceof Explanation) {
+            add((Explanation) d);
         }
-        this.deductions.add(d);
+        else {
+            if (this.deductions == null) {
+                this.deductions = new HashSet<Deduction>();
+            }
+//            System.out.println("adding to expl d:" + d + " here? " + this.deductions.contains(d));
+            this.deductions.add(d);
+        }
+
     }
 
     public void reset() {
@@ -74,4 +85,30 @@ public class Explanation extends Deduction {
         this.deductions = null;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+
+
+        bf.append("D: ");
+        if (this.deductions != null)  {
+            bf.append("(" + this.deductions.size() + ") ");
+            for (Deduction d: this.deductions) {
+                bf.append(d).append(", ");
+            }
+
+            bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+         }
+
+        bf.append(" // P:");
+        if (this.contraintes != null) {
+            bf.append("(" + this.contraintes.size() + ") ");
+            for (Propagator p: this.contraintes) {
+
+                bf.append(p).append(", ");
+            }
+          bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+         }
+        return bf.toString();
+    }
 }

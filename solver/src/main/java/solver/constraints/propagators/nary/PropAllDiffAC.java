@@ -151,4 +151,15 @@ public class PropAllDiffAC extends Propagator<IntVar> {
             p.struct.deleteMatch(idxVar, i - p.struct.getMinValue());
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(alldiff_ac,");
+        for (IntVar v : vars) {
+            bf.append(v.getName()).append(" ");
+        }
+        bf.append(")");
+        return bf.toString();
+    }
 }

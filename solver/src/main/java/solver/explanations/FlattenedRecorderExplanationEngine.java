@@ -27,6 +27,7 @@
 
 package solver.explanations;
 
+import choco.kernel.memory.IEnvironment;
 import solver.variables.IntVar;
 
 /**
@@ -36,8 +37,19 @@ import solver.variables.IntVar;
  * Time: 09:27:43
  */
 public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngine {
+    public FlattenedRecorderExplanationEngine(IEnvironment env) {
+        super(env);
+    }
+
     @Override
     public Deduction explain(IntVar var, int val) {
          return database.get(getValueRemoval(var, val));
     }
+
+    @Override
+    public Explanation why(IntVar var, int val) {
+        return database.get(getValueRemoval(var, val));
+    }
+
+
 }

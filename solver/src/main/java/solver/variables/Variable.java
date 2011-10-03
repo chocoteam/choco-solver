@@ -103,7 +103,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
     int nbConstraints();
 
-    Explanation explain();
+    Explanation explain(int what);
 
     D getDelta();
 

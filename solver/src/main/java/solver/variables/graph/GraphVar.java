@@ -173,7 +173,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     //***********************************************************************************
 
     @Override
-    public Explanation explain() {
+    public Explanation explain(int what) {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 

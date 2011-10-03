@@ -27,12 +27,13 @@
 
 package solver.explanations;
 
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateBitSet;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
-import java.util.BitSet;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,15 +45,55 @@ import java.util.BitSet;
  */
 public class ExplanationEngine implements Serializable {
 
+    IEnvironment env;
 
     public void removeValue(IntVar var, int val, @NotNull ICause cause) {}
     public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
     public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
     public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {}
 
-    public BitSet getRemovedValues(IntVar v) { return null; }
+    public IStateBitSet getRemovedValues(IntVar v) { return null; }
 
+    /**
+     * Provides an explanation for the removal of value <code>val</code> from variable
+     * <code>var</code> ; the implementation is recording policy dependent
+     * for a flattened policy, the database is checked (automatically flattening explanations)
+     * for a non flattened policy, only the value removal is returned
+     *
+     * @param var an integer variable
+     * @param val an integer value
+     */
     public Deduction explain(IntVar var, int val) {return null; }
+     /**
+     * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
+     * <code>var</code>
+     *
+     * @param var an integer variable
+     * @param val an integer value
+     */
+    public Explanation why(IntVar var, int val) {return null; }
+
+
+     /**
+     * Provides the recorded explanation in database for the removal of value <code>val</code>
+     * from variable <code>var</code>
+     * The result will depend upon the recording policy of the engine
+     *
+     * @param var an integer variable
+     * @param val an integer value
+     */
+    public Explanation check(IntVar var, int val) { return null; }
+
+
+
+
+    /**
+     * Builds an ExplanationEngine
+     * @param env associated solver's environment
+     */
+    public ExplanationEngine(IEnvironment env) {
+        this.env = env;
+    }
 
 
 

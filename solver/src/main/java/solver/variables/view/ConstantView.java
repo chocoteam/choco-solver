@@ -227,7 +227,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public Explanation explain() {
+    public Explanation explain(int what) {
         return null;
     }
 

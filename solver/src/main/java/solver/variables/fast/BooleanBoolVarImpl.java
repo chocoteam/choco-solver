@@ -29,6 +29,7 @@ package solver.variables.fast;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.ICause;
 import solver.Solver;
@@ -44,8 +45,6 @@ import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
-
-import java.util.BitSet;
 
 /**
  * <br/>
@@ -370,11 +369,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     /**
      * {@inheritDoc}
+     * @param what
      */
     @Override
-    public Explanation explain() {
+    public Explanation explain(int what) {
         Explanation expl = new Explanation(null, null);
-        BitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
             expl.add(solver.explainer.explain(this, val));
@@ -382,6 +382,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
         }
         return expl;
     }
+
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {

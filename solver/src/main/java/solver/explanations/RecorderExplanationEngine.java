@@ -27,12 +27,16 @@
 
 package solver.explanations;
 
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateBitSet;
 import solver.ICause;
+import solver.constraints.propagators.Propagator;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
-import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,22 +51,23 @@ import java.util.HashMap;
  */
 public class RecorderExplanationEngine extends ExplanationEngine {
 
-    HashMap<Variable, BitSet> removedvalues; // maintien du domaine courant
+    HashMap<Variable, IStateBitSet> removedvalues; // maintien du domaine courant
     HashMap<Variable, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
     HashMap<Deduction, Explanation> database; // base d'explications
 
 
-    public RecorderExplanationEngine() {
-        removedvalues = new HashMap<Variable, BitSet>();
+    public RecorderExplanationEngine(IEnvironment environment) {
+        super(environment);
+        removedvalues = new HashMap<Variable, IStateBitSet>();
         valueremovals = new HashMap<Variable, HashMap<Integer, ValueRemoval>>();
         database = new HashMap<Deduction, Explanation>();
     }
 
     @Override
-    public BitSet getRemovedValues(IntVar v) {
-        BitSet toreturn = removedvalues.get(v);
+    public IStateBitSet getRemovedValues(IntVar v) {
+        IStateBitSet toreturn = removedvalues.get(v);
         if (toreturn == null) {
-            toreturn = new BitSet();
+            toreturn = env.makeBitSet(v.getUB());
             removedvalues.put(v, toreturn);
             valueremovals.put(v, new HashMap<Integer, ValueRemoval>());
         }
@@ -71,7 +76,13 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public Deduction explain(IntVar var, int val) {
-        return getValueRemoval(var, val);
+        ValueRemoval vr = getValueRemoval(var, val);
+        return vr;
+    }
+
+    @Override
+    public Explanation check(IntVar var, int val) {
+        return database.get(getValueRemoval(var, val));
     }
 
     protected ValueRemoval getValueRemoval(IntVar var, int val) {
@@ -85,49 +96,97 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
 
     @Override
-    public void removeValue(IntVar var, int val, ICause cause) {
-        System.out.println("recording " + var + " - " + val);
-        BitSet invdom = getRemovedValues(var);
+    public void removeValue(IntVar var, int val, ICause cause){
+        IStateBitSet invdom = getRemovedValues(var);
         Deduction vr = getValueRemoval(var, val);
         database.put(vr, cause.explain(var, vr));
+//        System.out.println("recording " + var + " - " + val + database.get(vr));
         invdom.set(val);
     }
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
-        System.out.println("recording " + var + " : " + old + " -> " + val);
-        BitSet invdom = getRemovedValues(var);
+        //System.out.println("recording " + var + " : " + old+ " -> " + val);
+        IStateBitSet invdom = getRemovedValues(var);
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
             database.put(vr, cause.explain(var, vr));
             invdom.set(v);
+ //           System.out.println("recording " + var + " - " + v + " " + database.get(vr));
         }
+
     }
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
-        System.out.println("recording " + var + " : " + old + " -> " + val);
-        BitSet invdom = getRemovedValues(var);
+        //System.out.println("recording " + var + " : " + old+ " -> " + val);
+        IStateBitSet invdom = getRemovedValues(var);
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
+//            System.out.println("vr = " + vr);
             database.put(vr, cause.explain(var, vr));
             invdom.set(v);
+//            System.out.println("recording " + var + " - " + v + " " + database.get(vr));
         }
     }
 
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
-        System.out.println("recording " + var + " instantiated to " + val);
+       //System.out.println("recording " + var + " instantiated to " + val);
 
-        BitSet invdom = getRemovedValues(var);
-        int ub = var.getUB();
-        for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
-            if (v != val) {
+       IStateBitSet invdom = getRemovedValues(var);
+       int v = invdom.nextClearBit(0);
+       while (v < invdom.size()) {
+//           System.out.println("testing value " + v);
+           if (v != val) {
                 Deduction vr = getValueRemoval(var, v);
                 database.put(vr, cause.explain(var, vr));
                 invdom.set(v);
+           }
+           v = invdom.nextClearBit(v+1);
+//           System.out.println("looking for value " + v);
+       }
+    }
+
+    @Override
+    public Explanation why(IntVar var, int val) {
+
+        Explanation toreturn = new Explanation(null, null);
+
+        if (var.contains(val)) return toreturn;
+
+
+        Set<Deduction> toexpand = new HashSet<Deduction>();
+        Set<Deduction> expanded = new HashSet<Deduction>();
+        toexpand.add(getValueRemoval(var, val));
+
+        while (! toexpand.isEmpty()) {
+            Deduction d = toexpand.iterator().next();
+            toexpand.remove(d);
+            expanded.add(d);
+            Explanation e = database.get(d);
+//            System.out.println("Expanding d " + d);
+            if (e != null) {
+                if (e.contraintes != null) {
+                    for (Propagator prop : e.contraintes) {
+                        toreturn.add(prop);
+                    }
+                }
+                if (e.deductions != null) {
+
+                    for (Deduction ded : e.deductions){
+                        if (! expanded.contains(ded)) {
+//                            System.out.println("adding ded = " + ded);
+                            toexpand.add(ded);
+                        }
+                    }
+                }
+            }
+            else {
+                toreturn.add(d);
             }
         }
+        return toreturn; 
     }
 }

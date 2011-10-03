@@ -24,74 +24,66 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
 
-import solver.ICause;
+package solver.explanations.samples;
+
+import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.explanations.Explanation;
-import solver.variables.delta.NoDelta;
+import solver.constraints.binary.GreaterOrEqualX_YC;
+import solver.search.strategy.StrategyFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
+/**
+ * Created by IntelliJ IDEA.
+ * User: njussien
+ * Date: 01/05/11
+ * Time: 13:26
+ */
+public class ExplainedSimpleProblem extends AbstractProblem {
 
-	protected V[] components;
-	protected int dim;
-	
-	public MetaVariable(String name, Solver sol, V[] vars){
-		super(name, sol);
-		components = vars;
-		dim = vars.length;
-	}
-
-	@Override
-	public boolean instantiated() {
-		for(int i=0;i<dim;i++){
-			if (!components[i].instantiated()){
-				return false;
-			}
-		}return true;
-	}
-
-    public void updatePropagationConditions(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
-    }
+    IntVar[] vars ;
+    int n = 3;
+    int vals = n+1;
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-    }
+    public void buildModel() {
+        solver = new Solver();
 
-    @Override
-	public Explanation explain(int what) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+        vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
 
-	@Override
-	public NoDelta getDelta() {
-		return NoDelta.singleton;
-	}
-	
-	public String toString() {
-        String s = this.name +" : {";
-        for(int i=0; i<dim-1; i++){
-        	s+=components[i].toString()+", ";
+
+        for (int i = 0; i < vars.length - 1 ; i++)   {
+            solver.post(new GreaterOrEqualX_YC(vars[i], vars[i+1], 1, solver));
         }
-        s+=components[dim-1].toString()+"}";
-        return s;
     }
 
-	public V[] getComponents() {
-		return components;
-	}
+    @Override
+    public void configureSolver() {
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+//       solver.explainer = new RecorderExplanationEngine(solver.getEnvironment());
+//        solver.explainer = new FlattenedRecorderExplanationEngine(solver.getEnvironment());
+    }
 
-	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
-		engine.fails(cause, this, message);
-	}
+    @Override
+    public void solve() {
+        solver.findSolution();
 
-	@Override
-	public int getType() {
-		return Variable.META;
-	}
+    }
+
+    @Override
+    public void prettyOut() {
+
+        for (IntVar v : vars ) {
+            System.out.println("* variable " + v);
+            for (int i = 1; i <= vals; i++ ) {
+                System.out.println("- value " + i + " -> " + solver.explainer.why(v, i));
+                System.out.println("  unflat : " + solver.explainer.check(v, i));
+            }
+        }
+    }
+
+     public static void main(String[] args) {
+        new ExplainedSimpleProblem().execute();
+    }
 }

@@ -52,6 +52,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
     int branch;
 
     Assignment<IntVar> assignment;
+    VariableAssignment explanation;
 
     final PoolManager<FastDecision> poolManager;
 
@@ -109,7 +110,10 @@ public class FastDecision extends AbstractDecision<IntVar> {
     @Override
     public Explanation explain(IntVar v, Deduction d) {
         Explanation expl = new Explanation(null, null);
-        expl.add(new VariableAssignment(var, value));
+        if (explanation == null) {
+            explanation = new VariableAssignment(var, value);
+        }
+        expl.add(explanation);
         return expl;
     }
 }

@@ -33,6 +33,8 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -122,10 +124,31 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
             return ESat.UNDEFINED;
     }
 
+
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(x.getName()).append(" >= ").append(y.getName()).append(" + ").append(cste);
-        return st.toString();
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".GEQ.").append(vars[1].getName());
+        bf.append("+").append(cste).append(")");
+        return bf.toString();
+    }
+
+    @Override
+    public Explanation explain(IntVar var, Deduction d) {
+        Explanation expl = new Explanation(null, null);
+        // the current deduction is due to the current domain of the involved variables
+
+        if (var.equals(x)) {
+           // a deduction has been made on x ; this is related to y only
+            expl.add(y.explain(Explanation.LB));
+        }
+        else {
+
+           expl.add(x.explain(Explanation.UB));
+        }
+        // and the application of the current propagator
+        expl.add(this);
+        return expl;
+
     }
 }

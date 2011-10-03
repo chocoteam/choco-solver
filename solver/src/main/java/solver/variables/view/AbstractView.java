@@ -26,6 +26,7 @@
  */
 package solver.variables.view;
 
+import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
@@ -217,6 +218,17 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     @Override
     public Explanation explain(IntVar v, Deduction d) {
         return null;
+    }
+
+    public Explanation explain(int what) {
+        Explanation expl = new Explanation(null, null);
+        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
+        int val = invdom.nextSetBit(0);
+        while (val != -1) {
+            expl.add(solver.explainer.explain(this, val));
+            val = invdom.nextSetBit(val + 1);
+        }
+        return expl;
     }
 
     @Override
