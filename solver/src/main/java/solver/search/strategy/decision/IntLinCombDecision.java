@@ -120,6 +120,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
 
     @Override
     public void free() {
+        previous = null;
     }
 
     @Override

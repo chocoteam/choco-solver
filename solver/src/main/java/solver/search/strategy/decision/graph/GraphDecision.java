@@ -84,6 +84,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	@Override
 	public void free() {
 		// TODO
+        previous = null;
 	}
 
 	@Override

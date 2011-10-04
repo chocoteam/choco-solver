@@ -178,8 +178,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             if (decision.hasNext()) {
                 moveTo(DOWN_RIGHT_BRANCH);
             } else {
-                decision.free();
+                Decision tmp = decision;
                 decision = decision.getPrevious();
+                tmp.free();
             }
         }
     }

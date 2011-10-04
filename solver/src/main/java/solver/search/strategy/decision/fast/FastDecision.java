@@ -87,6 +87,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
 
     @Override
     public void free() {
+        previous = null;
         poolManager.returnE(this);
     }
 
