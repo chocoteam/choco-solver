@@ -31,7 +31,6 @@ import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.explanations.VariableAssignment;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.variables.EventType;
@@ -52,7 +51,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
     int branch;
 
     Assignment<IntVar> assignment;
-    VariableAssignment explanation;
+
 
     final PoolManager<FastDecision> poolManager;
 
@@ -110,10 +109,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
     @Override
     public Explanation explain(IntVar v, Deduction d) {
         Explanation expl = new Explanation(null, null);
-        if (explanation == null) {
-            explanation = new VariableAssignment(var, value);
-        }
-        expl.add(explanation);
+        expl.add(branch < 2 ? var.getSolver().explainer.getVariableAssignment(var, value) : var.getSolver().explainer.getVariableRefutation(var, value, this));
         return expl;
     }
 }

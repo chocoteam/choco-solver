@@ -31,6 +31,7 @@ import choco.kernel.memory.IStateBitSet;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -55,12 +56,18 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     HashMap<Variable, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
     HashMap<Deduction, Explanation> database; // base d'explications
 
+    HashMap<Variable, HashMap<Integer, VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
+    HashMap<Variable, HashMap<Integer, VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
+
+
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
         removedvalues = new HashMap<Variable, IStateBitSet>();
         valueremovals = new HashMap<Variable, HashMap<Integer, ValueRemoval>>();
         database = new HashMap<Deduction, Explanation>();
+        variableassignments = new HashMap<Variable, HashMap<Integer, VariableAssignment>>();
+        variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
     }
 
     @Override
@@ -74,11 +81,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         return toreturn;
     }
 
-    @Override
-    public Deduction explain(IntVar var, int val) {
-        ValueRemoval vr = getValueRemoval(var, val);
-        return vr;
-    }
 
     @Override
     public Explanation check(IntVar var, int val) {
@@ -96,11 +98,43 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
 
     @Override
+    public VariableAssignment getVariableAssignment(IntVar var, int val) {
+        HashMap mapvar = variableassignments.get(var);
+        if (mapvar == null)  {
+            variableassignments.put(var, new HashMap<Integer, VariableAssignment>());
+            variableassignments.get(var).put(val, new VariableAssignment(var, val));
+        }
+        VariableAssignment vr = variableassignments.get(var).get(val);
+        if (vr == null) {
+            vr = new VariableAssignment(var, val);
+            variableassignments.get(var).put(val, vr);
+        }
+        return vr;
+    }
+
+    @Override
+    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
+        HashMap mapvar = variablerefutations.get(var);
+        if (mapvar == null)  {
+            variablerefutations.put(var, new HashMap<Integer, VariableRefutation>());
+            variablerefutations.get(var).put(val, new VariableRefutation(var, val, dec));
+        }
+        VariableRefutation vr = variablerefutations.get(var).get(val);
+        if (vr == null) {
+            vr = new VariableRefutation(var, val, dec);
+            variablerefutations.get(var).put(val, vr);
+        }
+        database.put(vr, vr.explain());
+        return vr;
+     }
+
+
+
+    @Override
     public void removeValue(IntVar var, int val, ICause cause){
         IStateBitSet invdom = getRemovedValues(var);
         Deduction vr = getValueRemoval(var, val);
         database.put(vr, cause.explain(var, vr));
-//        System.out.println("recording " + var + " - " + val + database.get(vr));
         invdom.set(val);
     }
 
@@ -189,4 +223,11 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         }
         return toreturn; 
     }
+
+    @Override
+     public Deduction explain(IntVar var, int val) {
+         ValueRemoval vr = getValueRemoval(var, val);
+         return vr;
+     }
+
 }

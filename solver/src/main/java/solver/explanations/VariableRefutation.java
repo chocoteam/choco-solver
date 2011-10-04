@@ -25,67 +25,46 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.explanations.samples;
+package solver.explanations;
 
-import samples.AbstractProblem;
-import solver.Solver;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.explanations.RecorderExplanationEngine;
-import solver.search.strategy.StrategyFactory;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.search.strategy.decision.Decision;
+import solver.variables.Variable;
 
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
- * Date: 01/05/11
- * Time: 13:26
+ * Date: 04/10/11
+ * Time: 13:23
  */
-public class ExplainedSimpleProblem extends AbstractProblem {
+public class VariableRefutation extends VariableAssignment {
+    Decision decision ;
 
-    IntVar[] vars ;
-    int n = 3;
-    int vals = n+1;
+    public VariableRefutation(Variable v, int vl, Decision dec) {
+        super(v, vl);
+        decision = dec;
+    }
 
-    @Override
-    public void buildModel() {
-        solver = new Solver();
-        vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
-        for (int i = 0; i < vars.length - 1 ; i++)   {
-            solver.post(new GreaterOrEqualX_YC(vars[i], vars[i+1], 1, solver));
+    public Explanation explain() {
+        System.out.println("VariableRefutation.explain");
+        Explanation expl = new Explanation(null, null);
+        Decision prev = decision.getPrevious();
+        while (prev != null) {
+
+            expl.add(prev.explain(null, null));
+
+            prev = prev.getPrevious();
         }
+
+
+        return  expl;
+
     }
+
 
     @Override
-    public void configureSolver() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
-        solver.explainer = new RecorderExplanationEngine(solver);
-//        solver.explainer = new FlattenedRecorderExplanationEngine(solver);
-    }
-
-    @Override
-    public void solve() {
-        solver.findSolution();
-        this.prettyOut();
-
-        solver.nextSolution();
-    }
-
-    @Override
-    public void prettyOut() {
-
-        for (IntVar v : vars) {
-            System.out.println("* variable " + v);
-            for (int i = 1; i <= vals; i++) {
-                if (!v.contains(i)) {
-                    System.out.println("- value " + i + " -> " + solver.explainer.why(v, i));
-                    System.out.println("  unflat : " + solver.explainer.check(v, i));
-                }
-            }
-        }
-    }
-
-     public static void main(String[] args) {
-        new ExplainedSimpleProblem().execute();
+    public String toString() {
+        StringBuilder s = new StringBuilder("");
+        s.append("refutation(").append(this.var.getName()).append(".NEQ.").append(this.val).append(")");
+        return s.toString();
     }
 }

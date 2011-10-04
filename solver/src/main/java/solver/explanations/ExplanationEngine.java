@@ -32,6 +32,7 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
@@ -94,7 +95,28 @@ public class ExplanationEngine implements Serializable, ISearchMonitor {
      */
     public ExplanationEngine(Solver slv) {
         this.solver = slv;
+        slv.getSearchLoop().plugSearchMonitor(this);
     }
+
+
+    /**
+     * provides a VariableAssignment associated to a pair variable-value
+     *
+     * @param var an integer variable
+     * @param val an integer value
+     */
+
+    public VariableAssignment getVariableAssignment(IntVar var, int val) {return null;}
+
+    /**
+     * provides a ValueRefutation associated to a pair variable-value
+     *
+     * @param var an integer variable
+     * @param val an integer value
+     */
+
+    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {return null;}
+
 
 
     @Override
