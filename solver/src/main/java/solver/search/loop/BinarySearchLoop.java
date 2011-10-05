@@ -177,7 +177,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             interrupt();
         } else {
             jumpTo--;
-            if (jumpTo == 0 && decision.hasNext()) {
+            if (jumpTo <= 0 && decision.hasNext()) {
                 moveTo(DOWN_RIGHT_BRANCH);
             } else {
                 Decision tmp = decision;
