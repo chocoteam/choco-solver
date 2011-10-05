@@ -157,7 +157,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         } catch (ContradictionException e) {
             propEngine.flushAll();
             moveTo(UP_BRANCH);
-            smList.onContradiction();
+            smList.onContradiction(e);
         }
     }
 

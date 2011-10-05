@@ -31,8 +31,10 @@ package solver.search.measure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.search.loop.monitors.VoidSearchMonitor;
 
-public final class MeasuresRecorder implements IMeasures {
+public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasures {
 
     private static final float IN_MS = 1000 * 1000f;
 
@@ -251,10 +253,6 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
     public void afterInitialPropagation() {
         initialPropagationTimeCount = System.nanoTime() - startingTime;
     }
@@ -266,32 +264,10 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-    public void afterOpenNode() {
-
-    }
-
-    @Override
     public void onSolution() {
         solutionCount++;
         updateTimeCount();
         updatePropagationCount();
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-
-    }
-
-    @Override
-    public void afterDownRightBranch() {
     }
 
     @Override
@@ -300,18 +276,8 @@ public final class MeasuresRecorder implements IMeasures {
     }
 
     @Override
-    public void afterUpBranch() {
-
-
-    }
-
-    @Override
-    public void onContradiction() {
+    public void onContradiction(ContradictionException cex) {
         failCount++;
-    }
-
-    @Override
-    public void beforeRestart() {
     }
 
     @Override
@@ -325,11 +291,6 @@ public final class MeasuresRecorder implements IMeasures {
         updateMemoryUsed();
         updatePropagationCount();
     }
-
-    @Override
-    public void afterClose() {
-    }
-
 
     //****************************************************************************************************************//
     //**************************************** PRINTERS **************************************************************//

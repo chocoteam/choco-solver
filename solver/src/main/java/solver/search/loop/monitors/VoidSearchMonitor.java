@@ -24,43 +24,87 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.search.loop.monitors;
 
-import solver.search.loop.AbstractSearchLoop;
+import solver.exception.ContradictionException;
 
 /**
- * A search monitor logger which prints statistics every XX ms.
+ * An empty ISearchMonitor.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 aožt 2010
+ * @since 05/10/11
  */
-class LogStatEveryXXms extends VoidSearchMonitor implements ISearchMonitor{
+public class VoidSearchMonitor {
 
-    Thread printer;
+    public void beforeInitialize() {
+    }
 
-    public LogStatEveryXXms(final AbstractSearchLoop searchloop, final long duration) {
+    public void afterInitialize() {
+    }
 
-        printer = new Thread() {
 
-            @Override
-            public void run() {
-                try {
-                    long sleep = duration;
-                    Thread.sleep(sleep);
-                    do {
-                        searchloop.getMeasures().updateTimeCount();
-                        searchloop.getMeasures().updatePropagationCount();
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info(">> {}", searchloop.getMeasures().toOneLineString());
-                        }
-                        Thread.sleep(sleep);
-                    } while (true);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        };
-        printer.setDaemon(true);
+    public void beforeInitialPropagation() {
+    }
+
+
+    public void afterInitialPropagation() {
+    }
+
+
+    public void beforeOpenNode() {
+    }
+
+
+    public void afterOpenNode() {
+    }
+
+
+    public void onSolution() {
+    }
+
+
+    public void beforeDownLeftBranch() {
+    }
+
+
+    public void afterDownLeftBranch() {
+    }
+
+
+    public void beforeDownRightBranch() {
+    }
+
+
+    public void afterDownRightBranch() {
+    }
+
+
+    public void beforeUpBranch() {
+    }
+
+
+    public void afterUpBranch() {
+    }
+
+
+    public void onContradiction(ContradictionException cex) {
+    }
+
+
+    public void beforeRestart() {
+    }
+
+
+    public void afterRestart() {
+    }
+
+
+    public void beforeClose() {
+    }
+
+
+    public void afterClose() {
     }
 }

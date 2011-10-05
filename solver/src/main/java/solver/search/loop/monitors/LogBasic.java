@@ -38,7 +38,7 @@ import solver.Solver;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public class LogBasic implements ISearchMonitor {
+public final class LogBasic extends VoidSearchMonitor implements ISearchMonitor{
 
     final Solver solver;
     final String version;
@@ -61,72 +61,5 @@ public class LogBasic implements ISearchMonitor {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(solver.getSearchLoop().getMeasures().toString());
         }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void afterClose() {
     }
 }

@@ -29,7 +29,7 @@ package solver.search.loop;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -40,7 +40,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public abstract class SearchLayout<S extends AbstractSearchLoop> implements ISearchMonitor, Serializable {
+public abstract class SearchLayout<S extends AbstractSearchLoop> extends VoidSearchMonitor implements Serializable {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(SearchLayout.class);
 
@@ -61,87 +61,24 @@ public abstract class SearchLayout<S extends AbstractSearchLoop> implements ISea
         return s.toString();
     }
 
-    @Override
-    public void beforeInitialize() {
-    }
 
     @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-        public void onSolution() {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("- Solution #{} found. {} \n\t{}.",
-                        new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                                searchLoop.getMeasures().toOneLineString(),
-                                print(searchLoop.strategy.vars)}
-                );
-            }
+    public void onSolution() {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("- Solution #{} found. {} \n\t{}.",
+                    new Object[]{searchLoop.getMeasures().getSolutionCount(),
+                            searchLoop.getMeasures().toOneLineString(),
+                            print(searchLoop.strategy.vars)}
+            );
         }
-
-    @Override
-    public void beforeDownLeftBranch() {
     }
 
-    @Override
-    public void afterDownLeftBranch() {
-    }
 
     @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-        public void beforeClose() {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(searchLoop.getMeasures().toString());
-            }
+    public void beforeClose() {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(searchLoop.getMeasures().toString());
         }
-
-    @Override
-    public void afterClose() {
     }
-
 
 }

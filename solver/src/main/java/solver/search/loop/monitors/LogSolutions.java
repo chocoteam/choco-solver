@@ -37,7 +37,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public class LogSolutions implements ISearchMonitor {
+public final class LogSolutions extends VoidSearchMonitor implements ISearchMonitor{
 
     final AbstractSearchLoop searchLoop;
 
@@ -63,76 +63,5 @@ public class LogSolutions implements ISearchMonitor {
         }
         return s.toString();
 
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
     }
 }

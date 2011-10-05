@@ -36,7 +36,7 @@ import solver.search.restart.IRestartStrategy;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public class RestartManager implements ISearchMonitor {
+public final class RestartManager extends VoidSearchMonitor implements ISearchMonitor{
 
     final IRestartStrategy restartStrategy; // restart strategy -- how do restarts are applied
 
@@ -56,23 +56,12 @@ public class RestartManager implements ISearchMonitor {
     }
 
     @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
     public void afterInitialize() {
         restartFromStrategyCount = 0;
         restartCutoff = restartStrategy.getScaleFactor();
 		restartStrategyLimit.overrideLimit(restartCutoff);
     }
 
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
 
     @Override
     public void beforeOpenNode() {
@@ -87,10 +76,6 @@ public class RestartManager implements ISearchMonitor {
     }
 
     @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
     public void onSolution() {
         //reset the restart limit to allow diversification
 //		//I notice that solutions appear sometimes in cluster, at least for shop-scheduling.
@@ -98,38 +83,6 @@ public class RestartManager implements ISearchMonitor {
         restartStrategyLimit.overrideLimit(restartStrategyLimit.getLimitValue() + restartCutoff);
     }
 
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction() {
-    }
-
-    @Override
-    public void beforeRestart() {
-        //LOGGER.info("Restarting search - {} Restarts", restartFromStrategyCount);
-    }
 
     @Override
     public void afterRestart() {
@@ -138,13 +91,5 @@ public class RestartManager implements ISearchMonitor {
             //searchLoop.setRestartAfterEachSolution(false);
             restartStrategyLimit.overrideLimit(Long.MAX_VALUE);
         }
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
     }
 }

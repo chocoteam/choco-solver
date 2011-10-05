@@ -26,6 +26,8 @@
  */
 package solver.search.loop.monitors;
 
+import solver.exception.ContradictionException;
+
 /**
  * <br/>
  *
@@ -129,9 +131,9 @@ public final class SearchMonitorList implements ISearchMonitor {
     }
 
     @Override
-    public void onContradiction() {
+    public void onContradiction(ContradictionException cex) {
         for (int i = 0; i < size; i++) {
-            searchMonitors[i].onContradiction();
+            searchMonitors[i].onContradiction(cex);
         }
     }
 

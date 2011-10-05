@@ -35,6 +35,7 @@ import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.objective.NoObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
 
@@ -47,7 +48,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 27/01/11
  */
-public final class FZNLayout implements ISearchMonitor {
+public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -166,72 +167,5 @@ public final class FZNLayout implements ISearchMonitor {
     public void setSearchLoop(AbstractSearchLoop searchLoop) {
         searchLoop.plugSearchMonitor(this);
         this.searchLoop = searchLoop;
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void onContradiction() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void afterClose() {
     }
 }

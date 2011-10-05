@@ -28,6 +28,7 @@ package solver.search.loop.monitors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.exception.ContradictionException;
 
 import java.io.Serializable;
 
@@ -89,7 +90,7 @@ public interface ISearchMonitor extends Serializable{
 
     void afterUpBranch();
 
-    void onContradiction();
+    void onContradiction(ContradictionException cex);
 
     void beforeRestart();
 
