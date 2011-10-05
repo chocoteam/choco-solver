@@ -275,7 +275,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public int getDomainSize() {
-        return VALUES.cardinality();
+        return SIZE.get();
     }
 
     @Override
@@ -441,22 +441,20 @@ public final class BitsetXYSumView extends AbstractSumView {
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || size == 1) {
-                filterOnGeq(this, ilb);
+                filterOnGeq(Cause.Null, ilb);
             }
             if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
-                filterOnLeq(this, iub);
+                filterOnLeq(Cause.Null, iub);
             }
-            if (true) {
-                if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
-                    if (old_size > 0) {
-                        notifyPropagators(EventType.INSTANTIATE, this);
-                        solver.explainer.instantiateTo(this, ilb, this);
-                    }
-                } else {
-                    notifyPropagators(e, this);
-                    solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                    solver.explainer.updateUpperBound(this, iub, iub, this);
+            if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
+                if (old_size > 0) {
+                    notifyPropagators(EventType.INSTANTIATE, this);
+                    solver.explainer.instantiateTo(this, ilb, this);
                 }
+            } else {
+                notifyPropagators(e, this);
+                solver.explainer.updateLowerBound(this, ilb, ilb, this);
+                solver.explainer.updateUpperBound(this, iub, iub, this);
             }
         }
     }

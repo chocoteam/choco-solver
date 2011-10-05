@@ -106,6 +106,7 @@ public class Group implements Serializable {
         }
         for (int i = 0; i < nbRequests; i++) {
             requests[i].setIndex(i);
+            requests[i].setGroup(index); //HACK: usefull for Propagation.eval() when a group is deleted...
         }
     }
 

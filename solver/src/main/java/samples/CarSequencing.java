@@ -29,7 +29,6 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
 import solver.propagation.engines.Policy;
@@ -92,15 +91,17 @@ public class CarSequencing extends AbstractProblem {
             int nbConf = options[optNum].length;
             for (int seqStart = 0; seqStart < (cars.length - optfreq[optNum][1]); seqStart++) {
                 IntVar[] carSequence = extractor(cars, seqStart, optfreq[optNum][1]);
-                IntVar[] atMost = VariableFactory.boundedArray("atmost", options[optNum].length, 0, max, solver);
-                solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
+
                 // configurations that include given option may be chosen
-                // optfreq[optNum][0] times AT MOST
+                IntVar[] atMost = new IntVar[nbConf];
                 for (int i = 0; i < nbConf; i++) {
-                    solver.post(ConstraintFactory.leq(atMost[i], optfreq[optNum][0], solver));
+                // optfreq[optNum][0] times AT MOST
+                    atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
                 }
 
-                IntVar[] atLeast = VariableFactory.boundedArray("atleast", idleConfs[optNum].length, 0, max, solver);
+                solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
+
+                IntVar[] atLeast = VariableFactory.boundedArray("atleast_"+optNum+"_"+seqStart, idleConfs[optNum].length, 0, max, solver);
                 solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
                 // all others configurations may be chosen
                 solver.post(Sum.geq(atLeast, optfreq[optNum][1] - optfreq[optNum][0], solver));
@@ -109,7 +110,7 @@ public class CarSequencing extends AbstractProblem {
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = VariableFactory.enumerated("var", 0, demands[i], solver);
+            expArray[i] = VariableFactory.enumerated("var_"+i, 0, demands[i], solver);
             values[i] = i;
         }
         solver.post(GlobalCardinality.make(cars, values, expArray, solver));

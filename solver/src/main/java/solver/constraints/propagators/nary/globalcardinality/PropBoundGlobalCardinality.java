@@ -226,6 +226,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     public void propagateOnRequest(IRequest<IntVar> request, int idx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             int val = vars[idx].getValue();
+            forcePropagate();
             // if a value has been instantiated to its max number of occurrences
             // remove it from all variables
             if (idx < nbVars) {
@@ -238,6 +239,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
         } else {
             if (EventType.isInclow(mask)) {
+                forcePropagate();
                 if (idx < nbVars) {
                     if (!vars[idx].hasEnumeratedDomain()) {
                         filterBCOnInf(idx);
@@ -245,26 +247,21 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
                 }
             }
             if (EventType.isDecupp(mask)) {
+                forcePropagate();
                 if (idx < nbVars) {
                     if (!vars[idx].hasEnumeratedDomain()) {
                         filterBCOnSup(idx);
                     }
                 }
             }
-            if (EventType.isRemove(mask)) {
-                if (idx < nbVars) {
-                    IntVar var = request.getVariable();
-                    IntDelta delta = var.getDelta();
-                    int f = request.fromDelta();
-                    int l = request.toDelta();
-                    delta.forEach(rem_proc, f, l);
-                }
-            }
         }
-//        if (getNbRequestEnqued() == 0) {
-//            filter();
-//        }
-        forcePropagate();
+        if (idx < nbVars) {
+            IntVar var = request.getVariable();
+            IntDelta delta = var.getDelta();
+            int f = request.fromDelta();
+            int l = request.toDelta();
+            delta.forEach(rem_proc, f, l);
+        }
     }
 
     @Override

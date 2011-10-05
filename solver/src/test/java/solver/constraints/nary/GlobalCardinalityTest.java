@@ -62,7 +62,7 @@ public class GlobalCardinalityTest {
 
         Constraint gcc = GlobalCardinality.make(vars,
                 new int[]{1, 1, 1, 0, 0}, new int[]{2, 2, 1, 2, 2}, 0,
-                GlobalCardinality.Consistency.AC, solver);
+                GlobalCardinality.Consistency.BC, solver);
 
         solver.post(gcc);
         try {
