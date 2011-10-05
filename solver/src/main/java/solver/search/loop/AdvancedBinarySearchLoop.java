@@ -81,6 +81,7 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
             } catch (ContradictionException e) {
                 propEngine.flushAll();
                 moveTo(UP_BRANCH);
+                jumpTo = 1;
                 smList.onContradiction(e);
             }
         }
@@ -112,6 +113,7 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
             propEngine.flushAll();
             nbPrevisouDecisions.add(1);
             moveTo(UP_BRANCH);
+            jumpTo = 1;
             smList.onContradiction(e);
         }
 

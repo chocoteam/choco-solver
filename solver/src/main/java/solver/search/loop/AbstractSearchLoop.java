@@ -117,6 +117,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * initial value is <code>INITIAL_PROPAGATION</code> */
     int nextState;
 
+    // Store the number of wrolds to jump to -- usefull in UpBranch
+    int jumpTo;
+
     /**
      * Stores the search measures
      */
@@ -178,7 +181,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                     "!! Be sure you are respecting one of these call configurations :\n " +
                     "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
-        if(strategy == null){
+        if (strategy == null) {
             throw new SolverException("!! The search strategy is not defined.\n" +
                     "!! Please set a predefined one using StrategyFactory or build your own.");
         }
@@ -383,6 +386,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.solutionPoolCapacity = solutionPoolCapacity;
     }
 
+
+    public void overridePreviousWolrd(int gap) {
+        this.jumpTo = gap;
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// GETTERS ////////////////////////////////////////////////////////////////////

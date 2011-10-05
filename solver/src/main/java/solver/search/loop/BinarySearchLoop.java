@@ -157,6 +157,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         } catch (ContradictionException e) {
             propEngine.flushAll();
             moveTo(UP_BRANCH);
+            jumpTo = 1;
             smList.onContradiction(e);
         }
     }
@@ -175,7 +176,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             // The entire tree search has been explored, the search cannot be followed
             interrupt();
         } else {
-            if (decision.hasNext()) {
+            jumpTo--;
+            if (jumpTo == 0 && decision.hasNext()) {
                 moveTo(DOWN_RIGHT_BRANCH);
             } else {
                 Decision tmp = decision;
