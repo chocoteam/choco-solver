@@ -27,7 +27,6 @@
 
 package solver.variables.domain;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.variables.delta.Delta;
@@ -55,8 +54,6 @@ public final class IntervalIntDomain implements IIntDomain {
     private final IStateInt upperbound;
 
     private final choco.kernel.memory.IStateInt size;
-
-    protected DisposableIntIterator _cachedIterator;
 
     IntDelta delta = NoDelta.singleton;
 

@@ -27,7 +27,6 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
@@ -43,9 +42,9 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
-import solver.variables.delta.NoDelta;
 
 /**
  * A IntVar with one domain value.
@@ -274,32 +273,6 @@ public class ConstantView extends AbstractVariable implements IntVar {
     @Override
     public int getType() {
         return Variable.INTEGER;
-    }
-
-    private static class CsteIt extends DisposableIntIterator {
-        boolean next;
-        final int constante;
-
-        private CsteIt(int constante) {
-            this.constante = constante;
-        }
-
-        @Override
-        public void init() {
-            super.init();
-            this.next = true;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return next;
-        }
-
-        @Override
-        public int next() {
-            this.next = false;
-            return constante;
-        }
     }
 
     @Override

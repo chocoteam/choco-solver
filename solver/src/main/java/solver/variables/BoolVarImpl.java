@@ -28,7 +28,6 @@
 package solver.variables;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IStateBitSet;
@@ -61,8 +60,6 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     protected boolean reactOnRemoval = false;
 
     protected HeuristicVal heuristicVal;
-
-    private DisposableIntIterator _iterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 

@@ -26,7 +26,6 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
@@ -162,30 +161,6 @@ public class MinusView extends View<IntVar> {
             var.notifyPropagators(eventType.mask == 4 ? EventType.DECUPP : EventType.INCLOW, o);
         } else {
             var.notifyPropagators(eventType, o);
-        }
-    }
-
-    private static class MinusIt extends DisposableIntIterator {
-        DisposableIntIterator oIterator;
-
-        public void init(DisposableIntIterator oIterator) {
-            this.oIterator = oIterator;
-        }
-
-        @Override
-        public void dispose() {
-            this.oIterator.dispose();
-            super.dispose();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.oIterator.hasNext();
-        }
-
-        @Override
-        public int next() {
-            return -this.oIterator.next();
         }
     }
 

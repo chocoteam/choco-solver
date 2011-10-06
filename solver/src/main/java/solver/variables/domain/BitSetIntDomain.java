@@ -27,7 +27,6 @@
 
 package solver.variables.domain;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.OneWordS32BitSet;
@@ -63,8 +62,6 @@ public final class BitSetIntDomain implements IIntDomain {
      * offset of the lower bound and the first value in the domain
      */
     int offset;
-
-    protected DisposableIntIterator _cachedIterator;
 
     public BitSetIntDomain(int[] sortedValues, IEnvironment env) {
         offset = sortedValues[0];
