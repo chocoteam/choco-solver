@@ -72,7 +72,7 @@ public class PropAllDifferent extends AbstractBipartiteMatching {
     public int getPropagationConditions(int vIdx) {
         // the propagator does not react on bound events, but the constraint has to simulate them.
         // (convertion from bound events to remaval events).
-        return EventType.ALL_MASK();
+        return EventType.INT_ALL_MASK();
     }
 
 

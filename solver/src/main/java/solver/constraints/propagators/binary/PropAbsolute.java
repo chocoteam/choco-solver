@@ -59,7 +59,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.ALL_MASK();
+            return EventType.INT_ALL_MASK();
         } else {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         }

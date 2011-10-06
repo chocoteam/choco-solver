@@ -126,7 +126,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.ALL_MASK();
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
 	}
 
 	@Override

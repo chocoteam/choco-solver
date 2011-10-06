@@ -90,8 +90,11 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
 
 
     private void addAll(EventType e) {
+//        if ((e.mask & evtmask) == 0) {
+//            evtmask += e.mask;
+//        }
         if ((e.mask & evtmask) == 0) {
-            evtmask += e.mask;
+            evtmask |= e.fullmask;
         }
         last = variable.getDelta().size();
     }

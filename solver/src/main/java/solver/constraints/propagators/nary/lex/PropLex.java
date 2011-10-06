@@ -73,7 +73,7 @@ public class PropLex extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.ALL_MASK();
+        return EventType.INT_ALL_MASK();
     }
 
     @Override

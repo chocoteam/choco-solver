@@ -143,7 +143,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_MASK() + EventType.ENFORCEARC.mask  + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
+		return EventType.INT_ALL_MASK() + EventType.ENFORCEARC.mask  + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
 	}
 
 	@Override

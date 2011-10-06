@@ -46,34 +46,36 @@ package solver.variables;
  */
 public enum EventType {
 
-    VOID(0),
-    PROPAGATE(1),
+    VOID(0, 0),
+    PROPAGATE(1, 1),
     // INTVAR EVENT
-    REMOVE(2),
-    INCLOW(4),
-    DECUPP(8),
-    BOUND(12),
-    INSTANTIATE(16),
+    REMOVE(2, 2),
+    INCLOW(4, 6),
+    DECUPP(8, 10),
+    BOUND(12, 14),
+    INSTANTIATE(16, 30),
     // SETVAR
-    REMENV( 1 << 5),
-    ADDKER(1 << 6),
-    SETINSTANTIATE(1 << 7),
+    REMENV(32, 32),
+    ADDKER(64, 64),
+    SETINSTANTIATE(128, 128),
     // GRAPHVAR EVENT
-    REMOVENODE(1 << 8),
-    ENFORCENODE(1 << 9),
-    REMOVEARC(1 << 10),
-    ENFORCEARC(1 << 11),
+    REMOVENODE(256, 256),
+    ENFORCENODE(512, 512),
+    REMOVEARC(1024, 1024),
+    ENFORCEARC(2048, 2048),
     // META VARIABLE
-    META(1<<12);
+    META(4096, 4096);
 
     public final int mask;
+    public final int fullmask;
 
-    EventType(int mask) {
+    EventType(int mask, int fullmask) {
         this.mask = mask;
+        this.fullmask = fullmask;
     }
 
-    public static int ALL_MASK() {
-        return INSTANTIATE.mask + INCLOW.mask + DECUPP.mask + REMOVE.mask;
+    public static int INT_ALL_MASK() {
+        return INSTANTIATE.fullmask;
     }
 
     public static boolean isInstantiate(int mask) {
@@ -100,7 +102,7 @@ public enum EventType {
         return (mask & PROPAGATE.mask) != 0;
     }
 
-    public static boolean anInstantiationEvent(int mask){
+    public static boolean anInstantiationEvent(int mask) {
         return (mask & (INSTANTIATE.mask + SETINSTANTIATE.mask)) != 0;
     }
 }

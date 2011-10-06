@@ -57,7 +57,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vars[0].hasEnumeratedDomain()) {
-            return EventType.ALL_MASK();
+            return EventType.INT_ALL_MASK();
         }
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }

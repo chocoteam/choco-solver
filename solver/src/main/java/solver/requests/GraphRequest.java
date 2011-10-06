@@ -122,8 +122,8 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
     }
 
     private void addAll(EventType e) {
-        if ((e.mask & evtmask) == 0) {
-            evtmask += e.mask;
+        if ((e.fullmask & evtmask) == 0) {
+            evtmask |= e.fullmask;
         }
         switch (e) {//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
             case REMOVENODE:

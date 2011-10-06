@@ -86,7 +86,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
         if (vIdx < dsize) {
             return EventType.INSTANTIATE.mask;
         } else {
-            return EventType.ALL_MASK();
+            return EventType.INT_ALL_MASK();
         }
     }
 

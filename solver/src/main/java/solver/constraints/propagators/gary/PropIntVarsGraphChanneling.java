@@ -140,7 +140,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ALL_MASK() + EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+		return EventType.INT_ALL_MASK() + EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 
 	@Override

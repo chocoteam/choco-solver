@@ -122,7 +122,7 @@ public class PropCount extends Propagator<IntVar> {
         if (vIdx == vars.length-1) {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         } else {
-            return EventType.ALL_MASK();
+            return EventType.INT_ALL_MASK();
         }
     }
 

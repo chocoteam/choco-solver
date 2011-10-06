@@ -66,7 +66,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.ALL_MASK();
+        return EventType.INT_ALL_MASK();
     }
 
     private void updateInfV0() throws ContradictionException {
