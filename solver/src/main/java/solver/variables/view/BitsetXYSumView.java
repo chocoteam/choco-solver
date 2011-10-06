@@ -26,8 +26,8 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.CacheIntIterator;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IStateBitSet;
 import solver.Cause;
 import solver.ICause;
@@ -41,6 +41,13 @@ import static solver.variables.AbstractVariable.*;
 /**
  * View for A+B, where A and B are IntVar or views, ensure bound consistency
  * <br/>
+ * Based on
+ * "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
+ * <br/>And <br/>
+ * "Bounds Consistency Techniques for Long Linear Constraint" <br/>
+ * W. Harvey and J. Schimpf
  *
  * @author Charles Prud'homme
  * @since 23/08/11
@@ -51,8 +58,6 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     final IStateBitSet VALUES;
 
-    protected DisposableIntIterator _iterator;
-
     public BitsetXYSumView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
         int lbA = A.getLB();
@@ -62,18 +67,17 @@ public final class BitsetXYSumView extends AbstractSumView {
         OFFSET = lbA + lbB;
         VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
 
-        CacheIntIterator itB = new CacheIntIterator(B.getLowUppIterator());
-        DisposableIntIterator itA = A.getLowUppIterator();
+
+        DisposableRangeIterator itA = A.getRangeIterator(true);
+        DisposableRangeIterator itB = B.getRangeIterator(true);
         while (itA.hasNext()) {
-            int i = itA.next();
-            itB.init();
+            itB.bottomUpInit();
             while (itB.hasNext()) {
-                int j = itB.next();
-                if (!VALUES.get(i + j - OFFSET)) {
-                    VALUES.set(i + j - OFFSET);
-                }
+                VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
+                itB.next();
             }
             itB.dispose();
+            itA.next();
         }
         itA.dispose();
         SIZE.set(VALUES.cardinality());
@@ -336,44 +340,22 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
+    @Override
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
 
                 int value;
 
                 @Override
-                public void init() {
-                    super.init();
+                public void bottomUpInit() {
+                    super.bottomUpInit();
                     this.value = LB.get() - OFFSET;
                 }
 
                 @Override
-                public boolean hasNext() {
-                    return this.value != -1;
-                }
-
-                @Override
-                public int next() {
-                    int old = this.value;
-                    this.value = VALUES.nextSetBit(this.value + 1);
-                    return old + OFFSET;
-                }
-            };
-        }
-        _iterator.init();
-        return _iterator;
-    }
-
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-
-                @Override
-                public void init() {
-                    super.init();
+                public void topDownInit() {
+                    super.topDownInit();
                     this.value = UB.get() - OFFSET;
                 }
 
@@ -383,15 +365,92 @@ public final class BitsetXYSumView extends AbstractSumView {
                 }
 
                 @Override
+                public boolean hasPrevious() {
+                    return this.value != -1;
+                }
+
+                @Override
                 public int next() {
+                    int old = this.value;
+                    this.value = VALUES.nextSetBit(this.value + 1);
+                    return old + OFFSET;
+                }
+
+                @Override
+                public int previous() {
                     int old = this.value;
                     this.value = VALUES.prevSetBit(this.value - 1);
                     return old + OFFSET;
                 }
             };
         }
-        _iterator.init();
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
+    }
+
+    @Override
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
+
+                int from;
+                int to;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    this.from = VALUES.nextSetBit(0);
+                    this.to = VALUES.nextClearBit(from + 1) - 1;
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    this.to = VALUES.prevSetBit(VALUES.size() - 1);
+                    this.from = VALUES.prevClearBit(to) + 1;
+                }
+
+                public boolean hasNext() {
+                    return this.from != -1;
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return this.to != -1;
+                }
+
+                public void next() {
+                    this.from = VALUES.nextSetBit(this.to + 1);
+                    this.to = VALUES.nextClearBit(this.from) - 1;
+                }
+
+                @Override
+                public void previous() {
+                    this.to = VALUES.prevSetBit(this.from - 1);
+                    this.from = VALUES.prevClearBit(this.to) + 1;
+                }
+
+                @Override
+                public int min() {
+                    return from + OFFSET;
+                }
+
+                @Override
+                public int max() {
+                    return to + OFFSET;
+                }
+            };
+        }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 
     /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////

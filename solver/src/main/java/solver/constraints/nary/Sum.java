@@ -51,6 +51,8 @@ import java.util.Arrays;
 
 /**
  * <br/>
+ * Bounds Consistency Techniques for Long Linear Constraint" </br>
+ * W. Harvey and J. Schimpf
  *
  * @author Charles Prud'homme
  * @since 18/03/11

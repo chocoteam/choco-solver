@@ -28,6 +28,8 @@
 package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -64,7 +66,9 @@ public class ConstantView extends AbstractVariable implements IntVar {
 
     protected int uniqueID;
 
-    private DisposableIntIterator _iterator;
+    private DisposableValueIterator _viterator;
+
+    private DisposableRangeIterator _riterator;
 
     public ConstantView(String name, int constante, Solver solver) {
         super(name, solver);
@@ -272,24 +276,6 @@ public class ConstantView extends AbstractVariable implements IntVar {
         return Variable.INTEGER;
     }
 
-    @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new CsteIt(constante);
-        }
-        _iterator.init();
-        return _iterator;
-    }
-
-    @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new CsteIt(constante);
-        }
-        _iterator.init();
-        return _iterator;
-    }
-
     private static class CsteIt extends DisposableIntIterator {
         boolean next;
         final int constante;
@@ -314,5 +300,113 @@ public class ConstantView extends AbstractVariable implements IntVar {
             this.next = false;
             return constante;
         }
+    }
+
+    @Override
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
+
+                boolean _next;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    _next = true;
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    _next = true;
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return _next;
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return _next;
+                }
+
+                @Override
+                public int next() {
+                    _next = false;
+                    return constante;
+                }
+
+                @Override
+                public int previous() {
+                    _next = false;
+                    return constante;
+                }
+
+            };
+        }
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
+    }
+
+    @Override
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
+                boolean _next;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    _next = true;
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    _next = true;
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return _next;
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return _next;
+                }
+
+                @Override
+                public void next() {
+                    _next = false;
+                }
+
+                @Override
+                public void previous() {
+                    _next = false;
+                }
+
+                @Override
+                public int min() {
+                    return constante;
+                }
+
+                @Override
+                public int max() {
+                    return constante;
+                }
+            };
+        }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 }

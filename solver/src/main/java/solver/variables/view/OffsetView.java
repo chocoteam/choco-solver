@@ -27,7 +27,8 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -39,9 +40,11 @@ import solver.variables.delta.view.ViewDelta;
 /**
  * declare an IntVar based on X and C, such as X + C
  * <p/>
- * <p/>
- * Based on "Views and Iterators for Generic Constraint Implementations",
- * C. Schulte and G. Tack
+ * declare an IntVar based on X and Y, such max(X,Y)
+ * <br/>
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
  * @author Charles Prud'homme
  * @since 04/02/11
@@ -50,7 +53,8 @@ public final class OffsetView extends View<IntVar> {
 
     final int cste;
     final IntDelta delta;
-    OffIt _iterator;
+    DisposableValueIterator _viterator;
+    DisposableRangeIterator _riterator;
 
     public OffsetView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "+" + cste + ")", var, solver);
@@ -117,19 +121,19 @@ public final class OffsetView extends View<IntVar> {
     @Override
     public int nextValue(int v) {
         int value = var.nextValue(v - cste);
-        if(value == Integer.MAX_VALUE){
+        if (value == Integer.MAX_VALUE) {
             return value;
         }
-        return  value + cste;
+        return value + cste;
     }
 
     @Override
     public int previousValue(int v) {
         int value = var.previousValue(v - cste);
-        if(value == Integer.MIN_VALUE){
+        if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }
-        return  value + cste;
+        return value + cste;
     }
 
     @Override
@@ -148,51 +152,120 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new OffIt(cste);
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
+
+                DisposableValueIterator vit;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vit = var.getValueIterator(true);
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vit = var.getValueIterator(false);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return vit.hasNext();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return vit.hasPrevious();
+                }
+
+                @Override
+                public int next() {
+                    return vit.next() + cste;
+                }
+
+                @Override
+                public int previous() {
+                    return vit.previous() + cste;
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vit.dispose();
+                }
+            };
         }
-        _iterator.init(var.getLowUppIterator());
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
     @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new OffIt(cste);
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
+
+                DisposableRangeIterator vir;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vir = var.getRangeIterator(true);
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vir = var.getRangeIterator(false);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return vir.hasNext();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return vir.hasPrevious();
+                }
+
+                @Override
+                public void next() {
+                    vir.next();
+                }
+
+                @Override
+                public void previous() {
+                    vir.previous();
+                }
+
+                @Override
+                public int min() {
+                    return vir.min() + cste;
+                }
+
+                @Override
+                public int max() {
+                    return vir.max() + cste;
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vir.dispose();
+                }
+            };
         }
-        _iterator.init(var.getUppLowIterator());
-        return _iterator;
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
-
-    private static class OffIt extends DisposableIntIterator {
-        DisposableIntIterator oIterator;
-        final int cste;
-
-        public OffIt(int cste) {
-            this.cste = cste;
-        }
-
-        public void init(DisposableIntIterator oIterator) {
-            this.oIterator = oIterator;
-        }
-
-        @Override
-        public void dispose() {
-            this.oIterator.dispose();
-            super.dispose();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return this.oIterator.hasNext();
-        }
-
-        @Override
-        public int next() {
-            return this.oIterator.next() + cste;
-        }
-    }
-
-
 }

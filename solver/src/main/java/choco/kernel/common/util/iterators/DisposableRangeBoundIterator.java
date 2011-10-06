@@ -24,19 +24,71 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package choco.kernel.common.util.iterators;
 
-import java.io.Serializable;
-import java.util.Iterator;
+import solver.variables.IntVar;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 2 juil. 2009
-* Since : Choco 2.1.0
-* Update : Choco 2.1.0
-*/
-public abstract class DisposableIterator<E> extends Disposable implements Iterator<E>, Serializable {
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 05/10/11
+ */
+public class DisposableRangeBoundIterator extends DisposableRangeIterator {
 
+    int from;
+    int to;
+    boolean _next = true;
+
+    IntVar var;
+
+    public DisposableRangeBoundIterator(IntVar var) {
+        this.var = var;
+    }
+
+    @Override
+    public void bottomUpInit() {
+        super.bottomUpInit();
+        _next = true;
+        from = var.getLB();
+        to = var.getUB();
+    }
+
+    @Override
+    public void topDownInit() {
+        super.topDownInit();
+        _next = true;
+        from = var.getLB();
+        to = var.getUB();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return _next;
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return _next;
+    }
+
+    @Override
+    public void next() {
+        _next = false;
+    }
+
+    @Override
+    public void previous() {
+        _next = false;
+    }
+
+    @Override
+    public int min() {
+        return from;
+    }
+
+    @Override
+    public int max() {
+        return to;
+    }
 }

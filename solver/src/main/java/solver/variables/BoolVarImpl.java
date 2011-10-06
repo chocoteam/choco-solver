@@ -29,11 +29,14 @@ package solver.variables;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IStateBitSet;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -326,6 +329,7 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     /**
      * {@inheritDoc}
+     *
      * @param what
      */
     @Override
@@ -353,66 +357,12 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int ub;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = getLB();
-                    this.ub = getUB();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value < ub;
-                }
-
-                @Override
-                public int next() {
-                    int old = value;
-                    value = domain.nextValue(this.value);
-                    return old;
-                }
-            };
-        }
-        _iterator.init();
-        return _iterator;
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        throw new SolverException("Value Iterator is not implemented for BoolVarImpl");
     }
 
     @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int lb;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = getUB();
-                    this.lb = getLB();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value > lb;
-                }
-
-                @Override
-                public int next() {
-                    int old = value;
-                    value = domain.previousValue(this.value);
-                    return old;
-                }
-            };
-        }
-        _iterator.init();
-        return _iterator;
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        throw new SolverException("Range Iterator is not implemented for BoolVarImpl");
     }
 }

@@ -26,8 +26,7 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.BoundedIntIterator;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.*;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -40,8 +39,14 @@ import static solver.variables.AbstractVariable.*;
 
 /**
  * View for A+B, where A and B are IntVar or views, ensure bound consistency
- * based on "Bounds Consistency Techniques for Long Linear Constraint"
  * <br/>
+ * Based on
+ * "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
+ * <br/>And <br/>
+ * "Bounds Consistency Techniques for Long Linear Constraint" <br/>
+ * W. Harvey and J. Schimpf
  *
  * @author Charles Prud'homme
  * @since 23/08/11
@@ -247,21 +252,28 @@ public final class IntervalXYSumView extends AbstractSumView {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueBoundIterator(this);
         }
-        _iterator.init(this.LB.get(), this.UB.get());
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
-    @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeBoundIterator(this);
         }
-        _iterator.init(this.UB.get(), this.LB.get());
-        return _iterator;
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 
     /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
@@ -308,10 +320,10 @@ public final class IntervalXYSumView extends AbstractSumView {
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnGeq(this, ilb);
+                filterOnGeq(Cause.Null, ilb);
             }
             if (up || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnLeq(this, iub);
+                filterOnLeq(Cause.Null, iub);
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, this);

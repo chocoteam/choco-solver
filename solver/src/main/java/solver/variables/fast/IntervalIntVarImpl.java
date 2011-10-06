@@ -27,8 +27,7 @@
 
 package solver.variables.fast;
 
-import choco.kernel.common.util.iterators.BoundedIntIterator;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.*;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
@@ -66,7 +65,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     protected HeuristicVal heuristicVal;
 
-    private BoundedIntIterator _iterator;
+    private DisposableValueIterator _viterator;
+
+    private DisposableRangeIterator _riterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -451,20 +452,27 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueBoundIterator(this);
         }
-        _iterator.init(this.LB.get(), this.UB.get());
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
-    @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeBoundIterator(this);
         }
-        _iterator.init(this.UB.get(), this.LB.get());
-        return _iterator;
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 }

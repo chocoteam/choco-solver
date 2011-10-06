@@ -26,6 +26,8 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
@@ -66,6 +68,10 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     protected final IRequestList<IRequest> requests;
 
     protected final IPropagationEngine engine;
+
+    protected DisposableValueIterator _viterator;
+
+    protected DisposableRangeIterator _riterator;
 
     public AbstractView(IntVar a, IntVar b, Solver solver) {
         this.A = a;

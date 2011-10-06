@@ -27,6 +27,8 @@
 package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -41,8 +43,10 @@ import solver.variables.delta.view.ViewDelta;
 /**
  * View for -V, where V is a IntVar or view
  * <p/>
- * Based on "Views and Iterators for Generic Constraint Implementations",
- * C. Schulte and G. Tack
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
  * @author Charles Prud'homme
  * @since 23/08/11
@@ -51,7 +55,8 @@ public class MinusView extends View<IntVar> {
 
     final IntDelta delta;
 
-    MinusIt _iterator;
+    DisposableValueIterator _viterator;
+    DisposableRangeIterator _riterator;
 
     public MinusView(final IntVar var, Solver solver) {
         super("-(" + var.getName() + ")", var, solver);
@@ -160,24 +165,6 @@ public class MinusView extends View<IntVar> {
         }
     }
 
-    @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new MinusIt();
-        }
-        _iterator.init(var.getUppLowIterator());
-        return _iterator;
-    }
-
-    @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new MinusIt();
-        }
-        _iterator.init(var.getLowUppIterator());
-        return _iterator;
-    }
-
     private static class MinusIt extends DisposableIntIterator {
         DisposableIntIterator oIterator;
 
@@ -200,6 +187,124 @@ public class MinusView extends View<IntVar> {
         public int next() {
             return -this.oIterator.next();
         }
+    }
+
+    @Override
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
+
+                DisposableValueIterator vit;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vit = var.getValueIterator(false);
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vit = var.getValueIterator(true);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return vit.hasPrevious();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return vit.hasNext();
+                }
+
+                @Override
+                public int next() {
+                    return -vit.previous();
+                }
+
+                @Override
+                public int previous() {
+                    return -vit.next();
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vit.dispose();
+                }
+            };
+        }
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
+    }
+
+    @Override
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
+
+                DisposableRangeIterator vir;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vir = var.getRangeIterator(false);
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vir = var.getRangeIterator(true);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return vir.hasPrevious();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return vir.hasNext();
+                }
+
+                @Override
+                public void next() {
+                    vir.previous();
+                }
+
+                @Override
+                public void previous() {
+                    vir.next();
+                }
+
+                @Override
+                public int min() {
+                    return -vir.max();
+                }
+
+                @Override
+                public int max() {
+                    return -vir.min();
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vir.dispose();
+                }
+            };
+        }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 
     ///////////////

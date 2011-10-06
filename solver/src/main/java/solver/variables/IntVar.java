@@ -27,7 +27,8 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -39,10 +40,11 @@ import solver.variables.delta.IntDelta;
  * Interface for integer variables. Provides every required services.
  * The domain is explictly represented but is not (and should not be) accessible from outside.
  * <br/>
+ *
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable<IntDelta>{
+public interface IntVar extends Variable<IntDelta> {
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -74,8 +76,8 @@ public interface IntVar extends Variable<IntDelta>{
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param from lower bound of the interval to remove (int)
-     * @param to upper bound of the interval to remove(int)
+     * @param from  lower bound of the interval to remove (int)
+     * @param to    upper bound of the interval to remove(int)
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
@@ -142,7 +144,6 @@ public interface IntVar extends Variable<IntDelta>{
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
      *
-     *
      * @param value int
      * @return <code>true</code> if the value belongs to the domain of <code>this</code>, <code>false</code> otherwise.
      */
@@ -187,10 +188,10 @@ public interface IntVar extends Variable<IntDelta>{
     /**
      * Returns the next value just after v in <code>this</code>.
      * If no such value exists, returns Integer.MAX_VALUE;
-     *
+     * <p/>
      * To iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     *
+     * <p/>
      * <pre>
      * int ub = iv.getUB();
      * for (int i = iv.getLB(); i <= ub; i = iv.nextValue(i)) {
@@ -205,10 +206,10 @@ public interface IntVar extends Variable<IntDelta>{
     /**
      * Returns the previous value just befor v in <code>this</code>.
      * If no such value exists, returns Integer.MIN_VALUE;
-     *
+     * <p/>
      * To iterate over the values in a <code>IntVar</code>,
      * use the following loop:
-     *
+     * <p/>
      * <pre>
      * int lb = iv.getLB();
      * for (int i = iv.getUB(); i >= lb; i = iv.previousValue(i)) {
@@ -220,9 +221,81 @@ public interface IntVar extends Variable<IntDelta>{
      */
     int previousValue(int v);
 
-    DisposableIntIterator getLowUppIterator();
 
-    DisposableIntIterator getUppLowIterator();
+    /**
+     * Retrieves an iterator over values of <code>this</code>.
+     * <p/>
+     * The values can be iterated in a bottom-up way or top-down way.
+     * <p/>
+     * To bottom-up iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     * <p/>
+     * <pre>
+     * DisposableValueIterator vit = var.getValueIterator(true);
+     * while(vit.hasNext()){
+     *     int v = vit.next();
+     *     // operate on value v here
+     * }
+     * vit.dispose();</pre>
+     *
+     * <p/>
+     * To top-down iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     * <p/>
+     * <pre>
+     * DisposableValueIterator vit = var.getValueIterator(false);
+     * while(vit.hasPrevious()){
+     *     int v = vit.previous();
+     *     // operate on value v here
+     * }
+     * vit.dispose();</pre>
+     *
+     * <b>Using both previous and next can lead to unexpected behaviour.</b>
+     *
+     * @param bottomUp way to iterate over values. <code>true</code> means from lower bound to upper bound,
+     * <code>false</code> means from upper bound to lower bound.
+     * @return a disposable iterator over values of <code>this</code>.
+     */
+    DisposableValueIterator getValueIterator(boolean bottomUp);
+
+    /**
+     * Retrieves an iterator over ranges (or intervals) of <code>this</code>.
+     * <p/>
+     * The ranges can be iterated in a bottom-up way or top-down way.
+     * <p/>
+     * To bottom-up iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     * <p/>
+     * <pre>
+     * DisposableRangeIterator rit = var.getRangeIterator(true);
+     * while (rit.hasNext()) {
+     *     int from = rit.min();
+     *     int to = rit.max();
+     *     // operate on range [from,to] here
+     *     rit.next();
+     * }
+     * rit.dispose();</pre>
+     * <p/>
+     * To top-down iterate over the values in a <code>IntVar</code>,
+     * use the following loop:
+     * <p/>
+     * <pre>
+     * DisposableRangeIterator rit = var.getRangeIterator(false);
+     * while (rit.hasPrevious()) {
+     *     int from = rit.min();
+     *     int to = rit.max();
+     *     // operate on range [from,to] here
+     *     rit.previous();
+     * }
+     * rit.dispose();</pre>
+     *
+     * <b>Using both previous and next can lead to unexpected behaviour.</b>
+     *
+     * @param bottomUp way to iterate over ranges. <code>true</code> means from lower bound to upper bound,
+     * <code>false</code> means from upper bound to lower bound.
+     * @return a disposable iterator over ranges of <code>this</code>.
+     */
+    DisposableRangeIterator getRangeIterator(boolean bottomUp);
 
     /**
      * Defines the value iterator, ie the way to iterate over the domain's values, for <code>this</code>
@@ -241,6 +314,7 @@ public interface IntVar extends Variable<IntDelta>{
     /**
      * Indicates wether (or not) <code>this</code> has an enumerated domain (represented in extension)
      * or not (only bounds)
+     *
      * @return <code>true</code> if the domain is enumerated, <code>false</code> otherwise.
      */
     boolean hasEnumeratedDomain();

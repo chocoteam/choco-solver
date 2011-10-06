@@ -27,7 +27,8 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
 import solver.Solver;
@@ -39,8 +40,9 @@ import solver.variables.delta.view.ViewDelta;
 /**
  * declare an IntVar based on X and C, such as X * C
  * <p/>
- * Based on "Views and Iterators for Generic Constraint Implementations",
- * C. Schulte and G. Tack
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
  * @author Charles Prud'homme
  * @since 04/02/11
@@ -49,7 +51,8 @@ public final class ScaleView extends View<IntVar> {
 
     final int cste;
     final IntDelta delta;
-    ScaleIt _iterator;
+    DisposableValueIterator _viterator;
+    DisposableRangeIterator _riterator;
 
     public ScaleView(final IntVar var, final int cste, Solver solver) {
         super("(" + var.getName() + "*" + cste + ")", var, solver);
@@ -147,49 +150,158 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new ScaleIt(cste);
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
+
+                DisposableValueIterator vit;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vit = var.getValueIterator(true);
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vit = var.getValueIterator(false);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return vit.hasNext();
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return vit.hasPrevious();
+                }
+
+                @Override
+                public int next() {
+                    return vit.next() * cste;
+                }
+
+                @Override
+                public int previous() {
+                    return vit.previous() * cste;
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vit.dispose();
+                }
+            };
         }
-        _iterator.init(var.getLowUppIterator());
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
     @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new ScaleIt(cste);
-        }
-        _iterator.init(var.getUppLowIterator());
-        return _iterator;
-    }
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (cste == 1) return var.getRangeIterator(bottomUp);
+        // cste > 2, so no range anymore!
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
 
-    private static class ScaleIt extends DisposableIntIterator {
-        DisposableIntIterator oIterator;
-        final int cste;
+                DisposableRangeIterator vir;
+                int bound;
+                int value;
 
-        public ScaleIt(int cste) {
-            this.cste = cste;
-        }
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    vir = var.getRangeIterator(true);
+                    value = vir.min() - 1; // -1 for the first call to hasNext
+                    bound = vir.max();
+                    vir.next();
+                }
 
-        public void init(DisposableIntIterator oIterator) {
-            this.oIterator = oIterator;
-        }
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    vir = var.getRangeIterator(false);
+                    bound = vir.min();
+                    value = vir.max() + 1;// +1 for the first call to hasNext
+                    vir.previous();
+                }
 
-        @Override
-        public void dispose() {
-            this.oIterator.dispose();
-            super.dispose();
-        }
+                @Override
+                public boolean hasNext() {
+                    if (value < bound) {
+                        value++;
+                    }
+                    return value < Integer.MAX_VALUE;
+                }
 
-        @Override
-        public boolean hasNext() {
-            return this.oIterator.hasNext();
-        }
+                @Override
+                public boolean hasPrevious() {
+                    if (value > bound) {
+                        value--;
+                    }
+                    return value > Integer.MIN_VALUE;
+                }
 
-        @Override
-        public int next() {
-            return this.oIterator.next() * cste;
+                @Override
+                public void next() {
+                    if (value >= bound) {
+                        _next();
+                    }
+                }
+
+                private void _next() {
+                    value = bound = Integer.MAX_VALUE;
+                    if (vir.hasNext()) {
+                        value = vir.min() - 1;
+                        bound = vir.max();
+                        vir.next();
+                    }
+                }
+
+                @Override
+                public void previous() {
+                    if (value <= bound) {
+                        _previous();
+                    }
+                }
+
+                private void _previous() {
+                    value = bound = Integer.MIN_VALUE;
+                    if (vir.hasPrevious()) {
+                        value = vir.max() + 1;
+                        bound = vir.min();
+                        vir.previous();
+                    }
+                }
+
+                @Override
+                public int min() {
+                    return value * cste;
+                }
+
+                @Override
+                public int max() {
+                    return value * cste;
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vir.dispose();
+                }
+            };
         }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 }

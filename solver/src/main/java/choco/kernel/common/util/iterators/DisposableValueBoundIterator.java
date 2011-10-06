@@ -24,19 +24,58 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package choco.kernel.common.util.iterators;
 
-import java.io.Serializable;
-import java.util.Iterator;
+import solver.variables.IntVar;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 2 juil. 2009
-* Since : Choco 2.1.0
-* Update : Choco 2.1.0
-*/
-public abstract class DisposableIterator<E> extends Disposable implements Iterator<E>, Serializable {
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 05/10/11
+ */
+public class DisposableValueBoundIterator extends DisposableValueIterator {
 
+    int value;
+    int bound;
+
+    IntVar var;
+
+    public DisposableValueBoundIterator(IntVar var) {
+        this.var = var;
+    }
+
+    @Override
+    public void bottomUpInit() {
+        super.bottomUpInit();
+        value = var.getLB();
+        bound = var.getUB();
+    }
+
+    @Override
+    public void topDownInit() {
+        super.topDownInit();
+        value = var.getUB();
+        bound = var.getLB();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return value <= bound;
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return value >= bound;
+    }
+
+    @Override
+    public int next() {
+        return value++;
+    }
+
+    @Override
+    public int previous() {
+        return value--;
+    }
 }

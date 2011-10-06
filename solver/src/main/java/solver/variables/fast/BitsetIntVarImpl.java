@@ -27,7 +27,8 @@
 
 package solver.variables.fast;
 
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
@@ -75,7 +76,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     protected HeuristicVal heuristicVal;
 
-    private DisposableIntIterator _iterator;
+    private DisposableValueIterator _viterator;
+    private DisposableRangeIterator _riterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -535,44 +537,22 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
+    @Override
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueIterator() {
 
                 int value;
 
                 @Override
-                public void init() {
-                    super.init();
+                public void bottomUpInit() {
+                    super.bottomUpInit();
                     this.value = LB.get();
                 }
 
                 @Override
-                public boolean hasNext() {
-                    return this.value != -1;
-                }
-
-                @Override
-                public int next() {
-                    int old = this.value;
-                    this.value = VALUES.nextSetBit(this.value + 1);
-                    return old + OFFSET;
-                }
-            };
-        }
-        _iterator.init();
-        return _iterator;
-    }
-
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-
-                @Override
-                public void init() {
-                    super.init();
+                public void topDownInit() {
+                    super.topDownInit();
                     this.value = UB.get();
                 }
 
@@ -582,14 +562,91 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
 
                 @Override
+                public boolean hasPrevious() {
+                    return this.value != -1;
+                }
+
+                @Override
                 public int next() {
+                    int old = this.value;
+                    this.value = VALUES.nextSetBit(this.value + 1);
+                    return old + OFFSET;
+                }
+
+                @Override
+                public int previous() {
                     int old = this.value;
                     this.value = VALUES.prevSetBit(this.value - 1);
                     return old + OFFSET;
                 }
             };
         }
-        _iterator.init();
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
+    }
+
+    @Override
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeIterator() {
+
+                int from;
+                int to;
+
+                @Override
+                public void bottomUpInit() {
+                    super.bottomUpInit();
+                    this.from = VALUES.nextSetBit(0);
+                    this.to = VALUES.nextClearBit(from + 1) - 1;
+                }
+
+                @Override
+                public void topDownInit() {
+                    super.topDownInit();
+                    this.to = VALUES.prevSetBit(VALUES.size() - 1);
+                    this.from = VALUES.prevClearBit(to) + 1;
+                }
+
+                public boolean hasNext() {
+                    return this.from != -1;
+                }
+
+                @Override
+                public boolean hasPrevious() {
+                    return this.to != -1;
+                }
+
+                public void next() {
+                    this.from = VALUES.nextSetBit(this.to + 1);
+                    this.to = VALUES.nextClearBit(this.from) - 1;
+                }
+
+                @Override
+                public void previous() {
+                    this.to = VALUES.prevSetBit(this.from - 1);
+                    this.from = VALUES.prevClearBit(this.to) + 1;
+                }
+
+                @Override
+                public int min() {
+                    return from + OFFSET;
+                }
+
+                @Override
+                public int max() {
+                    return to + OFFSET;
+                }
+            };
+        }
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 }

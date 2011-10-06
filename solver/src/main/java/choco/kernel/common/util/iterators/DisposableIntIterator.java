@@ -30,49 +30,6 @@ package choco.kernel.common.util.iterators;
 /**
  * @author grochart
  */
-public abstract class DisposableIntIterator implements IntIterator {
+public abstract class DisposableIntIterator extends Disposable implements IntIterator {
 
-    public boolean reusable = true;
-
-    /**
-     * Freeze the iterator, cannot be reused.
-     */
-    public void init() {
-        reusable = false;
-    }
-
-    /**
-     * This method allows to declare that the iterator is not used anymoure. It
-     * can be reused by another object.
-     */
-    public void dispose() {
-        reusable = true;
-    }
-
-    /**
-     * Removes from the underlying collection the last element returned by the
-     * iterator (optional operation).  This method can be called only once per
-     * call to <tt>next</tt>.  The behavior of an iterator is unspecified if
-     * the underlying collection is modified while the iteration is in
-     * progress in any way other than by calling this method.
-     *
-     * @throws UnsupportedOperationException if the <tt>remove</tt>
-     *                                       operation is not supported by this Iterator.
-     * @throws IllegalStateException         if the <tt>next</tt> method has not
-     *                                       yet been called, or the <tt>remove</tt> method has already
-     *                                       been called after the last call to the <tt>next</tt>
-     *                                       method.
-     */
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Retrieve wether the iterator is free for reuse.
-     * @return true if the iterator is free for use, false otherwise.
-     */
-    public final boolean isReusable() {
-        return reusable;
-    }
 }

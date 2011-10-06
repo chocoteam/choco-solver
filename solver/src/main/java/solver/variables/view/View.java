@@ -41,6 +41,12 @@ import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
 
 /**
+ * "A view implements the same operations as a variable. A view stores a reference to a variable.
+ * Invoking an operation on the view exectutes the appropriate operation on the view's varaible."
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  * <br/>
  *
  * @author Charles Prud'homme

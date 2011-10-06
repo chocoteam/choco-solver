@@ -34,7 +34,16 @@ import solver.variables.IntVar;
 import static solver.variables.AbstractVariable.MSG_EMPTY;
 
 /**
+ * declare an IntVar based on X and Y, such X + Y
  * <br/>
+ * Based on
+ * "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
+ * <br/>And <br/>
+ * "Bounds Consistency Techniques for Long Linear Constraint" <br/>
+ * W. Harvey and J. Schimpf
+ *
  *
  * @author Charles Prud'homme
  * @since 01/09/11

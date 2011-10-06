@@ -26,8 +26,7 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.BoundedIntIterator;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.*;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -39,14 +38,16 @@ import solver.variables.IntVar;
 import static solver.variables.AbstractVariable.*;
 
 /**
+ * declare an IntVar based on X and Y, such max(X,Y)
  * <br/>
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
  * @author Charles Prud'homme
  * @since 01/09/11
  */
 public class MaxView extends AbstractView {
-
-    protected BoundedIntIterator _iterator;
 
 
     public MaxView(IntVar a, IntVar b, Solver solver) {
@@ -303,21 +304,29 @@ public class MaxView extends AbstractView {
     }
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueBoundIterator(this);
         }
-        _iterator.init(this.LB.get(), this.UB.get());
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
     @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new BoundedIntIterator();
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeBoundIterator(this);
         }
-        _iterator.init(this.UB.get(), this.LB.get());
-        return _iterator;
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 
     @Override

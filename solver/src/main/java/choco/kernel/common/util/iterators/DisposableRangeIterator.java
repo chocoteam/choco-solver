@@ -24,19 +24,23 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package choco.kernel.common.util.iterators;
 
-import java.io.Serializable;
-import java.util.Iterator;
+/**
+ * An disposable iterator for a range sequence.
+ * <p/>
+ *
+ * @author Charles Prud'homme
+ * @since 05/10/11
+ */
+public abstract class DisposableRangeIterator extends Disposable implements RangeIterator {
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 2 juil. 2009
-* Since : Choco 2.1.0
-* Update : Choco 2.1.0
-*/
-public abstract class DisposableIterator<E> extends Disposable implements Iterator<E>, Serializable {
+    public void bottomUpInit(){
+        super.init();
+    }
+
+    public void topDownInit(){
+        super.init();
+    }
 
 }

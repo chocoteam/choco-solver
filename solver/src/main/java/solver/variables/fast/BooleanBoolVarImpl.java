@@ -28,7 +28,7 @@
 package solver.variables.fast;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.*;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import solver.ICause;
@@ -81,7 +81,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     protected HeuristicVal heuristicVal;
 
-    private DisposableIntIterator _iterator;
+    private DisposableValueIterator _viterator;
+
+    private DisposableRangeIterator _riterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -369,6 +371,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     /**
      * {@inheritDoc}
+     *
      * @param what
      */
     @Override
@@ -397,62 +400,27 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public DisposableIntIterator getLowUppIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int ub;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = getLB();
-                    this.ub = getUB();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value < ub;
-                }
-
-                @Override
-                public int next() {
-                    return this.value++;
-                }
-            };
+    public DisposableValueIterator getValueIterator(boolean bottomUp) {
+        if (_viterator == null || !_viterator.isReusable()) {
+            _viterator = new DisposableValueBoundIterator(this);
         }
-        _iterator.init();
-        return _iterator;
+        if (bottomUp) {
+            _viterator.bottomUpInit();
+        } else {
+            _viterator.topDownInit();
+        }
+        return _viterator;
     }
 
-    @Override
-    public DisposableIntIterator getUppLowIterator() {
-        if (_iterator == null || !_iterator.isReusable()) {
-            _iterator = new DisposableIntIterator() {
-
-                int value;
-                int lb;
-
-                @Override
-                public void init() {
-                    super.init();
-                    this.value = getUB();
-                    this.lb = getLB();
-                }
-
-                @Override
-                public boolean hasNext() {
-                    return this.value > lb;
-                }
-
-                @Override
-                public int next() {
-                    return this.value--;
-                }
-            };
+    public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (_riterator == null || !_riterator.isReusable()) {
+            _riterator = new DisposableRangeBoundIterator(this);
         }
-        _iterator.init();
-        return _iterator;
+        if (bottomUp) {
+            _riterator.bottomUpInit();
+        } else {
+            _riterator.topDownInit();
+        }
+        return _riterator;
     }
 }
