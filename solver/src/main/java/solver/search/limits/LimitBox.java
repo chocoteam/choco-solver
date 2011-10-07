@@ -29,6 +29,8 @@ package solver.search.limits;
 
 import solver.Solver;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
 
 import java.io.Serializable;
 
@@ -44,7 +46,7 @@ import java.io.Serializable;
  * @see ILimit
  * @since 15 juil. 2010
  */
-public class LimitBox implements Serializable {
+public class LimitBox extends VoidSearchMonitor implements Serializable, ISearchMonitor {
 
     int index;
     ILimit[] limits;
@@ -63,6 +65,9 @@ public class LimitBox implements Serializable {
      * @param limit object to add
      */
     public void add(ILimit limit) {
+        if (index == 0) { // if not plugged uet
+            searchloop.plugSearchMonitor(this);
+        }
         ensureCapacity(index + 1);
         limits[index++] = limit;
     }
@@ -85,7 +90,7 @@ public class LimitBox implements Serializable {
     }
 
 
-    public void hasEncounteredLimit() {
+    private void hasEncounteredLimit() {
         for (int i = 0; i < index; i++) {
             if (limits[i].isReached()) {
                 searchloop.interrupt();
@@ -97,7 +102,7 @@ public class LimitBox implements Serializable {
     /**
      * Inits the limit checkers
      */
-    public void init() {
+    private void init() {
         for (int i = 0; i < index; i++) {
             limits[i].init();
         }
@@ -193,5 +198,23 @@ public class LimitBox implements Serializable {
 
     public static ILimit solutionLimit(Solver solver, long solutionLimit) {
         return new SolutionLimit(solver.getSearchLoop(), solutionLimit);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    @Override
+    public void afterInitialize() {
+        this.init();
+    }
+
+    @Override
+    public void afterOpenNode() {
+        this.hasEncounteredLimit();
+    }
+
+    @Override
+    public void afterUpBranch() {
+        this.hasEncounteredLimit();
     }
 }

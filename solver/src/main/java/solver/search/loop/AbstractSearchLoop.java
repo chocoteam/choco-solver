@@ -215,7 +215,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                 case OPEN_NODE:
                     smList.beforeOpenNode();
                     openNode();
-                    limitsfactory.hasEncounteredLimit();
                     smList.afterOpenNode();
                     break;
                 // GOING DOWN IN THE TREE SEARCH TO APPLY THE NEXT COMPUTED DECISION
@@ -236,7 +235,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                 case UP_BRANCH:
                     smList.beforeUpBranch();
                     upBranch();
-                    limitsfactory.hasEncounteredLimit();
                     smList.afterUpBranch();
                     break;
                 // RESTARTING THE SEARCH FROM A PREVIOUS NODE -- COMMONLY, THE ROOT NODE
@@ -262,7 +260,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         if (!propEngine.initialized()) {
             propEngine.init();
         }
-        limitsfactory.init();
         this.nextState = INITIAL_PROPAGATION;
     }
 
@@ -295,6 +292,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Close the search
+     * @return <code>true</code> if at least one solution has been found, <br/>
+     *  <code>null</code> if a limit has been reached before finding one solution, <br/>
+     *  <code>false</code> otherwise
      */
     public Boolean close() {
         if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {

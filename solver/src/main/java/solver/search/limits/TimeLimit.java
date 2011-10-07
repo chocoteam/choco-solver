@@ -28,6 +28,9 @@
 package solver.search.limits;
 
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.measure.IMeasures;
 
 /**
  * <br/>
@@ -35,19 +38,30 @@ import solver.search.loop.AbstractSearchLoop;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class TimeLimit extends ALimit {
+public class TimeLimit extends VoidSearchMonitor implements ILimit, ISearchMonitor {
+
     private long timeLimit;
+    private final IMeasures measures;
 
     protected TimeLimit(AbstractSearchLoop searchLoop, long timeLimit) {
-        super(searchLoop.getMeasures());
+        this.measures = searchLoop.getMeasures();
         this.timeLimit = timeLimit;
+        searchLoop.plugSearchMonitor(this);
     }
 
+
+    @Override
+    public void init() {
+    }
 
     @Override
     public boolean isReached() {
         final long diff = timeLimit - measures.getTimeCount();
         return diff <= 0;
+    }
+
+    @Override
+    public void update() {
     }
 
     @Override
@@ -64,4 +78,10 @@ public class TimeLimit extends ALimit {
     public void overrideLimit(long newLimit) {
         timeLimit = newLimit;
     }
+
+    @Override
+    public void beforeOpenNode() {
+        this.measures.updateTimeCount();
+    }
+
 }
