@@ -111,9 +111,9 @@ public final class IntervalXYSumView extends AbstractSumView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        solver.explainer.instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -127,10 +127,8 @@ public final class IntervalXYSumView extends AbstractSumView {
             filterOnGeq(cause, value);
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
-            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }

@@ -177,4 +177,5 @@ public abstract class AbstractVariable implements Serializable {
     public Solver getSolver() {
         return solver;
     }
+
 }

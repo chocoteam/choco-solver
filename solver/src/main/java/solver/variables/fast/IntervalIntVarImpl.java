@@ -180,9 +180,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        solver.explainer.instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -204,15 +204,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.UB.set(value);
             this.SIZE.set(1);
 
-            /*if (this.domain.empty()) {
-                solver.explainer.removeValue(this, value, cause);
-                this.contradiction(cause, MSG_EMPTY);
-            }*/
             this.notifyPropagators(e, cause);
-            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
@@ -432,6 +426,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     || (what == Explanation.UB && val > this.getUB())
                     || (what == Explanation.DOM)) {
                 expl.add(solver.explainer.explain(this, val));
+
             }
             val = invdom.nextSetBit(val + 1);
         }

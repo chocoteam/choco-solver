@@ -46,10 +46,22 @@ public class FlattenedRecorderExplanationEngine extends RecorderExplanationEngin
          return database.get(getValueRemoval(var, val));
     }
 
+
+    @Override
+    public Deduction explain(Deduction deduction) {
+        if (deduction instanceof VariableRefutation) {
+//            System.out.println("FlattenedRecorderExplanationEngine.explain");
+//            System.out.println("deduction = " + deduction + " expl: " + database.get(deduction));
+            return database.get(deduction);
+        }
+        else  {
+            return super.explain(deduction);
+        }
+    }
+
     @Override
     public Explanation why(IntVar var, int val) {
         return database.get(getValueRemoval(var, val));
     }
-
 
 }

@@ -31,6 +31,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.explanations.ExplanationEngine;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.variables.EventType;
@@ -103,14 +104,30 @@ public class FastDecision extends AbstractDecision<IntVar> {
 
     @Override
     public String toString() {
-        return String.format("%s%s %s %s (%d)", (branch == 0 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
+        return String.format("%s%s %s %s (%d)", (branch < 2 ? "" : "!"), var.getName(), assignment.toString(), value, branch);
     }
 
 
     @Override
     public Explanation explain(IntVar v, Deduction d) {
+//        System.out.println("FastDecision.explain");
+//        System.out.println("explaining " + this + " " + v + " d " + d);
         Explanation expl = new Explanation(null, null);
-        expl.add(branch < 2 ? var.getSolver().explainer.getVariableAssignment(var, value) : var.getSolver().explainer.getVariableRefutation(var, value, this));
+
+        ExplanationEngine explainer = var.getSolver().explainer;
+        expl.add(branch < 2 ? explainer.explain(getNegativeDeduction()) : explainer.explain(getPositiveDeduction()));
+        //TODO take into account the case of explained deduction (indirect
+        //need to be handled within the explainer (!)
         return expl;
+    }
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        return var.getSolver().explainer.getVariableRefutation(var, value, this);
+    }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        return var.getSolver().explainer.getVariableAssignment(var, value);
     }
 }

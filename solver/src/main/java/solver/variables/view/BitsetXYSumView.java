@@ -162,10 +162,10 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        solver.explainer.instantiateTo(this, value, cause);
         int lb = LB.get();
         if (this.instantiated()) {
             if (value != lb) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_EMPTY);
             }
             return false;
@@ -180,7 +180,6 @@ public final class BitsetXYSumView extends AbstractSumView {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                solver.explainer.removeValue(this, value, cause);
                 this.contradiction(cause, MSG_EMPTY);
             }
 
@@ -188,10 +187,8 @@ public final class BitsetXYSumView extends AbstractSumView {
             filterOnGeq(cause, value);
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
-            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }

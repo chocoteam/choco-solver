@@ -240,14 +240,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+        solver.explainer.instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
-
             int aValue = value - OFFSET;
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
@@ -266,14 +265,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                solver.explainer.removeValue(this, value, cause);
+//                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_EMPTY);
             }
             this.notifyPropagators(EventType.INSTANTIATE, cause);
-            solver.explainer.instantiateTo(this, value, cause);
+//            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
+//            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
@@ -517,10 +516,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             if ((what == Explanation.LB && val < this.getLB())
                     || (what == Explanation.UB && val > this.getUB())
                     || (what == Explanation.DOM)) {
+//                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
                 expl.add(solver.explainer.explain(this, val));
             }
             val = invdom.nextSetBit(val + 1);
         }
+//        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
         return expl;
     }
 

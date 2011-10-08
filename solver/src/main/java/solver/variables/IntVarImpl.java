@@ -190,9 +190,9 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+        solver.explainer.instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -204,14 +204,11 @@ public final class IntVarImpl extends AbstractVariable implements IntVar {
                 this.domain.restrict(value);
             }
             if (this.domain.empty()) {
-                solver.explainer.removeValue(this, value, cause);
                 this.contradiction(cause, MSG_EMPTY);
             }
             this.notifyPropagators(e, cause);
-            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }

@@ -112,4 +112,14 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
 		throw new UnsupportedOperationException();		
 	}
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        return null;
+    }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        return null;
+    }
 }

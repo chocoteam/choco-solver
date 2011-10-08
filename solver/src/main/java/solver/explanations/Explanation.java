@@ -47,15 +47,23 @@ public class Explanation extends Deduction {
     Set<Deduction> deductions;
     Set<Propagator> contraintes;
 
-    public Explanation(Set<Deduction> p, Set<Propagator> e ) {
+    public Explanation(Set<Deduction> p, Set<Propagator> e) {
         this.deductions = p;
         this.contraintes = e;
     }
 
     public void add(Explanation expl) {
-        if (this.deductions == null) this.deductions = expl.deductions;
+        if (this.deductions == null) {
+            if (expl.deductions != null) {
+                this.deductions = new HashSet<Deduction>(expl.deductions);
+            }
+        }
         else if (expl.deductions != null) this.deductions.addAll(expl.deductions);
-        if (this.contraintes == null) this.contraintes = expl.contraintes;
+        if (this.contraintes == null) {
+            if (expl.contraintes != null) {
+                this.contraintes = new HashSet<Propagator>(expl.contraintes);
+            }
+        }
         else if (expl.contraintes != null) this.contraintes.addAll(expl.contraintes);
     }
 
@@ -69,16 +77,19 @@ public class Explanation extends Deduction {
     public void add(Deduction d) {
         if (d instanceof Explanation) {
             add((Explanation) d);
-        }
-        else {
+        } else {
             if (this.deductions == null) {
                 this.deductions = new HashSet<Deduction>();
             }
 //            System.out.println("adding to expl d:" + d + " here? " + this.deductions.contains(d));
             this.deductions.add(d);
         }
-
     }
+
+    public void remove(Deduction d) {
+        this.deductions.remove(d);
+    }
+
 
     public void reset() {
         this.contraintes = null;
@@ -91,24 +102,26 @@ public class Explanation extends Deduction {
 
 
         bf.append("D: ");
-        if (this.deductions != null)  {
+        if (this.deductions != null && ! this.deductions.isEmpty()) {
             bf.append("(" + this.deductions.size() + ") ");
-            for (Deduction d: this.deductions) {
+            for (Deduction d : this.deductions) {
                 bf.append(d).append(", ");
             }
 
             bf.delete(bf.lastIndexOf(","), bf.length() - 1);
-         }
+        }
 
         bf.append(" // P:");
         if (this.contraintes != null) {
             bf.append("(" + this.contraintes.size() + ") ");
-            for (Propagator p: this.contraintes) {
+            for (Propagator p : this.contraintes) {
 
                 bf.append(p).append(", ");
             }
-          bf.delete(bf.lastIndexOf(","), bf.length() - 1);
-         }
+            bf.delete(bf.lastIndexOf(","), bf.length() - 1);
+        }
         return bf.toString();
     }
+
+
 }

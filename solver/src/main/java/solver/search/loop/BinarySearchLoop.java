@@ -44,8 +44,6 @@ import solver.search.strategy.decision.Decision;
  */
 public class BinarySearchLoop extends AbstractSearchLoop {
 
-    Decision decision;
-
     @SuppressWarnings({"unchecked"})
     BinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
         super(solver, propEngine);

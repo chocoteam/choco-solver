@@ -159,4 +159,14 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     public long getFails() {
         return fails;
     }
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        return null;
+    }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        return null;
+    }
 }

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
 
 /**
  *
@@ -55,4 +56,7 @@ public interface Decision extends ICause {
 
     void free();
 
+    // explanation related ...
+    Deduction getPositiveDeduction();
+    Deduction getNegativeDeduction();
 }

@@ -39,6 +39,7 @@ import solver.search.loop.monitors.SearchMonitorList;
 import solver.search.measure.IMeasures;
 import solver.search.solution.ISolutionPool;
 import solver.search.solution.SolutionPoolFactory;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
@@ -147,6 +148,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IObjectiveManager objectivemanager = NoObjectiveManager.get();
 
     private boolean alive;
+    public Decision decision;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver, IPropagationEngine propEngine) {

@@ -43,19 +43,28 @@ import java.io.Serializable;
  * User: njussien
  * Date: 26 oct. 2010
  * Time: 12:34:02
- *
+ * <p/>
  * A class to manage explanations. The default behavior is to do nothing !
  */
-public class ExplanationEngine extends VoidSearchMonitor implements Serializable, ISearchMonitor{
+public class ExplanationEngine extends VoidSearchMonitor implements Serializable, ISearchMonitor {
 
     Solver solver;
 
-    public void removeValue(IntVar var, int val, @NotNull ICause cause) {}
-    public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
-    public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {}
-    public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {}
+    public void removeValue(IntVar var, int val, @NotNull ICause cause) {
+    }
 
-    public IStateBitSet getRemovedValues(IntVar v) { return null; }
+    public void updateLowerBound(IntVar intVar, int old, int value, @NotNull ICause cause) {
+    }
+
+    public void updateUpperBound(IntVar intVar, int old, int value, @NotNull ICause cause) {
+    }
+
+    public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {
+    }
+
+    public IStateBitSet getRemovedValues(IntVar v) {
+        return null;
+    }
 
     /**
      * Provides an explanation for the removal of value <code>val</code> from variable
@@ -65,19 +74,42 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      *
      * @param var an integer variable
      * @param val an integer value
+     * @return a deduction
      */
-    public Deduction explain(IntVar var, int val) {return null; }
-     /**
+    public Deduction explain(IntVar var, int val) {
+        return null;
+    }
+
+    /**
+     * Provides an explanation for the deduction <code>deduction</code> ; the implementation is recording policy dependent
+     * for a flattened policy, the database is checked (automatically flattening explanations)
+     * for a non flattened policy, the deduction is returned unmodified
+     *
+     * @param deduction a Deduction
+     * @return a deduction
+     */
+    public Deduction explain(Deduction deduction) {
+        return null;
+    }
+
+
+    /**
      * Provides a FLATTENED explanation for the removal of value <code>val</code> from variable
      * <code>var</code>
      *
      * @param var an integer variable
      * @param val an integer value
      */
-    public Explanation why(IntVar var, int val) {return null; }
+    public Explanation why(IntVar var, int val) {
+        return null;
+    }
+
+    public Explanation why(Explanation expl) {
+        return null;
+    }
 
 
-     /**
+    /**
      * Provides the recorded explanation in database for the removal of value <code>val</code>
      * from variable <code>var</code>
      * The result will depend upon the recording policy of the engine
@@ -85,13 +117,14 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      * @param var an integer variable
      * @param val an integer value
      */
-    public Explanation check(IntVar var, int val) { return null; }
-
-
+    public Explanation check(IntVar var, int val) {
+        return null;
+    }
 
 
     /**
      * Builds an ExplanationEngine
+     *
      * @param slv associated solver's environment
      */
     public ExplanationEngine(Solver slv) {
@@ -107,7 +140,9 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      * @param val an integer value
      */
 
-    public VariableAssignment getVariableAssignment(IntVar var, int val) {return null;}
+    public VariableAssignment getVariableAssignment(IntVar var, int val) {
+        return null;
+    }
 
     /**
      * provides a ValueRefutation associated to a pair variable-value
@@ -116,6 +151,8 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      * @param val an integer value
      */
 
-    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {return null;}
+    public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
+        return null;
+    }
 
 }

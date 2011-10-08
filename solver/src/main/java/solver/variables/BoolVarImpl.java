@@ -143,9 +143,9 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+        solver.explainer.instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -158,10 +158,8 @@ public final class BoolVarImpl extends AbstractVariable implements BoolVar {
                     this.domain.restrict(value);
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.instantiateTo(this, value, cause);
                 return true;
             } else {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_UNKNOWN);
                 return false;
             }
