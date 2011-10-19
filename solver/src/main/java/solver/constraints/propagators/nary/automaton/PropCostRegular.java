@@ -89,8 +89,8 @@ public class PropCostRegular extends Propagator<IntVar> {
     @Override
     public void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
-        vars[zIdx].updateLowerBound(bounds.min.value, this);
-        vars[zIdx].updateUpperBound(bounds.max.value, this);
+        vars[zIdx].updateLowerBound(bounds.min.value, this, false);
+        vars[zIdx].updateUpperBound(bounds.max.value, this, false);
         this.prefilter();
     }
 
@@ -151,8 +151,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this, false);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this, false);
 
         DisposableIntIterator it = this.graph.inGraph.getIterator();
         //for (int id = this.graph.inGraph.nextSetBit(0) ; id >=0 ; id = this.graph.inGraph.nextSetBit(id+1))  {
@@ -264,8 +264,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this, false);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this, false);
     }
 
 

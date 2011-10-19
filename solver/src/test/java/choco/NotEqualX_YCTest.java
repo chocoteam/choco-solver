@@ -97,11 +97,11 @@ public class NotEqualX_YCTest {
         try {
             s.getSearchLoop().propEngine.init();
             s.getSearchLoop().propEngine.fixPoint();
-            vars[0].instantiateTo(1, Cause.Null);
+            vars[0].instantiateTo(1, Cause.Null, false);
             s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 2);
-            vars[1].removeValue(2, Cause.Null);
+            vars[1].removeValue(2, Cause.Null, false);
             s.getSearchLoop().propEngine.fixPoint();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 0);

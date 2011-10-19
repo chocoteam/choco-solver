@@ -57,25 +57,25 @@ public abstract class MetaRelation extends GraphRelation<MetaVariable> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyTrue(var1, var2, solver, cause);
+			unidimRelation[i].applyTrue(var1, var2, solver, cause, informCause);
 		}
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
 			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, cause);
+				unidimRelation[i].applyFalse(var1, var2, solver, cause, informCause);
 			}
 		}
 	}
 	
 	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applySymmetricFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
-			unidimRelation[i].applyFalse(var1, var2, solver, cause);
+			unidimRelation[i].applyFalse(var1, var2, solver, cause, informCause);
 		}
 	}
 	

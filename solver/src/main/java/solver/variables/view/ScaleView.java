@@ -67,28 +67,28 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return value % cste == 0 && var.removeValue(value / cste, cause);
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return value % cste == 0 && var.instantiateTo(value / cste, cause);
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound(MathUtils.divCeil(value, cste), cause);
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.updateLowerBound(MathUtils.divCeil(value, cste), cause, informCause);
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause);
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
     }
 
     @Override

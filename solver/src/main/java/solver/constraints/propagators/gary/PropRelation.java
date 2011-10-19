@@ -30,7 +30,6 @@ package solver.constraints.propagators.gary;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import solver.Cause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.relations.GraphRelation;
@@ -75,7 +74,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 		this.n = nodeVars.length;
 		this.relation = relation;
 		this.solver = solver;
-		this.nodeEnforced = new NodeEnf();
+		this.nodeEnforced = new NodeEnf(this);
 		this.arcEnforced = new EdgeEnf();
 		this.arcRemoved = new EdgeRem();
 		duration = 0;
@@ -98,9 +97,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(i) && ker.isActive(j)){
-								g.enforceArc(i, j, Cause.Null);
+								g.enforceArc(i, j, this, true);
 							}break;
-						case FALSE: g.removeArc(i, j, Cause.Null);break;
+						case FALSE: g.removeArc(i, j, this, true);break;
 						}
 					}else{
 						if(ker.isActive(i) && ker.isActive(j)){
@@ -156,14 +155,14 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	private void apply(int x, int y) throws ContradictionException{
-		relation.applyTrue(x,y, solver, Cause.Null);
+		relation.applyTrue(x,y, solver, this, true);
 	}
 
 	private void unapply(int x, int y) throws ContradictionException{
 		if(relation.isDirected() && !g.getEnvelopGraph().arcExists(y,x)){
-			relation.applySymmetricFalse(x,y, solver, Cause.Null);
+			relation.applySymmetricFalse(x,y, solver, this, true);
 		}else{
-			relation.applyFalse(x,y, solver, Cause.Null);
+			relation.applyFalse(x,y, solver, this, true);
 		}
 	}
 
@@ -177,9 +176,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 					switch(relation.isEntail(i,j)){
 					case TRUE: 
 						if(ker.isActive(i) && ker.isActive(j)){
-							g.enforceArc(i, j, Cause.Null);
+							g.enforceArc(i, j, this, true);
 						}break;
-					case FALSE: g.removeArc(i, j, Cause.Null);break;
+					case FALSE: g.removeArc(i, j, this, true);break;
 					}
 				}else{
 					if(ker.isActive(i) && ker.isActive(j)){
@@ -201,7 +200,14 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	}
 	/** When a node is enforced, the corresponding variable is checked */
 	private class NodeEnf implements IntProcedure {
-		@Override
+
+        final PropRelation p;
+
+        public NodeEnf(PropRelation p) {
+            this.p = p;
+        }
+
+        @Override
 		public void execute(int i) throws ContradictionException {
 			IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 			for(int j=0; j<n; j++){
@@ -212,9 +218,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(j)){
-								g.enforceArc(i, j, Cause.Null);
+								g.enforceArc(i, j, p, true);
 							}break;
-						case FALSE: g.removeArc(i, j, Cause.Null);break;
+						case FALSE: g.removeArc(i, j, p, true);break;
 						}
 					}else{
 						if(ker.isActive(j)){

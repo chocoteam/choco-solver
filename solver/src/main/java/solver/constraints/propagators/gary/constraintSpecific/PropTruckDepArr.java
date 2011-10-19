@@ -79,11 +79,11 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagate() throws ContradictionException {
 		for(int i=2*nbMaxTrucks;i<g.getEnvelopGraph().getNbNodes();i++){
-			g.enforceNode(i, this);
+			g.enforceNode(i, this, false);
 		}
 		int min = 2*nbtrucks.getLB();
 		for(int i=0;i<min;i++){
-			g.enforceNode(i, this);
+			g.enforceNode(i, this, false);
 		}
 	}
 
@@ -103,13 +103,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if ((mask & EventType.DECUPP.mask) != 0){
 				int ub = 2*nbtrucks.getUB();
 				for(int i=ub;i<nbMaxTrucks;i++){
-					g.removeNode(i, this);
+					g.removeNode(i, this, false);
 				}
 			}
 			if ((mask & EventType.INCLOW.mask) != 0){
 				int lb = 2*nbtrucks.getLB();
 				for(int i=0;i<lb;i++){
-					g.enforceNode(i, this);
+					g.enforceNode(i, this, false);
 				}
 			}
 		}
@@ -144,13 +144,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if(i<2*p.nbMaxTrucks){
 				int j = i+1;
 				if(i%2==0){
-					p.g.removeNode(i+1, p);
+					p.g.removeNode(i+1, p, false);
 					j++;
 				}else{
-					p.g.removeNode(i-1, p);
+					p.g.removeNode(i-1, p, false);
 				}
 				for(;j<p.nbMaxTrucks;j++){
-					p.g.removeNode(j, p);
+					p.g.removeNode(j, p, false);
 				}
 			}
 		}
@@ -171,13 +171,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if(i<2*p.nbMaxTrucks){
 				int j = i-1;
 				if(i%2==0){
-					p.g.enforceNode(i+1, p);
+					p.g.enforceNode(i+1, p, false);
 				}else{
-					p.g.enforceNode(i-1, p);
+					p.g.enforceNode(i-1, p, false);
 					j--;
 				}
 				for(;j>=0;j--){
-					p.g.enforceNode(j, p);
+					p.g.enforceNode(j, p, false);
 				}
 			}
 		}

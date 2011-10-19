@@ -126,11 +126,15 @@ public class MaxView extends AbstractView {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             this.contradiction(cause, AbstractVariable.MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -138,52 +142,62 @@ public class MaxView extends AbstractView {
                 // todo: delta...
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
                 if (A.getLB() > B.getUB()) {
-                    A.updateLowerBound(value + 1, this);
+                    A.updateLowerBound(value + 1, this, false);
                 }
                 if (B.getLB() > A.getUB()) {
-                    B.updateLowerBound(value + 1, this);
+                    B.updateLowerBound(value + 1, this, false);
                 }
             } else {
                 // todo: delta...
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
-                A.updateUpperBound(value - 1, this);
-                B.updateUpperBound(value - 1, this);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+                A.updateUpperBound(value - 1, this, false);
+                B.updateUpperBound(value - 1, this, false);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.explainer.removeValue(this, value, cause);
+                solver.explainer.removeValue(this, value, antipromo);
                 this.contradiction(cause, MSG_EMPTY);
             }
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause);
+            return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause);
+            return updateUpperBound(from - 1, cause, informCause);
         }
         return false;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         solver.explainer.instantiateTo(this, value, cause);
+        if (informCause) {
+            cause = Cause.Null;
+        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
+                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -193,13 +207,13 @@ public class MaxView extends AbstractView {
             this.UB.set(value);
             this.SIZE.set(1);
 
-            A.updateUpperBound(value, this);
-            B.updateUpperBound(value, this);
+            A.updateUpperBound(value, this, false);
+            B.updateUpperBound(value, this, false);
             if (!A.contains(value)) {
-                B.instantiateTo(value, this);
+                B.instantiateTo(value, this, false);
             }
             if (!B.contains(value)) {
-                A.instantiateTo(value, this);
+                A.instantiateTo(value, this, false);
             }
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
@@ -211,11 +225,15 @@ public class MaxView extends AbstractView {
     }
 
     @Override
-    public boolean updateLowerBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getLB();
         if (old < aValue) {
             if (this.getUB() < aValue) {
-                solver.explainer.updateLowerBound(this, old, aValue, cause);
+                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -224,19 +242,21 @@ public class MaxView extends AbstractView {
                 LB.set(aValue);
 
                 if (A.getLB() > B.getUB()) {
-                    A.updateLowerBound(aValue, this);
+                    A.updateLowerBound(aValue, this, false);
                 }
                 if (B.getLB() > A.getUB()) {
-                    B.updateLowerBound(aValue, this);
+                    B.updateLowerBound(aValue, this, false);
                 }
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, aValue, cause);
+                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
                 return true;
 
             }
@@ -245,11 +265,15 @@ public class MaxView extends AbstractView {
     }
 
     @Override
-    public boolean updateUpperBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getUB();
         if (old > aValue) {
             if (this.getLB() > aValue) {
-                solver.explainer.updateUpperBound(this, old, aValue, cause);
+                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -257,15 +281,17 @@ public class MaxView extends AbstractView {
                 SIZE.add(aValue - old);
                 UB.set(aValue);
 
-                A.updateUpperBound(aValue, this);
-                B.updateUpperBound(aValue, this);
+                A.updateUpperBound(aValue, this, false);
+                B.updateUpperBound(aValue, this, false);
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, aValue, cause);
+                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
                 return true;
             }
         }

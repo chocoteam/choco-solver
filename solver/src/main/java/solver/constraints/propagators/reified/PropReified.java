@@ -122,14 +122,14 @@ public class PropReified extends Propagator<Variable> {
         ESat sat = constraint.isEntailed();
         switch (sat) {
             case TRUE:
-                bVar.setToTrue(this);
+                bVar.setToTrue(this, false);
                 this.setPassive();
                 break;
             case FALSE:
                 sat = oppositeConstraint.isEntailed();
                 switch (sat) {
                     case TRUE:
-                        bVar.setToFalse(this);
+                        bVar.setToFalse(this, false);
                         this.setPassive();
                         break;
                     case FALSE:

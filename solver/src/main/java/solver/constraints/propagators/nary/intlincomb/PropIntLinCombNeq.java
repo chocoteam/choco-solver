@@ -105,7 +105,7 @@ public final class PropIntLinCombNeq extends AbstractPropIntLinComb {
             }else{
                 // Compute the value to remove (including position in the linear combination)
                 int value = -1 * sum / coeffs[index];
-                if(vars[index].removeValue(value, this)){
+                if(vars[index].removeValue(value, this, false)){
                     this.setPassive();
                 }
             }

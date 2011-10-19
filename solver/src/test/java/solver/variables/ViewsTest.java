@@ -420,7 +420,7 @@ public class ViewsTest {
             long t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (y.getLB() == x.getUB()) {
-                    y.updateLowerBound(0, Cause.Null);
+                    y.updateLowerBound(0, Cause.Null, false);
                 }
             }
             t += System.nanoTime();
@@ -428,7 +428,7 @@ public class ViewsTest {
             t = -System.nanoTime();
             for (int i = 0; i < 999999; i++) {
                 if (z.getLB() == x.getUB()) {
-                    z.updateLowerBound(0, Cause.Null);
+                    z.updateLowerBound(0, Cause.Null, false);
                 }
             }
             t += System.nanoTime();

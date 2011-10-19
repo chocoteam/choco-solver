@@ -24,61 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.unary;
+package samples;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.IntVar;
+import org.testng.annotations.Test;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/06/11
+ * @since 05/09/11
  */
-public class PropEqualXC extends Propagator<IntVar> {
+public class SamplesTest {
 
-    private final int constant;
+    AbstractProblem[] problems = {
+            new Alpha(),
+            new BIBD(),
+            new AllIntervalSeries(),
+            new AirPlaneLanding(),
+            new CarSequencing(),
+            new Donald(),
+            new GolombRuler(),
+            new Grocery(),
+            new Knapsack(),
+            new Langford(),
+            new LatinSquare(),
+            new MagicSeries(),
+            new MagicSquare(),
+            new Nonogram(),
+            new OrthoLatinSquare(),
+            new Partition(),
+            new Photo(),
+            new Pigeons(),
+            new SchurLemma(),
+            new SocialGolfer(),
+            new Sudoku(),
+            new WarehouseLocation()
+    };
 
-    public PropEqualXC(IntVar var, int cste, Solver solver,
-                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
-        this.constant = cste;
-    }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
-    }
-
-    @Override
-    public void propagate() throws ContradictionException {
-        vars[0].instantiateTo(constant, this, false);
-    }
-
-    @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        propagate();
-    }
-
-    @Override
-    public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
-            return ESat.TRUE;
-        } else if (vars[0].contains(constant)) {
-            return ESat.UNDEFINED;
+    @Test
+    public void testAll(){
+        for(AbstractProblem pb : problems){
+            pb.execute(new String[]{});
         }
-        return ESat.FALSE;
     }
 
-    @Override
-    public String toString() {
-        return vars[0].getName() + " = " + constant;
-    }
+
+
 }

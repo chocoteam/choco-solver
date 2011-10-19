@@ -82,28 +82,28 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return var.removeValue(-value, cause);
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.removeValue(-value, cause, informCause);
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
-        return var.removeInterval(-to, -from, cause);
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+        return var.removeInterval(-to, -from, cause, informCause);
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return var.instantiateTo(-value, cause);
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.instantiateTo(-value, cause, informCause);
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return var.updateUpperBound(-value, cause);
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.updateUpperBound(-value, cause, informCause);
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return var.updateLowerBound(-value, cause);
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return var.updateLowerBound(-value, cause, informCause);
     }
 
     @Override

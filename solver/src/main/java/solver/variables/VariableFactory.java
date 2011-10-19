@@ -63,8 +63,6 @@ public enum VariableFactory {
      * @return a BoolVar
      */
     public static BoolVar bool(String name, Solver solver) {
-        //BoolVarImpl var = new BoolVarImpl(name, solver);
-        //var.domain = new BooleanDomain(solver.getEnvironment());
         BooleanBoolVarImpl var = new BooleanBoolVarImpl(name, solver);
         var.setHeuristicVal(HeuristicValFactory.presetI(var));
         solver.associates(var);
@@ -92,8 +90,6 @@ public enum VariableFactory {
         if (min == max) {
             return Views.fixed(name, min, solver);
         } else {
-            //IntVarImpl var = new IntVarImpl(name, solver);
-            //var.domain = new IntervalIntDomain(min, max, solver.getEnvironment());
             IntVar var = new IntervalIntVarImpl(name, min, max, solver);
             var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);
@@ -122,8 +118,6 @@ public enum VariableFactory {
         if (min == max) {
             return Views.fixed(name, min, solver);
         } else {
-            //IntVarImpl var = new IntVarImpl(name, solver);
-            //var.domain = new BitSetIntDomain(min, max, solver.getEnvironment());
             BitsetIntVarImpl var = new BitsetIntVarImpl(name, min, max, solver);
             var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);
@@ -154,8 +148,6 @@ public enum VariableFactory {
         if (values.length == 1) {
             return Views.fixed(name, values[0], solver);
         } else {
-            //IntVarImpl var = new IntVarImpl(name, solver);
-            //var.domain = new BitSetIntDomain(values, solver.getEnvironment());
             BitsetIntVarImpl var = new BitsetIntVarImpl(name, values, solver);
             var.setHeuristicVal(HeuristicValFactory.presetI(var));
             solver.associates(var);

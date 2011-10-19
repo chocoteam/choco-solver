@@ -125,8 +125,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		// TODO couplage generalise
 		// PRUNING
 		// --- Bounds
-		k.updateLowerBound(min, this);
-		k.updateUpperBound(max, this);
+		k.updateLowerBound(min, this, false);
+		k.updateUpperBound(max, this, false);
 		if(k.instantiated()){
 			// --- Max
 			if(k.getValue()==max){
@@ -136,7 +136,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
-							g.removeArc(i, j, this);
+							g.removeArc(i, j, this, false);
 						}
 					}
 				}
@@ -146,13 +146,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
-						g.removeNode(cc.get(i), this);
+						g.removeNode(cc.get(i), this, false);
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel
 				TIntArrayList ap = envCcObj.getArticulationPoints();
 				for(int i=0;i<ap.size();i++){
-					g.enforceNode(ap.get(i), this);
+					g.enforceNode(ap.get(i), this, false);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();
@@ -163,13 +163,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					if(g instanceof DirectedGraphVar){
 						DirectedGraphVar dig = (DirectedGraphVar) g;
 						if (dig.getEnvelopGraph().arcExists(from, to) && !dig.getEnvelopGraph().arcExists(to, from) ){
-							g.enforceArc(from, to, this);
+							g.enforceArc(from, to, this, false);
 						}else {
-							g.enforceArc(to, from, this);
+							g.enforceArc(to, from, this, false);
 						}
 						throw new UnsupportedOperationException("check that case ");
 					}else{
-						g.enforceArc(from, to, this);
+						g.enforceArc(from, to, this, false);
 					}
 				}
 			}
@@ -219,8 +219,8 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 		// PRUNING
 		// --- Bounds
-		k.updateLowerBound(min, this);
-		k.updateUpperBound(max, this);
+		k.updateLowerBound(min, this, false);
+		k.updateUpperBound(max, this, false);
 		if(k.instantiated()){
 			// --- Max
 			if(k.getValue()==max){
@@ -230,7 +230,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
-							g.removeArc(i, j, this);
+							g.removeArc(i, j, this, false);
 						}
 					}
 				}
@@ -240,13 +240,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
-						g.removeNode(cc.get(i), this);
+						g.removeNode(cc.get(i), this, false);
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel
 				TIntArrayList ap = envCcObj.getArticulationPoints();
 				for(int i=0;i<ap.size();i++){
-					g.enforceNode(ap.get(i), this);
+					g.enforceNode(ap.get(i), this, false);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();
@@ -257,13 +257,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					if(g instanceof DirectedGraphVar){
 						DirectedGraphVar dig = (DirectedGraphVar) g;
 						if (dig.getEnvelopGraph().arcExists(from, to) && !dig.getEnvelopGraph().arcExists(to, from) ){
-							g.enforceArc(from, to, this);
+							g.enforceArc(from, to, this, false);
 						}else {
-							g.enforceArc(to, from, this);
+							g.enforceArc(to, from, this, false);
 						}
 						throw new UnsupportedOperationException("check that case ");
 					}else{
-						g.enforceArc(from, to, this);
+						g.enforceArc(from, to, this, false);
 					}
 				}
 			}

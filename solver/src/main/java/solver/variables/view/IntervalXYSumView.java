@@ -62,11 +62,15 @@ public final class IntervalXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             this.contradiction(cause, AbstractVariable.MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -74,46 +78,56 @@ public final class IntervalXYSumView extends AbstractSumView {
                 // todo: delta...
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
                 filterOnGeq(cause, value + 1);
             } else {
                 // todo: delta...
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
                 filterOnLeq(cause, value - 1);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.explainer.removeValue(this, value, cause);
+                solver.explainer.removeValue(this, value, antipromo);
                 this.contradiction(cause, MSG_EMPTY);
             }
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause);
+            return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause);
+            return updateUpperBound(from - 1, cause, informCause);
         }
         return false;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         solver.explainer.instantiateTo(this, value, cause);
+        if (informCause) {
+            cause = Cause.Null;
+        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
+                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -127,19 +141,25 @@ public final class IntervalXYSumView extends AbstractSumView {
             filterOnGeq(cause, value);
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
+            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
+            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
     }
 
     @Override
-    public boolean updateLowerBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getLB();
         if (old < aValue) {
             if (this.getUB() < aValue) {
-                solver.explainer.updateLowerBound(this, old, aValue, cause);
+                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -151,11 +171,13 @@ public final class IntervalXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, aValue, cause);
+                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
                 return true;
 
             }
@@ -164,11 +186,15 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateUpperBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getUB();
         if (old > aValue) {
             if (this.getLB() > aValue) {
-                solver.explainer.updateUpperBound(this, old, aValue, cause);
+                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -180,10 +206,12 @@ public final class IntervalXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, aValue, cause);
+                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
                 return true;
             }
         }
@@ -318,10 +346,10 @@ public final class IntervalXYSumView extends AbstractSumView {
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnGeq(Cause.Null, ilb);
+                filterOnGeq(this, ilb);
             }
             if (up || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnLeq(Cause.Null, iub);
+                filterOnLeq(this, iub);
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, this);

@@ -73,26 +73,26 @@ public class Dist_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause);
-			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
-			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], cause);
+			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause, informCause);
+			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause, informCause);
+			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause, informCause);
+			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], cause, informCause);
 		}
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause);
+	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause, informCause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause);
+	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause, informCause);
 	        }
 		}else if(distanceMatrix[var1][var2]==0){
 //			vars[var1].contradiction(prop, "x != x"); 

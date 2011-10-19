@@ -95,14 +95,14 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
 		for(int i=0; i<intVars.length; i++){
 			if(intVars[i].instantiated()){
-				g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this);
+				g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this, false);
 			}
 		}
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
 			if (g.getKernelGraph().getNeighborsOf(i).neighborhoodSize()==1){
 				if(i<intVars.length){
-					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
+					intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this, false);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		}
 		else{
 			if(EventType.anInstantiationEvent(mask)){
-				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
+				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this, false);
 			}
 			if((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) !=0){
 				IntVar var = (IntVar) request.getVariable();
@@ -190,7 +190,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 		public void execute(int i) throws ContradictionException {
 			int from = idx;
 			int to   = valuesHash.get(i);
-			g.removeArc(from, to,p);
+			g.removeArc(from, to,p, false);
 		}
 	}
 	
@@ -210,9 +210,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 			int from = i/n-1;
 			int to   = i%n;
 			if(from<to){
-				intVars[from].instantiateTo(values[to], p);
+				intVars[from].instantiateTo(values[to], p, false);
 			}else{
-				intVars[to].instantiateTo(values[from], p);
+				intVars[to].instantiateTo(values[from], p, false);
 			}
 		}
 		
@@ -234,9 +234,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 			int from = i/n-1;
 			int to   = i%n;
 			if(from<to){
-				intVars[from].removeValue(values[to], p);
+				intVars[from].removeValue(values[to], p, false);
 			}else{
-				intVars[to].removeValue(values[from], p);
+				intVars[to].removeValue(values[from], p, false);
 			}
 		}
 		

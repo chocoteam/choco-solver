@@ -129,9 +129,9 @@ public class PropClause extends Propagator<BoolVar> {
         }
         if (i == vars.length) {
             if (otherWL < firstNotPosLit) {
-                vars[otherWL].instantiateTo(1, this);
+                vars[otherWL].instantiateTo(1, this, false);
             } else {
-                vars[otherWL].instantiateTo(0, this);
+                vars[otherWL].instantiateTo(0, this, false);
             }
             setPassive();
         }
@@ -141,9 +141,9 @@ public class PropClause extends Propagator<BoolVar> {
     public void propagate() throws ContradictionException {
         if (vars.length == 1) {
             if (firstNotPosLit == 1) {
-                vars[0].instantiateTo(1, this);
+                vars[0].instantiateTo(1, this, false);
             } else {
-                vars[0].instantiateTo(0, this);
+                vars[0].instantiateTo(0, this, false);
             }
             setPassive();
         } else {

@@ -52,12 +52,12 @@ public abstract class Assignment<V extends Variable> {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
+            var.instantiateTo(value, cause, false);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
+            var.removeValue(value, cause, false);
         }
 
         @Override
@@ -70,12 +70,12 @@ public abstract class Assignment<V extends Variable> {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
+            var.removeValue(value, cause, false);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
+            var.instantiateTo(value, cause, false);
         }
 
         @Override
@@ -88,12 +88,12 @@ public abstract class Assignment<V extends Variable> {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value, cause);
+            var.updateUpperBound(value, cause, false);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value + 1, cause);
+            var.updateLowerBound(value + 1, cause, false);
         }
 
         @Override
@@ -106,12 +106,12 @@ public abstract class Assignment<V extends Variable> {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause);
+            var.updateLowerBound(value, cause, false);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value - 1, cause);
+            var.updateUpperBound(value - 1, cause, false);
         }
 
         @Override
@@ -129,10 +129,10 @@ public abstract class Assignment<V extends Variable> {
             	int from = value/n-1;
             	int to   = value%n;
 //            	System.out.println("enf "+value + " : "+from +" : "+to);
-            	var.enforceArc(from, to, cause);
+            	var.enforceArc(from, to, cause, false);
             }else{
 //            	System.out.println("enf "+value);
-            	var.enforceNode(value, cause);
+            	var.enforceNode(value, cause, false);
             }
         }
 
@@ -142,10 +142,10 @@ public abstract class Assignment<V extends Variable> {
             if (value>=n){
             	int from = value/n-1;
             	int to   = value%n;
-            	var.removeArc(from, to, cause);
+            	var.removeArc(from, to, cause, false);
             }else{
 //            	System.out.println("rem "+value);
-            	var.removeNode(value, cause);
+            	var.removeNode(value, cause, false);
             }
         }
         

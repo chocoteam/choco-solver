@@ -135,14 +135,14 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				nbKer++;
 			}
 		}
-		k.updateLowerBound(nbKer, this);
-		k.updateUpperBound(nbEnv, this);
+		k.updateLowerBound(nbKer, this, false);
+		k.updateUpperBound(nbEnv, this, false);
 		if(k.instantiated()){
 			if(nbInEnv.get()==k.getValue()){
 				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 				for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 					if(g.getEnvelopGraph().edgeExists(node, node)){
-						g.enforceArc(node,node, this);
+						g.enforceArc(node,node, this, false);
 					}
 				}
 				setPassive();
@@ -150,7 +150,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 				for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 					if(g.getEnvelopGraph().edgeExists(node, node) && !g.getKernelGraph().edgeExists(node, node)){
-						g.removeArc(node,node, this);
+						g.removeArc(node,node, this, false);
 					}
 				}
 				setPassive();

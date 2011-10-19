@@ -101,14 +101,14 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 				}
 			}			
 		}
-		nLoops.updateLowerBound(ker, this);
-		nLoops.updateUpperBound(g.getEnvelopOrder(), this);
-		nLoops.updateUpperBound(env, this);
+		nLoops.updateLowerBound(ker, this, false);
+		nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
+		nLoops.updateUpperBound(env, this, false);
 		int added = 0;
 		if(env==nLoops.getLB()){
 			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
-					g.enforceArc(node, node, this);
+					g.enforceArc(node, node, this, false);
 					added ++;
 				}			
 			}
@@ -131,12 +131,12 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 				int nbKer = nbKerLoop.get();
 				d.forEach(enforceProc, gv.fromArcEnforcing(), gv.toArcEnforcing());
 				if(nbKer<nbKerLoop.get()){
-					nLoops.updateLowerBound(nbKerLoop.get(), this);//recently added
+					nLoops.updateLowerBound(nbKerLoop.get(), this, false);//recently added
 					checkAllLoopsFound();
 				}
 			}
 			if ((mask & EventType.REMOVENODE.mask) != 0){
-				nLoops.updateUpperBound(g.getEnvelopOrder(), this);
+				nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
 			}
 		}
 	}
@@ -158,12 +158,12 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 			}
 			if(loopsInKer==nLoops.getUB()){
 				for(int l:loopOutOfKer){
-					g.removeArc(l, l, this);
+					g.removeArc(l, l, this, false);
 				}
 			}else{
 				if (loopsInEnv==nLoops.getValue()){
 					for(int l:loopOutOfKer){
-						g.enforceArc(l, l, this);
+						g.enforceArc(l, l, this, false);
 					}
 				}
 			}
@@ -207,13 +207,13 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
         			int env = p.nbEnvLoop.get();
         			int ker = p.nbKerLoop.get();
         			IActiveNodes act;
-        			p.nLoops.updateUpperBound(env, p);
-        			p.nLoops.updateLowerBound(ker, p);
+        			p.nLoops.updateUpperBound(env, p, false);
+        			p.nLoops.updateLowerBound(ker, p, false);
         			if(p.nLoops.getLB() == env && env>ker){
         				act = p.g.getEnvelopGraph().getActiveNodes();
         				for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
             				if (p.g.getEnvelopGraph().arcExists(node, node)){
-            					p.g.enforceArc(node, node, p);
+            					p.g.enforceArc(node, node, p, false);
             				}
             			}
         			}

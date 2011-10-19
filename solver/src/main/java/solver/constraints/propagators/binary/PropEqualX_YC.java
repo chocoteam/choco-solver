@@ -70,19 +70,19 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateInfX() throws ContradictionException {
-        x.updateLowerBound(y.getLB() + cste, this);
+        x.updateLowerBound(y.getLB() + cste, this, false);
     }
 
     private void updateInfY() throws ContradictionException {
-        y.updateLowerBound(x.getLB() - cste, this);
+        y.updateLowerBound(x.getLB() - cste, this, false);
     }
 
     private void updateSupX() throws ContradictionException {
-        x.updateUpperBound(y.getUB() + cste, this);
+        x.updateUpperBound(y.getUB() + cste, this, false);
     }
 
     private void updateSupY() throws ContradictionException {
-        y.updateUpperBound(x.getUB() - cste, this);
+        y.updateUpperBound(x.getUB() - cste, this, false);
     }
 
     @Override
@@ -96,13 +96,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val - cste))) {
-                    x.removeValue(val, this);
+                    x.removeValue(val, this, false);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val + cste))) {
-                    y.removeValue(val, this);
+                    y.removeValue(val, this, false);
                 }
             }
         }
@@ -134,9 +134,9 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     void awakeOnInst(int index) throws ContradictionException {
         if (index == 0) {
-            y.instantiateTo(x.getValue() - cste, this);
+            y.instantiateTo(x.getValue() - cste, this, false);
         } else {
-            x.instantiateTo(y.getValue() + cste, this);
+            x.instantiateTo(y.getValue() + cste, this, false);
         }
     }
 
@@ -151,9 +151,9 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     void awakeOnRem(int index, int val) throws ContradictionException {
-        if (index == 0) y.removeValue(val - cste, this);
+        if (index == 0) y.removeValue(val - cste, this, false);
         else {
-            x.removeValue(val + cste, this);
+            x.removeValue(val + cste, this, false);
         }
     }
 

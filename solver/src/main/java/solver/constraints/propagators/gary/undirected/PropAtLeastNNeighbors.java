@@ -90,13 +90,13 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		INeighbors nei;
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()<n_neighbors){
-				g.removeNode(node, this);
+				g.removeNode(node, this, false);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(node) 
 					&& g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors 
 					&& g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()<n_neighbors){
 				nei = g.getEnvelopGraph().getNeighborsOf(node);
 				for(next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(node, next, this);
+					g.enforceArc(node, next, this, false);
 				}
 			}
 		}
@@ -156,7 +156,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 			if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(i);
 				for(int next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(i, next, p);
+					g.enforceArc(i, next, p, false);
 				}
 			}
 		}
@@ -187,12 +187,12 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		}
 		private void prune(int from) throws ContradictionException{
 			if(g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
-				g.removeNode(from, p);
+				g.removeNode(from, p, false);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(from) &&
 					g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(from);
 				for(int next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
-					g.enforceArc(from, next, p);
+					g.enforceArc(from, next, p, false);
 				}
 			}
 		}

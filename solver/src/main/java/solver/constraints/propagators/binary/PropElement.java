@@ -76,8 +76,8 @@ public class PropElement extends Propagator<IntVar> {
             if (minVal > this.lval[index - cste]) minVal = this.lval[index - cste];
             if (maxVal < this.lval[index - cste]) maxVal = this.lval[index - cste];
         }
-        this.vars[1].updateLowerBound(minVal, this);
-        this.vars[1].updateUpperBound(maxVal, this);
+        this.vars[1].updateLowerBound(minVal, this, false);
+        this.vars[1].updateUpperBound(maxVal, this, false);
 
         // todo : <hcambaza> : why it does not perform AC on the value variable ?
     }
@@ -96,18 +96,18 @@ public class PropElement extends Propagator<IntVar> {
                     && !(this.vars[1].contains(lval[minFeasibleIndex - this.cste]))) {
                 minFeasibleIndex++;
             }
-            hasChange = this.vars[0].updateLowerBound(minFeasibleIndex, this);
+            hasChange = this.vars[0].updateLowerBound(minFeasibleIndex, this, false);
 
             while ((this.vars[0].contains(maxFeasibleIndex))
                     && !(this.vars[1].contains(lval[maxFeasibleIndex - this.cste]))) {
                 maxFeasibleIndex--;
             }
-            hasChange |= this.vars[0].updateUpperBound(maxFeasibleIndex, this);
+            hasChange |= this.vars[0].updateUpperBound(maxFeasibleIndex, this, false);
 
             if (this.vars[0].hasEnumeratedDomain()) {
                 for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
                     if (this.vars[0].contains(i) && !(this.vars[1].contains(this.lval[i - this.cste])))
-                        hasChange |= this.vars[0].removeValue(i, this);
+                        hasChange |= this.vars[0].removeValue(i, this, false);
                 }
             }
         } while (hasChange && !this.vars[1].hasEnumeratedDomain());
@@ -115,7 +115,7 @@ public class PropElement extends Propagator<IntVar> {
 
     void awakeOnInst(int index) throws ContradictionException {
         if (index == 0) {
-            this.vars[1].instantiateTo(this.lval[this.vars[0].getValue() - this.cste], this);
+            this.vars[1].instantiateTo(this.lval[this.vars[0].getValue() - this.cste], this, false);
             this.setPassive();
         }
     }

@@ -90,10 +90,10 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);
 				if(preds.neighborhoodSize()==nPreds && ker.isActive(i)){
 					for(int j=preds.getFirstElement(); j>=0; j=preds.getNextElement()){
-						g.enforceArc(j,i, this);
+						g.enforceArc(j,i, this, false);
 					}
 				}else if(preds.neighborhoodSize()<nPreds){
-					g.removeNode(i, this);
+					g.removeNode(i, this, false);
 				}
 			}
 		}
@@ -145,11 +145,11 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 				if(p.concernedNodes.contain(to)){
 					INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
 					if(prds.neighborhoodSize()<p.nPreds){
-						p.g.removeNode(to, p);
+						p.g.removeNode(to, p, false);
 					}
 					if(prds.neighborhoodSize()==p.nPreds && p.g.getKernelGraph().getActiveNodes().isActive(to) && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()!= p.nPreds){
 						for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
-							p.g.enforceArc(j,to, p);
+							p.g.enforceArc(j,to, p, false);
 						}
 					}
 				}
@@ -175,7 +175,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 					if(prds.neighborhoodSize()>p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize()==p.nPreds){
 						for(int from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
 							if (!p.g.getKernelGraph().arcExists(from, to)){
-								p.g.removeArc(from,to, p);
+								p.g.removeArc(from,to, p, false);
 							}
 						}
 					}
@@ -200,7 +200,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 					p.contradiction(p.g, "too many predecessors");
 				}else if(envPrds.neighborhoodSize()==p.nPreds && kerPrds.neighborhoodSize()<p.nPreds){
 					for(int from=envPrds.getFirstElement(); from>=0; from=envPrds.getNextElement()){
-						p.g.enforceArc(from, i, p);
+						p.g.enforceArc(from, i, p, false);
 					}
 				}
 			}

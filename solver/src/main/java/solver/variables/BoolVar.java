@@ -34,6 +34,7 @@ import solver.exception.ContradictionException;
 
 /**
  * <br/>
+ * CPRU r544: remove default implementation
  *
  * @author Charles Prud'homme
  * @since 18 nov. 2010
@@ -42,7 +43,7 @@ public interface BoolVar extends IntVar {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(@NotNull ICause cause) throws ContradictionException;
+    boolean setToTrue(@NotNull ICause cause, boolean informCause) throws ContradictionException;
 
-    boolean setToFalse(@NotNull ICause cause) throws ContradictionException;
+    boolean setToFalse(@NotNull ICause cause, boolean informCause) throws ContradictionException;
 }

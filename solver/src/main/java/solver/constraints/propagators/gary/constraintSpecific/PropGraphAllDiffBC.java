@@ -74,12 +74,12 @@ public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
             public void execute(int i) throws ContradictionException {
                 int lb = intVars[i].getLB();
                 while (!g.getEnvelopGraph().edgeExists(i, valuesHash.get(lb))) {
-                    intVars[i].removeValue(lb, instance);
+                    intVars[i].removeValue(lb, instance, false);
                     lb = intVars[i].getLB();
                 }
                 int ub = intVars[i].getUB();
                 while (!g.getEnvelopGraph().edgeExists(i, valuesHash.get(ub))) {
-                    intVars[i].removeValue(ub, instance);
+                    intVars[i].removeValue(ub, instance, false);
                     ub = intVars[i].getUB();
                 }
             }

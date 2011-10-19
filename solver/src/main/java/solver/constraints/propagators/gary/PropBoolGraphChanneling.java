@@ -94,26 +94,26 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			for(int j = 0; j<n; j++){
 				if(relations[i][j].instantiated()){
 					if(relations[i][j].getBooleanValue() == ESat.TRUE){
-						graph.enforceArc(i, j, this);
+						graph.enforceArc(i, j, this, false);
 					}else{
-						graph.removeArc(i, j, this);
+						graph.removeArc(i, j, this, false);
 					}
 				}else{
 					if (graph instanceof DirectedGraphVar) {
 						DirectedGraphVar dig = (DirectedGraphVar) graph;
 						if(!dig.getEnvelopGraph().arcExists(i, j)){
-							relations[i][j].setToFalse(this);
+							relations[i][j].setToFalse(this, false);
 						}
 						if(dig.getKernelGraph().arcExists(i, j)){
-							relations[i][j].setToTrue(this);
+							relations[i][j].setToTrue(this, false);
 						}
 					}else{
 						if(i>=j){
 							if(!graph.getEnvelopGraph().edgeExists(i, j)){
-								relations[i][j].setToFalse(this);
+								relations[i][j].setToFalse(this, false);
 							}
 							if(graph.getKernelGraph().edgeExists(i, j)){
-								relations[i][j].setToTrue(this);
+								relations[i][j].setToTrue(this, false);
 							}
 						}
 					}
@@ -227,9 +227,9 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 
 		protected void execute(int i, int j, boolean v) throws ContradictionException {
 			if(v){
-				g.enforceArc(i, j, p);
+				g.enforceArc(i, j, p, false);
 			}else{
-				g.removeArc(i, j, p);
+				g.removeArc(i, j, p, false);
 			}
 		}
 	}
@@ -250,8 +250,8 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			set( from, to);
 		}
 		protected void set(int i, int j) throws ContradictionException{
-			relations[i][j].setToTrue(p);
-			relations[j][i].setToTrue(p);
+			relations[i][j].setToTrue(p, false);
+			relations[j][i].setToTrue(p, false);
 		}
 	}
 	/** Directed */
@@ -261,7 +261,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 		}
 		@ Override
 		protected void set(int i, int j) throws ContradictionException{
-			relations[i][j].setToTrue(p);
+			relations[i][j].setToTrue(p, false);
 		}
 	}
 
@@ -277,8 +277,8 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			set( from, to);
 		}
 		protected void set(int i, int j) throws ContradictionException{
-			relations[i][j].setToFalse(p);
-			relations[j][i].setToFalse(p);
+			relations[i][j].setToFalse(p, false);
+			relations[j][i].setToFalse(p, false);
 		}
 	}
 	private class RemArc extends  RemEdge {
@@ -287,7 +287,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 		}
 		@ Override
 		protected void set(int i, int j) throws ContradictionException{
-			relations[i][j].setToFalse(p);
+			relations[i][j].setToFalse(p, false);
 		}
 	}
 }

@@ -54,12 +54,12 @@ public class BoolConstantView extends ConstantView implements BoolVar {
     }
 
     @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
+    public boolean setToTrue(ICause cause, boolean informCause) throws ContradictionException {
         return false;
     }
 
     @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
+    public boolean setToFalse(ICause cause, boolean informCause) throws ContradictionException {
         return false;
     }
 }

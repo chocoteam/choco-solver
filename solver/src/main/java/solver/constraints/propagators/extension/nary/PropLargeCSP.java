@@ -131,12 +131,12 @@ public class PropLargeCSP extends Propagator<IntVar> {
                         if (val == right + 1) {
                             right = val;
                         } else {
-                            vars[index].removeInterval(left, right, this);
+                            vars[index].removeInterval(left, right, this, false);
                             left = right = val;
                         }
                     }
                 }
-                vars[index].removeInterval(left, right, this);
+                vars[index].removeInterval(left, right, this, false);
             } else {
                 if (!relation.isConsistent(currentTuple)) {
                     this.contradiction(null, "not consistent");

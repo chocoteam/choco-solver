@@ -64,7 +64,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate() throws ContradictionException {
-        if (vars[0].removeValue(constant, this)) {
+        if (vars[0].removeValue(constant, this, false)) {
             this.setPassive();
         } else if (!vars[0].contains(constant)) {
             this.setPassive();

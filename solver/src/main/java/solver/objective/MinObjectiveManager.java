@@ -27,7 +27,6 @@
 
 package solver.objective;
 
-import solver.Cause;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -81,7 +80,7 @@ public class MinObjectiveManager extends IObjectiveManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        this.objective.updateUpperBound(bestKnownUpperBound - 1, Cause.Null);
+        this.objective.updateUpperBound(bestKnownUpperBound - 1, this, true);
     }
 
     @Override

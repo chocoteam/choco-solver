@@ -101,7 +101,7 @@ public class Solution {
             for (int i = 0; i < vars.length; i++) {
             	switch(vars[i].getType()){
                 case Variable.INTEGER : 
-                	((IntVar) vars[i]).instantiateTo(intvalues[i], Cause.Null);break;
+                	((IntVar) vars[i]).instantiateTo(intvalues[i], Cause.Null, false);break;
                 case Variable.GRAPH : 
                 	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), Cause.Null);break;
                 }

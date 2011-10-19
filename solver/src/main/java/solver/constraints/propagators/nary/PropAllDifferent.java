@@ -106,7 +106,7 @@ public class PropAllDifferent extends AbstractBipartiteMatching {
         this.setMatch(i, j);
         for (int i2 = 0; i2 < this.nbLeftVertices; i2++) {
             if (i2 != i) {
-                if (this.vars[i2].removeValue(j + this.minValue, this)) {
+                if (this.vars[i2].removeValue(j + this.minValue, this, false)) {
                     this.deleteMatch(i2, j);
                 }
             }
@@ -121,7 +121,7 @@ public class PropAllDifferent extends AbstractBipartiteMatching {
      * @throws ContradictionException
      */
     public boolean deleteEdgeAndPublish(int i, int j) throws ContradictionException {
-        this.vars[i].removeValue(j + this.minValue, this);
+        this.vars[i].removeValue(j + this.minValue, this, false);
         return this.deleteMatch(i, j);
     }
 

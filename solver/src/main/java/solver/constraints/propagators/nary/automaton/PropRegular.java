@@ -80,12 +80,12 @@ public class PropRegular extends Propagator<IntVar> {
                     if (j == right + 1) {
                         right = j;
                     } else {
-                        vars[i].removeInterval(left, right, this);
+                        vars[i].removeInterval(left, right, this, false);
                         left = right = j;
                     }
                 }
             }
-            vars[i].removeInterval(left, right, this);
+            vars[i].removeInterval(left, right, this, false);
         }
     }
 

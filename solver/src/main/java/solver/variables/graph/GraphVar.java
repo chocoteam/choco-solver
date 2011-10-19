@@ -93,7 +93,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     }
 
     @Override
-    public boolean removeNode(int x, ICause cause) throws ContradictionException {
+    public boolean removeNode(int x, ICause cause, boolean informCause) throws ContradictionException {
         if (kernel.getActiveNodes().isActive(x)) {
             this.contradiction(cause, "remove mandatory node");
             return true;
@@ -103,8 +103,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         if (reactOnModification) {
             INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause);
-                removeArc(i, x, cause);
+                removeArc(x, i, cause, informCause);
+                removeArc(i, x, cause, informCause);
             }
         }
         if (envelop.desactivateNode(x)) {
@@ -119,7 +119,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     }
 
     @Override
-    public boolean enforceNode(int x, ICause cause) throws ContradictionException {
+    public boolean enforceNode(int x, ICause cause, boolean informCause) throws ContradictionException {
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
@@ -129,7 +129,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                 notifyPropagators(e, cause);
                 INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
                 if (neig.neighborhoodSize() == 1) {
-                    enforceArc(x, neig.getFirstElement(), Cause.Null);
+                    enforceArc(x, neig.getFirstElement(), cause, informCause);
                 }
                 if (neig.neighborhoodSize() == 0) {
                     this.contradiction(Cause.Null, "cannot enforce nodes with no arcs");
@@ -213,9 +213,9 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (value[i][j]) {
-                    enforceArc(i, j, cause);
+                    enforceArc(i, j, cause, false);
                 } else {
-                    removeArc(i, j, cause);
+                    removeArc(i, j, cause, false);
                 }
             }
         }

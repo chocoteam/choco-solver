@@ -92,8 +92,8 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
 				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
 				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 			}
-			k.updateLowerBound(nbInKer.get(), this);
-			k.updateUpperBound(nbInEnv.get(), this);
+			k.updateLowerBound(nbInKer.get(), this, false);
+			k.updateUpperBound(nbInEnv.get(), this, false);
 		}
 	}
 

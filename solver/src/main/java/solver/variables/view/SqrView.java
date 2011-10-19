@@ -151,21 +151,21 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             return false;
         }
         int rootV = floor_sqrt(value);
         boolean done = false;
         if (rootV * rootV == value) { // is a perfect square ?
-            done = var.removeValue(-rootV, cause);
-            done |= var.removeValue(rootV, cause);
+            done = var.removeValue(-rootV, cause, informCause);
+            done |= var.removeValue(rootV, cause, informCause);
         }
         return done;
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (to < 0) {
             return false;
         }
@@ -174,23 +174,23 @@ public final class SqrView extends View<IntVar> {
         }
         int from_fX = floor_sqrt(from);
         int to_fX = floor_sqrt(to);
-        boolean done = var.removeInterval(-to_fX, -from_fX, cause);
-        done |= var.removeInterval(from_fX, to_fX, cause);
+        boolean done = var.removeInterval(-to_fX, -from_fX, cause, informCause);
+        done |= var.removeInterval(from_fX, to_fX, cause, informCause);
         return done;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
         int v = floor_sqrt(value);
         boolean done = false;
         if (v * v == value) { // is a perfect square ?
-            done = var.updateLowerBound(-v, cause);
-            done |= var.updateUpperBound(v, cause);
+            done = var.updateLowerBound(-v, cause, informCause);
+            done |= var.updateUpperBound(v, cause, informCause);
             if (var.hasEnumeratedDomain()) {
-                done |= var.removeInterval(-v + 1, v - 1, cause);
+                done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
             }
         } else { //otherwise, impossible value for instantiation
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
@@ -200,23 +200,23 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         boolean done = false;
         if (value > 0) {
             int floorV = floor_sqrt(value);
-            done = var.removeInterval(-floorV + 1, floorV - 1, cause);
+            done = var.removeInterval(-floorV + 1, floorV - 1, cause, informCause);
         }
         return done;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.updateLowerBound(-floorV, cause);
-        done |= var.updateUpperBound(floorV, cause);
+        boolean done = var.updateLowerBound(-floorV, cause, informCause);
+        done |= var.updateUpperBound(floorV, cause, informCause);
         return done;
     }
 

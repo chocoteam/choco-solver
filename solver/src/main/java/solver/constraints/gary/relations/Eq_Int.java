@@ -69,26 +69,26 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB(), cause);
-			y.updateLowerBound(x.getLB(), cause);
-			x.updateUpperBound(y.getUB(), cause);
-			y.updateUpperBound(x.getUB(), cause);
+			x.updateLowerBound(y.getLB(), cause, informCause);
+			y.updateLowerBound(x.getLB(), cause, informCause);
+			x.updateUpperBound(y.getUB(), cause, informCause);
+			y.updateUpperBound(x.getUB(), cause, informCause);
 			// ensure that, in case of enumerated domains,  holes are also propagated
 			if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
 				int ub = x.getUB();
 				for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
 					if (!(y.contains(val))) {
-						x.removeValue(val, cause);
+						x.removeValue(val, cause, informCause);
 					}
 				}
 				ub = y.getUB();
 				for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
 					if (!(x.contains(val))) {
-						y.removeValue(val, cause);
+						y.removeValue(val, cause, informCause);
 					}
 				}
 			}
@@ -96,14 +96,14 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue(), cause);
+	            y.removeValue(x.getValue(), cause, informCause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue(), cause);
+	        	x.removeValue(y.getValue(), cause, informCause);
 	        }
 		}else{
 			vars[var1].contradiction(cause, "x != x");

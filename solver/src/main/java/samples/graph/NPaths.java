@@ -83,7 +83,7 @@ public class NPaths extends AbstractProblem{
 			for(int i=0; i<n; i++){
 				for(int j=0; j<n ;j++){
 					if(!data[i].get(j)){
-						vars[i].removeValue(j, Cause.Null);
+						vars[i].removeValue(j, Cause.Null, false);
 					}
 				}
 			}

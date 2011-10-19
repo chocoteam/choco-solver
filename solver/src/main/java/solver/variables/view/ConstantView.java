@@ -86,7 +86,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value == constante) {
             this.contradiction(cause, "unique value removal");
         }
@@ -94,7 +94,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             this.contradiction(cause, "unique value removal");
         }
@@ -102,7 +102,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value != constante) {
             this.contradiction(cause, "outside domain instantitation");
         }
@@ -110,7 +110,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value > constante) {
             this.contradiction(cause, "outside domain update bound");
         }
@@ -118,7 +118,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < constante) {
             this.contradiction(cause, "outside domain update bound");
         }

@@ -103,14 +103,18 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value value to remove from the domain (int)
-     * @param cause removal releaser
+     * @param value       value to remove from the domain (int)
+     * @param cause       removal releaser
+     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -125,7 +129,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(-1);
                 LB.set(value + 1);
                 e = EventType.INCLOW;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             } else {
                 if (reactOnRemoval) {
                     delta.add(value);
@@ -133,12 +139,16 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 SIZE.add(-1);
                 UB.set(value - 1);
                 e = EventType.DECUPP;
-                cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
@@ -155,11 +165,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * {@inheritDoc}
      */
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
+            return updateLowerBound(to + 1, cause, informCause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
+            return updateUpperBound(from - 1, cause, informCause);
         return false;
     }
 
@@ -174,13 +184,17 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value instantiation value (int)
-     * @param cause instantiation releaser
+     * @param value       instantiation value (int)
+     * @param cause       instantiation releaser
+     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         solver.explainer.instantiateTo(this, value, cause);
+        if (informCause) {
+            cause = Cause.Null;
+        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, MSG_INST);
@@ -224,13 +238,17 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value new lower bound (included)
-     * @param cause updating releaser
+     * @param value       new lower bound (included)
+     * @param cause       updating releaser
+     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
@@ -249,7 +267,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 LB.set(value);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
 
@@ -273,13 +293,17 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value new upper bound (included)
-     * @param cause update releaser
+     * @param value       new upper bound (included)
+     * @param cause       update releaser
+     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
@@ -299,7 +323,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
                 solver.explainer.updateUpperBound(this, old, value, antipromo);
@@ -426,7 +452,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     || (what == Explanation.UB && val > this.getUB())
                     || (what == Explanation.DOM)) {
                 expl.add(solver.explainer.explain(this, val));
-
             }
             val = invdom.nextSetBit(val + 1);
         }

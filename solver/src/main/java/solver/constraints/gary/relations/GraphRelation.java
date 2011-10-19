@@ -60,9 +60,10 @@ public abstract class GraphRelation<V extends Variable> {
      * @param y index of node/var
      * @param solver
      * @param cause
+     * @param informCause
      * @throws ContradictionException
 	 */
-	public abstract void applyTrue(int x, int y, Solver solver, ICause cause) throws ContradictionException;
+	public abstract void applyTrue(int x, int y, Solver solver, ICause cause, boolean informCause) throws ContradictionException;
 	
 	/** Apply the filtering defined by !(xRy) so it apply the filtering of the opposite relation : x(!R)y
 	 *
@@ -70,9 +71,10 @@ public abstract class GraphRelation<V extends Variable> {
      * @param y index of node/var
      * @param solver
      * @param cause
+     * @param informCause
      * @throws ContradictionException
 	 */
-	public abstract void applyFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException;
+	public abstract void applyFalse(int x, int y, Solver solver, ICause cause, boolean informCause) throws ContradictionException;
 	
 
 	/** say !(xRy) AND !(yRx)
@@ -83,10 +85,11 @@ public abstract class GraphRelation<V extends Variable> {
      * @param y index of node/var
      * @param solver
      * @param cause
+     * @param informCause
      * @throws ContradictionException
 	 */
-	public void applySymmetricFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException {
-		applyFalse(x, y, solver, cause);
+	public void applySymmetricFalse(int x, int y, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+		applyFalse(x, y, solver, cause, informCause);
 	}
 
 	/**

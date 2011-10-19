@@ -33,74 +33,74 @@ import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
-/**Relation of distance (inequality) between two integer variables 
+/**
+ * Relation of distance (inequality) between two integer variables
  * Used for VRP (time windows)
  * Xi + MATRIX_i_j <= Xj
- * 
- * @author Jean-Guillaume Fages
  *
+ * @author Jean-Guillaume Fages
  */
 public class XplusC_Leq_Y_Int extends GraphRelation<IntVar> {
-	
-	private int[][] distanceMatrix;
 
-	protected XplusC_Leq_Y_Int(IntVar[] vars, int[][] matrix) {
-		super(vars);
-		this.distanceMatrix = matrix;
-		if(matrix.length!=matrix[0].length){
-			throw new UnsupportedOperationException("the distance matrix should be squarred");
-		}
-	}
+    private int[][] distanceMatrix;
 
-	@Override
-	public ESat isEntail(int var1, int var2) {
-		if(var1 == var2){
-			if(distanceMatrix[var1][var2]==0){
-				return ESat.TRUE;
-			}else{
-				return ESat.FALSE;
-			}
-		}
-		IntVar x = vars[var1];
-		IntVar y = vars[var2];
-		if(x.getLB()+distanceMatrix[var1][var2]>y.getUB()){
-			return ESat.FALSE;
-		}
-		if(x.instantiated() && y.instantiated() && x.getValue()+distanceMatrix[var1][var2] <= y.getValue()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
-	
-	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		if(var1 != var2){
-			IntVar x = vars[var1];
-			IntVar y = vars[var2];
-			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
-		}
-	}
-	
-	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
+    protected XplusC_Leq_Y_Int(IntVar[] vars, int[][] matrix) {
+        super(vars);
+        this.distanceMatrix = matrix;
+        if (matrix.length != matrix[0].length) {
+            throw new UnsupportedOperationException("the distance matrix should be squarred");
+        }
+    }
+
+    @Override
+    public ESat isEntail(int var1, int var2) {
+        if (var1 == var2) {
+            if (distanceMatrix[var1][var2] == 0) {
+                return ESat.TRUE;
+            } else {
+                return ESat.FALSE;
+            }
+        }
+        IntVar x = vars[var1];
+        IntVar y = vars[var2];
+        if (x.getLB() + distanceMatrix[var1][var2] > y.getUB()) {
+            return ESat.FALSE;
+        }
+        if (x.instantiated() && y.instantiated() && x.getValue() + distanceMatrix[var1][var2] <= y.getValue()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+        if (var1 != var2) {
+            IntVar x = vars[var1];
+            IntVar y = vars[var2];
+            x.updateUpperBound(y.getUB() - distanceMatrix[var1][var2], cause, informCause);
+            y.updateLowerBound(x.getLB() + distanceMatrix[var1][var2], cause, informCause);
+        }
+    }
+
+    @Override
+    public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
 //		if(var1 != var2){
 //			IntVar y = vars[var1];
 //			IntVar x = vars[var2];
-//			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2]-1, cause);
-//			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2]+1, cause);
+//			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2]-1, cause, informCause);
+//			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2]+1, cause,informCause);
 //		}else if(distanceMatrix[var1][var2]==0){
 //			vars[var1].contradiction(cause, "x != x");
 //		}
-	}
-	
-	@Override
-	public boolean isDirected() {
-		return true;
-	}
-	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.TRANSITIVITY,GraphProperty.REFLEXIVITY,GraphProperty.ANTI_SYMMETRY};
-	}
+    }
+
+    @Override
+    public boolean isDirected() {
+        return true;
+    }
+
+    @Override
+    public GraphProperty[] getGraphProperties() {
+        return new GraphProperty[]{GraphProperty.TRANSITIVITY, GraphProperty.REFLEXIVITY, GraphProperty.ANTI_SYMMETRY};
+    }
 }

@@ -27,7 +27,6 @@
 
 package solver.variables.graph.undirectedGraph;
 
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -64,7 +63,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// METHODS
 	//***********************************************************************************
 
-	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
+	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
     	if(kernel.edgeExists(x, y)){
     		this.contradiction(cause, "remove mandatory arc");
         	return false;
@@ -77,17 +76,17 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         	notifyPropagators(e, cause);
         	// A node has at least one arc/edge otherwise it is meaningless
         	if(getEnvelopGraph().getNeighborsOf(x).neighborhoodSize()==0){
-        		removeNode(x, Cause.Null);
+        		removeNode(x, cause, informCause);
         	}
         	if(getEnvelopGraph().getNeighborsOf(y).neighborhoodSize()==0){
-        		removeNode(y, Cause.Null);
+        		removeNode(y, cause, informCause);
         	}
         	return true;
         }return false;
     }
-    public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
-    	enforceNode(x, cause);
-    	enforceNode(y, cause);
+    public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+    	enforceNode(x, cause, informCause);
+    	enforceNode(y, cause, informCause);
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){

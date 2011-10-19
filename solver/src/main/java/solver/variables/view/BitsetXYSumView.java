@@ -86,12 +86,16 @@ public final class BitsetXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         boolean change = false;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
@@ -110,59 +114,74 @@ public final class BitsetXYSumView extends AbstractSumView {
                     LB.set(inf);
                     e = EventType.INCLOW;
                     filterOnGeq(cause, inf);
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 } else if (value == sup) {
                     sup = VALUES.prevSetBit(aValue) + OFFSET;
                     UB.set(sup);
                     e = EventType.DECUPP;
                     filterOnLeq(cause, sup);
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (change && !VALUES.isEmpty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     this.notifyPropagators(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
-                        solver.explainer.removeValue(this, value, cause);
+                        solver.explainer.removeValue(this, value, antipromo);
                         this.contradiction(cause, MSG_EMPTY);
                     }
                 }
             }
         }
         if (change) {
-            solver.explainer.removeValue(this, value, cause);
+            solver.explainer.removeValue(this, value, antipromo);
         }
         return change;
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         int lb = getLB();
         if (from <= lb && lb <= to) {
-            return updateLowerBound(to + 1, cause);
+            return updateLowerBound(to + 1, cause, informCause);
         }
         int ub = getUB();
         if (from <= ub && ub <= to) {
-            return updateUpperBound(from - 1, cause);
+            return updateUpperBound(from - 1, cause, informCause);
         }
         //otherwise, it's a hole in the middle:
-        boolean change = false;
+//        boolean change = false;
+//        for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
+//            change |= VALUES.get(v - OFFSET);
+//            VALUES.clear(v - OFFSET);
+//        }
+//        if (change) {
+//            this.notifyPropagators(EventType.REMOVE, cause);
+//            TODO: explain?
+//        }
+//        return change;
+        boolean anyChange = false;
         for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-            change |= VALUES.get(v - OFFSET);
-            VALUES.clear(v - OFFSET);
+            anyChange |= removeValue(v, cause, false);
         }
-        if (change) {
-            this.notifyPropagators(EventType.REMOVE, cause);
-        }
-        return change;
+        return anyChange;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         solver.explainer.instantiateTo(this, value, cause);
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int lb = LB.get();
         if (this.instantiated()) {
             if (value != lb) {
@@ -195,12 +214,16 @@ public final class BitsetXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         boolean change;
         int lb = this.getLB();
         if (lb < value) {
             if (this.getUB() < value) {
-                solver.explainer.updateLowerBound(this, lb, value, cause);
+                solver.explainer.updateLowerBound(this, lb, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -219,11 +242,13 @@ public final class BitsetXYSumView extends AbstractSumView {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, lb, value, cause);
+                solver.explainer.updateLowerBound(this, lb, value, antipromo);
                 return change;
             }
         }
@@ -232,12 +257,16 @@ public final class BitsetXYSumView extends AbstractSumView {
 
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         boolean change;
         int ub = this.getUB();
         if (ub > value) {
             if (this.getLB() > value) {
-                solver.explainer.updateUpperBound(this, ub, value, cause);
+                solver.explainer.updateUpperBound(this, ub, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -256,10 +285,12 @@ public final class BitsetXYSumView extends AbstractSumView {
 
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, ub, value, cause);
+                solver.explainer.updateUpperBound(this, ub, value, antipromo);
                 return change;
             }
         }
@@ -497,10 +528,10 @@ public final class BitsetXYSumView extends AbstractSumView {
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || size == 1) {
-                filterOnGeq(Cause.Null, ilb);
+                filterOnGeq(this, ilb);
             }
             if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
-                filterOnLeq(Cause.Null, iub);
+                filterOnLeq(this, iub);
             }
             if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
                 if (old_size > 0) {

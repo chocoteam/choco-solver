@@ -145,16 +145,20 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value value to remove from the domain (int)
-     * @param cause removal releaser
+     * @param value       value to remove from the domain (int)
+     * @param cause       removal releaser
+     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         boolean change = false;
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -177,16 +181,22 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (value == inf) {
                     LB.set(VALUES.nextSetBit(aValue));
                     e = EventType.INCLOW;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 } else if (value == sup) {
                     UB.set(VALUES.prevSetBit(aValue));
                     e = EventType.DECUPP;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (change && !VALUES.isEmpty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     this.notifyPropagators(e, cause);
                 } else {
@@ -207,15 +217,15 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * {@inheritDoc}
      */
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause);
+            return updateLowerBound(to + 1, cause, informCause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause);
+            return updateUpperBound(from - 1, cause, informCause);
         else {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause);
+                anyChange |= removeValue(v, cause, informCause);
             }
             return anyChange;
         }
@@ -232,15 +242,19 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value instantiation value (int)
-     * @param cause instantiation releaser
+     * @param value       instantiation value (int)
+     * @param cause       instantiation releaser
+     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         solver.explainer.instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
+        if (informCause) {
+            cause = Cause.Null;
+        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, MSG_INST);
@@ -265,14 +279,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-//                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_EMPTY);
             }
             this.notifyPropagators(EventType.INSTANTIATE, cause);
-//            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-//            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
@@ -290,15 +301,19 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value new lower bound (included)
-     * @param cause updating releaser
+     * @param value       new lower bound (included)
+     * @param cause       updating releaser
+     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
@@ -323,7 +338,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
@@ -348,15 +365,19 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value new upper bound (included)
-     * @param cause update releaser
+     * @param value       new upper bound (included)
+     * @param cause       update releaser
+     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
+        if (informCause) {
+            cause = Cause.Null;
+        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
@@ -380,7 +401,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
-                    cause = (cause != Cause.Null && cause.reactOnPromotion() ? Cause.Null : cause);
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);

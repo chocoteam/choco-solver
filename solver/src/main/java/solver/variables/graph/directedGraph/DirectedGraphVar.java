@@ -27,7 +27,6 @@
 
 package solver.variables.graph.directedGraph;
 
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -64,7 +63,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	//***********************************************************************************
 
 	@Override
-	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
+	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
 			this.contradiction(cause, "remove mandatory arc");
 			return false;
@@ -76,18 +75,18 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			EventType e = EventType.REMOVEARC;
 			notifyPropagators(e, cause);
 			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
-				removeNode(x, Cause.Null);
+				removeNode(x, cause, informCause);
 			}
 			if(getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize()==0){
-				removeNode(y, Cause.Null);
+				removeNode(y, cause, informCause);
 			}
 			return true;
 		}return false;
 	}
 	@Override
-	public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
-		enforceNode(x, cause);
-		enforceNode(y, cause);
+	public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+		enforceNode(x, cause, informCause);
+		enforceNode(y, cause, informCause);
 		if(envelop.arcExists(x, y)){
 			if (kernel.addArc(x, y)){
 				if (reactOnModification){

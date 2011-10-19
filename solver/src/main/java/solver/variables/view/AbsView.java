@@ -106,54 +106,54 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             return false;
         }
-        boolean done = var.removeValue(-value, cause);
-        done |= var.removeValue(value, cause);
+        boolean done = var.removeValue(-value, cause, informCause);
+        done |= var.removeValue(value, cause, informCause);
         return done;
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (to < 0) {
             return false;
         }
         if (from < 0) {
             from = 0;
         }
-        boolean done = var.removeInterval(-to, -from, cause);
-        done |= var.removeInterval(from, to, cause);
+        boolean done = var.removeInterval(-to, -from, cause, informCause);
+        done |= var.removeInterval(from, to, cause, informCause);
         return done;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, cause);
-        done |= var.updateUpperBound(v, cause);
+        boolean done = var.updateLowerBound(-v, cause, informCause);
+        done |= var.updateUpperBound(v, cause, informCause);
         if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, cause);
+            done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
         }
         return done;
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && var.removeInterval(-value + 1, value - 1, cause);
+    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        return value > 0 && var.removeInterval(-value + 1, value - 1, cause, informCause);
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
             this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, cause);
-        done |= var.updateUpperBound(value, cause);
+        boolean done = var.updateLowerBound(-value, cause, informCause);
+        done |= var.updateUpperBound(value, cause, informCause);
         return done;
     }
 

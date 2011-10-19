@@ -44,7 +44,6 @@ import static solver.variables.AbstractVariable.MSG_EMPTY;
  * "Bounds Consistency Techniques for Long Linear Constraint" <br/>
  * W. Harvey and J. Schimpf
  *
- *
  * @author Charles Prud'homme
  * @since 01/09/11
  */
@@ -75,10 +74,10 @@ public abstract class AbstractSumView extends AbstractView {
         if (-sumLB < 0) contradiction(cause, MSG_EMPTY);
         int ubA = A.getUB(), ubB = B.getUB();
         if (ubA - lbA + sumLB > 0) {
-            A.updateUpperBound(-sumLB + lbA, cause);
+            A.updateUpperBound(-sumLB + lbA, cause, true);
         }
         if (ubB - lbB + sumLB > 0) {
-            B.updateUpperBound(-sumLB + lbB, cause);
+            B.updateUpperBound(-sumLB + lbB, cause, true);
         }
         //TODO: back propager?
     }
@@ -89,10 +88,10 @@ public abstract class AbstractSumView extends AbstractView {
         if (-sumUB > 0) contradiction(cause, MSG_EMPTY);
         int lbA = A.getLB(), lbB = B.getLB();
         if (ubA - lbA - sumUB > 0) {
-            A.updateLowerBound(-sumUB + ubA, cause);
+            A.updateLowerBound(-sumUB + ubA, cause, true);
         }
         if (ubB - lbB - sumUB > 0) {
-            B.updateLowerBound(-sumUB + ubB, cause);
+            B.updateLowerBound(-sumUB + ubB, cause, true);
         }
         //TODO: back propager?
     }

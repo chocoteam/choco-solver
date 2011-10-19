@@ -56,13 +56,13 @@ public class IndexOf extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		vars[var1].instantiateTo(var2,cause);
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+		vars[var1].instantiateTo(var2,cause, informCause);
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		vars[var1].removeValue(var2, cause);
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+		vars[var1].removeValue(var2, cause, informCause);
 	}
 
 	@Override

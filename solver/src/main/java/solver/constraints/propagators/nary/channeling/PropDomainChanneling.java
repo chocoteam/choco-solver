@@ -92,8 +92,8 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     @Override
     public void propagate() throws ContradictionException {
-        vars[dsize].updateLowerBound(0, this);
-        vars[dsize].updateUpperBound(dsize - 1, this);
+        vars[dsize].updateLowerBound(0, this, false);
+        vars[dsize].updateUpperBound(dsize - 1, this, false);
 
         int left = Integer.MIN_VALUE;
         int right = left;
@@ -102,23 +102,23 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 if (i == right + 1) {
                     right = i;
                 } else {
-                    vars[dsize].removeInterval(left, right, this);
+                    vars[dsize].removeInterval(left, right, this, false);
                     left = i;
                     right = i;
                 }
 //                vars[dsize].removeVal(i, this, false);
             } else if (vars[i].instantiatedTo(1)) {
-                vars[dsize].instantiateTo(i, this);
+                vars[dsize].instantiateTo(i, this, false);
                 clearBooleanExcept(i);
             } else if (!vars[dsize].contains(i)) {
                 clearBoolean(i);
             }
         }
-        vars[dsize].removeInterval(left, right, this);
+        vars[dsize].removeInterval(left, right, this, false);
         if (vars[dsize].instantiated()) {
             final int value = vars[dsize].getValue();
             clearBooleanExcept(value);
-            vars[value].instantiateTo(1, this);
+            vars[value].instantiateTo(1, this, false);
         }
 
         //Set oldinf & oldsup equals to the nt bounds of the assignment var
@@ -137,19 +137,19 @@ public class PropDomainChanneling extends Propagator<IntVar> {
             if (idxVarInProp == dsize) {
                 //We instantiate the assignment var
                 //val = index to keep
-                vars[val].instantiateTo(1, this);
+                vars[val].instantiateTo(1, this, false);
                 clearBooleanExcept(val);
             } else {
                 //We instantiate a boolean var
                 if (val == 1) {
                     //We report the instantiation to the associated assignment var
-                    vars[dsize].instantiateTo(idxVarInProp, this);
+                    vars[dsize].instantiateTo(idxVarInProp, this, false);
                     //Next line should be useless ?
                     clearBooleanExcept(idxVarInProp);
                 } else {
-                    vars[dsize].removeValue(idxVarInProp, this);
+                    vars[dsize].removeValue(idxVarInProp, this, false);
                     if (vars[dsize].instantiated()) {
-                        vars[vars[dsize].getValue()].instantiateTo(1, this);
+                        vars[vars[dsize].getValue()].instantiateTo(1, this, false);
                     }
                 }
             }
@@ -184,7 +184,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
 
     private void clearBoolean(int val) throws ContradictionException {
-        vars[val].instantiateTo(0, this);
+        vars[val].instantiateTo(0, this, false);
     }
 
 

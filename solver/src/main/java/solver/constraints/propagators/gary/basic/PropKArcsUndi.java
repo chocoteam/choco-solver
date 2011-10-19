@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IEnvironment;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -76,8 +75,8 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 		}
 		min = min / 2;
 		max = max / 2;
-		k.updateLowerBound(min, this);
-		k.updateUpperBound(max, this);
+		k.updateLowerBound(min, this, false);
+		k.updateUpperBound(max, this, false);
 		nbInEnv.set(max);
 		nbInKer.set(min);
 		if(k.instantiated()){
@@ -88,7 +87,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this);
+							g.enforceArc(i, j, this, false);
 						}
 					}
 					setPassive();
@@ -99,7 +98,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this);
+								g.removeArc(i, j, this, false);
 							}
 						}
 					}
@@ -122,7 +121,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this);
+							g.enforceArc(i, j, this, false);
 						}
 					}
 					setPassive();
@@ -133,7 +132,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this);
+								g.removeArc(i, j, this, false);
 							}
 						}
 					}

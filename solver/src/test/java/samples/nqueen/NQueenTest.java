@@ -199,17 +199,17 @@ public class NQueenTest {
         Solver solver = modeler(new NQueenBinaryGlobal(), 16);
         solver.propagate();
         Variable[] vars = solver.getVars();
-        ((IntVar) vars[0]).instantiateTo(1, Cause.Null);
-        ((IntVar) vars[1]).instantiateTo(3, Cause.Null);
-        ((IntVar) vars[2]).instantiateTo(5, Cause.Null);
-        ((IntVar) vars[3]).instantiateTo(2, Cause.Null);
-        ((IntVar) vars[4]).instantiateTo(12, Cause.Null);
-        ((IntVar) vars[5]).instantiateTo(16, Cause.Null);
-        ((IntVar) vars[6]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[0]).instantiateTo(1, Cause.Null, false);
+        ((IntVar) vars[1]).instantiateTo(3, Cause.Null, false);
+        ((IntVar) vars[2]).instantiateTo(5, Cause.Null, false);
+        ((IntVar) vars[3]).instantiateTo(2, Cause.Null, false);
+        ((IntVar) vars[4]).instantiateTo(12, Cause.Null, false);
+        ((IntVar) vars[5]).instantiateTo(16, Cause.Null, false);
+        ((IntVar) vars[6]).instantiateTo(4, Cause.Null, false);
         solver.getSearchLoop().propEngine.fixPoint();
         LoggerFactory.getLogger("test").error("*******************************************");
         System.out.printf("%s\n", solver.toString());
-        ((IntVar) vars[7]).instantiateTo(7, Cause.Null);
+        ((IntVar) vars[7]).instantiateTo(7, Cause.Null, false);
         try {
             solver.getSearchLoop().propEngine.fixPoint();
             Assert.fail();

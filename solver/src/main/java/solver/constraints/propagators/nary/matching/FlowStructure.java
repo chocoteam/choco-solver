@@ -174,7 +174,7 @@ public class FlowStructure implements Serializable {
             if (vi == Integer.MAX_VALUE) {
                 vi = n.var.previousValue(val);
             }
-            n.var.instantiateTo(vi, propagator);
+            n.var.instantiateTo(vi, propagator, false);
             n.forceEdge(vi);
             return updateMatchingOnInstantiation(i, vi, propagator);
         } else {
