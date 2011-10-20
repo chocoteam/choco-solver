@@ -37,6 +37,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -176,7 +177,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      */
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        solver.explainer.instantiateTo(this, value, cause);
+        solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
         }
@@ -385,12 +386,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * @param what
      */
     @Override
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            expl.add(solver.explainer.explain(this, val));
+            expl.add(solver.getExplainer().explain(this, val));
             val = invdom.nextSetBit(val + 1);
         }
         return expl;

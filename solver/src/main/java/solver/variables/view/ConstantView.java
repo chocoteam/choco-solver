@@ -34,6 +34,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -230,7 +231,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         return null;
     }
 

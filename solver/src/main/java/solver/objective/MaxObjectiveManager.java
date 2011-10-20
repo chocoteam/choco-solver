@@ -103,7 +103,7 @@ public class MaxObjectiveManager extends IObjectiveManager {
     }
 
     @Override
-    public Explanation explain(IntVar v, Deduction val) {
+    public Explanation explain(Deduction val) {
         return null;  //TODO change body of implemented methods use File | Settings | File Templates.
     }
 }

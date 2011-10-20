@@ -37,6 +37,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -118,7 +119,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -152,10 +153,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.explainer.removeValue(this, value, antipromo);
+                solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, MSG_EMPTY);
             }
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
             return true;
         }
         return false;
@@ -191,7 +192,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
-        solver.explainer.instantiateTo(this, value, cause);
+        solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
         }
@@ -252,7 +253,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.explainer.updateLowerBound(this, old, value, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -273,7 +274,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, value, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
 
             }
@@ -307,7 +308,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.explainer.updateUpperBound(this, old, value, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -328,7 +329,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                     }
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, value, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
         }
@@ -443,15 +444,15 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            if ((what == Explanation.LB && val < this.getLB())
-                    || (what == Explanation.UB && val > this.getUB())
-                    || (what == Explanation.DOM)) {
-                expl.add(solver.explainer.explain(this, val));
+            if ((what == VariableState.LB && val < this.getLB())
+                    || (what == VariableState.UB && val > this.getUB())
+                    || (what == VariableState.DOM)) {
+                expl.add(solver.getExplainer().explain(this, val));
             }
             val = invdom.nextSetBit(val + 1);
         }

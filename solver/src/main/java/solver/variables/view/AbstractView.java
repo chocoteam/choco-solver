@@ -37,6 +37,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
@@ -222,16 +223,16 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     }
 
     @Override
-    public Explanation explain(IntVar v, Deduction d) {
+    public Explanation explain(Deduction d) {
         return null;
     }
 
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            expl.add(solver.explainer.explain(this, val));
+            expl.add(solver.getExplainer().explain(this, val));
             val = invdom.nextSetBit(val + 1);
         }
         return expl;

@@ -28,6 +28,7 @@
 package solver.explanations;
 
 import solver.constraints.propagators.Propagator;
+import solver.variables.Variable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -39,10 +40,10 @@ import java.util.Set;
  * Time: 12:54:50
  * An explanation
  */
+
+
+
 public class Explanation extends Deduction {
-    public static final int DOM = 1;
-    public static final int LB = 2;
-    public static final int UB = 3;
 
     Set<Deduction> deductions;
     Set<Propagator> contraintes;
@@ -96,6 +97,24 @@ public class Explanation extends Deduction {
         this.deductions = null;
     }
 
+
+    public int getMostRecentWorldToBacktrack(ExplanationEngine explainer) {
+        int topworld = 0;
+        if (this.deductions != null) {
+            for (Deduction dec : this.deductions) {
+                if (dec instanceof VariableAssignment) {
+                    Variable va = ((VariableAssignment) dec).var;
+                    int val = ((VariableAssignment) dec).val;
+                    int world = explainer.getWorldNumber(va, val);
+                    if (world > topworld) {
+                        topworld = world;
+                    }
+                }
+            }
+        }
+        return 1 + (explainer.solver.getEnvironment().getWorldIndex() - topworld);
+    }
+
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
@@ -111,7 +130,7 @@ public class Explanation extends Deduction {
             bf.delete(bf.lastIndexOf(","), bf.length() - 1);
         }
 
-        bf.append(" // P:");
+        bf.append(" ; P:");
         if (this.contraintes != null) {
             bf.append("(" + this.contraintes.size() + ") ");
             for (Propagator p : this.contraintes) {

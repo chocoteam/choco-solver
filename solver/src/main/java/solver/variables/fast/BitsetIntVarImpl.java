@@ -40,6 +40,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -162,7 +163,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
@@ -201,14 +202,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     this.notifyPropagators(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
-                        solver.explainer.removeValue(this, value, antipromo);
+                        solver.getExplainer().removeValue(this, value, antipromo);
                         this.contradiction(cause, MSG_EMPTY);
                     }
                 }
             }
         }
         if (change) {
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
         }
         return change;
     }
@@ -251,7 +252,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        solver.explainer.instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
+        solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
         if (informCause) {
             cause = Cause.Null;
         }
@@ -317,7 +318,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.explainer.updateLowerBound(this, old, value, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -345,7 +346,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 assert (change);
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, value, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -381,7 +382,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.explainer.updateUpperBound(this, old, value, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -407,7 +408,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, value, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
@@ -531,16 +532,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.explainer.getRemovedValues(this);
+        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
         int val = invdom.nextSetBit(0);
         while (val != -1) {
-            if ((what == Explanation.LB && val < this.getLB())
-                    || (what == Explanation.UB && val > this.getUB())
-                    || (what == Explanation.DOM)) {
+            if ((what == VariableState.LB && val < this.getLB())
+                    || (what == VariableState.UB && val > this.getUB())
+                    || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
-                expl.add(solver.explainer.explain(this, val));
+                expl.add(solver.getExplainer().explain(this, val));
             }
             val = invdom.nextSetBit(val + 1);
         }

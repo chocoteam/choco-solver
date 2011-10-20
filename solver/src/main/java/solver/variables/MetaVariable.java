@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.delta.NoDelta;
 
 public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
@@ -62,7 +63,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
     }
 
     @Override
-	public Explanation explain(int what) {
+	public Explanation explain(VariableState what) {
 		// TODO Auto-generated method stub
 		return null;
 	}

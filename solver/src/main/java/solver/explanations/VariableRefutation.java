@@ -44,23 +44,17 @@ public class VariableRefutation extends VariableAssignment {
         decision = dec;
     }
 
+    /*
     public Explanation explain() {
-//        System.out.println("VariableRefutation.explain");
-//        System.out.println("var = " + var);
-//        System.out.println("val = " + val);
-//        System.out.println("decision = " + decision);
-//        System.out.println("previous =" + decision.getPrevious());
-
-//        var.getSolver().explainer.
         Explanation expl = new Explanation(null, null);
         Decision prev = decision.getPrevious();
         while (prev != null) {
-             expl.add(prev.explain(null, null));
+             expl.add(prev.explain(null));
             prev = prev.getPrevious();
         }
         return  expl;
     }
-
+      */
 
     @Override
     public String toString() {

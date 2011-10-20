@@ -51,7 +51,6 @@ import java.util.Set;
  * An RecorderExplanationEngine is used to record explanations throughout computation.
  * Here we just record the explanations in a HashMap ...
  * <p/>
- * TODO revise the way of recording in order to be able to retrieve information
  */
 public class RecorderExplanationEngine extends ExplanationEngine {
 
@@ -89,7 +88,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
 
     @Override
-    public Explanation check(IntVar var, int val) {
+    public Explanation retrieve(IntVar var, int val) {
         return database.get(getValueRemoval(var, val));
     }
 
@@ -132,7 +131,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             variablerefutations.get(var).put(val, vr);
         }
         vr.decision = dec;
-        //       database.put(vr, vr.explain());
         return vr;
     }
 
@@ -141,57 +139,55 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public void removeValue(IntVar var, int val, ICause cause) {
         IStateBitSet invdom = getRemovedValues(var);
         Deduction vr = getValueRemoval(var, val);
-        database.put(vr, cause.explain(var, vr));
+        Explanation expl = cause.explain(vr);
+        database.put(vr, expl);
         invdom.set(val);
-//        System.out.println("RecorderExplanationEngine.removeValue");
-//        System.out.println("var = " + var + " val " + val);
-//        System.out.println("database.get(vr) = " + database.get(vr));
+        emList.onRemoveValue(var, val, cause, expl);
     }
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
-        //System.out.println("recording " + var + " : " + old+ " -> " + val);
         IStateBitSet invdom = getRemovedValues(var);
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
-            database.put(vr, cause.explain(var, vr));
+            Explanation expl = cause.explain(vr);
+            database.put(vr, expl);
             invdom.set(v);
-            //           System.out.println("recording " + var + " - " + v + " " + database.get(vr));
+            emList.onUpdateLowerBound(var, old, val, cause, expl);
         }
-
     }
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
-        //System.out.println("recording " + var + " : " + old+ " -> " + val);
         IStateBitSet invdom = getRemovedValues(var);
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
-//            System.out.println("vr = " + vr);
-            database.put(vr, cause.explain(var, vr));
+            Explanation explain = cause.explain(vr);
+            database.put(vr, explain);
             invdom.set(v);
-//            System.out.println("recording " + var + " - " + v + " " + database.get(vr));
+            emList.onUpdateUpperBound(var, old, val, cause, explain);
         }
     }
 
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
-        //System.out.println("recording " + var + " instantiated to " + val);
         IStateBitSet invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
         while (it.hasNext()) {
             int v = it.next();
             if ( v != val ) {
                 Deduction vr = getValueRemoval(var,v);
-                database.put(vr, cause.explain(var, vr));
+                Explanation explain = cause.explain(vr);
+                database.put(vr, explain);
                 invdom.set(v);
+                emList.onInstantiateTo(var, val, cause, explain);
             }
         }
     }
 
     @Override
-    public Explanation why(Explanation expl) {
+    public Explanation flatten(Explanation expl) {
         Explanation toreturn = new Explanation(null, null);
 
         Set<Deduction> toexpand = new HashSet<Deduction>();
@@ -200,15 +196,11 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         if (expl.deductions != null) {
             toexpand = new HashSet<Deduction>(expl.deductions); //
         }
-//        System.out.println("RecorderExplanationEngine.why");
-
         while (!toexpand.isEmpty()) {
             Deduction d = toexpand.iterator().next();
             toexpand.remove(d);
             expanded.add(d);
             Explanation e = database.get(d);
-//            System.out.println("d: " + d + " e = " + e);
-
 
             if (e != null) {
                 if (e.contraintes != null) {
@@ -220,7 +212,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
                     for (Deduction ded : e.deductions) {
                         if (!expanded.contains(ded)) {
-//                            System.out.println("adding ded = " + ded);
                             toexpand.add(ded);
                         }
                     }
@@ -233,20 +224,21 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
     @Override
-    public Explanation why(IntVar var, int val) {
+    public Explanation flatten(IntVar var, int val) {
+        // TODO check that it is always called with val NOT in var
+        return flatten(getValueRemoval(var, val));
+    }
 
-        Explanation toreturn = new Explanation(null, null);
-
-        if (var.contains(val)) return toreturn;
-
-        toreturn.add(getValueRemoval(var, val));
-        return why(toreturn);
+    @Override
+    public Explanation flatten(Deduction deduction) {
+        Explanation expl = new Explanation(null, null);
+        expl.add(deduction);
+        return flatten(expl);
     }
 
     @Override
     public Deduction explain(IntVar var, int val) {
-        ValueRemoval vr = getValueRemoval(var, val);
-        return vr;
+        return explain(getValueRemoval(var, val));
     }
 
     @Override
@@ -254,46 +246,10 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         return deduction;
     }
 
-    public int getMostRecentWorldToBacktrack(Explanation expl) {
-//        System.out.println(">>> RecorderExplanationEngine.getMostRecentWorldToBacktrack");
-//        System.out.println(expl);
-//        System.out.println("RecorderExplanationEngine.getMostRecentWorldToBacktrack");
-        int topworld = 0;
-        if (expl.deductions != null) {
-            for (Deduction dec : expl.deductions) {
-                if (dec instanceof VariableAssignment) {
-                    Variable va = ((VariableAssignment) dec).var;
-                    int val = ((VariableAssignment) dec).val;
-//                    System.out.println("dec = " + dec);
-//                    System.out.println("variableassignments = " + variableassignments);
-//                    System.out.println(variableassignments.get(va));
-                    Pair<VariableAssignment, Integer> vr = variableassignments.get(va).get(val);
-//                    System.out.println("dec = " + dec + "vr" + vr.snd);
-                    if (vr == null) System.exit(0);
-                    if (vr.snd > topworld) {
-                        topworld = vr.snd;
-                    }
-                }
-            }
-        }
-//        System.out.println("RecorderExplanationEngine.getMostRecentWorldToBacktrack");
-//        System.out.println(expl);
-//        System.out.println("topworld (cw) = " + topworld + " (" + this.solver.getEnvironment().getWorldIndex() + ")");
 
-        updateVRExplainUponbacktracking(1 + (this.solver.getEnvironment().getWorldIndex() - topworld), expl);
-
-//        System.out.println("<<< RecorderExplanationEngine.getMostRecentWorldToBacktrack");
-
-        return 1 + (this.solver.getEnvironment().getWorldIndex() - topworld);
-//        return 1;
-    }
-
-    private void updateVRExplainUponbacktracking(int nworld, Explanation expl) {
-//        System.out.println("RecorderExplanationEngine.updateVRExplainUponbacktracking");
-//        System.out.println("nworld = " + nworld);
+    private Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
         Decision dec = solver.getSearchLoop().decision; // the current decision to undo
         while (dec != null && nworld > 1) {
-//            System.out.println(")> dec = " + dec);
             dec = dec.getPrevious();
             nworld--;
         }
@@ -301,23 +257,80 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Deduction vr = dec.getPositiveDeduction();
             Deduction assign = dec.getNegativeDeduction();
             expl.remove(assign);
-//            System.out.println("RecorderExplanationEngine.updateVRExplainUponbacktracking");
-//            System.out.println("vr = " + vr + " expl " + why(expl));
-            database.put(vr, why(expl));
+            database.put(vr, flatten(expl));
         }
-//        System.out.println("END");
+        return dec;
+    }
+
+
+    @Override
+    public int getWorldNumber(Variable va, int val) {
+        Pair<VariableAssignment, Integer> vr = variableassignments.get(va).get(val);
+        if (vr != null) {
+            return vr.snd;
+        }
+        else {
+            System.err.println("RecorderExplanationEngine.getWorldNumber");
+            System.err.println("incoherent state !!!");
+            System.exit(-1);
+            return 0;
+        }
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-//        System.out.println("RecorderExplanationEngine.onContradiction");
-        if (cex.v != null) { // contradiction on domain wipe out
-//            System.out.println("*** " + cex.v + " (" + cex.v.getClass() + ") has been wiped out");
-            Explanation expl = cex.v.explain(Explanation.DOM);
-//            System.out.println("expl = " + expl);
-//            System.out.println("w(expl) = " + why(expl));
-//            System.out.println(expl);
-            cex.v.getSolver().getSearchLoop().overridePreviousWolrd(getMostRecentWorldToBacktrack(why(expl)));
+        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
+            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
+                    : cex.c.explain(null);
+            Solver solver = (cex.v != null) ? cex.v.getSolver() : cex.c.getConstraint().getVariables()[0].getSolver();
+            Explanation complete = flatten(expl);
+            int upto = complete.getMostRecentWorldToBacktrack(this);
+            solver.getSearchLoop().overridePreviousWolrd(upto);
+            Decision dec = updateVRExplainUponbacktracking(upto, complete);
+            emList.onContradiction(cex, complete, upto, dec);
+        } else {
+            System.err.println("RecorderExplanationEngine.onContradiction");
+            System.err.println("incoherent state !!!");
+            System.exit(-1);
         }
+    }
+
+    @Override
+    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + explanation);
+        }
+    }
+
+    @Override
+    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " APPLYING " + cause + " BECAUSE OF " + explanation);
+        }
+    }
+
+    @Override
+    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " APPLYING " + cause + " BECAUSE OF " + explanation);
+        }
+    }
+
+    @Override
+    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("::EXPL:: INST to " + val + " FOR " + var + " APPLYING " + cause + " BECAUSE OF " + explanation);
+        }
+    }
+
+    @Override
+    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision) {
+        if (LOGGER.isInfoEnabled()) {
+            if (cex.v != null) {
+                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
+                LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
+            }
+        }
+
     }
 }

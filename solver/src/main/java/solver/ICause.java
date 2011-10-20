@@ -30,7 +30,6 @@ package solver;
 import solver.constraints.Constraint;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.IntVar;
 
 import java.io.Serializable;
 
@@ -55,11 +54,12 @@ public interface ICause extends Serializable {
 
     /**
      * returns an explanation based on <code>this</code>.
-     * @param v the variable impacted by <code>this</code>
+     *
      * @param d the deduction
      * @return an explanation
      */
-    Explanation explain(IntVar v, Deduction d) ;
+    Explanation explain(Deduction d) ;
+
 
     /**
      * Returns the promomotion policy of <code>this</code>.

@@ -33,7 +33,6 @@ import solver.explanations.Explanation;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.variables.graph.GraphVar;
 
 public class GraphDecision extends AbstractDecision<GraphVar> {
@@ -93,7 +92,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	}
 
 	@Override
-	public Explanation explain(IntVar v, Deduction d) {
+	public Explanation explain(Deduction d) {
 		return null;
 	}
 

@@ -35,9 +35,11 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * X >= Y + C
@@ -134,21 +136,21 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public Explanation explain(IntVar var, Deduction d) {
+    public Explanation explain(Deduction d) {
         Explanation expl = new Explanation(null, null);
         // the current deduction is due to the current domain of the involved variables
 
+        Variable var = d.getVar();
+
         if (var.equals(x)) {
            // a deduction has been made on x ; this is related to y only
-            expl.add(y.explain(Explanation.LB));
+            expl.add(y.explain(VariableState.LB));
         }
-        else {
-
-           expl.add(x.explain(Explanation.UB));
+        else if (var != null) {
+           expl.add(x.explain(VariableState.UB));
         }
         // and the application of the current propagator
         expl.add(this);
         return expl;
-
     }
 }

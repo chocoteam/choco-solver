@@ -33,9 +33,13 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -133,5 +137,30 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
             return ESat.FALSE;
         else
             return ESat.UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".NEQ.").append(vars[1].getName());
+        bf.append("+").append(cste).append(")");
+        return bf.toString();
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        Explanation expl = new Explanation(null, null);
+        Variable var = d.getVar();
+
+        if (var.equals(x)) {
+            // a deduction has been made on x ; this is related to y only
+            expl.add(y.explain(VariableState.DOM));
+        }
+        else if (var != null) {
+            expl.add(x.explain(VariableState.DOM));
+        }
+        // and the application of the current propagator
+        expl.add(this);
+        return expl;
     }
 }

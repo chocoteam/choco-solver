@@ -40,12 +40,12 @@ import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.EventRequest;
 import solver.requests.IRequest;
 import solver.requests.PropRequest;
 import solver.variables.EventType;
-import solver.variables.IntVar;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -331,16 +331,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * returns a explanation for the decision mentionned in parameters
      *
+     *
      * @param d : a <code>Deduction</code> to explain
      * @return a set of constraints and past decisions
      */
 
     @Override
-    public Explanation explain(IntVar var, Deduction d) {
+    public Explanation explain(Deduction d) {
         Explanation expl = new Explanation(null, null);
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
-            expl.add(v.explain(Explanation.DOM));
+            expl.add(v.explain(VariableState.DOM));
         }
         // and the application of the current propagator
         expl.add(this);

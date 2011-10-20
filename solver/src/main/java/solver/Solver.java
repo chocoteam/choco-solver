@@ -86,11 +86,7 @@ public class Solver implements Serializable {
      */
     public Properties properties;
 
-    /**
-     * Explanation engine for the solver
-     */
-
-    public ExplanationEngine explainer;
+    private ExplanationEngine explainer;
 
     /**
      * Variables of the solver
@@ -159,7 +155,7 @@ public class Solver implements Serializable {
         this.creationTime -= System.nanoTime();
         this.engine = new PropagationEngine();
         this.search = SearchLoops.preset(this, engine);
-        this.explainer = new ExplanationEngine(this);
+        this.setExplainer(new ExplanationEngine(this));
     }
 
     private void loadProperties() {
@@ -521,5 +517,22 @@ public class Solver implements Serializable {
         in.close();
         return model;
     }
+
+    /**
+     * Explanation engine for the solver
+     */
+    public ExplanationEngine getExplainer() {
+        return explainer;
+    }
+
+    public void setExplainer(ExplanationEngine explainer) {
+        this.explainer = explainer;
+    }
+
+    public void set(ExplanationEngine explainer) {
+        this.setExplainer(explainer);
+    }
+
+
 
 }

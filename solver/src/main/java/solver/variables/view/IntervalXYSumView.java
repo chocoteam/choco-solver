@@ -70,7 +70,7 @@ public final class IntervalXYSumView extends AbstractSumView {
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, AbstractVariable.MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -100,10 +100,10 @@ public final class IntervalXYSumView extends AbstractSumView {
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.explainer.removeValue(this, value, antipromo);
+                solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, MSG_EMPTY);
             }
-            solver.explainer.removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, antipromo);
             return true;
         }
         return false;
@@ -121,13 +121,12 @@ public final class IntervalXYSumView extends AbstractSumView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
-        solver.explainer.instantiateTo(this, value, cause);
+        solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                solver.explainer.instantiateTo(this, value, cause);
                 this.contradiction(cause, MSG_INST);
             }
             return false;
@@ -141,10 +140,8 @@ public final class IntervalXYSumView extends AbstractSumView {
             filterOnGeq(cause, value);
 
             this.notifyPropagators(EventType.INSTANTIATE, cause);
-            solver.explainer.instantiateTo(this, value, cause);
             return true;
         } else {
-            solver.explainer.instantiateTo(this, value, cause);
             this.contradiction(cause, MSG_UNKNOWN);
             return false;
         }
@@ -159,7 +156,7 @@ public final class IntervalXYSumView extends AbstractSumView {
         int old = this.getLB();
         if (old < aValue) {
             if (this.getUB() < aValue) {
-                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -177,7 +174,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.explainer.updateLowerBound(this, old, aValue, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, aValue, antipromo);
                 return true;
 
             }
@@ -194,7 +191,7 @@ public final class IntervalXYSumView extends AbstractSumView {
         int old = this.getUB();
         if (old > aValue) {
             if (this.getLB() > aValue) {
-                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, aValue, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -211,7 +208,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                     }
                 }
                 this.notifyPropagators(e, cause);
-                solver.explainer.updateUpperBound(this, old, aValue, antipromo);
+                solver.getExplainer().updateUpperBound(this, old, aValue, antipromo);
                 return true;
             }
         }
@@ -316,7 +313,7 @@ public final class IntervalXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    solver.explainer.updateLowerBound(this, ilb, elb, this);
+                    solver.getExplainer().updateLowerBound(this, ilb, elb, this);
                     this.contradiction(this, MSG_LOW);
                 }
                 SIZE.add(elb - ilb);
@@ -327,7 +324,7 @@ public final class IntervalXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    solver.explainer.updateUpperBound(this, iub, eub, this);
+                    solver.getExplainer().updateUpperBound(this, iub, eub, this);
                     this.contradiction(this, MSG_LOW);
                 }
                 SIZE.add(eub - iub);
@@ -341,8 +338,8 @@ public final class IntervalXYSumView extends AbstractSumView {
                 up = true;
             }
             if (ilb > iub) {
-                solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                solver.explainer.updateUpperBound(this, iub, iub, this);
+                solver.getExplainer().updateLowerBound(this, ilb, ilb, this);
+                solver.getExplainer().updateUpperBound(this, iub, iub, this);
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || ilb == iub) { // ilb == iub means instantiation, then force filtering algo
@@ -353,11 +350,11 @@ public final class IntervalXYSumView extends AbstractSumView {
             }
             if (ilb == iub) {
                 notifyPropagators(EventType.INSTANTIATE, this);
-                solver.explainer.instantiateTo(this, ilb, this);
+                solver.getExplainer().instantiateTo(this, ilb, this);
             } else {
                 notifyPropagators(e, this);
-                solver.explainer.updateLowerBound(this, ilb, ilb, this);
-                solver.explainer.updateUpperBound(this, iub, iub, this);
+                solver.getExplainer().updateLowerBound(this, ilb, ilb, this);
+                solver.getExplainer().updateUpperBound(this, iub, iub, this);
             }
         }
     }

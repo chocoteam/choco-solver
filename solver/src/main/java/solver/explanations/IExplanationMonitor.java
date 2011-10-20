@@ -24,47 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
 
-import solver.constraints.Constraint;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
+package solver.explanations;
+
+import solver.ICause;
+import solver.exception.ContradictionException;
+import solver.search.strategy.decision.Decision;
+import solver.variables.IntVar;
 
 /**
-* <br/>
-*
-* @author Charles Prud'homme
-* @since 26/08/11
-*/
-public enum Cause implements ICause {
-    Null;
-
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
-    @Override
-    public Explanation explain(Deduction d) {
-        return null;
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
-    }
+ * Created by IntelliJ IDEA.
+ * User: njussien
+ * Date: 13/10/11
+ * Time: 16:33
+ * <p/>
+ * an interface for tracing explanation based operations
+ */
+public interface IExplanationMonitor {
+    public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation);
+    public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation);
+    public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation);
+    public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation);
+    public void onContradiction(ContradictionException cex, Explanation explanation, int upTo, Decision decision);
 }

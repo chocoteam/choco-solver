@@ -27,6 +27,8 @@
 
 package solver.explanations;
 
+import solver.variables.Variable;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -34,4 +36,5 @@ package solver.explanations;
  * Time: 12:57:36
  */
 public class Deduction {
+    public Variable getVar() { return null; }
 }

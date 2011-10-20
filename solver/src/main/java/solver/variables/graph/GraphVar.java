@@ -34,6 +34,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -173,8 +174,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     //***********************************************************************************
 
     @Override
-    public Explanation explain(int what) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public Explanation explain(VariableState what) {
+        return null;
     }
 
     @Override

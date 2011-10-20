@@ -30,7 +30,6 @@ package solver.objective;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.variables.IntVar;
 
 /**
  * This implementation of <code>IObjectiveManager</code> interface provides empty methods for satisfaction problems,
@@ -84,7 +83,7 @@ public class NoObjectiveManager extends IObjectiveManager {
 
    
     @Override
-    public Explanation explain(IntVar v, Deduction d) {
+    public Explanation explain(Deduction d) {
         return null;  //TODO change body of implemented methods use File | Settings | File Templates.
     }
 }

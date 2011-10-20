@@ -27,7 +27,7 @@
 
 package solver.explanations;
 
-import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * Created by IntelliJ IDEA.
@@ -36,14 +36,19 @@ import solver.variables.IntVar;
  * Time: 13:01:46
  */
 public class ValueRemoval extends Deduction {
-    IntVar var;
+    Variable var;
     int val ;
 
-    public ValueRemoval(IntVar v, int n) {
+    public ValueRemoval(Variable v, int n) {
         this.var = v;
         this.val = n;
     }
 
+
+    @Override
+    public Variable getVar() {
+        return var ;
+    }
 
     @Override
     public String toString() {

@@ -39,17 +39,17 @@ public enum ExplanationEngines {
     DEFAULT {
         @Override
         public void make(Solver solver) {
-            solver.explainer = new ExplanationEngine(solver);
+            solver.set(new ExplanationEngine(solver));
         }
     }, RECORDER {
         @Override
         public void make(Solver solver) {
-            solver.explainer = new RecorderExplanationEngine(solver);
+            solver.set(new RecorderExplanationEngine(solver));
         }
     }, FLATTEN {
         @Override
         public void make(Solver solver) {
-            solver.explainer = new FlattenedRecorderExplanationEngine(solver);
+            solver.set(new FlattenedRecorderExplanationEngine(solver));
         }
     };
 

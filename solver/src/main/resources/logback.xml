@@ -24,6 +24,7 @@
     <logger name="solver" level="info"/>
 
     <logger name="fzn" level="info"/>
+    <logger name="explainer" level="info"/>
 
     <root level="error">
         <appender-ref ref="STDOUT"/>

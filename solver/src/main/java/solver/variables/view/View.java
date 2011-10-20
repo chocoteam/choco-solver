@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -132,7 +133,7 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public Explanation explain(int what) {
+    public Explanation explain(VariableState what) {
         return var.explain(what);
     }
 

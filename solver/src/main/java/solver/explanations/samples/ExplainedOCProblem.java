@@ -31,7 +31,7 @@ package solver.explanations.samples;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.binary.NotEqualX_YC;
-import solver.explanations.RecorderExplanationEngine;
+import solver.explanations.ExplanationFactory;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -64,13 +64,14 @@ public class ExplainedOCProblem extends AbstractProblem {
 //        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
-        solver.explainer = new RecorderExplanationEngine(solver);
-//        solver.explainer = new FlattenedRecorderExplanationEngine(solver);
+        boolean flatten = false;
+        boolean trace = false;
+        solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver,false, true);
+        SearchMonitorFactory.log(solver, false, true);
         solver.findSolution();
         if (solver.isFeasible() == Boolean.TRUE) {
             do {
@@ -86,7 +87,7 @@ public class ExplainedOCProblem extends AbstractProblem {
 //            System.out.println("* variable " + v);
             for (int i = 1; i <= vals; i++) {
                 if (!v.contains(i)) {
-                    System.out.println(v + " != " + i + " because " + solver.explainer.check(v,i));
+                    System.out.println(v + " != " + i + " because " + solver.getExplainer().retrieve(v, i));
                 }
             }
         }

@@ -35,7 +35,6 @@ import solver.exception.ContradictionException;
  * @since 09/05/11
  */
 public final class SearchMonitorList implements ISearchMonitor {
-
     ISearchMonitor[] searchMonitors = new ISearchMonitor[4];
     int size = 0;
 

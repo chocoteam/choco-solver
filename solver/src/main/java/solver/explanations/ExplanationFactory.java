@@ -24,47 +24,30 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
 
-import solver.constraints.Constraint;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
+package solver.explanations;
+
+import solver.Solver;
 
 /**
-* <br/>
-*
-* @author Charles Prud'homme
-* @since 26/08/11
-*/
-public enum Cause implements ICause {
-    Null;
+ * Created by IntelliJ IDEA.
+ * User: njussien
+ * Date: 19/10/11
+ * Time: 19:22
+ */
+public final class ExplanationFactory {
 
-    @Override
-    public Constraint getConstraint() {
-        return null;
+    public ExplanationFactory() {
     }
 
-    @Override
-    public Explanation explain(Deduction d) {
-        return null;
+    public static ExplanationEngine engineFactory(Solver slv){
+        return ExplanationFactory.engineFactory(slv, false, false);
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
+    public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
+        ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
+                    : new RecorderExplanationEngine(slv);
+        if (trace) eng.addExplanationMonitor(eng);
+        return eng;
     }
 }

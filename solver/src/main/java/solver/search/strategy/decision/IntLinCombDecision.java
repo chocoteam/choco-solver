@@ -143,7 +143,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     }
 
     @Override
-    public Explanation explain(IntVar v, Deduction d) {
+    public Explanation explain(Deduction d) {
         return null;  // TODO implémenter la notion d'explication pour ce type de décision
     }
 
