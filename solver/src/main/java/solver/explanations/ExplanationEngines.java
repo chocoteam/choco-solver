@@ -44,12 +44,12 @@ public enum ExplanationEngines {
     }, RECORDER {
         @Override
         public void make(Solver solver) {
-            solver.set(new RecorderExplanationEngine(solver));
+            solver.set(ExplanationFactory.engineFactory(solver, false, false));
         }
     }, FLATTEN {
         @Override
         public void make(Solver solver) {
-            solver.set(new FlattenedRecorderExplanationEngine(solver));
+            solver.set(ExplanationFactory.engineFactory(solver, true, false));
         }
     };
 

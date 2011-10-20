@@ -106,10 +106,13 @@ public class Photo extends AbstractProblem {
                 Predicates.all(),
                 Policy.ONE
         ));
+
     }
 
     @Override
     public void solve() {
+//        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
+
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
     }
 
