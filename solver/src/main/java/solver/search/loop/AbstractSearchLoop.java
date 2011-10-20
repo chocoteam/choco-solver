@@ -389,7 +389,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
 
 
-    public void overridePreviousWolrd(int gap) {
+    public void overridePreviousWorld(int gap) {
         this.jumpTo = gap;
     }
 

@@ -29,6 +29,8 @@ package solver.variables.view;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.IntVar;
 
 import static solver.variables.AbstractVariable.MSG_EMPTY;
@@ -94,5 +96,14 @@ public abstract class AbstractSumView extends AbstractView {
             B.updateLowerBound(-sumUB + ubB, cause, true);
         }
         //TODO: back propager?
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        Explanation explanation = new Explanation(null, null);
+        explanation.add(A.explain(what));
+        explanation.add(B.explain(what));
+        return explanation;
+
     }
 }

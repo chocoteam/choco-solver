@@ -38,6 +38,7 @@ import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -111,8 +112,8 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void solve() {
-        //solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-        //SearchMonitorFactory.log(solver, true, true);
+        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
+        SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
     }
 

@@ -30,6 +30,7 @@ package solver.objective;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.search.measure.IMeasures;
 import solver.variables.IntVar;
 
@@ -98,6 +99,6 @@ public class MinObjectiveManager extends IObjectiveManager {
 
     @Override
     public Explanation explain(Deduction val) {
-        return null;  //TODO change body of implemented methods use File | Settings | File Templates.
+        return objective.explain(VariableState.UB);
     }
 }

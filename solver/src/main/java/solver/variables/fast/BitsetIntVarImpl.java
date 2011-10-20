@@ -40,6 +40,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
+import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
@@ -534,17 +535,18 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
-        int val = invdom.nextSetBit(0);
-        while (val != -1) {
+        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
+        DisposableValueIterator it = invdom.getValueIterator();
+        while (it.hasNext()) {
+            int val = it.next();
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
 //                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
                 expl.add(solver.getExplainer().explain(this, val));
             }
-            val = invdom.nextSetBit(val + 1);
         }
+
 //        System.out.println("BitsetIntVarImpl.explain " + this + invdom +  " expl: " + expl);
         return expl;
     }

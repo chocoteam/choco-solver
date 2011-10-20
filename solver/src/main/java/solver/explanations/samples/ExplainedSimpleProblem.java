@@ -89,6 +89,6 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     }
 
      public static void main(String[] args) {
-        new ExplainedSimpleProblem().execute();
+        new ExplainedSimpleProblem().execute(args);
     }
 }

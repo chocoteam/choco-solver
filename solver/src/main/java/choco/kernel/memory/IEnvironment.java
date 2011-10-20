@@ -165,6 +165,7 @@ public interface IEnvironment extends Serializable{
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment
      *
+     *
      * @param size initail size of the IStateBitSet
      * @return IStateBitSet
      */

@@ -27,7 +27,6 @@
 
 package solver.explanations;
 
-import choco.kernel.memory.IStateBitSet;
 import com.sun.istack.internal.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
 
     public void instantiateTo(IntVar var, int val, @NotNull ICause cause) {    }
 
-    public IStateBitSet getRemovedValues(IntVar v) {
+    public OffsetIStateBitset getRemovedValues(IntVar v) {
         return null;
     }
 

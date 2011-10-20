@@ -28,7 +28,6 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
@@ -131,10 +130,6 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
         return requests.size();
     }
 
-    public Explanation explain() {
-        throw new UnsupportedOperationException("AbstractView::can not be explained");
-    }
-
     public IntDelta getDelta() {
         return NoDelta.singleton;
     }
@@ -216,6 +211,12 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Explanation explain(VariableState what) {
+        throw new UnsupportedOperationException("AbstractView::can not be explained");
+    }
+
+
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
     @Override
     public Constraint getConstraint() {
@@ -224,19 +225,9 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     @Override
     public Explanation explain(Deduction d) {
-        return null;
+        throw new UnsupportedOperationException("AbstractView::can not be explained");
     }
 
-    public Explanation explain(VariableState what) {
-        Explanation expl = new Explanation(null, null);
-        IStateBitSet invdom = solver.getExplainer().getRemovedValues(this);
-        int val = invdom.nextSetBit(0);
-        while (val != -1) {
-            expl.add(solver.getExplainer().explain(this, val));
-            val = invdom.nextSetBit(val + 1);
-        }
-        return expl;
-    }
 
     @Override
     public boolean reactOnPromotion() {
@@ -256,5 +247,8 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     public long getFails() {
         return 0;
     }
+
+
+
 
 }

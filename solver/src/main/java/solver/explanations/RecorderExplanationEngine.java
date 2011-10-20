@@ -28,7 +28,6 @@
 package solver.explanations;
 
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.memory.IStateBitSet;
 import com.sun.tools.javac.util.Pair;
 import solver.ICause;
 import solver.Solver;
@@ -54,8 +53,8 @@ import java.util.Set;
  */
 public class RecorderExplanationEngine extends ExplanationEngine {
 
-    HashMap<Variable, IStateBitSet> removedvalues; // maintien du domaine courant
-    HashMap<Variable, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
+    HashMap<Variable, OffsetIStateBitset> removedvalues; // maintien du domaine courant
+    HashMap<IntVar, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
     HashMap<Deduction, Explanation> database; // base d'explications
 
     HashMap<Variable, HashMap<Integer, Pair<VariableAssignment, Integer>>> variableassignments; // maintien de la base de VariableAssignment
@@ -64,8 +63,8 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
-        removedvalues = new HashMap<Variable, IStateBitSet>();
-        valueremovals = new HashMap<Variable, HashMap<Integer, ValueRemoval>>();
+        removedvalues = new HashMap<Variable, OffsetIStateBitset>();
+        valueremovals = new HashMap<IntVar, HashMap<Integer, ValueRemoval>>();
         database = new HashMap<Deduction, Explanation>();
         variableassignments = new HashMap<Variable, HashMap<Integer, Pair<VariableAssignment, Integer>>>();
         variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
@@ -76,16 +75,15 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
     @Override
-    public IStateBitSet getRemovedValues(IntVar v) {
-        IStateBitSet toreturn = removedvalues.get(v);
+    public OffsetIStateBitset getRemovedValues(IntVar v) {
+        OffsetIStateBitset toreturn = removedvalues.get(v);
         if (toreturn == null) {
-            toreturn = solver.getEnvironment().makeBitSet(v.getUB());
+            toreturn = new OffsetIStateBitset(v); // .getSolver().getEnvironment().makeBitSet(v.getUB());
             removedvalues.put(v, toreturn);
             valueremovals.put(v, new HashMap<Integer, ValueRemoval>());
         }
         return toreturn;
     }
-
 
     @Override
     public Explanation retrieve(IntVar var, int val) {
@@ -137,7 +135,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void removeValue(IntVar var, int val, ICause cause) {
-        IStateBitSet invdom = getRemovedValues(var);
+        OffsetIStateBitset invdom = getRemovedValues(var);
         Deduction vr = getValueRemoval(var, val);
         Explanation expl = cause.explain(vr);
         database.put(vr, expl);
@@ -147,7 +145,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
-        IStateBitSet invdom = getRemovedValues(var);
+        OffsetIStateBitset invdom = getRemovedValues(var);
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
             Explanation expl = cause.explain(vr);
@@ -159,7 +157,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
-        IStateBitSet invdom = getRemovedValues(var);
+        OffsetIStateBitset invdom = getRemovedValues(var);
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
             Explanation explain = cause.explain(vr);
@@ -172,7 +170,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
 
     @Override
     public void instantiateTo(IntVar var, int val, ICause cause) {
-        IStateBitSet invdom = getRemovedValues(var);
+        OffsetIStateBitset invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
         while (it.hasNext()) {
             int v = it.next();
@@ -285,7 +283,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Solver solver = (cex.v != null) ? cex.v.getSolver() : cex.c.getConstraint().getVariables()[0].getSolver();
             Explanation complete = flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(this);
-            solver.getSearchLoop().overridePreviousWolrd(upto);
+            solver.getSearchLoop().overridePreviousWorld(upto);
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             emList.onContradiction(cex, complete, upto, dec);
         } else {
@@ -305,14 +303,14 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     @Override
     public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + explanation);
         }
     }
 
     @Override
     public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + explanation);
         }
     }
 
@@ -328,8 +326,11 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         if (LOGGER.isInfoEnabled()) {
             if (cex.v != null) {
                 LOGGER.info("::EXPL:: CONTRADICTION on " + cex.v + " BECAUSE " + explanation);
-                LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
             }
+            else if (cex.c != null) {
+                LOGGER.info("::EXPL:: CONTRADICTION on " + cex.c + " BECAUSE " + explanation);
+            }
+            LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
         }
 
     }
