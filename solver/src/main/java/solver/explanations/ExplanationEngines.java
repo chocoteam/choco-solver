@@ -46,6 +46,11 @@ public enum ExplanationEngines {
         public void make(Solver solver) {
             solver.set(ExplanationFactory.engineFactory(solver, false, false));
         }
+    }, TRACERECORDER {
+        @Override
+        public void make(Solver solver) {
+            solver.set(ExplanationFactory.engineFactory(solver, false, true));
+        }
     }, FLATTEN {
         @Override
         public void make(Solver solver) {

@@ -95,7 +95,6 @@ public final class BitsetXYSumView extends AbstractSumView {
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
@@ -136,14 +135,10 @@ public final class BitsetXYSumView extends AbstractSumView {
                     this.notifyPropagators(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
-                        solver.getExplainer().removeValue(this, value, antipromo);
                         this.contradiction(cause, MSG_EMPTY);
                     }
                 }
             }
-        }
-        if (change) {
-            solver.getExplainer().removeValue(this, value, antipromo);
         }
         return change;
     }
@@ -178,7 +173,6 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
-        solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
         }
@@ -223,7 +217,6 @@ public final class BitsetXYSumView extends AbstractSumView {
         int lb = this.getLB();
         if (lb < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, lb, value, antipromo);
                 this.contradiction(cause, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -248,7 +241,6 @@ public final class BitsetXYSumView extends AbstractSumView {
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.getExplainer().updateLowerBound(this, lb, value, antipromo);
                 return change;
             }
         }
@@ -266,7 +258,6 @@ public final class BitsetXYSumView extends AbstractSumView {
         int ub = this.getUB();
         if (ub > value) {
             if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, ub, value, antipromo);
                 this.contradiction(cause, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -290,7 +281,6 @@ public final class BitsetXYSumView extends AbstractSumView {
                     }
                 }
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateUpperBound(this, ub, value, antipromo);
                 return change;
             }
         }
@@ -496,7 +486,6 @@ public final class BitsetXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    solver.getExplainer().updateLowerBound(this, ilb, elb, this);
                     this.contradiction(this, MSG_LOW);
                 }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
@@ -507,7 +496,6 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    solver.getExplainer().updateUpperBound(this, iub, eub, this);
                     this.contradiction(this, MSG_LOW);
                 }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
@@ -523,8 +511,6 @@ public final class BitsetXYSumView extends AbstractSumView {
             int size = VALUES.cardinality();
             SIZE.set(size);
             if (ilb > iub) {
-                solver.getExplainer().updateLowerBound(this, ilb, ilb, this);
-                solver.getExplainer().updateUpperBound(this, iub, iub, this);
                 this.contradiction(this, MSG_EMPTY);
             }
             if (down || size == 1) {
@@ -536,12 +522,9 @@ public final class BitsetXYSumView extends AbstractSumView {
             if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
                 if (old_size > 0) {
                     notifyPropagators(EventType.INSTANTIATE, this);
-                    solver.getExplainer().instantiateTo(this, ilb, this);
                 }
             } else {
                 notifyPropagators(e, this);
-                solver.getExplainer().updateLowerBound(this, ilb, ilb, this);
-                solver.getExplainer().updateUpperBound(this, iub, iub, this);
             }
         }
     }
