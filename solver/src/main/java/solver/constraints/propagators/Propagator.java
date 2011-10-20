@@ -97,7 +97,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * List of requests of <code>this</code>
      */
-    protected IRequest<V>[] requests;
+    protected IRequest[] requests;
 
     protected int lastRequest;
 
@@ -179,6 +179,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Build internal structure of the propagator, if necessary
+     * @throws solver.exception.ContradictionException if initialisation encounters a contradiction
      */
     public void initialize() throws ContradictionException {
     }
@@ -281,7 +282,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void addRequest(IRequest<V> request) {
         if (lastRequest >= requests.length) {
-            IRequest<V>[] tmp = requests;
+            IRequest[] tmp = requests;
             requests = new IRequest[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, requests, 0, tmp.length);
         }
@@ -302,10 +303,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     public void unlinkVariables() {
-        for (lastRequest--; lastRequest >= 0; lastRequest--) {
-            IRequest request = requests[lastRequest];
+        for (; lastRequest > 0; lastRequest--) {
+            IRequest request = requests[lastRequest-1];
             request.getVariable().deleteRequest(request);
-            requests[lastRequest] = null;
+            requests[lastRequest-1] = null;
         }
     }
 
