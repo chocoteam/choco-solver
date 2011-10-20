@@ -111,8 +111,8 @@ public class Photo extends AbstractProblem {
 
     @Override
     public void solve() {
-//        solver.getExplainer().addExplanationMonitor(solver.getExplainer());
-
+        //solver.getExplainer().addExplanationMonitor(solver.getExplainer());
+        //SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, violations);
     }
 
