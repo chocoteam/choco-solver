@@ -33,6 +33,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.explanations.ExplanationEngines;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.EngineStrategies;
@@ -72,6 +73,9 @@ public abstract class AbstractProblem {
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
+
+    @Option(name = "-exp", usage = "Explanation engine.", required = false)
+    protected ExplanationEngines expeng = ExplanationEngines.DEFAULT;
 
     protected Solver solver;
 
@@ -120,12 +124,18 @@ public abstract class AbstractProblem {
         }
     }
 
+    protected void overrideExplanation() {
+        expeng.make(solver);
+    }
+
     public final void execute(String... args) {
         this.readArgs(args);
         Logger log = LoggerFactory.getLogger("bench");
         this.printDescription();
         this.buildModel();
         this.configureSolver();
+
+        overrideExplanation();
 
         overridePolicy();
 
