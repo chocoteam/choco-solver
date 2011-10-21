@@ -28,10 +28,13 @@
 package solver.search.solution;
 
 import org.slf4j.LoggerFactory;
-import solver.Cause;
+import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -45,7 +48,7 @@ import java.util.LinkedList;
  * @author Charles Prud'homme
  * @since 19 juil. 2010
  */
-public class Solution {
+public class Solution implements ICause {
 
 
     /* Reference to the solver */
@@ -101,9 +104,9 @@ public class Solution {
             for (int i = 0; i < vars.length; i++) {
             	switch(vars[i].getType()){
                 case Variable.INTEGER : 
-                	((IntVar) vars[i]).instantiateTo(intvalues[i], Cause.Null, false);break;
+                	((IntVar) vars[i]).instantiateTo(intvalues[i], this, false);break;
                 case Variable.GRAPH : 
-                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), Cause.Null);break;
+                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), this);break;
                 }
                 
             }
@@ -115,5 +118,39 @@ public class Solution {
 
     public long[] measures() {
         return measures;
+    }
+
+    @Override
+    public Constraint getConstraint() {
+        return null;
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        return null;
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
+    public void incFail() {
+    }
+
+    @Override
+    public long getFails() {
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        return "Solution";
     }
 }
