@@ -35,18 +35,45 @@ import solver.Solver;
  * Date: 19/10/11
  * Time: 19:22
  */
-public final class ExplanationFactory {
+public enum ExplanationFactory {
 
-    public ExplanationFactory() {
-    }
+    NONE {
+        @Override
+        public void make(Solver solver) {
+            solver.set(new ExplanationEngine(solver));
+        }
+    }, RECORDER {
+        @Override
+        public void make(Solver solver) {
+            solver.set(ExplanationFactory.engineFactory(solver, false, false));
+        }
+    }, TRACERECORDER {
+        @Override
+        public void make(Solver solver) {
+            solver.set(ExplanationFactory.engineFactory(solver, false, true));
+        }
+    }, FLATTEN {
+        @Override
+        public void make(Solver solver) {
+            solver.set(ExplanationFactory.engineFactory(solver, true, false));
+        }
+    }, TRACEFLATTEN {
+        @Override
+        public void make(Solver solver) {
+            solver.set(ExplanationFactory.engineFactory(solver, true, true));
+        }
+    };
 
-    public static ExplanationEngine engineFactory(Solver slv){
+    public abstract void make(Solver solver);
+
+
+    public static ExplanationEngine engineFactory(Solver slv) {
         return ExplanationFactory.engineFactory(slv, false, false);
     }
 
     public static ExplanationEngine engineFactory(Solver slv, boolean flattened, boolean trace) {
         ExplanationEngine eng = flattened ? new FlattenedRecorderExplanationEngine(slv)
-                    : new RecorderExplanationEngine(slv);
+                : new RecorderExplanationEngine(slv);
         if (trace) eng.addExplanationMonitor(eng);
         return eng;
     }
