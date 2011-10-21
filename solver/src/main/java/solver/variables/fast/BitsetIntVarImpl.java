@@ -32,8 +32,6 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.structure.OneWordS32BitSet;
-import choco.kernel.memory.structure.OneWordS64BitSet;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -88,13 +86,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         IEnvironment env = solver.getEnvironment();
         OFFSET = sortedValues[0];
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
-        if (capacity < 32) {
-            this.VALUES = new OneWordS32BitSet(env, capacity);
-        } else if (capacity < 64) {
-            this.VALUES = new OneWordS64BitSet(env, capacity);
-        } else {
-            this.VALUES = env.makeBitSet(capacity);
-        }
+        this.VALUES = env.makeBitSet(capacity);
         for (int i = 0; i < sortedValues.length; i++) {
             this.VALUES.set(sortedValues[i] - OFFSET, true);
         }
@@ -108,13 +100,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         IEnvironment env = solver.getEnvironment();
         this.OFFSET = min;
         int capacity = max - min + 1;
-        if (capacity < 32) {
-            this.VALUES = new OneWordS32BitSet(env, capacity);
-        } else if (capacity < 64) {
-            this.VALUES = new OneWordS64BitSet(env, capacity);
-        } else {
-            this.VALUES = env.makeBitSet(capacity);
-        }
+        this.VALUES = env.makeBitSet(capacity);
         for (int i = 0; i <= max - min; i++) {
             this.VALUES.set(i, true);
         }

@@ -28,6 +28,8 @@
 package choco.kernel.memory;
 
 import choco.kernel.memory.structure.IndexedBipartiteSet;
+import choco.kernel.memory.structure.OneWordS32BitSet;
+import choco.kernel.memory.structure.OneWordS64BitSet;
 import choco.kernel.memory.structure.S64BitSet;
 
 /**
@@ -55,13 +57,18 @@ public abstract class AbstractEnvironment implements IEnvironment {
     /**
      * Factory pattern: new IStateBitSet objects are created by the environment
      *
-     *
      * @param size initail size of the IStateBitSet
      * @return IStateBitSet
      */
     @Override
     public IStateBitSet makeBitSet(int size) {
-        return new S64BitSet(this, size);
+        if (size < 32) {
+            return new OneWordS32BitSet(this, size);
+        } else if (size < 64) {
+            return new OneWordS64BitSet(this, size);
+        } else {
+            return new S64BitSet(this, size);
+        }
     }
 
 
