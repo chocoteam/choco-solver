@@ -232,7 +232,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
 
     @Override
     public Explanation explain(VariableState what) {
-        return null;
+        return new Explanation(null, null);
     }
 
     @Override
