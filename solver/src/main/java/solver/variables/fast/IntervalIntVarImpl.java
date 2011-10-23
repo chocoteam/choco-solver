@@ -450,7 +450,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
-       DisposableValueIterator it = invdom.getValueIterator();
+        DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
             if ((what == VariableState.LB && val < this.getLB())

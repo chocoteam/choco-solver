@@ -64,8 +64,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 
     @Override
 	public Explanation explain(VariableState what) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("MetaVariable does not (yet) implement method explain(...)");
 	}
 
 	@Override
