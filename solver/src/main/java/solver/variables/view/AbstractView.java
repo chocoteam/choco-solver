@@ -228,7 +228,11 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     @Override
     public Explanation explain(Deduction d) {
-        throw new UnsupportedOperationException("AbstractView (as a cause)::can not be explained");
+        Explanation explanation = A.explain(VariableState.DOM);
+        explanation.add(B.explain(VariableState.DOM));
+        return explanation;
+       // return A.explain(VariableState.DOM).add(B.explain(VariableState.DOM));
+       // throw new UnsupportedOperationException("AbstractView (as a cause)::can not be explained");
     }
 
 
