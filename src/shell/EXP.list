@@ -1,0 +1,40 @@
+samples.AllIntervalSeries -o 500
+samples.Alpha
+samples.BIBD -v 7 -k 3 -l 60
+samples.CarSequencing -d myPb
+samples.Donald -c BC
+samples.Donald -c AC
+samples.Donald -c CLIQUE
+samples.GolombRuler -m 10 -c BC
+samples.Grocery
+samples.LatinSquare -n 7
+samples.Partition -n 64
+samples.Photo -d large
+samples.Nonogram -d p200
+samples.nqueen.NQueenBinary -q 400
+samples.nqueen.NQueenGlobal -q 400
+samples.MagicSeries -n 500
+samples.MagicSquare -n 5 -c AC
+samples.MagicSquare -n 7 -c BC
+samples.MagicSquare -n 7 -c CLIQUE
+samples.WarehouseLocation
+samples.AllIntervalSeries -o 500 -exp RECORDER
+samples.Alpha -exp RECORDER
+samples.BIBD -v 7 -k 3 -l 60 -exp RECORDER
+samples.CarSequencing -d myPb -exp RECORDER
+samples.Donald -c BC -exp RECORDER
+samples.Donald -c AC -exp RECORDER
+samples.Donald -c CLIQUE -exp RECORDER
+samples.GolombRuler -m 10 -c BC -exp RECORDER
+samples.Grocery -exp RECORDER
+samples.LatinSquare -n 7 -exp RECORDER
+samples.Partition -n 64 -exp RECORDER
+samples.Photo -d large -exp RECORDER
+samples.Nonogram -d p200 -exp RECORDER
+samples.nqueen.NQueenBinary -q 400 -exp RECORDER
+samples.nqueen.NQueenGlobal -q 400 -exp RECORDER
+samples.MagicSeries -n 500 -exp RECORDER
+samples.MagicSquare -n 5 -c AC -exp RECORDER
+samples.MagicSquare -n 7 -c BC -exp RECORDER
+samples.MagicSquare -n 7 -c CLIQUE -exp RECORDER
+samples.WarehouseLocation -exp RECORDER
