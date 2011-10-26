@@ -91,14 +91,18 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
     protected ValueRemoval getValueRemoval(IntVar var, int val) {
-        ValueRemoval vr = valueremovals.get(var).get(val);
+        ValueRemoval vr;
+        HashMap<Integer, ValueRemoval> hm = valueremovals.get(var);
+        if (hm == null) {
+            valueremovals.put(var, new HashMap<Integer, ValueRemoval>());
+        }
+        vr = valueremovals.get(var).get(val);
         if (vr == null) {
             vr = new ValueRemoval(var, val);
             valueremovals.get(var).put(val, vr);
         }
         return vr;
     }
-
 
     @Override
     public VariableAssignment getVariableAssignment(IntVar var, int val) {
@@ -252,9 +256,13 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             nworld--;
         }
         if (dec != null) {
-            Deduction vr = dec.getPositiveDeduction();
-            Deduction assign = dec.getNegativeDeduction();
+            Deduction vr = dec.getNegationDeduction();
+            Deduction assign = dec.getPositiveDeduction();
             expl.remove(assign);
+            if  (assign instanceof  VariableAssignment) {
+                VariableAssignment va = (VariableAssignment) assign;
+                variableassignments.get(va.var).remove(va.val);
+            }
             database.put(vr, flatten(expl));
         }
         return dec;
@@ -268,10 +276,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             return vr.snd;
         }
         else {
-            System.err.println("RecorderExplanationEngine.getWorldNumber");
-            System.err.println("incoherent state !!!");
-            System.exit(-1);
-            return 0;
+            throw new UnsupportedOperationException("RecorderExplanationEngine.getWorldNumber incoherente state");
         }
     }
 
@@ -287,37 +292,35 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             emList.onContradiction(cex, complete, upto, dec);
         } else {
-            System.err.println("RecorderExplanationEngine.onContradiction");
-            System.err.println("incoherent state !!!");
-            System.exit(-1);
+            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherente state");
         }
     }
 
     @Override
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: REMVAL " + val + " FROM " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
         }
     }
 
     @Override
     public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: UPLOWB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
         }
     }
 
     @Override
     public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: UPUPPB from " + old + " to " + value + " FOR " + intVar + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
         }
     }
 
     @Override
     public void onInstantiateTo(IntVar var, int val, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("::EXPL:: INST to " + val + " FOR " + var + " APPLYING " + cause + " BECAUSE OF " + explanation);
+            LOGGER.info("::EXPL:: INST to " + val + " FOR " + var + " APPLYING " + cause + " BECAUSE OF " + flatten(explanation));
         }
     }
 

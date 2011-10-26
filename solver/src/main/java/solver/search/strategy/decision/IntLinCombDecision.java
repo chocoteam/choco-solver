@@ -144,7 +144,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
 
     @Override
     public Explanation explain(Deduction d) {
-        return null;  // TODO implémenter la notion d'explication pour ce type de décision
+        throw new UnsupportedOperationException("IntLinCombDecision is not equipped for explanations");
     }
 
     @Override
@@ -161,12 +161,12 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     }
 
     @Override
-    public Deduction getPositiveDeduction() {
-        return null;
+    public Deduction getNegationDeduction() {
+        throw new UnsupportedOperationException(("IntLinCombDecision is not equipped for explanations"));
     }
 
     @Override
-    public Deduction getNegativeDeduction() {
-        return null;
+    public Deduction getPositiveDeduction() {
+        throw new UnsupportedOperationException(("IntLinCombDecision is not equipped for explanations"));
     }
 }

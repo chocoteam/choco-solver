@@ -110,24 +110,20 @@ public class FastDecision extends AbstractDecision<IntVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-//        System.out.println("FastDecision.explain");
-//        System.out.println("explaining " + this + " " + v + " d " + d);
         Explanation expl = new Explanation(null, null);
 
         ExplanationEngine explainer = var.getSolver().getExplainer();
-        expl.add(branch < 2 ? explainer.explain(getNegativeDeduction()) : explainer.explain(getPositiveDeduction()));
-        //TODO take into account the case of explained deduction (indirect
-        //need to be handled within the explainer (!)
+        expl.add(branch < 2 ? explainer.explain(getPositiveDeduction()) : explainer.explain(getNegationDeduction()));
         return expl;
     }
 
     @Override
-    public Deduction getPositiveDeduction() {
+    public Deduction getNegationDeduction() {
         return var.getSolver().getExplainer().getVariableRefutation(var, value, this);
     }
 
     @Override
-    public Deduction getNegativeDeduction() {
+    public Deduction getPositiveDeduction() {
         return var.getSolver().getExplainer().getVariableAssignment(var, value);
     }
 }

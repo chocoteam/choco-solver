@@ -57,6 +57,6 @@ public interface Decision extends ICause {
     void free();
 
     // explanation related ...
+    Deduction getNegationDeduction();
     Deduction getPositiveDeduction();
-    Deduction getNegativeDeduction();
 }
