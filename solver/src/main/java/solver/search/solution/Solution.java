@@ -127,7 +127,7 @@ public class Solution implements ICause {
 
     @Override
     public Explanation explain(Deduction d) {
-        return new Explanation(null, null);
+        return Explanation.SYSTEM;
     }
 
     @Override

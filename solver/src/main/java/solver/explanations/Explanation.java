@@ -44,6 +44,7 @@ import java.util.Set;
 
 
 public class Explanation extends Deduction {
+    public static Explanation SYSTEM = new Explanation(null, null);
 
     Set<Deduction> deductions;
     Set<Propagator> contraintes;
@@ -141,6 +142,4 @@ public class Explanation extends Deduction {
         }
         return bf.toString();
     }
-
-
 }

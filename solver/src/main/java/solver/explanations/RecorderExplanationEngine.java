@@ -276,7 +276,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             return vr.snd;
         }
         else {
-            throw new UnsupportedOperationException("RecorderExplanationEngine.getWorldNumber incoherente state");
+             throw new UnsupportedOperationException("RecorderExplanationEngine.getWorldNumber incoherent state");
         }
     }
 
@@ -292,7 +292,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             emList.onContradiction(cex, complete, upto, dec);
         } else {
-            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherente state");
+            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherent state");
         }
     }
 
@@ -335,6 +335,14 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             }
             LOGGER.info("::EXPL:: BACKTRACK on " + decision +" (up to " + upTo + " level(s))");
         }
-
     }
+
+    @Override
+    public void onSolution() {
+        // we need to prepare a "false" backtrack on this decision
+        Decision dec = solver.getSearchLoop().decision;
+        database.put(dec.getNegationDeduction(), Explanation.SYSTEM);
+    }
+
+
 }

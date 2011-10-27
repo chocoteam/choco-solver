@@ -83,8 +83,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             decision.setPrevious(tmp);
             moveTo(DOWN_LEFT_BRANCH);
         } else {
-            recordSolution();
             decision = tmp;
+            recordSolution();
         }
     }
 
