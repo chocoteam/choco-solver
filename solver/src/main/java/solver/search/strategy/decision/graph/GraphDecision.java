@@ -113,7 +113,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	}
 
     @Override
-    public Deduction getNegationDeduction() {
+    public Deduction getNegativeDeduction() {
         throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
     }
 

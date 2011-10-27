@@ -44,6 +44,10 @@ public class VariableAssignment extends Deduction {
         this.val = vl;
     }
 
+    @Override
+    public Variable getVar() {
+        return var;
+    }
 
     @Override
     public String toString() {

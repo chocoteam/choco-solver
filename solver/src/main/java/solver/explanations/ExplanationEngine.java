@@ -99,6 +99,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      *
      * @param var an integer variable
      * @param val an integer value
+     * @return an explanation
      */
     public Explanation flatten(IntVar var, int val) {
         return null;
@@ -120,6 +121,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      *
      * @param var an integer variable
      * @param val an integer value
+     * @return an explanation
      */
     public Explanation retrieve(IntVar var, int val) {
         return null;
@@ -143,6 +145,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      *
      * @param var an integer variable
      * @param val an integer value
+     * @return the associated VariableAssignment
      */
 
     public VariableAssignment getVariableAssignment(IntVar var, int val) {
@@ -154,6 +157,8 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
      *
      * @param var an integer variable
      * @param val an integer value
+     * @param dec the associated decision
+     * @return the associated VariableRefutation
      */
 
     public VariableRefutation getVariableRefutation(IntVar var, int val, Decision dec) {
@@ -170,7 +175,7 @@ public class ExplanationEngine extends VoidSearchMonitor implements Serializable
     }
 
 
-    public int getWorldNumber(Variable va, int val) {
+    public int getWorldIndex(Variable va, int val) {
         return 0;
     }
 

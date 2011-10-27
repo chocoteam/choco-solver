@@ -161,7 +161,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
     }
 
     @Override
-    public Deduction getNegationDeduction() {
+    public Deduction getNegativeDeduction() {
         throw new UnsupportedOperationException(("IntLinCombDecision is not equipped for explanations"));
     }
 

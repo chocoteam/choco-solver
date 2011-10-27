@@ -28,7 +28,6 @@
 package solver.explanations;
 
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import com.sun.tools.javac.util.Pair;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -57,7 +56,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     HashMap<IntVar, HashMap<Integer, ValueRemoval>> valueremovals; // maintien de la base de deduction
     HashMap<Deduction, Explanation> database; // base d'explications
 
-    HashMap<Variable, HashMap<Integer, Pair<VariableAssignment, Integer>>> variableassignments; // maintien de la base de VariableAssignment
+    HashMap<Variable, HashMap<Integer, VariableAssignment>> variableassignments; // maintien de la base de VariableAssignment
     HashMap<Variable, HashMap<Integer, VariableRefutation>> variablerefutations; // maintien de la base de VariableRefutation
 
 
@@ -66,7 +65,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         removedvalues = new HashMap<Variable, OffsetIStateBitset>();
         valueremovals = new HashMap<IntVar, HashMap<Integer, ValueRemoval>>();
         database = new HashMap<Deduction, Explanation>();
-        variableassignments = new HashMap<Variable, HashMap<Integer, Pair<VariableAssignment, Integer>>>();
+        variableassignments = new HashMap<Variable, HashMap<Integer, VariableAssignment>>();
         variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
 
         for(Variable v : solver.getVars()) {
@@ -105,19 +104,29 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
     @Override
+    public int getWorldIndex(Variable var, int val) {
+        int wi = solver.getEnvironment().getWorldIndex();
+        Decision dec = solver.getSearchLoop().decision;
+        while (! dec.getPositiveDeduction().getVar().equals(var)) {
+            dec = dec.getPrevious();
+            wi--;
+        }
+        return wi;
+    }
+
+    @Override
     public VariableAssignment getVariableAssignment(IntVar var, int val) {
         HashMap mapvar = variableassignments.get(var);
         if (mapvar == null) {
-            variableassignments.put(var, new HashMap<Integer, Pair<VariableAssignment, Integer>>());
-            variableassignments.get(var).put(val, new Pair<VariableAssignment, Integer>(
-                    new VariableAssignment(var, val), this.solver.getEnvironment().getWorldIndex()));
+            variableassignments.put(var, new HashMap<Integer, VariableAssignment>());
+            variableassignments.get(var).put(val, new VariableAssignment(var, val));
         }
-        Pair<VariableAssignment, Integer> vrw = variableassignments.get(var).get(val);
-        if (vrw == null) {
-            vrw = new Pair<VariableAssignment, Integer>(new VariableAssignment(var, val), this.solver.getEnvironment().getWorldIndex());
-            variableassignments.get(var).put(val, vrw);
+        VariableAssignment vr = variableassignments.get(var).get(val);
+        if (vr == null) {
+            vr = new VariableAssignment(var, val);
+            variableassignments.get(var).put(val, vr);
         }
-        return vrw.fst;
+        return vr;
     }
 
     @Override
@@ -256,7 +265,8 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             nworld--;
         }
         if (dec != null) {
-            Deduction vr = dec.getNegationDeduction();
+            if (! dec.hasNext())  throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
+            Deduction vr = dec.getNegativeDeduction();
             Deduction assign = dec.getPositiveDeduction();
             expl.remove(assign);
             if  (assign instanceof  VariableAssignment) {
@@ -269,16 +279,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     }
 
 
-    @Override
-    public int getWorldNumber(Variable va, int val) {
-        Pair<VariableAssignment, Integer> vr = variableassignments.get(va).get(val);
-        if (vr != null) {
-            return vr.snd;
-        }
-        else {
-             throw new UnsupportedOperationException("RecorderExplanationEngine.getWorldNumber incoherent state");
-        }
-    }
 
     @Override
     public void onContradiction(ContradictionException cex) {
@@ -341,7 +341,12 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public void onSolution() {
         // we need to prepare a "false" backtrack on this decision
         Decision dec = solver.getSearchLoop().decision;
-        database.put(dec.getNegationDeduction(), Explanation.SYSTEM);
+        while ((dec != null) && (! dec.hasNext())) {
+            dec = dec.getPrevious();
+        }
+        if (dec != null) {
+            database.put(dec.getNegativeDeduction(), Explanation.SYSTEM);
+        }
     }
 
 

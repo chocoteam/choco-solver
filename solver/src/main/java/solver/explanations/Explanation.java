@@ -41,8 +41,6 @@ import java.util.Set;
  * An explanation
  */
 
-
-
 public class Explanation extends Deduction {
     public static Explanation SYSTEM = new Explanation(null, null);
 
@@ -106,7 +104,7 @@ public class Explanation extends Deduction {
                 if (dec instanceof VariableAssignment) {
                     Variable va = ((VariableAssignment) dec).var;
                     int val = ((VariableAssignment) dec).val;
-                    int world = explainer.getWorldNumber(va, val);
+                    int world = explainer.getWorldIndex(va, val);
                     if (world > topworld) {
                         topworld = world;
                     }
