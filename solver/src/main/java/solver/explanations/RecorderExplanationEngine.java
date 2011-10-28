@@ -67,9 +67,12 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         database = new HashMap<Deduction, Explanation>();
         variableassignments = new HashMap<Variable, HashMap<Integer, VariableAssignment>>();
         variablerefutations = new HashMap<Variable, HashMap<Integer, VariableRefutation>>();
+    }
 
+    @Override
+    public void beforeInitialPropagation() {
         for(Variable v : solver.getVars()) {
-            getRemovedValues((IntVar) v); // TODO make a more generic method for that
+            getRemovedValues((IntVar) v);
         }
     }
 
@@ -111,6 +114,10 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             dec = dec.getPrevious();
             wi--;
         }
+//        if ( ((VariableAssignment) dec.getPositiveDeduction()).val != val) {
+//            throw new UnsupportedOperationException("hohoho");
+//        }
+
         return wi;
     }
 
@@ -159,25 +166,33 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     @Override
     public void updateLowerBound(IntVar var, int old, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
+        Explanation explanation = new Explanation();
         for (int v = old; v < val; v++) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
             Explanation expl = cause.explain(vr);
-            database.put(vr, expl);
-            invdom.set(v);
-            emList.onUpdateLowerBound(var, old, val, cause, expl);
+            if (! invdom.get(v)) {
+                database.put(vr, expl);
+                invdom.set(v);
+                explanation.add(expl);
+            }
         }
+        emList.onUpdateLowerBound(var, old, val, cause, explanation);
     }
 
     @Override
     public void updateUpperBound(IntVar var, int old, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
+        Explanation explanation = new Explanation();
         for (int v = old; v > val; v--) {    // itération explicite des valeurs retirées
             Deduction vr = getValueRemoval(var, v);
             Explanation explain = cause.explain(vr);
-            database.put(vr, explain);
-            invdom.set(v);
-            emList.onUpdateUpperBound(var, old, val, cause, explain);
+            if ( ! invdom.get(v)) {
+                database.put(vr, explain);
+                invdom.set(v);
+                explanation.add(explain);
+            }
         }
+        emList.onUpdateUpperBound(var, old, val, cause, explanation);
     }
 
 
@@ -185,6 +200,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     public void instantiateTo(IntVar var, int val, ICause cause) {
         OffsetIStateBitset invdom = getRemovedValues(var);
         DisposableValueIterator it = var.getValueIterator(true);
+        Explanation explanation = new Explanation();
         while (it.hasNext()) {
             int v = it.next();
             if ( v != val ) {
@@ -192,9 +208,10 @@ public class RecorderExplanationEngine extends ExplanationEngine {
                 Explanation explain = cause.explain(vr);
                 database.put(vr, explain);
                 invdom.set(v);
-                emList.onInstantiateTo(var, val, cause, explain);
+                explanation.add(explain);
             }
         }
+        emList.onInstantiateTo(var, val, cause, explanation);
     }
 
     @Override
@@ -278,8 +295,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         return dec;
     }
 
-
-
     @Override
     public void onContradiction(ContradictionException cex) {
         if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
@@ -289,6 +304,7 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Explanation complete = flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(this);
             solver.getSearchLoop().overridePreviousWorld(upto);
+            emList.onContradiction(cex, complete, upto, null);
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             emList.onContradiction(cex, complete, upto, dec);
         } else {

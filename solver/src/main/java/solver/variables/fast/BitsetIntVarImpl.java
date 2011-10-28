@@ -332,7 +332,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 

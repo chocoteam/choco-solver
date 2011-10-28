@@ -63,9 +63,10 @@ public class OffsetIStateBitset {
         if (inside < this.LB.get()) this.LB.set(inside);
     }
 
-
-
-
+    public boolean get(int outsideval) {
+        int inside = outsideval - offset;
+        return domain.get(inside);
+    }
 
      public DisposableValueIterator getValueIterator() {
         if (_viterator == null || !_viterator.isReusable()) {
@@ -113,6 +114,16 @@ public class OffsetIStateBitset {
         return _viterator;
     }
 
+    @Override
+    public String toString() {
 
-
+        StringBuffer bf = new StringBuffer();
+        bf.append("[");
+        DisposableValueIterator it = getValueIterator();
+        while (it.hasNext()) {
+            bf.append(" " + it.next());
+        }
+        bf.append("]");
+        return bf.toString();
+    }
 }

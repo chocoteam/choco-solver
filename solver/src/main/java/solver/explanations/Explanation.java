@@ -47,6 +47,10 @@ public class Explanation extends Deduction {
     Set<Deduction> deductions;
     Set<Propagator> contraintes;
 
+    public Explanation() {
+        this(null, null);
+    }
+
     public Explanation(Set<Deduction> p, Set<Propagator> e) {
         this.deductions = p;
         this.contraintes = e;
@@ -138,6 +142,7 @@ public class Explanation extends Deduction {
             }
             bf.delete(bf.lastIndexOf(","), bf.length() - 1);
         }
+
         return bf.toString();
     }
 }
