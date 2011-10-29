@@ -34,9 +34,13 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * VALUE = TABLE[INDEX]
@@ -78,8 +82,8 @@ public class PropElement extends Propagator<IntVar> {
         }
         this.vars[1].updateLowerBound(minVal, this, false);
         this.vars[1].updateUpperBound(maxVal, this, false);
-
         // todo : <hcambaza> : why it does not perform AC on the value variable ?
+        // <nj> perhaps because it is possible to have several times the same value in VALUES
     }
 
     protected void updateIndexFromValue() throws ContradictionException {
@@ -190,5 +194,13 @@ public class PropElement extends Propagator<IntVar> {
         sb.append(this.lval[lval.length - 1]);
         sb.append('[').append(this.vars[0].getName()).append(']');
         return sb.toString();
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
+        Explanation explanation = new Explanation(this);
+        explanation.add(reason.explain(VariableState.DOM));
+        return explanation;
     }
 }

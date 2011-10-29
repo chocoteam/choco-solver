@@ -32,6 +32,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -80,5 +82,11 @@ public class PropEqualXC extends Propagator<IntVar> {
     @Override
     public String toString() {
         return vars[0].getName() + " = " + constant;
+    }
+
+
+    @Override
+    public Explanation explain(Deduction d) {
+        return new Explanation(this);
     }
 }

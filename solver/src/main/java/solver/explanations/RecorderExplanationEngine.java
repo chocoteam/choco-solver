@@ -304,7 +304,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             Explanation complete = flatten(expl);
             int upto = complete.getMostRecentWorldToBacktrack(this);
             solver.getSearchLoop().overridePreviousWorld(upto);
-            emList.onContradiction(cex, complete, upto, null);
             Decision dec = updateVRExplainUponbacktracking(upto, complete);
             emList.onContradiction(cex, complete, upto, dec);
         } else {
@@ -361,7 +360,15 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             dec = dec.getPrevious();
         }
         if (dec != null) {
-            database.put(dec.getNegativeDeduction(), Explanation.SYSTEM);
+            Explanation explanation = new Explanation();
+            Decision d = dec.getPrevious();
+            while ( (d != null) ) {
+                if (d.hasNext()) {
+                    explanation.add(d.getPositiveDeduction());
+                }
+                d = d.getPrevious();
+            }
+            database.put(dec.getNegativeDeduction(), explanation);
         }
     }
 

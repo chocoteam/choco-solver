@@ -137,20 +137,18 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = new Explanation(this);
         // the current deduction is due to the current domain of the involved variables
-
         Variable var = d.getVar();
-
         if (var.equals(x)) {
-           // a deduction has been made on x ; this is related to y only
+            // a deduction has been made on x ; this is related to y only
             expl.add(y.explain(VariableState.LB));
         }
-        else if (var != null) {
-           expl.add(x.explain(VariableState.UB));
+        else if (var.equals(y)) {
+            expl.add(x.explain(VariableState.UB));
+        } else {
+            return super.explain(d);
         }
-        // and the application of the current propagator
-        expl.add(this);
         return expl;
     }
 }

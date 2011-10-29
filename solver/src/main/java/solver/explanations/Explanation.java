@@ -51,6 +51,11 @@ public class Explanation extends Deduction {
         this(null, null);
     }
 
+    public Explanation(Propagator p) {
+        this(null, null);
+        this.add(p);
+    }
+
     public Explanation(Set<Deduction> p, Set<Propagator> e) {
         this.deductions = p;
         this.contraintes = e;

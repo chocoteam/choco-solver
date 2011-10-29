@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.Element;
+import solver.constraints.binary.GreaterOrEqualX_YC;
+import solver.explanations.ExplanationFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -116,4 +118,35 @@ public class ElementTest {
         model(s, env, index, values, var, 1, 3, 5);
     }
 
+    @Test(groups = "1s")
+    public void test5() {
+        Solver s = new Solver();
+        s.set(ExplanationFactory.engineFactory(s));
+
+        Random r = new Random(125);
+        int[] values = new int[10];
+        for(int i = 0; i < values.length; i++){
+            values[i] = r.nextInt(5);
+        }
+
+        IntVar[] vars = new IntVar[3];
+        IntVar[] indices = new IntVar[3];
+        List<Constraint> lcstrs = new ArrayList<Constraint>(1);
+
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = VariableFactory.enumerated("v_" + i, 0, 10, s);
+            indices[i] = VariableFactory.enumerated("i_"+i, 0, values.length-1,s);
+            lcstrs.add(new Element(vars[i], values, indices[i], 0, s));
+        }
+
+        for (int i = 0; i < vars.length - 1; i++) {
+            lcstrs.add(new GreaterOrEqualX_YC(vars[i], vars[i+1], 1, s));
+        }
+
+        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+        s.post(cstrs);
+
+        s.findAllSolutions();
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 58, "nb sol");
+    }
 }

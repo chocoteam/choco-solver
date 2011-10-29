@@ -33,6 +33,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -88,5 +90,10 @@ public class PropMemberBound extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        return new Explanation(this);
     }
 }
