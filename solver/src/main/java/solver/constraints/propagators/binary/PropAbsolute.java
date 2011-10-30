@@ -92,16 +92,21 @@ public class PropAbsolute extends Propagator<IntVar> {
                 delta.forEach(rem_proc.set(idxVarInProp), f, l);
 //                updateHolesinY();
             }
-        } else {// filter from Y to X
-            if (EventType.isRemove(mask)) {
+        } else { // filter from Y to X
+            // <nj> originally we had the following condition
+//            if (EventType.isRemove(mask) && EventType.isRemove(getPropagationConditions(idxVarInProp))) {
+            // this led to a nasty bug due to event promotion
+
+            if (EventType.isInstantiate(mask) || EventType.isBound(mask))  {
+                updateLowerBoundofX();
+                updateUpperBoundofX();
+                updateHolesinX();
+            } else {
                 IntDelta delta = vars[idxVarInProp].getDelta();
                 int f = intVarIRequest.fromDelta();
                 int l = intVarIRequest.toDelta();
                 delta.forEach(rem_proc.set(idxVarInProp), f, l);
 //                updateHolesinX();
-            } else {
-                updateLowerBoundofX();
-                updateUpperBoundofX();
             }
         }
     }
