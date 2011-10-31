@@ -133,7 +133,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
                         this.awakeOnUpp(varIdx);
 
                     }
-                } else if (EventType.isRemove(mask)) {
+                }
+                if (EventType.isRemove(mask)) {
                     int f = request.fromDelta();
                     int l = request.toDelta();
                     delta.forEach(rem_proc.set(varIdx), f, l);
