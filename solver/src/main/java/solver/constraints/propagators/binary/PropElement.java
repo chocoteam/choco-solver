@@ -72,7 +72,7 @@ public class PropElement extends Propagator<IntVar> {
     }
 
 
-    protected void updateValueFromIndex() throws ContradictionException {
+    protected void updateValueFromIndex(boolean repropag) throws ContradictionException {
         int minVal = Integer.MAX_VALUE;
         int maxVal = Integer.MIN_VALUE;
         int ub = vars[1].getUB();
@@ -80,13 +80,13 @@ public class PropElement extends Propagator<IntVar> {
             if (minVal > this.lval[index - cste]) minVal = this.lval[index - cste];
             if (maxVal < this.lval[index - cste]) maxVal = this.lval[index - cste];
         }
-        this.vars[0].updateLowerBound(minVal, this, true);
-        this.vars[0].updateUpperBound(maxVal, this, true);
+        this.vars[0].updateLowerBound(minVal, this, repropag);
+        this.vars[0].updateUpperBound(maxVal, this, repropag);
         // todo : <hcambaza> : why it does not perform AC on the value variable ?
         // <nj> perhaps because it is possible to have several times the same value in VALUES
     }
 
-    protected void updateIndexFromValue() throws ContradictionException {
+    protected void updateIndexFromValue(boolean repropag) throws ContradictionException {
         boolean hasChange;
         do {
             int minFeasibleIndex = Math.max(cste, this.vars[1].getLB());
@@ -99,18 +99,18 @@ public class PropElement extends Propagator<IntVar> {
                     && !(this.vars[0].contains(lval[minFeasibleIndex - this.cste]))) {
                 minFeasibleIndex++;
             }
-            hasChange = this.vars[1].updateLowerBound(minFeasibleIndex, this, true);
+            hasChange = this.vars[1].updateLowerBound(minFeasibleIndex, this, repropag);
 
             while ((this.vars[1].contains(maxFeasibleIndex))
                     && !(this.vars[0].contains(lval[maxFeasibleIndex - this.cste]))) {
                 maxFeasibleIndex--;
             }
-            hasChange |= this.vars[1].updateUpperBound(maxFeasibleIndex, this, true);
+            hasChange |= this.vars[1].updateUpperBound(maxFeasibleIndex, this, repropag);
 
             if (this.vars[1].hasEnumeratedDomain()) {
                 for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
                     if (this.vars[1].contains(i) && !(this.vars[0].contains(this.lval[i - this.cste])))
-                        hasChange |= this.vars[1].removeValue(i, this, true);
+                        hasChange |= this.vars[1].removeValue(i, this, repropag);
                 }
             }
         } while (hasChange && !this.vars[0].hasEnumeratedDomain());
@@ -127,16 +127,16 @@ public class PropElement extends Propagator<IntVar> {
 
     void awakeOnRem(int index) throws ContradictionException {
         if (index == 0) {  // value
-            this.updateIndexFromValue();
+            this.updateIndexFromValue(true);
         } else {  // index
-            this.updateValueFromIndex();
+            this.updateValueFromIndex(true);
         }
     }
 
     @Override
     public void propagate() throws ContradictionException {
-        this.updateIndexFromValue();
-        this.updateValueFromIndex();
+        this.updateIndexFromValue(false);
+        this.updateValueFromIndex(false);
     }
 
     @Override
