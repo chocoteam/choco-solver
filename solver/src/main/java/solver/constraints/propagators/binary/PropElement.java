@@ -64,10 +64,10 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) {
-            return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
-        } else {
+        if (vIdx == 0) {   // value : need to react on removals
             return EventType.REMOVE.mask;
+        } else {  // index : need to react on removals AND on instantiations
+            return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
         }
     }
 
@@ -75,13 +75,13 @@ public class PropElement extends Propagator<IntVar> {
     protected void updateValueFromIndex() throws ContradictionException {
         int minVal = Integer.MAX_VALUE;
         int maxVal = Integer.MIN_VALUE;
-        int ub = vars[0].getUB();
-        for (int index = vars[0].getLB(); index <= ub; index = vars[0].nextValue(index)) {
+        int ub = vars[1].getUB();
+        for (int index = vars[1].getLB(); index <= ub; index = vars[1].nextValue(index)) {
             if (minVal > this.lval[index - cste]) minVal = this.lval[index - cste];
             if (maxVal < this.lval[index - cste]) maxVal = this.lval[index - cste];
         }
-        this.vars[1].updateLowerBound(minVal, this, false);
-        this.vars[1].updateUpperBound(maxVal, this, false);
+        this.vars[0].updateLowerBound(minVal, this, true);
+        this.vars[0].updateUpperBound(maxVal, this, true);
         // todo : <hcambaza> : why it does not perform AC on the value variable ?
         // <nj> perhaps because it is possible to have several times the same value in VALUES
     }
@@ -89,46 +89,47 @@ public class PropElement extends Propagator<IntVar> {
     protected void updateIndexFromValue() throws ContradictionException {
         boolean hasChange;
         do {
-
-            int minFeasibleIndex = Math.max(cste, this.vars[0].getLB());
-            int maxFeasibleIndex = Math.min(this.vars[0].getUB(), lval.length - 1 + cste);
+            int minFeasibleIndex = Math.max(cste, this.vars[1].getLB());
+            int maxFeasibleIndex = Math.min(this.vars[1].getUB(), lval.length - 1 + cste);
 
             if (minFeasibleIndex > maxFeasibleIndex) {
                 this.contradiction(null, "feasible index is incoherent");
             }
-            while ((this.vars[0].contains(minFeasibleIndex))
-                    && !(this.vars[1].contains(lval[minFeasibleIndex - this.cste]))) {
+            while ((this.vars[1].contains(minFeasibleIndex))
+                    && !(this.vars[0].contains(lval[minFeasibleIndex - this.cste]))) {
                 minFeasibleIndex++;
             }
-            hasChange = this.vars[0].updateLowerBound(minFeasibleIndex, this, false);
+            hasChange = this.vars[1].updateLowerBound(minFeasibleIndex, this, true);
 
-            while ((this.vars[0].contains(maxFeasibleIndex))
-                    && !(this.vars[1].contains(lval[maxFeasibleIndex - this.cste]))) {
+            while ((this.vars[1].contains(maxFeasibleIndex))
+                    && !(this.vars[0].contains(lval[maxFeasibleIndex - this.cste]))) {
                 maxFeasibleIndex--;
             }
-            hasChange |= this.vars[0].updateUpperBound(maxFeasibleIndex, this, false);
+            hasChange |= this.vars[1].updateUpperBound(maxFeasibleIndex, this, true);
 
-            if (this.vars[0].hasEnumeratedDomain()) {
+            if (this.vars[1].hasEnumeratedDomain()) {
                 for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
-                    if (this.vars[0].contains(i) && !(this.vars[1].contains(this.lval[i - this.cste])))
-                        hasChange |= this.vars[0].removeValue(i, this, false);
+                    if (this.vars[1].contains(i) && !(this.vars[0].contains(this.lval[i - this.cste])))
+                        hasChange |= this.vars[1].removeValue(i, this, true);
                 }
             }
-        } while (hasChange && !this.vars[1].hasEnumeratedDomain());
+        } while (hasChange && !this.vars[0].hasEnumeratedDomain());
     }
 
+
+
     void awakeOnInst(int index) throws ContradictionException {
-        if (index == 0) {
-            this.vars[1].instantiateTo(this.lval[this.vars[0].getValue() - this.cste], this, false);
+        if (index == 1) {  // index (should be only that)
+            this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], this, false);
             this.setPassive();
         }
     }
 
     void awakeOnRem(int index) throws ContradictionException {
-        if (index == 0) {
-            this.updateValueFromIndex();
-        } else {
+        if (index == 0) {  // value
             this.updateIndexFromValue();
+        } else {  // index
+            this.updateValueFromIndex();
         }
     }
 
@@ -150,14 +151,14 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (this.vars[1].instantiated()) {
+        if (this.vars[0].instantiated()) {
             boolean allVal = true;
             boolean oneVal = false;
-            int ub = this.vars[0].getUB();
-            for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
+            int ub = this.vars[1].getUB();
+            for (int val = this.vars[1].getLB(); val <= ub; val = this.vars[1].nextValue(val)) {
                 boolean b = (val - this.cste) >= 0
                         && (val - this.cste) < this.lval.length
-                        && this.lval[val - this.cste] == this.vars[1].getValue();
+                        && this.lval[val - this.cste] == this.vars[0].getValue();
                 allVal &= b;
                 oneVal |= b;
             }
@@ -168,13 +169,12 @@ public class PropElement extends Propagator<IntVar> {
                 return ESat.UNDEFINED;
             }
         } else {
-            int ub = this.vars[0].getUB();
-            for (int val = this.vars[0].getLB(); val <= ub; val = this.vars[0].nextValue(val)) {
+            int ub = this.vars[1].getUB();
+            for (int val = this.vars[1].getLB(); val <= ub; val = this.vars[1].nextValue(val)) {
                 if ((val - this.cste) >= 0 &&
                         (val - this.cste) < this.lval.length) {
-                    if (this.vars[1].contains(this.lval[val - this.cste])) {
+                    if (this.vars[0].contains(this.lval[val - this.cste])) {
                         return ESat.UNDEFINED;
-
                     }
                 }
             }
@@ -184,7 +184,7 @@ public class PropElement extends Propagator<IntVar> {
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
-        sb.append(this.vars[1].getName()).append(" = ");
+        sb.append(this.vars[0].getName()).append(" = ");
         sb.append(" <");
         int i = 0;
         for (; i < Math.max(this.lval.length - 1, 5); i++) {
@@ -192,15 +192,17 @@ public class PropElement extends Propagator<IntVar> {
         }
         if (i == 5 && this.lval.length - 1 > 5) sb.append("..., ");
         sb.append(this.lval[lval.length - 1]);
-        sb.append('[').append(this.vars[0].getName()).append(']');
+        sb.append('[').append(this.vars[1].getName()).append(']');
         return sb.toString();
     }
 
     @Override
     public Explanation explain(Deduction d) {
+
         Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
         Explanation explanation = new Explanation(this);
         explanation.add(reason.explain(VariableState.DOM));
+        explanation.add(super.explain(d));
         return explanation;
     }
 }

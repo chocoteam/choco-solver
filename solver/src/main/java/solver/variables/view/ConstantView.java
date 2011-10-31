@@ -241,7 +241,16 @@ public class ConstantView extends AbstractVariable implements IntVar {
 
     @Override
     public Explanation explain(VariableState what) {
-        Explanation explanation = new Explanation(null, null);
+        Explanation explanation = new Explanation();
+        if (empty.get()) {
+            explanation.add(solver.getExplainer().explain(this, constante));
+        }
+        return explanation;
+    }
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+         Explanation explanation = new Explanation();
         if (empty.get()) {
             explanation.add(solver.getExplainer().explain(this, constante));
         }

@@ -34,6 +34,8 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -339,6 +341,21 @@ public final class SqrView extends View<IntVar> {
     @Override
     public int getDomainSize() {
         return var.getDomainSize();
+    }
+
+
+    @Override
+    public Explanation explain(VariableState what) {
+        return var.explain(VariableState.DOM);
+    }
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        int fl = floor_sqrt(val);
+        Explanation explanation = new Explanation();
+        explanation.add(var.explain(what, fl));
+        explanation.add(var.explain(what, -fl));
+        return explanation;
     }
 
     @Override

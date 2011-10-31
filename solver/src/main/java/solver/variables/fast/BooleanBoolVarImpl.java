@@ -398,12 +398,17 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
             if ((what == VariableState.LB && val < this.getLB())
                     || (what == VariableState.UB && val > this.getUB())
                     || (what == VariableState.DOM)) {
-//                System.out.println("solver.explainer.explain(this,"+ val +") = " + solver.explainer.explain(this, val));
                 expl.add(solver.getExplainer().explain(this, val));
             }
         }       return expl;
     }
 
+    @Override
+     public Explanation explain(VariableState what, int val) {
+         Explanation expl = new Explanation();
+         expl.add(solver.getExplainer().explain(this, val));
+         return expl;
+     }
 
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {

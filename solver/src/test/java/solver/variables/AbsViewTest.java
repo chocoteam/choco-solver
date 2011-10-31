@@ -48,7 +48,6 @@ import java.util.Random;
  * @since 18/05/11
  */
 public class AbsViewTest {
-
     private int[][] bounded(int xl, int xu, int yl, int yu) throws ContradictionException {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);

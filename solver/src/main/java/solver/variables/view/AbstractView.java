@@ -213,12 +213,19 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     @Override
     public Explanation explain(VariableState what) {
-        Explanation explanation = new Explanation(null, null);
+        Explanation explanation = new Explanation();
         explanation.add(A.explain(what));
         explanation.add(B.explain(what));
         return explanation;
     }
 
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        Explanation explanation = new Explanation();
+        explanation.add(A.explain(VariableState.DOM));
+        explanation.add(B.explain(VariableState.DOM ));
+        return explanation;
+    }
 
     ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
     @Override

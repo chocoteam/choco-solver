@@ -67,6 +67,11 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 		throw new UnsupportedOperationException("MetaVariable does not (yet) implement method explain(...)");
 	}
 
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+    }
+
 	@Override
 	public NoDelta getDelta() {
 		return NoDelta.singleton;

@@ -34,6 +34,10 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -189,5 +193,34 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         public void execute(int i) throws ContradictionException {
             p.awakeOnRem(idxVar, i);
         }
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+   //     return super.explain(d);
+
+        if (d.getVar() == x) {
+            Explanation explanation = new Explanation(this);
+            if (d instanceof ValueRemoval) {
+                explanation.add (y.explain(VariableState.REM,((ValueRemoval) d).getVal() - cste));
+            }
+            else {
+                throw new UnsupportedOperationException("PropEqualX_YC only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        } else if (d.getVar() == y) {
+            Explanation explanation = new Explanation(this);
+            if (d instanceof ValueRemoval) {
+                explanation.add (x.explain(VariableState.REM,((ValueRemoval) d).getVal() + cste));
+            }
+            else {
+                throw new UnsupportedOperationException("PropEqualX_YC only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        }
+        else {
+            return super.explain(d);
+        }
+
     }
 }

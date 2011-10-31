@@ -536,6 +536,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         return expl;
     }
 
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        Explanation expl = new Explanation();
+        expl.add(solver.getExplainer().explain(this, val));
+        return expl;
+    }
+
     @Override
     public void contradiction(ICause cause, String message) throws ContradictionException {
         engine.fails(cause, this, message);

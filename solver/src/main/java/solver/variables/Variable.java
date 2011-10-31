@@ -113,6 +113,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
 
     Explanation explain(VariableState what);
+    Explanation explain(VariableState what, int val);
 
     D getDelta();
 

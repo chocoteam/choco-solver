@@ -179,6 +179,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     }
 
     @Override
+    public Explanation explain(VariableState what, int val) {
+        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+    }
+
+    @Override
     public IGraphDelta getDelta() {
         return delta;
     }

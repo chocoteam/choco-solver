@@ -44,6 +44,9 @@ public class ValueRemoval extends Deduction {
         this.val = n;
     }
 
+    public int getVal() {
+        return val;
+    }
 
     @Override
     public Variable getVar() {

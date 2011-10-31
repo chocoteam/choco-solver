@@ -9,6 +9,6 @@ package solver.explanations;
 public enum VariableState {
     DOM,
     LB,
-    UB
-
+    UB,
+    REM
 }

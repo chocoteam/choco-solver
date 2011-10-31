@@ -32,6 +32,8 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.ViewRequestWrapper;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -162,6 +164,20 @@ public class MinusView extends View<IntVar> {
         } else {
             var.notifyPropagators(eventType, o);
         }
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        switch (what) {
+            case UB: return var.explain(VariableState.LB);
+            case LB: return var.explain(VariableState.UB);
+            default: return var.explain(what);
+        }
+    }
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        return var.explain(what, -val);
     }
 
     @Override

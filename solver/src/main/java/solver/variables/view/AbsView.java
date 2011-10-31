@@ -33,6 +33,8 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
@@ -165,12 +167,25 @@ public final class AbsView extends View<IntVar> {
     @Override
     public boolean instantiatedTo(int value) {
         return var.instantiatedTo(value) || var.instantiatedTo(-value) ||
-                var.getDomainSize() == 2 && var.getLB() == var.getUB();
+                (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug
     }
 
     @Override
     public int getValue() {
         return Math.abs(var.getValue());
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        return var.explain(VariableState.DOM);
+    }
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        Explanation expl = new Explanation();
+        expl.add(var.explain(what, val));
+        expl.add(var.explain(what, -val));
+        return expl;
     }
 
     @Override

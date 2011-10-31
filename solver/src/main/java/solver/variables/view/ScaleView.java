@@ -33,6 +33,8 @@ import choco.kernel.common.util.tools.MathUtils;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.view.ViewDelta;
@@ -147,6 +149,28 @@ public final class ScaleView extends View<IntVar> {
     @Override
     public int getType() {
         return INTEGER;
+    }
+
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        Explanation expl = new Explanation();
+        expl.add(var.explain(what, val / cste));
+        return expl;
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        if (cste > 0) {
+            return var.explain(what);
+        }
+        else {
+            switch (what)  {
+                case UB : return var.explain(VariableState.LB);
+                case LB : return var.explain(VariableState.UB);
+                default: return var.explain(what);
+            }
+        }
     }
 
     @Override

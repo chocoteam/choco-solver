@@ -52,7 +52,7 @@ public class Element extends IntConstraint<IntVar> {
         super(ArrayUtils.toArray(value, index), solver);
         this.values = values;
         this.offset = offset;
-        setPropagators(new PropElement(vars[1], values, vars[0], offset, solver, this));
+        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver, this));
     }
 
     public Element(IntVar value, int[] values, IntVar index, Solver solver) {
