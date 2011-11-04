@@ -27,19 +27,22 @@
 
 package solver.constraints.gary;
 
-import java.util.LinkedList;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import solver.Solver;
-import solver.constraints.*;
+import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
-import solver.constraints.propagators.*;
-import solver.constraints.propagators.gary.*;
+import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.PropRelation;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
+
+import java.util.LinkedList;
 
 /**Constraint for working on graph properties
  * TODO : change properties management
@@ -70,7 +73,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	 * @param relation (arc meaning)
 	 */
 	GraphConstraint(V[] vars, Solver solver, PropagatorPriority storeThreshold, GraphRelation relation) {
-		super(solver, storeThreshold);
+		super(solver);
 		this.inputVars = vars;
 		this.relation   = relation;
 		this.graph = relation.generateInitialGraph(vars, solver);

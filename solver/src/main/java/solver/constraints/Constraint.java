@@ -116,7 +116,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
 
     //BEWARE : ONLY FOR GRAPH CONSTRAINTS
-    public Constraint(Solver solver, PropagatorPriority storeThreshold) {
+    public Constraint(Solver solver) {
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
         initialize = false;

@@ -29,17 +29,12 @@ package solver.constraints.probabilistic.propagators.nary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.probabilistic.IProbaPropagator;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.requests.ConditionnalRequest;
 import solver.requests.IRequest;
-import solver.requests.conditions.AbstractCondition;
-import solver.requests.conditions.CompletlyInstantiated;
+import solver.requests.conditions.CondAllDiffBC;
+import solver.variables.EventType;
 import solver.variables.IntVar;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * <br/>
@@ -49,29 +44,23 @@ import java.util.Set;
  */
 public class PropProbaAllDiffBC extends PropAllDiffBC {
 
+    final CondAllDiffBC cond;
+
     public PropProbaAllDiffBC(IntVar[] vars, Solver solver, IntConstraint constraint) {
         super(vars, solver, constraint);
+        cond = new CondAllDiffBC(environment, vars); // requetes conditionnees par la proba que alldiff BC soit consistant
         //unionset = new Union(vars, environment);
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVE.mask;
     }
 
     // todo voir charles pour mettre cela en oeuvre
     @Override
     public IRequest<IntVar> makeRequest(IntVar var, int idx) {
-        throw new UnsupportedOperationException();
+        return new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
     }
 
-    @Override
-    public void linkToVariables() {
-        //noinspection unchecked
-        AbstractCondition condition = new CompletlyInstantiated(this.environment, vars.length / 2);
-        for (int i = 0; i < vars.length; i++) {
-            vars[i].updatePropagationConditions(this, i);
-            ConditionnalRequest crequest =
-                    new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[i], i, condition, this.environment);
-            this.addRequest(crequest);
-            vars[i].addRequest(requests[i]);
-            condition.linkRequest(crequest);
-        }
-    }
-    
 }
