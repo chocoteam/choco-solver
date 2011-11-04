@@ -64,7 +64,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 50;
+    private int m = 500;
 
     IntVar[] vars;
     IntVar[] dist;
@@ -146,7 +146,6 @@ public class AllIntervalSeries extends AbstractProblem {
     public void solve() {
         //SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
-        PropagatorChecker.check(solver);
     }
 
     @Override
