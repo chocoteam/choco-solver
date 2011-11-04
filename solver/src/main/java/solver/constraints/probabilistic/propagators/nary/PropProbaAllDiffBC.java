@@ -30,7 +30,7 @@ package solver.constraints.probabilistic.propagators.nary;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.IProbaPropagator;
-import solver.constraints.propagators.nary.PropAllDifferent;
+import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.requests.ConditionnalRequest;
 import solver.requests.IRequest;
 import solver.requests.conditions.AbstractCondition;
@@ -47,15 +47,14 @@ import java.util.Set;
  * @author Charles Prud'homme
  * @since 25 nov. 2010
  */
-public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPropagator {
+public class PropProbaAllDiffBC extends PropAllDiffBC {
 
-    protected Union unionset;
-
-    public PropProbaAllDifferent(IntVar[] vars, Solver solver, IntConstraint constraint) {
+    public PropProbaAllDiffBC(IntVar[] vars, Solver solver, IntConstraint constraint) {
         super(vars, solver, constraint);
-        unionset = new Union(vars, environment);
+        //unionset = new Union(vars, environment);
     }
 
+    // todo voir charles pour mettre cela en oeuvre
     @Override
     public IRequest<IntVar> makeRequest(IntVar var, int idx) {
         throw new UnsupportedOperationException();
@@ -68,83 +67,11 @@ public class PropProbaAllDifferent extends PropAllDifferent implements IProbaPro
         for (int i = 0; i < vars.length; i++) {
             vars[i].updatePropagationConditions(this, i);
             ConditionnalRequest crequest =
-                    new ConditionnalRequest<PropProbaAllDifferent>(this, vars[i], i, condition, this.environment);
+                    new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[i], i, condition, this.environment);
             this.addRequest(crequest);
             vars[i].addRequest(requests[i]);
             condition.linkRequest(crequest);
         }
     }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean toPropagate() {
-        return true;
-    }
-
-    @Override
-    public void updateOnRem(int value) {
-        unionset.remove(value);
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    /**
-     * test for unionset => has to be executed in the search loop at the beginning of downBranch method
-     *
-     * @return true if unionset is ok
-     */
-    public boolean checkUnion() {
-        int[] toCheck = unionset.getValues();
-        Arrays.sort(toCheck);
-        int[] computed = computeUnion();
-        Arrays.sort(computed);
-        if (toCheck.length != computed.length) {
-            System.out.println(printTab("incr", toCheck));
-            System.out.println("--------------------");
-            System.out.println(printTab("comp", computed));
-            return false;
-        } else {
-            int i = 0;
-            while (i < toCheck.length && toCheck[i] == computed[i]) {
-                i++;
-            }
-            if (i != toCheck.length) {
-                System.out.println(printTab("incr", toCheck));
-                System.out.println("--------------------");
-                System.out.println(printTab("comp", computed));
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-
-    private int[] computeUnion() {
-        Set<Integer> vals = new HashSet<Integer>();
-        for (IntVar var : vars) {
-            int ub = var.getUB();
-            for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-                vals.add(i);
-            }
-        }
-        int[] res = new int[vals.size()];
-        int j = 0;
-        for (Integer i : vals) {
-            res[j++] = i;
-        }
-        return res;
-    }
-
-    private String printTab(String s, int[] tab) {
-        String res = s + " : [";
-        for (int aTab : tab) {
-            res += aTab + ", ";
-        }
-        res = res.substring(0, res.length() - 2);
-        res += "]";
-        return res;
-    }
+    
 }
