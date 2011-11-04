@@ -26,10 +26,10 @@
  */
 package solver.constraints.gary.relations;
 
-import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
+import solver.variables.view.CustomerVisitVariableVRPTW;
 
 
 public class GraphRelationFactory {
@@ -78,8 +78,8 @@ public class GraphRelationFactory {
 		return new IndexOf(vars);
 	}
 	
-	public static GraphRelation customerVisit(CustomerVisitVariable[] vars, int[][] distancesMatrix){
-		return new CustomerVisitRelation(vars, distancesMatrix);
+	public static GraphRelation customerVisit(CustomerVisitVariableVRPTW[] vars, int[][] distancesMatrix){
+		return new CustomerVisitRelationVRPTW(vars, distancesMatrix);
 	}
 	public static GraphRelation distanceEq(IntVar[] vars, int[][] distancesMatrix){
 		return new Dist_Int(vars, distancesMatrix);

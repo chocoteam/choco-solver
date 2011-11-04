@@ -174,7 +174,7 @@ public class NVector extends AbstractProblem{
 	}
 	
 	//******************//
-	// AD HOC INSTANCES //
+	// AD HOC ATSP //
 	//******************//
 	
 	// dim = 2

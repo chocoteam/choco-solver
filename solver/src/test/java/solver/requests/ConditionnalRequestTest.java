@@ -29,6 +29,8 @@ package solver.requests;
 
 import choco.kernel.common.util.tools.MathUtils;
 import choco.kernel.memory.IEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -99,6 +101,12 @@ public class ConditionnalRequestTest {
         }
     }
 
+    public final void execute(Solver solver) {
+        Logger log = LoggerFactory.getLogger("bench");
+        solver.findAllSolutions();
+        System.out.println(solver.getMeasures()+"\n");
+    }
+
     @Test(groups = "1s")
     public void test1() {
         Solver solver = new Solver();
@@ -134,14 +142,15 @@ public class ConditionnalRequestTest {
 
             IntVar[] x = VariableFactory.enumeratedArray("x", n, 1, n, solver);
 
-            Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.AC)};
+            Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
 
             castRequests(cstrs, solver.getEnvironment(), n / 2);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));
 
-            solver.findAllSolutions();
+            execute(solver);
+
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
         }
     }

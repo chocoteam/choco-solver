@@ -55,7 +55,7 @@ public class NTreeTest {
 		
 		s.post(cstrs);
 		s.set(strategy);
-		s.findSolution();
+		s.findAllSolutions();
 		
 		if(s.getMeasures().getBackTrackCount()>0){
 			throw new UnsupportedOperationException("error (no GAC)");

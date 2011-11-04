@@ -76,7 +76,7 @@ public interface INeighbors {
 	 * 
 	 * should be used as follow :
 	 * 
-	 * for(int i=getFirstElement(); i>=0; i = getNextElement(){
+	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
 	 * 		...
 	 * }
 	 * 
