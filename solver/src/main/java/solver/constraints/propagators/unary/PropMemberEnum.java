@@ -40,6 +40,8 @@ import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+import java.util.Arrays;
+
 /**
  * <br/>
  *
@@ -105,6 +107,11 @@ public class PropMemberEnum extends Propagator<IntVar> {
         if (nb == 0) return ESat.FALSE;
         else if (nb == vars[0].getDomainSize()) return ESat.TRUE;
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        return vars[0].getName() + " in " + Arrays.toString(values.toArray());
     }
 
     @Override

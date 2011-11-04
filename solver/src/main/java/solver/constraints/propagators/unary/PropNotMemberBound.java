@@ -93,6 +93,11 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     }
 
     @Override
+    public String toString() {
+        return vars[0].getName() + " outside [" + lb + ","  + ub + "]";
+    }
+
+    @Override
     public Explanation explain(Deduction d) {
         return new Explanation(this);
     }

@@ -93,6 +93,11 @@ public class PropMemberBound extends Propagator<IntVar> {
     }
 
     @Override
+    public String toString() {
+        return vars[0].getName() + " in [" + lb + ","  + ub + "]";
+    }
+
+    @Override
     public Explanation explain(Deduction d) {
         return new Explanation(this);
     }
