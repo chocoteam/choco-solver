@@ -61,11 +61,11 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.search.strategy.strategy.graph.GraphStrategy.NodeArcPriority;
+import solver.variables.CustomerVisitVariable;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.view.CustomerVisitVariableVRPTW;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -90,7 +90,7 @@ public class VRP extends AbstractProblem {
 	private int[][] distancesMatrix;
 	private VRPInstance instance;
 	//variables and graph
-	private CustomerVisitVariableVRPTW[] nodes;
+	private CustomerVisitVariable[] nodes; 
 	private IntVar nbNodes;
 	private DirectedGraphVar g; // graph of the main constraint
 	private int n; // number of nodes in the graph of the main constraint
@@ -119,7 +119,7 @@ public class VRP extends AbstractProblem {
 		n = instance.getNbCustomers() + nbMaxTrucks * 2;
 		// create a distance matrix between nodes
 		distancesMatrix = buildDistances(n, nbMaxTrucks);
-		nodes = new CustomerVisitVariableVRPTW[n];
+		nodes = new CustomerVisitVariable[n];
 		nbNodes = VariableFactory.bounded("nbNodes", instance.getNbCustomers()+2, n, solver);
 		// trucks
 		nTrucks = VariableFactory.bounded("nbTrucks", 1, nbMaxTrucks, solver);
@@ -132,13 +132,13 @@ public class VRP extends AbstractProblem {
 			}
 			IntVar truck = VariableFactory.bounded("num", i / 2, i / 2, solver);
 			IntVar tstart = VariableFactory.bounded("time", instance.getDepotOpening(), instance.getDepotClosure(), solver);
-			nodes[i] = new CustomerVisitVariableVRPTW("truck " + i / 2 + s, truck, tstart, solver);
+			nodes[i] = new CustomerVisitVariable("truck " + i / 2 + s, truck, tstart, solver);
 		}
 		// customers
 		for (int i=2*nbMaxTrucks; i<n; i++) {
 			IntVar truck = VariableFactory.bounded("num", 0, nbMaxTrucks - 1, solver);
 			IntVar tstart = VariableFactory.bounded("time", instance.getOpenings()[i-2*nbMaxTrucks+1], instance.getClosures()[i-2*nbMaxTrucks+1], solver);
-			nodes[i] = new CustomerVisitVariableVRPTW("custo " + i, truck, tstart, solver);
+			nodes[i] = new CustomerVisitVariable("custo " + i, truck, tstart, solver);
 		}
 
 		Constraint[] cstrs = new Constraint[n + 1];
@@ -169,7 +169,7 @@ public class VRP extends AbstractProblem {
 	 * @return a graph constraint
 	 */
 	private GraphConstraint graphSuccs(int[][] distancesMatrix){
-		GraphRelation<CustomerVisitVariableVRPTW> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
+		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
 		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, nTrucks);
 		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
@@ -194,7 +194,7 @@ public class VRP extends AbstractProblem {
 	 * @return a graph constraint
 	 */
 	private GraphConstraint graphTransClos(int[][] distancesMatrix){
-		GraphRelation<CustomerVisitVariableVRPTW> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
+		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
 		gc.addProperty(GraphProperty.TRANSITIVITY);
 		gc.addProperty(GraphProperty.ANTI_SYMMETRY);
