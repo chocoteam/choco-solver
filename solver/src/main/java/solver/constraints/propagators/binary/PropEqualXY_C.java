@@ -27,6 +27,7 @@
 
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure1;
 import solver.Solver;
@@ -51,6 +52,8 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
+
+@PropAnn
 public final class PropEqualXY_C extends Propagator<IntVar> {
 
     IntVar x;
