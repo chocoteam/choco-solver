@@ -42,6 +42,10 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import static solver.constraints.propagators.annotations.Propagator.Status.BENCHMARK;
+import static solver.constraints.propagators.annotations.Propagator.Status.CORRECTION;
+import static solver.constraints.propagators.annotations.Propagator.Status.CONSISTENCY;
+
 /**
  * Based on: </br>
  * "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
@@ -51,6 +55,7 @@ import java.util.Comparator;
  * @author Hadrien Cambazard
  * @since 07/02/11
  */
+@solver.constraints.propagators.annotations.Propagator(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
 public class PropAllDiffBC extends Propagator<IntVar> {
 
     //TODO: minsorted et maxsorted => LinkedList
