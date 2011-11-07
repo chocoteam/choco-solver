@@ -27,6 +27,7 @@
 
 package solver.constraints.propagators.nary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
@@ -42,9 +43,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import static solver.constraints.propagators.annotations.Propagator.Status.BENCHMARK;
-import static solver.constraints.propagators.annotations.Propagator.Status.CORRECTION;
-import static solver.constraints.propagators.annotations.Propagator.Status.CONSISTENCY;
+import static choco.annotations.PropAnn.Status.*;
 
 /**
  * Based on: </br>
@@ -55,7 +54,7 @@ import static solver.constraints.propagators.annotations.Propagator.Status.CONSI
  * @author Hadrien Cambazard
  * @since 07/02/11
  */
-@solver.constraints.propagators.annotations.Propagator(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
+@PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
 public class PropAllDiffBC extends Propagator<IntVar> {
 
     //TODO: minsorted et maxsorted => LinkedList

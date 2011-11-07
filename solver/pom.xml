@@ -38,6 +38,11 @@
             <artifactId>jgrapht</artifactId>
             <version>0.8.1</version>
         </dependency>
+        <dependency>
+            <groupId>choco</groupId>
+            <artifactId>PropAnn</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
         <!--<dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjrt</artifactId>
