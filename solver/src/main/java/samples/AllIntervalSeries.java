@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.annotations.PropagatorChecker;
 import solver.constraints.unary.Relation;
 import solver.propagation.engines.IPropagationEngine;
 import solver.propagation.engines.Policy;
