@@ -32,6 +32,7 @@ public class TestProbaBAllDiff {
 
             IntVar[] x = VariableFactory.enumeratedArray("x", n, 1, n, solver);
 
+            // une contrainte alldiff
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.PROBABILISTIC)};
 
             solver.post(cstrs);
