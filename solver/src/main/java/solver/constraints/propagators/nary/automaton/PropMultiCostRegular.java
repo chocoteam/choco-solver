@@ -55,7 +55,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -288,11 +287,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public void propagateOnRequest(IRequest<IntVar> request, int vIdx, int mask) throws ContradictionException {
         if (vIdx < offset) {
             checkWorld();
-            IntVar var = request.getVariable();
-            IntDelta delta = var.getDelta();
-            int f = request.fromDelta();
-            int l = request.toDelta();
-            delta.forEach(rem_proc.set(vIdx), f, l);
+            request.forEach(rem_proc.set(vIdx));
         } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(vIdx - offset);
             computed = false;

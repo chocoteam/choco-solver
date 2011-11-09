@@ -138,9 +138,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
                     }
                 }
                 if (EventType.isRemove(mask)) {
-                    int f = request.fromDelta();
-                    int l = request.toDelta();
-                    delta.forEach(rem_proc.set(varIdx), f, l);
+                    request.forEach(rem_proc.set(varIdx));
                 }
             }
         }

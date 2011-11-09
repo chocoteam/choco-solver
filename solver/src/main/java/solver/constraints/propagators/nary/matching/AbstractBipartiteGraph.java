@@ -40,7 +40,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 import java.text.MessageFormat;
 
@@ -618,16 +617,11 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-        IntDelta delta = request.getVariable().getDelta();
-        int f = request.fromDelta();
-        int l = request.toDelta();
 
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
-            delta.forEach(rem_proc.set(varIdx), f, l);
-        } else {
-            delta.forEach(rem_proc.set(varIdx), f, l);
         }
+        request.forEach(rem_proc.set(varIdx));
     }
 
 
