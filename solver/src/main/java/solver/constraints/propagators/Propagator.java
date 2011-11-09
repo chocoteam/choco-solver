@@ -357,7 +357,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    protected int getNbRequestEnqued() {
+    public int getNbRequestEnqued() {
         return nbRequestEnqued;
     }
 

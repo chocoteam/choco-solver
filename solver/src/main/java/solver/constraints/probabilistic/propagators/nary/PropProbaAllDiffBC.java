@@ -54,7 +54,7 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE.mask;
+        return EventType.INT_ALL_MASK();// HACK -- EventType.REMOVE.mask;
     }
 
     // todo voir charles pour mettre cela en oeuvre

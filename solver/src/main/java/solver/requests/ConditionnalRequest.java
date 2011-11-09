@@ -62,7 +62,7 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     int frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
 
-    int dLast; // regarding variable delta domain, point out last already recorded value
+    int dLast; // regarding variable delta domain, point out last value already recorded
 
     public ConditionnalRequest(P propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
         super(propagator, variable, idxInProp);
@@ -75,14 +75,23 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
     }
 
 
+    public int getLast() {
+        return last.get();
+    }
+
     @Override
     public void forEach(IntProcedure proc) throws ContradictionException {
-        variable.getDelta().forEach(proc, first.get(), last.get());
+        int last_ = last.get();
+        for(int i = first.get(); i < last_; i++){
+            proc.execute(removedValues[i]);
+        }
     }
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        variable.getDelta().forEach(proc, from, to);
+        for(int i = from; i < to; i++){
+            proc.execute(removedValues[i]);
+        }
     }
 
     @Override

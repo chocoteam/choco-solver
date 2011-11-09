@@ -36,7 +36,7 @@ public class TestProbaBAllDiff {
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.PROBABILISTIC)};
 
             solver.post(cstrs);
-            solver.set(StrategyFactory.random(x, solver.getEnvironment()));
+            solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
 
             execute(solver);
 

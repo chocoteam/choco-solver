@@ -1,9 +1,12 @@
 package solver.requests.conditions;
 
+import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
+import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.requests.ConditionnalRequest;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -19,11 +22,18 @@ public class CondAllDiffBC extends AbstractCondition {
 
     protected Union unionset;
     protected IntVar[] vars;
+    protected IStateInt[] fromDelta;
+    protected final RemProc rem_proc;
 
     public CondAllDiffBC(IEnvironment environment, IntVar[] vars) {
         super(environment);
         this.vars = vars;
+        fromDelta = new IStateInt[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            fromDelta[i] = environment.makeInt();
+        }
         this.unionset = new Union(vars, environment);
+        rem_proc = new RemProc(this);
     }
 
 
@@ -39,10 +49,41 @@ public class CondAllDiffBC extends AbstractCondition {
 
     @Override
     void update(ConditionnalRequest request, int evtMask) {
-        if(EventType.isRemove(evtMask)){
-//            for (int i = request.fromDelta(); i <= request.toDelta(); i++) {
-//                unionset.remove(i);
-//            }
+//        if (EventType.isRemove(evtMask)) {
+        int last = request.getLast();
+        try {
+            request.forEach(rem_proc.set(request.getIdxVarInProp()),
+                    fromDelta[request.getIdxVarInProp()].get(),
+                    last);
+        } catch (ContradictionException e) {
+            throw new SolverException("CondAllDiffBC#update encounters an exception");
+        }
+        fromDelta[request.getIdxVarInProp()].set(last);
+        if (request.getPropagator().getNbRequestEnqued() == 0
+                && !checkUnion()) {
+            throw new SolverException("CondAllDiffBC#checkUnion is not valid");
+        }
+    }
+
+    private static class RemProc implements IntProcedure1<Integer> {
+
+        private final CondAllDiffBC p;
+        private int idxVar;
+
+        public RemProc(CondAllDiffBC p) {
+            this.p = p;
+        }
+
+        @Override
+        public IntProcedure1 set(Integer idxVar) {
+            this.idxVar = idxVar;
+            return this;
+        }
+
+        @Override
+        public void execute(int i) throws ContradictionException {
+            p.unionset.remove(i);
+//            LoggerFactory.getLogger("solver").info("{} remove from {}", i, p.vars[idxVar]);
         }
     }
 
