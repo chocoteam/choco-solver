@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} <= or >= or = occVar
@@ -164,11 +163,7 @@ public class PropCount extends Propagator<IntVar> {
                 }
             }
             //assumption : we only get the inst events on all variables except the occurrence variable
-            IntVar var = request.getVariable();
-            IntDelta delta = var.getDelta();
-            int f = request.fromDelta();
-            int l = request.toDelta();
-            delta.forEach(rem_proc.set(vIdx), f, l);
+            request.forEach(rem_proc.set(vIdx));
             checkNbPossible();
         }
 

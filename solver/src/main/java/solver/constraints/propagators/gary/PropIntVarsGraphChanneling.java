@@ -126,10 +126,8 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 				g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this, false);
 			}
 			if((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) !=0){
-				IntVar var = (IntVar) request.getVariable();
-				IntDelta d = var.getDelta();
 				valRemoved.set(idxVarInProp);
-				d.forEach(valRemoved, request.fromDelta(), request.toDelta());
+                request.forEach(valRemoved);
 			}
 		}
 	}

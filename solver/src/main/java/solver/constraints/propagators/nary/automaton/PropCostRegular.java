@@ -43,7 +43,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -105,12 +104,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         if (idxVarInProp == zIdx) { // z only deals with bound events
             boundChange.set(true);
         } else { // other variables only deals with removal events
-            IntVar var = intVarIRequest.getVariable();
-            IntDelta delta = var.getDelta();
-
-            int f = intVarIRequest.fromDelta();
-            int l = intVarIRequest.toDelta();
-            delta.forEach(rem_proc.set(idxVarInProp), f, l);
+            intVarIRequest.forEach(rem_proc.set(idxVarInProp));
         }
         forcePropagate();
     }

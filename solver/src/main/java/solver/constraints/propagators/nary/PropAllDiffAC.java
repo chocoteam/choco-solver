@@ -97,9 +97,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
         } else {
-            int f = request.fromDelta();
-            int l = request.toDelta();
-            delta.forEach(rem_proc.set(varIdx), f, l);
+            request.forEach(rem_proc.set(varIdx));
         }
         forcePropagate();
     }

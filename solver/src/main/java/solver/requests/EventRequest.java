@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
@@ -64,13 +65,13 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
     }
 
     @Override
-    public int fromDelta() {
-        return frozenFirst;
+    public void forEach(IntProcedure proc) throws ContradictionException {
+        variable.getDelta().forEach(proc, frozenFirst, frozenLast);
     }
 
     @Override
-    public int toDelta() {
-        return frozenLast;
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        variable.getDelta().forEach(proc, from, to);
     }
 
     @Override
