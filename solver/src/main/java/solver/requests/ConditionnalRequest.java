@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.Propagator;
@@ -73,14 +74,15 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
         dLast = 0;
     }
 
+
     @Override
-    public int fromDelta() {
-        return frozenFirst;
+    public void forEach(IntProcedure proc) throws ContradictionException {
+        variable.getDelta().forEach(proc, first.get(), last.get());
     }
 
     @Override
-    public int toDelta() {
-        return frozenLast;
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        variable.getDelta().forEach(proc, from, to);
     }
 
     @Override

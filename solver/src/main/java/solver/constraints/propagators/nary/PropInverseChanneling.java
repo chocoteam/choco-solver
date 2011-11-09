@@ -130,9 +130,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {
-            int f = request.fromDelta();
-            int l = request.toDelta();
-            delta.forEach(rem_proc.set(varIdx), f, l);
+            request.forEach(rem_proc.set(varIdx));
         }
     }
 

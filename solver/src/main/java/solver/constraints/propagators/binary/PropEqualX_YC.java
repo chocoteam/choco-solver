@@ -42,7 +42,6 @@ import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * X = Y + C
@@ -119,10 +118,6 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     public void propagateOnRequest
             (IRequest<IntVar> request, int varIdx,
              int mask) throws ContradictionException {
-        IntDelta delta = request.getVariable().getDelta();
-        int f = request.fromDelta();
-        int l = request.toDelta();
-
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {
@@ -133,7 +128,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                 this.awakeOnUpp(varIdx);
             }
             if (EventType.isRemove(mask)) {
-                delta.forEach(rem_proc.set(varIdx), f, l);
+                request.forEach(rem_proc.set(varIdx));
             }
         }
     }

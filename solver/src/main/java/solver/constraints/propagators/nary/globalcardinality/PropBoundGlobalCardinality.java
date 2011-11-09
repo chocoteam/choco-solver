@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -255,11 +254,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
         }
         if (idx < nbVars) {
-            IntVar var = request.getVariable();
-            IntDelta delta = var.getDelta();
-            int f = request.fromDelta();
-            int l = request.toDelta();
-            delta.forEach(rem_proc, f, l);
+            request.forEach(rem_proc);
         }
     }
 

@@ -40,9 +40,9 @@ public class CondAllDiffBC extends AbstractCondition {
     @Override
     void update(ConditionnalRequest request, int evtMask) {
         if(EventType.isRemove(evtMask)){
-            for (int i = request.fromDelta(); i <= request.toDelta(); i++) {
-                unionset.remove(i);
-            }
+//            for (int i = request.fromDelta(); i <= request.toDelta(); i++) {
+//                unionset.remove(i);
+//            }
         }
     }
 
