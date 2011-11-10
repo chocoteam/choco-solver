@@ -1,14 +1,9 @@
 package solver.requests.conditions;
 
-<<<<<<< HEAD
+
 import choco.kernel.common.util.procedure.IntProcedure1;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-=======
-import choco.kernel.common.util.tools.MathUtils;
-import choco.kernel.memory.IEnvironment;
-import org.testng.Assert;
->>>>>>> some preliminaries tests for conditional requests
 import solver.constraints.probabilistic.propagators.nary.Union;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -91,7 +86,6 @@ public class CondAllDiffBC extends AbstractCondition {
             p.unionset.remove(i);
 //            LoggerFactory.getLogger("solver").info("{} remove from {}", i, p.vars[idxVar]);
         }
-        Assert.assertEquals(true, checkUnion());
     }
 
     /**
