@@ -26,6 +26,8 @@ public class CondAllDiffBC extends AbstractCondition {
     protected IStateInt[] fromDelta;
     protected final RemProc rem_proc;
 
+    boolean exec;
+
     public CondAllDiffBC(IEnvironment environment, IntVar[] vars) {
         super(environment);
         this.vars = vars;
@@ -35,12 +37,14 @@ public class CondAllDiffBC extends AbstractCondition {
         }
         this.unionset = new Union(vars, environment);
         rem_proc = new RemProc(this);
+        this.exec = true;//false;
     }
 
 
     @Override
     boolean isValid() {
-        return true;  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
+        //exec = !exec; 
+        return true;//exec;  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
     }
 
     @Override

@@ -49,7 +49,6 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
     public PropProbaAllDiffBC(IntVar[] vars, Solver solver, IntConstraint constraint) {
         super(vars, solver, constraint);
         cond = new CondAllDiffBC(environment, vars); // requetes conditionnees par la proba que alldiff BC soit consistant
-        //unionset = new Union(vars, environment);
     }
 
     @Override

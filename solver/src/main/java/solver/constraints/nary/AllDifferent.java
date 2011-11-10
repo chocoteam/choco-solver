@@ -79,7 +79,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
             }
             break;
             case PROBABILISTIC:
-                setPropagators(new PropProbaAllDiffBC(this.vars, solver, this));
+                setPropagators(new PropProbaAllDiffBC(this.vars, solver, this)); //new PropAllDiffBC(this.vars, solver, this));
             {
                 int s = vars.length;
                 int k = 0;
