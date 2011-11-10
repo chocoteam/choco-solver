@@ -57,7 +57,6 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
         return EventType.INT_ALL_MASK();// HACK -- EventType.REMOVE.mask;
     }
 
-    // todo voir charles pour mettre cela en oeuvre
     @Override
     public IRequest<IntVar> makeRequest(IntVar var, int idx) {
         return new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
