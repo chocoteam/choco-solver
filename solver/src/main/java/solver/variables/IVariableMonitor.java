@@ -24,30 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables;
 
-package choco.kernel.common;
+import choco.kernel.common.IIndex;
+import solver.exception.ContradictionException;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 17 févr. 2009
-* Since : Choco 2.0.1
-* Update : Choco 2.0.1
-*
-* Indexed object.
-*/
-public interface IIndex {
-
-    /**
-     * Define the index
-     */
-    void setIndex(int idx);
+/**
+ * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
+ * or instantiation.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 14/11/11
+ */
+public interface IVariableMonitor<V extends Variable> extends IIndex {
 
     /**
-     * Return the index
+     * Operations to execute before updating the domain variable
      *
-     * @return the index of the objet
+     * @param var variable concerned
+     * @param evt modification event
      */
-    int getIndex();
+    void beforeUpdate(V var, EventType evt);
+
+    /**
+     * Operations to execute after updating the domain variable
+     *
+     * @param var variable concerned
+     * @param evt modification event
+     */
+    void afterUpdate(V var, EventType evt);
+
+    /**
+     * Operations to execute if a contradiction occurs during variable modification
+     */
+    void onContradiction(ContradictionException cex);
 
 }
