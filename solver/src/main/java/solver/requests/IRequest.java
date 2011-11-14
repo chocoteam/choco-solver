@@ -64,11 +64,11 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
      */
     V getVariable();
 
-    void setIndex(int idx);
+    void setIndexinGroup(int idx);
 
     void setGroup(int gidx);
 
-    int getIndex();
+    int getIndexInGroup();
 
     int getGroup();
 

@@ -70,7 +70,7 @@ public class MemberCAndLight implements Predicate {
                     for (int k = 0; k < p.nbRequests(); k++) {
                         IRequest r = p.getRequest(k);
                         if (r.getVariable() == null) {
-                            tmp.add(r.getIndex());
+                            tmp.add(r.getIndexInGroup());
                         }
                     }
                 }

@@ -77,12 +77,12 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     }
 
     @Override
-    public void setIndex(int idx) {
+    public void setIndexinGroup(int idx) {
         index = idx;
     }
 
     @Override
-    public final int getIndex() {
+    public final int getIndexInGroup() {
         return index;
     }
 

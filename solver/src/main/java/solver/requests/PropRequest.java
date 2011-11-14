@@ -103,7 +103,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public void setIndex(int idx) {
+    public void setIndexinGroup(int idx) {
         index = idx;
     }
 
@@ -113,7 +113,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public int getIndex() {
+    public int getIndexInGroup() {
         return index;
     }
 

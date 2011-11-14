@@ -52,7 +52,7 @@ public class LeftHandSide implements Predicate {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getIdxVarInProp() == 0) {
-                    int idx = all[i].getIndex();
+                    int idx = all[i].getIndexInGroup();
                     tmp.add(idx);
                 }
                 cached = tmp.toArray();

@@ -60,8 +60,8 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
-    public void setIndex(int idx) {
-        original.setIndex(idx);
+    public void setIndexinGroup(int idx) {
+        original.setIndexinGroup(idx);
     }
 
     @Override
@@ -70,8 +70,8 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
-    public int getIndex() {
-        return original.getIndex();
+    public int getIndexInGroup() {
+        return original.getIndexInGroup();
     }
 
     @Override

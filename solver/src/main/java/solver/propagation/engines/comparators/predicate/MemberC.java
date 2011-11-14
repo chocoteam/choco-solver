@@ -65,11 +65,11 @@ public class MemberC implements Predicate {
                 for (int j = 0; j < c.propagators.length; j++) {
                     Propagator p = c.propagators[j];
                     for (int k = 0; k < p.nbRequests(); k++) {
-                        int idx = p.getRequest(k).getIndex();
+                        int idx = p.getRequest(k).getIndexInGroup();
                         tmp.add(idx);
                     }
                     //-1 is the PropRequest in a propagator
-                    tmp.add(p.getRequest(-1).getIndex());
+                    tmp.add(p.getRequest(-1).getIndexInGroup());
                 }
             }
             cached = tmp.toArray();

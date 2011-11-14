@@ -65,7 +65,7 @@ public class MemberV<V extends Variable> implements Predicate {
             for (int i = 0; i < vars.length; i++) {
                 IRequestList rlist = vars[i].getRequests();
                 for (int k = 0; k < rlist.cardinality(); k++) {
-                    int idx = rlist.get(k).getIndex();
+                    int idx = rlist.get(k).getIndexInGroup();
                     tmp.add(idx);
                 }
             }
