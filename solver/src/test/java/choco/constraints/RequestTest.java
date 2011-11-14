@@ -35,13 +35,13 @@ package choco.constraints;
  */
 public class RequestTest {
 
-//    private static class Check implements Delta.Procedure2<EventRequest, int[]> {
+//    private static class Check implements Delta.BinaryProcedure<EventRequest, int[]> {
 //        int[] value;
 //        EventRequest ad;
 //
 //
 //        @Override
-//        public Delta.Procedure2 set(EventRequest advisor, int[] ints) {
+//        public Delta.BinaryProcedure set(EventRequest advisor, int[] ints) {
 //            this.value = ints;
 //            this.ad = advisor;
 //            return this;
