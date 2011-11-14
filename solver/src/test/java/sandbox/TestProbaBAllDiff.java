@@ -22,7 +22,11 @@ import java.util.Random;
  */
 public class TestProbaBAllDiff {
 
-    public final void execute(Solver solver) {
+    public final void execute(Solver solver, int size, int seed, AllDifferent.Type type) {
+        IntVar[] x = VariableFactory.enumeratedArray("x", size, 1, size, solver);
+            Constraint[] cstrs = {new AllDifferent(x, solver, type)};
+            solver.post(cstrs);
+            solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
         solver.findAllSolutions();
     }
 
@@ -33,43 +37,33 @@ public class TestProbaBAllDiff {
         IMeasures mes;
 
 
-        for (int seed = 0; seed < 50; seed++) {
+        /*for (int seed = 0; seed < 5; seed++)*/ int seed = 1; {
             random.setSeed(seed);
-            int n = 2 + random.nextInt(7);
+            int n = 3;//2 + random.nextInt(7);
             out.write("inst"+n+"\t");
 
             solver = new Solver();
-            IntVar[] x = VariableFactory.enumeratedArray("x", n, 1, n, solver);
-            // une contrainte alldiff pour l'approche classique
-            Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
-            solver.post(cstrs);
-            solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
-            execute(solver);
+            execute(solver,n,seed,AllDifferent.Type.BC);
             mes = solver.getMeasures();
-            out.write(mes.getNodeCount()+"\t");
-            out.write(mes.getBackTrackCount()+"\t");
-            out.write(mes.getPropagationsCount()+"\t");
-            out.write(mes.getTimeCount()+"\t");
-            out.flush();
+            String s = mes.getNodeCount()+"\t";
+            s += mes.getBackTrackCount()+"\t";
+            s += mes.getPropagationsCount()+"\t";
+            s += mes.getTimeCount()+"|\t";
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
 
             solverProba = new Solver();
-            IntVar[] y = VariableFactory.enumeratedArray("y", n, 1, n, solverProba);
-            // une contrainte alldiff pour la proba
-            Constraint[] cstrsProba = {new AllDifferent(y, solverProba, AllDifferent.Type.PROBABILISTIC)};
-            solverProba.post(cstrsProba);
-            solverProba.set(StrategyFactory.random(y, solverProba.getEnvironment(), seed));
-            execute(solverProba);
+            execute(solverProba,n,seed,AllDifferent.Type.PROBABILISTIC);
             mes = solverProba.getMeasures();
-            out.write(mes.getNodeCount()+"\t");
-            out.write(mes.getBackTrackCount()+"\t");
-            out.write(mes.getPropagationsCount()+"\t");
-            out.write(""+mes.getTimeCount());
-            out.flush();
+            s += mes.getNodeCount()+"\t";
+            s += mes.getBackTrackCount()+"\t";
+            s += mes.getPropagationsCount()+"\t";
+            s += ""+mes.getTimeCount();
             Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
 
             Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
-
+            System.out.println(s+"\n");
+            out.write(s);
+            out.flush();
             out.newLine();
         }
         out.close();
@@ -78,15 +72,9 @@ public class TestProbaBAllDiff {
     public static void main(String[] args) throws IOException {
         String outDir = "/Users/chameau/Travail/2011-2012/Thse JDB-2/tests/OneAllDiff.csv";
         BufferedWriter out = new BufferedWriter(new FileWriter(outDir));
-        out.write("instance"+"\t");
-        out.write("search nodes"+"\t");
-        out.write("search bcks"+"\t");
-        out.write("nb propag"+"\t");
-        out.write("solving time"+"\t");
-        out.write("search nodes"+"\t");
-        out.write("search bcks"+"\t");
-        out.write("nb propag"+"\t");
-        out.write("solving time");
+        String s = "search nodes"+"\t"+"search bcks"+"\t"+"nb propag"+"\t"+"solving time";
+        out.write("instance"+"\t"+s+"\t"+s);
+        System.out.println("instance"+"\t"+s+"|\t"+s);
         out.newLine();
         out.flush();
         TestProbaBAllDiff test = new TestProbaBAllDiff();
