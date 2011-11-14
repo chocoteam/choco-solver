@@ -36,18 +36,19 @@ package choco.kernel.common;
 *
 * Indexed object.
 */
-public interface IIndex {
+public interface MultiDimensionIndex {
 
     /**
      * Define the index
      */
-    void setIndex(int idx);
+    void setIndex(int dim, int idx);
 
     /**
      * Return the index
      *
      * @return the index of the objet
+     * @param dim
      */
-    int getIndex();
+    int getIndex(int dim);
 
 }
