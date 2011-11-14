@@ -26,6 +26,7 @@
  */
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
@@ -119,13 +120,13 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
-    public int fromDelta() {
-        return original.fromDelta();
+    public void forEach(IntProcedure proc) throws ContradictionException {
+        original.forEach(proc);
     }
 
     @Override
-    public int toDelta() {
-        return original.toDelta();
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        original.forEach(proc, from, to);
     }
 
     @Override

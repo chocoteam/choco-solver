@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IQueable;
@@ -51,12 +52,14 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
 
     /**
      * Return the propagator declared in <code>this</code>
+     *
      * @return the propagator
      */
     Propagator<V> getPropagator();
 
     /**
      * Returns the variable declared in <code>this</code>
+     *
      * @return the variable
      */
     V getVariable();
@@ -71,20 +74,24 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
 
     /**
      * Return the index of <code>this</code> in the requests list of the variable
+     *
      * @return index of <code>this</code> in the list of requests of the variable
      */
     int getIdxInVar();
 
     /**
      * Update the index of <code>this</code> in the list of requests of the variable to <code>idx</code>
+     *
      * @param idx new index
      */
     void setIdxInVar(int idx);
 
 
     int getIdxVarInProp();
+
     /**
      * Return the propagation conditions mask of the declared propagator
+     *
      * @return propagation conditions maks of the propagator
      */
     int getMask();
@@ -92,14 +99,15 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
     /**
      * Call the filtering algorithm of the declared propagator.
      * Must prepare the propagator to be called.
+     *
      * @throws ContradictionException if a contradiction occurs during call to filtering algorithm
      */
     void filter() throws ContradictionException;
 
     /**
      * Inform <code>this</code> on its variable modification
-     * @param e event occured on the variable
      *
+     * @param e event occured on the variable
      */
     void update(EventType e);
 
@@ -114,16 +122,22 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
     void desactivate();
 
     /**
-     * Return the index, in the delta of the variable, of the first element removed but not propagated
-     * @return index, in the delta of the variable, of the first element removed but not propagated
+     * Execute a given procedure <code>proc</code> for every value removed from the variable and not yet propagated
+     * @param proc procedure to execute
+     * @throws ContradictionException if a contradiction occurs.
      */
-    int fromDelta();
+    void forEach(IntProcedure proc) throws ContradictionException;
 
     /**
-     * Return the index, in the delta of the variable, of the last element removed but not propagated
-     * @return index, in the delta of the variable, of the last element removed but not propagated
+     * Execute a given procedure <code>proc</code> for every value removed from the variable between the index <code>from</code>
+     * to the index <code>to</code>.
+     * <br/> <b>For advanced users only!</b>
+     * @param proc procedure to execute
+     * @param from from index (inclusive) regarding values already propagated by the propagator
+     * @param to   from index (exclusive) regarding values already propagated by the propagator
+     * @throws ContradictionException if a contradiction occurs.
      */
-    int toDelta();
+    void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
 
     IPropagationEngine getPropagationEngine();
 

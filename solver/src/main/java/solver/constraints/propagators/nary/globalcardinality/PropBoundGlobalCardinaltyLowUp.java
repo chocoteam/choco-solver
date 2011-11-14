@@ -34,7 +34,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * A constraint to enforce BoundConsistency on a global cardinality
@@ -121,11 +120,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             }
             if (EventType.isRemove(mask)) {
                 if (idx < nbVars) {
-                    IntVar var = request.getVariable();
-                    IntDelta delta = var.getDelta();
-                    int f = request.fromDelta();
-                    int l = request.toDelta();
-                    delta.forEach(rem_proc, f, l);
+                    request.forEach(rem_proc);
                 }
             }
         }

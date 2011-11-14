@@ -28,6 +28,7 @@
 package solver.requests;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -71,13 +72,13 @@ public class RequestListTest {
         }
 
         @Override
-        public int fromDelta() {
-            return 0;
+        public void forEach(IntProcedure proc) throws ContradictionException {
+            throw new UnsupportedOperationException();
         }
 
         @Override
-        public int toDelta() {
-            return 0;
+        public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+            throw new UnsupportedOperationException();
         }
     }
 

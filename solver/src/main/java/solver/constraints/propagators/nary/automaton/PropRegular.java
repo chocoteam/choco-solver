@@ -41,7 +41,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -92,12 +91,7 @@ public class PropRegular extends Propagator<IntVar> {
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp,
                                    int mask) throws ContradictionException {
-        IntVar var = intVarIRequest.getVariable();
-        IntDelta delta = var.getDelta();
-
-        int f = intVarIRequest.fromDelta();
-        int l = intVarIRequest.toDelta();
-        delta.forEach(rem_proc.set(idxVarInProp), f, l);
+        intVarIRequest.forEach(rem_proc.set(idxVarInProp));
     }
 
     @Override

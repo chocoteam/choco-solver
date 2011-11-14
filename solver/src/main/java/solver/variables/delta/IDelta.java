@@ -27,6 +27,9 @@
 
 package solver.variables.delta;
 
+import choco.kernel.common.util.procedure.IntProcedure;
+import solver.exception.ContradictionException;
+
 import java.io.Serializable;
 
 /**
@@ -43,4 +46,14 @@ public interface IDelta extends Serializable{
      */
     int size();
 
+    /**
+     * Execute a given procedure <code>proc</code> for every value removed from the variable between the index <code>from</code>
+     * to the index <code>to</code>.
+     * <br/> <b>For advanced users only!</b>
+     * @param proc procedure to execute
+     * @param from from index (inclusive) regarding values already propagated by the propagator
+     * @param to   from index (exclusive) regarding values already propagated by the propagator
+     * @throws ContradictionException if a contradiction occurs.
+     */
+    void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
 }

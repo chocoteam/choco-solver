@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
@@ -60,14 +61,12 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
     }
 
     @Override
-    @Deprecated
-    public int fromDelta() {
+    public void forEach(IntProcedure proc) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    @Deprecated
-    public int toDelta() {
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

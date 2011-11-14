@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * Enforces X = |Y|
@@ -86,10 +85,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
-                IntDelta delta = vars[idxVarInProp].getDelta();
-                int f = intVarIRequest.fromDelta();
-                int l = intVarIRequest.toDelta();
-                delta.forEach(rem_proc.set(idxVarInProp), f, l);
+                intVarIRequest.forEach(rem_proc.set(idxVarInProp));
 //                updateHolesinY();
             }
         } else { // filter from Y to X
@@ -102,10 +98,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
-                IntDelta delta = vars[idxVarInProp].getDelta();
-                int f = intVarIRequest.fromDelta();
-                int l = intVarIRequest.toDelta();
-                delta.forEach(rem_proc.set(idxVarInProp), f, l);
+                intVarIRequest.forEach(rem_proc.set(idxVarInProp));
 //                updateHolesinX();
             }
         }

@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
@@ -72,12 +73,12 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public int fromDelta() {
+    public void forEach(IntProcedure proc) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int toDelta() {
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

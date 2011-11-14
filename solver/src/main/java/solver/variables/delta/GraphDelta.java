@@ -27,55 +27,63 @@
 
 package solver.variables.delta;
 
-public class GraphDelta implements IGraphDelta{
+import choco.kernel.common.util.procedure.IntProcedure;
+import solver.exception.ContradictionException;
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+public class GraphDelta implements IGraphDelta {
 
-	private IntDelta nodeEnf,nodeRem,arcEnf,arcRem;
-	
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	public GraphDelta(){
-		nodeEnf = new Delta();
-		nodeRem = new Delta();
-		arcEnf = new Delta();
-		arcRem = new Delta();
-	}
-	
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    private IntDelta nodeEnf, nodeRem, arcEnf, arcRem;
 
-	@Override
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+    public GraphDelta() {
+        nodeEnf = new Delta();
+        nodeRem = new Delta();
+        arcEnf = new Delta();
+        arcRem = new Delta();
+    }
 
-	@Override
-	public IntDelta getNodeRemovalDelta() {
-		return nodeRem;
-	}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public IntDelta getNodeEnforcingDelta() {
-		return nodeEnf;
-	}
+    @Override
+    public int size() {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public IntDelta getArcRemovalDelta() {
-		return arcRem;
-	}
+    @Override
+    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+        throw new UnsupportedOperationException();
+    }
 
-	@Override
-	public IntDelta getArcEnforcingDelta() {
-		return arcEnf;
-	}
+    //***********************************************************************************
+    // ACCESSORS
+    //***********************************************************************************
+
+    @Override
+    public IntDelta getNodeRemovalDelta() {
+        return nodeRem;
+    }
+
+    @Override
+    public IntDelta getNodeEnforcingDelta() {
+        return nodeEnf;
+    }
+
+    @Override
+    public IntDelta getArcRemovalDelta() {
+        return arcRem;
+    }
+
+    @Override
+    public IntDelta getArcEnforcingDelta() {
+        return arcEnf;
+    }
 }
