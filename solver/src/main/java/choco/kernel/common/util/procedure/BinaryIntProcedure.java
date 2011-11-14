@@ -33,6 +33,6 @@ package choco.kernel.common.util.procedure;
  * @author Charles Prud'homme
  * @since 29 sept. 2010
  */
-public interface IntProcedure2<A, B> extends IntProcedure {
-    IntProcedure2 set(A a, B b);
+public interface BinaryIntProcedure<A, B> extends IntProcedure {
+    BinaryIntProcedure set(A a, B b);
 }
