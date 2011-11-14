@@ -60,38 +60,13 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     }
 
     @Override
-    public void setIndexinGroup(int idx) {
-        original.setIndexinGroup(idx);
+    public int getIndex(int dim) {
+        return original.getIndex(dim);
     }
 
     @Override
-    public void setGroup(int gidx) {
-        original.setGroup(gidx);
-    }
-
-    @Override
-    public int getIndexInGroup() {
-        return original.getIndexInGroup();
-    }
-
-    @Override
-    public int getGroup() {
-        return original.getGroup();
-    }
-
-    @Override
-    public int getIdxInVar() {
-        return original.getIdxInVar();
-    }
-
-    @Override
-    public void setIdxInVar(int idx) {
-        original.setIdxInVar(idx);
-    }
-
-    @Override
-    public int getIdxVarInProp() {
-        return original.getIdxVarInProp();
+    public void setIndex(int dim, int idx) {
+        original.setIndex(dim, idx);
     }
 
     @Override

@@ -101,7 +101,7 @@ public final class ArrayReacher implements IReacher {
     @Override
     public void update(IRequest request) {
         if (!request.enqueued()) {
-            toPropagate.set(request.getIndexInGroup(), true);
+            toPropagate.set(request.getIndex(IRequest.IN_GROUP), true);
             request.enqueue();
         }
     }
@@ -109,7 +109,7 @@ public final class ArrayReacher implements IReacher {
     @Override
     public boolean remove(IRequest request) {
         request.deque();
-        toPropagate.set(request.getIndexInGroup(), false);
+        toPropagate.set(request.getIndex(IRequest.IN_GROUP), false);
         return toPropagate.isEmpty();
     }
 

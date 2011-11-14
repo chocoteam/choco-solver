@@ -60,7 +60,7 @@ public class PriorityPAndLight implements Predicate {
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
                     if (all[i].getVariable() == null) {
-                        tmp.add(all[i].getIndexInGroup());
+                        tmp.add(all[i].getIndex(IRequest.IN_GROUP));
                     }
                 }
             }

@@ -145,13 +145,13 @@ public final class PropagationEngine implements IPropagationEngine {
     private void extract() {
         int i, j;
         for (i = 0; i < size; i++) {
-            requests[i].setIndexinGroup(i);
+            requests[i].setIndex(IRequest.IN_GROUP,i);
         }
         for (j = 0; j < nbGroup; j++) {
             int[] indices = groups[j].getPredicate().extract(requests);
             Arrays.sort(indices);
             for (i = 0; i < indices.length; i++) {
-                if (requests[indices[i]].getGroup() < 0) {
+                if (requests[indices[i]].getIndex(IRequest.GROUP_ID) < 0) {
                     groups[j].addRequest(requests[indices[i]]);
                 }
             }

@@ -53,7 +53,7 @@ public final class Light implements Predicate {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getVariable() != null) {
-                    int idx = all[i].getIndexInGroup();
+                    int idx = all[i].getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
             }

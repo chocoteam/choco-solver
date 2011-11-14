@@ -60,14 +60,14 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     @Override
     public void setActive(R request) {
         int first = this.firstActive.get();
-        int i = request.getIdxInVar();
+        int i = request.getIndex(IRequest.IN_VAR);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             R tmp1 = requests[--first];
             requests[first] = requests[i];
-            requests[first].setIdxInVar(first);
+            requests[first].setIndex(IRequest.IN_VAR, first);
             requests[i] = tmp1;
-            requests[i].setIdxInVar(i);
+            requests[i].setIndex(IRequest.IN_VAR, i);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate a request");
@@ -78,14 +78,14 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     @Override
     public void setPassive(R request) {
         int last = this.firstPassive.get();
-        int i = request.getIdxInVar();
+        int i = request.getIndex(IRequest.IN_VAR);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             R tmp1 = requests[--last];
             requests[last] = requests[i];
-            requests[last].setIdxInVar(last);
+            requests[last].setIndex(IRequest.IN_VAR, last);
             requests[i] = tmp1;
-            requests[i].setIdxInVar(i);
+            requests[i].setIndex(IRequest.IN_VAR, i);
         }
         firstPassive.add(-1);
     }
@@ -100,7 +100,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         requests = (R[]) new IRequest[tmp.length + 1];
         System.arraycopy(tmp, 0, requests, 0, tmp.length);
         requests[tmp.length] = request;
-        request.setIdxInVar(tmp.length);
+        request.setIndex(IRequest.IN_VAR, tmp.length);
         this.firstActive.add(1);
         this.firstPassive.add(1);
     }
@@ -116,7 +116,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
         System.arraycopy(tmp, 0, requests, 0, i);
         System.arraycopy(tmp, i + 1, requests, i, tmp.length - i - 1);
         for (int j = i; j < requests.length; j++) {
-            requests[j].setIdxInVar(j);
+            requests[j].setIndex(IRequest.IN_VAR, j);
         }
         assert (this.firstPassive.getEnvironment().getWorldIndex() == 0);
         if (i < firstActive.get()) {

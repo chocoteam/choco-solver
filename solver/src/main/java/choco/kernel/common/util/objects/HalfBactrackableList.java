@@ -26,7 +26,7 @@
  */
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.IIndex;
+import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
@@ -38,7 +38,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public class HalfBactrackableList<E extends IIndex> {
+public class HalfBactrackableList<E extends MultiDimensionIndex> {
 
     private static final int OFFSET = 100000;
     private static final int SIZE = 8;
@@ -54,16 +54,19 @@ public class HalfBactrackableList<E extends IIndex> {
 
     protected E[] sElements, dElements; // null at creation
 
+    protected final int DIMENSION;
 
-    public HalfBactrackableList(IEnvironment environment) {
+
+    public HalfBactrackableList(IEnvironment environment, int dim) {
         sIdx = sFirstActive = sFirstPassive = 0;
         dIdx = environment.makeInt();
         dFirstActive = environment.makeInt();
         dFirstPassive = environment.makeInt();
+        DIMENSION = dim;
     }
 
     public void setActive(E element) {
-        if (element.getIndex() < OFFSET) {
+        if (element.getIndex(DIMENSION) < OFFSET) {
             sActivate(element);
         } else {
             dActivate(element);
@@ -72,14 +75,14 @@ public class HalfBactrackableList<E extends IIndex> {
 
     private void sActivate(E element) {
         int first = this.sFirstActive;
-        int i = element.getIndex();
+        int i = element.getIndex(DIMENSION);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = sElements[--first];
             sElements[first] = sElements[i];
-            sElements[first].setIndex(first);
+            sElements[first].setIndex(DIMENSION, first);
             sElements[i] = tmp1;
-            sElements[i].setIndex(i);
+            sElements[i].setIndex(DIMENSION, i);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
@@ -89,14 +92,14 @@ public class HalfBactrackableList<E extends IIndex> {
 
     private void dActivate(E element) {
         int first = this.dFirstActive.get();
-        int i = element.getIndex() - OFFSET;
+        int i = element.getIndex(DIMENSION) - OFFSET;
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = dElements[--first];
             dElements[first] = dElements[i];
-            dElements[first].setIndex(first + OFFSET);
+            dElements[first].setIndex(DIMENSION, first + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIndex(i + OFFSET);
+            dElements[i].setIndex(DIMENSION, i + OFFSET);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
@@ -106,7 +109,7 @@ public class HalfBactrackableList<E extends IIndex> {
 
 
     public void setPassive(E element) {
-        if (element.getIndex() < OFFSET) {
+        if (element.getIndex(DIMENSION) < OFFSET) {
             sPassivate(element);
         } else {
             dPassivate(element);
@@ -115,14 +118,14 @@ public class HalfBactrackableList<E extends IIndex> {
 
     private void sPassivate(E element) {
         int last = this.sFirstPassive;
-        int i = element.getIndex();
+        int i = element.getIndex(DIMENSION);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = sElements[--last];
             sElements[last] = sElements[i];
-            sElements[last].setIndex(last);
+            sElements[last].setIndex(DIMENSION, last);
             sElements[i] = tmp1;
-            sElements[i].setIndex(i);
+            sElements[i].setIndex(DIMENSION, i);
         }
         sFirstPassive++;
 
@@ -130,14 +133,14 @@ public class HalfBactrackableList<E extends IIndex> {
 
     public void dPassivate(E element) {
         int last = this.dFirstPassive.get();
-        int i = element.getIndex() - OFFSET;
+        int i = element.getIndex(DIMENSION) - OFFSET;
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = dElements[--last];
             dElements[last] = dElements[i];
-            dElements[last].setIndex(last + OFFSET);
+            dElements[last].setIndex(DIMENSION, last + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIndex(i + OFFSET);
+            dElements[i].setIndex(DIMENSION, i + OFFSET);
         }
         dFirstPassive.add(-1);
     }
@@ -145,14 +148,14 @@ public class HalfBactrackableList<E extends IIndex> {
 
     public void addStatic(E element) {
         if (sElements == null) {
-            sElements = (E[]) new IIndex[SIZE];
+            sElements = (E[]) new MultiDimensionIndex[SIZE];
         }
         if (sElements.length >= sIdx) {
             E[] tmp = sElements;
-            sElements = (E[]) new IIndex[3 / 2 * SIZE + 1];
+            sElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
             System.arraycopy(tmp, 0, sElements, 0, sIdx);
         }
-        element.setIndex(sIdx);
+        element.setIndex(DIMENSION, sIdx);
         sElements[sIdx++] = element;
         this.sFirstActive++;
         this.sFirstPassive++;
@@ -160,16 +163,16 @@ public class HalfBactrackableList<E extends IIndex> {
 
     public void addDynamic(E element) {
         if (dElements == null) {
-            dElements = (E[]) new IIndex[SIZE];
+            dElements = (E[]) new MultiDimensionIndex[SIZE];
             world = dIdx.getEnvironment().getWorldIndex();
         }
         int idx = dIdx.get();
         if (dElements.length >= idx) {
             E[] tmp = dElements;
-            dElements = (E[]) new IIndex[3 / 2 * SIZE + 1];
+            dElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
             System.arraycopy(tmp, 0, dElements, 0, idx);
         }
-        element.setIndex(idx + OFFSET);
+        element.setIndex(DIMENSION, idx + OFFSET);
         dElements[idx++] = element;
         dIdx.add(1);
         this.dFirstActive.add(1);
@@ -177,21 +180,21 @@ public class HalfBactrackableList<E extends IIndex> {
     }
 
     public void remove(E element) {
-        if (element.getIndex() < OFFSET) {
-
+        if (element.getIndex(DIMENSION) < OFFSET) {
+            sRemove(element);
         } else {
-
+            dRemove(element);
         }
     }
 
     private void sRemove(E e) {
-        int i = e.getIndex();
+        int i = e.getIndex(DIMENSION);
         E[] tmp = sElements;
-        sElements = (E[]) new IIndex[tmp.length - 1];
+        sElements = (E[]) new MultiDimensionIndex[tmp.length - 1];
         System.arraycopy(tmp, 0, sElements, 0, i);
         System.arraycopy(tmp, i + 1, sElements, i, tmp.length - i - 1);
         for (int j = i; j < sElements.length; j++) {
-            sElements[j].setIndex(j);
+            sElements[j].setIndex(DIMENSION, j);
         }
         if (i < sFirstActive) {
             this.sFirstActive--;
@@ -200,13 +203,13 @@ public class HalfBactrackableList<E extends IIndex> {
     }
 
     private void dRemove(E e) {
-        int i = e.getIndex() - OFFSET;
+        int i = e.getIndex(DIMENSION) - OFFSET;
         E[] tmp = dElements;
-        dElements = (E[]) new IIndex[tmp.length - 1];
+        dElements = (E[]) new MultiDimensionIndex[tmp.length - 1];
         System.arraycopy(tmp, 0, dElements, 0, i);
         System.arraycopy(tmp, i + 1, dElements, i, tmp.length - i - 1);
         for (int j = i; j < dElements.length; j++) {
-            dElements[j].setIndex(j + OFFSET);
+            dElements[j].setIndex(DIMENSION, j + OFFSET);
         }
         assert (this.dFirstPassive.getEnvironment().getWorldIndex() == world);
         if (i < dFirstActive.get()) {

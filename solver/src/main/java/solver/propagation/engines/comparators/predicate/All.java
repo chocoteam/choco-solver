@@ -52,7 +52,7 @@ public class All implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
-                int idx = all[i].getIndexInGroup();
+                int idx = all[i].getIndex(IRequest.IN_GROUP);
                 tmp.add(idx);
             }
             cached = tmp.toArray();

@@ -57,7 +57,7 @@ public class EqualCandLight implements Predicate {
                 //-1 is the big request, so we can skip it easily
                 for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
                     IRequest r = cstr.propagators[j].getRequest(k);
-                    tmp.add(r.getIndexInGroup());
+                    tmp.add(r.getIndex(IRequest.IN_GROUP));
                 }
             }
             cached = tmp.toArray();

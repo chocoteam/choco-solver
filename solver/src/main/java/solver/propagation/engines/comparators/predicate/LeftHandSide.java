@@ -43,7 +43,7 @@ public class LeftHandSide implements Predicate {
 
     @Override
     public boolean eval(IRequest request) {
-        return request.getVariable() != null && request.getIdxVarInProp() == 0;
+        return request.getVariable() != null && request.getIndex(IRequest.VAR_IN_PROP) == 0;
     }
 
     @Override
@@ -51,8 +51,8 @@ public class LeftHandSide implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
-                if (all[i].getIdxVarInProp() == 0) {
-                    int idx = all[i].getIndexInGroup();
+                if (all[i].getIndex(IRequest.VAR_IN_PROP) == 0) {
+                    int idx = all[i].getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
                 cached = tmp.toArray();

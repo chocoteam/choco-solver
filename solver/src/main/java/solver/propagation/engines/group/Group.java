@@ -105,8 +105,8 @@ public class Group implements Serializable {
             reacher = new ArrayReacher(requests, comparator);
         }
         for (int i = 0; i < nbRequests; i++) {
-            requests[i].setIndexinGroup(i);
-            requests[i].setGroup(index); //HACK: usefull for Propagation.eval() when a group is deleted...
+            requests[i].setIndex(IRequest.IN_GROUP, i);
+            requests[i].setIndex(IRequest.GROUP_ID, index); //HACK: usefull for Propagation.eval() when a group is deleted...
         }
     }
 
@@ -119,7 +119,7 @@ public class Group implements Serializable {
             System.arraycopy(tmp, 0, requests, 0, nbRequests);
         }
         requests[nbRequests++] = aRequest;
-        aRequest.setGroup(index);
+        aRequest.setIndex(IRequest.GROUP_ID, index);
     }
 
     @Override

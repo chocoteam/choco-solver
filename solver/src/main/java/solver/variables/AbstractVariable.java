@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import choco.kernel.common.util.procedure.TernaryProcedure;
 import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
@@ -74,6 +75,8 @@ public abstract class AbstractVariable implements Serializable {
      */
     protected final IRequestList<IRequest> requests;
 
+//    protected final HalfBactrackableList<IVariableMonitor> monitors;
+
     protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
@@ -84,6 +87,10 @@ public abstract class AbstractVariable implements Serializable {
 
     protected final IPropagationEngine engine;
 
+    protected final OnBeforeProc procB = new OnBeforeProc();
+    protected final OnAfterProc procA = new OnAfterProc();
+    protected final OnContradiction procC = new OnContradiction();
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     protected AbstractVariable(String name, Solver solver) {
@@ -92,6 +99,7 @@ public abstract class AbstractVariable implements Serializable {
         this.engine = solver.getEngine();
         this.requests = RequestListBuilder.preset(solver.getEnvironment());
         views = new IView[2];
+//        monitors = new HalfBactrackableList<IVariableMonitor>(solver.getEnvironment(), IRequest.IN_VAR);
     }
 
     public abstract IDelta getDelta();
@@ -153,6 +161,18 @@ public abstract class AbstractVariable implements Serializable {
         requests.deleteRequest(request);
     }
 
+    /*public void addMonitor(IVariableMonitor monitor, boolean dynamic) {
+        if (dynamic) {
+            monitors.addDynamic(monitor);
+        } else {
+            monitors.addStatic(monitor);
+        }
+    }
+
+    public void deleteMonitor(IVariableMonitor monitor) {
+        monitors.remove(monitor);
+    }*/
+
     public void subscribeView(IView view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
@@ -176,6 +196,43 @@ public abstract class AbstractVariable implements Serializable {
 
     public Solver getSolver() {
         return solver;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    protected static abstract class Monitoring implements TernaryProcedure<IVariableMonitor, Variable, EventType, ICause> {
+        Variable var;
+        EventType evt;
+        ICause cause;
+
+        @Override
+        public TernaryProcedure set(Variable variable, EventType eventType, ICause cause) {
+            this.var = variable;
+            this.evt = eventType;
+            this.cause = cause;
+            return this;
+        }
+    }
+
+    protected static class OnBeforeProc extends Monitoring {
+        @Override
+        public void execute(IVariableMonitor monitor) throws ContradictionException {
+            monitor.beforeUpdate(var, evt, cause);
+        }
+    }
+
+    protected static class OnAfterProc extends Monitoring {
+        @Override
+        public void execute(IVariableMonitor monitor) throws ContradictionException {
+            monitor.afterUpdate(var, evt, cause);
+        }
+    }
+
+    protected static class OnContradiction extends Monitoring {
+        @Override
+        public void execute(IVariableMonitor monitor) throws ContradictionException {
+            monitor.contradict(var, evt, cause);
+        }
     }
 
 }

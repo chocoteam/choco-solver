@@ -26,8 +26,8 @@
  */
 package solver.variables;
 
-import choco.kernel.common.IIndex;
-import solver.exception.ContradictionException;
+import choco.kernel.common.MultiDimensionIndex;
+import solver.ICause;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -37,27 +37,33 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends IIndex {
+public interface IVariableMonitor<V extends Variable> extends MultiDimensionIndex {
 
     /**
      * Operations to execute before updating the domain variable
      *
-     * @param var variable concerned
-     * @param evt modification event
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
      */
-    void beforeUpdate(V var, EventType evt);
+    void beforeUpdate(V var, EventType evt, ICause cause);
 
     /**
      * Operations to execute after updating the domain variable
      *
-     * @param var variable concerned
-     * @param evt modification event
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
      */
-    void afterUpdate(V var, EventType evt);
+    void afterUpdate(V var, EventType evt, ICause cause);
 
     /**
      * Operations to execute if a contradiction occurs during variable modification
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
      */
-    void onContradiction(ContradictionException cex);
+    void contradict(V var, EventType evt, ICause cause);
 
 }

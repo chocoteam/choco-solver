@@ -44,21 +44,27 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     protected final P propagator; // Propagator of the request
     protected IPropagationEngine engine;
 
-    protected int index = -1; // index of the request in the engine
-
-    protected int gIndex = -1; // index of the group in the engine
-
-    protected final int idxVarInProp; // index of the variable within the propagatro
-
-    protected int idxInVar; // current index of the request within variable request list
+    protected final int[] indices;
 
     protected boolean enqueued;
 
     AbstractRequest(P propagator, V variable, int idxInProp) {
         this.propagator = propagator;
         this.variable = variable;
-        this.idxVarInProp = idxInProp;
+
+        this.indices = new int[]{-1, -1, -1, -1};
+        this.indices[VAR_IN_PROP] = idxInProp;
         enqueued = false;
+    }
+
+    @Override
+    public void setIndex(int dim, int idx) {
+        indices[dim] = idx;
+    }
+
+    @Override
+    public int getIndex(int dim) {
+        return indices[dim];
     }
 
     @Override
@@ -72,33 +78,8 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     }
 
     @Override
-    public void setGroup(int gidx) {
-        gIndex = gidx;
-    }
-
-    @Override
-    public void setIndexinGroup(int idx) {
-        index = idx;
-    }
-
-    @Override
-    public final int getIndexInGroup() {
-        return index;
-    }
-
-    @Override
-    public final int getGroup() {
-        return gIndex;
-    }
-
-    @Override
-    public final int getIdxVarInProp() {
-        return idxVarInProp;
-    }
-
-    @Override
     public final int getMask() {
-        return propagator.getPropagationConditions(idxVarInProp);
+        return propagator.getPropagationConditions(indices[VAR_IN_PROP]);
     }
 
     @Override
@@ -109,15 +90,6 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     @Override
     public final V getVariable() {
         return variable;
-    }
-
-    public final int getIdxInVar() {
-        return idxInVar;
-    }
-
-    @Override
-    public final void setIdxInVar(int idx) {
-        idxInVar = idx;
     }
 
     @Override

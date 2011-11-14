@@ -142,6 +142,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+//        monitors.forEach(procB.set(this, EventType.REMOVE, cause));
         boolean change = false;
         ICause antipromo = cause;
         if (informCause) {
@@ -151,6 +152,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int sup = getUB();
         if (value == inf && value == sup) {
             solver.getExplainer().removeValue(this, value, antipromo);
+//            monitors.forEach(procC.set(this, EventType.REMOVE, cause));
             this.contradiction(cause, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
@@ -190,6 +192,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 } else {
                     if (VALUES.isEmpty()) {
                         solver.getExplainer().removeValue(this, value, antipromo);
+//                        monitors.forEach(procC.set(this, EventType.REMOVE, cause));
                         this.contradiction(cause, MSG_EMPTY);
                     }
                 }
@@ -198,6 +201,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (change) {
             solver.getExplainer().removeValue(this, value, antipromo);
         }
+//        monitors.forEach(procA.set(this, EventType.REMOVE, cause));
         return change;
     }
 
