@@ -26,7 +26,6 @@
  */
 package samples.graph;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.tools.ArrayUtils;
 import samples.AbstractProblem;
@@ -37,10 +36,6 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.PropKCC;
-import solver.constraints.propagators.gary.PropKCliques;
-import solver.constraints.propagators.gary.PropRelation;
-import solver.constraints.propagators.gary.PropTransitivity;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -48,7 +43,6 @@ import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -72,7 +66,6 @@ public class NVector extends AbstractProblem{
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
-
 
 	public NVector(int n, int k, int d, int[][][] b) {
 		this.n = n;
