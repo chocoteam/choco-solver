@@ -66,7 +66,7 @@ public class WhileEngine implements IEngine {
 
     @Override
     public void update(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         groups[gidx].update(request);
         notEmpty.set(gidx, true);
 
@@ -74,7 +74,7 @@ public class WhileEngine implements IEngine {
 
     @Override
     public void remove(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         if (groups[gidx].remove(request)) {
             notEmpty.set(gidx, false);
         }

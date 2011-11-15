@@ -50,7 +50,7 @@ public class IncrPosP implements Comparator<IRequest>, Serializable {
     }
 
     public int compare(IRequest v1, IRequest v2) {
-        return v2.getIdxVarInProp() - v1.getIdxVarInProp();
+        return v2.getIndex(IRequest.VAR_IN_PROP) - v1.getIndex(IRequest.VAR_IN_PROP);
     }
 
     public String toString() {

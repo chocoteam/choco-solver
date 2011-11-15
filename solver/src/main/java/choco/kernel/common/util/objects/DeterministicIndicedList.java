@@ -27,14 +27,15 @@
 
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.IIndex;
+import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.iterators.ArrayIterator;
 import choco.kernel.common.util.iterators.DisposableIterator;
 import gnu.trove.TLongIntHashMap;
 
 import java.io.Serializable;
-import static java.lang.reflect.Array.newInstance;
 import java.util.Arrays;
+
+import static java.lang.reflect.Array.newInstance;
 
 /*
 * User : charles
@@ -49,7 +50,7 @@ import java.util.Arrays;
 *
 * It allows deterministic iteration.
 */
-public class DeterministicIndicedList<O extends IIndex> implements Serializable{
+public class DeterministicIndicedList<O extends MultiDimensionIndex> implements Serializable {
 
     private final Class clazz;
 
@@ -68,27 +69,33 @@ public class DeterministicIndicedList<O extends IIndex> implements Serializable{
      */
     private int last;
 
+
+    private final int DIMENSION;
+
     /**
      * Constructor
-     * @param clazz the super Class of include object
+     *
+     * @param clazz       the super Class of include object
      * @param initialSize initial size of the structure
      */
-    public DeterministicIndicedList(final Class clazz, final int initialSize) {
+    public DeterministicIndicedList(final Class clazz, final int initialSize, int dim) {
         this.clazz = clazz;
         indices = new TLongIntHashMap(initialSize);
         objects = (O[]) newInstance(clazz, initialSize);
         last = 0;
+        this.DIMENSION = dim;
     }
 
     /**
      * Constructor
+     *
      * @param clazz the super Class of include object
      */
     public DeterministicIndicedList(final Class clazz) {
-        this(clazz, 32);
+        this(clazz, 32, 0);
     }
 
-    public void clear(){
+    public void clear() {
         indices.clear();
         Arrays.fill(objects, null);
         objects = null;
@@ -96,13 +103,14 @@ public class DeterministicIndicedList<O extends IIndex> implements Serializable{
 
     /**
      * Add object to the structure
+     *
      * @param object
      */
-    public void add(final O object){
-        if(!indices.containsKey(object.getIndex())){
+    public void add(final O object) {
+        if (!indices.containsKey(object.getIndex(DIMENSION))) {
             ensureCapacity();
             objects[last] = object;
-            indices.put(object.getIndex(), last++);
+            indices.put(object.getIndex(DIMENSION), last++);
         }
     }
 
@@ -110,10 +118,10 @@ public class DeterministicIndicedList<O extends IIndex> implements Serializable{
      * Ensure that the array has a correct size
      */
     @SuppressWarnings({"unchecked"})
-    private void ensureCapacity(){
-        if(last >= objects.length){
+    private void ensureCapacity() {
+        if (last >= objects.length) {
             // treat the case where intial value = 1
-            final int cindT = objects.length * 3/2+1;
+            final int cindT = objects.length * 3 / 2 + 1;
             final O[] oldObjects = objects;
             objects = (O[]) newInstance(clazz, cindT);
             System.arraycopy(oldObjects, 0, objects, 0, last);
@@ -123,16 +131,17 @@ public class DeterministicIndicedList<O extends IIndex> implements Serializable{
 
     /**
      * Remove object from the structure
-     * We just swap the last object and the removed object 
+     * We just swap the last object and the removed object
+     *
      * @param object to remove
      */
-    public int remove(final O object){
-        if(indices.containsKey(object.getIndex())){
-            final int ind = indices.get(object.getIndex());
-            indices.remove(object.getIndex());
-            if(last > 0 && ind < last-1){
-                objects[ind] = objects[last-1];
-                indices.adjustValue(objects[ind].getIndex(), -last+ind+1);
+    public int remove(final O object) {
+        if (indices.containsKey(object.getIndex(DIMENSION))) {
+            final int ind = indices.get(object.getIndex(DIMENSION));
+            indices.remove(object.getIndex(DIMENSION));
+            if (last > 0 && ind < last - 1) {
+                objects[ind] = objects[last - 1];
+                indices.adjustValue(objects[ind].getIndex(DIMENSION), -last + ind + 1);
             }
             objects[--last] = null;
             return ind;
@@ -142,53 +151,58 @@ public class DeterministicIndicedList<O extends IIndex> implements Serializable{
 
     /**
      * Indicates wether the structure contains the object
+     *
      * @param object
      * @return
      */
-    public boolean contains(final O object){
-        return indices.containsKey(object.getIndex());
+    public boolean contains(final O object) {
+        return indices.containsKey(object.getIndex(DIMENSION));
     }
 
     /**
      * Get the number of objects contained
+     *
      * @return
      */
-    public int size(){
+    public int size() {
         return last;
     }
 
     /**
      * Get the object in position i
+     *
      * @param i position of the object
      * @return the ith object
      */
-    public O get(final int i){
+    public O get(final int i) {
         return objects[i];
     }
 
     /**
      * Get the position of the object
+     *
      * @param object required
      * @return its position
      */
-    public int get(final O object){
-        return indices.get(object.getIndex());
+    public int get(final O object) {
+        return indices.get(object.getIndex(DIMENSION));
     }
 
 
-    public O getLast(){
-        if(last>0){
-            return objects[last-1];
-        }else{
+    public O getLast() {
+        if (last > 0) {
+            return objects[last - 1];
+        } else {
             return null;
         }
     }
 
     /**
      * Iterator over objects
+     *
      * @return
      */
-    public DisposableIterator<O> iterator(){
+    public DisposableIterator<O> iterator() {
         return ArrayIterator.getIterator(objects, last);
     }
 }

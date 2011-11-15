@@ -25,47 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.comparators.predicate;
-
-import gnu.trove.TIntHashSet;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.requests.IRequest;
+package choco.kernel.common.util.procedure;
 
 /**
- * Prop.priority <= threshold (inclusive)
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 04/04/11
+ * @since 29 sept. 2010
  */
-public class PriorityPAndLight implements Predicate {
-
-    int[] cached;
-
-    final PropagatorPriority threshold;
-
-    PriorityPAndLight(PropagatorPriority threshold) {
-        this.threshold = threshold;
-    }
-
-    @Override
-    public boolean eval(IRequest request) {
-        return request.getPropagator().getPriority().priority >= threshold.priority && request.getVariable() != null;
-    }
-
-    @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < all.length; i++) {
-                if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
-                    if (all[i].getVariable() == null) {
-                        tmp.add(all[i].getIndex(IRequest.IN_GROUP));
-                    }
-                }
-            }
-            cached = tmp.toArray();
-        }
-        return cached;
-    }
+public interface TernaryProcedure<E, A, B, C> extends Procedure<E> {
+    TernaryProcedure set(A a, B b, C c);
 }

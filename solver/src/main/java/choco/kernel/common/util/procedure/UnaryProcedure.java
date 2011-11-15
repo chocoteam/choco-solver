@@ -25,47 +25,8 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.comparators.predicate;
+package choco.kernel.common.util.procedure;
 
-import gnu.trove.TIntHashSet;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.requests.IRequest;
-
-/**
- * Prop.priority <= threshold (inclusive)
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 04/04/11
- */
-public class PriorityPAndLight implements Predicate {
-
-    int[] cached;
-
-    final PropagatorPriority threshold;
-
-    PriorityPAndLight(PropagatorPriority threshold) {
-        this.threshold = threshold;
-    }
-
-    @Override
-    public boolean eval(IRequest request) {
-        return request.getPropagator().getPriority().priority >= threshold.priority && request.getVariable() != null;
-    }
-
-    @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < all.length; i++) {
-                if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
-                    if (all[i].getVariable() == null) {
-                        tmp.add(all[i].getIndex(IRequest.IN_GROUP));
-                    }
-                }
-            }
-            cached = tmp.toArray();
-        }
-        return cached;
-    }
+public interface UnaryProcedure<E, A> extends Procedure<E> {
+    UnaryProcedure set(A a);
 }

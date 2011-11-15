@@ -93,14 +93,14 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
             first.set(last.get()); // point out current last
             evtmask.set(0); // and clean up current mask
             propagator.eventCalls++;
-            propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+            propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
         }
     }
 
     @Override
     public void update(EventType e) {
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             this.lazyClear();
             if (EventType.anInstantiationEvent(e.mask)) {
                 propagator.decArity();
