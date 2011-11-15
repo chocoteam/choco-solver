@@ -41,6 +41,10 @@ public class AllTest {
     String[] args;
     long[] stats;
 
+    public AllTest() {
+        this(new AllIntervalSeries(), new String[]{"-o", "50"}, new long[]{1,2});
+    }
+
     public AllTest(AbstractProblem prob, String[] arguments, long[] statistics) {
         this.prob = prob;
         this.args = arguments;

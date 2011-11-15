@@ -44,11 +44,11 @@ public class AllTestFactory {
     };
 
     String[][] arguments = new String[][]{
-            {"-n", "50"}
+            {"-0", "50"}
     };
 
     long[][] statistics = new long[][]{
-            {10, 10}
+            {1, 2}
     };
 
     @Factory
