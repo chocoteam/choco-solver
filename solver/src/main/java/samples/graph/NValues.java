@@ -76,7 +76,7 @@ public class NValues extends AbstractProblem{
 		vars[3] = VariableFactory.enumerated("vars_3", new int[]{2,3}, solver);
 		IntVar nv = VariableFactory.enumerated("n", 4,4, solver);
 		IntVar nVal = VariableFactory.bounded("N_CC", k,k, solver);
-		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver, PropagatorPriority.LINEAR);
+		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver);
 		g = (UndirectedGraphVar) gc.getGraph();
 		gc.addProperty(GraphProperty.K_NODES, nv);
 		Constraint[] cstrs = new Constraint[]{gc};

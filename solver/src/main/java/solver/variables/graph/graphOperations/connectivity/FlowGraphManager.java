@@ -82,11 +82,12 @@ public class FlowGraphManager {
 	 * and its flow bridges
 	 * @param r root node of the flowgraph
 	 * @param g strongly connected graph
+	 * @param version true=simple=O(m.log(n)) false=complex=O(alpha.m)
 	 */
-	public FlowGraphManager(int r, IDirectedGraph g){
+	public FlowGraphManager(int r, IDirectedGraph g, boolean version){
 		root = r;
 		graph = g;
-		simple = false;// enable a O(alpha.m) otherwise it is O(m.log(n))
+		simple = version;
 		initParams();
 		proceedFirstDFS();
 		findAllIdom();

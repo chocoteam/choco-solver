@@ -34,6 +34,7 @@ import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
+import solver.variables.graph.GraphVar;
 
 /**Predefined graph constraints
  * @author Jean-Guillaume Fages
@@ -48,29 +49,13 @@ public class GraphConstraintFactory {
 	 * @param vars successor variables
 	 * @param NVar number of anti arborescences
 	 * @param solver
-	 * @param storeThreshold
 	 * @return tree constraint
 	 */
-	public static GraphConstraint nTrees(IntVar[] vars, IntVar NVar, Solver solver, PropagatorPriority storeThreshold) {
+	public static GraphConstraint nTrees(IntVar[] vars, IntVar NVar, Solver solver) {
 		GraphRelation relation = GraphRelationFactory.indexOf(vars);
-		GraphConstraint tree = makeConstraint(vars, relation, solver, storeThreshold);
+		GraphConstraint tree = makeConstraint(vars, relation, solver);
 		tree.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, NVar);
 		return tree;
-	}
-	
-	/** directed path partitioning constraint
-	 * tree constraint + degree restriction
-	 * ends of paths are loops
-	 * @param vars successor variables
-	 * @param NVar number of paths (i.e. cardinality of the partition)
-	 * @param solver
-	 * @param storeThreshold
-	 * @return path partitioning constraint
-	 */
-	public static GraphConstraint nPaths(IntVar[] vars, IntVar NVar, Solver solver, PropagatorPriority storeThreshold) {
-		GraphConstraint path = nTrees(vars, NVar, solver, storeThreshold);
-		path.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
-		return path;
 	}
 	
 	/**There will be exactly NVal distinct values in the collection of variables (integers,vectors,tasks,sets...) vars 
@@ -78,12 +63,11 @@ public class GraphConstraintFactory {
 	 * @param vars variables (nodes in the graph), they must have the same type
 	 * @param NVal number of distinct values
 	 * @param solver 
-	 * @param storeThreshold
 	 * @return a generic nValue constraint NOT RESTRICTED TO INTEGERS
 	 */
-	public static GraphConstraint nValues(Variable[] vars, IntVar NVal, Solver solver, PropagatorPriority storeThreshold) {
+	public static GraphConstraint nValues(Variable[] vars, IntVar NVal, Solver solver) {
 		GraphRelation relation = GraphRelationFactory.equivalence(vars);
-		GraphConstraint nEq = makeConstraint(vars, relation, solver, storeThreshold);
+		GraphConstraint nEq = makeConstraint(vars, relation, solver);
 		nEq.addProperty(GraphProperty.K_CLIQUES, NVal);
 		return nEq;
 	}
@@ -91,36 +75,33 @@ public class GraphConstraintFactory {
 	/**There will be exactly NVal distinct integer values in the collection of integer variables vars 
 	 * @param vars variables (nodes in the graph)
 	 * @param NInt number of distinct integer values
-	 * @param solver 
-	 * @param storeThreshold
+	 * @param solver
 	 * @return classical nValues constraint (for integers)
 	 */
-	public static GraphConstraint nIntegers(IntVar[] vars, IntVar NInt, Solver solver, PropagatorPriority storeThreshold) {
-		return nValues(vars, NInt, solver, storeThreshold); // TODO find and add 1-dim properties
+	public static GraphConstraint nIntegers(IntVar[] vars, IntVar NInt, Solver solver) {
+		return nValues(vars, NInt, solver); // TODO find and add 1-dim properties
 	}
 	
 	/**There will be exactly NVal distinct vectors in the collection of vector variables vars 
 	 * @param vars variables (nodes in the graph)
 	 * @param NVect number of distinct vectors
-	 * @param solver 
-	 * @param storeThreshold
+	 * @param solver
 	 * @return nVectors constraint
 	 */
-	public static GraphConstraint nVectors(MetaVariable[] vars, IntVar NVect, Solver solver, PropagatorPriority storeThreshold) {
-		return nValues(vars, NVect, solver, storeThreshold);
+	public static GraphConstraint nVectors(MetaVariable[] vars, IntVar NVect, Solver solver) {
+		return nValues(vars, NVect, solver);
 	}
 	
 	/**There will be exactly NVar integer variables that take value in the collection values
 	 * @param vars integer variables (nodes in the graph)
 	 * @param NVar number of variables that take value in values
 	 * @param values collection of values
-	 * @param solver 
-	 * @param storeThreshold
+	 * @param solver
 	 * @return among constraint for integer variables
 	 */
-	public static GraphConstraint among(IntVar[] vars, IntVar NVar, int[] values, Solver solver, PropagatorPriority storeThreshold) {
+	public static GraphConstraint among(IntVar[] vars, IntVar NVar, int[] values, Solver solver) {
 		GraphRelation relation = GraphRelationFactory.member(vars, values);
-		GraphConstraint among = makeConstraint(vars, relation, solver, storeThreshold);
+		GraphConstraint among = makeConstraint(vars, relation, solver);
 		among.addProperty(GraphProperty.K_NODES, NVar);
 		return among;
 	}
@@ -128,11 +109,19 @@ public class GraphConstraintFactory {
 	/** Create a generic graph constraint
 	 * @param vars variables represented by nodes
 	 * @param relation meaning of an arc/edge
-	 * @param solver 
-	 * @param storeThreshold
+	 * @param solver
 	 * @return a generic graph constraint
 	 */
-	public static GraphConstraint makeConstraint(Variable[] vars, GraphRelation relation, Solver solver, PropagatorPriority storeThreshold) {
-		return new GraphConstraint (vars, solver, storeThreshold, relation);
+	public static GraphConstraint makeConstraint(Variable[] vars, GraphRelation relation, Solver solver) {
+		return new GraphConstraint (vars, solver, relation);
+	}
+
+	/** Create a generic graph constraint
+	 * @param g graph variable
+	 * @param solver
+	 * @return a generic graph constraint
+	 */
+	public static GraphConstraint makeConstraint(GraphVar g, Solver solver) {
+		return new GraphConstraint (g, solver);
 	}
 }
