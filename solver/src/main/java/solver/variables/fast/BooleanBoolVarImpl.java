@@ -412,6 +412,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(procC.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

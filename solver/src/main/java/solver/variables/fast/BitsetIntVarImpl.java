@@ -550,6 +550,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(procC.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

@@ -169,6 +169,7 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(procC.set(this, event, cause));
         var.contradiction(cause, event, message);
     }
 

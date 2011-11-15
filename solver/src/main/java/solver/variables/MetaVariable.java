@@ -92,6 +92,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 
 	@Override
 	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(procC.set(this, event, cause));
 		engine.fails(cause, this, message);
 	}
 
