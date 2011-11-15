@@ -59,11 +59,20 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] dist, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	/**
+	 * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
+	 *
+	 * @param graph
+	 * @param obj
+	 * @param costMatrix
+	 * @param constraint
+	 * @param solver
+	 * */
+	public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new Variable[]{graph,obj}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
 		sum = obj;
-		distMatrix = dist;
+		distMatrix = costMatrix;
 	}
 
 	//***********************************************************************************

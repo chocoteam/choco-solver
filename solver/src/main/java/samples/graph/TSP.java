@@ -182,11 +182,9 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void configureSolver() {
 		AbstractStrategy strategy = StrategyFactory.graphLexico(graph);
-//		AbstractStrategy strategy = StrategyFactory.graphStrategy(graph,new LexNode(graph),new MaxArc(graph), GraphStrategy.NodeArcPriority.ARCS);
-//		AbstractStrategy strategy = StrategyFactory.graphRandom(graph, 0);
 		solver.set(strategy);
 		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrArityP.get(), Policy.FIXPOINT));
-//		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}
 

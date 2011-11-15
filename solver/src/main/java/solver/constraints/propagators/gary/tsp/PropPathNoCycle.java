@@ -66,6 +66,13 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 	// CONSTRUCTORS
 	//***********************************************************************************
 
+	/**
+	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
+	 * runs in O(1) per instantiation event
+	 * @param graph
+	 * @param constraint
+	 * @param solver
+	 * */
 	public PropPathNoCycle(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;

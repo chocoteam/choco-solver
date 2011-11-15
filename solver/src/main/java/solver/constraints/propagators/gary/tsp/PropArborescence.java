@@ -46,6 +46,9 @@ import solver.variables.graph.graphOperations.connectivity.*;
 import java.util.BitSet;
 import java.util.LinkedList;
 
+/**
+ * Arborescence constraint (simplification from tree constraint)
+ * */
 public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
@@ -54,12 +57,17 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	DirectedGraphVar g;
 	int source;
-	int counter;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
+	/**Ensures that graph is an arborescence rooted in node source
+	 * @param graph
+	 * @param source root of the arborescence
+	 * @param constraint
+	 * @param solver
+	 * */
 	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
@@ -105,9 +113,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-//		if(counter==10)
 		filtering();
-//		counter++;
 	}
 
 	private void structuralPruning() throws ContradictionException {
@@ -171,6 +177,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 					if (in[node]>in[suc] && out[node]<out[suc]){
 						g.removeArc(node, suc, this,false);
 					}
+					// arc-dominator detection (redundant with 1-pred propagator
 //					else if(in[node]<in[suc] && out[node]>out[suc]){
 //						INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(suc);
 //						boolean arcDominator = true;
