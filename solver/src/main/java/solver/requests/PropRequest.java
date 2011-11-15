@@ -28,6 +28,7 @@
 package solver.requests;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
@@ -60,9 +61,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     protected IPropagationEngine engine;
 
-    protected int index = -1; // index of the request in the engine
-
-    protected int gIndex = -1; // index of the group in the engine
+    protected final int[] indices;
 
     protected boolean enqueued;
 
@@ -70,6 +69,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     public PropRequest(P propagator) {
         this.propagator = propagator;
         enqueued = false;
+        this.indices = new int[]{-1,-1,-1,-1};
     }
 
     @Override
@@ -103,38 +103,13 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     }
 
     @Override
-    public void setIndex(int idx) {
-        index = idx;
+    public int getIndex(int dim) {
+        return indices[dim];
     }
 
     @Override
-    public void setGroup(int gidx) {
-        gIndex = gidx;
-    }
-
-    @Override
-    public int getIndex() {
-        return index;
-    }
-
-    @Override
-    public int getGroup() {
-        return gIndex;
-    }
-
-    @Override
-    public int getIdxInVar() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setIdxInVar(int idx) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int getIdxVarInProp() {
-        throw new UnsupportedOperationException();
+    public void setIndex(int dim, int idx) {
+        indices[dim] = idx;
     }
 
     @Override

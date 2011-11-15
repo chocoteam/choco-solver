@@ -25,8 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.common.util.procedure;
+package choco.kernel.common;
 
-public interface Procedure1<E, A> extends Procedure<E> {
-    Procedure1 set(A a);
+/*
+* User : charles
+* Mail : cprudhom(a)emn.fr
+* Date : 17 févr. 2009
+* Since : Choco 2.0.1
+* Update : Choco 2.0.1
+*
+* Indexed object.
+*/
+public interface MultiDimensionIndex {
+
+    /**
+     * Define the index
+     */
+    void setIndex(int dim, int idx);
+
+    /**
+     * Return the index
+     *
+     * @return the index of the objet
+     * @param dim
+     */
+    int getIndex(int dim);
+
 }

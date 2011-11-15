@@ -24,15 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables;
 
-package choco.kernel.common.util.procedure;
+import choco.kernel.common.MultiDimensionIndex;
+import solver.ICause;
 
 /**
+ * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
+ * or instantiation.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 29 sept. 2010
+ * @since 14/11/11
  */
-public interface IntProcedure3<A, B, C> extends IntProcedure {
-    IntProcedure3 set(A a, B b, C c);
+public interface IVariableMonitor<V extends Variable> extends MultiDimensionIndex {
+
+    /**
+     * Operations to execute before updating the domain variable
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
+     */
+    void beforeUpdate(V var, EventType evt, ICause cause);
+
+    /**
+     * Operations to execute after updating the domain variable
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
+     */
+    void afterUpdate(V var, EventType evt, ICause cause);
+
+    /**
+     * Operations to execute if a contradiction occurs during variable modification
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
+     */
+    void contradict(V var, EventType evt, ICause cause);
+
 }

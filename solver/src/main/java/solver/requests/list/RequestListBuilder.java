@@ -27,6 +27,9 @@
 
 package solver.requests.list;
 
+import choco.kernel.common.util.objects.HalfBactrackableList;
+import choco.kernel.common.util.objects.IList;
+import choco.kernel.common.util.objects.RequestArrayList;
 import choco.kernel.memory.IEnvironment;
 import solver.requests.IRequest;
 
@@ -39,7 +42,7 @@ import solver.requests.IRequest;
  */
 public class RequestListBuilder {
 
-    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: RequestImmutableArrayList, 2: RequestTypedImmutableArrayList, ...
+    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: HalfBactrackableList
 
     protected RequestListBuilder() {
     }
@@ -48,17 +51,24 @@ public class RequestListBuilder {
      * Builds and returns the preset IRequestList object.
      *
      * @param environment bracktrackable environment
-     * @param <R>         type of request
+     * @param dim         dimension to set and get index
+     * @param <R>         type of element
      * @return a implementation of IRequestList
      */
-    public static <R extends IRequest> IRequestList<R> preset(IEnvironment environment) {
+    public static <R extends IRequest> IList<R> preset(IEnvironment environment, int dim) {
         switch (_DEFAULT) {
+            case 1:
+                return halfBacktracakbleList(environment, dim);
             default:
-                return arraylist(environment);
+                return arraylist(environment, dim);
         }
     }
 
-    public static <R extends IRequest> IRequestList<R> arraylist(IEnvironment environment) {
-        return new RequestArrayList<R>(environment);
+    public static <R extends IRequest> IList<R> arraylist(IEnvironment environment, int dim) {
+        return new RequestArrayList<R>(environment, dim);
+    }
+
+    public static <R extends IRequest> IList<R> halfBacktracakbleList(IEnvironment environment, int dim) {
+        return new HalfBactrackableList<R>(environment, dim);
     }
 }

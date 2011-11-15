@@ -180,7 +180,7 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
             this.map2idx = new TObjectIntHashMap<IntVar>();
             for (int i = 0; i < pmcr.nbRequests(); i++) {
                 IRequest r = pmcr.getRequest(0);
-                map2idx.put((IntVar) r.getVariable(), r.getIdxVarInProp());
+                map2idx.put((IntVar) r.getVariable(), r.getIndex(IRequest.VAR_IN_PROP));
             }
         }
 

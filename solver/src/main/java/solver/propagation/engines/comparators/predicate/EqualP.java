@@ -51,7 +51,7 @@ public class EqualP implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < prop.nbRequests(); j++) {
-                int idx = prop.getRequest(j).getIndex();
+                int idx = prop.getRequest(j).getIndex(IRequest.IN_GROUP);
                 tmp.add(idx);
             }
             cached = tmp.toArray();

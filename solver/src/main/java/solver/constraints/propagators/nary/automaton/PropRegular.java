@@ -28,7 +28,7 @@ package solver.constraints.propagators.nary.automaton;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
 import gnu.trove.TIntStack;
 import solver.Solver;
@@ -108,7 +108,7 @@ public class PropRegular extends Propagator<IntVar> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropRegular p;
         private int idxVar;
@@ -118,7 +118,7 @@ public class PropRegular extends Propagator<IntVar> {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

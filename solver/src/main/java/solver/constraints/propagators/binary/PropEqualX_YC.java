@@ -29,7 +29,7 @@ package solver.constraints.propagators.binary;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -171,7 +171,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             return ESat.UNDEFINED;
     }
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropEqualX_YC p;
         private int idxVar;
@@ -181,7 +181,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

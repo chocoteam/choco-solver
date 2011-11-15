@@ -27,6 +27,7 @@
 
 package solver.requests;
 
+import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -48,7 +49,10 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 5 oct. 2010
  */
-public interface IRequest<V extends Variable> extends Serializable, IQueable {
+public interface IRequest<V extends Variable> extends Serializable, IQueable, MultiDimensionIndex {
+
+    public static final int VAR_IN_PROP = 0, IN_VAR = 1, GROUP_ID = 2, IN_GROUP = 3;
+
 
     /**
      * Return the propagator declared in <code>this</code>
@@ -63,31 +67,6 @@ public interface IRequest<V extends Variable> extends Serializable, IQueable {
      * @return the variable
      */
     V getVariable();
-
-    void setIndex(int idx);
-
-    void setGroup(int gidx);
-
-    int getIndex();
-
-    int getGroup();
-
-    /**
-     * Return the index of <code>this</code> in the requests list of the variable
-     *
-     * @return index of <code>this</code> in the list of requests of the variable
-     */
-    int getIdxInVar();
-
-    /**
-     * Update the index of <code>this</code> in the list of requests of the variable to <code>idx</code>
-     *
-     * @param idx new index
-     */
-    void setIdxInVar(int idx);
-
-
-    int getIdxVarInProp();
 
     /**
      * Return the propagation conditions mask of the declared propagator
