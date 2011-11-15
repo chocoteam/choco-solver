@@ -179,6 +179,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      */
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+        requests.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
@@ -382,7 +383,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            requests.forEach(procA.set(this, event, cause));
+            requests.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
     }
@@ -417,7 +418,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(procC.set(this, event, cause));
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

@@ -35,8 +35,6 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-import static solver.variables.AbstractVariable.*;
-
 /**
  * View for A+B, where A and B are IntVar or views, ensure bound consistency
  * <br/>
@@ -63,6 +61,7 @@ public final class IntervalXYSumView extends AbstractSumView {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        requests.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;

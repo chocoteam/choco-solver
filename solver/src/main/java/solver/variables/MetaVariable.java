@@ -66,7 +66,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            requests.forEach(procA.set(this, event, cause));
+            requests.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
     }
@@ -101,7 +101,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(procC.set(this, event, cause));
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

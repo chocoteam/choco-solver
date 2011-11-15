@@ -32,8 +32,6 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-import static solver.variables.AbstractVariable.MSG_EMPTY;
-
 /**
  * declare an IntVar based on X and Y, such X + Y
  * <br/>
@@ -48,7 +46,7 @@ import static solver.variables.AbstractVariable.MSG_EMPTY;
  * @author Charles Prud'homme
  * @since 01/09/11
  */
-public abstract class AbstractSumView extends AbstractView {
+public abstract class AbstractSumView extends AbstractViewWithDomain {
 
     public AbstractSumView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);

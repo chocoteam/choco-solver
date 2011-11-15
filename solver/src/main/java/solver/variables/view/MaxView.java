@@ -38,8 +38,6 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-import static solver.variables.AbstractVariable.*;
-
 /**
  * declare an IntVar based on X and Y, such max(X,Y)
  * <br/>
@@ -50,7 +48,7 @@ import static solver.variables.AbstractVariable.*;
  * @author Charles Prud'homme
  * @since 01/09/11
  */
-public class MaxView extends AbstractView {
+public class MaxView extends AbstractViewWithDomain {
 
 
     public MaxView(IntVar a, IntVar b, Solver solver) {

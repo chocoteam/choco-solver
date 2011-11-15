@@ -286,7 +286,6 @@ public class ConstantView extends AbstractVariable implements IntVar {
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         this.empty.set(true);
-        requests.forEach(procC.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

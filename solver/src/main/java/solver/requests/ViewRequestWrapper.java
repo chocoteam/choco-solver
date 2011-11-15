@@ -27,10 +27,12 @@
 package solver.requests;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
 /**
@@ -39,12 +41,12 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 02/09/11
  */
-public class ViewRequestWrapper implements IRequest<IntVar> {
+public class ViewRequestWrapper implements IRequest<IntVar>, IVariableMonitor<IntVar> {
 
-    final IRequest<IntVar> original;
+    final AbstractRequest<IntVar, Propagator<IntVar>> original;
     final Modifier modifier;
 
-    public ViewRequestWrapper(IRequest<IntVar> original, Modifier modifier) {
+    public ViewRequestWrapper(AbstractRequest original, Modifier modifier) {
         this.original = original;
         this.modifier = modifier;
     }
@@ -82,6 +84,21 @@ public class ViewRequestWrapper implements IRequest<IntVar> {
     @Override
     public void update(EventType eventType) {
         original.update(modifier.update(original.getVariable(), eventType));
+    }
+
+    @Override
+    public void beforeUpdate(IntVar var, EventType evt, ICause cause) {
+        original.beforeUpdate(var, evt, cause);
+    }
+
+    @Override
+    public void afterUpdate(IntVar var, EventType evt, ICause cause) {
+        original.afterUpdate(var, evt, cause);
+    }
+
+    @Override
+    public void contradict(IntVar var, EventType evt, ICause cause) {
+        original.contradict(var, evt, cause);
     }
 
     @Override

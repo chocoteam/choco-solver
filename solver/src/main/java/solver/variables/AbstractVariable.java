@@ -62,6 +62,8 @@ public abstract class AbstractVariable implements Serializable {
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
+    private static final String NO_NAME = "";
+
     /**
      * Reference to the solver containing this variable.
      */
@@ -85,13 +87,15 @@ public abstract class AbstractVariable implements Serializable {
 
     protected final IPropagationEngine engine;
 
-    protected final NotifyProcedure procN = new NotifyProcedure();
-
-    protected final OnBeforeProc procB = new OnBeforeProc();
-    protected final OnAfterProc procA = new OnAfterProc();
-    protected final OnContradiction procC = new OnContradiction();
+    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+    protected final OnAfterProc afterModification = new OnAfterProc();
+    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
+
+    protected AbstractVariable(Solver solver) {
+        this(NO_NAME, solver);
+    }
 
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
