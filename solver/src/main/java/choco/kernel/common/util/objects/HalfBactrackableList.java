@@ -33,13 +33,15 @@ import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
 
 /**
- * [<--inactive-->|<--active--->|<---entailed-->]<br/>
+ * STATIC.......[<--inactive-->|<--active--->|<---entailed-->]<br/>
+ * OFFSET = 100000<br/>
+ * DYNAMIC....[<--inactive-->|<--active--->|<---entailed-->]<br/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public class HalfBactrackableList<E extends MultiDimensionIndex> {
+public class HalfBactrackableList<E extends MultiDimensionIndex> implements IList<E> {
 
     private static final int OFFSET = 100000;
     private static final int SIZE = 8;
@@ -68,12 +70,105 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         DIMENSION = dim;
     }
 
+    @Override
+    public void add(E element, boolean dynamic) {
+        if (dynamic) {
+            dAdd(element);
+        } else {
+            sAdd(element);
+        }
+    }
+
     public void setActive(E element) {
         if (element.getIndex(DIMENSION) < OFFSET) {
             sActivate(element);
         } else {
             dActivate(element);
         }
+    }
+
+    public void setPassive(E element) {
+        if (element.getIndex(DIMENSION) < OFFSET) {
+            sPassivate(element);
+        } else {
+            dPassivate(element);
+        }
+    }
+
+    public void remove(E element) {
+        if (element.getIndex(DIMENSION) < OFFSET) {
+            sRemove(element);
+        } else {
+            dRemove(element);
+        }
+    }
+
+    @Override
+    public int size() {
+        return sIdx + dIdx.get();
+    }
+
+    @Override
+    public int cardinality() {
+        return sFirstPassive.get() + dFirstPassive.get();
+    }
+
+    @Override
+    public E get(int i) {
+        if (i < OFFSET) {
+            return sElements[i];
+        } else {
+            return dElements[i];
+        }
+    }
+
+    public void forEach(Procedure proc) throws ContradictionException {
+        int first = sFirstActive.get();
+        int last = sFirstPassive.get();
+        for (int a = first; a < last; a++) {
+            proc.execute(sElements[a]);
+        }
+        first = dFirstActive.get();
+        last = dFirstPassive.get();
+        for (int a = first; a < last; a++) {
+            proc.execute(dElements[a]);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void sAdd(E element) {
+        if (sElements == null) {
+            sElements = (E[]) new MultiDimensionIndex[SIZE];
+        }
+        if (sElements.length <= sIdx) {
+            E[] tmp = sElements;
+            sElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
+            System.arraycopy(tmp, 0, sElements, 0, sIdx);
+        }
+        element.setIndex(DIMENSION, sIdx);
+        sElements[sIdx++] = element;
+        this.sFirstActive.add(1);
+        this.sFirstPassive.add(1);
+    }
+
+    private void dAdd(E element) {
+        if (dElements == null) {
+            dElements = (E[]) new MultiDimensionIndex[SIZE];
+            world = dIdx.getEnvironment().getWorldIndex();
+        }
+        int idx = dIdx.get();
+        if (dElements.length <= idx) {
+            E[] tmp = dElements;
+            dElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
+            System.arraycopy(tmp, 0, dElements, 0, idx);
+        }
+        element.setIndex(DIMENSION, idx + OFFSET);
+        dElements[idx++] = element;
+        dIdx.add(1);
+        this.dFirstActive.add(1);
+        this.dFirstPassive.add(1);
     }
 
     private void sActivate(E element) {
@@ -90,8 +185,9 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
         }
-        sFirstActive.add(1);
+        sFirstActive.add(-1);
     }
+
 
     private void dActivate(E element) {
         int first = this.dFirstActive.get();
@@ -110,15 +206,6 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         dFirstActive.add(-1);
     }
 
-
-    public void setPassive(E element) {
-        if (element.getIndex(DIMENSION) < OFFSET) {
-            sPassivate(element);
-        } else {
-            dPassivate(element);
-        }
-    }
-
     private void sPassivate(E element) {
         int last = this.sFirstPassive.get();
         int i = element.getIndex(DIMENSION);
@@ -130,7 +217,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
             sElements[i] = tmp1;
             sElements[i].setIndex(DIMENSION, i);
         }
-        sFirstPassive.add(1);
+        sFirstPassive.add(-1);
 
     }
 
@@ -146,48 +233,6 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
             dElements[i].setIndex(DIMENSION, i + OFFSET);
         }
         dFirstPassive.add(-1);
-    }
-
-
-    public void addStatic(E element) {
-        if (sElements == null) {
-            sElements = (E[]) new MultiDimensionIndex[SIZE];
-        }
-        if (sElements.length >= sIdx) {
-            E[] tmp = sElements;
-            sElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
-            System.arraycopy(tmp, 0, sElements, 0, sIdx);
-        }
-        element.setIndex(DIMENSION, sIdx);
-        sElements[sIdx++] = element;
-        this.sFirstActive.add(1);
-        this.sFirstPassive.add(1);
-    }
-
-    public void addDynamic(E element) {
-        if (dElements == null) {
-            dElements = (E[]) new MultiDimensionIndex[SIZE];
-            world = dIdx.getEnvironment().getWorldIndex();
-        }
-        int idx = dIdx.get();
-        if (dElements.length >= idx) {
-            E[] tmp = dElements;
-            dElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
-            System.arraycopy(tmp, 0, dElements, 0, idx);
-        }
-        element.setIndex(DIMENSION, idx + OFFSET);
-        dElements[idx++] = element;
-        dIdx.add(1);
-        this.dFirstActive.add(1);
-        this.dFirstPassive.add(1);
-    }
-
-    public void remove(E element) {
-        if (element.getIndex(DIMENSION) < OFFSET) {
-            sRemove(element);
-        } else {
-            dRemove(element);
-        }
     }
 
     private void sRemove(E e) {
@@ -219,16 +264,5 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
             this.dFirstActive.add(-1);
         }
         this.dFirstPassive.add(-1);
-    }
-
-
-    public void forEach(Procedure proc) throws ContradictionException {
-        for (int i = 0; i < sIdx; i++) {
-            proc.execute(sElements[i]);
-        }
-        int idx = dIdx.get();
-        for (int i = 0; i < idx; i++) {
-            proc.execute(dElements[i]);
-        }
     }
 }

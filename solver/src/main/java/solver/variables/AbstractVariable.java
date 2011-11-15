@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
 import com.sun.istack.internal.NotNull;
 import solver.Cause;
@@ -36,7 +37,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
@@ -73,9 +73,8 @@ public abstract class AbstractVariable implements Serializable {
     /**
      * List of requests
      */
-    protected final IRequestList<IRequest> requests;
+    protected final IList<IRequest> requests;
 
-//    protected final HalfBactrackableList<IVariableMonitor> monitors;
 
     protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
@@ -87,6 +86,8 @@ public abstract class AbstractVariable implements Serializable {
 
     protected final IPropagationEngine engine;
 
+    protected final NotifyProcedure procN = new NotifyProcedure();
+
     protected final OnBeforeProc procB = new OnBeforeProc();
     protected final OnAfterProc procA = new OnAfterProc();
     protected final OnContradiction procC = new OnContradiction();
@@ -97,9 +98,8 @@ public abstract class AbstractVariable implements Serializable {
         this.name = name;
         this.solver = solver;
         this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment());
+        this.requests = RequestListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         views = new IView[2];
-//        monitors = new HalfBactrackableList<IVariableMonitor>(solver.getEnvironment(), IRequest.IN_VAR);
     }
 
     public abstract IDelta getDelta();
@@ -134,7 +134,7 @@ public abstract class AbstractVariable implements Serializable {
 
     public void notifyPropagators(EventType e, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & e.mask) != 0) {
-            requests.notifyButCause(cause, e, getDelta());
+            requests.forEach(procN.set(cause, e, getDelta()));
         }
         notifyViews(e, cause);
     }
@@ -154,24 +154,12 @@ public abstract class AbstractVariable implements Serializable {
     }
 
     public void addRequest(IRequest request) {
-        requests.addRequest(request);
+        requests.add(request, false);
     }
 
     public void deleteRequest(IRequest request) {
-        requests.deleteRequest(request);
+        requests.remove(request);
     }
-
-    /*public void addMonitor(IVariableMonitor monitor, boolean dynamic) {
-        if (dynamic) {
-            monitors.addDynamic(monitor);
-        } else {
-            monitors.addStatic(monitor);
-        }
-    }
-
-    public void deleteMonitor(IVariableMonitor monitor) {
-        monitors.remove(monitor);
-    }*/
 
     public void subscribeView(IView view) {
         if (vIdx == views.length) {
@@ -182,7 +170,7 @@ public abstract class AbstractVariable implements Serializable {
         views[vIdx++] = view;
     }
 
-    public IRequestList getRequests() {
+    public IList getRequests() {
         return requests;
     }
 
