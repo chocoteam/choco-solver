@@ -33,6 +33,6 @@ package choco.kernel.common.util.procedure;
  * @author Charles Prud'homme
  * @since 29 sept. 2010
  */
-public interface TernaryProcedure<E, A, B, C> extends Procedure<E> {
-    TernaryProcedure set(A a, B b, C c);
+public interface Procedure3<E, A, B, C> extends Procedure<E> {
+    Procedure3 set(A a, B b, C c);
 }
