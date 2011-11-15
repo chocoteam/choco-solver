@@ -33,6 +33,7 @@ import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
 
 /**
+ * [<--inactive-->|<--active--->|<---entailed-->]<br/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -45,8 +46,8 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
 
 
     protected int sIdx;  // index of static objects
-    protected int sFirstActive;
-    protected int sFirstPassive;
+    protected final IStateInt sFirstActive;
+    protected final IStateInt sFirstPassive;
     protected final IStateInt dIdx; // index of dynamic objects
     protected final IStateInt dFirstActive;
     protected final IStateInt dFirstPassive;
@@ -58,8 +59,10 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
 
 
     public HalfBactrackableList(IEnvironment environment, int dim) {
-        sIdx = sFirstActive = sFirstPassive = 0;
+        sIdx = 0;
         dIdx = environment.makeInt();
+        sFirstActive = environment.makeInt();
+        sFirstPassive = environment.makeInt();
         dFirstActive = environment.makeInt();
         dFirstPassive = environment.makeInt();
         DIMENSION = dim;
@@ -74,7 +77,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
     }
 
     private void sActivate(E element) {
-        int first = this.sFirstActive;
+        int first = this.sFirstActive.get();
         int i = element.getIndex(DIMENSION);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
@@ -87,7 +90,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
         }
-        sFirstActive++;
+        sFirstActive.add(1);
     }
 
     private void dActivate(E element) {
@@ -117,7 +120,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
     }
 
     private void sPassivate(E element) {
-        int last = this.sFirstPassive;
+        int last = this.sFirstPassive.get();
         int i = element.getIndex(DIMENSION);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
@@ -127,7 +130,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
             sElements[i] = tmp1;
             sElements[i].setIndex(DIMENSION, i);
         }
-        sFirstPassive++;
+        sFirstPassive.add(1);
 
     }
 
@@ -157,8 +160,8 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         }
         element.setIndex(DIMENSION, sIdx);
         sElements[sIdx++] = element;
-        this.sFirstActive++;
-        this.sFirstPassive++;
+        this.sFirstActive.add(1);
+        this.sFirstPassive.add(1);
     }
 
     public void addDynamic(E element) {
@@ -196,10 +199,10 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> {
         for (int j = i; j < sElements.length; j++) {
             sElements[j].setIndex(DIMENSION, j);
         }
-        if (i < sFirstActive) {
-            this.sFirstActive--;
+        if (i < sFirstActive.get()) {
+            this.sFirstActive.add(-1);
         }
-        this.sFirstPassive--;
+        this.sFirstPassive.add(-1);
     }
 
     private void dRemove(E e) {
