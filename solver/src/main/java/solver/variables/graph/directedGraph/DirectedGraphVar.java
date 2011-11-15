@@ -73,7 +73,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 			}
 			EventType e = EventType.REMOVEARC;
-			notifyPropagators(e, cause);
+			notifyMonitors(e, cause);
 			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
 				removeNode(x, cause, informCause);
 			}
@@ -93,7 +93,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 					delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 				}
 				EventType e = EventType.ENFORCEARC;
-				notifyPropagators(e, cause);
+				notifyMonitors(e, cause);
 				return true;
 			}return false;
 		}

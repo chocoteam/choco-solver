@@ -29,7 +29,6 @@ package solver.variables;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
-import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -132,22 +131,15 @@ public abstract class AbstractVariable implements Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public void notifyPropagators(EventType e, @NotNull ICause cause) throws ContradictionException {
-        if ((modificationEvents & e.mask) != 0) {
-            requests.forEach(procN.set(cause, e, getDelta()));
-        }
-        notifyViews(e, cause);
-    }
-
-    public void notifyViews(EventType e, ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(e.mask);
+                views[i].backPropagate(event.mask);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(e.mask);
+                    views[i].backPropagate(event.mask);
                 }
             }
         }

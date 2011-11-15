@@ -28,6 +28,7 @@
 package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
+import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -113,7 +114,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                 delta.getNodeRemovalDelta().add(x);
             }
             EventType e = EventType.REMOVENODE;
-            notifyPropagators(e, cause);
+            notifyMonitors(e, cause);
             return true;
         }
         return false;
@@ -127,7 +128,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                     delta.getNodeEnforcingDelta().add(x);
                 }
                 EventType e = EventType.ENFORCENODE;
-                notifyPropagators(e, cause);
+                notifyMonitors(e, cause);
                 INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
                 if (neig.neighborhoodSize() == 1) {
                     enforceArc(x, neig.getFirstElement(), cause, informCause);
@@ -207,6 +208,13 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         IRequest<GraphVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(procA.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     @Override

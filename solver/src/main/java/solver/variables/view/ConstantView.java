@@ -271,7 +271,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
     }
 
     @Override

@@ -132,7 +132,7 @@ public final class BitsetXYSumView extends AbstractSumView {
                             cause = Cause.Null;
                         }
                     }
-                    this.notifyPropagators(e, cause);
+                    this.notifyMonitors(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
                         this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
@@ -160,7 +160,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 //            VALUES.clear(v - OFFSET);
 //        }
 //        if (change) {
-//            this.notifyPropagators(EventType.REMOVE, cause);
+//            this.notifyMonitors(EventType.REMOVE, cause);
 //            TODO: explain?
 //        }
 //        return change;
@@ -199,7 +199,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             filterOnLeq(cause, value);
             filterOnGeq(cause, value);
 
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -239,7 +239,7 @@ public final class BitsetXYSumView extends AbstractSumView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
 
                 return change;
             }
@@ -280,7 +280,7 @@ public final class BitsetXYSumView extends AbstractSumView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return change;
             }
         }
@@ -521,10 +521,10 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
                 if (old_size > 0) {
-                    notifyPropagators(EventType.INSTANTIATE, this);
+                    notifyMonitors(EventType.INSTANTIATE, this);
                 }
             } else {
-                notifyPropagators(e, this);
+                notifyMonitors(e, this);
             }
         }
     }

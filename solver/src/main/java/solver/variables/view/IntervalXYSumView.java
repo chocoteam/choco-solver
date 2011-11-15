@@ -98,7 +98,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
             } else if (SIZE.get() == 0) {
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
@@ -136,7 +136,7 @@ public final class IntervalXYSumView extends AbstractSumView {
             filterOnLeq(cause, value);
             filterOnGeq(cause, value);
 
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -168,7 +168,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
 
                 return true;
 
@@ -201,7 +201,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
             }
         }
@@ -338,9 +338,9 @@ public final class IntervalXYSumView extends AbstractSumView {
                 filterOnLeq(this, iub);
             }
             if (ilb == iub) {
-                notifyPropagators(EventType.INSTANTIATE, this);
+                notifyMonitors(EventType.INSTANTIATE, this);
             } else {
-                notifyPropagators(e, this);
+                notifyMonitors(e, this);
             }
         }
     }

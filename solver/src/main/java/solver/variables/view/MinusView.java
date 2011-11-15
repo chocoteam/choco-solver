@@ -158,20 +158,23 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
-        if (eventType.mask == 4 || eventType.mask == 8) {
-            var.notifyPropagators(eventType.mask == 4 ? EventType.DECUPP : EventType.INCLOW, o);
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        if (event == EventType.INCLOW || event == EventType.DECUPP) {
+            var.notifyMonitors(event == EventType.INCLOW ? EventType.DECUPP : EventType.INCLOW, cause);
         } else {
-            var.notifyPropagators(eventType, o);
+            var.notifyMonitors(event, cause);
         }
     }
 
     @Override
     public Explanation explain(VariableState what) {
         switch (what) {
-            case UB: return var.explain(VariableState.LB);
-            case LB: return var.explain(VariableState.UB);
-            default: return var.explain(what);
+            case UB:
+                return var.explain(VariableState.LB);
+            case LB:
+                return var.explain(VariableState.UB);
+            default:
+                return var.explain(what);
         }
     }
 

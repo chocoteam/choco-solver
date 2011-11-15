@@ -188,12 +188,12 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     }
 
 
-    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
-        requests.forEach(procN.set(cause, e, getDelta()));
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        requests.forEach(procN.set(cause, event, getDelta()));
     }
 
     @Override
-    public void notifyViews(EventType e, ICause o) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

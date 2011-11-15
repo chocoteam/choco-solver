@@ -108,9 +108,9 @@ public class MaxView extends AbstractView {
             }
             if (change) {
                 if (ilb == iub) {
-                    notifyPropagators(EventType.INSTANTIATE, this);
+                    notifyMonitors(EventType.INSTANTIATE, this);
                 } else {
-                    notifyPropagators(e, this);
+                    notifyMonitors(e, this);
                 }
             }
         }
@@ -163,7 +163,7 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
             } else if (SIZE.get() == 0) {
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
@@ -207,7 +207,7 @@ public class MaxView extends AbstractView {
                 A.instantiateTo(value, this, false);
             }
 
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -244,7 +244,7 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
 
             }
@@ -277,7 +277,7 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
             }
         }

@@ -153,8 +153,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
-        var.notifyPropagators(eventType, o);
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        var.notifyMonitors(event, cause);
     }
 
     @Override

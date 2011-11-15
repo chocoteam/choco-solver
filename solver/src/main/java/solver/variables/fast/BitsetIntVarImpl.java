@@ -32,6 +32,7 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
+import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -188,7 +189,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                             cause = Cause.Null;
                         }
                     }
-                    this.notifyPropagators(e, cause);
+                    this.notifyMonitors(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
                         solver.getExplainer().removeValue(this, value, antipromo);
@@ -273,7 +274,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             if (VALUES.isEmpty()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -335,7 +336,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     }
                 }
                 assert (change);
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
@@ -397,7 +398,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     }
                 }
                 assert (change);
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
@@ -518,6 +519,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         IRequest<IntVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(procA.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

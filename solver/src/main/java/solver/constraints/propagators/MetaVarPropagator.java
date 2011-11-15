@@ -58,7 +58,7 @@ public class MetaVarPropagator extends Propagator {
 
 	@Override
 	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyPropagators(EventType.META, this);
+		meta.notifyMonitors(EventType.META, this);
 	}
 
 	@Override
