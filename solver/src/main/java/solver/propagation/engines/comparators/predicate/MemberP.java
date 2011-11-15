@@ -62,7 +62,7 @@ public class MemberP implements Predicate {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < props.length; i++) {
                 for (int k = 0; k < props[i].nbRequests(); k++) {
-                    int idx = props[i].getRequest(k).getIndex();
+                    int idx = props[i].getRequest(k).getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
             }

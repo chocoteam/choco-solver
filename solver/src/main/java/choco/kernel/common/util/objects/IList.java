@@ -25,50 +25,51 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests.list;
+package choco.kernel.common.util.objects;
 
-import solver.ICause;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.delta.IDelta;
+import choco.kernel.common.MultiDimensionIndex;
+import choco.kernel.common.util.procedure.Procedure;
+import solver.exception.ContradictionException;
 
 import java.io.Serializable;
 
 /**
  *
- * A IRequestList is a container of IRequest objects.
- * A request can change of state (from active to passive) during a propagation step, this container must consider
- * this information. Restoring the previous state of requests must be done upon backtracking.
+ * A IList is a container of elements.
+ * An element in this list has particular behavior: it can change of state (from active to passive),
+ * this container must consider this information.
+ * Restoring the previous state of requests must be done upon backtracking.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public interface IRequestList<R extends IRequest> extends Serializable{
+public interface IList<E extends MultiDimensionIndex> extends Serializable{
 
     /**
      * Add a new <code>request</code>
-     * @param request to add
+     * @param element to add
+     * @param dynamic
      */
-    void addRequest(R request);
+    void add(E element, boolean dynamic);
 
     /**
-     * Activate a request
-     * @param request the modified element
+     * Activate a element
+     * @param element the modified element
      */
-    void setActive(R request);
+    void setActive(E element);
 
     /**
      * Desactivate a request
-     * @param request the modified element
+     * @param element the modified element
      */
-    void setPassive(R request);
+    void setPassive(E element);
 
     /**
      * Permanently delete <code>request</code>
-     * @param request to delete
+     * @param element to delete
      */
-    void deleteRequest(IRequest request);
+    void remove(E element);
 
     /**
      * Returns the total number of element contained.
@@ -83,13 +84,9 @@ public interface IRequestList<R extends IRequest> extends Serializable{
     int cardinality();
 
     /**
-     * Notifies the active requests of an event occuring on the variable declaring <code>this</code>.
-     * This method loops over active requests matching the event to update it, avoiding the causing request, if exists.
-     * @param cause cause of the notification
-     * @param event event implication of the cause
-     * @param delta removed values implied by the event
+     * This method loops over active requests matching the event to execute the procedure in parameter.
      */
-    void notifyButCause(ICause cause, EventType event, IDelta delta);
+    void forEach(Procedure proc) throws ContradictionException;
 
-    R get(int i);
+    E get(int i);
 }
