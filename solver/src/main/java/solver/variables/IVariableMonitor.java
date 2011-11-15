@@ -24,29 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.variables;
 
-package choco.kernel.common;
+import choco.kernel.common.MultiDimensionIndex;
+import solver.ICause;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 17 févr. 2009
-* Since : Choco 2.0.1
-* Update : Choco 2.0.1
-*
-* Index of an object.
-*
-* BEWARE : IT IS NOT SIMILAR TO HASHCODE!!!
-*
-* Index can change from one execution to another one. HashCode should not!
-*/
-public interface IIndex {
-    
+/**
+ * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
+ * or instantiation.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 14/11/11
+ */
+public interface IVariableMonitor<V extends Variable> extends MultiDimensionIndex {
+
     /**
-     * Unique index 
-     * (Different from hashCode, can change from one execution to another one) 
-     * @return the indice of the objet
+     * Operations to execute before updating the domain variable
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
      */
-    long getIndex();
+    void beforeUpdate(V var, EventType evt, ICause cause);
+
+    /**
+     * Operations to execute after updating the domain variable
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
+     */
+    void afterUpdate(V var, EventType evt, ICause cause);
+
+    /**
+     * Operations to execute if a contradiction occurs during variable modification
+     *
+     * @param var   variable concerned
+     * @param evt   modification event
+     * @param cause origin of the modification
+     */
+    void contradict(V var, EventType evt, ICause cause);
 
 }

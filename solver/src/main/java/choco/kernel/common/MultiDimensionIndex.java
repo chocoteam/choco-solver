@@ -25,47 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.comparators.predicate;
+package choco.kernel.common;
 
-import gnu.trove.TIntHashSet;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.requests.IRequest;
+/*
+* User : charles
+* Mail : cprudhom(a)emn.fr
+* Date : 17 févr. 2009
+* Since : Choco 2.0.1
+* Update : Choco 2.0.1
+*
+* Indexed object.
+*/
+public interface MultiDimensionIndex {
 
-/**
- * Prop.priority <= threshold (inclusive)
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 04/04/11
- */
-public class PriorityPAndLight implements Predicate {
+    /**
+     * Define the index
+     */
+    void setIndex(int dim, int idx);
 
-    int[] cached;
+    /**
+     * Return the index
+     *
+     * @return the index of the objet
+     * @param dim
+     */
+    int getIndex(int dim);
 
-    final PropagatorPriority threshold;
-
-    PriorityPAndLight(PropagatorPriority threshold) {
-        this.threshold = threshold;
-    }
-
-    @Override
-    public boolean eval(IRequest request) {
-        return request.getPropagator().getPriority().priority >= threshold.priority && request.getVariable() != null;
-    }
-
-    @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < all.length; i++) {
-                if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
-                    if (all[i].getVariable() == null) {
-                        tmp.add(all[i].getIndex(IRequest.IN_GROUP));
-                    }
-                }
-            }
-            cached = tmp.toArray();
-        }
-        return cached;
-    }
 }

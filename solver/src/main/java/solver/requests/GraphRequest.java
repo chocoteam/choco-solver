@@ -117,7 +117,7 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
         this.evtmask = 0; // and clean up mask
         filter++;
         assert (propagator.isActive());
-        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+        propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
     }
 
     private void addAll(EventType e) {
@@ -152,7 +152,7 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
     @Override
     public void update(EventType e) {
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             addAll(e);
             engine.update(this);
