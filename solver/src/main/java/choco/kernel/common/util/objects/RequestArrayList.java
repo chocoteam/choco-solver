@@ -25,18 +25,13 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests.list;
+package choco.kernel.common.util.objects;
 
+import choco.kernel.common.MultiDimensionIndex;
+import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import com.sun.istack.internal.NotNull;
-import solver.Cause;
-import solver.ICause;
-import solver.constraints.propagators.Propagator;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.delta.IDelta;
+import solver.exception.ContradictionException;
 
 /**
  * [<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -44,30 +39,33 @@ import solver.variables.delta.IDelta;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class RequestArrayList<R extends IRequest> implements IRequestList<R> {
+public final class RequestArrayList<E extends MultiDimensionIndex> implements IList<E> {
 
-    protected R[] requests;
+    protected E[] elements;
 
     protected IStateInt firstActive;
     protected IStateInt firstPassive;
 
-    protected RequestArrayList(IEnvironment environment) {
-        requests = (R[]) new IRequest[0];
+    protected final int DIMENSION;
+
+    public RequestArrayList(IEnvironment environment, int dim) {
+        elements = (E[]) new MultiDimensionIndex[0];
         firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
+        this.DIMENSION = dim;
     }
 
     @Override
-    public void setActive(R request) {
+    public void setActive(E element) {
         int first = this.firstActive.get();
-        int i = request.getIndex(IRequest.IN_VAR);
+        int i = element.getIndex(DIMENSION);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
-            R tmp1 = requests[--first];
-            requests[first] = requests[i];
-            requests[first].setIndex(IRequest.IN_VAR, first);
-            requests[i] = tmp1;
-            requests[i].setIndex(IRequest.IN_VAR, i);
+            E tmp1 = elements[--first];
+            elements[first] = elements[i];
+            elements[first].setIndex(DIMENSION, first);
+            elements[i] = tmp1;
+            elements[i].setIndex(DIMENSION, i);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate a request");
@@ -76,47 +74,47 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     }
 
     @Override
-    public void setPassive(R request) {
+    public void setPassive(E element) {
         int last = this.firstPassive.get();
-        int i = request.getIndex(IRequest.IN_VAR);
+        int i = element.getIndex(DIMENSION);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
-            R tmp1 = requests[--last];
-            requests[last] = requests[i];
-            requests[last].setIndex(IRequest.IN_VAR, last);
-            requests[i] = tmp1;
-            requests[i].setIndex(IRequest.IN_VAR, i);
+            E tmp1 = elements[--last];
+            elements[last] = elements[i];
+            elements[last].setIndex(DIMENSION, last);
+            elements[i] = tmp1;
+            elements[i].setIndex(DIMENSION, i);
         }
         firstPassive.add(-1);
     }
 
 
     @Override
-    public void addRequest(R request) {
+    public void add(E element, boolean dynamic) {
         if (firstActive.get() != firstPassive.get()) {
-            throw new UnsupportedOperationException("Can not add a request: activation has already started");
+            throw new UnsupportedOperationException("Can not add an element: activation has already started");
         }
-        R[] tmp = requests;
-        requests = (R[]) new IRequest[tmp.length + 1];
-        System.arraycopy(tmp, 0, requests, 0, tmp.length);
-        requests[tmp.length] = request;
-        request.setIndex(IRequest.IN_VAR, tmp.length);
+        E[] tmp = elements;
+        elements = (E[]) new MultiDimensionIndex[tmp.length + 1];
+        System.arraycopy(tmp, 0, elements, 0, tmp.length);
+        elements[tmp.length] = element;
+        element.setIndex(DIMENSION, tmp.length);
         this.firstActive.add(1);
         this.firstPassive.add(1);
     }
 
     @Override
-    public void deleteRequest(IRequest request) {
+    public void remove(E element) {
         int i = 0;
-        for (; i < requests.length && requests[i] != request; i++) {
+        for (; i < elements.length && elements[i] != element; i++) {
         }
-        if (i == requests.length) return;
-        R[] tmp = requests;
-        requests = (R[]) new IRequest[tmp.length - 1];
-        System.arraycopy(tmp, 0, requests, 0, i);
-        System.arraycopy(tmp, i + 1, requests, i, tmp.length - i - 1);
-        for (int j = i; j < requests.length; j++) {
-            requests[j].setIndex(IRequest.IN_VAR, j);
+        if (i == elements.length) return;
+        E[] tmp = elements;
+        elements = (E[]) new MultiDimensionIndex[tmp.length - 1];
+        System.arraycopy(tmp, 0, elements, 0, i);
+        System.arraycopy(tmp, i + 1, elements, i, tmp.length - i - 1);
+        for (int j = i; j < elements.length; j++) {
+            elements[j].setIndex(DIMENSION, j);
         }
         assert (this.firstPassive.getEnvironment().getWorldIndex() == 0);
         if (i < firstActive.get()) {
@@ -127,7 +125,7 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
 
     @Override
     public int size() {
-        return requests.length;
+        return elements.length;
     }
 
     @Override
@@ -136,30 +134,16 @@ public final class RequestArrayList<R extends IRequest> implements IRequestList<
     }
 
     @Override
-    public R get(int i) {
-        return requests[i];
+    public E get(int i) {
+        return elements[i];
     }
 
     @Override
-    public void notifyButCause(@NotNull ICause cause, EventType event, IDelta delta) {
-        IRequest request;
+    public void forEach(Procedure proc) throws ContradictionException {
         int first = firstActive.get();
         int last = firstPassive.get();
-        assert cause != null : "should be Cause.Null instead";
-        if (cause == Cause.Null) {
-            for (int a = first; a < last; a++) {
-                request = requests[a];
-                request.update(event);
-            }
-        } else {
-            //TODO: get the id of the cause, to avoid testing it at each iteration
-            for (int a = first; a < last; a++) {
-                request = requests[a];
-                Propagator<IntVar> o = request.getPropagator();
-                if (o != cause) {
-                    request.update(event);
-                }
-            }
+        for (int a = first; a < last; a++) {
+            proc.execute(elements[a]);
         }
     }
 
