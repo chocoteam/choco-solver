@@ -18,7 +18,7 @@ public class NotifyProcedure implements TernaryProcedure<IRequest, ICause, Event
         this.cause = cause;
         this.evt = event;
         this.delta = delta;
-        return null;
+        return this;
     }
 
     @Override
