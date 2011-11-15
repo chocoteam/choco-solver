@@ -28,8 +28,8 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateInt;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,14 +38,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
-import solver.requests.list.RequestListBuilder;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.NotifyProcedure;
-import solver.variables.Variable;
+import solver.variables.*;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -58,30 +53,20 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public abstract class AbstractView implements IntVar, IView, Serializable, ICause {
+public abstract class AbstractViewWithDomain extends AbstractVariable implements IntVar, IView, Serializable, ICause {
 
     final IntVar A, B;
 
     final IStateInt LB, UB, SIZE;
 
-    protected final Solver solver;
-
-    protected final IList<IRequest> requests;
-
-    protected final IPropagationEngine engine;
-
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
 
-    protected final NotifyProcedure procN = new NotifyProcedure();
-
-    public AbstractView(IntVar a, IntVar b, Solver solver) {
+    public AbstractViewWithDomain(IntVar a, IntVar b, Solver solver) {
+        super(solver);
         this.A = a;
         this.B = b;
-        this.solver = solver;
-        this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         this.LB = solver.getEnvironment().makeInt(0);
         this.UB = solver.getEnvironment().makeInt(0);
         this.SIZE = solver.getEnvironment().makeInt(0);
@@ -92,45 +77,9 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
-    public int getUniqueID() {
-        throw new UnsupportedOperationException();
-    }
-
-    public void setUniqueID(int uniqueID) {
-        throw new UnsupportedOperationException();
-    }
-
-    public void addRequest(IRequest request) {
-        requests.add(request, false);
-    }
-
-    public void activate(IRequest request) {
-        requests.setActive(request);
-    }
-
-    public void desactivate(IRequest request) {
-        requests.setPassive(request);
-    }
-
-    public void deleteRequest(IRequest request) {
-        requests.remove(request);
-    }
-
-    public IList getRequests() {
-        return requests;
-    }
-
     public void subscribeView(IView view) {
         A.subscribeView(view);
         B.subscribeView(view);
-    }
-
-    public int nbRequests() {
-        return requests.cardinality();
-    }
-
-    public int nbConstraints() {
-        return requests.size();
     }
 
     public IntDelta getDelta() {
@@ -140,13 +89,9 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     public void updatePropagationConditions(Propagator propagator, int idxInProp) {
     }
 
-    public void deletePropagator(Propagator observer) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<AbstractView> request = propagator.makeRequest(this, idxInProp);
+        IRequest<AbstractViewWithDomain> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
         this.addRequest(request);
     }
@@ -154,6 +99,7 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 
@@ -187,9 +133,8 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
         return SIZE.get();
     }
 
-
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        requests.forEach(procN.set(cause, event, getDelta()));
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        requests.forEach(afterModification.set(this, event, cause));
     }
 
     @Override
