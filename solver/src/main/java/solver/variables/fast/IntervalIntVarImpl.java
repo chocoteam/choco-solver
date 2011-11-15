@@ -123,7 +123,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int sup = getUB();
         if (value == inf && value == sup) {
             solver.getExplainer().removeValue(this, value, antipromo);
-            this.contradiction(cause, MSG_REMOVE);
+            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
             if (value == inf) {
@@ -157,7 +157,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 solver.getExplainer().removeValue(this, value, antipromo);
-                this.contradiction(cause, MSG_EMPTY);
+                this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
             solver.getExplainer().removeValue(this, value, antipromo);
             return true;
@@ -201,7 +201,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                this.contradiction(cause, MSG_INST);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -225,7 +225,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             this.notifyPropagators(e, cause);
             return true;
         } else {
-            this.contradiction(cause, MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -257,7 +257,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (old < value) {
             if (this.getUB() < value) {
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, MSG_LOW);
+                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
 
@@ -312,7 +312,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         if (old > value) {
             if (this.getLB() > value) {
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, MSG_UPP);
+                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
 
@@ -472,7 +472,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         engine.fails(cause, this, message);
     }
 

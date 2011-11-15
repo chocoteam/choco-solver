@@ -186,7 +186,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                this.contradiction(cause, MSG_INST);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else {
@@ -201,7 +201,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
                 this.notifyPropagators(e, cause);
                 return true;
             } else {
-                this.contradiction(cause, MSG_UNKNOWN);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
             }
         }
@@ -411,7 +411,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         engine.fails(cause, this, message);
     }
 

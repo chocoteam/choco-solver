@@ -94,7 +94,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value == constante) {
             solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, "unique value removal");
+            this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
     }
@@ -103,7 +103,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, "unique value removal");
+            this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
     }
@@ -112,7 +112,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value != constante) {
             solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, "outside domain instantitation");
+            this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
         }
         return false;
     }
@@ -121,7 +121,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value > constante) {
             solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, "outside domain update bound");
+            this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
         }
         return false;
     }
@@ -130,7 +130,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < constante) {
             solver.getExplainer().removeValue(this, constante, cause);
-            this.contradiction(cause, "outside domain update bound");
+            this.contradiction(cause, EventType.DECUPP, "outside domain update bound");
         }
         return false;
     }
@@ -284,7 +284,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         this.empty.set(true);
         solver.getEngine().fails(cause, this, message);
     }

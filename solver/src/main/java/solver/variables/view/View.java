@@ -168,8 +168,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        var.contradiction(cause, message);
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        var.contradiction(cause, event, message);
     }
 
     @Override

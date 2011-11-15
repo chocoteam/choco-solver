@@ -27,7 +27,8 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.*;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -38,6 +39,7 @@ import solver.explanations.VariableState;
 import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
@@ -133,7 +135,7 @@ public final class AbsView extends View<IntVar> {
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
-            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
         boolean done = var.updateLowerBound(-v, cause, informCause);
@@ -152,7 +154,7 @@ public final class AbsView extends View<IntVar> {
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
-            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
         boolean done = var.updateLowerBound(-value, cause, informCause);
         done |= var.updateUpperBound(value, cause, informCause);

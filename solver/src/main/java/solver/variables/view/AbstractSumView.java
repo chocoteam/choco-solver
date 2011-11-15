@@ -29,6 +29,7 @@ package solver.variables.view;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import static solver.variables.AbstractVariable.MSG_EMPTY;
@@ -71,7 +72,7 @@ public abstract class AbstractSumView extends AbstractView {
     void filterOnLeq(ICause cause, int ub) throws ContradictionException {
         int lbA = A.getLB(), lbB = B.getLB();
         int sumLB = lbA + lbB - ub;
-        if (-sumLB < 0) contradiction(cause, MSG_EMPTY);
+        if (-sumLB < 0) contradiction(cause, EventType.PROPAGATE, MSG_EMPTY);
         int ubA = A.getUB(), ubB = B.getUB();
         if (ubA - lbA + sumLB > 0) {
             A.updateUpperBound(-sumLB + lbA, cause, true);
@@ -85,7 +86,7 @@ public abstract class AbstractSumView extends AbstractView {
     void filterOnGeq(ICause cause, int lb) throws ContradictionException {
         int ubA = A.getUB(), ubB = B.getUB();
         int sumUB = ubA + ubB - lb;
-        if (-sumUB > 0) contradiction(cause, MSG_EMPTY);
+        if (-sumUB > 0) contradiction(cause, EventType.PROPAGATE, MSG_EMPTY);
         int lbA = A.getLB(), lbB = B.getLB();
         if (ubA - lbA - sumUB > 0) {
             A.updateLowerBound(-sumUB + ubA, cause, true);

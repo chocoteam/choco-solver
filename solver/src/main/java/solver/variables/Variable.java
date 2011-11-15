@@ -166,11 +166,12 @@ public interface Variable<D extends IDelta> extends Serializable {
 
     /**
      * Throws a contradiction exception based on <cause, message>
+     *
      * @param cause ICause causing the exception
-     * @param message the detailed message
-     * @throws ContradictionException expected behavior
+     * @param event
+     *@param message the detailed message  @throws ContradictionException expected behavior
      */
-    void contradiction(@NotNull ICause cause, String message) throws ContradictionException;
+    void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

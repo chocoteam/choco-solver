@@ -91,7 +91,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 	}
 
 	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
+	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
 		engine.fails(cause, this, message);
 	}
 

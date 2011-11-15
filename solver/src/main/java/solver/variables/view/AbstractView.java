@@ -153,7 +153,7 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
         engine.fails(cause, this, message);
     }
 

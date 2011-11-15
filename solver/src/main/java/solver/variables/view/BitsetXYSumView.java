@@ -95,7 +95,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            this.contradiction(cause, MSG_REMOVE);
+            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
@@ -135,7 +135,7 @@ public final class BitsetXYSumView extends AbstractSumView {
                     this.notifyPropagators(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
-                        this.contradiction(cause, MSG_EMPTY);
+                        this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
                     }
                 }
             }
@@ -179,7 +179,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         int lb = LB.get();
         if (this.instantiated()) {
             if (value != lb) {
-                this.contradiction(cause, MSG_EMPTY);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
             return false;
         } else if (contains(value)) {
@@ -193,7 +193,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                this.contradiction(cause, MSG_EMPTY);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
 
             filterOnLeq(cause, value);
@@ -202,7 +202,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             this.notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         } else {
-            this.contradiction(cause, MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -217,7 +217,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         int lb = this.getLB();
         if (lb < value) {
             if (this.getUB() < value) {
-                this.contradiction(cause, MSG_LOW);
+                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
 
@@ -258,7 +258,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         int ub = this.getUB();
         if (ub > value) {
             if (this.getLB() > value) {
-                this.contradiction(cause, MSG_UPP);
+                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
                 int aValue = value - OFFSET;
@@ -486,7 +486,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    this.contradiction(this, MSG_LOW);
+                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
                 }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
                 ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
@@ -496,7 +496,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    this.contradiction(this, MSG_LOW);
+                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
                 }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
@@ -511,7 +511,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             int size = VALUES.cardinality();
             SIZE.set(size);
             if (ilb > iub) {
-                this.contradiction(this, MSG_EMPTY);
+                this.contradiction(this, EventType.PROPAGATE, MSG_EMPTY);
             }
             if (down || size == 1) {
                 filterOnGeq(this, ilb);
