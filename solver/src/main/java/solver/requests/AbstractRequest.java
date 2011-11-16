@@ -128,7 +128,9 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
 
     @Override
     public void afterUpdate(Variable var, EventType evt, ICause cause) {
-        update(evt);
+        if(this.propagator != cause){
+            update(evt);
+        }
     }
 
     @Override

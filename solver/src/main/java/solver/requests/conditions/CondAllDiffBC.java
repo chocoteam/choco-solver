@@ -1,6 +1,6 @@
 package solver.requests.conditions;
 
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
@@ -57,7 +57,7 @@ public class CondAllDiffBC extends AbstractCondition {
 //        if (EventType.isRemove(evtMask)) {
         int last = request.getLast();
         try {
-            request.forEach(rem_proc.set(request.getIndex(IRequest.VAR_IN_PROP)),
+            request.forEach(rem_proc,
                     fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].get(),
                     last);
         } catch (ContradictionException e) {
@@ -70,19 +70,12 @@ public class CondAllDiffBC extends AbstractCondition {
         }
     }
 
-    private static class RemProc implements UnaryIntProcedure<Integer> {
+    private static class RemProc implements IntProcedure {
 
         private final CondAllDiffBC p;
-        private int idxVar;
 
         public RemProc(CondAllDiffBC p) {
             this.p = p;
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
         }
 
         @Override

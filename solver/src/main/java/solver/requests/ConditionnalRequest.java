@@ -30,12 +30,14 @@ package solver.requests;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.requests.conditions.AbstractCondition;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 
 /**
@@ -149,4 +151,9 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
         evtmask.set(0);
     }
 
+    @Override
+    public void afterUpdate(Variable var, EventType evt, ICause cause) {
+        // BEWARE: propagators must be monotonic to avoid storing previously removed values
+        update(evt);
+    }
 }
