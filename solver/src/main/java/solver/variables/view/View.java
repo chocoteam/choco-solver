@@ -28,6 +28,7 @@
 package solver.variables.view;
 
 import choco.kernel.common.util.objects.IList;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -36,7 +37,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
@@ -53,15 +53,20 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class View<IV extends IntVar> extends AbstractVariable implements IntVar {
+public abstract class View<IV extends IntVar> implements IntVar {
+
+    protected final String name;
 
     protected final IV var;
 
     protected int uniqueID;
 
+    protected final Solver solver;
+
     public View(String name, IV var, Solver solver) {
-        super(name, solver);
+        this.name = name;
         this.var = var;
+        this.solver = solver;
     }
 
     public int getUniqueID() {
@@ -95,6 +100,11 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     @Override
     public IntDelta getDelta() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void activate(IRequest request) {
+        var.activate(request);
     }
 
     @Override
@@ -158,6 +168,11 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
+    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
+        var.notifyViews(event, cause);
+    }
+
+    @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
         var.attachPropagator(propagator, idxInProp);
     }
@@ -169,9 +184,9 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(onContradiction.set(this, event, cause));
         var.contradiction(cause, event, message);
     }
+
 
     @Override
     public Solver getSolver() {

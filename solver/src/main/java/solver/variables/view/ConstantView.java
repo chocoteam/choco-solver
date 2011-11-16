@@ -31,6 +31,7 @@ import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateBool;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -40,7 +41,6 @@ import solver.explanations.VariableState;
 import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -58,7 +58,7 @@ import solver.variables.domain.IIntDomain;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ConstantView extends AbstractVariable implements IntVar {
+public class ConstantView implements IntVar {
 
     protected final int constante;
     protected final String name;
@@ -74,7 +74,6 @@ public class ConstantView extends AbstractVariable implements IntVar {
     private DisposableRangeIterator _riterator;
 
     public ConstantView(String name, int constante, Solver solver) {
-        super(name, solver);
         this.name = name;
         this.solver = solver;
         this.constante = constante;
@@ -204,6 +203,11 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public void activate(IRequest request) {
+        //useless
+    }
+
+    @Override
     public void desactivate(IRequest request) {
         //useless
     }
@@ -263,19 +267,31 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
+    public void subscribeView(IView view) {
+    }
+
+    @Override
     public void updatePropagationConditions(Propagator propagator, int idxInProp) {
     }
 
     @Override
-    public void deletePropagator(Propagator observer) {
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        //void
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
+        //void
     }
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
+        //void
+    }
+
+    @Override
+    public void deletePropagator(Propagator observer) {
+        //void
     }
 
     @Override
