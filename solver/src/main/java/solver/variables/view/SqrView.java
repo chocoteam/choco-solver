@@ -36,9 +36,11 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.requests.AbstractRequest;
 import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
@@ -78,7 +80,8 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
+        //todo : ugly
+        ViewRequestWrapper req = new ViewRequestWrapper((AbstractRequest)propagator.makeRequest(var, idxInProp),
                 ViewRequestWrapper.Modifier.ABS);
         propagator.addRequest(req);
         var.addRequest(req);
@@ -184,7 +187,7 @@ public final class SqrView extends View<IntVar> {
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
-            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = floor_sqrt(value);
         boolean done = false;
@@ -195,7 +198,7 @@ public final class SqrView extends View<IntVar> {
                 done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
             }
         } else { //otherwise, impossible value for instantiation
-            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
 
         return done;
@@ -214,7 +217,7 @@ public final class SqrView extends View<IntVar> {
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         if (value < 0) {
-            this.contradiction(cause, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
         int floorV = floor_sqrt(value);
         boolean done = var.updateLowerBound(-floorV, cause, informCause);

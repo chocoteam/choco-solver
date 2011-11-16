@@ -24,50 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package samples;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
-import choco.kernel.ESat;
+import junit.framework.Assert;
+import org.testng.annotations.Test;
 
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 15/11/11
  */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
+public class AllTest {
 
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
+    AbstractProblem prob;
+    String[] args;
+    long[] stats;
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
+    public AllTest() {
+        this(new AllIntervalSeries(), new String[]{"-o", "50"}, new long[]{1,2});
+    }
 
-	@Override
-	public void propagate() throws ContradictionException {}
+    public AllTest(AbstractProblem prob, String[] arguments, long[] statistics) {
+        this.prob = prob;
+        this.args = arguments;
+        this.stats = statistics;
+    }
 
-	@Override
-	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyMonitors(EventType.META, this);
-	}
+    @Test(groups = "1m")
+    public void mainTest() {
+        prob.readArgs(args);
+        prob.buildModel();
+        prob.configureSolver();
+        prob.overrideExplanation();
+        prob.overridePolicy();
+        prob.solve();
 
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+        Assert.assertEquals("incorrect nb solutions", stats[0], prob.getSolver().getMeasures().getSolutionCount());
+        Assert.assertEquals("incorrect nb nodes", stats[1], prob.getSolver().getMeasures().getNodeCount());
+
+    }
 }

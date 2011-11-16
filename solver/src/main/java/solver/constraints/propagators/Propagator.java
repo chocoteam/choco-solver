@@ -179,7 +179,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Build internal structure of the propagator, if necessary
-     * @throws solver.exception.ContradictionException if initialisation encounters a contradiction
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
      */
     public void initialize() throws ContradictionException {
     }
@@ -304,9 +306,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     public void unlinkVariables() {
         for (; lastRequest > 0; lastRequest--) {
-            IRequest request = requests[lastRequest-1];
+            IRequest request = requests[lastRequest - 1];
             request.getVariable().deleteRequest(request);
-            requests[lastRequest-1] = null;
+            requests[lastRequest - 1] = null;
         }
     }
 
@@ -330,7 +332,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * returns a explanation for the decision mentionned in parameters
-     *
      *
      * @param d : a <code>Deduction</code> to explain
      * @return a set of constraints and past decisions

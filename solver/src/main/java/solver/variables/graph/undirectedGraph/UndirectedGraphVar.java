@@ -65,7 +65,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 
 	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
     	if(kernel.edgeExists(x, y)){
-    		this.contradiction(cause, "remove mandatory arc");
+    		this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
         	return false;
     	}
         if (envelop.removeEdge(x, y)){
@@ -73,7 +73,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         		delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
         	}
         	EventType e = EventType.REMOVEARC;
-        	notifyPropagators(e, cause);
+        	notifyMonitors(e, cause);
         	// A node has at least one arc/edge otherwise it is meaningless
         	if(getEnvelopGraph().getNeighborsOf(x).neighborhoodSize()==0){
         		removeNode(x, cause, informCause);
@@ -93,11 +93,11 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
             		delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
             	}
             	EventType e = EventType.ENFORCEARC;
-            	notifyPropagators(e, cause);
+            	notifyMonitors(e, cause);
             	return true;
         	}return false;
     	}
-    	this.contradiction(cause, "enforce arc which is not in the domain");
+    	this.contradiction(cause, EventType.ENFORCEARC, "enforce arc which is not in the domain");
     	return false;
     }
     

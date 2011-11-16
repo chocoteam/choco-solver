@@ -141,16 +141,14 @@ public interface Variable<D extends IDelta> extends Serializable {
      * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *
-     *
-     *
-     * @param e event on this object
-     * @param o object which leads to the modification of this object
+     * @param event event on this object
+     * @param cause object which leads to the modification of this object
      * @throws solver.exception.ContradictionException if a contradiction occurs during notification
      */
-    void notifyPropagators(EventType e, @NotNull ICause o) throws ContradictionException;
+    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
 
 
-    void notifyViews(EventType e, @NotNull ICause o) throws ContradictionException;
+    void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)
@@ -166,11 +164,12 @@ public interface Variable<D extends IDelta> extends Serializable {
 
     /**
      * Throws a contradiction exception based on <cause, message>
+     *
      * @param cause ICause causing the exception
-     * @param message the detailed message
-     * @throws ContradictionException expected behavior
+     * @param event
+     *@param message the detailed message  @throws ContradictionException expected behavior
      */
-    void contradiction(@NotNull ICause cause, String message) throws ContradictionException;
+    void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

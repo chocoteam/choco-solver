@@ -27,8 +27,11 @@
 
 package solver.requests;
 
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.propagation.engines.IPropagationEngine;
+import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
 
 /**
@@ -38,7 +41,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
+public abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V>, IVariableMonitor {
 
     protected final V variable; // Variable of the request
     protected final P propagator; // Propagator of the request
@@ -117,5 +120,18 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     @Override
     public void desactivate() {
         variable.desactivate(this);
+    }
+
+    @Override
+    public void beforeUpdate(Variable var, EventType evt, ICause cause) {
+    }
+
+    @Override
+    public void afterUpdate(Variable var, EventType evt, ICause cause) {
+        update(evt);
+    }
+
+    @Override
+    public void contradict(Variable var, EventType evt, ICause cause) {
     }
 }

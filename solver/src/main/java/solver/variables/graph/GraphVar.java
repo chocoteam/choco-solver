@@ -28,6 +28,7 @@
 package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
+import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -96,7 +97,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     @Override
     public boolean removeNode(int x, ICause cause, boolean informCause) throws ContradictionException {
         if (kernel.getActiveNodes().isActive(x)) {
-            this.contradiction(cause, "remove mandatory node");
+            this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
         } else if (!envelop.getActiveNodes().isActive(x)) {
             return false;
@@ -113,7 +114,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                 delta.getNodeRemovalDelta().add(x);
             }
             EventType e = EventType.REMOVENODE;
-            notifyPropagators(e, cause);
+            notifyMonitors(e, cause);
             return true;
         }
         return false;
@@ -127,19 +128,19 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                     delta.getNodeEnforcingDelta().add(x);
                 }
                 EventType e = EventType.ENFORCENODE;
-                notifyPropagators(e, cause);
+                notifyMonitors(e, cause);
                 INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
                 if (neig.neighborhoodSize() == 1) {
                     enforceArc(x, neig.getFirstElement(), cause, informCause);
                 }
                 if (neig.neighborhoodSize() == 0) {
-                    this.contradiction(Cause.Null, "cannot enforce nodes with no arcs");
+                    this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no arcs");
                 }
                 return true;
             }
             return false;
         }
-        this.contradiction(cause, "enforce node which is not in the domain");
+        this.contradiction(cause, EventType.ENFORCENODE, "enforce node which is not in the domain");
         return true;
     }
 
@@ -209,8 +210,16 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         this.addRequest(request);
     }
 
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
+    }
+
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

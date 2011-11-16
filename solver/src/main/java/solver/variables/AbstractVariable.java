@@ -29,7 +29,6 @@ package solver.variables;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
-import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -63,6 +62,8 @@ public abstract class AbstractVariable implements Serializable {
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
+    private static final String NO_NAME = "";
+
     /**
      * Reference to the solver containing this variable.
      */
@@ -86,13 +87,15 @@ public abstract class AbstractVariable implements Serializable {
 
     protected final IPropagationEngine engine;
 
-    protected final NotifyProcedure procN = new NotifyProcedure();
-
-    protected final OnBeforeProc procB = new OnBeforeProc();
-    protected final OnAfterProc procA = new OnAfterProc();
-    protected final OnContradiction procC = new OnContradiction();
+    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+    protected final OnAfterProc afterModification = new OnAfterProc();
+    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
+
+    protected AbstractVariable(Solver solver) {
+        this(NO_NAME, solver);
+    }
 
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
@@ -132,22 +135,15 @@ public abstract class AbstractVariable implements Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public void notifyPropagators(EventType e, @NotNull ICause cause) throws ContradictionException {
-        if ((modificationEvents & e.mask) != 0) {
-            requests.forEach(procN.set(cause, e, getDelta()));
-        }
-        notifyViews(e, cause);
-    }
-
-    public void notifyViews(EventType e, ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(e.mask);
+                views[i].backPropagate(event.mask);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(e.mask);
+                    views[i].backPropagate(event.mask);
                 }
             }
         }
