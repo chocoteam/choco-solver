@@ -237,8 +237,10 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
+        if (!vars[0].contains(-remVal)) {
         vars[1].removeValue(remVal, this, false);
         vars[1].removeValue(-remVal, this, false);
+    }
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

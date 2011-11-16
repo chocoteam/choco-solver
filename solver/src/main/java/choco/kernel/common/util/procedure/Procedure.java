@@ -31,6 +31,10 @@ import solver.exception.ContradictionException;
 
 import java.io.Serializable;
 
+/**
+ * A class that permits to execute a embeded "function"
+ * @param <E>
+ */
 public interface Procedure<E> extends Serializable {
     /**
      * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
