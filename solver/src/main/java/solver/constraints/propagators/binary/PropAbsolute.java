@@ -27,7 +27,7 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -237,11 +237,13 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
+        if (!vars[0].contains(-remVal)) {
         vars[1].removeValue(remVal, this, false);
         vars[1].removeValue(-remVal, this, false);
     }
+    }
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropAbsolute p;
         private int idxVar;
@@ -251,7 +253,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

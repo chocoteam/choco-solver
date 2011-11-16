@@ -33,13 +33,15 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public abstract class Assignment<V extends Variable> {
+public abstract class Assignment<V extends Variable> implements Serializable{
 
     public abstract void apply(V var, int value, ICause cause) throws ContradictionException;
 

@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.objects.IList;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -34,7 +35,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -123,7 +123,7 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public IRequestList getRequests() {
+    public IList getRequests() {
         return var.getRequests();
     }
 

@@ -26,10 +26,11 @@
  */
 package solver.search.strategy.enumerations.sorters;
 
+import choco.kernel.common.util.objects.IList;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
-import solver.requests.list.IRequestList;
+import solver.requests.IRequest;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
 
@@ -52,7 +53,7 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     }
 
     private int weight(IntVar v) {
-        IRequestList requests = v.getRequests();
+        IList<IRequest> requests = v.getRequests();
         int w = 0;
         int card = requests.cardinality();
         for (int i = 0; i < card; i++) {

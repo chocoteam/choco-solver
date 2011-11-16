@@ -27,10 +27,10 @@
 
 package solver.propagation.engines.comparators.predicate;
 
+import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.TIntHashSet;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.variables.Variable;
 
 import java.util.*;
@@ -63,9 +63,9 @@ public class MemberV<V extends Variable> implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < vars.length; i++) {
-                IRequestList rlist = vars[i].getRequests();
+                IList rlist = vars[i].getRequests();
                 for (int k = 0; k < rlist.cardinality(); k++) {
-                    int idx = rlist.get(k).getIndex();
+                    int idx = rlist.get(k).getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
             }

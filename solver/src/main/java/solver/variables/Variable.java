@@ -27,6 +27,7 @@
 
 package solver.variables;
 
+import choco.kernel.common.util.objects.IList;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
@@ -35,7 +36,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -90,7 +90,7 @@ public interface Variable<D extends IDelta> extends Serializable {
     //todo : to complete
     void deleteRequest(IRequest request);
 
-    IRequestList getRequests();
+    IList getRequests();
 
     int nbRequests();
 

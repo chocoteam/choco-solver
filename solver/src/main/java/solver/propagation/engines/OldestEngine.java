@@ -73,7 +73,7 @@ public class OldestEngine implements IEngine {
 
     @Override
     public void update(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         Group g = groups[gidx];
         g.update(request);
         if (!active.get(gidx)) {
@@ -84,7 +84,7 @@ public class OldestEngine implements IEngine {
 
     @Override
     public void remove(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         Group g = groups[gidx];
         if (g.remove(request)) {
             queue.remove(g);

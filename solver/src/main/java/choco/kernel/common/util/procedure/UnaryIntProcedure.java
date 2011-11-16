@@ -27,6 +27,6 @@
 
 package choco.kernel.common.util.procedure;
 
-public interface IntProcedure1<A> extends IntProcedure {
-    IntProcedure1 set(A a);
+public interface UnaryIntProcedure<A> extends IntProcedure {
+    UnaryIntProcedure set(A a);
 }

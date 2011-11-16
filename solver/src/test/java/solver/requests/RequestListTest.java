@@ -28,6 +28,7 @@
 package solver.requests;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import org.testng.Assert;
@@ -36,7 +37,6 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -115,47 +115,97 @@ public class RequestListTest {
         Solver solver = new Solver();
         IEnvironment env = solver.getEnvironment();
         RequestListBuilder._DEFAULT = 0;
-        IRequestList<MockRequest> list = RequestListBuilder.preset(env);
+        IList<MockRequest> list = RequestListBuilder.preset(env, IRequest.IN_VAR);
 
         MockRequest[] requests = new MockRequest[3];
         for (int i = 0; i < requests.length; i++) {
             requests[i] = new MockRequest(new MockPropagator(solver, 2), i);
-            list.addRequest(requests[i]);
+            list.add(requests[i], false);
         }
 
-        Assert.assertEquals(requests[0].getIdxInVar(), 0);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 2);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 2);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
 
         env.worldPush();
         list.setPassive(requests[0]);
-        Assert.assertEquals(requests[0].getIdxInVar(), 2);
-        Assert.assertEquals(requests[1].getIdxInVar(), 1);
-        Assert.assertEquals(requests[2].getIdxInVar(), 0);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 0);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPush();
         list.setPassive(requests[2]);
-        Assert.assertEquals(requests[0].getIdxInVar(), 2);
-        Assert.assertEquals(requests[1].getIdxInVar(), 0);
-        Assert.assertEquals(requests[2].getIdxInVar(), 1);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 1);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIdxInVar(), 2);
-        Assert.assertEquals(requests[1].getIdxInVar(), 0);
-        Assert.assertEquals(requests[2].getIdxInVar(), 1);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIdxInVar(), 2);
-        Assert.assertEquals(requests[1].getIdxInVar(), 0);
-        Assert.assertEquals(requests[2].getIdxInVar(), 1);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.cardinality(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testHalfBcktList() {
+        Solver solver = new Solver();
+        IEnvironment env = solver.getEnvironment();
+        RequestListBuilder._DEFAULT = 1;
+        IList<MockRequest> list = RequestListBuilder.preset(env, IRequest.IN_VAR);
+
+        MockRequest[] requests = new MockRequest[3];
+        for (int i = 0; i < requests.length; i++) {
+            requests[i] = new MockRequest(new MockPropagator(solver, 2), i);
+            list.add(requests[i], false);
+        }
+
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.cardinality(), 3);
+
+        env.worldPush();
+        list.setPassive(requests[0]);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.cardinality(), 2);
+
+        env.worldPush();
+        list.setPassive(requests[2]);
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.cardinality(), 1);
+
+        env.worldPop();
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(list.size(), 3);
+        Assert.assertEquals(list.cardinality(), 2);
+
+        env.worldPop();
+        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
     }
