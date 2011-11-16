@@ -31,20 +31,20 @@ import choco.kernel.common.util.objects.HalfBactrackableList;
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.objects.RequestArrayList;
 import choco.kernel.memory.IEnvironment;
-import solver.requests.IRequest;
+import solver.variables.IVariableMonitor;
 
 /**
- * A class declaring builder for IRequestList.
+ * A class declaring builder for IList<IVariableMonitor>.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 24/02/11
  */
-public class RequestListBuilder {
+public class VariableMonitorListBuilder {
 
     public static int _DEFAULT = 0; // 0: RequestArrayList, 1: HalfBactrackableList
 
-    protected RequestListBuilder() {
+    protected VariableMonitorListBuilder() {
     }
 
     /**
@@ -52,10 +52,10 @@ public class RequestListBuilder {
      *
      * @param environment bracktrackable environment
      * @param dim         dimension to set and get index
-     * @param <R>         type of element
+     * @param <M>         type of element, should extends IVariableMonitor
      * @return a implementation of IRequestList
      */
-    public static <R extends IRequest> IList<R> preset(IEnvironment environment, int dim) {
+    public static <M extends IVariableMonitor> IList<M> preset(IEnvironment environment, int dim) {
         switch (_DEFAULT) {
             case 1:
                 return halfBacktracakbleList(environment, dim);
@@ -64,11 +64,11 @@ public class RequestListBuilder {
         }
     }
 
-    public static <R extends IRequest> IList<R> arraylist(IEnvironment environment, int dim) {
-        return new RequestArrayList<R>(environment, dim);
+    public static <M extends IVariableMonitor> IList<M> arraylist(IEnvironment environment, int dim) {
+        return new RequestArrayList<M>(environment, dim);
     }
 
-    public static <R extends IRequest> IList<R> halfBacktracakbleList(IEnvironment environment, int dim) {
-        return new HalfBactrackableList<R>(environment, dim);
+    public static <M extends IVariableMonitor> IList<M> halfBacktracakbleList(IEnvironment environment, int dim) {
+        return new HalfBactrackableList<M>(environment, dim);
     }
 }
