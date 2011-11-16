@@ -32,6 +32,8 @@ import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.variables.IntVar;
 
+import java.io.Serializable;
+
 /**
  * Created by IntelliJ IDEA.
  * User: njussien
@@ -40,7 +42,7 @@ import solver.variables.IntVar;
  * <p/>
  * an interface for tracing explanation based operations
  */
-public interface IExplanationMonitor {
+public interface IExplanationMonitor extends Serializable{
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation);
     public void onUpdateLowerBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation);
     public void onUpdateUpperBound(IntVar intVar, int old, int value, ICause cause, Explanation explanation);
