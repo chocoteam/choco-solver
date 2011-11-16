@@ -58,6 +58,7 @@ public abstract class AbstractCondition {
     /**
      * Keep informed the condition of the modification of one of its related requests.
      * If the condition is newly validate, push all related requests in the propagation engine.
+     * todo: preciser les raisons
      *
      * @param request    recently modified request
      * @param evtmask variable modification event

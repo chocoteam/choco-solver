@@ -5,6 +5,7 @@ import org.testng.Assert;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -27,6 +28,7 @@ public class TestProbaBAllDiff {
             Constraint[] cstrs = {new AllDifferent(x, solver, type)};
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
+        SearchMonitorFactory.log(solver, true, true);
         solver.findAllSolutions();
     }
 
@@ -37,19 +39,24 @@ public class TestProbaBAllDiff {
         IMeasures mes;
 
 
-        /*for (int seed = 0; seed < 5; seed++)*/ int seed = 1; {
+//        for (int seed = 0; seed < 100; seed++){
+            int seed = 1;{
             random.setSeed(seed);
-            int n = 3;//2 + random.nextInt(7);
+//            int n = 2 + random.nextInt(7);
+            int n = 6;
             out.write("inst"+n+"\t");
 
-            solver = new Solver();
-            execute(solver,n,seed,AllDifferent.Type.BC);
-            mes = solver.getMeasures();
-            String s = mes.getNodeCount()+"\t";
-            s += mes.getBackTrackCount()+"\t";
-            s += mes.getPropagationsCount()+"\t";
-            s += mes.getTimeCount()+"|\t";
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
+            System.out.printf("%d vs. %d\n", seed, n);
+
+            String s = "";
+//            solver = new Solver();
+//            execute(solver,n,seed,AllDifferent.Type.BC);
+//            mes = solver.getMeasures();
+//            s = mes.getNodeCount()+"\t";
+//            s += mes.getBackTrackCount()+"\t";
+//            s += mes.getPropagationsCount()+"\t";
+//            s += mes.getTimeCount()+"|\t";
+//            Assert.assertEquals(solver.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
 
             solverProba = new Solver();
             execute(solverProba,n,seed,AllDifferent.Type.PROBABILISTIC);
@@ -60,7 +67,7 @@ public class TestProbaBAllDiff {
             s += ""+mes.getTimeCount();
             Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
 
-            Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+//            Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
             System.out.println(s+"\n");
             out.write(s);
             out.flush();
@@ -70,7 +77,7 @@ public class TestProbaBAllDiff {
     }
 
     public static void main(String[] args) throws IOException {
-        String outDir = "/Users/chameau/Travail/2011-2012/Thse JDB-2/tests/OneAllDiff.csv";
+        String outDir = "/Users/cprudhom/Downloads/OneAllDiff.csv";
         BufferedWriter out = new BufferedWriter(new FileWriter(outDir));
         String s = "search nodes"+"\t"+"search bcks"+"\t"+"nb propag"+"\t"+"solving time";
         out.write("instance"+"\t"+s+"\t"+s);

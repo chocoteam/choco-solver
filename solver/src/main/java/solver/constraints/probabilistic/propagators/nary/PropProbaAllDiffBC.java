@@ -58,7 +58,9 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
 
     @Override
     public IRequest<IntVar> makeRequest(IntVar var, int idx) {
-        return new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
+        ConditionnalRequest<PropProbaAllDiffBC> cr = new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
+        cond.linkRequest(cr);
+        return cr;
     }
 
 }
