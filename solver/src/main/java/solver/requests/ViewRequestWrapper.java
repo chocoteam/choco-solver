@@ -32,7 +32,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
 /**
@@ -41,12 +40,12 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 02/09/11
  */
-public class ViewRequestWrapper implements IRequest<IntVar>, IVariableMonitor<IntVar> {
+public class ViewRequestWrapper implements IRequestWithVariable<IntVar> {
 
-    final AbstractRequest<IntVar, Propagator<IntVar>> original;
+    final IRequestWithVariable<IntVar> original;
     final Modifier modifier;
 
-    public ViewRequestWrapper(AbstractRequest original, Modifier modifier) {
+    public ViewRequestWrapper(IRequestWithVariable original, Modifier modifier) {
         this.original = original;
         this.modifier = modifier;
     }

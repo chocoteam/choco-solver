@@ -36,7 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -205,9 +205,9 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<GraphVar> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<GraphVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

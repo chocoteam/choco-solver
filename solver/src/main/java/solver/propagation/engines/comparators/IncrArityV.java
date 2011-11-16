@@ -44,7 +44,7 @@ public class IncrArityV implements Comparator<IRequest>, Serializable {
     }
 
     public int compare(IRequest v1, IRequest v2) {
-        return v1.getVariable().nbRequests() - v2.getVariable().nbRequests();
+        return v1.getVariable().nbMonitors() - v2.getVariable().nbMonitors();
     }
 
     public String toString() {

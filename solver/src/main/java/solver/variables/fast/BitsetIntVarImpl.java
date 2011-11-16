@@ -41,7 +41,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -516,9 +516,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<IntVar> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<IntVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

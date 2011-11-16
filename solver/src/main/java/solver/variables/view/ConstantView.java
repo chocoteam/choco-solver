@@ -38,10 +38,10 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.delta.NoDelta;
@@ -203,12 +203,12 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void activate(IRequest request) {
+    public void activate(IVariableMonitor monitor) {
         //useless
     }
 
     @Override
-    public void desactivate(IRequest request) {
+    public void desactivate(IVariableMonitor monitor) {
         //useless
     }
 
@@ -223,17 +223,17 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void addRequest(IRequest request) {
+    public void addMonitor(IVariableMonitor monitor) {
         //useless
     }
 
     @Override
-    public void deleteRequest(IRequest request) {
+    public void removeMonitor(IVariableMonitor monitor) {
         //useless
     }
 
     @Override
-    public IList getRequests() {
+    public IList getMonitors() {
         return null;
     }
 
@@ -262,7 +262,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int nbRequests() {
+    public int nbMonitors() {
         return 0;
     }
 

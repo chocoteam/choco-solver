@@ -36,7 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
-import solver.requests.list.RequestListBuilder;
+import solver.requests.list.VariableMonitorListBuilder;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -74,7 +74,7 @@ public abstract class AbstractVariable implements Serializable {
     /**
      * List of requests
      */
-    protected final IList<IRequest> requests;
+    protected final IList<IVariableMonitor> requests;
 
 
     protected IView[] views; // views to inform of domain modification
@@ -101,7 +101,7 @@ public abstract class AbstractVariable implements Serializable {
         this.name = name;
         this.solver = solver;
         this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
+        this.requests = VariableMonitorListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         views = new IView[2];
     }
 
@@ -115,12 +115,12 @@ public abstract class AbstractVariable implements Serializable {
         this.uniqueID = uniqueID;
     }
 
-    public void activate(IRequest request) {
-        requests.setActive(request);
+    public void activate(IVariableMonitor monitor) {
+        requests.setActive(monitor);
     }
 
-    public void desactivate(IRequest request) {
-        requests.setPassive(request);
+    public void desactivate(IVariableMonitor monitor) {
+        requests.setPassive(monitor);
     }
 
     public String getName() {
@@ -149,12 +149,12 @@ public abstract class AbstractVariable implements Serializable {
         }
     }
 
-    public void addRequest(IRequest request) {
-        requests.add(request, false);
+    public void addMonitor(IVariableMonitor monitor) {
+        requests.add(monitor, false);
     }
 
-    public void deleteRequest(IRequest request) {
-        requests.remove(request);
+    public void removeMonitor(IVariableMonitor monitor) {
+        requests.remove(monitor);
     }
 
     public void subscribeView(IView view) {
@@ -166,7 +166,7 @@ public abstract class AbstractVariable implements Serializable {
         views[vIdx++] = view;
     }
 
-    public IList getRequests() {
+    public IList getMonitors() {
         return requests;
     }
 
@@ -174,7 +174,7 @@ public abstract class AbstractVariable implements Serializable {
         return requests.size();
     }
 
-    public int nbRequests() {
+    public int nbMonitors() {
         return requests.cardinality();
     }
 

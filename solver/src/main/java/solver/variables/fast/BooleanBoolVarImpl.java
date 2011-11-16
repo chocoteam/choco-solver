@@ -42,7 +42,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
@@ -376,9 +376,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<BoolVar> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<BoolVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

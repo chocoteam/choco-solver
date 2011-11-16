@@ -38,9 +38,12 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.*;
+import solver.variables.AbstractVariable;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -91,9 +94,9 @@ public abstract class AbstractViewWithDomain extends AbstractVariable implements
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<AbstractViewWithDomain> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<AbstractViewWithDomain> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
     }
 
 

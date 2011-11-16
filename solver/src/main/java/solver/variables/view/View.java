@@ -35,9 +35,9 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
 
@@ -103,13 +103,13 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void activate(IRequest request) {
-        var.activate(request);
+    public void activate(IVariableMonitor monitor) {
+        var.activate(monitor);
     }
 
     @Override
-    public void desactivate(IRequest request) {
-        var.desactivate(request);
+    public void desactivate(IVariableMonitor monitor) {
+        var.desactivate(monitor);
     }
 
     @Override
@@ -118,13 +118,13 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void addRequest(IRequest request) {
-        var.addRequest(request);
+    public void addMonitor(IVariableMonitor monitor) {
+        var.addMonitor(monitor);
     }
 
     @Override
-    public void deleteRequest(IRequest request) {
-        var.deleteRequest(request);
+    public void removeMonitor(IVariableMonitor monitor) {
+        var.removeMonitor(monitor);
     }
 
     @Override
@@ -133,8 +133,8 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public IList getRequests() {
-        return var.getRequests();
+    public IList getMonitors() {
+        return var.getMonitors();
     }
 
     @Override
@@ -148,8 +148,8 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public int nbRequests() {
-        return var.nbRequests();
+    public int nbMonitors() {
+        return var.nbMonitors();
     }
 
     @Override

@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.requests.ConditionnalRequest;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.requests.conditions.CondAllDiffBC;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -57,8 +57,8 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
     }
 
     @Override
-    public IRequest<IntVar> makeRequest(IntVar var, int idx) {
-        ConditionnalRequest<PropProbaAllDiffBC> cr = new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
+    public IRequestWithVariable<IntVar> makeRequest(IntVar var, int idx) {
+        ConditionnalRequest cr = new ConditionnalRequest(this, vars[idx], idx, cond, this.environment);
         cond.linkRequest(cr);
         return cr;
     }

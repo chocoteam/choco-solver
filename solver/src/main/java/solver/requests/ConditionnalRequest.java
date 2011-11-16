@@ -37,7 +37,6 @@ import solver.requests.conditions.AbstractCondition;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 
 /**
@@ -50,7 +49,7 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractRequest<IntVar, P> {
+public class ConditionnalRequest extends AbstractRequestWithVar<IntVar> {
 
     int timestamp; // timestamp of the last clear call -- for lazy clear
 
@@ -62,11 +61,9 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     final IStateInt first, last; // regarding "removedValues", point out the interval not propagated
 
-    int frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
-
     int dLast; // regarding variable delta domain, point out last value already recorded
 
-    public ConditionnalRequest(P propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
+    public ConditionnalRequest(Propagator<IntVar> propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
         super(propagator, variable, idxInProp);
         this.condition = condition;
         evtmask = environment.makeInt();
@@ -84,14 +81,14 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
     @Override
     public void forEach(IntProcedure proc) throws ContradictionException {
         int last_ = last.get();
-        for(int i = first.get(); i < last_; i++){
+        for (int i = first.get(); i < last_; i++) {
             proc.execute(removedValues[i]);
         }
     }
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        for(int i = from; i < to; i++){
+        for (int i = from; i < to; i++) {
             proc.execute(removedValues[i]);
         }
     }
@@ -152,7 +149,7 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
     }
 
     @Override
-    public void afterUpdate(Variable var, EventType evt, ICause cause) {
+    public void afterUpdate(IntVar var, EventType evt, ICause cause) {
         // BEWARE: propagators must be monotonic to avoid storing previously removed values
         update(evt);
     }

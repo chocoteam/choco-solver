@@ -24,34 +24,16 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.strategy.enumerations.sorters.metrics;
+package solver.requests;
 
+import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
 
 /**
- * A metric to evaluate the degree (nb of constraints) of a Variable
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 10/05/11
+ * @since 16/11/11
  */
-public class Degree implements IMetric<Variable> {
-
-    private static Degree singleton;
-
-    private Degree() {
-    }
-
-    public static Degree build() {
-        if (singleton == null) {
-            singleton = new Degree();
-        }
-        return singleton;
-    }
-
-
-    @Override
-    public int eval(Variable var) {
-        return var.nbMonitors();
-    }
+public interface IRequestWithVariable<V extends Variable> extends IRequest<V>, IVariableMonitor<V> {
 }

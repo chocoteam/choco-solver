@@ -44,7 +44,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 23 sept. 2010
  */
-public class EventRequest<V extends Variable, P extends Propagator<V>> extends AbstractRequest<V, P> {
+public class EventRequest<V extends Variable> extends AbstractRequestWithVar<V> {
 
     int timestamp; // timestamp of the last clear call -- for lazy clear
 
@@ -53,7 +53,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
 
     int evtmask; // reference to events occuring
 
-    public EventRequest(P propagator, V variable, int idxInProp) {
+    public EventRequest(Propagator<V> propagator, V variable, int idxInProp) {
         super(propagator, variable, idxInProp);
 
         this.evtmask = 0;

@@ -42,9 +42,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.propagation.engines.IPropagationEngine;
-import solver.requests.EventRequest;
-import solver.requests.IRequest;
-import solver.requests.PropRequest;
+import solver.requests.*;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -97,7 +95,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * List of requests of <code>this</code>
      */
-    protected IRequest[] requests;
+    protected IRequestWithVariable[] requests;
 
     protected int lastRequest;
 
@@ -151,7 +149,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         arity = environment.makeInt(nbNi);
         fails = 0;
-        requests = new IRequest[vars.length];
+        requests = new IRequestWithVariable[vars.length];
         lastRequest = 0;
     }
 
@@ -162,8 +160,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param idx idx of the variable in <code>this</code>
      * @return a request
      */
-    public IRequest<V> makeRequest(V var, int idx) {
-        return new EventRequest<V, Propagator<V>>(this, var, idx);
+    public IRequestWithVariable<V> makeRequest(V var, int idx) {
+        return new EventRequest<V>(this, var, idx);
     }
 
 
@@ -282,10 +280,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         throw new IndexOutOfBoundsException();
     }
 
-    public void addRequest(IRequest<V> request) {
+    public void addRequest(IRequestWithVariable request) {
         if (lastRequest >= requests.length) {
-            IRequest[] tmp = requests;
-            requests = new IRequest[tmp.length * 3 / 2 + 1];
+            IRequestWithVariable[] tmp = requests;
+            requests = new IRequestWithVariable[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, requests, 0, tmp.length);
         }
         requests[lastRequest++] = request;
@@ -306,8 +304,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     @SuppressWarnings({"UnusedDeclaration", "unchecked"})
     public void unlinkVariables() {
         for (; lastRequest > 0; lastRequest--) {
-            IRequest request = requests[lastRequest - 1];
-            request.getVariable().deleteRequest(request);
+            IRequestWithVariable request = requests[lastRequest - 1];
+            request.getVariable().removeMonitor(request);
             requests[lastRequest - 1] = null;
         }
     }

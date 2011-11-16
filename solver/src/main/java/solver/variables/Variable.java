@@ -35,7 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -69,36 +68,36 @@ public interface Variable<D extends IDelta> extends Serializable {
     String getName();
 
     /**
-     * Build and add a request to the request list of <code>this</code>.
-     * The request is inactive at the creation and must be activated (by the engine propagation).
-     * @param request
+     * Build and add a monitor to the monitor list of <code>this</code>.
+     * The monitor is inactive at the creation and must be activated (by the engine propagation).
+     * @param monitor a variable monitor
      */
-    void addRequest(IRequest request);
+    void addMonitor(IVariableMonitor monitor);
 
     /**
-     * Activate a request
-     * @param request
+     * Activate a IVariableMonitor
+     * @param monitor a variable monitor
      */
-    void activate(IRequest request);
+    void activate(IVariableMonitor monitor);
 
     /**
-     * Desactivate a request, the request is reactivate upon backtracking.
-     * @param request
+     * Desactivate a monitor, the monitor is reactivate upon backtracking.
+     * @param monitor a variable monitor
      */
-    void desactivate(IRequest request);
+    void desactivate(IVariableMonitor monitor);
 
     //todo : to complete
-    void deleteRequest(IRequest request);
+    void removeMonitor(IVariableMonitor monitor);
 
-    IList getRequests();
+    IList getMonitors();
 
-    int nbRequests();
+    int nbMonitors();
 
     void subscribeView(IView view);
 
     /**
      * Returns the number of constraints involving <code>this</code>
-     * TODO: MostConstrained: count requests instead of constraints
+     * TODO: MostConstrained: count monitors instead of constraints
      *
      * @return the number of constraints of <code>this</code>
      */
