@@ -70,7 +70,7 @@ public interface IPropagationEngine extends Serializable {
      * Define the action to apply on a state changes of observable objects.
      * @param request
      */
-    void update(IRequest request);
+    void schedule(IRequest request);
 
     void remove(IRequest request);
 

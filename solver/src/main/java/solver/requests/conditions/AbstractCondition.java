@@ -66,12 +66,12 @@ public abstract class AbstractCondition {
     public final void updateAndValid(ConditionnalRequest request, int evtmask) {
         update(request, evtmask);
         if (wasValid.get()) {
-            request.getPropagationEngine().update(request);
+            request.schedule();
         } else if (isValid()) {
             for (int i = 0; i < idxLastRequest; i++) {
                 ConditionnalRequest crequest = relatedRequests[i];
                 if (crequest.hasChanged()) {
-                    crequest.getPropagationEngine().update(crequest);
+                    crequest.schedule();
                 }
             }
             wasValid.set(alwaysValid());

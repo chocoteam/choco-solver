@@ -117,7 +117,7 @@ public class EventRequest<V extends Variable> extends AbstractRequestWithVar<V> 
                 propagator.decArity();
             }
             addAll(e);
-            engine.update(this);
+            schedule();
         }
     }
 

@@ -49,7 +49,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 5 oct. 2010
  */
-public interface IRequest<V extends Variable> extends Serializable, IQueable, MultiDimensionIndex {
+public interface IRequest<V extends Variable> extends Serializable, IQueable, MultiDimensionIndex, ISchedulable {
 
     public static final int VAR_IN_PROP = 0, IN_VAR = 1, GROUP_ID = 2, IN_GROUP = 3;
 

@@ -155,7 +155,7 @@ public class GraphRequest<V extends GraphVar> extends AbstractRequestWithVar<V> 
         if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             addAll(e);
-            engine.update(this);
+            schedule();
         }
     }
 }

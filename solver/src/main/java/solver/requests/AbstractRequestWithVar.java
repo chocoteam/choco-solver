@@ -80,6 +80,11 @@ public abstract class AbstractRequestWithVar<V extends Variable> implements IReq
     }
 
     @Override
+    public void schedule() {
+        engine.schedule(this);
+    }
+
+    @Override
     public final int getMask() {
         return propagator.getPropagationConditions(indices[VAR_IN_PROP]);
     }

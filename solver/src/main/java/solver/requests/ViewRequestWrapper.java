@@ -81,6 +81,11 @@ public class ViewRequestWrapper implements IRequestWithVariable<IntVar> {
     }
 
     @Override
+    public void schedule() {
+        original.schedule();
+    }
+
+    @Override
     public void update(EventType eventType) {
         original.update(modifier.update(original.getVariable(), eventType));
     }
