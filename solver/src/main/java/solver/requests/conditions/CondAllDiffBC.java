@@ -1,13 +1,13 @@
 package solver.requests.conditions;
 
-
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.requests.ConditionnalRequest;
+import solver.requests.IRequest;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -57,20 +57,20 @@ public class CondAllDiffBC extends AbstractCondition {
 //        if (EventType.isRemove(evtMask)) {
         int last = request.getLast();
         try {
-            request.forEach(rem_proc.set(request.getIdxVarInProp()),
-                    fromDelta[request.getIdxVarInProp()].get(),
+            request.forEach(rem_proc.set(request.getIndex(IRequest.VAR_IN_PROP)),
+                    fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].get(),
                     last);
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBC#update encounters an exception");
         }
-        fromDelta[request.getIdxVarInProp()].set(last);
+        fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].set(last);
         if (request.getPropagator().getNbRequestEnqued() == 0
                 && !checkUnion()) {
             throw new SolverException("CondAllDiffBC#checkUnion is not valid");
         }
     }
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final CondAllDiffBC p;
         private int idxVar;
@@ -80,7 +80,7 @@ public class CondAllDiffBC extends AbstractCondition {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }
