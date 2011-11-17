@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.queues.aqueues;
+package solver.propagation.engines.queues;
 
 import java.util.Random;
 
