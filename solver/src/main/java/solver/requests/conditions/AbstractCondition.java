@@ -29,7 +29,8 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import solver.requests.ConditionnalRequest;
+import solver.requests.IRequest;
+import solver.variables.EventType;
 
 /**
  * An abstract class to declare a specific conditions to be satisfied for a conditionnal request.
@@ -44,15 +45,15 @@ import solver.requests.ConditionnalRequest;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractCondition {
+public abstract class AbstractCondition<R extends IRequest> implements ICondition<R> {
 
-    ConditionnalRequest[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
+    R[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
     int idxLastRequest; // index of the last not null request in relatedRequests
     final IStateBool wasValid;
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedRequests = new ConditionnalRequest[8];
+        relatedRequests = (R[]) new IRequest[8];
     }
 
     /**
@@ -60,21 +61,25 @@ public abstract class AbstractCondition {
      * If the condition is newly validate, push all related requests in the propagation engine.
      * todo: preciser les raisons
      *
-     * @param request    recently modified request
-     * @param evtmask variable modification event
+     * @param request recently modified request
+     * @param event
      */
-    public final void updateAndValid(ConditionnalRequest request, int evtmask) {
-        update(request, evtmask);
+    public final boolean validateScheduling(R request, EventType event) {
         if (wasValid.get()) {
-            request.schedule();
-        } else if (isValid()) {
-            for (int i = 0; i < idxLastRequest; i++) {
-                ConditionnalRequest crequest = relatedRequests[i];
-                if (crequest.hasChanged()) {
-                    crequest.schedule();
+            return true;
+        } else {
+            update(request, event);
+            if (isValid()) {
+                for (int i = 0; i < idxLastRequest; i++) {
+                    R crequest = relatedRequests[i];
+                    if (crequest.getMask() > 0) {
+                        crequest.schedule(); // TODO: do not add request...
+                    }
                 }
+                wasValid.set(alwaysValid());
+                return true;
             }
-            wasValid.set(alwaysValid());
+            return false;
         }
     }
 
@@ -97,20 +102,20 @@ public abstract class AbstractCondition {
     /**
      * Updates the current condition on the modification of one its related requests.
      *
-     * @param request    recently modified request
-     * @param evtMask
+     * @param request recently modified request
+     * @param event
      */
-    abstract void update(ConditionnalRequest request, int evtMask);
+    abstract void update(R request, EventType event);
 
     /**
      * Link the <code>request</code> to the condition
      *
      * @param request condition request
      */
-    public void linkRequest(ConditionnalRequest request) {
+    public void linkRequest(R request) {
         if (idxLastRequest >= relatedRequests.length) {
-            ConditionnalRequest[] tmp = relatedRequests;
-            relatedRequests = new ConditionnalRequest[tmp.length * 2];
+            R[] tmp = relatedRequests;
+            relatedRequests = (R[]) new IRequest[tmp.length * 2];
             System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
         }
         relatedRequests[idxLastRequest++] = request;

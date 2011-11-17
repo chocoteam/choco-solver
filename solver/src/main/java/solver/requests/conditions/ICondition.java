@@ -24,45 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.requests.conditions;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.IntVar;
+
+import java.io.Serializable;
 
 /**
- * A simple condition based on number of instantiated variables.
- * Requests are posted when each variable is instantiated.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/03/11
+ * @since 17/11/11
  */
-public class IsInstantiated extends AbstractCondition {
+public interface ICondition<R extends IRequest> extends Serializable {
 
-    final IStateInt nbVarInstantiated;
-    final IntVar variable;
+    /**
+     * Keep informed the condition of the modification of one of its related requests.
+     * If the condition is newly validate, schedule all related requests, if any.
+     *
+     * @param request recently modified request
+     * @param event   event requiring a validation
+     */
+    boolean validateScheduling(R request, EventType event);
 
-    public IsInstantiated(IEnvironment environment, IntVar variable) {
-        super(environment);
-        nbVarInstantiated = environment.makeInt();
-        this.variable = variable;
-    }
+    public static enum Default implements ICondition {
+        ALWAYS_TRUE;
 
-    @Override
-    boolean isValid() {
-        return variable.instantiated();
-    }
-
-    @Override
-    boolean alwaysValid() {
-        return true;
-    }
-
-    @Override
-    void update(IRequest request, EventType event) {
+        @Override
+        public boolean validateScheduling(IRequest request, EventType event) {
+            return true;
+        }
     }
 }

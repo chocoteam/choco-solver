@@ -8,6 +8,7 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.requests.ConditionnalRequest;
 import solver.requests.IRequest;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ import java.util.Set;
  * User: chameau
  * Date: 3 nov. 2011
  */
-public class CondAllDiffBC extends AbstractCondition {
+public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
 
     protected Union unionset;
     protected IntVar[] vars;
@@ -53,7 +54,7 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalRequest request, int evtMask) {
+    void update(ConditionnalRequest request, EventType event) {
 //        if (EventType.isRemove(evtMask)) {
         int last = request.getLast();
         try {

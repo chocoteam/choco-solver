@@ -114,7 +114,9 @@ public class ConditionnalRequest extends AbstractRequestWithVar<IntVar> {
                 propagator.decArity();
             }
             addAll(e);
-            condition.updateAndValid(this, e.mask);
+            if (condition.validateScheduling(this, e)) {
+                schedule();
+            }
         }
     }
 
@@ -136,10 +138,6 @@ public class ConditionnalRequest extends AbstractRequestWithVar<IntVar> {
             this.dLast = 0;
             timestamp = AbstractSearchLoop.timeStamp;
         }
-    }
-
-    public boolean hasChanged() {
-        return evtmask.get() > 0;
     }
 
     @Override
