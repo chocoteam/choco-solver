@@ -100,10 +100,10 @@ public final class ArrayReacher implements IReacher {
 
     @Override
     public void update(IRequest request) {
-        if (!request.enqueued()) {
+        //if (!request.enqueued()) {
             toPropagate.set(request.getIndex(IRequest.IN_GROUP), true);
             request.enqueue();
-        }
+        //}
     }
 
     @Override

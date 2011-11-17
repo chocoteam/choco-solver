@@ -79,11 +79,8 @@ public final class QueueReacher implements IReacher {
 
     @Override
     public void update(IRequest request) {
-        if (!request.enqueued()) {
-            toPropagate.add(request);
-            request.enqueue();
-        }
-
+        toPropagate.add(request);
+        request.enqueue();
     }
 
     @Override

@@ -81,7 +81,9 @@ public abstract class AbstractRequestWithVar<V extends Variable> implements IReq
 
     @Override
     public void schedule() {
-        engine.schedule(this);
+        if (!enqueued()) { // todo : to impact in propagation engine
+            engine.schedule(this);
+        }
     }
 
     @Override

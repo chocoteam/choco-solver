@@ -73,7 +73,7 @@ public abstract class AbstractCondition<R extends IRequest> implements IConditio
                 for (int i = 0; i < idxLastRequest; i++) {
                     R crequest = relatedRequests[i];
                     if (crequest.getMask() > 0) {
-                        crequest.schedule(); // TODO: do not add request...
+                        crequest.schedule(); // TODO: do not add request in parameter...
                     }
                 }
                 wasValid.set(alwaysValid());

@@ -194,10 +194,8 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
 
     @Override
     public void schedule(IRequest request) {
-        if (!request.enqueued()) {
-            sequencer.set(request.getIndex(IRequest.IN_GROUP), true);
-            request.enqueue();
-        }
+        sequencer.set(request.getIndex(IRequest.IN_GROUP), true);
+        request.enqueue();
     }
 
     @Override
