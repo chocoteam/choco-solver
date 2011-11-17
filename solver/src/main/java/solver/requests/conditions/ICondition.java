@@ -32,6 +32,10 @@ import solver.variables.EventType;
 import java.io.Serializable;
 
 /**
+ * A condition on request scheduling.
+ * #validateScheduling can react on a request updating to compute (or update) a condition
+ * that validates (or not) the scheduling of the request
+ *
  * <br/>
  *
  * @author Charles Prud'homme
