@@ -28,7 +28,7 @@
 package solver.propagation.engines.group;
 
 import solver.exception.ContradictionException;
-import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
+import solver.propagation.engines.queues.FixSizeCircularQueue;
 import solver.requests.IRequest;
 
 /**
