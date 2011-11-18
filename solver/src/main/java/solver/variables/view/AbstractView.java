@@ -28,6 +28,7 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
+import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.Solver;
@@ -39,11 +40,11 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.requests.list.RequestListBuilder;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.NotifyProcedure;
 import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -65,7 +66,7 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     protected final Solver solver;
 
-    protected final IRequestList<IRequest> requests;
+    protected final IList<IRequest> requests;
 
     protected final IPropagationEngine engine;
 
@@ -73,12 +74,14 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
 
     protected DisposableRangeIterator _riterator;
 
+    protected final NotifyProcedure procN = new NotifyProcedure();
+
     public AbstractView(IntVar a, IntVar b, Solver solver) {
         this.A = a;
         this.B = b;
         this.solver = solver;
         this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment());
+        this.requests = RequestListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         this.LB = solver.getEnvironment().makeInt(0);
         this.UB = solver.getEnvironment().makeInt(0);
         this.SIZE = solver.getEnvironment().makeInt(0);
@@ -98,7 +101,7 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     }
 
     public void addRequest(IRequest request) {
-        requests.addRequest(request);
+        requests.add(request, false);
     }
 
     public void activate(IRequest request) {
@@ -110,10 +113,10 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     }
 
     public void deleteRequest(IRequest request) {
-        requests.deleteRequest(request);
+        requests.remove(request);
     }
 
-    public IRequestList getRequests() {
+    public IList getRequests() {
         return requests;
     }
 
@@ -185,8 +188,8 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     }
 
 
-    public void notifyPropagators(EventType e, ICause o) {
-        requests.notifyButCause(o, e, getDelta());
+    public void notifyPropagators(EventType e, ICause cause) throws ContradictionException {
+        requests.forEach(procN.set(cause, e, getDelta()));
     }
 
     @Override
@@ -223,7 +226,7 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     public Explanation explain(VariableState what, int val) {
         Explanation explanation = new Explanation();
         explanation.add(A.explain(VariableState.DOM));
-        explanation.add(B.explain(VariableState.DOM ));
+        explanation.add(B.explain(VariableState.DOM));
         return explanation;
     }
 
@@ -238,8 +241,8 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
         Explanation explanation = A.explain(VariableState.DOM);
         explanation.add(B.explain(VariableState.DOM));
         return explanation;
-       // return A.explain(VariableState.DOM).add(B.explain(VariableState.DOM));
-       // throw new UnsupportedOperationException("AbstractView (as a cause)::can not be explained");
+        // return A.explain(VariableState.DOM).add(B.explain(VariableState.DOM));
+        // throw new UnsupportedOperationException("AbstractView (as a cause)::can not be explained");
     }
 
 
@@ -261,8 +264,6 @@ public abstract class AbstractView implements IntVar, IView, Serializable, ICaus
     public long getFails() {
         return 0;
     }
-
-
 
 
 }

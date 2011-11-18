@@ -29,6 +29,7 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
+import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateBool;
 import solver.ICause;
 import solver.Solver;
@@ -37,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Empty;
 import solver.variables.AbstractVariable;
@@ -229,7 +229,7 @@ public class ConstantView extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public IRequestList getRequests() {
+    public IList getRequests() {
         return null;
     }
 

@@ -27,19 +27,6 @@
 
 package choco.kernel.common.util.procedure;
 
-import solver.exception.ContradictionException;
-
-import java.io.Serializable;
-
-/**
- * A class that permits to execute a embeded "function"
- * @param <E>
- */
-public interface Procedure<E> extends Serializable {
-    /**
-     * Action to execute in a <code>Delta</code> object, within the <code>forEach</code> method.
-     * @param e object to deal with in the execution
-     * @throws solver.exception.ContradictionException if a contradiction occurs
-     */
-    void execute(E e) throws ContradictionException;
+public interface UnaryProcedure<E, A> extends Procedure<E> {
+    UnaryProcedure set(A a);
 }

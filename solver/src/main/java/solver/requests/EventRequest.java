@@ -85,7 +85,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
             this.evtmask = 0; // and clean up mask
             propagator.eventCalls++;
             assert (propagator.isActive()) : this + " is not active";
-            propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+            propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
         }
     }
 
@@ -111,7 +111,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
     public void update(EventType e) {
 //        LoggerFactory.getLogger("solver").info("\tfilter on {}", this.toString());
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             if (EventType.anInstantiationEvent(e.mask)) {
                 propagator.decArity();

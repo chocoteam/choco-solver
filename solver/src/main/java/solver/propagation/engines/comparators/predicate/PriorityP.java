@@ -59,7 +59,7 @@ public class PriorityP implements Predicate {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getPropagator().getPriority().priority >= threshold.priority) {
-                    int idx = all[i].getIndex();
+                    int idx = all[i].getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
             }

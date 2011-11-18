@@ -25,28 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.common;
+package choco.kernel.common.util.procedure;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 17 févr. 2009
-* Since : Choco 2.0.1
-* Update : Choco 2.0.1
-*
-* Index of an object.
-*
-* BEWARE : IT IS NOT SIMILAR TO HASHCODE!!!
-*
-* Index can change from one execution to another one. HashCode should not!
-*/
-public interface IIndex {
-    
-    /**
-     * Unique index 
-     * (Different from hashCode, can change from one execution to another one) 
-     * @return the indice of the objet
-     */
-    long getIndex();
-
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 29 sept. 2010
+ */
+public interface BinaryIntProcedure<A, B> extends IntProcedure {
+    BinaryIntProcedure set(A a, B b);
 }
