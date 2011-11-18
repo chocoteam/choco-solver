@@ -29,7 +29,7 @@ package solver.propagation.engines;
 
 import solver.exception.ContradictionException;
 import solver.propagation.engines.group.Group;
-import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
+import solver.propagation.engines.queues.FixSizeCircularQueue;
 import solver.requests.IRequest;
 
 import java.util.BitSet;
@@ -73,7 +73,7 @@ public class OldestEngine implements IEngine {
 
     @Override
     public void update(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         Group g = groups[gidx];
         g.update(request);
         if (!active.get(gidx)) {
@@ -84,7 +84,7 @@ public class OldestEngine implements IEngine {
 
     @Override
     public void remove(IRequest request) {
-        int gidx = request.getGroup();
+        int gidx = request.getIndex(IRequest.GROUP_ID);
         Group g = groups[gidx];
         if (g.remove(request)) {
             queue.remove(g);

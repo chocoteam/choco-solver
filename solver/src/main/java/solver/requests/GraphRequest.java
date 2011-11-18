@@ -34,7 +34,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 
-public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends AbstractRequest<V, P> {
+public class GraphRequest<V extends GraphVar> extends AbstractRequestWithVar<V> {
 
     //NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
     final static int NR = 0;
@@ -48,7 +48,7 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
 
     int evtmask; // reference to events occuring
 
-    public GraphRequest(P propagator, V variable, int idxInProp) {
+    public GraphRequest(Propagator<V> propagator, V variable, int idxInProp) {
         super(propagator, variable, idxInProp);
 
         this.evtmask = 0;
@@ -117,7 +117,7 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
         this.evtmask = 0; // and clean up mask
         filter++;
         assert (propagator.isActive());
-        propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+        propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
     }
 
     private void addAll(EventType e) {
@@ -152,10 +152,10 @@ public class GraphRequest<V extends GraphVar, P extends Propagator<V>> extends A
     @Override
     public void update(EventType e) {
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             addAll(e);
-            engine.update(this);
+            schedule();
         }
     }
 }

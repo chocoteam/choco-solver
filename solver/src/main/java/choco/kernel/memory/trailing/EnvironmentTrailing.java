@@ -261,7 +261,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
         throw (new UnsupportedOperationException());
     }
 
-    private void increaseTrail() {
+    private void increaseTrail() {// TODO check resizing
         ITrailStorage[] tmp = trails;
         trails = new ITrailStorage[tmp.length + 1];
         System.arraycopy(tmp, 0, trails, 0, tmp.length);

@@ -108,12 +108,12 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
         // initialization requests are also enqued to be treated at initial propagation
         for (i = offset; i < size; i++) {
             request = requests[i];
-            requests[i].setGroup(0);
+            requests[i].setIndex(IRequest.GROUP_ID, 0);
             request.enqueue();
         }
         for (i = 0; i < offset; i++) {
             request = requests[i];
-            requests[i].setGroup(0);
+            requests[i].setIndex(IRequest.GROUP_ID, 0);
         }
         init = false;
         sequencer = new LonelySequencer(this, offset, solver.getNbVars(), nbThreads);
@@ -193,16 +193,14 @@ public final class ThreadedPropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void update(IRequest request) {
-        if (!request.enqueued()) {
-            sequencer.set(request.getIndex(), true);
-            request.enqueue();
-        }
+    public void schedule(IRequest request) {
+        sequencer.set(request.getIndex(IRequest.IN_GROUP), true);
+        request.enqueue();
     }
 
     @Override
     public void remove(IRequest request) {
-        sequencer.set(request.getIndex(), false);
+        sequencer.set(request.getIndex(IRequest.IN_GROUP), false);
         request.deque();
     }
 

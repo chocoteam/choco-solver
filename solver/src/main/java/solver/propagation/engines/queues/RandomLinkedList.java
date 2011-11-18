@@ -25,71 +25,46 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests.list;
+package solver.propagation.engines.queues;
 
-import solver.ICause;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.delta.IDelta;
-
-import java.io.Serializable;
+import java.util.Random;
 
 /**
- *
- * A IRequestList is a container of IRequest objects.
- * A request can change of state (from active to passive) during a propagation step, this container must consider
- * this information. Restoring the previous state of requests must be done upon backtracking.
+ * A linked list where element is added after the last element, and where elements are popped randomly
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 23/02/11
+ * @since 25/02/11
  */
-public interface IRequestList<R extends IRequest> extends Serializable{
+public class RandomLinkedList<E> extends LinkedList<E> {
+
+    Random random;
+
+    @SuppressWarnings({"unchecked"})
+    public RandomLinkedList(int size) {
+        super(size);
+        random = new Random();
+    }
 
     /**
-     * Add a new <code>request</code>
-     * @param request to add
+     * {@inheritDoc}
      */
-    void addRequest(R request);
+    public E pop() {
+        int index = random.nextInt(size);
+        return remove(index);
+    }
 
     /**
-     * Activate a request
-     * @param request the modified element
+     * {@inheritDoc}
      */
-    void setActive(R request);
+    public E remove() {
+        return remove(header.next);
+    }
 
     /**
-     * Desactivate a request
-     * @param request the modified element
+     * {@inheritDoc}
      */
-    void setPassive(R request);
-
-    /**
-     * Permanently delete <code>request</code>
-     * @param request to delete
-     */
-    void deleteRequest(IRequest request);
-
-    /**
-     * Returns the total number of element contained.
-     * @return the total number of element contained.
-     */
-    int size();
-
-    /**
-     * Returns the number of active elements.
-     * @return the number of active elements.
-     */
-    int cardinality();
-
-    /**
-     * Notifies the active requests of an event occuring on the variable declaring <code>this</code>.
-     * This method loops over active requests matching the event to update it, avoiding the causing request, if exists.
-     * @param cause cause of the notification
-     * @param event event implication of the cause
-     * @param delta removed values implied by the event
-     */
-    void notifyButCause(ICause cause, EventType event, IDelta delta);
-
-    R get(int i);
+    public E remove(int index) {
+        return remove(getEntry(index));
+    }
 }

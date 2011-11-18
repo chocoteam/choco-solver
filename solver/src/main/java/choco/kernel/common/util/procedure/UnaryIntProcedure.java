@@ -24,50 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
-import choco.kernel.ESat;
+package choco.kernel.common.util.procedure;
 
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
- *
- */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
-
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
-
-	@Override
-	public void propagate() throws ContradictionException {}
-
-	@Override
-	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyMonitors(EventType.META, this);
-	}
-
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+public interface UnaryIntProcedure<A> extends IntProcedure {
+    UnaryIntProcedure set(A a);
 }

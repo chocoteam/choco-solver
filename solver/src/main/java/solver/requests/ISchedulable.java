@@ -24,41 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.requests.list;
-
-import choco.kernel.memory.IEnvironment;
-import solver.requests.IRequest;
+package solver.requests;
 
 /**
- * A class declaring builder for IRequestList.
+ * An interface for schedulable object
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24/02/11
+ * @since 16/11/11
  */
-public class RequestListBuilder {
+public interface ISchedulable {
 
-    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: RequestImmutableArrayList, 2: RequestTypedImmutableArrayList, ...
+    void schedule();
 
-    protected RequestListBuilder() {
-    }
-
-    /**
-     * Builds and returns the preset IRequestList object.
-     *
-     * @param environment bracktrackable environment
-     * @param <R>         type of request
-     * @return a implementation of IRequestList
-     */
-    public static <R extends IRequest> IRequestList<R> preset(IEnvironment environment) {
-        switch (_DEFAULT) {
-            default:
-                return arraylist(environment);
-        }
-    }
-
-    public static <R extends IRequest> IRequestList<R> arraylist(IEnvironment environment) {
-        return new RequestArrayList<R>(environment);
-    }
 }

@@ -24,29 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package choco.kernel.common;
+import junit.framework.Assert;
+import org.testng.annotations.Test;
 
-/*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 17 févr. 2009
-* Since : Choco 2.0.1
-* Update : Choco 2.0.1
-*
-* Index of an object.
-*
-* BEWARE : IT IS NOT SIMILAR TO HASHCODE!!!
-*
-* Index can change from one execution to another one. HashCode should not!
-*/
-public interface IIndex {
-    
-    /**
-     * Unique index 
-     * (Different from hashCode, can change from one execution to another one) 
-     * @return the indice of the objet
-     */
-    long getIndex();
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 15/11/11
+ */
+public class AllTest {
 
+    AbstractProblem prob;
+    String[] args;
+    long[] stats;
+
+    public AllTest() {
+        this(new AllIntervalSeries(), new String[]{"-o", "50"}, new long[]{1,2});
+    }
+
+    public AllTest(AbstractProblem prob, String[] arguments, long[] statistics) {
+        this.prob = prob;
+        this.args = arguments;
+        this.stats = statistics;
+    }
+
+    @Test(groups = "1m")
+    public void mainTest() {
+        prob.readArgs(args);
+        prob.buildModel();
+        prob.configureSolver();
+        prob.overrideExplanation();
+        prob.overridePolicy();
+        prob.solve();
+
+        Assert.assertEquals("incorrect nb solutions", stats[0], prob.getSolver().getMeasures().getSolutionCount());
+        Assert.assertEquals("incorrect nb nodes", stats[1], prob.getSolver().getMeasures().getNodeCount());
+
+    }
 }

@@ -26,6 +26,7 @@
  */
 package solver.variables;
 
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -36,23 +37,24 @@ import solver.variables.delta.NoDelta;
 
 public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
 
-	protected V[] components;
-	protected int dim;
-	
-	public MetaVariable(String name, Solver sol, V[] vars){
-		super(name, sol);
-		components = vars;
-		dim = vars.length;
-	}
+    protected V[] components;
+    protected int dim;
 
-	@Override
-	public boolean instantiated() {
-		for(int i=0;i<dim;i++){
-			if (!components[i].instantiated()){
-				return false;
-			}
-		}return true;
-	}
+    public MetaVariable(String name, Solver sol, V[] vars) {
+        super(name, sol);
+        components = vars;
+        dim = vars.length;
+    }
+
+    @Override
+    public boolean instantiated() {
+        for (int i = 0; i < dim; i++) {
+            if (!components[i].instantiated()) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public void updatePropagationConditions(Propagator observer, int idxInProp) {
         modificationEvents |= observer.getPropagationConditions(idxInProp);
@@ -62,41 +64,49 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
     public void attachPropagator(Propagator propagator, int idxInProp) {
     }
 
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
+    }
+
     @Override
-	public Explanation explain(VariableState what) {
-		throw new UnsupportedOperationException("MetaVariable does not (yet) implement method explain(...)");
-	}
+    public Explanation explain(VariableState what) {
+        throw new UnsupportedOperationException("MetaVariable does not (yet) implement method explain(...)");
+    }
 
     @Override
     public Explanation explain(VariableState what, int val) {
         throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
     }
 
-	@Override
-	public NoDelta getDelta() {
-		return NoDelta.singleton;
-	}
-	
-	public String toString() {
-        String s = this.name +" : {";
-        for(int i=0; i<dim-1; i++){
-        	s+=components[i].toString()+", ";
+    @Override
+    public NoDelta getDelta() {
+        return NoDelta.singleton;
+    }
+
+    public String toString() {
+        String s = this.name + " : {";
+        for (int i = 0; i < dim - 1; i++) {
+            s += components[i].toString() + ", ";
         }
-        s+=components[dim-1].toString()+"}";
+        s += components[dim - 1].toString() + "}";
         return s;
     }
 
-	public V[] getComponents() {
-		return components;
-	}
+    public V[] getComponents() {
+        return components;
+    }
 
-	@Override
-	public void contradiction(ICause cause, String message) throws ContradictionException {
-		engine.fails(cause, this, message);
-	}
+    @Override
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(onContradiction.set(this, event, cause));
+        engine.fails(cause, this, message);
+    }
 
-	@Override
-	public int getType() {
-		return Variable.META;
-	}
+    @Override
+    public int getType() {
+        return Variable.META;
+    }
 }

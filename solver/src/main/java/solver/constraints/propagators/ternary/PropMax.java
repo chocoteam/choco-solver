@@ -28,7 +28,7 @@
 package solver.constraints.propagators.ternary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -211,7 +211,7 @@ public class PropMax extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropMax p;
         private int idxVar;
@@ -221,7 +221,7 @@ public class PropMax extends Propagator<IntVar> {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

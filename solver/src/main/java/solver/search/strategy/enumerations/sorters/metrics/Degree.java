@@ -52,6 +52,6 @@ public class Degree implements IMetric<Variable> {
 
     @Override
     public int eval(Variable var) {
-        return var.nbRequests();
+        return var.nbMonitors();
     }
 }

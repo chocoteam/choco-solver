@@ -28,7 +28,7 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure1;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -128,7 +128,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private static class RemProc implements IntProcedure1<Integer> {
+    private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropAllDiffAC p;
         private int idxVar;
@@ -138,7 +138,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         }
 
         @Override
-        public IntProcedure1 set(Integer idxVar) {
+        public UnaryIntProcedure set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

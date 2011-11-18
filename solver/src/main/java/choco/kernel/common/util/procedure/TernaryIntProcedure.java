@@ -25,46 +25,14 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.queues.aqueues;
-
-import java.util.Random;
+package choco.kernel.common.util.procedure;
 
 /**
- * A linked list where element is added after the last element, and where elements are popped randomly
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 25/02/11
+ * @since 29 sept. 2010
  */
-public class RandomLinkedList<E> extends LinkedList<E> {
-
-    Random random;
-
-    @SuppressWarnings({"unchecked"})
-    public RandomLinkedList(int size) {
-        super(size);
-        random = new Random();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public E pop() {
-        int index = random.nextInt(size);
-        return remove(index);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public E remove() {
-        return remove(header.next);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public E remove(int index) {
-        return remove(getEntry(index));
-    }
+public interface TernaryIntProcedure<A, B, C> extends IntProcedure {
+    TernaryIntProcedure set(A a, B b, C c);
 }

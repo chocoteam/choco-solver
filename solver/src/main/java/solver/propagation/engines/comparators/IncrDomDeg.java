@@ -52,13 +52,13 @@ public class IncrDomDeg<V extends IntVar> implements Comparator<IRequest<V>>, Se
 
     @Override
     public int compare(IRequest<V> o1, IRequest<V> o2) {
-        if (o1.getVariable().nbRequests() == 0) {
+        if (o1.getVariable().nbMonitors() == 0) {
             return 1;
-        } else if (o2.getVariable().nbRequests() == 0) {
+        } else if (o2.getVariable().nbMonitors() == 0) {
             return -1;
         } else {
-            return o1.getVariable().getDomainSize() / o1.getVariable().nbRequests()
-                    - o2.getVariable().getDomainSize() / o2.getVariable().nbRequests();
+            return o1.getVariable().getDomainSize() / o1.getVariable().nbMonitors()
+                    - o2.getVariable().getDomainSize() / o2.getVariable().nbMonitors();
         }
     }
 

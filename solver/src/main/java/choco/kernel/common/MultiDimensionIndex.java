@@ -25,57 +25,30 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.queues;
+package choco.kernel.common;
 
-import choco.kernel.common.util.procedure.Procedure;
-import solver.exception.ContradictionException;
-
-/**
- *
- *
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 29 sept. 2010
- */
-public interface ITwoStateStoreQueue<E> {
+/*
+* User : charles
+* Mail : cprudhom(a)emn.fr
+* Date : 17 févr. 2009
+* Since : Choco 2.0.1
+* Update : Choco 2.0.1
+*
+* Indexed object.
+*/
+public interface MultiDimensionIndex {
 
     /**
-     * Add an element to the queue
-     * @param e element to add
+     * Define the index
      */
-    public void add(E e);
+    void setIndex(int dim, int idx);
 
     /**
-     * Move an element from left side to right side, ie  <code>c</code> state has changed
-     * @param c
-     */
-    public void moveRight(E c);
-
-    /**
-     * @param proc procedure to apply
-     * @throws solver.exception.ContradictionException
+     * Return the index
      *
+     * @return the index of the objet
+     * @param dim
      */
-    public void forEach(Procedure<E> proc) throws ContradictionException;
-
-    /**
-     * @param proc procedure to apply
-     * @throws solver.exception.ContradictionException
-     *
-     */
-    public void forVeryEach(Procedure<E> proc) throws ContradictionException;
-
-    /**
-     * Return the number of element contained
-     * @return
-     */
-    public int size();
-
-    /**
-     * Return the number of active element contained
-     * @return
-     */
-    public int cardinality();
+    int getIndex(int dim);
 
 }

@@ -27,17 +27,17 @@
 
 package solver.variables.view;
 
+import choco.kernel.common.util.objects.IList;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
-import solver.requests.list.IRequestList;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
 
@@ -53,15 +53,20 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class View<IV extends IntVar> extends AbstractVariable implements IntVar {
+public abstract class View<IV extends IntVar> implements IntVar {
+
+    protected final String name;
 
     protected final IV var;
 
     protected int uniqueID;
 
+    protected final Solver solver;
+
     public View(String name, IV var, Solver solver) {
-        super(name, solver);
+        this.name = name;
         this.var = var;
+        this.solver = solver;
     }
 
     public int getUniqueID() {
@@ -98,8 +103,13 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void desactivate(IRequest request) {
-        var.desactivate(request);
+    public void activate(IVariableMonitor monitor) {
+        var.activate(monitor);
+    }
+
+    @Override
+    public void desactivate(IVariableMonitor monitor) {
+        var.desactivate(monitor);
     }
 
     @Override
@@ -108,13 +118,13 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void addRequest(IRequest request) {
-        var.addRequest(request);
+    public void addMonitor(IVariableMonitor monitor) {
+        var.addMonitor(monitor);
     }
 
     @Override
-    public void deleteRequest(IRequest request) {
-        var.deleteRequest(request);
+    public void removeMonitor(IVariableMonitor monitor) {
+        var.removeMonitor(monitor);
     }
 
     @Override
@@ -123,8 +133,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public IRequestList getRequests() {
-        return var.getRequests();
+    public IList getMonitors() {
+        return var.getMonitors();
     }
 
     @Override
@@ -138,8 +148,8 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public int nbRequests() {
-        return var.nbRequests();
+    public int nbMonitors() {
+        return var.nbMonitors();
     }
 
     @Override
@@ -153,8 +163,13 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
-        var.notifyPropagators(eventType, o);
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        var.notifyMonitors(event, cause);
+    }
+
+    @Override
+    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
+        var.notifyViews(event, cause);
     }
 
     @Override
@@ -168,9 +183,10 @@ public abstract class View<IV extends IntVar> extends AbstractVariable implement
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        var.contradiction(cause, message);
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        var.contradiction(cause, event, message);
     }
+
 
     @Override
     public Solver getSolver() {

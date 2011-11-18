@@ -24,9 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package choco.kernel.common.util.procedure;
+import org.testng.annotations.Factory;
 
-public interface Procedure1<E, A> extends Procedure<E> {
-    Procedure1 set(A a);
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 15/11/11
+ */
+public class AllTestFactory {
+
+    AbstractProblem[] problems = new AbstractProblem[]{
+            new AllIntervalSeries()
+    };
+
+    String[][] arguments = new String[][]{
+            {"-0", "50"}
+    };
+
+    long[][] statistics = new long[][]{
+            {1, 2}
+    };
+
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<Object>(12);
+
+        for (int s = 0; s < problems.length; s++) {
+            lresult.add(new AllTest(problems[s], arguments[s], statistics[s]));
+        }
+        return lresult.toArray();
+    }
 }

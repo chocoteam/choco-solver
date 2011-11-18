@@ -30,6 +30,7 @@ package solver.requests;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.requests.conditions.AbstractCondition;
@@ -48,7 +49,7 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractRequest<IntVar, P> {
+public class ConditionnalRequest extends AbstractRequestWithVar<IntVar> {
 
     int timestamp; // timestamp of the last clear call -- for lazy clear
 
@@ -60,11 +61,9 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
 
     final IStateInt first, last; // regarding "removedValues", point out the interval not propagated
 
-    int frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
+    int dLast; // regarding variable delta domain, point out last value already recorded
 
-    int dLast; // regarding variable delta domain, point out last already recorded value
-
-    public ConditionnalRequest(P propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
+    public ConditionnalRequest(Propagator<IntVar> propagator, IntVar variable, int idxInProp, AbstractCondition condition, IEnvironment environment) {
         super(propagator, variable, idxInProp);
         this.condition = condition;
         evtmask = environment.makeInt();
@@ -75,14 +74,23 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
     }
 
 
+    public int getLast() {
+        return last.get();
+    }
+
     @Override
     public void forEach(IntProcedure proc) throws ContradictionException {
-        variable.getDelta().forEach(proc, first.get(), last.get());
+        int last_ = last.get();
+        for (int i = first.get(); i < last_; i++) {
+            proc.execute(removedValues[i]);
+        }
     }
 
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        variable.getDelta().forEach(proc, from, to);
+        for (int i = from; i < to; i++) {
+            proc.execute(removedValues[i]);
+        }
     }
 
     @Override
@@ -93,20 +101,22 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
             first.set(last.get()); // point out current last
             evtmask.set(0); // and clean up current mask
             propagator.eventCalls++;
-            propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+            propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
         }
     }
 
     @Override
     public void update(EventType e) {
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             this.lazyClear();
             if (EventType.anInstantiationEvent(e.mask)) {
                 propagator.decArity();
             }
             addAll(e);
-            condition.updateAndValid(this, e.mask);
+            if (condition.validateScheduling(this, e)) {
+                schedule();
+            }
         }
     }
 
@@ -130,14 +140,15 @@ public class ConditionnalRequest<P extends Propagator<IntVar>> extends AbstractR
         }
     }
 
-    public boolean hasChanged() {
-        return evtmask.get() > 0;
-    }
-
     @Override
     public void desactivate() {
         super.desactivate();
         evtmask.set(0);
     }
 
+    @Override
+    public void afterUpdate(IntVar var, EventType evt, ICause cause) {
+        // BEWARE: propagators must be monotonic to avoid storing previously removed values
+        update(evt);
+    }
 }

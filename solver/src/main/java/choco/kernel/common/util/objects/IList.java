@@ -25,8 +25,68 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.kernel.common.util.procedure;
+package choco.kernel.common.util.objects;
 
-public interface IntProcedure1<A> extends IntProcedure {
-    IntProcedure1 set(A a);
+import choco.kernel.common.MultiDimensionIndex;
+import choco.kernel.common.util.procedure.Procedure;
+import solver.exception.ContradictionException;
+
+import java.io.Serializable;
+
+/**
+ *
+ * A IList is a container of elements.
+ * An element in this list has particular behavior: it can change of state (from active to passive),
+ * this container must consider this information.
+ * Restoring the previous state of requests must be done upon backtracking.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 23/02/11
+ */
+public interface IList<E extends MultiDimensionIndex> extends Serializable{
+
+    /**
+     * Add a new <code>request</code>
+     * @param element to add
+     * @param dynamic
+     */
+    void add(E element, boolean dynamic);
+
+    /**
+     * Activate a element
+     * @param element the modified element
+     */
+    void setActive(E element);
+
+    /**
+     * Desactivate a request
+     * @param element the modified element
+     */
+    void setPassive(E element);
+
+    /**
+     * Permanently delete <code>request</code>
+     * @param element to delete
+     */
+    void remove(E element);
+
+    /**
+     * Returns the total number of element contained.
+     * @return the total number of element contained.
+     */
+    int size();
+
+    /**
+     * Returns the number of active elements.
+     * @return the number of active elements.
+     */
+    int cardinality();
+
+    /**
+     * This method loops over active requests matching the event to execute the procedure in parameter.
+     */
+    void forEach(Procedure proc) throws ContradictionException;
+
+    E get(int i);
 }

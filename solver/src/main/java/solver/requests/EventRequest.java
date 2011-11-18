@@ -44,7 +44,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 23 sept. 2010
  */
-public class EventRequest<V extends Variable, P extends Propagator<V>> extends AbstractRequest<V, P> {
+public class EventRequest<V extends Variable> extends AbstractRequestWithVar<V> {
 
     int timestamp; // timestamp of the last clear call -- for lazy clear
 
@@ -53,7 +53,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
 
     int evtmask; // reference to events occuring
 
-    public EventRequest(P propagator, V variable, int idxInProp) {
+    public EventRequest(Propagator<V> propagator, V variable, int idxInProp) {
         super(propagator, variable, idxInProp);
 
         this.evtmask = 0;
@@ -85,7 +85,7 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
             this.evtmask = 0; // and clean up mask
             propagator.eventCalls++;
             assert (propagator.isActive()) : this + " is not active";
-            propagator.propagateOnRequest(this, idxVarInProp, evtmask_);
+            propagator.propagateOnRequest(this, indices[VAR_IN_PROP], evtmask_);
         }
     }
 
@@ -111,13 +111,13 @@ public class EventRequest<V extends Variable, P extends Propagator<V>> extends A
     public void update(EventType e) {
 //        LoggerFactory.getLogger("solver").info("\tfilter on {}", this.toString());
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(idxVarInProp)) != 0) {
+        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             if (EventType.anInstantiationEvent(e.mask)) {
                 propagator.decArity();
             }
             addAll(e);
-            engine.update(this);
+            schedule();
         }
     }
 
