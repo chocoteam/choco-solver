@@ -28,7 +28,6 @@
 package solver.requests;
 
 import choco.kernel.common.util.procedure.IntProcedure;
-import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
@@ -69,7 +68,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     public PropRequest(P propagator) {
         this.propagator = propagator;
         enqueued = false;
-        this.indices = new int[]{-1,-1,-1,-1};
+        this.indices = new int[]{-1, -1, -1, -1};
     }
 
     @Override
@@ -131,8 +130,13 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     @Override
     public void update(EventType e) {
         if (EventType.PROPAGATE == e) {
-            engine.update(this);
+            schedule();
         }
+    }
+
+    @Override
+    public void schedule() {
+        engine.schedule(this);
     }
 
     @Override

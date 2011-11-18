@@ -80,7 +80,7 @@ public class ConditionnalRequestTest {
                         ivars[i].updatePropagationConditions(prop, i);
                         requests[i] = new ConditionnalRequest(prop, ivars[i], i, cond, environment);
                         prop.addRequest(requests[i]);
-                        ivars[i].addRequest(requests[i]);
+                        ivars[i].addMonitor(requests[i]);
                         cond.linkRequest(requests[i]);
                     }
                     f_requests.set(prop, requests);

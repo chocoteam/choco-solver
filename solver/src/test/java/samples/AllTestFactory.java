@@ -24,58 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package solver.propagation.engines.queues;
+import org.testng.annotations.Factory;
 
-import choco.kernel.common.util.procedure.Procedure;
-import solver.exception.ContradictionException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- *
- *
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 29 sept. 2010
+ * @since 15/11/11
  */
-public interface ITwoStateStoreQueue<E> {
+public class AllTestFactory {
 
-    /**
-     * Add an element to the queue
-     * @param e element to add
-     */
-    public void add(E e);
+    AbstractProblem[] problems = new AbstractProblem[]{
+            new AllIntervalSeries()
+    };
 
-    /**
-     * Move an element from left side to right side, ie  <code>c</code> state has changed
-     * @param c
-     */
-    public void moveRight(E c);
+    String[][] arguments = new String[][]{
+            {"-0", "50"}
+    };
 
-    /**
-     * @param proc procedure to apply
-     * @throws solver.exception.ContradictionException
-     *
-     */
-    public void forEach(Procedure<E> proc) throws ContradictionException;
+    long[][] statistics = new long[][]{
+            {1, 2}
+    };
 
-    /**
-     * @param proc procedure to apply
-     * @throws solver.exception.ContradictionException
-     *
-     */
-    public void forVeryEach(Procedure<E> proc) throws ContradictionException;
+    @Factory
+    public Object[] createInstances() {
+        List<Object> lresult = new ArrayList<Object>(12);
 
-    /**
-     * Return the number of element contained
-     * @return
-     */
-    public int size();
-
-    /**
-     * Return the number of active element contained
-     * @return
-     */
-    public int cardinality();
-
+        for (int s = 0; s < problems.length; s++) {
+            lresult.add(new AllTest(problems[s], arguments[s], statistics[s]));
+        }
+        return lresult.toArray();
+    }
 }

@@ -38,8 +38,6 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-import static solver.variables.AbstractVariable.*;
-
 /**
  * declare an IntVar based on X and Y, such max(X,Y)
  * <br/>
@@ -50,7 +48,7 @@ import static solver.variables.AbstractVariable.*;
  * @author Charles Prud'homme
  * @since 01/09/11
  */
-public class MaxView extends AbstractView {
+public class MaxView extends AbstractViewWithDomain {
 
 
     public MaxView(IntVar a, IntVar b, Solver solver) {
@@ -81,7 +79,7 @@ public class MaxView extends AbstractView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    this.contradiction(this, MSG_LOW);
+                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
                 }
                 SIZE.add(elb - ilb);
                 ilb = elb;
@@ -91,7 +89,7 @@ public class MaxView extends AbstractView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    this.contradiction(this, MSG_LOW);
+                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
                 }
                 SIZE.add(eub - iub);
                 iub = eub;
@@ -104,13 +102,13 @@ public class MaxView extends AbstractView {
                 change |= true;
             }
             if (ilb > iub) {
-                this.contradiction(this, MSG_EMPTY);
+                this.contradiction(this, EventType.PROPAGATE, MSG_EMPTY);
             }
             if (change) {
                 if (ilb == iub) {
-                    notifyPropagators(EventType.INSTANTIATE, this);
+                    notifyMonitors(EventType.INSTANTIATE, this);
                 } else {
-                    notifyPropagators(e, this);
+                    notifyMonitors(e, this);
                 }
             }
         }
@@ -130,7 +128,7 @@ public class MaxView extends AbstractView {
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            this.contradiction(cause, AbstractVariable.MSG_REMOVE);
+            this.contradiction(cause, EventType.REMOVE, AbstractVariable.MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
             if (value == inf) {
@@ -163,9 +161,9 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
             } else if (SIZE.get() == 0) {
-                this.contradiction(cause, MSG_EMPTY);
+                this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
             return true;
         }
@@ -189,7 +187,7 @@ public class MaxView extends AbstractView {
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                this.contradiction(cause, MSG_INST);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -207,10 +205,10 @@ public class MaxView extends AbstractView {
                 A.instantiateTo(value, this, false);
             }
 
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
-            this.contradiction(cause, MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -224,7 +222,7 @@ public class MaxView extends AbstractView {
         int old = this.getLB();
         if (old < aValue) {
             if (this.getUB() < aValue) {
-                this.contradiction(cause, MSG_LOW);
+                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
                 //todo delta
@@ -244,7 +242,7 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
 
             }
@@ -261,7 +259,7 @@ public class MaxView extends AbstractView {
         int old = this.getUB();
         if (old > aValue) {
             if (this.getLB() > aValue) {
-                this.contradiction(cause, MSG_UPP);
+                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
                 //todo delta
@@ -277,7 +275,7 @@ public class MaxView extends AbstractView {
                         cause = Cause.Null;
                     }
                 }
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
             }
         }

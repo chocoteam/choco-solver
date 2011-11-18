@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.requests.EventRequest;
 import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 
@@ -51,11 +51,11 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
 
 
     @Override
-    public IRequest<V> makeRequest(V var, int idx) {
+    public IRequestWithVariable<V> makeRequest(V var, int idx) {
         if (var instanceof GraphVar) {
             return new GraphRequest(this, (GraphVar) var, idx);
         } else {
-            return new EventRequest<V, Propagator<V>>(this, var, idx);
+            return new EventRequest<V>(this, var, idx);
         }
     }
 
