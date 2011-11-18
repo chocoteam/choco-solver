@@ -25,46 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.engines.queues.aqueues;
+package solver.requests.list;
 
-import java.util.Random;
+import choco.kernel.common.util.objects.HalfBactrackableList;
+import choco.kernel.common.util.objects.IList;
+import choco.kernel.common.util.objects.RequestArrayList;
+import choco.kernel.memory.IEnvironment;
+import solver.variables.IVariableMonitor;
 
 /**
- * A linked list where element is added after the last element, and where elements are popped randomly
+ * A class declaring builder for IList<IVariableMonitor>.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 25/02/11
+ * @since 24/02/11
  */
-public class RandomLinkedList<E> extends LinkedList<E> {
+public class VariableMonitorListBuilder {
 
-    Random random;
+    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: HalfBactrackableList
 
-    @SuppressWarnings({"unchecked"})
-    public RandomLinkedList(int size) {
-        super(size);
-        random = new Random();
+    protected VariableMonitorListBuilder() {
     }
 
     /**
-     * {@inheritDoc}
+     * Builds and returns the preset IRequestList object.
+     *
+     * @param environment bracktrackable environment
+     * @param dim         dimension to set and get index
+     * @param <M>         type of element, should extends IVariableMonitor
+     * @return a implementation of IRequestList
      */
-    public E pop() {
-        int index = random.nextInt(size);
-        return remove(index);
+    public static <M extends IVariableMonitor> IList<M> preset(IEnvironment environment, int dim) {
+        switch (_DEFAULT) {
+            case 1:
+                return halfBacktracakbleList(environment, dim);
+            default:
+                return arraylist(environment, dim);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public E remove() {
-        return remove(header.next);
+    public static <M extends IVariableMonitor> IList<M> arraylist(IEnvironment environment, int dim) {
+        return new RequestArrayList<M>(environment, dim);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public E remove(int index) {
-        return remove(getEntry(index));
+    public static <M extends IVariableMonitor> IList<M> halfBacktracakbleList(IEnvironment environment, int dim) {
+        return new HalfBactrackableList<M>(environment, dim);
     }
 }

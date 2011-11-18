@@ -32,6 +32,7 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
+import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -40,7 +41,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -142,7 +143,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      */
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-//        monitors.forEach(procB.set(this, EventType.REMOVE, cause));
+        requests.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         boolean change = false;
         ICause antipromo = cause;
         if (informCause) {
@@ -152,8 +153,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int sup = getUB();
         if (value == inf && value == sup) {
             solver.getExplainer().removeValue(this, value, antipromo);
-//            monitors.forEach(procC.set(this, EventType.REMOVE, cause));
-            this.contradiction(cause, MSG_REMOVE);
+//            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
+            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
@@ -188,12 +189,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                             cause = Cause.Null;
                         }
                     }
-                    this.notifyPropagators(e, cause);
+                    this.notifyMonitors(e, cause);
                 } else {
                     if (VALUES.isEmpty()) {
                         solver.getExplainer().removeValue(this, value, antipromo);
-//                        monitors.forEach(procC.set(this, EventType.REMOVE, cause));
-                        this.contradiction(cause, MSG_EMPTY);
+//                        monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
+                        this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
                     }
                 }
             }
@@ -201,7 +202,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (change) {
             solver.getExplainer().removeValue(this, value, antipromo);
         }
-//        monitors.forEach(procA.set(this, EventType.REMOVE, cause));
+//        monitors.forEach(afterModification.set(this, EventType.REMOVE, cause));
         return change;
     }
 
@@ -249,7 +250,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                this.contradiction(cause, MSG_INST);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else if (contains(value)) {
@@ -271,12 +272,12 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             this.SIZE.set(1);
 
             if (VALUES.isEmpty()) {
-                this.contradiction(cause, MSG_EMPTY);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-            this.notifyPropagators(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause);
             return true;
         } else {
-            this.contradiction(cause, MSG_UNKNOWN);
+            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
             return false;
         }
     }
@@ -310,7 +311,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (old < value) {
             if (this.getUB() < value) {
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, MSG_LOW);
+                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
 
@@ -335,7 +336,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     }
                 }
                 assert (change);
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
@@ -373,7 +374,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (old > value) {
             if (this.getLB() > value) {
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, MSG_UPP);
+                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
                 int aValue = value - OFFSET;
@@ -397,7 +398,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                     }
                 }
                 assert (change);
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
@@ -515,9 +516,16 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<IntVar> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<IntVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -549,7 +557,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

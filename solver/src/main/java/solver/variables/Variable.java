@@ -35,7 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -69,36 +68,36 @@ public interface Variable<D extends IDelta> extends Serializable {
     String getName();
 
     /**
-     * Build and add a request to the request list of <code>this</code>.
-     * The request is inactive at the creation and must be activated (by the engine propagation).
-     * @param request
+     * Build and add a monitor to the monitor list of <code>this</code>.
+     * The monitor is inactive at the creation and must be activated (by the engine propagation).
+     * @param monitor a variable monitor
      */
-    void addRequest(IRequest request);
+    void addMonitor(IVariableMonitor monitor);
 
     /**
-     * Activate a request
-     * @param request
+     * Activate a IVariableMonitor
+     * @param monitor a variable monitor
      */
-    void activate(IRequest request);
+    void activate(IVariableMonitor monitor);
 
     /**
-     * Desactivate a request, the request is reactivate upon backtracking.
-     * @param request
+     * Desactivate a monitor, the monitor is reactivate upon backtracking.
+     * @param monitor a variable monitor
      */
-    void desactivate(IRequest request);
+    void desactivate(IVariableMonitor monitor);
 
     //todo : to complete
-    void deleteRequest(IRequest request);
+    void removeMonitor(IVariableMonitor monitor);
 
-    IList getRequests();
+    IList getMonitors();
 
-    int nbRequests();
+    int nbMonitors();
 
     void subscribeView(IView view);
 
     /**
      * Returns the number of constraints involving <code>this</code>
-     * TODO: MostConstrained: count requests instead of constraints
+     * TODO: MostConstrained: count monitors instead of constraints
      *
      * @return the number of constraints of <code>this</code>
      */
@@ -141,16 +140,14 @@ public interface Variable<D extends IDelta> extends Serializable {
      * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *
-     *
-     *
-     * @param e event on this object
-     * @param o object which leads to the modification of this object
+     * @param event event on this object
+     * @param cause object which leads to the modification of this object
      * @throws solver.exception.ContradictionException if a contradiction occurs during notification
      */
-    void notifyPropagators(EventType e, @NotNull ICause o) throws ContradictionException;
+    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
 
 
-    void notifyViews(EventType e, @NotNull ICause o) throws ContradictionException;
+    void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)
@@ -166,11 +163,12 @@ public interface Variable<D extends IDelta> extends Serializable {
 
     /**
      * Throws a contradiction exception based on <cause, message>
+     *
      * @param cause ICause causing the exception
-     * @param message the detailed message
-     * @throws ContradictionException expected behavior
+     * @param event
+     *@param message the detailed message  @throws ContradictionException expected behavior
      */
-    void contradiction(@NotNull ICause cause, String message) throws ContradictionException;
+    void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver

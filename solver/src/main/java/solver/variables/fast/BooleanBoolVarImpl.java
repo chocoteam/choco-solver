@@ -33,6 +33,7 @@ import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
+import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -41,7 +42,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
@@ -123,9 +124,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value value to remove from the domain (int)
-     * @param cause removal releaser
+     * @param value       value to remove from the domain (int)
+     * @param cause       removal releaser
      * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
@@ -170,9 +170,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     *
-     * @param value instantiation value (int)
-     * @param cause instantiation releaser
+     * @param value       instantiation value (int)
+     * @param cause       instantiation releaser
      * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
@@ -180,13 +179,14 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      */
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
+        requests.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
         }
         if (this.instantiated()) {
             if (value != this.getValue()) {
-                this.contradiction(cause, MSG_INST);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
             }
             return false;
         } else {
@@ -198,10 +198,10 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
                     delta.add(1 - value);
                 }
                 mValue = value;
-                this.notifyPropagators(e, cause);
+                this.notifyMonitors(e, cause);
                 return true;
             } else {
-                this.contradiction(cause, MSG_UNKNOWN);
+                this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
                 return false;
             }
         }
@@ -219,9 +219,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value new lower bound (included)
-     * @param cause updating releaser
+     * @param value       new lower bound (included)
+     * @param cause       updating releaser
      * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
@@ -243,9 +242,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value new upper bound (included)
-     * @param cause update releaser
+     * @param value       new upper bound (included)
+     * @param cause       update releaser
      * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
@@ -378,9 +376,16 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequest<BoolVar> request = propagator.makeRequest(this, idxInProp);
+        IRequestWithVariable<BoolVar> request = propagator.makeRequest(this, idxInProp);
         propagator.addRequest(request);
-        this.addRequest(request);
+        this.addMonitor(request);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            requests.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     /**
@@ -392,7 +397,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
     public Explanation explain(VariableState what) {
         Explanation expl = new Explanation(null, null);
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
-       DisposableValueIterator it = invdom.getValueIterator();
+        DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
             int val = it.next();
             if ((what == VariableState.LB && val < this.getLB())
@@ -400,18 +405,20 @@ public final class BooleanBoolVarImpl extends AbstractVariable implements BoolVa
                     || (what == VariableState.DOM)) {
                 expl.add(solver.getExplainer().explain(this, val));
             }
-        }       return expl;
+        }
+        return expl;
     }
 
     @Override
-     public Explanation explain(VariableState what, int val) {
-         Explanation expl = new Explanation();
-         expl.add(solver.getExplainer().explain(this, val));
-         return expl;
-     }
+    public Explanation explain(VariableState what, int val) {
+        Explanation expl = new Explanation();
+        expl.add(solver.getExplainer().explain(this, val));
+        return expl;
+    }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        requests.forEach(onContradiction.set(this, event, cause));
         engine.fails(cause, this, message);
     }
 

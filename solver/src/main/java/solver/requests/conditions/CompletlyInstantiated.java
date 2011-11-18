@@ -29,8 +29,8 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.requests.ConditionnalRequest;
 
 /**
  * A simple condition based on number of instantiated variables.
@@ -40,7 +40,7 @@ import solver.requests.ConditionnalRequest;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class CompletlyInstantiated extends AbstractCondition {
+public class CompletlyInstantiated extends AbstractCondition<IRequest> {
 
     final IStateInt nbVarInstantiated;
     final int threshold;
@@ -53,7 +53,7 @@ public class CompletlyInstantiated extends AbstractCondition {
 
     @Override
     boolean isValid() {
-        return nbVarInstantiated.get()  >= threshold;
+        return nbVarInstantiated.get() >= threshold;
     }
 
     @Override
@@ -62,16 +62,16 @@ public class CompletlyInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalRequest request, int evtMask) {
-        if(EventType.isInstantiate(evtMask)){
+    void update(IRequest request, EventType event) {
+        if (EventType.isInstantiate(event.mask)) {
             nbVarInstantiated.add(1);
         }
     }
 
     @Override
-    public void linkRequest(ConditionnalRequest request) {
+    public void linkRequest(IRequest request) {
         super.linkRequest(request);
-        if(request.getVariable().instantiated()){
+        if (request.getVariable().instantiated()) {
             nbVarInstantiated.add(1);
         }
     }

@@ -76,10 +76,8 @@ public final class SortedArrayReacher implements IReacher {
 
     @Override
     public void update(IRequest request) {
-        if (!request.enqueued()) {
-            requests.add(request);
-            request.enqueue();
-        }
+        requests.add(request);
+        request.enqueue();
     }
 
     @Override
