@@ -29,7 +29,7 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.requests.IRequest;
+import solver.requests.ConditionnalRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -63,6 +63,6 @@ public class IsInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(IRequest request, EventType event) {
+    void update(ConditionnalRequest request, EventType event) {
     }
 }

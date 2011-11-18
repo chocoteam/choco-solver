@@ -29,7 +29,7 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import solver.requests.IRequest;
+import solver.requests.ConditionnalRequest;
 import solver.variables.EventType;
 
 /**
@@ -45,15 +45,17 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractCondition<R extends IRequest> implements ICondition<R> {
+public abstract class AbstractCondition implements ICondition<ConditionnalRequest> {
 
-    R[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
+    ConditionnalRequest[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
     int idxLastRequest; // index of the last not null request in relatedRequests
     final IStateBool wasValid;
+    ICondition<ConditionnalRequest> next = Default.NO_CONDITION;
+
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedRequests = (R[]) new IRequest[8];
+        relatedRequests = new ConditionnalRequest[8];
     }
 
     /**
@@ -64,23 +66,30 @@ public abstract class AbstractCondition<R extends IRequest> implements IConditio
      * @param request recently modified request
      * @param event
      */
-    public final boolean validateScheduling(R request, EventType event) {
+    public final boolean validateScheduling(ConditionnalRequest request, EventType event) {
         if (wasValid.get()) {
             return true;
         } else {
             update(request, event);
             if (isValid()) {
                 for (int i = 0; i < idxLastRequest; i++) {
-                    R crequest = relatedRequests[i];
-                    if (crequest.getMask() > 0) {
+                    ConditionnalRequest crequest = relatedRequests[i];
+                    if (crequest.hasChanged()) {
                         crequest.schedule(); // TODO: do not add request in parameter...
                     }
                 }
                 wasValid.set(alwaysValid());
+                next.validateScheduling(request, event);
                 return true;
             }
-            return false;
+            //return false;
+            return next.validateScheduling(request, event);
         }
+    }
+
+    @Override
+    public ICondition next() {
+        return null;
     }
 
     /**
@@ -105,20 +114,21 @@ public abstract class AbstractCondition<R extends IRequest> implements IConditio
      * @param request recently modified request
      * @param event
      */
-    abstract void update(R request, EventType event);
+    abstract void update(ConditionnalRequest request, EventType event);
 
     /**
      * Link the <code>request</code> to the condition
      *
      * @param request condition request
      */
-    public void linkRequest(R request) {
+    public void linkRequest(ConditionnalRequest request) {
         if (idxLastRequest >= relatedRequests.length) {
-            R[] tmp = relatedRequests;
-            relatedRequests = (R[]) new IRequest[tmp.length * 2];
+            ConditionnalRequest[] tmp = relatedRequests;
+            relatedRequests = new ConditionnalRequest[tmp.length * 2];
             System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
         }
         relatedRequests[idxLastRequest++] = request;
+        next.linkRequest(request);
     }
 
 

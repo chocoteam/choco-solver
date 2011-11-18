@@ -20,7 +20,7 @@ import java.util.Set;
  * User: chameau
  * Date: 3 nov. 2011
  */
-public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
+public class CondAllDiffBC extends AbstractCondition {
 
     protected Union unionset;
     protected IntVar[] vars;
@@ -38,14 +38,15 @@ public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
         }
         this.unionset = new Union(vars, environment);
         rem_proc = new RemProc(this);
-        this.exec = true;//false;
+        this.exec = false;
+        this.next = new CompletlyInstantiated(environment, vars.length);
     }
 
 
     @Override
     boolean isValid() {
-        //exec = !exec; 
-        return true;//exec;  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
+        exec ^= true;
+        return exec;
     }
 
     @Override
@@ -65,10 +66,10 @@ public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
             throw new SolverException("CondAllDiffBC#update encounters an exception");
         }
         fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].set(last);
-        if (request.getPropagator().getNbRequestEnqued() == 0
+        /*if (request.getPropagator().getNbRequestEnqued() == 0
                 && !checkUnion()) {
             throw new SolverException("CondAllDiffBC#checkUnion is not valid");
-        }
+        }*/
     }
 
     private static class RemProc implements IntProcedure {
@@ -116,7 +117,6 @@ public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
             }
         }
     }
-
     private int[] computeUnion() {
         Set<Integer> vals = new HashSet<Integer>();
         for (IntVar var : vars) {

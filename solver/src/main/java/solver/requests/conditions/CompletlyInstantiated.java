@@ -29,7 +29,7 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.requests.IRequest;
+import solver.requests.ConditionnalRequest;
 import solver.variables.EventType;
 
 /**
@@ -40,7 +40,7 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class CompletlyInstantiated extends AbstractCondition<IRequest> {
+public class CompletlyInstantiated extends AbstractCondition{
 
     final IStateInt nbVarInstantiated;
     final int threshold;
@@ -62,14 +62,14 @@ public class CompletlyInstantiated extends AbstractCondition<IRequest> {
     }
 
     @Override
-    void update(IRequest request, EventType event) {
+    void update(ConditionnalRequest request, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             nbVarInstantiated.add(1);
         }
     }
 
     @Override
-    public void linkRequest(IRequest request) {
+    public void linkRequest(ConditionnalRequest request) {
         super.linkRequest(request);
         if (request.getVariable().instantiated()) {
             nbVarInstantiated.add(1);
