@@ -26,7 +26,7 @@
  */
 package solver.requests.conditions;
 
-import solver.requests.IRequest;
+import solver.requests.AbstractRequestWithVar;
 import solver.variables.EventType;
 
 import java.io.Serializable;
@@ -41,7 +41,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 17/11/11
  */
-public interface ICondition<R extends IRequest> extends Serializable {
+public interface ICondition<R extends AbstractRequestWithVar> extends Serializable {
 
     /**
      * Keep informed the condition of the modification of one of its related requests.
@@ -56,7 +56,7 @@ public interface ICondition<R extends IRequest> extends Serializable {
         ALWAYS_TRUE;
 
         @Override
-        public boolean validateScheduling(IRequest request, EventType event) {
+        public boolean validateScheduling(AbstractRequestWithVar request, EventType event) {
             return true;
         }
     }

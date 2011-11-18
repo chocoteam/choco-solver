@@ -20,7 +20,7 @@ import java.util.Set;
  * User: chameau
  * Date: 3 nov. 2011
  */
-public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
+public class CondAllDiffBC extends AbstractCondition{
 
     protected Union unionset;
     protected IntVar[] vars;
