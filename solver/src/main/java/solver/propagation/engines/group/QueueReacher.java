@@ -28,7 +28,7 @@
 package solver.propagation.engines.group;
 
 import solver.exception.ContradictionException;
-import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
+import solver.propagation.engines.queues.FixSizeCircularQueue;
 import solver.requests.IRequest;
 
 /**
@@ -79,11 +79,8 @@ public final class QueueReacher implements IReacher {
 
     @Override
     public void update(IRequest request) {
-        if (!request.enqueued()) {
-            toPropagate.add(request);
-            request.enqueue();
-        }
-
+        toPropagate.add(request);
+        request.enqueue();
     }
 
     @Override

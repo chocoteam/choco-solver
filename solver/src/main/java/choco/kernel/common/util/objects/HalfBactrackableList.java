@@ -144,7 +144,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
         }
         if (sElements.length <= sIdx) {
             E[] tmp = sElements;
-            sElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
+            sElements = (E[]) new MultiDimensionIndex[3 / 2 * sElements.length + 1];
             System.arraycopy(tmp, 0, sElements, 0, sIdx);
         }
         element.setIndex(DIMENSION, sIdx);
@@ -161,7 +161,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
         int idx = dIdx.get();
         if (dElements.length <= idx) {
             E[] tmp = dElements;
-            dElements = (E[]) new MultiDimensionIndex[3 / 2 * SIZE + 1];
+            dElements = (E[]) new MultiDimensionIndex[3 / 2 * sElements.length + 1];
             System.arraycopy(tmp, 0, dElements, 0, idx);
         }
         element.setIndex(DIMENSION, idx + OFFSET);

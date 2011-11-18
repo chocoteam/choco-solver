@@ -1,8 +1,13 @@
 package solver.requests.conditions;
 
+import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
+import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.requests.ConditionnalRequest;
+import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -15,21 +20,32 @@ import java.util.Set;
  * User: chameau
  * Date: 3 nov. 2011
  */
-public class CondAllDiffBC extends AbstractCondition {
+public class CondAllDiffBC extends AbstractCondition<ConditionnalRequest> {
 
     protected Union unionset;
     protected IntVar[] vars;
+    protected IStateInt[] fromDelta;
+    protected final RemProc rem_proc;
+
+    boolean exec;
 
     public CondAllDiffBC(IEnvironment environment, IntVar[] vars) {
         super(environment);
         this.vars = vars;
+        fromDelta = new IStateInt[vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            fromDelta[i] = environment.makeInt();
+        }
         this.unionset = new Union(vars, environment);
+        rem_proc = new RemProc(this);
+        this.exec = true;//false;
     }
 
 
     @Override
     boolean isValid() {
-        return true;  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
+        //exec = !exec; 
+        return true;//exec;  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
     }
 
     @Override
@@ -38,11 +54,35 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalRequest request, int evtMask) {
-        if(EventType.isRemove(evtMask)){
-//            for (int i = request.fromDelta(); i <= request.toDelta(); i++) {
-//                unionset.remove(i);
-//            }
+    void update(ConditionnalRequest request, EventType event) {
+//        if (EventType.isRemove(evtMask)) {
+        int last = request.getLast();
+        try {
+            request.forEach(rem_proc,
+                    fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].get(),
+                    last);
+        } catch (ContradictionException e) {
+            throw new SolverException("CondAllDiffBC#update encounters an exception");
+        }
+        fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].set(last);
+        if (request.getPropagator().getNbRequestEnqued() == 0
+                && !checkUnion()) {
+            throw new SolverException("CondAllDiffBC#checkUnion is not valid");
+        }
+    }
+
+    private static class RemProc implements IntProcedure {
+
+        private final CondAllDiffBC p;
+
+        public RemProc(CondAllDiffBC p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int i) throws ContradictionException {
+            p.unionset.remove(i);
+//            LoggerFactory.getLogger("solver").info("{} remove from {}", i, p.vars[idxVar]);
         }
     }
 

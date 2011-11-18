@@ -29,8 +29,9 @@ package solver.requests.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.requests.IRequest;
+import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.requests.ConditionnalRequest;
 
 /**
  * A simple condition based on number of instantiated variables.
@@ -62,6 +63,6 @@ public class IsInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalRequest request, int evtMask) {
+    void update(IRequest request, EventType event) {
     }
 }

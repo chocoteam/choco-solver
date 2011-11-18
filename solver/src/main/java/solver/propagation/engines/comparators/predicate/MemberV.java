@@ -63,7 +63,7 @@ public class MemberV<V extends Variable> implements Predicate {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < vars.length; i++) {
-                IList rlist = vars[i].getRequests();
+                IList rlist = vars[i].getMonitors();
                 for (int k = 0; k < rlist.cardinality(); k++) {
                     int idx = rlist.get(k).getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);

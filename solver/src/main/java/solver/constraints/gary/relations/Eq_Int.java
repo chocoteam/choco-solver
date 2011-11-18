@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 
 public class Eq_Int extends GraphRelation<IntVar> {
@@ -106,7 +107,7 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	        	x.removeValue(y.getValue(), cause, informCause);
 	        }
 		}else{
-			vars[var1].contradiction(cause, "x != x");
+			vars[var1].contradiction(cause, EventType.REMOVE, "x != x");
 		}
 	}
 	
