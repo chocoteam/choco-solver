@@ -24,51 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package solver.requests.list;
-
-import choco.kernel.common.util.objects.HalfBactrackableList;
-import choco.kernel.common.util.objects.IList;
-import choco.kernel.common.util.objects.RequestArrayList;
-import choco.kernel.memory.IEnvironment;
-import solver.requests.IRequest;
+import junit.framework.Assert;
+import org.testng.annotations.Test;
 
 /**
- * A class declaring builder for IRequestList.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24/02/11
+ * @since 15/11/11
  */
-public class RequestListBuilder {
+public class AllTest {
 
-    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: HalfBactrackableList
+    AbstractProblem prob;
+    String[] args;
+    long[] stats;
 
-    protected RequestListBuilder() {
+    public AllTest() {
+        this(new AllIntervalSeries(), new String[]{"-o", "50"}, new long[]{1,2});
     }
 
-    /**
-     * Builds and returns the preset IRequestList object.
-     *
-     * @param environment bracktrackable environment
-     * @param dim         dimension to set and get index
-     * @param <R>         type of element
-     * @return a implementation of IRequestList
-     */
-    public static <R extends IRequest> IList<R> preset(IEnvironment environment, int dim) {
-        switch (_DEFAULT) {
-            case 1:
-                return halfBacktracakbleList(environment, dim);
-            default:
-                return arraylist(environment, dim);
-        }
+    public AllTest(AbstractProblem prob, String[] arguments, long[] statistics) {
+        this.prob = prob;
+        this.args = arguments;
+        this.stats = statistics;
     }
 
-    public static <R extends IRequest> IList<R> arraylist(IEnvironment environment, int dim) {
-        return new RequestArrayList<R>(environment, dim);
-    }
+    @Test(groups = "1m")
+    public void mainTest() {
+        prob.readArgs(args);
+        prob.buildModel();
+        prob.configureSolver();
+        prob.overrideExplanation();
+        prob.overridePolicy();
+        prob.solve();
 
-    public static <R extends IRequest> IList<R> halfBacktracakbleList(IEnvironment environment, int dim) {
-        return new HalfBactrackableList<R>(environment, dim);
+        Assert.assertEquals("incorrect nb solutions", stats[0], prob.getSolver().getMeasures().getSolutionCount());
+        Assert.assertEquals("incorrect nb nodes", stats[1], prob.getSolver().getMeasures().getNodeCount());
+
     }
 }

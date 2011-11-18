@@ -29,7 +29,6 @@ package solver.variables;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
-import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -37,7 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
 import solver.requests.IRequest;
-import solver.requests.list.RequestListBuilder;
+import solver.requests.list.VariableMonitorListBuilder;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -63,6 +62,8 @@ public abstract class AbstractVariable implements Serializable {
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
+    private static final String NO_NAME = "";
+
     /**
      * Reference to the solver containing this variable.
      */
@@ -73,7 +74,7 @@ public abstract class AbstractVariable implements Serializable {
     /**
      * List of requests
      */
-    protected final IList<IRequest> requests;
+    protected final IList<IVariableMonitor> requests;
 
 
     protected IView[] views; // views to inform of domain modification
@@ -86,19 +87,21 @@ public abstract class AbstractVariable implements Serializable {
 
     protected final IPropagationEngine engine;
 
-    protected final NotifyProcedure procN = new NotifyProcedure();
-
-    protected final OnBeforeProc procB = new OnBeforeProc();
-    protected final OnAfterProc procA = new OnAfterProc();
-    protected final OnContradiction procC = new OnContradiction();
+    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+    protected final OnAfterProc afterModification = new OnAfterProc();
+    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
+
+    protected AbstractVariable(Solver solver) {
+        this(NO_NAME, solver);
+    }
 
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
         this.engine = solver.getEngine();
-        this.requests = RequestListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
+        this.requests = VariableMonitorListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         views = new IView[2];
     }
 
@@ -112,12 +115,12 @@ public abstract class AbstractVariable implements Serializable {
         this.uniqueID = uniqueID;
     }
 
-    public void activate(IRequest request) {
-        requests.setActive(request);
+    public void activate(IVariableMonitor monitor) {
+        requests.setActive(monitor);
     }
 
-    public void desactivate(IRequest request) {
-        requests.setPassive(request);
+    public void desactivate(IVariableMonitor monitor) {
+        requests.setPassive(monitor);
     }
 
     public String getName() {
@@ -132,33 +135,26 @@ public abstract class AbstractVariable implements Serializable {
         throw new UnsupportedOperationException();
     }
 
-    public void notifyPropagators(EventType e, @NotNull ICause cause) throws ContradictionException {
-        if ((modificationEvents & e.mask) != 0) {
-            requests.forEach(procN.set(cause, e, getDelta()));
-        }
-        notifyViews(e, cause);
-    }
-
-    public void notifyViews(EventType e, ICause cause) throws ContradictionException {
+    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(e.mask);
+                views[i].backPropagate(event.mask);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(e.mask);
+                    views[i].backPropagate(event.mask);
                 }
             }
         }
     }
 
-    public void addRequest(IRequest request) {
-        requests.add(request, false);
+    public void addMonitor(IVariableMonitor monitor) {
+        requests.add(monitor, false);
     }
 
-    public void deleteRequest(IRequest request) {
-        requests.remove(request);
+    public void removeMonitor(IVariableMonitor monitor) {
+        requests.remove(monitor);
     }
 
     public void subscribeView(IView view) {
@@ -170,7 +166,7 @@ public abstract class AbstractVariable implements Serializable {
         views[vIdx++] = view;
     }
 
-    public IList getRequests() {
+    public IList getMonitors() {
         return requests;
     }
 
@@ -178,7 +174,7 @@ public abstract class AbstractVariable implements Serializable {
         return requests.size();
     }
 
-    public int nbRequests() {
+    public int nbMonitors() {
         return requests.cardinality();
     }
 

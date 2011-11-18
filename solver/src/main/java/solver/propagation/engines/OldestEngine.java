@@ -29,7 +29,7 @@ package solver.propagation.engines;
 
 import solver.exception.ContradictionException;
 import solver.propagation.engines.group.Group;
-import solver.propagation.engines.queues.aqueues.FixSizeCircularQueue;
+import solver.propagation.engines.queues.FixSizeCircularQueue;
 import solver.requests.IRequest;
 
 import java.util.BitSet;

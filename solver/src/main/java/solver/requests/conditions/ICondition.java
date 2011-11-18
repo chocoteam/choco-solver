@@ -24,31 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.requests.conditions;
 
-package solver.propagation.engines.queues;
+import solver.requests.IRequest;
+import solver.variables.EventType;
 
 import java.io.Serializable;
 
 /**
+ * A condition on request scheduling.
+ * #validateScheduling can react on a request updating to compute (or update) a condition
+ * that validates (or not) the scheduling of the request
+ *
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 29 sept. 2010
+ * @since 17/11/11
  */
-public class APriorityQueues implements Serializable {
+public interface ICondition<R extends IRequest> extends Serializable {
 
-    protected APriorityQueues() {}
+    /**
+     * Keep informed the condition of the modification of one of its related requests.
+     * If the condition is newly validate, schedule all related requests, if any.
+     *
+     * @param request recently modified request
+     * @param event   event requiring a validation
+     */
+    boolean validateScheduling(R request, EventType event);
 
-    public static final int _NB_PRIORITY = 8;
+    public static enum Default implements ICondition {
+        ALWAYS_TRUE;
 
-    static final int[] index = new int[1 << _NB_PRIORITY];
-
-    static {
-        index[0] = -1;
-        for (int i = 0; i < _NB_PRIORITY; i++) {
-            for (int j = (1 << i); j < (1 << i + 1); j++) {
-                index[j] = i;
-            }
+        @Override
+        public boolean validateScheduling(IRequest request, EventType event) {
+            return true;
         }
     }
 }

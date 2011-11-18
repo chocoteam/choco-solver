@@ -27,8 +27,10 @@
 
 package solver.requests;
 
+import solver.ICause;
 import solver.constraints.propagators.Propagator;
 import solver.propagation.engines.IPropagationEngine;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -38,17 +40,17 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
+public abstract class AbstractRequestWithVar<V extends Variable> implements IRequestWithVariable<V> {
 
     protected final V variable; // Variable of the request
-    protected final P propagator; // Propagator of the request
+    protected final Propagator<V> propagator; // Propagator of the request
     protected IPropagationEngine engine;
 
     protected final int[] indices;
 
     protected boolean enqueued;
 
-    AbstractRequest(P propagator, V variable, int idxInProp) {
+    AbstractRequestWithVar(Propagator<V> propagator, V variable, int idxInProp) {
         this.propagator = propagator;
         this.variable = variable;
 
@@ -75,6 +77,13 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     @Override
     public final IPropagationEngine getPropagationEngine() {
         return engine;
+    }
+
+    @Override
+    public void schedule() {
+        if (!enqueued()) {
+            engine.schedule(this);
+        }
     }
 
     @Override
@@ -117,5 +126,20 @@ public abstract class AbstractRequest<V extends Variable, P extends Propagator<V
     @Override
     public void desactivate() {
         variable.desactivate(this);
+    }
+
+    @Override
+    public void beforeUpdate(V var, EventType evt, ICause cause) {
+    }
+
+    @Override
+    public void afterUpdate(V var, EventType evt, ICause cause) {
+        if (this.propagator != cause) {
+            update(evt);
+        }
+    }
+
+    @Override
+    public void contradict(V var, EventType evt, ICause cause) {
     }
 }

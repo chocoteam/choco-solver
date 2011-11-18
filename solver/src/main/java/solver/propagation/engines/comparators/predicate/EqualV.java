@@ -50,8 +50,8 @@ public class EqualV implements Predicate {
     public int[] extract(IRequest[] all) {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
-            for (int j = 0; j < var.getRequests().size(); j++) {
-                int idx = var.getRequests().get(j).getIndex(IRequest.IN_GROUP);
+            for (int j = 0; j < var.getMonitors().size(); j++) {
+                int idx = var.getMonitors().get(j).getIndex(IRequest.IN_GROUP);
                 tmp.add(idx);
             }
             cached = tmp.toArray();

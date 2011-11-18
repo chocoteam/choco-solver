@@ -34,6 +34,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.requests.AbstractRequestWithVar;
 import solver.requests.ViewRequestWrapper;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -72,10 +73,11 @@ public class MinusView extends View<IntVar> {
 
     @Override
     public void attachPropagator(Propagator propagator, int idxInProp) {
-        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
+        //todo : ugly
+        ViewRequestWrapper req = new ViewRequestWrapper((AbstractRequestWithVar)propagator.makeRequest(var, idxInProp),
                 ViewRequestWrapper.Modifier.MINUS);
         propagator.addRequest(req);
-        var.addRequest(req);
+        var.addMonitor(req);
     }
 
     @Override
@@ -158,20 +160,23 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public void notifyPropagators(EventType eventType, ICause o) throws ContradictionException {
-        if (eventType.mask == 4 || eventType.mask == 8) {
-            var.notifyPropagators(eventType.mask == 4 ? EventType.DECUPP : EventType.INCLOW, o);
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        if (event == EventType.INCLOW || event == EventType.DECUPP) {
+            var.notifyMonitors(event == EventType.INCLOW ? EventType.DECUPP : EventType.INCLOW, cause);
         } else {
-            var.notifyPropagators(eventType, o);
+            var.notifyMonitors(event, cause);
         }
     }
 
     @Override
     public Explanation explain(VariableState what) {
         switch (what) {
-            case UB: return var.explain(VariableState.LB);
-            case LB: return var.explain(VariableState.UB);
-            default: return var.explain(what);
+            case UB:
+                return var.explain(VariableState.LB);
+            case LB:
+                return var.explain(VariableState.UB);
+            default:
+                return var.explain(what);
         }
     }
 

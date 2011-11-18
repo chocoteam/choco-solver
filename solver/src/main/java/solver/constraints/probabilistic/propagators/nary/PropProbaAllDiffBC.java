@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.requests.ConditionnalRequest;
-import solver.requests.IRequest;
+import solver.requests.IRequestWithVariable;
 import solver.requests.conditions.CondAllDiffBC;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -49,18 +49,18 @@ public class PropProbaAllDiffBC extends PropAllDiffBC {
     public PropProbaAllDiffBC(IntVar[] vars, Solver solver, IntConstraint constraint) {
         super(vars, solver, constraint);
         cond = new CondAllDiffBC(environment, vars); // requetes conditionnees par la proba que alldiff BC soit consistant
-        //unionset = new Union(vars, environment);
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVE.mask;
+        return EventType.INT_ALL_MASK();// HACK -- EventType.REMOVE.mask;
     }
 
-    // todo voir charles pour mettre cela en oeuvre
     @Override
-    public IRequest<IntVar> makeRequest(IntVar var, int idx) {
-        return new ConditionnalRequest<PropProbaAllDiffBC>(this, vars[idx], idx, cond, this.environment);
+    public IRequestWithVariable<IntVar> makeRequest(IntVar var, int idx) {
+        ConditionnalRequest cr = new ConditionnalRequest(this, vars[idx], idx, cond, this.environment);
+        cond.linkRequest(cr);
+        return cr;
     }
 
 }

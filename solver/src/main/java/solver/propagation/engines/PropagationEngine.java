@@ -239,7 +239,7 @@ public final class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void update(IRequest request) {
+    public void schedule(IRequest request) {
         engine.update(request);
     }
 

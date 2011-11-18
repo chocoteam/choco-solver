@@ -37,7 +37,7 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.list.RequestListBuilder;
+import solver.requests.list.VariableMonitorListBuilder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -49,7 +49,7 @@ import solver.variables.IntVar;
  */
 public class RequestListTest {
 
-    private static class MockRequest extends AbstractRequest {
+    private static class MockRequest extends AbstractRequestWithVar {
 
         Propagator p;
         int vidx;
@@ -114,8 +114,8 @@ public class RequestListTest {
     public void testArrayList() {
         Solver solver = new Solver();
         IEnvironment env = solver.getEnvironment();
-        RequestListBuilder._DEFAULT = 0;
-        IList<MockRequest> list = RequestListBuilder.preset(env, IRequest.IN_VAR);
+        VariableMonitorListBuilder._DEFAULT = 0;
+        IList<MockRequest> list = VariableMonitorListBuilder.preset(env, IRequest.IN_VAR);
 
         MockRequest[] requests = new MockRequest[3];
         for (int i = 0; i < requests.length; i++) {
@@ -164,8 +164,8 @@ public class RequestListTest {
     public void testHalfBcktList() {
         Solver solver = new Solver();
         IEnvironment env = solver.getEnvironment();
-        RequestListBuilder._DEFAULT = 1;
-        IList<MockRequest> list = RequestListBuilder.preset(env, IRequest.IN_VAR);
+        VariableMonitorListBuilder._DEFAULT = 1;
+        IList<MockRequest> list = VariableMonitorListBuilder.preset(env, IRequest.IN_VAR);
 
         MockRequest[] requests = new MockRequest[3];
         for (int i = 0; i < requests.length; i++) {
