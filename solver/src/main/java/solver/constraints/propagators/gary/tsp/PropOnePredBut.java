@@ -67,6 +67,12 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// CONSTRUCTORS
 	//***********************************************************************************
 
+	/** All nodes of the graph but "but" have only one predecessor
+	 * @param graph
+	 * @param but the node which is not concerned by the constraint
+	 * @param constraint
+	 * @param solver
+	 * */
 	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY, false);
 		g = graph;
@@ -98,18 +104,14 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if( request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
-			}
-		}else{
-			throw new UnsupportedOperationException("error ");
+		GraphRequest gr = (GraphRequest) request;
+		if((mask & EventType.ENFORCEARC.mask) !=0){
+			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+		}
+		if((mask & EventType.REMOVEARC.mask)!=0){
+			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 		}
 	}
 
@@ -120,6 +122,20 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public ESat isEntailed() {
+		boolean done = true;
+		for(int i=0;i<n;i++){
+			if(i!=but){
+				if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()>1){
+					return ESat.FALSE;
+				}
+				if(g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()){
+					done = false;
+				}
+			}
+		}
+		if(done){
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 

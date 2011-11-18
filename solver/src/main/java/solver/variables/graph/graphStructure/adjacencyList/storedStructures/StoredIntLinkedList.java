@@ -28,26 +28,43 @@
 package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
 
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.structure.Operation;
 import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 
+import java.util.LinkedList;
+
 /**
+ * Backtrable LinkedList of m elements
+ * add : O(1)
+ * testPresence: O(m)
+ * remove: O(m)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 10 fŽvr. 2011
+ * Date: 10 fï¿½vr. 2011
  */
 public class StoredIntLinkedList extends IntLinkedList {
 
     final IEnvironment environment;
+	private LinkedList<ListOP> operationPoolGC;
+	private final static boolean ADD = true;
+	private final static boolean REMOVE = false;
 
     public StoredIntLinkedList(IEnvironment environment) {
     	super();
         this.environment = environment;
+		operationPoolGC  = new LinkedList<ListOP>();
     }
 
     @Override
     public void add(int element) {
         this._add(element);
-        new RemOperation(environment, this, element);
+        if(operationPoolGC.isEmpty()){
+			new ListOP(element, REMOVE);
+		}else{
+			ListOP op = operationPoolGC.removeFirst();
+			op.set(element,REMOVE);
+		}
     }
 
     protected void _add(int element) {
@@ -58,7 +75,12 @@ public class StoredIntLinkedList extends IntLinkedList {
     public boolean remove(int element) {
         boolean done = this._remove(element);
         if (done) {
-            new AddOperation(environment, this, element);
+            if(operationPoolGC.isEmpty()){
+				new ListOP(element, ADD);
+			}else{
+				ListOP op = operationPoolGC.removeFirst();
+				op.set(element,ADD);
+			}
         }
         return done;
     }
@@ -70,8 +92,40 @@ public class StoredIntLinkedList extends IntLinkedList {
     @Override
     public void clear() {
         for(int i=getFirstElement(); i>=0; i=getNextElement()){
-        	new AddOperation(environment, this, i);
+        	if(operationPoolGC.isEmpty()){
+				new ListOP(i, ADD);
+			}else{
+				ListOP op = operationPoolGC.removeFirst();
+				op.set(i,ADD);
+			}
         }
         super.clear();
     }
+
+	//***********************************************************************************
+	// TRAILING OPERATIONS
+	//***********************************************************************************
+
+	private class ListOP extends Operation{
+		int element;
+		boolean addOrRemove;
+		public ListOP(int i,boolean add) {
+			super();
+			set(i, add);
+		}
+		@Override
+		public void undo() {
+			if(addOrRemove){
+				_add(element);
+			}else{
+				_remove(element);
+			}
+			operationPoolGC.add(this);
+		}
+		public void set(int i,boolean add){
+			element = i;
+			addOrRemove = add;
+			environment.save(this);
+		}
+	}
 }

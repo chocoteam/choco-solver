@@ -125,6 +125,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		propagate();
+		// TODO
 	}
 
 	@Override

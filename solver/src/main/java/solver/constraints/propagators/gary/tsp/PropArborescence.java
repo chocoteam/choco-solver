@@ -119,6 +119,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	private void structuralPruning() throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
 		//dominators
+		// BEWARE the FlowGraphManager might have a bug
 		FlowGraphManager flowGM = new FlowGraphManager(source, g.getEnvelopGraph(),true);
 		DirectedGraph dominatorGraph = new DirectedGraph(n, GraphType.LINKED_LIST);
 		for (int node=0; node<n; node++){

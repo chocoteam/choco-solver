@@ -30,11 +30,14 @@ package solver.variables.graph;
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 10 fŽvr. 2011
+ * Date: 10 fï¿½vr. 2011
  */
 public enum GraphType {
 
-	// ENVELOPE_LINKEDLIST might be removed
-    COMPOSITE, ENVELOPE_LINKEDLIST, LINKED_LIST, MATRIX
+    COMPOSITE,
+	ENVELOPE_LINKEDLIST, // to avoid
+	LINKED_LIST,
+	DOUBLE_LINKED_LIST,  // enable deletion of current element in O(1)
+	MATRIX
 
 }

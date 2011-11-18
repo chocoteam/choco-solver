@@ -36,7 +36,7 @@ package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -49,9 +49,13 @@ import solver.variables.EventType;
 import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import java.util.BitSet;
+import java.util.LinkedList;
 
-/** Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
- * */public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
+/**
+ * Find some infeasible patterns based on nodes degree
+ * */
+public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -59,31 +63,25 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 	DirectedGraphVar g;
 	int n;
-	private IntProcedure arcEnforced;
-	private IStateInt[] origin,end;
+	private IStateBitSet computed;
+	private IntProcedure remArcs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
+	 * Find some infeasible patterns
 	 * @param graph
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropPathNoCycle(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	public PropDegreePatterns(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc(this);
-		origin = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			end[i] = environment.makeInt(i);
-		}
+		remArcs = new RemArc(this);
+		computed = environment.makeBitSet(n);
 	}
 
 	//***********************************************************************************
@@ -92,31 +90,62 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 	@Override
 	public void propagate() throws ContradictionException {
-		int j,start,last;
-		for(int i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-			if(j!=-1){
-				last = end[j].get();
-				start = origin[i].get();
-				g.removeArc(last,start,this,false);
-				origin[last].set(start);
-				end[start].set(last);
-			}
-		}
+		checkPattern();
 	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		GraphRequest gr = (GraphRequest) request;
-		if((mask & EventType.ENFORCEARC.mask) !=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+		IntDelta d = g.getDelta().getArcRemovalDelta();
+		d.forEach(remArcs, gr.fromArcRemoval(), gr.toArcRemoval());
+	}
+
+	private void checkPattern() throws ContradictionException {
+		BitSet notInList = new BitSet(n);
+		LinkedList<Integer> list = new LinkedList<Integer>();
+		INeighbors suc,pred;
+		int j,k;
+		notInList.clear();
+		for(int i=0; i<n;i++){
+			list.add(i);
+		}
+		int i;
+		while(!list.isEmpty()){
+			i = list.pop();
+			notInList.set(i);
+			suc = g.getEnvelopGraph().getSuccessorsOf(i);
+			if(suc.neighborhoodSize()==2){
+				j = suc.getFirstElement();
+				k = suc.getNextElement() ;
+				if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
+					if(notInList.get(j)){
+						list.add(j);
+					}
+					if(notInList.get(k)){
+						list.add(k);
+					}
+				}
+			}else{
+				pred = g.getEnvelopGraph().getPredecessorsOf(i);
+				if(pred.neighborhoodSize()==2){
+					j = pred.getFirstElement();
+					k = pred.getNextElement() ;
+					if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
+						if(notInList.get(j)){
+							list.add(j);
+						}
+						if(notInList.get(k)){
+							list.add(k);
+						}
+					}
+				}
+			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.mask;
 	}
 
 	@Override
@@ -128,21 +157,57 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
+	private class RemArc implements IntProcedure {
 		private GraphPropagator p;
+		private INeighbors nei;
 
-		private EnfArc(GraphPropagator p){
+		private RemArc(GraphPropagator p){
 			this.p = p;
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int to = i%n;
 			int from = i/n-1;
-			int last = end[to].get();
-			int start = origin[from].get();
-			g.removeArc(last,start,p,false);
-			origin[last].set(start);
-			end[start].set(last);
+			checkSuccs(from);
+			checkPreds(to);
+		}
+
+		private void checkPreds(int i) throws ContradictionException {
+			if(!computed.get(i)){
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				if(nei.neighborhoodSize()==2){
+					computed.set(i);
+					int j = nei.getFirstElement();
+					int k = nei.getNextElement() ;
+					if(g.removeArc(j,k,p,false)){
+						checkPreds(k);
+						checkSuccs(j);
+					}
+					if(g.removeArc(k,j,p,false)){
+						checkSuccs(k);
+						checkPreds(j);
+					}
+				}
+			}
+		}
+
+		private void checkSuccs(int i) throws ContradictionException {
+			if(!computed.get(i)){
+				nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(nei.neighborhoodSize()==2){
+					computed.set(i);
+					int j = nei.getFirstElement();
+					int k = nei.getNextElement() ;
+					if(g.removeArc(j,k,p,false)){
+						checkPreds(k);
+						checkSuccs(j);
+					}
+					if(g.removeArc(k,j,p,false)){
+						checkSuccs(k);
+						checkPreds(j);
+					}
+				}
+			}
 		}
 	}
 }
