@@ -42,13 +42,13 @@ public class TestProbaBAllDiff {
             //int seed = 1;{
             random.setSeed(seed);
             int n = 2 + random.nextInt(7);
-            //int n = 6;
+            //int n = 4;
             out.write("inst"+n+"\t");
 
             System.out.printf("%d vs. %d\n", seed, n);
 
             String s = "";
-            solver = new Solver();
+            /*solver = new Solver();
             execute(solver,n,seed,AllDifferent.Type.BC);
             mes = solver.getMeasures();
             s = mes.getNodeCount()+"\t";
@@ -56,7 +56,7 @@ public class TestProbaBAllDiff {
             s += mes.getPropagationsCount()+"\t";
             s += mes.getTimeCount()+"|\t";
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
-
+            */
             solverProba = new Solver();
             execute(solverProba,n,seed,AllDifferent.Type.PROBABILISTIC);
             mes = solverProba.getMeasures();
@@ -66,7 +66,7 @@ public class TestProbaBAllDiff {
             s += ""+mes.getTimeCount();
             Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), MathUtils.factoriel(n));
 
-            Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
+            //Assert.assertEquals(solverProba.getMeasures().getSolutionCount(), solver.getMeasures().getSolutionCount());
             System.out.println(s+"\n");
             out.write(s);
             out.flush();

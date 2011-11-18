@@ -93,6 +93,10 @@ public class ConditionnalRequest extends AbstractRequestWithVar<IntVar> {
         }
     }
 
+    public boolean hasChanged() {
+        return evtmask.get() > 0;
+    }
+
     @Override
     public void filter() throws ContradictionException {
         int evtmask_ = evtmask.get();
