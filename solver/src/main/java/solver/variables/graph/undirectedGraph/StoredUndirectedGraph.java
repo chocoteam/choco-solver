@@ -30,10 +30,10 @@ package solver.variables.graph.undirectedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
 import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredEnvelopeIntLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
+import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
 
@@ -62,10 +62,16 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 					this.neighbors[i] = new CompositeList(new StoredIntLinkedList(env),new StoredBitSetNeighbors(env, nbits));
 				}
 				break;
-			case ENVELOPE_LINKEDLIST:
-				this.neighbors = new StoredEnvelopeIntLinkedList[nbits];
+			case ENVELOPE_SWAP_ARRAY:
+				neighbors = new StoredArraySwapList_Array[nbits];
 				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new StoredEnvelopeIntLinkedList(nbits,environment);
+					neighbors[i] = new StoredArraySwapList_Array(env,nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+				neighbors = new StoredArraySwapList_HashMap[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_HashMap(env,nbits);
 				}
 				break;
 			case DOUBLE_LINKED_LIST:

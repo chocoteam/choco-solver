@@ -25,20 +25,89 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables.graph.graphStructure.adjacencyList;
+
+import solver.variables.graph.INeighbors;
 
 /**
+ * List of m elements based on Array int_swaping
+ * add : O(1)
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public enum GraphType {
+public abstract class ArraySwapList implements INeighbors {
 
-    COMPOSITE,
-	ENVELOPE_SWAP_HASH, // efficient but cannot add elements during the search
-	ENVELOPE_SWAP_ARRAY,// LOOKS BETTER THAN HASHMAP efficient but cannot add elements during the search
-	LINKED_LIST,
-	DOUBLE_LINKED_LIST,  // enable deletion of current element in O(1)
-	MATRIX
+	protected int arrayLength,sizeMax,currentIdx,size;
+	protected int[] array;
 
+	public ArraySwapList(int n) {
+		size=0;
+		sizeMax = n;
+		arrayLength = 10;
+		array = new int[arrayLength];
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getSize() == 0;
+	}
+
+	@Override
+	public int neighborhoodSize() {
+		return getSize();
+	}
+
+	protected int getSize(){
+		return size;
+	}
+
+	protected void setSize(int s){
+		size = s;
+	}
+
+	protected void addSize(int delta){
+		size += delta;
+	}
+
+	@Override
+	public String toString() {
+		int size = getSize();
+		if(size==0){
+			return "empty";
+		}
+		String res = "";
+		for(int i=0;i<size-1;i++){
+			res += array[i]+" -> ";
+		}
+		res += array[size-1];
+		return res;
+	}
+
+	@Override
+	public void clear() {
+		setSize(0);
+	}
+
+	// --- Iterations	
+	@Override
+	public int getFirstElement() {
+		if(getSize()==0){
+			return -1;
+		}
+		currentIdx = 0;
+		return array[currentIdx];
+	}
+
+	@Override
+	public int getNextElement() {
+		currentIdx++;
+		if(currentIdx>=getSize()){
+			return -1;
+		}
+		return array[currentIdx];
+	}
 }

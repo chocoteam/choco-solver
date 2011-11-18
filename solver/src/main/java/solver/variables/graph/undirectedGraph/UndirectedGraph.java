@@ -31,9 +31,7 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
-import solver.variables.graph.graphStructure.adjacencyList.IntDoubleLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
+import solver.variables.graph.graphStructure.adjacencyList.*;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
@@ -70,12 +68,18 @@ public class UndirectedGraph implements IGraph {
 					this.neighbors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
 				}
 				break;
-			case ENVELOPE_LINKEDLIST: // not efficient
-//			neighbors = new EnvelopeIntLinkedList[nbits];
-//			for (int i = 0; i < nbits; i++) {
-//				neighbors[i] = new EnvelopeIntLinkedList(nbits);
-//			}
-//			break;
+			case ENVELOPE_SWAP_ARRAY:
+				neighbors = new ArraySwapList_Array[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new ArraySwapList_Array(nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+				neighbors = new ArraySwapList_HashMap[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new ArraySwapList_HashMap(nbits);
+				}
+				break;
 			case DOUBLE_LINKED_LIST:
 				this.neighbors = new IntDoubleLinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {

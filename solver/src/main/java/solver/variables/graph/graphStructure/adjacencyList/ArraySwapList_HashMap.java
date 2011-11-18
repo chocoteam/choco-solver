@@ -25,20 +25,79 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables.graph.graphStructure.adjacencyList;
+
+import gnu.trove.TIntIntHashMap;
 
 /**
+ * List of m elements based on Array int_swaping with an HashMap
+ * add : O(1)
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public enum GraphType {
+public class ArraySwapList_HashMap extends ArraySwapList{
 
-    COMPOSITE,
-	ENVELOPE_SWAP_HASH, // efficient but cannot add elements during the search
-	ENVELOPE_SWAP_ARRAY,// LOOKS BETTER THAN HASHMAP efficient but cannot add elements during the search
-	LINKED_LIST,
-	DOUBLE_LINKED_LIST,  // enable deletion of current element in O(1)
-	MATRIX
+	protected TIntIntHashMap map;
 
+	public ArraySwapList_HashMap(int n) {
+		super(n);
+		map = new TIntIntHashMap();
+	}
+
+	@Override
+	public boolean contain(int element) {
+		if(map.containsKey(element)){
+			return (map.get(element)<getSize());
+		}
+		return false;
+	}
+
+	@Override
+	public void add(int element) {
+		if(contain(element)){
+			Exception e = new Exception("element already in list");
+			e.printStackTrace();
+			System.exit(0);
+			return;
+		}
+		int size = getSize();
+		if(getSize()==arrayLength){
+			int[] tmp = array;
+			int ns = Math.max(sizeMax,tmp.length+1+(tmp.length*2)/3);
+			array = new int[ns];
+			System.arraycopy(tmp,0,array,0,size);
+		}
+		array[size] = element;
+		map.put(element, size);
+		addSize(1);
+	}
+
+	@Override
+	public boolean remove(int element) {
+		int size = getSize();
+		if(map.containsKey(element)){
+			int idx = map.get(element);
+			if(idx<size){
+				if(size==1){
+					setSize(0);
+					return true;
+				}
+				int replacer = array[size-1];
+				map.adjustValue(replacer,idx-size+1);
+				array[idx]	  = replacer;
+				map.adjustValue(element,size-1-idx);
+				array[size-1] = element;
+				addSize(-1);
+				if(idx==currentIdx){
+					currentIdx--;
+				}
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -25,20 +25,49 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph;
+package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 
 /**
+ * Backtrable List of m elements based on Array int_swaping
+ * add : O(1) only at root node!
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public enum GraphType {
+public class StoredArraySwapList_Array extends ArraySwapList_Array {
 
-    COMPOSITE,
-	ENVELOPE_SWAP_HASH, // efficient but cannot add elements during the search
-	ENVELOPE_SWAP_ARRAY,// LOOKS BETTER THAN HASHMAP efficient but cannot add elements during the search
-	LINKED_LIST,
-	DOUBLE_LINKED_LIST,  // enable deletion of current element in O(1)
-	MATRIX
+	protected IStateInt size;
+	protected IEnvironment env;
 
+	public StoredArraySwapList_Array(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
+	}
+
+	@Override
+	public void add(int element) {
+		if(env.getWorldIndex()!=0){
+			System.out.println("cannot add elements in StoredArraySwapList after world 0");
+			System.exit(0);
+		}
+		super.add(element);
+	}
+
+	protected int getSize(){
+		return size.get();
+	}
+	protected void setSize(int s){
+		size.set(s);
+	}
+	protected void addSize(int delta){
+		size.add(delta);
+	}
 }

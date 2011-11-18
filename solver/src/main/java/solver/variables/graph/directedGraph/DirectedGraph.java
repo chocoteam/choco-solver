@@ -31,10 +31,7 @@ import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
-import solver.variables.graph.graphStructure.adjacencyList.EnvelopeIntLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.IntDoubleLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
+import solver.variables.graph.graphStructure.adjacencyList.*;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
@@ -73,14 +70,22 @@ public class DirectedGraph implements IDirectedGraph {
 					this.predecessors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
 				}
 				break;
-			case ENVELOPE_LINKEDLIST: // Not efficient
-//			this.successors = new EnvelopeIntLinkedList[nbits];
-//			this.predecessors = new EnvelopeIntLinkedList[nbits];
-//			for (int i = 0; i < nbits; i++) {
-//				this.successors[i] = new EnvelopeIntLinkedList(nbits);
-//				this.predecessors[i] = new EnvelopeIntLinkedList(nbits);
-//			}
-//			break;
+			case ENVELOPE_SWAP_ARRAY:
+				this.successors = new ArraySwapList_Array[nbits];
+				this.predecessors = new ArraySwapList_Array[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new ArraySwapList_Array(nbits);
+					this.predecessors[i] = new ArraySwapList_Array(nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+				this.successors = new ArraySwapList_HashMap[nbits];
+				this.predecessors = new ArraySwapList_HashMap[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new ArraySwapList_HashMap(nbits);
+					this.predecessors[i] = new ArraySwapList_HashMap(nbits);
+				}
+				break;
 			case DOUBLE_LINKED_LIST:
 				this.successors = new IntDoubleLinkedList[nbits];
 				this.predecessors = new IntDoubleLinkedList[nbits];

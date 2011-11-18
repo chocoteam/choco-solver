@@ -29,12 +29,14 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import samples.AbstractProblem;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
+import solver.exception.ContradictionException;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.predicate.Predicates;
@@ -95,7 +97,7 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		totalCost = VariableFactory.enumerated("total cost ", 0,maxValue*n, solver);
-		graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_HASH,GraphType.LINKED_LIST);
 		try{
 			for(int i=0; i<n; i++){
 				graph.getKernelGraph().activateNode(i);
@@ -105,7 +107,10 @@ public class TSP extends AbstractProblem{
 					}
 				}
 			}
-		}catch(Exception e){}
+		}catch(Exception e){
+			e.printStackTrace();
+			System.exit(0);
+		}
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		
 		gc.addAdHocProp(new PropOneSuccBut((DirectedGraphVar) graph,n-1,gc,solver));
@@ -120,14 +125,14 @@ public class TSP extends AbstractProblem{
 //		gc.addAdHocProp(new PropWSTCCincr((DirectedGraphVar) graph,totalCost,distanceMatrix, gc, solver));
 
 		// find a first solution with a greedy algorithm
-//		greedyUB = getGreedyBound();
+		greedyUB = getGreedyBound();
 //		try {
 //			totalCost.updateUpperBound(greedyUB, Cause.Null, false);
 //		} catch (ContradictionException e) {
 //			e.printStackTrace();
 //			System.exit(0);
 //		}
-//		System.out.println("\nBOUND : "+greedyUB+"\n");
+		System.out.println("\nBOUND : "+greedyUB+"\n");
 		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
@@ -201,8 +206,8 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void prettyOut() {
 //		System.out.println(graph.getKernelGraph());
-//		writeTextInto(instanceName+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"
-//				+status+";"+greedyUB+";"+totalCost.getValue()+";"+bestSol+"\n", outFile);
+		writeTextInto(instanceName+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"
+				+status+";"+greedyUB+";"+totalCost.getValue()+";"+bestSol+"\n", outFile);
 	}
 
 	//***********************************************************************************
@@ -210,9 +215,9 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		bench();
-		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
-		testInstance(instance);
+		bench();
+//		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
+//		testInstance(instance);
 	}
 
 	private static void testInstance(String url){
