@@ -38,7 +38,7 @@ public class TestProbaBAllDiff {
         IMeasures mes;
 
 
-        for (int seed = 0; seed < 1000; seed++){
+        for (int seed = 0; seed < 500; seed++){
             //int seed = 1;{
             random.setSeed(seed);
             int n = 2 + random.nextInt(7);
