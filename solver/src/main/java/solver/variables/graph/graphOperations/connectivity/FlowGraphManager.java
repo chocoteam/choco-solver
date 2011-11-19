@@ -88,16 +88,6 @@ public class FlowGraphManager {
 		root = r;
 		graph = g;
 		simple = version;
-		initParams();
-		proceedFirstDFS();
-		findAllIdom();
-	}
-
-	//***********************************************************************************
-	// INITIALIZATION
-	//***********************************************************************************
-
-	private void initParams(){
 		nbNodes = graph.getNbNodes();
 		nodeOfDfsNumber = new int[nbNodes];
 		father = new int[nbNodes];
@@ -110,6 +100,19 @@ public class FlowGraphManager {
 		buckets = new LinkedList[nbNodes];
 		dfsNumberOfNode = new int[nbNodes];
 		immediateDominators = new BitSet(nbNodes);
+	}
+
+	//***********************************************************************************
+	// INITIALIZATION
+	//***********************************************************************************
+
+	public void findDominators() {
+		initParams();
+		proceedFirstDFS();
+		findAllIdom();
+	}
+
+	private void initParams(){
 		for (int i=0; i<nbNodes; i++){
 			father[i] = -1;
 			sdom[i] = i;
@@ -292,18 +295,18 @@ public class FlowGraphManager {
 	}
 
 	//***********************************************************************************
-	// FLOW BRIDGES
+	// ARC-DOMINATORS (FLOW BRIDGES)
 	//***********************************************************************************
 
 	boolean preprocessed;
 	private LCAGraphManager lcaManager;
 
-	/**Test if (x,y) is a flowbridge
+	/**Test if (x,y) is an arc-dominator
 	 * @param x node 
 	 * @param y node 
-	 * @return true iff (x,y) is a flowbridge
+	 * @return true iff (x,y) is an arc dominator
 	 */
-	public boolean isFlowBridge(int x, int y) {
+	public boolean isArcDominator(int x, int y) {
 		if(!preprocessed){
 			preprocessed = true;
 			lcaManager = new LCAGraphManager(root, graph);

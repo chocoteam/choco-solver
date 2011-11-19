@@ -57,6 +57,7 @@ import solver.variables.graph.graphStructure.adjacencyList.storedStructures.Stor
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedList;
 
 /** Maintain incrementally the reduced graph G_R and SCC
  *  make G_R a hamiltonian path
@@ -86,12 +87,13 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 	//***********************************************************************************
 
 	/** Maintain incrementally the reduced graph and strongly connected components of a directed graph variable
+	 * Ensures that the reduced graph is a Hamiltonian path
 	 * @param graph
 	 * @param constraint
 	 * @param solver
 	 * */
 	public PropReducedGraphHamPath(V graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
 		G = graph;
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
@@ -258,11 +260,9 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						// SCC broken
 						nodesOf[x].clear();
 						mates[x].clear();
-						TIntArrayList nodes = new TIntArrayList();
 						// first scc
 						for(int e=0; e<newSCC.get(0).size();e++){
 							nodesOf[x].add(newSCC.get(0).get(e));
-							nodes.add(newSCC.get(0).get(e));
 						}
 						// others
 						int idx=n_R.get();
@@ -274,7 +274,6 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 								nodesOf[idx].add(elem);
 								sccOf[elem].set(idx);
 								G_R.getActiveNodes().activate(idx);
-								nodes.add(elem);
 								idx++;
 							}
 						}

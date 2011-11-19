@@ -39,6 +39,7 @@ import solver.constraints.propagators.gary.tsp.*;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.Policy;
 import solver.propagation.engines.comparators.IncrArityP;
+import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -97,7 +98,7 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		totalCost = VariableFactory.enumerated("total cost ", 0,maxValue*n, solver);
-		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_HASH,GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
 		try{
 			for(int i=0; i<n; i++){
 				graph.getKernelGraph().activateNode(i);
@@ -126,12 +127,12 @@ public class TSP extends AbstractProblem{
 
 		// find a first solution with a greedy algorithm
 		greedyUB = getGreedyBound();
-//		try {
-//			totalCost.updateUpperBound(greedyUB, Cause.Null, false);
-//		} catch (ContradictionException e) {
-//			e.printStackTrace();
-//			System.exit(0);
-//		}
+		try {
+			totalCost.updateUpperBound(greedyUB, Cause.Null, false);
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
 		System.out.println("\nBOUND : "+greedyUB+"\n");
 		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
@@ -192,7 +193,7 @@ public class TSP extends AbstractProblem{
 	public void configureSolver() {
 		AbstractStrategy strategy = StrategyFactory.graphRandom(graph,seed);
 		solver.set(strategy);
-		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrArityP.get(), Policy.FIXPOINT));
+		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}
@@ -215,9 +216,9 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		bench();
-//		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
-//		testInstance(instance);
+//		bench();
+		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
+		testInstance(instance);
 	}
 
 	private static void testInstance(String url){

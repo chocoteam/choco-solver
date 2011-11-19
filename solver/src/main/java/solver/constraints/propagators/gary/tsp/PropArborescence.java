@@ -42,7 +42,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.*;
-
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -57,6 +56,16 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	DirectedGraphVar g;
 	int source;
+	int n;
+	// dominators
+	FlowGraphManager flowGM;
+	DirectedGraph dominatorGraph;
+	// for preprocessing queries
+	int[] in, out, father;
+	INeighbors[] successors;
+	// check reachability
+	LinkedList<Integer> list;
+	BitSet visited;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -69,41 +78,49 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	 * @param solver
 	 * */
 	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC, false);
 		g = graph;
+		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;
+		dominatorGraph = new DirectedGraph(n, GraphType.LINKED_LIST);
+		in = new int[n];
+		out = new int[n];
+		father = new int[n];
+		successors = new INeighbors[n];
+		list = new LinkedList<Integer>();
+		visited = new BitSet(n);
+		flowGM = new FlowGraphManager(source, g.getEnvelopGraph(),true);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	private boolean allReachableFrom(int x) {
-		int n = g.getEnvelopGraph().getNbNodes();
-		LinkedList<Integer> list = new LinkedList<Integer>();
-		list.add(x);
-		INeighbors env;
-		BitSet visited = new BitSet(n);
-		visited.set(x);
-		while(!list.isEmpty()){
-			x = list.removeFirst();
-			env = g.getEnvelopGraph().getSuccessorsOf(x);
-			for(int suc=env.getFirstElement(); suc>=0; suc=env.getNextElement()){
-				if(!visited.get(suc)){
-					visited.set(suc);
-					list.addLast(suc);
-				}
-			}
-		}
-		return visited.nextClearBit(0)>=n;
-	}
+//	private boolean allReachableFrom(int x) {
+//		list.clear();
+//		visited.clear();
+//		list.add(x);
+//		INeighbors env;
+//		visited.set(x);
+//		while(!list.isEmpty()){
+//			x = list.removeFirst();
+//			env = g.getEnvelopGraph().getSuccessorsOf(x);
+//			for(int suc=env.getFirstElement(); suc>=0; suc=env.getNextElement()){
+//				if(!visited.get(suc)){
+//					visited.set(suc);
+//					list.addLast(suc);
+//				}
+//			}
+//		}
+//		return visited.nextClearBit(0)>=n;
+//	}
 
 	private void filtering() throws ContradictionException{
-		if(allReachableFrom(source)){
+//		if(allReachableFrom(source)){ // REDUNDANT WITH REDUCED GRAPH HAMILTONIAN PATH
 			structuralPruning();
-		}else{
-			this.contradiction(g, "infeasible");
-		}
+//		}else{
+//			this.contradiction(g, "infeasible");
+//		}
 	}
 
 	@Override
@@ -117,23 +134,20 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	}
 
 	private void structuralPruning() throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
-		//dominators
-		// BEWARE the FlowGraphManager might have a bug
-		FlowGraphManager flowGM = new FlowGraphManager(source, g.getEnvelopGraph(),true);
-		DirectedGraph dominatorGraph = new DirectedGraph(n, GraphType.LINKED_LIST);
+		//dominators BEWARE the FlowGraphManager might have a bug
+		flowGM.findDominators();
+		for(int i=0;i<n;i++){
+			dominatorGraph.getPredecessorsOf(i).clear();
+			dominatorGraph.getSuccessorsOf(i).clear();
+			in[i] = 0;
+			out[i]= 0;
+			father[i]=-1;
+			successors[i] = dominatorGraph.getSuccessorsOf(i);
+		}
 		for (int node=0; node<n; node++){
 			if(node!=source)dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
 		}
 		//PREPROCESSING
-		int[] in = new int[n];
-		int[] out = new int[n];
-		int[] father = new int[n];
-		INeighbors[] successors = new INeighbors[n];
-		for (int i=0; i<n; i++){
-			father[i] = -1;
-			successors[i] = dominatorGraph.getSuccessorsOf(i);
-		}
 		int time = 0;
 		int currentNode = source;
 		father[currentNode] = currentNode;
@@ -167,8 +181,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 				}
 			}
 		}
-		//END_PREPROCESSING
-		//queries
+		//QUERIES
 		INeighbors nei;
 		for (int node=0; node<n; node++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(node);
@@ -178,7 +191,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 					if (in[node]>in[suc] && out[node]<out[suc]){
 						g.removeArc(node, suc, this,false);
 					}
-					// arc-dominator detection (redundant with 1-pred propagator
+					// ENFORCING : arc-dominator detection (redundant with 1-pred propagator
 //					else if(in[node]<in[suc] && out[node]>out[suc]){
 //						INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(suc);
 //						boolean arcDominator = true;
