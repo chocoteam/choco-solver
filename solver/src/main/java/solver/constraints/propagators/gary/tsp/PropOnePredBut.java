@@ -74,7 +74,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	 * @param solver
 	 * */
 	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.but = but;
@@ -106,11 +106,11 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		GraphRequest gr = (GraphRequest) request;
 		if((mask & EventType.ENFORCEARC.mask) !=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+			IntDelta d = g.getDelta().getArcEnforcingDelta();
 			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
 		}
 		if((mask & EventType.REMOVEARC.mask)!=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+			IntDelta d = g.getDelta().getArcRemovalDelta();
 			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 		}
 	}
@@ -156,7 +156,9 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 				int from = i/n-1;
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
-					if(i!=from)g.removeArc(i,to,p,false);
+					if(i!=from){
+						g.removeArc(i,to,p,false);
+					}
 				}
 			}
 		}

@@ -35,21 +35,15 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphTools;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
-import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.graph.graphOperations.connectivity.*;
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.LinkedList;
 
 public class PropNTree<V extends Variable> extends GraphPropagator<V>{
@@ -69,9 +63,8 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropNTree(DirectedGraphVar graph, IntVar nT,Solver solver,
-			Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph,nT}, solver, constraint, priority, reactOnPromotion);
+					 Constraint<V, Propagator<V>> constraint) {
+		super((V[]) new Variable[]{graph,nT}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		nTree = nT;
 	}
@@ -80,13 +73,13 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-	private boolean checkFeasibility() throws ContradictionException {
+//	private boolean checkFeasibility() throws ContradictionException {
 //		int n = g.getEnvelopGraph().getNbNodes();
-		computeSinks();
-		int MINTREE = minTree;
-		int MAXTREE = calcMaxTree();
+//		computeSinks();
+//		int MINTREE = minTree;
+//		int MAXTREE = calcMaxTree();
 //		INeighbors nei;
-		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
+//		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
 //			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 //			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
 //			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
@@ -105,144 +98,73 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 //			int[] numDFS = GraphTools.performDFS(n, Grs);
 //			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 //				if(numDFS[node]==0){
-//					g.removeNode(node, this);
+//					g.removeNode(node, this, false);
 //				}
 //			}
-		}else{
-			return false;
-		}
-		return true;
-	}
+//		}else{
+//			return false;
+//		}
+//		return true;
+//	}
 
-	private int calcMaxTree() {
-		int ct = 0;
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			if (g.getEnvelopGraph().arcExists(node, node)){
-				ct++;
-			}
-		}
-		return ct;
-	}
+//	private int calcMaxTree() {
+//		int ct = 0;
+//		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+//		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
+//			if (g.getEnvelopGraph().arcExists(node, node)){
+//				ct++;
+//			}
+//		}
+//		return ct;
+//	}
 
 	private void filtering() throws ContradictionException{
 		computeSinks();
 		//1) Bound pruning
-		minTreePruning(); // MAXTREE pruning is done by PropNLoops
+		minTreePruning();
 		//2) structural pruning
 		structuralPruning();
 	}
 
 	@Override
 	public void propagate() throws ContradictionException {
-		if(!checkFeasibility()){
-			this.contradiction(g, "infeasible");
-		}else{
-//			structuralPruning();
-			filtering();
-		}
+		filtering();
 	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			if(!checkFeasibility()){
-				this.contradiction(g, "infeasible");
-			}else{
-				filtering();
-			}
-		}
+		filtering();
 	}
 
 	private void structuralPruning() throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
 		INeighbors nei;
 		for (int node = 0; node<n; node++) {
-			if(env.isActive(node)){
-				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-				for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
+			nei = g.getEnvelopGraph().getSuccessorsOf(node);
+			for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
+				if(suc==node){
+					Grs.addArc(n, node);
+				}else{
 					Grs.addArc(suc, node);
-					if(suc==node){
-						Grs.addArc(node, n);
-						Grs.addArc(n, node);
-					}
 				}
-			} else{ // enables to manage deleted nodes
-				Grs.desactivateNode(node);
-			}
-		}
-		// for subgraphs
-		int[] numDFS = GraphTools.performDFS(n, Grs);
-		INeighbors tr = Grs.getActiveNodes();
-		for (int node=tr.getFirstElement();node>=0;node=tr.getNextElement()){
-			if(numDFS[node]==0 && node !=n){
-				Grs.desactivateNode(node);
-				g.removeNode(node, this, false);
 			}
 		}
 		//dominators
-		FlowGraphManager flowGM = new FlowGraphManager(n, Grs, true);
-		
-		//LCA preprocessing
-		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST);
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
-		}
-		
-		//PREPROCESSING
-		int[] in = new int[n+1];
-		int[] out = new int[n+1];
-		int[] father = new int[n+1];
-		INeighbors[] successors = new INeighbors[n+1];
-		BitSet notFirsts = new BitSet(n+1);
-		for (int i=0; i<n+1; i++){
-			father[i] = -1;
-			successors[i] = dominatorGraph.getSuccessorsOf(i);
-		}
-		int time = 0;
-		int currentNode = n;
-		int nextNode;
-		father[n] = n;
-		in[n] = 0;
-		boolean notFinished = true;
-		while(notFinished){
-			if(notFirsts.get(currentNode)){
-				nextNode = successors[currentNode].getNextElement();
-			}else{
-				notFirsts.set(currentNode);
-				nextNode = successors[currentNode].getFirstElement();
-			}
-			if(nextNode<0){
-				time++;
-				out[currentNode] = time;
-				if(currentNode==n){
-					notFinished = false;
-					break;
-				}
-				currentNode = father[currentNode];
-			}else{
-				if (father[nextNode]==-1) {
-					time++;
-					in[nextNode] = time;
-					father[nextNode] = currentNode;
-					currentNode = nextNode;
+		AbstractLengauerTarjanDominatorsFinder dominatorsFinder = new SimpleDominatorsFinder(n,Grs);
+		if(dominatorsFinder.findDominators()){
+			for (int x=0; x<n; x++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(x);
+				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
+					//--- STANDART PRUNING
+					if(dominatorsFinder.isDomminatedBy(y,x)){
+						g.removeArc(x,y,this,false);
+					}
+					// ENFORCE ARC-DOMINATORS (redondant)
 				}
 			}
-		}
-		time++;
-		out[n] = time;
-		//END_PREPROCESSING
-		//queries
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			nei = g.getEnvelopGraph().getSuccessorsOf(node);
-			for(int suc = nei.getFirstElement(); suc>=0; suc = nei.getNextElement()){
-				//--- STANDART PRUNING
-				if (node != suc && in[suc]>in[node] && out[suc]<out[node]){
-					g.removeArc(node, suc, this, false);
-				}
-			}
+		}else{
+			contradiction(g,"the source cannot reach all nodes");
 		}
 	}
 
@@ -311,6 +233,13 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public ESat isEntailed() {
+		if(g.instantiated()){
+			try{
+				structuralPruning();
+			}catch (Exception e){
+				return ESat.FALSE;
+			}return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 }

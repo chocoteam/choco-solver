@@ -63,10 +63,9 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion, int nNeigh) {
+	public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nNeigh) {
 
-		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
+		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		n_neighbors = nNeigh;
 		final PropAtMostNNeighbors<V> instance = this;

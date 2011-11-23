@@ -42,14 +42,9 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.ValueRemoval;
-import solver.explanations.VariableState;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -79,7 +74,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	 * @param solver
 	 * */
 	public PropOneSuccBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.but = but;
@@ -111,11 +106,11 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		GraphRequest gr = (GraphRequest) request;
 		if((mask & EventType.ENFORCEARC.mask) !=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+			IntDelta d = g.getDelta().getArcEnforcingDelta();
 			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
 		}
 		if((mask & EventType.REMOVEARC.mask)!=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
+			IntDelta d = g.getDelta().getArcRemovalDelta();
 			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 		}
 	}
@@ -161,7 +156,9 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 				int to   = i%n;
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
 				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
-					if(i!=to)g.removeArc(from,i,p,false);
+					if(i!=to){
+						g.removeArc(from,i,p,false);
+					}
 				}
 			}
 		}

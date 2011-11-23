@@ -49,6 +49,7 @@ import solver.variables.EventType;
 import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 /** Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  * */public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
@@ -74,7 +75,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 	 * @param solver
 	 * */
 	public PropPathNoCycle(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc(this);
@@ -109,18 +110,29 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		GraphRequest gr = (GraphRequest) request;
 		if((mask & EventType.ENFORCEARC.mask) !=0){
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
+			IntDelta d = g.getDelta().getArcEnforcingDelta();
 			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		return EventType.ENFORCEARC.mask ;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		if(g.instantiated()){
+			int narcs = 0;
+			for(int i=0;i<n;i++){
+				narcs+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+			}
+			boolean connected = ConnectivityFinder.findCCOf(g.getEnvelopGraph()).size()==1;
+			if(connected && narcs==n-1){
+				return ESat.TRUE;
+			}
+			return ESat.FALSE;
+		}
 		return ESat.UNDEFINED;
 	}
 
@@ -136,8 +148,8 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int to = i%n;
 			int from = i/n-1;
+			int to = i%n;
 			int last = end[to].get();
 			int start = origin[from].get();
 			g.removeArc(last,start,p,false);

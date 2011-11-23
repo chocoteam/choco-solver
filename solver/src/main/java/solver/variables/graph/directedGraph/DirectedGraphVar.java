@@ -64,6 +64,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 
 	@Override
 	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+		informCause = false;
 		if(kernel.arcExists(x, y)){
 			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
 			return false;
@@ -74,17 +75,42 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			}
 			EventType e = EventType.REMOVEARC;
 			notifyMonitors(e, cause);
-			if(getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize()==0){
-				removeNode(x, cause, informCause);
+			int px = getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize();
+			int py = getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize();
+			int sx = getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize();
+			int sy = getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize();
+			if(px+sx<2){
+				if(px==0 && sx==0){
+					removeNode(x, cause, informCause);
+				}
+				if(getKernelGraph().getActiveNodes().isActive(x)){
+					if(px==1 && sx==0){
+						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause,informCause);
+					}
+					if(px==0 && sx==1){
+						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause,informCause);
+					}
+				}
 			}
-			if(getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize()==0 && getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize()==0){
-				removeNode(y, cause, informCause);
+			if(py+sy<2){
+				if(py==0 && sy==0){
+					removeNode(y, cause, informCause);
+				}
+				if(getKernelGraph().getActiveNodes().isActive(y)){
+					if(py==1 && sy==0){
+						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause,informCause);
+					}
+					if(py==0 && sy==1){
+						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause,informCause);
+					}
+				}
 			}
 			return true;
 		}return false;
 	}
 	@Override
 	public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+		informCause = false;
 		enforceNode(x, cause, informCause);
 		enforceNode(y, cause, informCause);
 		if(envelop.arcExists(x, y)){
@@ -113,13 +139,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	@Override
 	public StoredDirectedGraph getEnvelopGraph() {
 		return envelop;
-	} 
-
-	@Override
-	public int getType() {
-		return Variable.GRAPH;
 	}
-	
+
 	@Override
 	public boolean isDirected(){
 		return true;

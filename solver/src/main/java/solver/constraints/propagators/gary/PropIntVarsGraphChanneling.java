@@ -72,8 +72,8 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,Solver solver, Constraint mixtedAllDiff,PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, b);
+	public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph,Solver solver, Constraint mixtedAllDiff, int[] v, TIntIntHashMap vH) {
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, mixtedAllDiff, PropagatorPriority.QUADRATIC);
 		g = graph;
 		intVars = vars;
 		this.values = v;

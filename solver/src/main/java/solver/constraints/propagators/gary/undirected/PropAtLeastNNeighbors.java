@@ -66,9 +66,8 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtLeastNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion, int nNeigh) {
-		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
+	public PropAtLeastNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nNeigh) {
+		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		n_neighbors = nNeigh;
 		int n = g.getEnvelopGraph().getNbNodes();

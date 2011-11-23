@@ -67,7 +67,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 			V graph,
 			Solver solver,
 			Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
 		enf = new EnfProc(this);
 	}

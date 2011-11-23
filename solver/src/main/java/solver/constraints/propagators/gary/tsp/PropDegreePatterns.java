@@ -77,7 +77,7 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 	 * @param solver
 	 * */
 	public PropDegreePatterns(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		remArcs = new RemArc(this);
@@ -90,11 +90,37 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 
 	@Override
 	public void propagate() throws ContradictionException {
-		checkPattern();
+//		checkPattern();
+		INeighbors nei;
+		int x,y;
+		boolean hasChanged = true;
+		while(hasChanged){
+			hasChanged = false;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(nei.neighborhoodSize()==2){
+					x=nei.getFirstElement();
+					y=nei.getNextElement();
+					hasChanged |= g.removeArc(x,y,this,false);
+					hasChanged |= g.removeArc(y,x,this,false);
+				}
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				if(nei.neighborhoodSize()==2){
+					x=nei.getFirstElement();
+					y=nei.getNextElement();
+					hasChanged |= g.removeArc(x,y,this,false);
+					hasChanged |= g.removeArc(y,x,this,false);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		if(true){
+			propagate();
+			return;
+		}
 		GraphRequest gr = (GraphRequest) request;
 		IntDelta d = g.getDelta().getArcRemovalDelta();
 		d.forEach(remArcs, gr.fromArcRemoval(), gr.toArcRemoval());

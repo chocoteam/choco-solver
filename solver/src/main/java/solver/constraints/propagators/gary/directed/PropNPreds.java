@@ -67,7 +67,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	public PropNPreds(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds, INeighbors concernedNodes) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
 		this.concernedNodes = concernedNodes;
 		this.nPreds = nbPreds;
