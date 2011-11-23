@@ -25,57 +25,56 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.graph.graphOperations.connectivity;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 f�vr. 2011
- */
-public class IntCell {
+import solver.variables.graph.directedGraph.IDirectedGraph;
 
-    int element;
-    IntCell next;
+/**Class that finds dominators of a given flow graph g(s)
+ * Uses the simple LT algorithm which runs in O(m.log(n))
+ * Fast in practice*/
+public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder{
 
-    public IntCell(int element, IntCell next) {
-        init(element,next);
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-//    public int getElement() {
-//        return element;
-//    }
-//
-//    public IntCell getNext() {
-//        return next;
-//    }
-//
-//    public void setNext(IntCell next) {
-//        this.next = next;
-//    }
-//
-//    public boolean equals(Object o) {
-//        if (o instanceof IntCell) {
-//            IntCell c = (IntCell) o;
-//            return c.getElement() == this.getElement();
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    public boolean contains(int element) {
-//        return this.element == element;
-//    }
+	/**Object that finds dominators of the given flow graph g(s)
+	 * It uses the simple LT algorithm which runs in O(m.log(n))*/
+	public SimpleDominatorsFinder(int s, IDirectedGraph g){
+		super(s,g);
+	}
 
-    public String toString() {
-        if (next == null) {
-            return ""+element;
-        } else {
-            return ""+element+" -> ";
-        }
-    }
+	//***********************************************************************************
+	// LINK-EVAL
+	//***********************************************************************************
 
-	public void init(int element, IntCell next) {
-		this.element = element;
-        this.next = next;
+	protected void LINK(int v, int w) {
+		ancestor[w]=v;
+	}
+
+	protected int EVAL(int v) {
+		if(ancestor[v] == -1){
+			return v;
+		}else{
+			COMPRESS(v);
+			return label[v];
+		}
+
+	}
+
+	protected void COMPRESS(int v) {
+		int k = v;
+		list.clear();
+		while(ancestor[ancestor[k]]!=-1){
+			list.add(k);
+			k = ancestor[k];
+		}
+		for(k=list.size()-1;k>=0;k--){
+			v = list.get(k);
+			if(semi[label[ancestor[v]]] < semi[label[v]]){
+				label[v] = label[ancestor[v]];
+			}
+			ancestor[v] = ancestor[ancestor[v]];
+		}
 	}
 }

@@ -92,7 +92,7 @@ public final class Delta implements IntDelta{
      */
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-    	to = Math.min(to, rem.length);
+    	to = Math.min(to, rem.length); // TODO virer non?
         for (int i = from; i < to; i++) {
             proc.execute(rem[i]);
         }

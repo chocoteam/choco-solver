@@ -150,16 +150,16 @@ public class AllDifferent extends IntConstraint<IntVar> {
         }
         if (bcMode) {
             setPropagators(
-                    new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),
-                    new PropAtMostNNeighbors(graph, solver, this, PropagatorPriority.LINEAR, false, 1),
-                    new PropIntVarsGraphChanneling(vars, graph, solver, this, PropagatorPriority.LINEAR, false, values, valuesHash),
-                    new PropGraphAllDiffBC(vars, graph, solver, this, PropagatorPriority.LINEAR, valuesHash)
+                    new PropAllDiffGraph(graph, vars.length, solver, this),
+                    new PropAtMostNNeighbors(graph, solver, this, 1),
+                    new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash),
+                    new PropGraphAllDiffBC(vars, graph, solver, this, valuesHash)
             );
         } else {
             setPropagators(
-                    new PropAllDiffGraph(graph, vars.length, solver, this, PropagatorPriority.QUADRATIC, false),
-                    new PropAtMostNNeighbors(graph, solver, this, PropagatorPriority.LINEAR, false, 1),
-                    new PropIntVarsGraphChanneling(vars, graph, solver, this, PropagatorPriority.LINEAR, false, values, valuesHash)
+                    new PropAllDiffGraph(graph, vars.length, solver, this),
+                    new PropAtMostNNeighbors(graph, solver, this, 1),
+                    new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash)
             );
         }
     }

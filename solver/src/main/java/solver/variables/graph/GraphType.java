@@ -27,14 +27,28 @@
 
 package solver.variables.graph;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 févr. 2011
- */
 public enum GraphType {
+	SWAP_ARRAY,
+	SWAP_HASH,
+	// efficient but cannot add elements during the search
+	ENVELOPE_SWAP_HASH,
+	ENVELOPE_SWAP_ARRAY,// LOOKS BETTER THAN HASHMAP efficient but cannot add elements during the search
+	// efficient but cannot remove elements during the search
+	KERNEL_SWAP_HASH,
+	KERNEL_SWAP_ARRAY,
+	LINKED_LIST,
+	DOUBLE_LINKED_LIST,  // enable deletion of current element in O(1)
+	MATRIX;
 
-	// ENVELOPE_LINKEDLIST might be removed
-    COMPOSITE, ENVELOPE_LINKEDLIST, LINKED_LIST, MATRIX
+	public final static GraphType[] ENVELOPE_TYPES = new GraphType[]{
+			ENVELOPE_SWAP_ARRAY,ENVELOPE_SWAP_HASH,
+			LINKED_LIST,DOUBLE_LINKED_LIST,MATRIX};
 
+	public final static GraphType[] KERNEL_TYPES = new GraphType[]{
+			KERNEL_SWAP_ARRAY,KERNEL_SWAP_HASH,
+			LINKED_LIST,DOUBLE_LINKED_LIST,MATRIX};
+
+	public final static GraphType ENVELOPE_BEST = ENVELOPE_SWAP_ARRAY;
+	public final static GraphType KERNEL_BEST   = LINKED_LIST;
 }
+

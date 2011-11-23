@@ -65,7 +65,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropTransitivity(V graph, Solver solver, GraphConstraint constraint) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		n = graph.getEnvelopGraph().getNbNodes();
 		if( graph instanceof DirectedGraphVar){

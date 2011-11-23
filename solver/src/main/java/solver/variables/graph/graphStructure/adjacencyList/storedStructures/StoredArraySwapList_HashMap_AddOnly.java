@@ -25,57 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
 
 /**
+ * Backtrable List of m elements based on Array int_swaping
+ * add : O(1) only at root node!
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public class IntCell {
+public class StoredArraySwapList_HashMap_AddOnly extends ArraySwapList_HashMap{
 
-    int element;
-    IntCell next;
+	protected IStateInt size;
+	protected IEnvironment env;
 
-    public IntCell(int element, IntCell next) {
-        init(element,next);
-    }
+	public StoredArraySwapList_HashMap_AddOnly(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
+	}
 
-//    public int getElement() {
-//        return element;
-//    }
-//
-//    public IntCell getNext() {
-//        return next;
-//    }
-//
-//    public void setNext(IntCell next) {
-//        this.next = next;
-//    }
-//
-//    public boolean equals(Object o) {
-//        if (o instanceof IntCell) {
-//            IntCell c = (IntCell) o;
-//            return c.getElement() == this.getElement();
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    public boolean contains(int element) {
-//        return this.element == element;
-//    }
+	@Override
+	public boolean remove(int element) {
+		if(env.getWorldIndex()!=0){
+			Exception e = new Exception("cannot remove elements after world 0");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		return super.remove(element);
+	}
 
-    public String toString() {
-        if (next == null) {
-            return ""+element;
-        } else {
-            return ""+element+" -> ";
-        }
-    }
-
-	public void init(int element, IntCell next) {
-		this.element = element;
-        this.next = next;
+	protected int getSize(){
+		return size.get();
+	}
+	protected void setSize(int s){
+		size.set(s);
+	}
+	protected void addSize(int delta){
+		size.add(delta);
 	}
 }

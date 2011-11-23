@@ -28,24 +28,47 @@
 package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
 
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.structure.Operation;
+import choco.kernel.memory.IStateInt;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 09/02/11
+ * Backtrable List of m elements based on Array int_swaping
+ * add : O(1) only at root node!
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public abstract class LeafOperation extends Operation {
+public class StoredArraySwapList_Array_AddOnly extends ArraySwapList_Array {
 
-    final StoredIntLinkedList list;
+	protected IStateInt size;
+	protected IEnvironment env;
 
-    final int element;
+	public StoredArraySwapList_Array_AddOnly(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
+	}
 
-    public LeafOperation(IEnvironment environment, StoredIntLinkedList list, int element) {
-        super(environment);
-        this.list = list;
-        this.element = element;
-    }
+	@Override
+	public boolean remove(int element) {
+		if(env.getWorldIndex()!=0){
+			Exception e = new Exception("cannot remove elements after world 0");
+			e.printStackTrace();
+			System.exit(0);
+		}
+		return super.remove(element);
+	}
 
+	protected int getSize(){
+		return size.get();
+	}
+	protected void setSize(int s){
+		size.set(s);
+	}
+	protected void addSize(int delta){
+		size.add(delta);
+	}
 }

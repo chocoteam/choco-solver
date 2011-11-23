@@ -170,7 +170,7 @@ public class VRP extends AbstractProblem {
 	 */
 	private GraphConstraint graphSuccs(int[][] distancesMatrix){
 		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
+		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver);
 		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, nTrucks);
 		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
 		g = (DirectedGraphVar) gc.getGraph(); // stores the graph variable
@@ -195,7 +195,7 @@ public class VRP extends AbstractProblem {
 	 */
 	private GraphConstraint graphTransClos(int[][] distancesMatrix){
 		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver, PropagatorPriority.LINEAR);
+		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver);
 		gc.addProperty(GraphProperty.TRANSITIVITY);
 		gc.addProperty(GraphProperty.ANTI_SYMMETRY);
 		g = (DirectedGraphVar) gc.getGraph(); // stores the graph variable
