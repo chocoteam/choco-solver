@@ -50,6 +50,8 @@ public abstract class AbstractCondition implements ICondition<ConditionnalReques
     ConditionnalRequest[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
     int idxLastRequest; // index of the last not null request in relatedRequests
     final IStateBool wasValid;
+    ICondition<ConditionnalRequest> next = Default.NO_CONDITION;
+
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
@@ -77,10 +79,17 @@ public abstract class AbstractCondition implements ICondition<ConditionnalReques
                     }
                 }
                 wasValid.set(alwaysValid());
+                next.validateScheduling(request, event);
                 return true;
             }
-            return false;
+            //return false;
+            return next.validateScheduling(request, event);
         }
+    }
+
+    @Override
+    public ICondition next() {
+        return null;
     }
 
     /**
@@ -119,6 +128,7 @@ public abstract class AbstractCondition implements ICondition<ConditionnalReques
             System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
         }
         relatedRequests[idxLastRequest++] = request;
+        next.linkRequest(request);
     }
 
 

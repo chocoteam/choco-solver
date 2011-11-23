@@ -90,7 +90,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
                     }
                 }
                 addPropagators(props);
-            }*/
+            }//*/
             break;
             case GRAPH:
                 buildGraphAllDifferent(this.vars, solver);

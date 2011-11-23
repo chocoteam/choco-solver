@@ -136,7 +136,9 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public void schedule() {
-        engine.schedule(this);
+        if (!enqueued) {
+            engine.schedule(this);
+        }
     }
 
     @Override

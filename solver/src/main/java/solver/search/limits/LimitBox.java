@@ -120,7 +120,10 @@ public class LimitBox extends VoidSearchMonitor implements Serializable, ISearch
     /**
      * Defines a limit over the run time.
      * When the limit is reached, the resolution is stopped.
-     *
+     * <br/>
+     * <br/>
+     * <b>One must consider also LimitBox.setThreadTimeLimit(long), that runs the limit in a separated thread.</b>
+     * @see LimitBox#setThreadTimeLimit(long)
      * @param timelimit maximal resolution time in millisecond
      */
     public void setTimeLimit(long timelimit) {

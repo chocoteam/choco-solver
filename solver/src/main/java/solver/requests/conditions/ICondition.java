@@ -27,6 +27,7 @@
 package solver.requests.conditions;
 
 import solver.requests.AbstractRequestWithVar;
+import solver.requests.ConditionnalRequest;
 import solver.variables.EventType;
 
 import java.io.Serializable;
@@ -35,7 +36,7 @@ import java.io.Serializable;
  * A condition on request scheduling.
  * #validateScheduling can react on a request updating to compute (or update) a condition
  * that validates (or not) the scheduling of the request
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -52,12 +53,38 @@ public interface ICondition<R extends AbstractRequestWithVar> extends Serializab
      */
     boolean validateScheduling(R request, EventType event);
 
-    public static enum Default implements ICondition {
-        ALWAYS_TRUE;
+    /**
+     * Return the next condition to check, if <code>this</code> is not valid </br>
+     * Default value is ICondition.NO_CONDITION
+     *
+     * @return
+     */
+    ICondition next();
+
+    /**
+     * Link the <code>request</code> to the condition
+     *
+     * @param request condition request
+     */
+    public void linkRequest(R request);
+
+    public static enum Default implements ICondition<ConditionnalRequest> {
+        NO_CONDITION;
 
         @Override
-        public boolean validateScheduling(AbstractRequestWithVar request, EventType event) {
-            return true;
+        public boolean validateScheduling(ConditionnalRequest request, EventType event) {
+            return false;
         }
+
+        @Override
+        public ICondition next() {
+            return NO_CONDITION;
+        }
+
+        @Override
+        public void linkRequest(ConditionnalRequest request) {
+        }
+
+
     }
 }
