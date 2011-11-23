@@ -51,7 +51,7 @@ public class ArraySwapList_HashMap extends ArraySwapList{
 	@Override
 	public boolean contain(int element) {
 		if(map.containsKey(element)){
-			return (map.get(element)<getSize());
+			return array[map.get(element)]==element && map.get(element)<getSize();
 		}
 		return false;
 	}
@@ -72,6 +72,7 @@ public class ArraySwapList_HashMap extends ArraySwapList{
 			System.arraycopy(tmp,0,array,0,size);
 		}
 		array[size] = element;
+		map.remove(element);
 		map.put(element, size);
 		addSize(1);
 	}

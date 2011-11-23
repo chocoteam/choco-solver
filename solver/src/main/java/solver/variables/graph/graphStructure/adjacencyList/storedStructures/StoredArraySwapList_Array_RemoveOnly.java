@@ -24,69 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.graph.graphStructure.adjacencyList;
 
-import solver.variables.graph.INeighbors;
+package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
 
 /**
- * @author Jean-Guillaume Fages
- * 
- * Composite collection composed of a matrix and a list representation to get the benefit of each
- *
+ * Backtrable List of m elements based on Array int_swaping
+ * add : O(1) only at root node!
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public class CompositeList implements INeighbors{
+public class StoredArraySwapList_Array_RemoveOnly extends ArraySwapList_Array {
 
-	private INeighbors listLike;
-	private INeighbors matrixLike;
+	protected IStateInt size;
+	protected IEnvironment env;
 
-	public CompositeList(INeighbors iterator, INeighbors presenceChecker){
-		this.listLike = iterator;
-		this.matrixLike = presenceChecker;
+	public StoredArraySwapList_Array_RemoveOnly(IEnvironment e, int n) {
+		super(n);
+		env = e;
+		size = e.makeInt(0);
 	}
 
 	@Override
 	public void add(int element) {
-		listLike.add(element);
-		matrixLike.add(element);
-	}
-
-	@Override
-	public boolean remove(int element) {
-		if(!matrixLike.remove(element)){
-			return false;
+		if(env.getWorldIndex()!=0){
+			Exception e = new Exception("cannot add elements after world 0");
+			e.printStackTrace();
+			System.exit(0);
 		}
-		listLike.remove(element);
-		return true;
+		super.add(element);
 	}
 
-	@Override
-	public boolean contain(int element) {
-		return matrixLike.contain(element);
+	protected int getSize(){
+		return size.get();
 	}
-
-	@Override
-	public boolean isEmpty() {
-		return matrixLike.isEmpty();
+	protected void setSize(int s){
+		size.set(s);
 	}
-
-	@Override
-	public int neighborhoodSize() {
-		return matrixLike.neighborhoodSize();
-	}
-
-	@Override
-	public void clear() {
-		listLike.clear();
-		matrixLike.clear();
-	}
-
-	@Override
-	public int getFirstElement() {
-		return listLike.getFirstElement();
-	}
-
-	@Override
-	public int getNextElement() {
-		return listLike.getNextElement();
+	protected void addSize(int delta){
+		size.add(delta);
 	}
 }

@@ -41,12 +41,12 @@ import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap
  * User: Jean-Guillaume Fages
  * Date: 18/11/2011
  */
-public class StoredArraySwapList_HashMap extends ArraySwapList_HashMap{
+public class StoredArraySwapList_HashMap_RemoveOnly extends ArraySwapList_HashMap{
 
 	protected IStateInt size;
 	protected IEnvironment env;
 
-	public StoredArraySwapList_HashMap(IEnvironment e, int n) {
+	public StoredArraySwapList_HashMap_RemoveOnly(IEnvironment e, int n) {
 		super(n);
 		env = e;
 		size = e.makeInt(0);
@@ -55,7 +55,8 @@ public class StoredArraySwapList_HashMap extends ArraySwapList_HashMap{
 	@Override
 	public void add(int element) {
 		if(env.getWorldIndex()!=0){
-			System.out.println("cannot add elements in StoredArraySwapList after world 0");
+			Exception e = new Exception("cannot add elements after world 0");
+			e.printStackTrace();
 			System.exit(0);
 		}
 		super.add(element);

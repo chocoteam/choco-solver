@@ -30,9 +30,6 @@ package solver.variables.graph.directedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
-import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
@@ -56,14 +53,7 @@ public class StoredDirectedGraph extends DirectedGraph implements IStoredGraph{
 		this.type = type;
 		environment = env;
 		switch (type) {
-			case COMPOSITE:
-				this.successors = new CompositeList[nb];
-				this.predecessors = new CompositeList[nb];
-				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new CompositeList(new StoredIntLinkedList(env),new StoredBitSetNeighbors(env, nb));
-					this.predecessors[i] = new CompositeList(new StoredIntLinkedList(env),new StoredBitSetNeighbors(env, nb));
-				}
-				break;
+			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
 				this.successors = new StoredDoubleIntLinkedList[nb];
 				this.predecessors = new StoredDoubleIntLinkedList[nb];
@@ -80,22 +70,40 @@ public class StoredDirectedGraph extends DirectedGraph implements IStoredGraph{
 					this.predecessors[i] = new StoredIntLinkedList(env);
 				}
 				break;
+			// ARRAY SWAP
 			case ENVELOPE_SWAP_ARRAY:
-				this.successors = new StoredArraySwapList_Array[nb];
-				this.predecessors = new StoredArraySwapList_Array[nb];
+				this.successors = new StoredArraySwapList_Array_RemoveOnly[nb];
+				this.predecessors = new StoredArraySwapList_Array_RemoveOnly[nb];
 				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new StoredArraySwapList_Array(env,nb);
-					this.predecessors[i] = new StoredArraySwapList_Array(env,nb);
+					this.successors[i] = new StoredArraySwapList_Array_RemoveOnly(env,nb);
+					this.predecessors[i] = new StoredArraySwapList_Array_RemoveOnly(env,nb);
 				}
 				break;
 			case ENVELOPE_SWAP_HASH:
-				this.successors = new StoredArraySwapList_HashMap[nb];
-				this.predecessors = new StoredArraySwapList_HashMap[nb];
+				this.successors = new StoredArraySwapList_HashMap_RemoveOnly[nb];
+				this.predecessors = new StoredArraySwapList_HashMap_RemoveOnly[nb];
 				for (int i = 0; i < nb; i++) {
-					this.successors[i] = new StoredArraySwapList_HashMap(env,nb);
-					this.predecessors[i] = new StoredArraySwapList_HashMap(env,nb);
+					this.successors[i] = new StoredArraySwapList_HashMap_RemoveOnly(env,nb);
+					this.predecessors[i] = new StoredArraySwapList_HashMap_RemoveOnly(env,nb);
 				}
 				break;
+			case KERNEL_SWAP_ARRAY:
+				this.successors = new StoredArraySwapList_Array_AddOnly[nb];
+				this.predecessors = new StoredArraySwapList_Array_AddOnly[nb];
+				for (int i = 0; i < nb; i++) {
+					this.successors[i] = new StoredArraySwapList_Array_AddOnly(env,nb);
+					this.predecessors[i] = new StoredArraySwapList_Array_AddOnly(env,nb);
+				}
+				break;
+			case KERNEL_SWAP_HASH:
+				this.successors = new StoredArraySwapList_HashMap_AddOnly[nb];
+				this.predecessors = new StoredArraySwapList_HashMap_AddOnly[nb];
+				for (int i = 0; i < nb; i++) {
+					this.successors[i] = new StoredArraySwapList_HashMap_AddOnly(env,nb);
+					this.predecessors[i] = new StoredArraySwapList_HashMap_AddOnly(env,nb);
+				}
+				break;
+			// MATRIX
 			case MATRIX:
 				this.successors = new StoredBitSetNeighbors[nb];
 				this.predecessors = new StoredBitSetNeighbors[nb];

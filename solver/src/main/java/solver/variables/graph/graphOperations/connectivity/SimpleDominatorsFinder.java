@@ -25,82 +25,56 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.adjacencyList;
+package solver.variables.graph.graphOperations.connectivity;
 
-import gnu.trove.TIntIntHashMap;
+import solver.variables.graph.directedGraph.IDirectedGraph;
 
-/**
- * List of m elements based on Array int_swaping with an additionnal array
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 18/11/2011
- */
-public class ArraySwapList_Array extends ArraySwapList{
+/**Class that finds dominators of a given flow graph g(s)
+ * Uses the simple LT algorithm which runs in O(m.log(n))
+ * Fast in practice*/
+public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder{
 
-	protected int[] map;
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-	public ArraySwapList_Array(int n) {
-		super(n);
-		map = new int[n];
-		for(int i=0;i<n;i++){
-			map[i]=-1;
-		}
+	/**Object that finds dominators of the given flow graph g(s)
+	 * It uses the simple LT algorithm which runs in O(m.log(n))*/
+	public SimpleDominatorsFinder(int s, IDirectedGraph g){
+		super(s,g);
 	}
 
-	@Override
-	public boolean contain(int element) {
-		if(map[element]>=0){
-			return array[map[element]]==element && map[element]<getSize();
-		}
-		return false;
+	//***********************************************************************************
+	// LINK-EVAL
+	//***********************************************************************************
+
+	protected void LINK(int v, int w) {
+		ancestor[w]=v;
 	}
 
-	@Override
-	public void add(int element) {
-		if(contain(element)){
-			Exception e = new Exception("element already in list");
-			e.printStackTrace();
-			System.exit(0);
-			return;
+	protected int EVAL(int v) {
+		if(ancestor[v] == -1){
+			return v;
+		}else{
+			COMPRESS(v);
+			return label[v];
 		}
-		int size = getSize();
-		if(getSize()==arrayLength){
-			int[] tmp = array;
-			int ns = Math.max(sizeMax,tmp.length+1+(tmp.length*2)/3);
-			array = new int[ns];
-			System.arraycopy(tmp,0,array,0,size);
-		}
-		array[size] = element;
-		map[element] = size;
-		addSize(1);
+
 	}
 
-	@Override
-	public boolean remove(int element) {
-		int size = getSize();
-		if(map[element]>=0){
-			if(size==1){
-				setSize(0);
-				return true;
+	protected void COMPRESS(int v) {
+		int k = v;
+		list.clear();
+		while(ancestor[ancestor[k]]!=-1){
+			list.add(k);
+			k = ancestor[k];
+		}
+		for(k=list.size()-1;k>=0;k--){
+			v = list.get(k);
+			if(semi[label[ancestor[v]]] < semi[label[v]]){
+				label[v] = label[ancestor[v]];
 			}
-			int idx = map[element];
-			if(idx<size){
-				int replacer = array[size-1];
-				map[replacer] = idx;
-				array[idx]	  = replacer;
-				map[element] = size-1;
-				array[size-1] = element;
-				addSize(-1);
-				if(idx==currentIdx){
-					currentIdx--;
-				}
-				return true;
-			}
+			ancestor[v] = ancestor[ancestor[v]];
 		}
-		return false;
 	}
 }

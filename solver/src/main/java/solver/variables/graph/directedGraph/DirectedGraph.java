@@ -62,15 +62,10 @@ public class DirectedGraph implements IDirectedGraph {
 	public DirectedGraph(int nbits, GraphType type) {
 		this.type = type;
 		switch (type) {
-			case COMPOSITE:
-				this.successors = new CompositeList[nbits];
-				this.predecessors = new CompositeList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.successors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
-					this.predecessors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
-				}
-				break;
+			// ARRAY SWAP
 			case ENVELOPE_SWAP_ARRAY:
+			case KERNEL_SWAP_ARRAY:
+			case SWAP_ARRAY:
 				this.successors = new ArraySwapList_Array[nbits];
 				this.predecessors = new ArraySwapList_Array[nbits];
 				for (int i = 0; i < nbits; i++) {
@@ -79,6 +74,8 @@ public class DirectedGraph implements IDirectedGraph {
 				}
 				break;
 			case ENVELOPE_SWAP_HASH:
+			case KERNEL_SWAP_HASH:
+			case SWAP_HASH:
 				this.successors = new ArraySwapList_HashMap[nbits];
 				this.predecessors = new ArraySwapList_HashMap[nbits];
 				for (int i = 0; i < nbits; i++) {
@@ -86,6 +83,7 @@ public class DirectedGraph implements IDirectedGraph {
 					this.predecessors[i] = new ArraySwapList_HashMap(nbits);
 				}
 				break;
+			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
 				this.successors = new IntDoubleLinkedList[nbits];
 				this.predecessors = new IntDoubleLinkedList[nbits];
@@ -256,6 +254,9 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addArc(int from, int to) {
+//		System.out.println(from+" - "+to);
+//		System.out.println(successors[from]+" mm "+predecessors[to]);
+//		System.out.println(successors[from].contain(to)+" and "+predecessors[to].contain(from));
 		if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))){
 			successors[from].add(to);
 			predecessors[to].add(from);

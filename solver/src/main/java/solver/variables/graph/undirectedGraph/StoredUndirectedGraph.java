@@ -30,9 +30,6 @@ package solver.variables.graph.undirectedGraph;
 import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IStoredGraph;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
-import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.StoredActiveNodes;
@@ -56,24 +53,32 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 		this.type = type;
 		environment = env;
 		switch (type) {
-			case COMPOSITE:
-				this.neighbors = new CompositeList[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new CompositeList(new StoredIntLinkedList(env),new StoredBitSetNeighbors(env, nbits));
-				}
-				break;
+			// SWAP ARRAYS
 			case ENVELOPE_SWAP_ARRAY:
-				neighbors = new StoredArraySwapList_Array[nbits];
+				neighbors = new StoredArraySwapList_Array_RemoveOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_Array(env,nbits);
+					neighbors[i] = new StoredArraySwapList_Array_RemoveOnly(env,nbits);
 				}
 				break;
 			case ENVELOPE_SWAP_HASH:
-				neighbors = new StoredArraySwapList_HashMap[nbits];
+				neighbors = new StoredArraySwapList_HashMap_RemoveOnly[nbits];
 				for (int i = 0; i < nbits; i++) {
-					neighbors[i] = new StoredArraySwapList_HashMap(env,nbits);
+					neighbors[i] = new StoredArraySwapList_HashMap_RemoveOnly(env,nbits);
 				}
 				break;
+			case KERNEL_SWAP_ARRAY:
+				neighbors = new StoredArraySwapList_Array_AddOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_Array_AddOnly(env,nbits);
+				}
+				break;
+			case KERNEL_SWAP_HASH:
+				neighbors = new StoredArraySwapList_HashMap_AddOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_HashMap_AddOnly(env,nbits);
+				}
+				break;
+			// LINKED LISTS
 			case DOUBLE_LINKED_LIST:
 				this.neighbors = new StoredDoubleIntLinkedList[nbits];
 				for (int i = 0; i < nbits; i++) {
@@ -86,6 +91,7 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 					this.neighbors[i] = new StoredIntLinkedList(environment);
 				}
 				break;
+			// MATRIX
 			case MATRIX:
 				this.neighbors = new StoredBitSetNeighbors[nbits];
 				for (int i = 0; i < nbits; i++) {
@@ -93,11 +99,7 @@ public class StoredUndirectedGraph extends UndirectedGraph implements IStoredGra
 				}
 				break;
 			default:
-				this.neighbors = new StoredBitSetNeighbors[nbits];
-				for (int i = 0; i < nbits; i++) {
-					this.neighbors[i] = new StoredBitSetNeighbors(environment,nbits);
-				}
-				break;
+				throw new UnsupportedOperationException();
 		}
 		this.activeIdx = new StoredActiveNodes(environment, nbits);
 		for (int i = 0; i < nbits; i++) {

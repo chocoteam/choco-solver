@@ -32,7 +32,7 @@
  * Time: 10:42
  */
 
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -54,13 +54,12 @@ import solver.variables.graph.directedGraph.*;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
-
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 
 /** Maintain incrementally the reduced graph G_R and SCC
  *  make G_R a hamiltonian path
+ *  BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
  *  O(n+m)
  *  User: Jean-Guillaume Fages
  *  Date: 17/11/2011
@@ -88,12 +87,13 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 
 	/** Maintain incrementally the reduced graph and strongly connected components of a directed graph variable
 	 * Ensures that the reduced graph is a Hamiltonian path
+	 * BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
 	 * @param graph
 	 * @param constraint
 	 * @param solver
 	 * */
 	public PropReducedGraphHamPath(V graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		G = graph;
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
@@ -129,11 +129,14 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		TIntArrayList list;
 		for(int i=0;i<s;i++){
 			list = allSCC.get(i);
+			nodesOf[i].clear();
+			mates[i].clear();
+			G_R.getActiveNodes().desactivate(i);
+			G_R.getActiveNodes().activate(i);
 			for(int j=list.size()-1;j>=0;j--){
 				elem = list.get(j);
 				sccOf[elem].set(i);
 				nodesOf[i].add(elem);
-				G_R.getActiveNodes().activate(i);
 			}
 		}
 		INeighbors succs;
@@ -205,27 +208,17 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 
 	@Override
 	public ESat isEntailed() {
+		if(G.instantiated()){
+			int nr = 0;
+			for(int i=0;i<n_R.get();i++){
+				nr+=G_R.getSuccessorsOf(i).neighborhoodSize();
+			}
+			if(nr==n_R.get()-1){
+				return ESat.TRUE;
+			}
+			return ESat.FALSE;
+		}
 		return ESat.UNDEFINED;
-	}
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	public int getSccOf(int node) {
-		return sccOf[node].get();
-	}
-	public INeighbors getNodesOf(int scc) {
-		return nodesOf[scc];
-	}
-	public INeighbors getMates(int node_in_G_R) {
-		return mates[node_in_G_R];
-	}
-	public IDirectedGraph getReducedGraph() {
-		return G_R;
-	}
-	public int getN_R() {
-		return n_R.get();
 	}
 
 	//***********************************************************************************
@@ -251,6 +244,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 					for(int k=nodesOf[x].getFirstElement(); k>=0; k=nodesOf[x].getNextElement()){
 						restriction.set(k);
 					}
+					// piste1 algo faux
 					ArrayList<TIntArrayList> newSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph(), restriction);
 					sccComputed.set(x);
 					int ns = newSCC.size();
@@ -260,6 +254,8 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						// SCC broken
 						nodesOf[x].clear();
 						mates[x].clear();
+						G_R.removeArc(first,x);
+						G_R.removeArc(x,last);
 						// first scc
 						for(int e=0; e<newSCC.get(0).size();e++){
 							nodesOf[x].add(newSCC.get(0).get(e));
@@ -269,26 +265,28 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						int elem;
 						for(int scc=1;scc<ns;scc++){
 							nodesOf[idx].clear();
+							mates[idx].clear();
+							G_R.getActiveNodes().activate(idx);
 							for(int e=0; e<newSCC.get(scc).size();e++){
 								elem = newSCC.get(scc).get(e);
 								nodesOf[idx].add(elem);
 								sccOf[elem].set(idx);
-								G_R.getActiveNodes().activate(idx);
-								idx++;
 							}
+							idx++;
 						}
-						n_R.add(ns-1);
+						n_R.set(idx);
 						// link arcs
-						int e;
+						int e,sccE;
 						INeighbors nei;
 						for(int scc=0;scc<ns;scc++){
 							for(int k=newSCC.get(scc).size()-1;k>=0;k--){
 								e = newSCC.get(scc).get(k);
+								sccE = sccOf[e].get();
 								nei = G.getEnvelopGraph().getSuccessorsOf(e);
 								for(int next=nei.getFirstElement(); next>=0; next=nei.getNextElement()){
-									if(sccOf[e].get()!=sccOf[next].get()){
-										G_R.addArc(sccOf[e].get(),sccOf[next].get());
-										mates[sccOf[e].get()].add((e+1)*n+next);
+									if(sccE!=sccOf[next].get()){
+										G_R.addArc(sccE,sccOf[next].get());
+										mates[sccE].add((e+1)*n+next);
 									}
 								}
 							}
