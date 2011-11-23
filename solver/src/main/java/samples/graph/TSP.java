@@ -34,11 +34,10 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.PropReducedGraphHamPath;
+import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrArityP;
 import solver.propagation.engines.comparators.IncrPriorityP;
 import solver.propagation.engines.comparators.predicate.Predicates;
 import solver.propagation.engines.group.Group;
@@ -49,6 +48,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -64,7 +64,7 @@ public class TSP extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 10000;
+	private static final long TIMELIMIT = 100000;
 	private static String outFile = "/Users/jfages07/Documents/code/results/results_atsp_"+(TIMELIMIT/1000)+".csv";
 	static int seed = 0;
 	// instance
@@ -100,7 +100,7 @@ public class TSP extends AbstractProblem{
 		totalCost = VariableFactory.enumerated("total cost ", 0,maxValue*n, solver);
 		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
 		try{
-			for(int i=0; i<n; i++){
+			for(int i=0; i<n-1; i++){
 				graph.getKernelGraph().activateNode(i);
 				for(int j=0; j<n ;j++){
 					if(distanceMatrix[i][j]!=noVal){
@@ -113,15 +113,14 @@ public class TSP extends AbstractProblem{
 			System.exit(0);
 		}
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		
+		graph = (DirectedGraphVar) gc.getGraph();
 		gc.addAdHocProp(new PropOneSuccBut((DirectedGraphVar) graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut((DirectedGraphVar) graph,0,gc,solver));
 		gc.addAdHocProp(new PropPathNoCycle((DirectedGraphVar) graph,gc,solver));
+		// beaucoup trop lent (pourquoi?)
 		gc.addAdHocProp(new PropDegreePatterns((DirectedGraphVar) graph,gc,solver));
 		gc.addAdHocProp(new PropEvalObj((DirectedGraphVar) graph,totalCost,distanceMatrix,gc,solver));
-//		gc.addAdHocProp(new PropRGPath((DirectedGraphVar) graph,0,gc,solver));
-//		gc.addAdHocProp(new PropRGPathincr((DirectedGraphVar) graph,0,gc,solver));
-		gc.addAdHocProp(new PropArborescence((DirectedGraphVar) graph,0,gc,solver));
+		gc.addAdHocProp(new PropArborescence((DirectedGraphVar) graph,0,gc,solver,true));
 		gc.addAdHocProp(new PropReducedGraphHamPath((DirectedGraphVar) graph,gc,solver));
 //		gc.addAdHocProp(new PropWSTCCincr((DirectedGraphVar) graph,totalCost,distanceMatrix, gc, solver));
 
@@ -192,6 +191,7 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void configureSolver() {
 		AbstractStrategy strategy = StrategyFactory.graphRandom(graph,seed);
+//		AbstractStrategy strategy = StrategyFactory.graphLexico(graph);
 		solver.set(strategy);
 		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
@@ -206,7 +206,7 @@ public class TSP extends AbstractProblem{
 
 	@Override
 	public void prettyOut() {
-//		System.out.println(graph.getKernelGraph());
+		System.out.println(graph.getKernelGraph());
 		writeTextInto(instanceName+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"
 				+status+";"+greedyUB+";"+totalCost.getValue()+";"+bestSol+"\n", outFile);
 	}
@@ -248,11 +248,7 @@ public class TSP extends AbstractProblem{
 							if(i==n-1)break;
 							nbSuccs = 0;
 						}
-//						if(i<n-1){
 						dist[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
-//						}else{
-//							nbSuccs = n;
-//						}
 						nbSuccs ++;
 					}
 				}
