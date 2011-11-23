@@ -96,6 +96,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public boolean removeNode(int x, ICause cause, boolean informCause) throws ContradictionException {
+		informCause = false;
         if (kernel.getActiveNodes().isActive(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
@@ -122,6 +123,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
 
     @Override
     public boolean enforceNode(int x, ICause cause, boolean informCause) throws ContradictionException {
+		informCause = false;
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
@@ -129,12 +131,15 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
                 }
                 EventType e = EventType.ENFORCENODE;
                 notifyMonitors(e, cause);
-                INeighbors neig = getEnvelopGraph().getNeighborsOf(x);
-                if (neig.neighborhoodSize() == 1) {
-                    enforceArc(x, neig.getFirstElement(), cause, informCause);
-                }
-                if (neig.neighborhoodSize() == 0) {
-                    this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no arcs");
+                INeighbors succ = getEnvelopGraph().getSuccessorsOf(x);
+				INeighbors pred = getEnvelopGraph().getPredecessorsOf(x);
+				if(succ.neighborhoodSize()==0 && pred.neighborhoodSize()==1){
+					enforceArc(pred.getFirstElement(),x,cause,informCause);
+				}else if(succ.neighborhoodSize()==1 && pred.neighborhoodSize()==0){
+					enforceArc(x,succ.getFirstElement(),cause,informCause);
+				}
+                if (succ.neighborhoodSize()==0 && pred.neighborhoodSize()==0) {
+                    this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no incident arcs");
                 }
                 return true;
             }
@@ -188,6 +193,11 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     public IGraphDelta getDelta() {
         return delta;
     }
+	
+	@Override
+	public int getType() {
+		return Variable.GRAPH;
+	}
 
     @Override
     public String toString() {
@@ -199,7 +209,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new GraphDelta();
+            delta = new GraphDelta(solver);
         }
     }
 
