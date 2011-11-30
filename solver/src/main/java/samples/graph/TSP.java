@@ -28,12 +28,17 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.IStateInt;
+import org.omg.PortableServer.RequestProcessingPolicy;
 import samples.AbstractProblem;
 import solver.Cause;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.gary.relations.GraphRelationFactory;
+import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.exception.ContradictionException;
@@ -47,6 +52,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.io.BufferedReader;
@@ -54,6 +60,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.BitSet;
+import java.util.prefs.BackingStoreException;
 
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
@@ -64,7 +71,7 @@ public class TSP extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 100000;
+	private static final long TIMELIMIT = 1800000;
 	private static String outFile = "/Users/jfages07/Documents/code/results/results_atsp_"+(TIMELIMIT/1000)+".csv";
 	static int seed = 0;
 	// instance
@@ -75,6 +82,7 @@ public class TSP extends AbstractProblem{
 	private DirectedGraphVar graph;
 	private IntVar totalCost;
 	private int greedyUB;
+	private int[] greedySol;
 	private Boolean status;
 
 	//***********************************************************************************
@@ -97,14 +105,25 @@ public class TSP extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		totalCost = VariableFactory.enumerated("total cost ", 0,maxValue*n, solver);
+		// first solution
+		getGreedyFirstSolution();
+		greedyUB = getGreedyBound();
+		System.out.println("\nBOUND : "+greedyUB+"\n");
+		permutNodes();// relabeling of nodes to optimize boundAllDiff
+		// create model
+		IntVar[] intVars = new IntVar[n];
 		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
+		totalCost = VariableFactory.bounded("total cost ", 0, greedyUB, solver);
 		try{
+			intVars[n-1] = VariableFactory.enumerated("vlast", n, n, solver);
 			for(int i=0; i<n-1; i++){
+				intVars[i] = VariableFactory.enumerated("v" + i, 1, n - 1, solver);
 				graph.getKernelGraph().activateNode(i);
 				for(int j=0; j<n ;j++){
 					if(distanceMatrix[i][j]!=noVal){
 						graph.getEnvelopGraph().addArc(i,j);
+					}else{
+						intVars[i].removeValue(j,Cause.Null,false);
 					}
 				}
 			}
@@ -113,38 +132,91 @@ public class TSP extends AbstractProblem{
 			System.exit(0);
 		}
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		graph = (DirectedGraphVar) gc.getGraph();
-		gc.addAdHocProp(new PropOneSuccBut((DirectedGraphVar) graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut((DirectedGraphVar) graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle((DirectedGraphVar) graph,gc,solver));
-		// beaucoup trop lent (pourquoi?)
-		gc.addAdHocProp(new PropDegreePatterns((DirectedGraphVar) graph,gc,solver));
-		gc.addAdHocProp(new PropEvalObj((DirectedGraphVar) graph,totalCost,distanceMatrix,gc,solver));
-		gc.addAdHocProp(new PropArborescence((DirectedGraphVar) graph,0,gc,solver,true));
-		gc.addAdHocProp(new PropReducedGraphHamPath((DirectedGraphVar) graph,gc,solver));
-//		gc.addAdHocProp(new PropWSTCCincr((DirectedGraphVar) graph,totalCost,distanceMatrix, gc, solver));
-
-		// find a first solution with a greedy algorithm
-		greedyUB = getGreedyBound();
-		try {
-			totalCost.updateUpperBound(greedyUB, Cause.Null, false);
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-			System.exit(0);
-		}
-		System.out.println("\nBOUND : "+greedyUB+"\n");
-		Constraint[] cstrs = new Constraint[]{gc};
+		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,gc,solver));
+		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
+		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+		gc.addAdHocProp(RP);
+		IStateInt nR = RP.getNSCC();
+		IStateInt[] sccOf = RP.getSCCOF();
+		INeighbors[] outArcs = RP.getOutArcs();
+		gc.addAdHocProp(new PropIntVarChanneling(intVars,graph,gc,solver));
+		PropBST BST = new PropBST(graph, totalCost, distanceMatrix, gc, solver);
+		gc.addAdHocProp(BST);
+		BST.setRGStructure(nR,sccOf,outArcs);
+		Constraint[] cstrs = new Constraint[]{gc, new AllDifferent(intVars,solver,AllDifferent.Type.AC)};
 		solver.post(cstrs);
 	}
 
 	private int getGreedyBound() {
 		int ub = 0;
-		BitSet inTour = new BitSet(n);
-		int[] tourNext = new int[n];
-		for(int i=0; i<n;i++){
-			tourNext[i] = -1;
+		for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
+			ub += distanceMatrix[a][greedySol[a]];
 		}
-		tourNext[0] = n-1;
+		return ub;
+	}
+
+	private void permutNodes() {
+//		permutFirstSol();
+		permutMinCost();
+	}
+
+	private void permutFirstSol() {
+		int[][] costs = new int[n][n];
+		int[] nodeAtPos = new int[n];
+		int i=0;
+		for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
+			nodeAtPos[i] = a;
+			i++;
+		}
+		nodeAtPos[n-1] = n-1;
+		for (i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				costs[i][j] = distanceMatrix[nodeAtPos[i]][nodeAtPos[j]];
+			}
+		}
+		distanceMatrix = costs;
+	}
+
+	private void permutMinCost() {
+		int[][] costs = new int[n][n];
+		int[] nodeAtPos = new int[n];
+		BitSet done = new BitSet(n);
+		done.set(n-1);
+		done.set(0);
+		int next,nextCost;
+		for(int i=0;i<n-2;i++){
+			next = done.nextClearBit(0);
+			nextCost = distanceMatrix[i][next];
+			for(int j=1;j<n-1;j++){
+				if(distanceMatrix[i][j]<nextCost && !done.get(j)){
+					next = j;
+					nextCost = distanceMatrix[i][next];
+				}
+			}
+			nodeAtPos[i+1] = next;
+			done.set(next);
+		}
+		nodeAtPos[0] = 0;
+		nodeAtPos[n-1] = n-1;
+		for (int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				costs[i][j] = distanceMatrix[nodeAtPos[i]][nodeAtPos[j]];
+			}
+		}
+		distanceMatrix = costs;
+	}
+
+	private void getGreedyFirstSolution() {
+		BitSet inTour = new BitSet(n);
+		greedySol = new int[n];
+		for(int i=0; i<n;i++){
+			greedySol[i] = -1;
+		}
+		greedySol[0] = n-1;
 		inTour.set(0);
 		inTour.set(n-1);
 		int nbNodesInTour = 2;
@@ -154,8 +226,8 @@ public class TSP extends AbstractProblem{
 			int minGoBack;
 			for(int i=inTour.nextClearBit(0); i<n;i=inTour.nextClearBit(i+1)){
 				minGoBack = distanceMatrix[0][i]+ distanceMatrix[i][n-1];
-				for(int a=0;a>=0 && a<n-1; a=tourNext[a]){
-					minGoBack = Math.min(minGoBack,distanceMatrix[a][i]+distanceMatrix[i][tourNext[a]]);
+				for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
+					minGoBack = Math.min(minGoBack,distanceMatrix[a][i]+distanceMatrix[i][greedySol[a]]);
 				}
 				if(minDist > minGoBack){
 					minDist = minGoBack;
@@ -163,29 +235,25 @@ public class TSP extends AbstractProblem{
 				}
 			}
 			if(nbNodesInTour==2){
-				tourNext[nextNode] = n-1;
-				tourNext[0]  =  nextNode;
+				greedySol[nextNode] = n-1;
+				greedySol[0]  =  nextNode;
 			}else{
 				minGoBack = noVal*2;
 				int bestFrom = 0;
 				int bestTo = 0;
-				for(int a=0;a>=0 && a<n-1; a=tourNext[a]){
-					if(minGoBack > distanceMatrix[a][nextNode]+distanceMatrix[nextNode][tourNext[a]]-distanceMatrix[a][tourNext[a]]){
-						minGoBack = distanceMatrix[a][nextNode]+distanceMatrix[nextNode][tourNext[a]]-distanceMatrix[a][tourNext[a]];
+				for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
+					if(minGoBack > distanceMatrix[a][nextNode]+distanceMatrix[nextNode][greedySol[a]]-distanceMatrix[a][greedySol[a]]){
+						minGoBack = distanceMatrix[a][nextNode]+distanceMatrix[nextNode][greedySol[a]]-distanceMatrix[a][greedySol[a]];
 						bestFrom = a;
-						bestTo = tourNext[a];
+						bestTo = greedySol[a];
 					}
 				}
-				tourNext[nextNode] = bestTo;
-				tourNext[bestFrom] = nextNode;
+				greedySol[nextNode] = bestTo;
+				greedySol[bestFrom] = nextNode;
 			}
 			inTour.set(nextNode);
 			nbNodesInTour++;
 		}
-		for(int a=0;a>=0 && a<n-1; a=tourNext[a]){
-			ub += distanceMatrix[a][tourNext[a]];
-		}
-		return ub;
 	}
 
 	@Override
@@ -206,7 +274,7 @@ public class TSP extends AbstractProblem{
 
 	@Override
 	public void prettyOut() {
-		System.out.println(graph.getKernelGraph());
+//		System.out.println(graph.getKernelGraph());
 		writeTextInto(instanceName+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"
 				+status+";"+greedyUB+";"+totalCost.getValue()+";"+bestSol+"\n", outFile);
 	}
@@ -216,9 +284,9 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		bench();
-		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
-		testInstance(instance);
+		bench();
+//		String instance = "/Users/jfages07/Documents/code/atsp instances/br17.atsp";
+//		testInstance(instance);
 	}
 
 	private static void testInstance(String url){
@@ -285,7 +353,7 @@ public class TSP extends AbstractProblem{
 		String[] list = folder.list();
 		for(String s:list){
 			if(s.contains(".atsp"))
-			testInstance(dir+"/"+s);
+				testInstance(dir+"/"+s);
 		}
 	}
 

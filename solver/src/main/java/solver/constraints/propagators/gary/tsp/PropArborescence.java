@@ -64,9 +64,6 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// dominators finder that contains the dominator tree
 	AbstractLengauerTarjanDominatorsFinder domFinder;
 	INeighbors[] successors;
-	// check reachability
-	LinkedList<Integer> list;
-	BitSet visited;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -84,8 +81,6 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;
 		successors = new INeighbors[n];
-		list = new LinkedList<Integer>();
-		visited = new BitSet(n);
 		if(simple){
 			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
 		}else{
