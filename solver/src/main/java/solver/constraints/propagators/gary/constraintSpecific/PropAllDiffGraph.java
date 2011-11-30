@@ -89,8 +89,8 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropAllDiffGraph(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, Constraint constraint, PropagatorPriority storeThreshold, boolean b) {
-        super((V[]) new Variable[]{graph}, sol, constraint, storeThreshold, b);
+    public PropAllDiffGraph(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, Constraint constraint) {
+        super((V[]) new Variable[]{graph}, sol, constraint, PropagatorPriority.QUADRATIC);
         this.sizeFirstSet = sizeFirstSet;
         this.solver = sol;
         n = graph.getEnvelopGraph().getNbNodes();

@@ -66,7 +66,7 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
 	//***********************************************************************************
 
 	public PropKArcs(G graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();

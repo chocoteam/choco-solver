@@ -91,7 +91,7 @@ public class Tree extends AbstractProblem{
 			}
 		}
 		}catch(Exception e){}
-		GraphConstraint gc = GraphConstraintFactory.nTrees(vars, nTree, solver, PropagatorPriority.LINEAR);
+		GraphConstraint gc = GraphConstraintFactory.nTrees(vars, nTree, solver);
 		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("n", n,n, solver));
 		g = (DirectedGraphVar) gc.getGraph();
 		Constraint[] cstrs = new Constraint[]{gc};

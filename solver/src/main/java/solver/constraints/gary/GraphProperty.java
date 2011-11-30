@@ -33,6 +33,8 @@ import solver.constraints.propagators.gary.*;
 import solver.constraints.propagators.gary.basic.*;
 import solver.constraints.propagators.gary.constraintSpecific.*;
 import solver.constraints.propagators.gary.directed.*;
+import solver.constraints.propagators.gary.tsp.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
 import solver.variables.IntVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -161,7 +163,7 @@ public enum GraphProperty {
 	ONE_SUCCESSORS_PER_NODE {
 		@Override
 		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			return new GraphPropagator[]{new PropNSuccs((DirectedGraphVar) cons.getGraph(), cons.getSolver(), cons, PropagatorPriority.LINEAR, true, 1)};
+			return new GraphPropagator[]{new PropNSuccs((DirectedGraphVar) cons.getGraph(), cons.getSolver(), cons, 1)};
 		}
 	},
 //	/** Restrict the number of predecessors of each node in the final graph
@@ -266,9 +268,10 @@ public enum GraphProperty {
 			DirectedGraphVar graph = (DirectedGraphVar) cons.graph;
 			Solver solver = cons.getSolver();
 			return new GraphPropagator[]{
-					new PropNSuccs(graph, solver, cons, PropagatorPriority.LINEAR, true, 1),
-					new PropNLoopsTree(graph, k, solver, cons, PropagatorPriority.LINEAR, true),
-					new PropNTree(graph, k,solver,cons, PropagatorPriority.VERY_SLOW,true)
+//					new PropNSuccs(graph, solver, cons,1),
+					new PropOneSuccBut(graph, -1, cons, solver),
+					new PropNLoopsTree(graph, k, solver, cons),
+					new PropNTree(graph, k,solver,cons)
 					};
 		}
 	};

@@ -25,98 +25,149 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary;
+package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
+import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import java.util.BitSet;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**Propagator that ensures that the final graph consists in K cliques
- * @author Jean-Guillaume Fages
- */
-public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
+import java.util.BitSet;
+import java.util.LinkedList;
+
+/**
+ * Arborescence constraint (simplification from tree constraint)
+ * Use naive implementation in O(n.m) for testing
+ * */
+public class PropArborescenceNM<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	public static long duration;
-	private GraphVar g;
-	private IntVar k;
+	DirectedGraphVar g;
+	int source;
+	int n;
+	LinkedList<Integer> list;
+	BitSet visited;
+	DirectedGraph domTrans;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCliques(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);//
+	/**Ensures that graph is an arborescence rooted in node source
+	 * naive form: O(n.m)
+	 * @param graph
+	 * @param source root of the arborescence
+	 * @param constraint
+	 * @param solver
+	 * */
+	public PropArborescenceNM(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver) {
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
-		this.k = k;
+		n = g.getEnvelopGraph().getNbNodes();
+		this.source = source;
+		list = new LinkedList<Integer>();
+		visited = new BitSet(n);
+		domTrans= new DirectedGraph(n,GraphType.MATRIX);
 	}
 
 	//***********************************************************************************
-	// PROPAGATIONS
+	// METHODS
 	//***********************************************************************************
+
+	private boolean allReachableFrom(int x,DirectedGraph g) {
+		list.clear();
+		visited.clear();
+		list.add(x);
+		INeighbors env;
+		visited.set(x);
+		while(!list.isEmpty()){
+			x = list.removeFirst();
+			env = g.getSuccessorsOf(x);
+			for(int suc=env.getFirstElement(); suc>=0; suc=env.getNextElement()){
+				if(!visited.get(suc)){
+					visited.set(suc);
+					list.addLast(suc);
+				}
+			}
+		}
+		return visited.nextSetBit(0)>=0;
+	}
+
+	private void filtering() throws ContradictionException{
+		structuralPruning();
+	}
 
 	@Override
 	public void propagate() throws ContradictionException {
-		filter();
-		duration = 0;
+		for(int i=0;i<n;i++){
+			g.enforceNode(i,this,false);
+			g.removeArc(i,i,this,false);
+		}
+		filtering();
 	}
 
-	
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		long time = System.currentTimeMillis();
-		filter();
-		duration += (System.currentTimeMillis()-time);
-	}
-	
-	private void filter() throws ContradictionException{
-		float n = g.getEnvelopGraph().getNbNodes();
-		BitSet iter = new BitSet((int)n);
-		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-				iter.set(i);
-		}
-		int idx = -1;
-		INeighbors nei;
-		int min = 0;
-		while (iter.cardinality()>0){
-			idx = iter.nextSetBit(idx+1);
-			nei = g.getEnvelopGraph().getNeighborsOf(idx);
-			iter.clear(idx);
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				iter.clear(j);
-			}
-			min ++;
-		}
-		k.updateLowerBound(min, this, false);
+		filtering();
 	}
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+	private void structuralPruning() throws ContradictionException {
+		INeighbors succ;
+		for(int i=0;i<n;i++){
+			domTrans.getSuccessorsOf(i).clear();
+			domTrans.getPredecessorsOf(i).clear();
+		}
+		for(int i=0;i<n;i++){
+			DirectedGraph dig = new DirectedGraph(n,GraphType.LINKED_LIST);
+			for(int j=0; j<n; j++){
+				if(j!=i){
+					succ = g.getEnvelopGraph().getSuccessorsOf(j);
+					for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
+						dig.addArc(j,k);
+					}
+				}
+			}
+			allReachableFrom(source,dig);
+			for(int z=visited.nextClearBit(0);z<n;z=visited.nextClearBit(z+1)){
+				domTrans.addArc(i,z);
+			}
+		}
+		for(int i=0;i<n;i++){
+			succ = domTrans.getSuccessorsOf(i);
+			for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
+				g.removeArc(k,i,this,false);
+			}
+		}
+	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		if(isCompletelyInstantiated()){
+			try{
+				structuralPruning();
+			}catch (Exception e){
+				return ESat.FALSE;
+			}
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
-		
 }

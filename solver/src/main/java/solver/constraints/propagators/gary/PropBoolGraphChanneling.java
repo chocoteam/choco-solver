@@ -67,8 +67,8 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropBoolGraphChanneling(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr,PropagatorPriority storeThreshold) {
-		super((V[]) ArrayUtils.append(ArrayUtils.flatten(rel),new Variable[]{graph}), solver, cstr, storeThreshold, false);
+	public PropBoolGraphChanneling(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+		super((V[]) ArrayUtils.append(ArrayUtils.flatten(rel),new Variable[]{graph}), solver, cstr, PropagatorPriority.QUADRATIC);
 		this.graph = graph;
 		relations = rel;
 		n = rel.length;

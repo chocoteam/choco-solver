@@ -66,12 +66,8 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNSuccs(
-			V graph,
-			Solver solver,
-			Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion, int nbSuccs) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
+	public PropNSuccs(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nbSuccs) {
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		nSuccs = nbSuccs;
 		rem = new RemProc(this);
@@ -110,6 +106,14 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public ESat isEntailed() {
+		if(g.instantiated()){
+			try{
+				check();
+			}catch (Exception e){
+				return ESat.FALSE;
+			}
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 

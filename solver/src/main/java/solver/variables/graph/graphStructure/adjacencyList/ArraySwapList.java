@@ -24,69 +24,90 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package solver.variables.graph.graphStructure.adjacencyList;
 
 import solver.variables.graph.INeighbors;
 
 /**
- * @author Jean-Guillaume Fages
- * 
- * Composite collection composed of a matrix and a list representation to get the benefit of each
- *
+ * List of m elements based on Array int_swaping
+ * add : O(1)
+ * testPresence: O(1)
+ * remove: O(1)
+ * iteration : O(m)
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 18/11/2011
  */
-public class CompositeList implements INeighbors{
+public abstract class ArraySwapList implements INeighbors {
 
-	private INeighbors listLike;
-	private INeighbors matrixLike;
+	protected int arrayLength,sizeMax,currentIdx,size;
+	protected int[] array;
 
-	public CompositeList(INeighbors iterator, INeighbors presenceChecker){
-		this.listLike = iterator;
-		this.matrixLike = presenceChecker;
-	}
-
-	@Override
-	public void add(int element) {
-		listLike.add(element);
-		matrixLike.add(element);
-	}
-
-	@Override
-	public boolean remove(int element) {
-		if(!matrixLike.remove(element)){
-			return false;
-		}
-		listLike.remove(element);
-		return true;
-	}
-
-	@Override
-	public boolean contain(int element) {
-		return matrixLike.contain(element);
+	public ArraySwapList(int n) {
+		size=0;
+		sizeMax = n;
+		arrayLength = 10;
+		array = new int[arrayLength];
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return matrixLike.isEmpty();
+		return getSize() == 0;
 	}
 
 	@Override
 	public int neighborhoodSize() {
-		return matrixLike.neighborhoodSize();
+		return getSize();
+	}
+
+	protected int getSize(){
+		return size;
+	}
+
+	protected void setSize(int s){
+		size = s;
+	}
+
+	protected void addSize(int delta){
+		size += delta;
+	}
+
+	@Override
+	public String toString() {
+		int size = getSize();
+		if(size==0){
+			return "empty";
+		}
+		String res = "";
+		for(int i=0;i<size-1;i++){
+			res += array[i]+" -> ";
+		}
+		res += array[size-1];
+		return res;
 	}
 
 	@Override
 	public void clear() {
-		listLike.clear();
-		matrixLike.clear();
+		setSize(0);
 	}
 
+	// --- Iterations	
 	@Override
 	public int getFirstElement() {
-		return listLike.getFirstElement();
+		if(getSize()==0){
+			return -1;
+		}
+		currentIdx = 0;
+		return array[currentIdx];
 	}
 
 	@Override
 	public int getNextElement() {
-		return listLike.getNextElement();
+		currentIdx++;
+		if(currentIdx>=getSize()){
+			return -1;
+		}
+		return array[currentIdx];
 	}
 }

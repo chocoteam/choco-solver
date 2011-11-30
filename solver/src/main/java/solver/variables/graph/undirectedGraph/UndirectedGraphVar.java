@@ -75,12 +75,22 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         	EventType e = EventType.REMOVEARC;
         	notifyMonitors(e, cause);
         	// A node has at least one arc/edge otherwise it is meaningless
-        	if(getEnvelopGraph().getNeighborsOf(x).neighborhoodSize()==0){
-        		removeNode(x, cause, informCause);
-        	}
-        	if(getEnvelopGraph().getNeighborsOf(y).neighborhoodSize()==0){
-        		removeNode(y, cause, informCause);
-        	}
+			int nx = getEnvelopGraph().getNeighborsOf(x).neighborhoodSize();
+			int ny = getEnvelopGraph().getNeighborsOf(y).neighborhoodSize();
+			if(nx<2){
+				if(nx==0){
+					removeNode(x, cause, true);
+				}else if(getKernelGraph().getActiveNodes().isActive(x)){
+					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause,true);
+				}
+			}
+			if(ny<2){
+				if(ny==0){
+					removeNode(y, cause, true);
+				}else if(getKernelGraph().getActiveNodes().isActive(y)){
+					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause,true);
+				}
+			}
         	return true;
         }return false;
     }
@@ -115,11 +125,6 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 		return envelop;
 	}
 	
-	@Override
-	public int getType() {
-		return Variable.GRAPH;
-	}
-
 	@Override
 	public boolean isDirected(){
 		return true;
