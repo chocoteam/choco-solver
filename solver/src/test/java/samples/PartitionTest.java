@@ -52,7 +52,7 @@ public class PartitionTest {
     public void test4to14() {
         int[] size = {8, 12, 16, 20, 24, 28};
         int[] sols = {1, 1, 7, 24, 296, 1443};
-        int[] nodes = {5, 30, 285, 3045, 30497, 300363};
+        int[] nodes = {3, 22, 189, 1739, 17892, 189963};
 
         for (int i = 0; i < size.length; i++) {
             Solver sol = modeler(size[i]);
@@ -64,9 +64,9 @@ public class PartitionTest {
 
     @Test(groups = "10m")
     public void test16to32() {
-        int[] size = {32, 26, 40, 44, 48, 52, 56, 60, 64};
+        int[] size = {32, 36, 40, 44, 48, 52, 56, 60, 64};
         int[] sols = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-        int[] nodes = {442, 4026, 19272, 47600, 304, 3936, 33052, 397446, 810410};
+        int[] nodes = {633, 760, 2250, 6331, 19832, 19592, 60477, 139296, 180302};
 
         for (int i = 0; i < size.length; i++) {
             Solver sol = modeler(size[i]);
