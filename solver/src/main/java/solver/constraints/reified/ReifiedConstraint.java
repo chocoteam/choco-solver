@@ -107,11 +107,6 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
     }
 
     @Override
-    public void filter() throws ContradictionException {
-        propagators[0].propagate(EventType.FULL_PROPAGATION.mask);
-    }
-
-    @Override
     public String toString() {
         return vars[0].toString() + "<=>" + cons.toString() + " (" + oppcons.toString() + ")";
     }

@@ -33,7 +33,6 @@ import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
@@ -43,7 +42,6 @@ import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
 import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -87,13 +85,9 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     private static final long serialVersionUID = 1L;
 
-    public static PropagatorPriority _DEFAULT_THRESHOLD = PropagatorPriority.TERNARY;
-
     public static final String VAR_DEFAULT = "var_default";
     public static final String VAL_DEFAULT = "val_default";
     public static final String METRIC_DEFAULT = "met_default";
-
-    public static final String MSG_ENTAILED = "Entailed false";
 
     protected final Solver solver;
 
@@ -103,15 +97,12 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     protected int staticPropagationPriority;
 
-    protected transient boolean initialize = false;
-
     protected final IPropagationEngine engine;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        this.initialize = false;
         this.engine = solver.getEngine();
     }
 
@@ -120,7 +111,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public Constraint(Solver solver) {
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        initialize = false;
         this.engine = solver.getEngine();
     }
 
@@ -237,39 +227,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
             prop.linkToVariables();
             staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
         }
-    }
-
-    /**
-     * Initial propagation of the constraint
-     *
-     * @throws ContradictionException when a contradiction occurs during filtering
-     */
-    public void filter() throws ContradictionException {
-        int last = lastPropagatorActive.get();
-        Propagator prop;
-        for (int p = 0; p < last; p++) {
-            prop = propagators[p];
-            ESat entailed = prop.isEntailed();
-            switch (entailed) {
-                case FALSE:
-                    this.contradiction(prop, null, MSG_ENTAILED);
-                    break;
-                case TRUE:
-                    prop.setPassive();
-                    p--;
-                    last--;
-                    break;
-                case UNDEFINED:
-                    prop.propagate(EventType.FULL_PROPAGATION.mask);
-                    if (!prop.isActive()) {
-                        p--;
-                        last--;
-                    }
-                    break;
-
-            }
-        }
-        initialize = true;
     }
 
     /**

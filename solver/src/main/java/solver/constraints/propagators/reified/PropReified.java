@@ -28,6 +28,7 @@
 package solver.constraints.propagators.reified;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -38,9 +39,6 @@ import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 /**
  * <br/>
  *
@@ -49,9 +47,15 @@ import java.lang.reflect.Method;
  */
 public class PropReified extends Propagator<Variable> {
 
+    public static final String MSG_ENTAILED = "Entailed false";
+
     protected BoolVar bVar;
 
-    protected Constraint constraint, oppositeConstraint;
+    //    protected Constraint constraint, oppositeConstraint;
+    protected final Propagator[] left, right;
+
+    protected final IStateInt lastActiveR, lastActiveL;
+
 
     public PropReified(Variable[] vars,
                        Constraint cons,
@@ -61,29 +65,19 @@ public class PropReified extends Propagator<Variable> {
                        PropagatorPriority priority, boolean reactOnPromotion) {
         super(vars, solver, owner, priority, reactOnPromotion);
         this.bVar = (BoolVar) vars[0];
-        this.constraint = cons;
-        this.oppositeConstraint = oppCons;
+        left = cons.propagators.clone();
+        right = oppCons.propagators.clone();
 
-        try {
-            Method unlink = Propagator.class.getDeclaredMethod("unlinkVariables");
-            unlink.setAccessible(true);
-            Propagator[] props = constraint.propagators;
-            for (int p = 0; p < props.length; p++) {
-                props[p].setActive();
-                unlink.invoke(props[p]);
-            }
-            props = oppositeConstraint.propagators;
-            for (int p = 0; p < props.length; p++) {
-                props[p].setActive();
-                unlink.invoke(props[p]);
-            }
-            unlink.setAccessible(false);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        lastActiveL = environment.makeInt(left.length);
+        lastActiveR = environment.makeInt(right.length);
+
+        for (int i = 0; i < left.length; i++) {
+            left[i].setActive();
+            left[i].unlinkVariables();
+        }
+        for (int i = 0; i < right.length; i++) {
+            right[i].setActive();
+            right[i].unlinkVariables();
         }
     }
 
@@ -94,7 +88,6 @@ public class PropReified extends Propagator<Variable> {
 
     @Override
     public void propagateOnRequest(IRequest<Variable> variableIFineRequest, int varIdx, int mask) throws ContradictionException {
-//        throw new UnsupportedOperationException();
         filter();
     }
 
@@ -110,23 +103,56 @@ public class PropReified extends Propagator<Variable> {
 
         switch (bVar.getBooleanValue()) {
             case TRUE:
-                constraint.filter();
+                filter(left, lastActiveL);
                 break;
             case FALSE:
-                oppositeConstraint.filter();
+                filter(right, lastActiveR);
                 break;
         }
     }
 
+    private void filter(Propagator[] propagators, IStateInt last) throws ContradictionException {
+        int _last = last.get();
+        Propagator prop;
+        for (int p = 0; p < _last; p++) {
+            prop = propagators[p];
+            ESat entailed = prop.isEntailed();
+            switch (entailed) {
+                case FALSE:
+                    contradiction(null, MSG_ENTAILED);
+                    break;
+                case TRUE:
+                    //set passive: swap
+                {
+                    Propagator _prop = propagators[--_last];
+                    propagators[_last] = prop;
+                    propagators[p--] = _prop;
+                    last.add(-1);
+                }
+                break;
+                case UNDEFINED:
+                    prop.propagate(EventType.FULL_PROPAGATION.mask);
+                    if (!prop.isActive()) { //if the propagation has an impact on entailment
+                        Propagator _prop = propagators[--_last];
+                        propagators[_last] = prop;
+                        propagators[p--] = _prop;
+                        last.add(-1);
+                    }
+                    break;
+
+            }
+        }
+    }
+
     public void filterFromConstraint() throws ContradictionException {
-        ESat sat = constraint.isEntailed();
+        ESat sat = entailed(left, lastActiveL);
         switch (sat) {
             case TRUE:
                 bVar.setToTrue(this, false);
                 this.setPassive();
                 break;
             case FALSE:
-                sat = oppositeConstraint.isEntailed();
+                sat = entailed(right, lastActiveR);
                 switch (sat) {
                     case TRUE:
                         bVar.setToFalse(this, false);
@@ -140,6 +166,26 @@ public class PropReified extends Propagator<Variable> {
         }
     }
 
+    private ESat entailed(Propagator[] propagators, IStateInt last) {
+        int _last = last.get();
+        int sat = 0;
+        for (int i = 0; i < _last; i++) {
+            ESat entail = propagators[i].isEntailed();
+            if (entail.equals(ESat.FALSE)) {
+                return entail;
+            } else if (entail.equals(ESat.TRUE)) {
+                sat++;
+            }
+        }
+        if (sat == _last) {
+            return ESat.TRUE;
+        }
+        // No need to check if FALSE, must have been returned before
+        else {
+            return ESat.UNDEFINED;
+        }
+    }
+
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
@@ -150,9 +196,9 @@ public class PropReified extends Propagator<Variable> {
         if (vars[0].instantiated()) {
             BoolVar b = (BoolVar) vars[0];
             if (b.getValue() == 1) {
-                return constraint.isEntailed();
+                return entailed(left, lastActiveL);
             } else {
-                return oppositeConstraint.isEntailed();
+                return entailed(right, lastActiveR);
             }
         }
         return ESat.UNDEFINED;
