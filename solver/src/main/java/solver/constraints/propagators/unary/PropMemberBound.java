@@ -59,7 +59,7 @@ public class PropMemberBound extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // with views such as abs(...), the prop can be not entailed after initial propagation
         boolean change = vars[0].updateLowerBound(lb, this, false);
         change &= vars[0].updateUpperBound(ub, this, false);
@@ -70,7 +70,7 @@ public class PropMemberBound extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
-        propagate();
+        propagate(EventType.FULL_PROPAGATION.mask);
     }
 
     @Override

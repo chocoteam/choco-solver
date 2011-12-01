@@ -116,7 +116,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         adjust();
         checkAllY();
         int step = (checkAllX() ? ON_Y : STOP);

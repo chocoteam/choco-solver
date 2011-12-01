@@ -73,7 +73,7 @@ public class PropBinAC2001 extends PropBinCSP {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         int support = 0;
         boolean found = false;
         int left = Integer.MIN_VALUE;

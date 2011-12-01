@@ -88,7 +88,7 @@ public class PropReified extends Propagator<Variable> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter();
     }
 

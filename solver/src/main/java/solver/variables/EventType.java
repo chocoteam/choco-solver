@@ -27,6 +27,8 @@
 
 package solver.variables;
 
+import solver.IEventType;
+
 /**
  * An enum defining the variable event type:
  * <ul>
@@ -44,38 +46,56 @@ package solver.variables;
  * @see solver.constraints.Constraint
  * @since 0.01
  */
-public enum EventType {
+public enum EventType implements IEventType {
 
-    VOID(0, 0),
-    PROPAGATE(1, 1),
+    VOID(0),
+    //PROPAGATORS
+    CUSTOM_PROPAGATION(1),
+    FULL_PROPAGATION(2, 3),
     // INTVAR EVENT
-    REMOVE(2, 2),
-    INCLOW(4, 6),
-    DECUPP(8, 10),
-    BOUND(12, 14),
-    INSTANTIATE(16, 30),
-    // SETVAR
-    REMENV(32, 32),
-    ADDKER(64, 64),
-    SETINSTANTIATE(128, 128),
+    REMOVE(4),
+    INCLOW(8, 12),
+    DECUPP(16, 20),
+    BOUND(24, 28),
+    INSTANTIATE(32, 60),
+
     // GRAPHVAR EVENT
-    REMOVENODE(256, 256),
-    ENFORCENODE(512, 512),
-    REMOVEARC(1024, 1024),
-    ENFORCEARC(2048, 2048),
+    REMOVENODE(64),
+    ENFORCENODE(128),
+    REMOVEARC(256),
+    ENFORCEARC(512),
+
     // META VARIABLE
-    META(4096, 4096);
+    META(1024);
 
     public final int mask;
-    public final int fullmask;
+    public final int strengthened_mask;
 
     EventType(int mask, int fullmask) {
         this.mask = mask;
-        this.fullmask = fullmask;
+        this.strengthened_mask = fullmask;
     }
 
+    EventType(int mask) {
+        this(mask, mask);
+    }
+
+
+    @Override
+    public int getMask() {
+        return mask;
+    }
+
+    @Override
+    public int getStrengthenedMask() {
+        return strengthened_mask;
+    }
+
+    //******************************************************************************************************************
+    //******************************************************************************************************************
+
     public static int INT_ALL_MASK() {
-        return INSTANTIATE.fullmask;
+        return INSTANTIATE.strengthened_mask;
     }
 
     public static boolean isInstantiate(int mask) {
@@ -98,11 +118,7 @@ public enum EventType {
         return (mask & DECUPP.mask) != 0;
     }
 
-    public static boolean isPropagate(int mask) {
-        return (mask & PROPAGATE.mask) != 0;
-    }
-
     public static boolean anInstantiationEvent(int mask) {
-        return (mask & (INSTANTIATE.mask + SETINSTANTIATE.mask)) != 0;
+        return (mask & INSTANTIATE.mask) != 0;
     }
 }

@@ -95,7 +95,10 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            initialize();
+        }
         filter();
     }
 
@@ -127,7 +130,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 //        if (getNbRequestEnqued() == 0) {
 //            filter();
 //        }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     boolean directInconsistentCount() {

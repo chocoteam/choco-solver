@@ -77,7 +77,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		INeighbors succ;
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){

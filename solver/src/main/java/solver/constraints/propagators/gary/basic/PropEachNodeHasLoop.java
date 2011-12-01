@@ -79,7 +79,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for (int i=ker.getFirstElement();i>=0;i=ker.getNextElement()){
 			if(concernedNodes.contain(i)){

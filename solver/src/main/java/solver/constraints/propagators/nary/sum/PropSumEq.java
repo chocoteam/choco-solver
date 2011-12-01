@@ -103,7 +103,7 @@ public class PropSumEq extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(true, 2);
     }
 

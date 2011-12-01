@@ -88,7 +88,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		long tps = System.currentTimeMillis();
 		for(int i=0; i<n; i++){
 			for(int j = 0; j<n; j++){

@@ -164,9 +164,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return new EventRequest<V>(this, var, idx);
     }
 
+    /**
+     * Return the specific mask indicating the <b>propagation events</b> on which <code>this</code> can react. <br/>
+     *
+     * @return
+     */
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask;
+    }
 
     /**
-     * Return the specific mask indicating the event on which this <code>Propagator</code> object can react.<br/>
+     * Return the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * <i>Checks are made applying bitwise AND between the mask and the event.</i>
      *
      * @param vIdx index of the variable within the propagator
@@ -174,15 +182,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *         and/or <code>DECUPP</code> and/or <code>INCLOW</code>
      */
     public abstract int getPropagationConditions(int vIdx);
-
-    /**
-     * Build internal structure of the propagator, if necessary
-     *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
-     */
-    public void initialize() throws ContradictionException {
-    }
 
     /**
      * Call the main filtering algorithm to apply to the <code>Domain</code> of the <code>Variable</code> objects.
@@ -194,8 +193,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
      * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
+     * @param evtmask type of propagation event <code>this</code> must consider.
      */
-    public abstract void propagate() throws ContradictionException;
+    public abstract void propagate(int evtmask) throws ContradictionException;
 
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
@@ -210,9 +210,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * Add the PropRequest to be added into the engine
+     *
+     * @param evt
      */
-    public final void forcePropagate() {
-        propRequest.update(EventType.PROPAGATE);
+    public final void forcePropagate(EventType evt) {
+        propRequest.update(evt);
     }
 
     public void setActive() {

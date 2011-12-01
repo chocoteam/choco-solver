@@ -61,7 +61,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		int min = 0;
 		int max = 0;
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();

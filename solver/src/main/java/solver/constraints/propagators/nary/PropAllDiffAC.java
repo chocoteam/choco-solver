@@ -38,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,6 +50,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     //int idxVar; // index of var in struct
     public MatchingStructure struct;
     protected final RemProc rem_proc;
+    protected final Solver solver;
 
 
     @SuppressWarnings({"unchecked"})
@@ -58,7 +58,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
         //this.var = var;
         //this.idxVar = idxVar;
-        this.struct = new MatchingStructure(vars, vars.length, getValueGap(vars), solver);
+        this.solver = solver;
         rem_proc = new RemProc(this);
     }
 
@@ -78,28 +78,45 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
     }
 
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
+        this.struct = new MatchingStructure(vars, vars.length, getValueGap(vars), solver);
+    }
+
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // On suppose que la structure struct est deja ete initialisee par la contrainte
         // car elle est partagee entre tous les propagateurs
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            initialize();
+        }
         struct.removeUselessEdges(this);
     }
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
         IntVar var = request.getVariable();
-        IntDelta delta = var.getDelta();
 
         if (EventType.isInstantiate(mask)) {
             struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
         } else {
             request.forEach(rem_proc.set(varIdx));
         }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

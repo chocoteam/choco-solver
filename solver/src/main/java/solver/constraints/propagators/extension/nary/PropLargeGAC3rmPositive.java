@@ -120,7 +120,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         initSupports();
         for (int indexVar = 0; indexVar < arity; indexVar++)
             reviseVar(indexVar);

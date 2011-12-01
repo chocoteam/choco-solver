@@ -125,7 +125,7 @@ public class PropCount extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         int nbSure = 0, nbPossible = 0;
         for (int i = 0; i < (nbListVars); i++) {
             if (vars[i].contains(occval)) {

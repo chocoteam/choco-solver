@@ -62,7 +62,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         TIntIterator it = values.iterator();
         int left = Integer.MIN_VALUE;
         int right = left;
@@ -85,7 +85,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
-        propagate();
+        propagate(EventType.FULL_PROPAGATION.mask);
     }
 
     @Override

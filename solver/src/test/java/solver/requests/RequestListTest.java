@@ -92,7 +92,7 @@ public class RequestListTest {
         }
 
         @Override
-        public void propagate() throws ContradictionException {
+        public void propagate(int evtmask) throws ContradictionException {
         }
 
         @Override

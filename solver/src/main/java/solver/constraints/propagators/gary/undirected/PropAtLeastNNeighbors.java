@@ -84,7 +84,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;

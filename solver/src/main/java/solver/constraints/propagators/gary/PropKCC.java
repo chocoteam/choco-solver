@@ -86,7 +86,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		int n = g.getEnvelopGraph().getNbNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();

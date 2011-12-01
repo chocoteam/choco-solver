@@ -127,7 +127,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;

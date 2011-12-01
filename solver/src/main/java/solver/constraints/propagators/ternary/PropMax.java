@@ -68,7 +68,7 @@ public class PropMax extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(0);
         filter(1);
         filter(2);

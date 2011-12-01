@@ -85,7 +85,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		int np=0;
 		for(int i=0; i<n ; i++){
 			INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);

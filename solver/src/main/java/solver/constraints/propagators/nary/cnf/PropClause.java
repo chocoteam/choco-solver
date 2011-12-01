@@ -138,7 +138,7 @@ public class PropClause extends Propagator<BoolVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         if (vars.length == 1) {
             if (firstNotPosLit == 1) {
                 vars[0].instantiateTo(1, this, false);

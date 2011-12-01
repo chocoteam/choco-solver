@@ -266,7 +266,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
     //***********************************************************************************
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         for (int i = 0; i < n; i++) {
             matching[i] = -1;
             storedMatching[i].set(-1);

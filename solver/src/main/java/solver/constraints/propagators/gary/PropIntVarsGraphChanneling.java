@@ -91,7 +91,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		// BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
 		for(int i=0; i<intVars.length; i++){
 			if(intVars[i].instantiated()){

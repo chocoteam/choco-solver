@@ -65,13 +65,13 @@ public class PropLargeCSP extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter();
     }
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate();
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     @Override

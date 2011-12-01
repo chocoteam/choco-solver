@@ -81,12 +81,22 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
         return (vIdx != zIdx ? EventType.INT_ALL_MASK() : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
         vars[zIdx].updateLowerBound(bounds.min.value, this, false);
         vars[zIdx].updateUpperBound(bounds.max.value, this, false);
@@ -94,7 +104,10 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
@@ -106,7 +119,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         } else { // other variables only deals with removal events
             intVarIRequest.forEach(rem_proc.set(idxVarInProp));
         }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

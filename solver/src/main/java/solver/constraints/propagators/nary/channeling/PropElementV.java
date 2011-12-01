@@ -73,7 +73,7 @@ public class PropElementV extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         int n = vars.length;
         IntVar idxVar = getIndexVar();
         idxVar.updateLowerBound(0 - offset, this, false);

@@ -59,7 +59,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         if (vars[0].removeInterval(lb, ub, this, false)) {
             this.setPassive();
         }
@@ -67,7 +67,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
-        propagate();
+        propagate(EventType.FULL_PROPAGATION.mask);
     }
 
     @Override

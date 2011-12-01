@@ -89,7 +89,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int ker = 0;
 		int env = 0;

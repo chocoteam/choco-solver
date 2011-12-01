@@ -121,8 +121,8 @@ public class GraphRequest<V extends GraphVar> extends AbstractRequestWithVar<V> 
     }
 
     private void addAll(EventType e) {
-        if ((e.fullmask & evtmask) == 0) {
-            evtmask |= e.fullmask;
+        if ((e.strengthened_mask & evtmask) == 0) {
+            evtmask |= e.strengthened_mask;
         }
         switch (e) {//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
             case REMOVENODE:
@@ -152,7 +152,7 @@ public class GraphRequest<V extends GraphVar> extends AbstractRequestWithVar<V> 
     @Override
     public void update(EventType e) {
         // Only notify constraints that filter on the specific event received
-        if ((e.mask & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
+        if ((e.getMask() & propagator.getPropagationConditions(indices[VAR_IN_PROP])) != 0) {
             lazyClear();
             addAll(e);
             schedule();

@@ -82,7 +82,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 //		int min = 0;
 //		int max = 0;
 //		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();

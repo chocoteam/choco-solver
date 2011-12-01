@@ -26,6 +26,7 @@
  */
 package solver.constraints.propagators.nary.lex;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateBool;
@@ -48,6 +49,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 10/08/11
  */
+@PropAnn(tested = {PropAnn.Status.CONSISTENCY, PropAnn.Status.CORRECTION, PropAnn.Status.BENCHMARK,PropAnn.Status.IDEMPOTENCE})
 public class PropLex extends Propagator<IntVar> {
 
     public final int n;            // size of both vectors
@@ -77,7 +79,10 @@ public class PropLex extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter(alpha.get());
     }
 
@@ -181,7 +186,13 @@ public class PropLex extends Propagator<IntVar> {
         }
     }
 
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         entailed.set(false);
         int i = 0;
         while (i < n && groundEq(x[i], y[i])) {

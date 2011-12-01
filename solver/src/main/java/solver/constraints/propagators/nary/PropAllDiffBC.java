@@ -105,12 +105,22 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         int left, right;
         for (int j = 0; j < vars.length; j++) {
             left = right = Integer.MIN_VALUE;
@@ -141,7 +151,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
@@ -165,7 +178,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 awakeOnSup(varIdx);
             }
         }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

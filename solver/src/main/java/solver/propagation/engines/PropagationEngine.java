@@ -112,7 +112,7 @@ public final class PropagationEngine implements IPropagationEngine {
 
         // FINALLY, post initial propagation event for every heavy requests
         for (int i = offset; i < size; i++) {
-            requests[i].update(EventType.PROPAGATE); // post initial propagation
+            requests[i].update(EventType.FULL_PROPAGATION); // post initial propagation
         }
 
     }

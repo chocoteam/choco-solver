@@ -91,7 +91,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         updateInfX();
         updateSupX();
         updateInfY();

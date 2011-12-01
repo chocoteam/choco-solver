@@ -134,7 +134,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		if(!checkFeasibility()){
 			this.contradiction(g, "infeasible");
 		}else{

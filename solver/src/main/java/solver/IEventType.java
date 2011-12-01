@@ -24,50 +24,30 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package solver;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.requests.IRequest;
-import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
-import choco.kernel.ESat;
-
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
+/**
+ * An interface to define event to categorize the filtering algorithm to apply.
+ * <br/>Event can promoted or strengthened (cf. "CHOCO : implementing a CP kernel" -- F. Laburthe, 2000).
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 01/12/11
  */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
+public interface IEventType {
 
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
+    /**
+     * Return the value of the mask associated with the event.
+     *
+     * @return the mask of the event.
+     */
+    int getMask();
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
-
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {}
-
-	@Override
-	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyMonitors(EventType.META, this);
-	}
-
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+    /**
+     * Return the strengthened mask associated to the event.
+     * This can be equal to the mask.
+     *
+     * @return the mask of the strenghtened event.
+     */
+    int getStrengthenedMask();
 }

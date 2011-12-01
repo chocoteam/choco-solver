@@ -82,7 +82,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for(int i=env.getFirstElement(); i>=0; i=env.getNextElement()){

@@ -152,12 +152,22 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         int j = 0;
         for(; j < nbVars; j++){
             vars[j].updateLowerBound(offset, this, false);
@@ -187,7 +197,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
@@ -224,7 +237,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     public void propagateOnRequest(IRequest<IntVar> request, int idx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             int val = vars[idx].getValue();
-            forcePropagate();
+            forcePropagate(EventType.CUSTOM_PROPAGATION);
             // if a value has been instantiated to its max number of occurrences
             // remove it from all variables
             if (idx < nbVars) {
@@ -237,7 +250,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
         } else {
             if (EventType.isInclow(mask)) {
-                forcePropagate();
+                forcePropagate(EventType.CUSTOM_PROPAGATION);
                 if (idx < nbVars) {
                     if (!vars[idx].hasEnumeratedDomain()) {
                         filterBCOnInf(idx);
@@ -245,7 +258,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
                 }
             }
             if (EventType.isDecupp(mask)) {
-                forcePropagate();
+                forcePropagate(EventType.CUSTOM_PROPAGATION);
                 if (idx < nbVars) {
                     if (!vars[idx].hasEnumeratedDomain()) {
                         filterBCOnSup(idx);

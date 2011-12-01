@@ -81,7 +81,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         updateInfX();
         updateSupY();
         if (x.getLB() >= y.getUB() + this.cste) {

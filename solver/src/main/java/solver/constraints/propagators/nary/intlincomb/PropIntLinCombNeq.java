@@ -61,7 +61,7 @@ public final class PropIntLinCombNeq extends AbstractPropIntLinComb {
     /**
      * Update nb_instantiated
      */
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         int n = 0;
         for(Variable v : vars){
             if(v.instantiated()){

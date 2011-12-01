@@ -85,7 +85,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		long time = System.currentTimeMillis();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for(int i=0; i<n; i++){

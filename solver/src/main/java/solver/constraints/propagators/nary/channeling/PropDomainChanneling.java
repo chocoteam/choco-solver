@@ -90,7 +90,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         vars[dsize].updateLowerBound(0, this, false);
         vars[dsize].updateUpperBound(dsize - 1, this, false);
 

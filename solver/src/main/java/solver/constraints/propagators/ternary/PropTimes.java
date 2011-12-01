@@ -66,7 +66,7 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     @Override
-    public final void propagate() throws ContradictionException {
+    public final void propagate(int evtmask) throws ContradictionException {
         filter(0);
         filter(1);
         filter(2);

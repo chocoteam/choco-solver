@@ -82,7 +82,7 @@ public class PropLexChain extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter();
     }
 
@@ -91,7 +91,7 @@ public class PropLexChain extends Propagator<IntVar> {
 //        if (getNbRequestEnqued() == 0) {
 //            filter();
 //        }
-        forcePropagate();
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     @Override

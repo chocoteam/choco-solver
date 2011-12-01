@@ -51,7 +51,7 @@ public class EventRequest<V extends Variable> extends AbstractRequestWithVar<V> 
     int first, last; // references, in variable delta value to propagate, to un propagated values
     int frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
 
-    int evtmask; // reference to events occuring
+    int evtmask; // reference to events occuring -- inclusive OR over event mask
 
     public EventRequest(Propagator<V> propagator, V variable, int idxInProp) {
         super(propagator, variable, idxInProp);
@@ -91,11 +91,8 @@ public class EventRequest<V extends Variable> extends AbstractRequestWithVar<V> 
 
 
     private void addAll(EventType e) {
-//        if ((e.mask & evtmask) == 0) {
-//            evtmask += e.mask;
-//        }
-        if ((e.mask & evtmask) == 0) {
-            evtmask |= e.fullmask;
+        if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+            evtmask |= e.strengthened_mask;
         }
         last = variable.getDelta().size();
     }

@@ -65,7 +65,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // Filter on X from Y
         updateLowerBoundofX();
         updateUpperBoundofX();

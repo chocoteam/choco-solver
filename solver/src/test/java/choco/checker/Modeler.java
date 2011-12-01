@@ -37,6 +37,7 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.InverseChanneling;
+import solver.constraints.nary.lex.Lex;
 import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -267,7 +268,7 @@ public interface Modeler {
                 map.put(domains[i], vars[i]);
             }
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
-            map.put(domains[n-1], occVar);
+            map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             Count.Relop ro = null;
             switch (params[0]) {
@@ -303,7 +304,7 @@ public interface Modeler {
                 map.put(domains[i], vars[i]);
             }
             IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1], s);
-            map.put(domains[n-1], occVar);
+            map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             Count.Relop ro = null;
             switch (params[0]) {
@@ -321,6 +322,32 @@ public interface Modeler {
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
+            s.post(ctrs);
+            s.set(strategy);
+            return s;
+        }
+    };
+
+    Modeler modelLexAC = new Modeler() {
+        @Override
+        public Solver model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Solver s = new Solver("Lex");
+            IEnvironment env = s.getEnvironment();
+
+            IntVar[] X = new IntVar[n / 2];
+            for (int i = 0; i < n / 2; i++) {
+                X[i] = VariableFactory.enumerated("X_" + i, domains[i], s);
+                map.put(domains[i], X[i]);
+            }
+            IntVar[] Y = new IntVar[n / 2];
+            for (int i = n / 2; i < n; i++) {
+                Y[i - n/2] = VariableFactory.enumerated("Y_" + i, domains[i], s);
+                map.put(domains[i], Y[i - n/2]);
+            }
+            Constraint ctr = new Lex(X, Y, (Boolean) parameters, s);
+            Constraint[] ctrs = new Constraint[]{ctr};
+
+            AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(ArrayUtils.append(X, Y), env);
             s.post(ctrs);
             s.set(strategy);
             return s;

@@ -31,6 +31,7 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.IPropagationEngine;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -56,6 +57,8 @@ import solver.variables.Variable;
  */
 public final class PropRequest<V extends Variable, P extends Propagator<V>> implements IRequest<V> {
 
+    int timestamp; // timestamp of the last clear call -- for lazy clear
+
     protected final P propagator; // Propagator of the request
 
     protected IPropagationEngine engine;
@@ -64,11 +67,13 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     protected boolean enqueued;
 
+    int evtmask; // reference to events occuring -- inclusive OR over event mask
 
     public PropRequest(P propagator) {
         this.propagator = propagator;
         enqueued = false;
         this.indices = new int[]{-1, -1, -1, -1};
+        evtmask = 0;
     }
 
     @Override
@@ -113,23 +118,41 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
 
     @Override
     public int getMask() {
-        return EventType.PROPAGATE.mask;
+        return evtmask;
     }
 
     @Override
     public void filter() throws ContradictionException {
-        propagator.propCalls++;
 //        LoggerFactory.getLogger("solver").info("PROP: {}", this.toString());
         if (!propagator.isActive()) {
-            propagator.initialize();
+            //propagator.initialize();
+            //promote event to top level event FULL_PROPAGATION
+            evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
             propagator.setActive();
         }
-        propagator.propagate();
+        if (evtmask > 0) {
+            propagator.propCalls++;
+            int _evt = evtmask;
+            evtmask = 0;
+            propagator.propagate(_evt);
+        }
     }
+
+    protected void lazyClear() {
+        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+            this.evtmask = 0;
+            timestamp = AbstractSearchLoop.timeStamp;
+        }
+    }
+
 
     @Override
     public void update(EventType e) {
-        if (EventType.PROPAGATE == e) {
+        if ((e.mask & propagator.getPropagationConditions()) != 0) {
+            lazyClear();
+            if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                evtmask |= e.strengthened_mask;
+            }
             schedule();
         }
     }
@@ -150,6 +173,7 @@ public final class PropRequest<V extends Variable, P extends Propagator<V>> impl
     public void desactivate() {
         // Can not be desactivated: it depends on the event requests of the propagator
         // when they are all entailed, this can not be call anymore.
+        evtmask = 0;
     }
 
     @Override

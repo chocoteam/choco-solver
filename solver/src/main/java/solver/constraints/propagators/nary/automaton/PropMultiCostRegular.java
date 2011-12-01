@@ -249,13 +249,23 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
 //TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
         return EventType.INT_ALL_MASK();
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
@@ -279,7 +289,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
@@ -295,7 +308,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 //        if (getNbRequestEnqued() == 0 && toRemove.size() > 0) {
 //            filter();
 //        }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

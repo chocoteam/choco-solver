@@ -75,7 +75,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		k.updateLowerBound(g.getKernelOrder(), this, false);
 		k.updateUpperBound(g.getEnvelopOrder(), this, false);
 		if(k.instantiated()){

@@ -82,7 +82,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {duration=0;}
+	public void propagate(int evtmask) throws ContradictionException {duration=0;}
 
 	
 	@Override

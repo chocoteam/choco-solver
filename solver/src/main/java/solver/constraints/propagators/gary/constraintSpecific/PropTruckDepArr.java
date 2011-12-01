@@ -77,7 +77,7 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=2*nbMaxTrucks;i<g.getEnvelopGraph().getNbNodes();i++){
 			g.enforceNode(i, this, false);
 		}

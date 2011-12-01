@@ -69,7 +69,7 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         int left, right;
         for (int i = 0; i < vars.length; i++) {
             left = right = Integer.MIN_VALUE;

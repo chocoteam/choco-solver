@@ -91,7 +91,7 @@ public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
     //***********************************************************************************
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
     }
 

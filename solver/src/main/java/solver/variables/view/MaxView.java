@@ -79,7 +79,7 @@ public class MaxView extends AbstractViewWithDomain {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 SIZE.add(elb - ilb);
                 ilb = elb;
@@ -89,7 +89,7 @@ public class MaxView extends AbstractViewWithDomain {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 SIZE.add(eub - iub);
                 iub = eub;
@@ -102,7 +102,7 @@ public class MaxView extends AbstractViewWithDomain {
                 change |= true;
             }
             if (ilb > iub) {
-                this.contradiction(this, EventType.PROPAGATE, MSG_EMPTY);
+                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
             }
             if (change) {
                 if (ilb == iub) {

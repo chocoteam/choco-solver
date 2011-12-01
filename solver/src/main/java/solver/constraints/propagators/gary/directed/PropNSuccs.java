@@ -84,7 +84,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {check();}
+	public void propagate(int evtmask) throws ContradictionException {check();}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {

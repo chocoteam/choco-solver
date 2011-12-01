@@ -485,7 +485,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
                 ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
@@ -495,7 +495,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
@@ -510,7 +510,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             int size = VALUES.cardinality();
             SIZE.set(size);
             if (ilb > iub) {
-                this.contradiction(this, EventType.PROPAGATE, MSG_EMPTY);
+                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
             }
             if (down || size == 1) {
                 filterOnGeq(this, ilb);

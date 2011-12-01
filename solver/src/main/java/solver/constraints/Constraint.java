@@ -43,6 +43,7 @@ import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
 import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -259,7 +260,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
                     last--;
                     break;
                 case UNDEFINED:
-                    prop.propagate();
+                    prop.propagate(EventType.FULL_PROPAGATION.mask);
                     if (!prop.isActive()) {
                         p--;
                         last--;

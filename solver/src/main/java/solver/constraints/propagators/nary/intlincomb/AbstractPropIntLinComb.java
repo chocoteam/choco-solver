@@ -176,8 +176,9 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
      *
      * @throws ContradictionException if a domain empties or a contradiction is
      *                                infered
+     * @param evtmask
      */
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(true, 2);
     }
 
@@ -238,7 +239,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
      *          infered
      */
     void awakeOnInst(final int idx, Constraint constraint) throws ContradictionException {
-        propagate();
+        propagate(EventType.FULL_PROPAGATION.mask);
     }
 
     /**

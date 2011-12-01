@@ -275,6 +275,20 @@ public class TestCompletenessConsistency {
             checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0,1}, seed + i, "ac");
     }
 
+    @Test(groups = "10s")
+    public void testLEX1() {
+        long seed = 0;//System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelLexAC, 6, -10, 10, true, seed + i, "ac");
+    }
+
+    @Test(groups = "10s")
+    public void testLEX2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelLexAC, 6, -10, 10, false, seed + i, "ac");
+    }
+
     /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/SOLVER_ERROR.ser");

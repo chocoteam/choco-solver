@@ -84,7 +84,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         if (x.instantiated()) {
             removeValV1();
         } else if (y.instantiated()) {
@@ -106,7 +106,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
             // typical case: A=[1,4], B=[1,4] (bounded domains)
             // A instantiated to 3 => nothing can be done on B
             // then B dec supp to 3 => 3 can also be removed du to A = 3.
-            propagate();
+            propagate(EventType.FULL_PROPAGATION.mask);
         }
     }
 

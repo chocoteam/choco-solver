@@ -124,7 +124,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test1() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 2000; i++) {
             Solver solver = make(5, i + seed);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 4, "seed:"+(seed+i));
@@ -134,7 +134,7 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 2000; i++) {
             Solver solver = make(7, i);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 6, "seed:"+(seed+i));
@@ -144,17 +144,17 @@ public class MultiCostRegularTest {
     @Test(groups = "10s")
     public void test3() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 2000; i++) {
             Solver solver = make(14, i);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 141, "seed:"+(seed+i));
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "10s")
     public void test4() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 2000; i++) {
             Solver solver = make(21, i);
             solver.findAllSolutions();
             Assert.assertEquals(solver.getMeasures().getSolutionCount(), 85, "seed:"+(seed+i));
