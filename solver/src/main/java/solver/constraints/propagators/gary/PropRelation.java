@@ -68,7 +68,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	public PropRelation(Variable[] vars, G graph,Solver solver, GraphConstraint cons,GraphRelation relation) {
-		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, cons, relation.getPriority(), true);
+		super((V[]) ArrayUtils.append(vars,new Variable[]{graph}), solver, cons, relation.getPriority());
 		this.g = graph;
 		this.nodeVars = vars;
 		this.n = nodeVars.length;

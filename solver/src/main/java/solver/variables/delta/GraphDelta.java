@@ -28,62 +28,137 @@
 package solver.variables.delta;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.variables.graph.GraphVar;
 
 public class GraphDelta implements IGraphDelta {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private IntDelta nodeEnf, nodeRem, arcEnf, arcRem;
+	private GDelta nodeEnf, nodeRem, arcEnf, arcRem;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public GraphDelta() {
-        nodeEnf = new Delta();
-        nodeRem = new Delta();
-        arcEnf = new Delta();
-        arcRem = new Delta();
-    }
+	public GraphDelta(Solver solver) {
+		nodeEnf = new GDelta();
+		nodeRem = new GDelta();
+		arcEnf = new GDelta();
+		arcRem = new GDelta();
+		solver.getSearchLoop().plugSearchMonitor(new WorldObserver());
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public int size() {
+		throw new UnsupportedOperationException();
+	}
 
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+		throw new UnsupportedOperationException();
+	}
 
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
 
-    @Override
-    public IntDelta getNodeRemovalDelta() {
-        return nodeRem;
-    }
+	@Override
+	public IntDelta getNodeRemovalDelta() {
+		return nodeRem;
+	}
 
-    @Override
-    public IntDelta getNodeEnforcingDelta() {
-        return nodeEnf;
-    }
+	@Override
+	public IntDelta getNodeEnforcingDelta() {
+		return nodeEnf;
+	}
 
-    @Override
-    public IntDelta getArcRemovalDelta() {
-        return arcRem;
-    }
+	@Override
+	public IntDelta getArcRemovalDelta() {
+		return arcRem;
+	}
 
-    @Override
-    public IntDelta getArcEnforcingDelta() {
-        return arcEnf;
-    }
+	@Override
+	public IntDelta getArcEnforcingDelta() {
+		return arcEnf;
+	}
+
+	@Override
+	public void clear() {
+		nodeEnf.last = 0;
+		nodeRem.last = 0;
+		arcEnf.last = 0;
+		arcRem.last = 0;
+	}
+	
+	//***********************************************************************************
+	// WORLD OBSERVER
+	//***********************************************************************************
+
+	/**Enables lazy clear*/
+	private class WorldObserver extends VoidSearchMonitor implements ISearchMonitor{
+		@Override
+		public void beforeDownLeftBranch() {
+			clear();
+		}
+		@Override
+		public void beforeDownRightBranch() {
+			clear();
+		}
+	}
+
+	//***********************************************************************************
+	// DELTA
+	//***********************************************************************************
+
+	private class GDelta implements IntDelta{
+
+		int[] rem;
+		int last;
+
+		private GDelta() {
+			rem = new int[16];
+		}
+
+		private int[] ensureCapacity(int idx, int[] values) {
+			if (idx >= values.length) {
+				int[] tmp = new int[idx * 3 / 2 + 1];
+				System.arraycopy(values, 0, tmp, 0, idx);
+				return tmp;
+			}
+			return values;
+		}
+
+		public void add(int value) {
+			rem = ensureCapacity(last, rem);
+			rem[last++] = value;
+		}
+
+		@Override
+		public int get(int idx){
+			return rem[idx];
+		}
+
+		@Override
+		public int size() {
+			return last;
+		}
+
+		@Override
+		public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
+			for (int i = from; i < to; i++) {
+				proc.execute(rem[i]);
+			}
+		}
+	}
 }

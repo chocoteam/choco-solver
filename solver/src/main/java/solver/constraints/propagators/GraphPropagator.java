@@ -41,8 +41,8 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
     // CONSTRUCTORS
     //***********************************************************************************
 
-    protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
-        super(vars, solver, constraint, priority, reactOnPromotion);
+    protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
+        super(vars, solver, constraint, priority, true);
     }
 
     //***********************************************************************************

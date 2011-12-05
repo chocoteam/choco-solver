@@ -29,32 +29,42 @@ package solver.variables.graph.graphStructure.adjacencyList;
 
 import solver.variables.graph.INeighbors;
 
-/**
- * LinkedList of m elements
+import java.util.LinkedList;
+
+/**Linked list of m elements with double link (predecessor and successor)
  * add : O(1)
  * testPresence: O(m)
  * remove: O(m)
+ * Enable deletion of the current item in O(1) (except for the last one)
  * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 17/11/2011
  */
-public class IntLinkedList implements INeighbors {
+public class IntDoubleLinkedList implements INeighbors {
 
 	/**
 	 * The first cell of the linked list
 	 */
-	protected IntCell first;
 	protected int size;
-	protected IntCell nextCell; // enables to iterate
-	protected IntCell poolGC;
+	protected DoubleIntCell first;
+	protected DoubleIntCell nextCell; // enables to iterate
+	protected DoubleIntCell poolGC;
 
-	public IntLinkedList() {
-		this.first  = null;
-		nextCell    = null;
-		this.size 	= 0;
+	//***********************************************************************************
+	// TCONSTRUCTOR
+	//***********************************************************************************
+
+	public IntDoubleLinkedList() {
+		this.first    = null;
+		this.nextCell = null;
+		this.size	  = 0;
 		poolGC = null;
 	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
 	@Override
 	/**
@@ -82,7 +92,7 @@ public class IntLinkedList implements INeighbors {
 	 */
 	public boolean contain(int element) {
 		boolean res = false;
-		IntCell current = first;
+		DoubleIntCell current = first;
 		while (!res && current != null) {
 			if (current.element==element) {
 				res = true;
@@ -100,9 +110,9 @@ public class IntLinkedList implements INeighbors {
 	 */
 	public void add(int element) {
 		if(poolGC==null){
-			this.first = new IntCell(element, first);
+			this.first = new DoubleIntCell(element, first);
 		}else{
-			IntCell recycled = poolGC;
+			DoubleIntCell recycled = poolGC;
 			poolGC = poolGC.next;
 			recycled.init(element,first);
 			first = recycled;
@@ -117,25 +127,48 @@ public class IntLinkedList implements INeighbors {
 	 * @return true iff the element has been effectively removed
 	 */
 	public boolean remove(int element) {
-		IntCell current = first;
-		IntCell previous = null;
+		if(first!=null && first.element==element){
+			DoubleIntCell old = poolGC;
+			poolGC = first;
+			first = first.next;
+			if(first!=null)first.pred = null;
+			size--;
+			poolGC.next = old;
+			return true;
+		}
+		if(nextCell!=null && nextCell.pred!=null && nextCell.pred.element==element){
+			DoubleIntCell pred = nextCell.pred.pred;
+			nextCell.pred.pred = null;
+			nextCell.pred.next = null;
+
+			DoubleIntCell old = poolGC;
+			poolGC = nextCell.pred;
+
+			if(pred!=null){
+				pred.next = nextCell;
+			}
+			nextCell.pred = pred;
+			size--;
+			poolGC.next = old;
+			return true;
+		}
+		DoubleIntCell current = first;
+		DoubleIntCell nextCurrent, prevCurrent;
 		boolean removed = false;
 		while ((!removed) && current != null) {
 			if (current.element==element) {
 				if(current == nextCell){
 					nextCell = nextCell.next;
 				}
-				IntCell old = poolGC;
+				DoubleIntCell old = poolGC;
 				poolGC = current;
-				if (previous == null) {
-					this.first = current.next;
-				} else {
-					previous.next = current.next;
-				}
+				nextCurrent = current.next;
+				prevCurrent = current.pred;
+				if(nextCurrent!=null)nextCurrent.pred = prevCurrent;
+				if(prevCurrent!=null)prevCurrent.next = nextCurrent;
 				removed = true;
 				poolGC.next = old;
 			}
-			previous = current;
 			current = current.next;
 		}
 		if (removed) {
@@ -147,7 +180,7 @@ public class IntLinkedList implements INeighbors {
 	@Override
 	public String toString() {
 		String res = "";
-		IntCell current = first;
+		DoubleIntCell current = first;
 		while (current != null) {
 			res += current;
 			current = current.next;
@@ -185,4 +218,34 @@ public class IntLinkedList implements INeighbors {
 		nextCell = nextCell.next;
 		return el;
 	}
+
+	//***********************************************************************************
+	// STRUCTURE
+	//***********************************************************************************
+
+	private class DoubleIntCell {
+
+		DoubleIntCell pred,next;
+		int element;
+
+		public DoubleIntCell(int element, DoubleIntCell next) {
+			init(element,next);
+		}
+
+		public void init(int element, DoubleIntCell next) {
+			this.element = element;
+			this.next = next;
+			this.pred = null;
+			if(next!=null)next.pred = this;
+		}
+
+		public String toString() {
+			if (next == null) {
+				return ""+element;
+			} else {
+				return ""+element+" -> ";
+			}
+		}
+	}
+
 }

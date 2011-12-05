@@ -29,78 +29,86 @@ package solver.variables.graph.graphStructure.adjacencyList.storedStructures;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.Operation;
-import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
-
+import solver.variables.graph.graphStructure.adjacencyList.IntDoubleLinkedList;
 import java.util.LinkedList;
 
 /**
- * Backtrable LinkedList of m elements
+ * Backtrable linked list of m elements with double link (predecessor and successor)
  * add : O(1)
  * testPresence: O(m)
  * remove: O(m)
+ * Enable deletion of the current item in O(1) (except for the last one)
  * iteration : O(m)
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 10 f�vr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 17/11/2011
  */
-public class StoredIntLinkedList extends IntLinkedList {
+public class StoredDoubleIntLinkedList extends IntDoubleLinkedList {
 
-    final IEnvironment environment;
-	private LinkedList<ListOP> operationPoolGC;
-	private final static boolean ADD = true;
-	private final static boolean REMOVE = false;
+	final IEnvironment environment;
+	public final static boolean ADD = true;
+	public final static boolean REMOVE = false;
+	LinkedList<ListOP> operationPoolGC;
 
-    public StoredIntLinkedList(IEnvironment environment) {
-    	super();
-        this.environment = environment;
+	//***********************************************************************************
+	// CONSTRUCTOR
+	//***********************************************************************************
+
+	public StoredDoubleIntLinkedList(IEnvironment environment) {
+		super();
+		this.environment = environment;
 		operationPoolGC  = new LinkedList<ListOP>();
-    }
+	}
 
-    @Override
-    public void add(int element) {
-        this._add(element);
-        if(operationPoolGC.isEmpty()){
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	@Override
+	public void add(int element) {
+		this._add(element);
+		if(operationPoolGC.isEmpty()){
 			new ListOP(element, REMOVE);
 		}else{
 			ListOP op = operationPoolGC.removeFirst();
 			op.set(element,REMOVE);
 		}
-    }
+	}
 
-    protected void _add(int element) {
-        super.add(element);
-    }
+	protected void _add(int element) {
+		super.add(element);
+	}
 
-    @Override
-    public boolean remove(int element) {
-        boolean done = this._remove(element);
-        if (done) {
-            if(operationPoolGC.isEmpty()){
+	@Override
+	public boolean remove(int element) {
+		boolean done = this._remove(element);
+		if (done) {
+			if(operationPoolGC.isEmpty()){
 				new ListOP(element, ADD);
 			}else{
 				ListOP op = operationPoolGC.removeFirst();
 				op.set(element,ADD);
 			}
-        }
-        return done;
-    }
+		}
+		return done;
+	}
 
-    protected boolean _remove(int element) {
-        return super.remove(element);
-    }
-    
-    @Override
-    public void clear() {
-        for(int i=getFirstElement(); i>=0; i=getNextElement()){
-        	if(operationPoolGC.isEmpty()){
+	protected boolean _remove(int element) {
+		return super.remove(element);
+	}
+
+	@Override
+	public void clear() {
+		for(int i=getFirstElement(); i>=0; i=getNextElement()){
+			if(operationPoolGC.isEmpty()){
 				new ListOP(i, ADD);
 			}else{
 				ListOP op = operationPoolGC.removeFirst();
 				op.set(i,ADD);
 			}
-        }
-        super.clear();
-    }
+		}
+		super.clear();
+	}
 
 	//***********************************************************************************
 	// TRAILING OPERATIONS

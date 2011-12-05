@@ -37,17 +37,11 @@ import choco.kernel.memory.IEnvironment;
  */
 public abstract class Operation {
 
-    protected IEnvironment environment;
-
-    protected Operation(IEnvironment environment) {
-        this.environment = environment;
-        save();
-    }
-
-    public abstract void undo();
-
-
-    protected void save() {
+	protected Operation(IEnvironment environment) {
         environment.save(this);
     }
+
+	protected Operation() {}
+
+    public abstract void undo();
 }

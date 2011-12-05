@@ -69,10 +69,9 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 	 * create a new generic graph constraint
 	 * @param vars (nodes)
 	 * @param solver
-	 * @param storeThreshold
 	 * @param relation (arc meaning)
 	 */
-	GraphConstraint(V[] vars, Solver solver, PropagatorPriority storeThreshold, GraphRelation relation) {
+	GraphConstraint(V[] vars, Solver solver , GraphRelation relation) {
 		super(solver);
 		this.inputVars = vars;
 		this.relation   = relation;
@@ -84,6 +83,19 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		for(GraphProperty gp:relation.getGraphProperties()){
 			addProperty(gp);
 		}
+	}
+
+	/** Please use ConstraintFactory.makeConstraint(...)
+	 *
+	 * create a new generic graph constraint
+	 * @param g graph
+	 * @param solver
+	 */
+	GraphConstraint(GraphVar g, Solver solver) {
+		super(solver);
+		this.graph = g;
+		this.properties = new LinkedList<GraphProperty>();
+		solver.associates(graph);
 	}
 
 	//***********************************************************************************

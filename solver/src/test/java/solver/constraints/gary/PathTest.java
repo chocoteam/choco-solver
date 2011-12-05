@@ -28,71 +28,98 @@
 package solver.constraints.gary;
 
 import org.testng.annotations.Test;
-import solver.Cause;
 import solver.Solver;
-import solver.exception.ContradictionException;
+import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
+import solver.constraints.propagators.gary.tsp.*;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class NTreeTest {
+public class PathTest {
 
 	private static GraphType graphTypeEnv = GraphType.MATRIX;
 	private static GraphType graphTypeKer = GraphType.MATRIX;
 
-	public static void model(int n, int tmin, int tmax,int seed) {
+	public static Solver model(int n, int seed, boolean path, boolean arbo, boolean RG, long nbMaxSols) {
 		Solver s = new Solver();
 		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer);
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
+		for(int i=0;i<n-1;i++){
+			for(int j=1;j<n;j++){
 				g.getEnvelopGraph().addArc(i, j);
 			}
-			try {
-				g.enforceNode(i, Cause.Null,false);
-			} catch (ContradictionException e) {
-				e.printStackTrace();
-				System.exit(0);
-			}
 		}
-		IntVar nTree = VariableFactory.bounded("NTREE ", tmin, tmax, s);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES,nTree);
-		AbstractStrategy strategy = StrategyFactory.graphRandom(g,seed);
-
+		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
+		gc.addAdHocProp(new PropOneSuccBut(g,n-1,gc,s));
+		if(path){
+			gc.addAdHocProp(new PropPathNoCycle(g,gc,s));
+		}
+		if(arbo){
+			gc.addAdHocProp(new PropArborescence(g,0,gc,s,true));
+		}
+		if(RG){
+			gc.addAdHocProp(new PropReducedGraphHamPath(g,gc,s));
+		}
+		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		s.post(gc);
 		s.set(strategy);
+		if(nbMaxSols>0){
+			s.getSearchLoop().getLimitsBox().setSolutionLimit(nbMaxSols);
+		}
 		s.findAllSolutions();
+		return s;
+	}
 
-		assertTrue(s.getMeasures().getFailCount()==0);
-		assertTrue(s.getMeasures().getSolutionCount()>0);
+	public static void test(int s, int n, int nbMax) {
+		System.out.println("Test n="+n+", with seed="+s);
+		Solver path = model(n,s,true,false,false,nbMax);
+		Solver pathArbo = model(n,s,true,true,false,nbMax);
+		Solver pathArboRG = model(n,s,true,true,true,nbMax);
+		Solver arbo = model(n,s,false,true,false,nbMax);
+		Solver arboRG = model(n,s,false,true,true,nbMax);
+		// NbSolutions
+		System.out.println("nbSols : "+path.getMeasures().getSolutionCount());
+		assertEquals(path.getMeasures().getSolutionCount(), arbo.getMeasures().getSolutionCount());
+		assertEquals(path.getMeasures().getSolutionCount(), pathArbo.getMeasures().getSolutionCount());
+		assertEquals(path.getMeasures().getSolutionCount(),arboRG.getMeasures().getSolutionCount());
+		assertEquals(path.getMeasures().getSolutionCount(),pathArboRG.getMeasures().getSolutionCount());
+		// NbFails
+		if(graphTypeEnv==GraphType.MATRIX){
+			assertTrue(path.getMeasures().getFailCount()   >= arbo.getMeasures().getFailCount());
+			assertTrue(arbo.getMeasures().getFailCount()   >= arboRG.getMeasures().getFailCount());
+			assertEquals(pathArbo.getMeasures().getFailCount(), arbo.getMeasures().getFailCount());
+			assertEquals(arboRG.getMeasures().getFailCount(), pathArboRG.getMeasures().getFailCount());
+		}
+	}
+
+	@Test(groups = "1s")
+	public static void smallTrees() {
+		for(int s=0;s<3;s++){
+			for(int n=3;n<8;n++){
+				test(s, n, -1);
+			}
+		}
 	}
 
 	@Test(groups = "10m")
-	public static void debug() {
-		for(int seed = 0;seed<5;seed++){
-			for(int n=5;n<7;n++){
-				for(int t1=1;t1<n;t1++){
-					for(int t2=t1;t2<n;t2++){
-						System.out.println("tree : n="+n+" nbTrees = ["+t1+","+t2+"]");
-						model(n,t1,t2,seed);
-					}
-				}
+	public static void bigTrees() {
+		for(int s=0;s<3;s++){
+			for(int n = 100;n<1000; n+=100){
+				test(s, n, 1);
 			}
 		}
 	}
 
-	@Test(groups = "30m")
+	@Test(groups = "1s")
 	public static void testAllDataStructure(){
 		for(GraphType ge:GraphType.ENVELOPE_TYPES){
 			graphTypeEnv = ge;
 			for(GraphType gk:GraphType.KERNEL_TYPES){
 				graphTypeKer = gk;
-				System.out.println("env:"+ge+" ker :"+gk);
-				debug();
+				smallTrees();
 			}
 		}
 	}
