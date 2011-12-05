@@ -366,7 +366,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateLong makeLong(int init) {
+    public IStateLong makeLong(long init) {
         return new RcLong(this, init);
     }
 

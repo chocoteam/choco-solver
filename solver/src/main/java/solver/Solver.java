@@ -30,6 +30,7 @@ package solver;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.buffer.EnvironmentBuffering;
 import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.slf4j.LoggerFactory;
@@ -79,7 +80,8 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 3L;
 
-    public static int _DEFAULT_ENV = 0; // 1 :copying, other: trailing
+    // 1 :copying, 2: buffering, 3: buffering unsafe,other: trailing
+    public static int _DEFAULT_ENV = 0;
 
     /**
      * Properties of the solver
@@ -148,10 +150,16 @@ public class Solver implements Serializable {
             case 1:
                 this.environment = new EnvironmentCopying();
                 break;
+            case 2:
+                this.environment = new EnvironmentBuffering(false);
+                break;
+            case 3:
+                this.environment = new EnvironmentBuffering(true);
+                break;
             default:
                 this.environment = new EnvironmentTrailing();
         }
-        this.measures = new MeasuresRecorder(this);
+        this.measures = new MeasuresRecorder(this); // required for event recorder
         this.creationTime -= System.nanoTime();
         this.engine = new PropagationEngine();
         this.search = SearchLoops.preset(this, engine);

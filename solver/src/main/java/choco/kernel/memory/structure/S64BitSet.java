@@ -39,6 +39,8 @@ import java.util.BitSet;
 
 public class S64BitSet implements IStateBitSet {
 
+    private final static boolean CHECK = true;
+
     /*
     * BitSets are packed into arrays of "words."  Currently a word is
     * a long, which consists of 64 bits, requiring 6 address bits.
@@ -79,11 +81,11 @@ public class S64BitSet implements IStateBitSet {
     /**
      * Every public method must preserve these invariants.
      */
-    /*private void checkInvariants() {
+    private void checkInvariants() {
         assert (wordsInUse.get() == 0 || words[wordsInUse.get() - 1].get() != 0);
         assert (wordsInUse.get() >= 0 && wordsInUse.get() <= words.length);
         assert (wordsInUse.get() == words.length || words[wordsInUse.get()].get() == 0);
-    } */
+    }
 
     /**
      * Set the field wordsInUse with the logical size in words of the bit
@@ -93,11 +95,13 @@ public class S64BitSet implements IStateBitSet {
     private void recalculateWordsInUse() {
         // Traverse the bitset until a used word is found
         int i;
-        for (i = wordsInUse.get() - 1; i >= 0; i--)
+        int n = wordsInUse.get();
+        for (i = n - 1; i >= 0; i--)
             if (words[i].get() != 0)
                 break;
-
-        wordsInUse.set(i + 1); // The new logical size
+        if(i + 1 < n){
+            wordsInUse.set(i + 1); // The new logical size
+        }
     }
 
     /**
@@ -134,6 +138,7 @@ public class S64BitSet implements IStateBitSet {
     private void initWords(int nbits) {
         words = new IStateLong[wordIndex(nbits - 1) + 1];
         for (int i = 0; i < words.length; i++) words[i] = this.environment.makeLong(0);
+        if(CHECK)checkInvariants();
     }
 
 
@@ -238,7 +243,7 @@ public class S64BitSet implements IStateBitSet {
         words[wordIndex].set(tmp);
 
         recalculateWordsInUse();
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -284,7 +289,7 @@ public class S64BitSet implements IStateBitSet {
         }
 
         recalculateWordsInUse();
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -297,13 +302,13 @@ public class S64BitSet implements IStateBitSet {
     public void set(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
+        if(CHECK)checkInvariants();
         int wordIndex = wordIndex(bitIndex);
         expandTo(wordIndex);
 
         words[wordIndex].set(words[wordIndex].get() | (1L << bitIndex)); // Restores invariants
 
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -361,7 +366,7 @@ public class S64BitSet implements IStateBitSet {
             words[endWordIndex].set(words[endWordIndex].get() | lastWordMask);
         }
 
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -395,13 +400,15 @@ public class S64BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
         int wordIndex = wordIndex(bitIndex);
-        if (wordIndex >= wordsInUse.get())
+        int n = wordsInUse.get();
+        if (wordIndex >= n)
             return;
 
         words[wordIndex].set(words[wordIndex].get() & ~(1L << bitIndex));
 
-        recalculateWordsInUse();
-        //checkInvariants();
+        //if(wordIndex == n-1)
+            recalculateWordsInUse();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -450,8 +457,9 @@ public class S64BitSet implements IStateBitSet {
             words[endWordIndex].set(words[endWordIndex].get() & ~lastWordMask);
         }
 
-        recalculateWordsInUse();
-        //checkInvariants();
+       //if(endWordIndex < wiu)
+            recalculateWordsInUse();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -466,6 +474,8 @@ public class S64BitSet implements IStateBitSet {
         for (IStateLong word : words) {
             word.set(0);
         }
+        wordsInUse.set(0);
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -482,7 +492,7 @@ public class S64BitSet implements IStateBitSet {
         //if (bitIndex < 0)
         //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
 
-        //checkInvariants();
+        if(CHECK)checkInvariants();
 
         int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD; //wordIndex(bitIndex);
         return (wordIndex < wordsInUse.get())
@@ -504,7 +514,7 @@ public class S64BitSet implements IStateBitSet {
     public S64BitSet get(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
-        //checkInvariants();
+        if(CHECK)checkInvariants();
 
         int len = length();
 
@@ -541,7 +551,7 @@ public class S64BitSet implements IStateBitSet {
         // Set wordsInUse correctly
         result.wordsInUse.set(targetWords);
         result.recalculateWordsInUse();
-        //result.checkInvariants();
+        if(CHECK)result.checkInvariants();
 
         return result;
     }
@@ -780,7 +790,7 @@ public class S64BitSet implements IStateBitSet {
             words[i].set(words[i].get() & set.words[i].get());
 
         recalculateWordsInUse();
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -815,7 +825,7 @@ public class S64BitSet implements IStateBitSet {
                     wordsInUse.get() - wordsInCommon);
 
         // recalculateWordsInUse() is unnecessary
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -852,7 +862,7 @@ public class S64BitSet implements IStateBitSet {
                     set.wordsInUse.get() - wordsInCommon);
 
         recalculateWordsInUse();
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -870,7 +880,7 @@ public class S64BitSet implements IStateBitSet {
             words[i].set(words[i].get() & ~set.words[i].get());
 
         recalculateWordsInUse();
-        //checkInvariants();
+        if(CHECK)checkInvariants();
     }
 
     /**
@@ -918,8 +928,8 @@ public class S64BitSet implements IStateBitSet {
 
         S64BitSet set = (S64BitSet) obj;
 
-        //checkInvariants();
-        //set.checkInvariants();
+        if(CHECK)checkInvariants();
+        if(CHECK)set.checkInvariants();
 
         if (wordsInUse != set.wordsInUse)
             return false;
@@ -940,12 +950,12 @@ public class S64BitSet implements IStateBitSet {
         for (int i = 0; i < wordsInUse.get(); i++) {
             result.words[i].set(words[i].get());
         }
-        //result.checkInvariants();
+        if(CHECK)result.checkInvariants();
         return result;
     }
 
     public String toString() {
-        //checkInvariants();
+        if(CHECK)checkInvariants();
 
         int numBits = (wordsInUse.get() > 128) ?
                 cardinality() : wordsInUse.get() * BITS_PER_WORD;
