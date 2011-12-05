@@ -41,6 +41,12 @@ public interface IMeasures extends ISearchMonitor, Serializable {
     String toString();
 
     /**
+     * Get current world unique id
+     * @return
+     */
+    long timestamp();
+
+    /**
      * Get the time count in milliseconds of the measure
      *
      * @return time count

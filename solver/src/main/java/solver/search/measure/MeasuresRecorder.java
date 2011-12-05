@@ -87,6 +87,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         failCount = 0;
     }
 
+
+    public long timestamp() {
+        return nodeCount + backtrackCount;
+    }
 //	public void setSearchMeasures(ISearchMeasures toCopy) {
 //		timeCount = toCopy.getTimeCount();
 //		nodeCount = toCopy.getNodeCount();
