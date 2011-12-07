@@ -39,7 +39,6 @@ import solver.constraints.nary.automata.FA.ICostAutomaton;
 import solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
 import solver.constraints.propagators.nary.automaton.PropMultiCostRegular;
 import solver.exception.SolverException;
-import solver.requests.IRequest;
 import solver.search.strategy.enumerations.sorters.metrics.IMetric;
 import solver.variables.IntVar;
 
@@ -178,9 +177,9 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
         MinSP(PropMultiCostRegular pmcr) {
             this.pmcr = pmcr;
             this.map2idx = new TObjectIntHashMap<IntVar>();
-            for (int i = 0; i < pmcr.nbRequests(); i++) {
-                IRequest r = pmcr.getRequest(0);
-                map2idx.put((IntVar) r.getVariable(), r.getIndex(IRequest.VAR_IN_PROP));
+            for (int i = 0; i < pmcr.getNbVars(); i++) {
+                IntVar var = pmcr.getVar(i);
+                map2idx.put(var, i);
             }
         }
 

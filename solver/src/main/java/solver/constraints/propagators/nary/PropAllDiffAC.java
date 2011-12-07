@@ -38,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.requests.IRequest;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * Created by IntelliJ IDEA.
@@ -91,8 +90,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 
     @Override
     public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-        IntVar var = request.getVariable();
-        IntDelta delta = var.getDelta();
+        IntVar var = vars[varIdx];
 
         if (EventType.isInstantiate(mask)) {
             struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
