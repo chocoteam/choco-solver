@@ -153,6 +153,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         int sat = 0;
         for (int i = 0; i < last; i++) {
             ESat entail = propagators[i].isEntailed();
+//			System.out.println(propagators[i]+" => "+entail);
             if (entail.equals(ESat.FALSE)) {
                 return entail;
             } else if (entail.equals(ESat.TRUE)) {

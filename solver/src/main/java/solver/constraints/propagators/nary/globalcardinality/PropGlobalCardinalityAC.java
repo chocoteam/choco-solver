@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -116,7 +115,7 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         // On suppose que la structure struct est deja ete initialisee par la contrainte
         // car elle est partagee entre tous les propagateurs
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
         }
         struct.removeUselessEdges(this);
@@ -126,8 +125,6 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         IntVar var = vars[varIdx];
-        IntDelta delta = var.getDelta();
-
         if (EventType.isInstantiate(mask)) {
             struct.setMatch(varIdx, var.getValue());
         } else {

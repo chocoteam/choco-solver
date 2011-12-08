@@ -147,5 +147,4 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
     public int toArcEnforcing() {
         return frozenLast[AE];
     }
-
 }

@@ -28,71 +28,89 @@
 package solver.constraints.gary;
 
 import org.testng.annotations.Test;
-import solver.Cause;
 import solver.Solver;
-import solver.exception.ContradictionException;
+import solver.constraints.propagators.gary.tsp.PropArborescence;
+import solver.constraints.propagators.gary.tsp.PropArborescenceNM;
+import solver.constraints.propagators.gary.tsp.PropOnePredBut;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 
-public class NTreeTest {
+public class ArborescenceTest {
 
 	private static GraphType graphTypeEnv = GraphType.MATRIX;
 	private static GraphType graphTypeKer = GraphType.MATRIX;
 
-	public static void model(int n, int tmin, int tmax,int seed) {
+	public static Solver model(int n, int seed, boolean naive, boolean simple, long nbMaxSols) {
 		Solver s = new Solver();
 		DirectedGraphVar g = new DirectedGraphVar(s, n, graphTypeEnv, graphTypeKer);
 		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
+			for(int j=1;j<n;j++){
 				g.getEnvelopGraph().addArc(i, j);
 			}
-			try {
-				g.enforceNode(i, Cause.Null,false);
-			} catch (ContradictionException e) {
-				e.printStackTrace();
-				System.exit(0);
-			}
 		}
-		IntVar nTree = VariableFactory.bounded("NTREE ", tmin, tmax, s);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES,nTree);
+		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
+		if(naive){
+			gc.addAdHocProp(new PropArborescenceNM(g,0,gc,s));
+		}else{
+			gc.addAdHocProp(new PropArborescence(g,0,gc,s,simple));
+		}
 		AbstractStrategy strategy = StrategyFactory.graphRandom(g,seed);
-
 		s.post(gc);
 		s.set(strategy);
+		if(nbMaxSols>0){
+			s.getSearchLoop().getLimitsBox().setSolutionLimit(nbMaxSols);
+		}
 		s.findAllSolutions();
-
-		assertTrue(s.getMeasures().getFailCount()==0);
-		assertTrue(s.getMeasures().getSolutionCount()>0);
+		return s;
 	}
 
-	@Test(groups = "10m")
-	public static void debug() {
-		for(int seed = 0;seed<5;seed++){
-			for(int n=5;n<7;n++){
-				for(int t1=1;t1<n;t1++){
-					for(int t2=t1;t2<n;t2++){
-						System.out.println("tree : n="+n+" nbTrees = ["+t1+","+t2+"]");
-						model(n,t1,t2,seed);
-					}
-				}
+	@Test(groups = "10s")
+	public static void smallTrees() {
+		for(int s=0;s<3;s++){
+			for(int n=3;n<8;n++){
+				System.out.println("Test n="+n+", with seed="+s);
+				Solver naive = model(n,s,true,false,-1);
+				Solver efficientA = model(n,s,false,true,-1);
+				Solver efficientN = model(n,s,false,false,-1);
+				System.out.println(naive.getMeasures().getSolutionCount()+" sols");
+				assertEquals(naive.getMeasures().getFailCount(),0);
+				assertEquals(naive.getMeasures().getSolutionCount(),efficientA.getMeasures().getSolutionCount());
+				assertEquals(naive.getMeasures().getFailCount(),efficientA.getMeasures().getFailCount());
+				assertEquals(naive.getMeasures().getSolutionCount(),efficientN.getMeasures().getSolutionCount());
+				assertEquals(naive.getMeasures().getFailCount(),efficientN.getMeasures().getFailCount());
 			}
 		}
 	}
 
-	@Test(groups = "30m")
+	@Test(groups = "10S")
+	public static void bigTrees() {
+		for(int s=0;s<3;s++){
+			int n = 60;
+			System.out.println("Test n="+n+", with seed="+s);
+			Solver naive = model(n,s,true,false,10);
+			Solver efficientA = model(n,s,false,true,10);
+			Solver efficientN = model(n,s,false,false,10);
+			System.out.println(naive.getMeasures().getSolutionCount()+" sols");
+			assertEquals(naive.getMeasures().getFailCount(),0);
+			assertEquals(naive.getMeasures().getSolutionCount(), efficientA.getMeasures().getSolutionCount());
+			assertEquals(naive.getMeasures().getFailCount(),efficientA.getMeasures().getFailCount());
+			assertEquals(naive.getMeasures().getSolutionCount(),efficientN.getMeasures().getSolutionCount());
+			assertEquals(naive.getMeasures().getFailCount(),efficientN.getMeasures().getFailCount());
+		}
+	}
+
+	@Test(groups = "30s")
 	public static void testAllDataStructure(){
 		for(GraphType ge:GraphType.ENVELOPE_TYPES){
 			graphTypeEnv = ge;
 			for(GraphType gk:GraphType.KERNEL_TYPES){
 				graphTypeKer = gk;
 				System.out.println("env:"+ge+" ker :"+gk);
-				debug();
+				smallTrees();
 			}
 		}
 	}

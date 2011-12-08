@@ -67,7 +67,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKLoops(GraphVar graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR, false);
+		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();

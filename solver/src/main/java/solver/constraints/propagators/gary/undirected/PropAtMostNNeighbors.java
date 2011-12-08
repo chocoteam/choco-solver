@@ -47,127 +47,124 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  * @param <V>
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V> {
+public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private UndirectedGraphVar g;
-    private IntProcedure enf_proc;
-    private int n_neighbors;
+	private UndirectedGraphVar g;
+	private IntProcedure enf_proc;
+	private int n_neighbors;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint,
-                                PropagatorPriority priority, boolean reactOnPromotion, int nNeigh) {
+	public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nNeigh) {
 
-        super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, priority, reactOnPromotion);
-        g = graph;
-        n_neighbors = nNeigh;
-        final PropAtMostNNeighbors<V> instance = this;
-        if (n_neighbors == 1) {
-            enf_proc = new IntProcedure() {
-                @Override
-                public void execute(int i) throws ContradictionException {
-                    int n = g.getEnvelopGraph().getNbNodes();
-                    if (i >= n) {
-                        int from = i / n - 1;
-                        int to = i % n;
-                        prune(from, to);
-                        prune(to, from);
-                    } else {
-                        throw new UnsupportedOperationException();
-                    }
-                }
+		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		n_neighbors = nNeigh;
+		final PropAtMostNNeighbors<V> instance = this;
+		if (n_neighbors==1){
+			enf_proc = new IntProcedure() {
+				@Override
+				public void execute(int i) throws ContradictionException {
+					int n = g.getEnvelopGraph().getNbNodes();
+					if (i>=n){
+						int from = i/n-1;
+						int to   = i%n;
+						prune(from,to);
+						prune(to,from);
+					}else{
+						throw new UnsupportedOperationException();
+					}
+				}
+				private void prune(int from, int mate) throws ContradictionException{
+					INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
+					for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
+						if (mate!=to){
+							g.removeArc(from, to, instance, false);
+						}
+					}
+				}
+			};
+		}else{
+			enf_proc = new IntProcedure() {
+				@Override
+				public void execute(int i) throws ContradictionException {
+					int n = g.getEnvelopGraph().getNbNodes();
+					if (i>=n){
+						int from = i/n-1;
+						int to   = i%n;
+						prune(from);
+						prune(to);
+					}else{
+						throw new UnsupportedOperationException();
+					}
+				}
+				private void prune(int from) throws ContradictionException{
+					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors &&
+					   g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
+						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
+						for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
+							if (!g.getKernelGraph().edgeExists(from, to)){
+								g.removeArc(from, to, instance, false);
+							}
+						}
+					}
+				}
+			};
+		}
+	}
 
-                private void prune(int from, int mate) throws ContradictionException {
-                    INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-                    for (int to = succs.getFirstElement(); to >= 0; to = succs.getNextElement()) {
-                        if (mate != to) {
-                            g.removeArc(from, to, instance, false);
-                        }
-                    }
-                }
-            };
-        } else {
-            enf_proc = new IntProcedure() {
-                @Override
-                public void execute(int i) throws ContradictionException {
-                    int n = g.getEnvelopGraph().getNbNodes();
-                    if (i >= n) {
-                        int from = i / n - 1;
-                        int to = i % n;
-                        prune(from);
-                        prune(to);
-                    } else {
-                        throw new UnsupportedOperationException();
-                    }
-                }
+	//***********************************************************************************
+	// PROPAGATIONS
+	//***********************************************************************************
 
-                private void prune(int from) throws ContradictionException {
-                    if (g.getKernelGraph().getNeighborsOf(from).neighborhoodSize() == n_neighbors &&
-                            g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize() > n_neighbors) {
-                        INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-                        for (int to = succs.getFirstElement(); to >= 0; to = succs.getNextElement()) {
-                            if (!g.getKernelGraph().edgeExists(from, to)) {
-                                g.removeArc(from, to, instance, false);
-                            }
-                        }
-                    }
-                }
-            };
-        }
-    }
-
-    //***********************************************************************************
-    // PROPAGATIONS
-    //***********************************************************************************
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-        int next;
-        INeighbors nei;
-        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
-            nei = g.getEnvelopGraph().getNeighborsOf(node);
-            if (g.getKernelGraph().getNeighborsOf(node).neighborhoodSize() == n_neighbors && nei.neighborhoodSize() > n_neighbors) {
-                for (next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()) {
-                    if (!g.getKernelGraph().edgeExists(node, next)) {
-                        g.removeArc(node, next, this, false);
-                    }
-                }
-            }
-        }
-    }
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		int next;
+		INeighbors nei;
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			nei = g.getEnvelopGraph().getNeighborsOf(node); 
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && nei.neighborhoodSize()>n_neighbors){
+				for(next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
+					if (!g.getKernelGraph().edgeExists(node, next)){
+						g.removeArc(node, next, this, false);
+					}
+				}
+			}
+		}
+	}
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        eventRecorder.getDeltaMonitor(g).forEach(enf_proc, EventType.ENFORCEARC);
-    }
+		eventRecorder.getDeltaMonitor(g).forEach(enf_proc, EventType.ENFORCEARC);
+	}
 
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ENFORCEARC.mask;
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.ENFORCEARC.mask;
+	}
 
-    @Override
-    public ESat isEntailed() {
-        IActiveNodes act = g.getKernelGraph().getActiveNodes();
-        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
-            if (g.getKernelGraph().getNeighborsOf(node).neighborhoodSize() > n_neighbors) {
-                return ESat.FALSE;
-            }
-        }
-        if (g.instantiated()) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
-    }
+	@Override
+	public ESat isEntailed() {
+		IActiveNodes act = g.getKernelGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
+				return ESat.FALSE;
+			}
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}return ESat.UNDEFINED;
+	}
 }

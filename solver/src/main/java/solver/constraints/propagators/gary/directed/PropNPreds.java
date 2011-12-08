@@ -65,7 +65,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
     //***********************************************************************************
 
     public PropNPreds(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds, INeighbors concernedNodes) {
-        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR, false);
+        super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
         this.g = graph;
         this.concernedNodes = concernedNodes;
         this.nPreds = nbPreds;
@@ -78,6 +78,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
+
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -99,6 +100,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+
         if ((mask & EventType.REMOVEARC.mask) != 0) {
             eventRecorder.getDeltaMonitor(g).forEach(remArc, EventType.REMOVEARC);
         }
@@ -108,7 +110,6 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
         if ((mask & EventType.ENFORCENODE.mask) != 0) {
             eventRecorder.getDeltaMonitor(g).forEach(enfNode, EventType.ENFORCENODE);
         }
-
     }
 
     @Override

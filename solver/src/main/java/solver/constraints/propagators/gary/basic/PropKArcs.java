@@ -64,15 +64,15 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
     //***********************************************************************************
 
     public PropKArcs(G graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-        super((V[]) new Variable[]{graph, k}, sol, constraint, PropagatorPriority.LINEAR, false);
-        g = graph;
-        this.k = k;
-        n = g.getEnvelopGraph().getNbNodes();
-        nbInEnv = environment.makeInt();
-        nbInKer = environment.makeInt();
-        arcEnforced = new EnfArc();
-        arcRemoved = new RemArc();
-    }
+		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
+		g = graph;
+		this.k = k;
+		n = g.getEnvelopGraph().getNbNodes();
+		nbInEnv = environment.makeInt();
+		nbInKer = environment.makeInt();
+		arcEnforced = new EnfArc();
+		arcRemoved  = new RemArc();
+	}
 
     //***********************************************************************************
     // PROPAGATIONS
@@ -88,7 +88,6 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
             if ((mask & EventType.REMOVEARC.mask) != 0) {
                 eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
             }
-
             k.updateLowerBound(nbInKer.get(), this, false);
             k.updateUpperBound(nbInEnv.get(), this, false);
         }

@@ -25,48 +25,72 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.directed;
+package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.requests.IRequest;
 import solver.variables.EventType;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.graphOperations.connectivity.*;
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**
- * @param <V>
- * @author Jean-Guillaume Fages
- *         <p/>
- *         Ensures that the final graph is antisymmetric
- */
-public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V>{
+ * Arborescence constraint (simplification from tree constraint)
+ * based on dominators
+ * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
+ * but very efficient in practice
+ * */
+public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	// flow graph
 	DirectedGraphVar g;
-	EnfProc enf;
+	// source that reaches other nodes
+	int source;
+	// number of nodes
+	int n;
+	// dominators finder that contains the dominator tree
+	AbstractLengauerTarjanDominatorsFinder domFinder;
+	INeighbors[] successors;
+	// check reachability
+	LinkedList<Integer> list;
+	BitSet visited;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAntiSymmetric(
-			V graph,
-			Solver solver,
-			Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
+	/**Ensures that graph is an arborescence rooted in node source
+	 * @param graph
+	 * @param source root of the arborescence
+	 * @param constraint
+	 * @param solver
+	 * */
+	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
-		enf = new EnfProc(this);
+		n = g.getEnvelopGraph().getNbNodes();
+		this.source = source;
+		successors = new INeighbors[n];
+		list = new LinkedList<Integer>();
+		visited = new BitSet(n);
+		if(simple){
+			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
+		}else{
+			domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
+		}
 	}
 
 	//***********************************************************************************
@@ -74,69 +98,53 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	//***********************************************************************************
 
 	@Override
-    public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				g.removeArc(j, i, this, false);
+	public void propagate() throws ContradictionException {
+		for(int i=0;i<n;i++){
+			g.enforceNode(i,this,false);
+			g.removeArc(i,i,this,false);
+			g.removeArc(i,source,this,false);
+		}
+		structuralPruning();
+	}
+
+	@Override
+	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+		structuralPruning();
+	}
+
+	private void structuralPruning() throws ContradictionException {
+		if(domFinder.findDominators()){
+			INeighbors nei;
+			for (int x=0; x<n; x++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(x);
+				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
+					//--- STANDART PRUNING
+					if(domFinder.isDomminatedBy(x,y)){
+						g.removeArc(x,y,this,false);
+					}
+					// ENFORCE ARC-DOMINATORS (redondant)
+				}
 			}
+		}else{
+			contradiction(g,"the source cannot reach all nodes");
 		}
 	}
 
 	@Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-			if ((mask & EventType.ENFORCEARC.mask) != 0){
-            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
-			}
-		}
-
-	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				if(g.getKernelGraph().arcExists(j, i)){
-					return ESat.FALSE;
-				}
+		if(isCompletelyInstantiated()){
+			try{
+				structuralPruning();
+			}catch (Exception e){
+				return ESat.FALSE;
 			}
+			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
-	}
-
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
-	/** Enable to remove the opposite arc */
-	private static class EnfProc implements IntProcedure {
-
-		private final PropAntiSymmetric p;
-
-		public EnfProc(PropAntiSymmetric p) {
-			this.p = p;
-		}
-
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>=n){
-				int from = i/n-1;
-				int to   = i%n;
-				if(from!=to){
-					p.g.removeArc(to, from, p, false);
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
 	}
 }

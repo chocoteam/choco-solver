@@ -64,8 +64,8 @@ public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph, Solver solver, Constraint mixtedAllDiff, PropagatorPriority storeThreshold, TIntIntHashMap vH) {
-        super((V[]) ArrayUtils.append(vars, new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, false);
+    public PropGraphAllDiffBC(IntVar[] vars, UndirectedGraphVar graph, Solver solver, Constraint mixtedAllDiff, TIntIntHashMap vH) {
+        super((V[]) ArrayUtils.append(vars, new Variable[]{graph}), solver, mixtedAllDiff, PropagatorPriority.LINEAR);
         g = graph;
         intVars = vars;
         this.valuesHash = vH;

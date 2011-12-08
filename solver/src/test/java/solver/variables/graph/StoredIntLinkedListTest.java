@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.adjacencyLlist;
+package solver.variables.graph;
 
 import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;

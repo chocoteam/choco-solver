@@ -123,7 +123,6 @@ public class StrongConnectivityFinder {
 		//initialization
 		int stackIdx= 0;
 		INeighbors[] successors = new INeighbors[nb];
-		BitSet notFirsts = new BitSet(nb);
 		for(int m=0;m<nb;m++){
 			inf[m] = nb+2;
 		}	
@@ -138,13 +137,14 @@ public class StrongConnectivityFinder {
 		int j = 0;
 		// algo
 		boolean notFinished = true;
+		boolean first = true;
 		while(notFinished){
-			if(notFirsts.get(i)){
-				j = successors[i].getNextElement();
-			}else{
+			if(first){
 				j = successors[i].getFirstElement();
-				notFirsts.set(i);
+			}else{
+				j = successors[i].getNextElement();
 			}
+			first = false;
 			if(j>=0){
 				if(restriction.get(j)){
 					if (dfsNumOfNode[j]==0 && j!=start) {
@@ -153,6 +153,7 @@ public class StrongConnectivityFinder {
 						dfsNumOfNode[j] = k;
 						p[k] = i;
 						i = k;
+						first = true;
 						successors[i] = graph.getSuccessorsOf(j);
 						stack[stackIdx++] = i;
 						inStack.set(i);

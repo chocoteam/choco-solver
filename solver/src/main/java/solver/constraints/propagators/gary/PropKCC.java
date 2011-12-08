@@ -74,7 +74,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKCC(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.VERY_SLOW, false);//
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.VERY_SLOW);//
 		g = graph;
 		this.k = k;
 		initDataStructure();

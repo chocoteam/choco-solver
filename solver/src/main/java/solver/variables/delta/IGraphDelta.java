@@ -37,4 +37,5 @@ public interface IGraphDelta extends IDelta {
     IntDelta getArcRemovalDelta();
 
     IntDelta getArcEnforcingDelta();
+
 }

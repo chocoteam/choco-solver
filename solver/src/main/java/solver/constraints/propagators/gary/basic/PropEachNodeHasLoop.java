@@ -61,7 +61,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
     //***********************************************************************************
 
     public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
-        super((GraphVar[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY, false);
+        super((GraphVar[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
         this.g = graph;
         this.enfNode = new NodeEnf(this);
         this.remArc = new ArcRem(this);
@@ -76,6 +76,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
     //***********************************************************************************
     // PROPAGATIONS
     //***********************************************************************************
+
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {

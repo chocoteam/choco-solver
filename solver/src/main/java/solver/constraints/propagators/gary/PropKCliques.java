@@ -60,7 +60,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKCliques(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR, false);//
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);//
 		g = graph;
 		this.k = k;
 	}

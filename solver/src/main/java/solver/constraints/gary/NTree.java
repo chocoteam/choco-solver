@@ -83,9 +83,9 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver, PropagatorPriority storeThreshold) {
 		super((V[]) new Variable[]{graph,nTree}, solver);
 		setPropagators(
-				new PropNSuccs(graph, solver, this, storeThreshold, true, 1),
-				new PropNLoopsTree(graph, nTree, solver, this, storeThreshold, true),
-				new PropNTree(graph, nTree,solver,this, storeThreshold,true));
+				new PropNSuccs(graph, solver, this, 1),
+				new PropNLoopsTree(graph, nTree, solver, this),
+				new PropNTree(graph, nTree,solver,this));
 		this.g = graph;
 		this.nTree = nTree;
 	}

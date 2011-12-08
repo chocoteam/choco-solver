@@ -36,10 +36,6 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.PropKCC;
-import solver.constraints.propagators.gary.PropKCliques;
-import solver.constraints.propagators.gary.PropRelation;
-import solver.constraints.propagators.gary.PropTransitivity;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -47,11 +43,11 @@ import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+/** Graph based AtMostNValue sample */
 public class NVector extends AbstractProblem{
 
 	//***********************************************************************************
@@ -71,11 +67,17 @@ public class NVector extends AbstractProblem{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	
 	public NVector(int n, int k, int d, int[][][] b) {
 		this.n = n;
 		this.d = d;
 		this.k = k;
+		boxes = b;
+		System.out.println(n+" : "+k);
+	}
+	public NVector(int n, int d, int[][][] b) {
+		this.n = n;
+		this.d = d;
+		this.k=-1;
 		boxes = b;
 		System.out.println(n+" : "+k);
 	}
@@ -85,7 +87,7 @@ public class NVector extends AbstractProblem{
 	//***********************************************************************************
 
 	@Override
-	public void buildModel() { 
+	public void buildModel() {
 		solver = new Solver();
 		vectors = new MetaVariable[n];
 		vars  	= new IntVar[n*d];
@@ -104,8 +106,12 @@ public class NVector extends AbstractProblem{
 			meta[i] = new MetaVarConstraint(components, vectors[i], solver);
 		}
 		IntVar nv = VariableFactory.enumerated("n", n,n , solver);
-		nVect = VariableFactory.bounded("N_CC", k,k, solver);
-		GraphConstraint gc = GraphConstraintFactory.nVectors(vectors, nVect, solver, PropagatorPriority.LINEAR);
+		if(k>=0){
+			nVect = VariableFactory.bounded("N_CC", k,k, solver);
+		}else{
+			nVect = VariableFactory.bounded("N_CC", 1,n, solver);
+		}
+		GraphConstraint gc = GraphConstraintFactory.nVectors(vectors, nVect, solver);
 		g = (UndirectedGraphVar) gc.getGraph();
 		gc.addProperty(GraphProperty.K_LOOPS, nv);
 		gc.addProperty(GraphProperty.K_NODES, nv);
@@ -115,37 +121,33 @@ public class NVector extends AbstractProblem{
 
 	@Override
 	public void configureSolver() {
-		AbstractStrategy strategy = StrategyFactory.graphLexico(g); 
+		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		solver.set(strategy);
+		// TODO : ajouter goal sur les variables restantes
 	}
 
 	@Override
 	public void solve() {
 		System.out.println("resolution");
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(100000);
+		solver.getSearchLoop().getLimitsBox().setTimeLimit(10000);
 		SearchMonitorFactory.log(solver, false, false);
-//		Boolean status = solver.findSolution();
 		Boolean status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nVect);
 	}
 
 	@Override
 	public void prettyOut() {
 		System.out.println("nVect : "+nVect);
-		System.out.println("KCC time "+PropKCC.duration);
-		System.out.println("KCl time "+PropKCliques.duration);
-		System.out.println("rel time "+PropRelation.duration);
-		System.out.println("trans time "+PropTransitivity.duration);
 	}
 
 	//***********************************************************************************
 	// MAIN
 	//***********************************************************************************
-	
-	private static IntVar bounded(String name, int min, int max, Solver solver) {
-        return VariableFactory.bounded(name, min, max, solver);
-    }
-	
+
 	public static void main(String[] args) {
+		fromData1();
+	}
+
+	public static void fromFile() {
 		File file = new File("box_set.csv");
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
@@ -172,23 +174,34 @@ public class NVector extends AbstractProblem{
 			e.printStackTrace();
 		}
 	}
-	
+
 	//******************//
-	// AD HOC ATSP //
+	// AD HOC instances //
 	//******************//
-	
-	// dim = 2
-	
-//	vars[0] = bounded("v"+0+","+0, 1,6, solver);
-//	vars[1] = bounded("v"+0+","+1, 2,7, solver);
-//	vars[2] = bounded("v"+1+","+0, 2,5, solver);
-//	vars[3] = bounded("v"+1+","+1, 5,9, solver);
-//	vars[4] = bounded("v"+2+","+0, 3,10, solver);
-//	vars[5] = bounded("v"+2+","+1, 1,4, solver);
-//	vars[6] = bounded("v"+3+","+0, 4,11, solver);
-//	vars[7] = bounded("v"+3+","+1, 3,8, solver);
-//	vars[8] = bounded("v"+4+","+0, 9,12, solver);
-//	vars[9] = bounded("v"+4+","+1, 0,7, solver);
+
+	public static void fromData1() {
+		int n = 5;
+		int d = 2;
+		int[][][] boxes = new int[n][d][2];
+		// box         inf;sup
+		boxes[0][0][0] = 1; boxes[0][0][1] = 6;
+		boxes[0][1][0] = 2; boxes[0][1][1] = 7;
+		// box
+		boxes[1][0][0] = 2; boxes[1][0][1] = 5;
+		boxes[1][1][0] = 5; boxes[1][1][1] = 9;
+		// box
+		boxes[2][0][0] = 3; boxes[2][0][1] = 10;
+		boxes[2][1][0] = 1; boxes[2][1][1] = 4;
+		// box
+		boxes[3][0][0] = 4; boxes[3][0][1] = 11;
+		boxes[3][1][0] = 3; boxes[3][1][1] = 8;
+		// box
+		boxes[4][0][0] = 9; boxes[4][0][1] = 12;
+		boxes[4][1][0] = 0; boxes[4][1][1] = 7;
+		// run
+		NVector nc = new NVector(n,d,boxes);
+		nc.execute();
+	}
 	
 //	vars[0] = bounded("v"+0+","+0, 10,30, solver);
 //	vars[1] = bounded("v"+0+","+1, 0,20, solver);

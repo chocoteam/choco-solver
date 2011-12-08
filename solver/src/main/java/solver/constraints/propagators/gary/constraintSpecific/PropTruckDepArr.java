@@ -62,7 +62,7 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 
 	public PropTruckDepArr(DirectedGraphVar graph, IntVar nbt,
 			Solver sol,	Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new Variable[]{graph,nbt}, sol, constraint, PropagatorPriority.UNARY, false);
+		super((V[]) new Variable[]{graph,nbt}, sol, constraint, PropagatorPriority.UNARY);
 		g = graph;
 		nbtrucks = nbt;
 		nbMaxTrucks = nbt.getUB();

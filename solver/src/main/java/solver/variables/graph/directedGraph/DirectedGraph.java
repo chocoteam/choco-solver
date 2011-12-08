@@ -31,16 +31,14 @@ import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.adjacencyList.CompositeList;
-import solver.variables.graph.graphStructure.adjacencyList.EnvelopeIntLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
+import solver.variables.graph.graphStructure.adjacencyList.*;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
- * Date: 9 fŽvr. 2011
+ * Date: 9 fï¿½vr. 2011
  *
  * *
  * Specific implementation of a directed graph
@@ -64,40 +62,54 @@ public class DirectedGraph implements IDirectedGraph {
 	public DirectedGraph(int nbits, GraphType type) {
 		this.type = type;
 		switch (type) {
-		case COMPOSITE:
-			this.successors = new CompositeList[nbits];
-			this.predecessors = new CompositeList[nbits];
-			for (int i = 0; i < nbits; i++) {
-				this.successors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
-				this.predecessors[i] = new CompositeList(new IntLinkedList(), new BitSetNeighbors(nbits));
-			}
-			break;
-		case ENVELOPE_LINKEDLIST: // Not efficient
-//			this.successors = new EnvelopeIntLinkedList[nbits];
-//			this.predecessors = new EnvelopeIntLinkedList[nbits];
-//			for (int i = 0; i < nbits; i++) {
-//				this.successors[i] = new EnvelopeIntLinkedList(nbits);
-//				this.predecessors[i] = new EnvelopeIntLinkedList(nbits);
-//			}
-//			break;
-		case LINKED_LIST:
-			this.successors = new IntLinkedList[nbits];
-			this.predecessors = new IntLinkedList[nbits];
-			for (int i = 0; i < nbits; i++) {
-				this.successors[i] = new IntLinkedList();
-				this.predecessors[i] = new IntLinkedList();
-			}
-			break;
-		case MATRIX:
-			this.successors = new BitSetNeighbors[nbits];
-			this.predecessors = new BitSetNeighbors[nbits];
-			for (int i = 0; i < nbits; i++) {
-				this.successors[i] = new BitSetNeighbors(nbits);
-				this.predecessors[i] = new BitSetNeighbors(nbits);
-			}
-			break;
-		default:
-			throw new UnsupportedOperationException();
+			// ARRAY SWAP
+			case ENVELOPE_SWAP_ARRAY:
+			case KERNEL_SWAP_ARRAY:
+			case SWAP_ARRAY:
+				this.successors = new ArraySwapList_Array[nbits];
+				this.predecessors = new ArraySwapList_Array[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new ArraySwapList_Array(nbits);
+					this.predecessors[i] = new ArraySwapList_Array(nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+			case KERNEL_SWAP_HASH:
+			case SWAP_HASH:
+				this.successors = new ArraySwapList_HashMap[nbits];
+				this.predecessors = new ArraySwapList_HashMap[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new ArraySwapList_HashMap(nbits);
+					this.predecessors[i] = new ArraySwapList_HashMap(nbits);
+				}
+				break;
+			// LINKED LISTS
+			case DOUBLE_LINKED_LIST:
+				this.successors = new IntDoubleLinkedList[nbits];
+				this.predecessors = new IntDoubleLinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new IntDoubleLinkedList();
+					this.predecessors[i] = new IntDoubleLinkedList();
+				}
+				break;
+			case LINKED_LIST:
+				this.successors = new IntLinkedList[nbits];
+				this.predecessors = new IntLinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new IntLinkedList();
+					this.predecessors[i] = new IntLinkedList();
+				}
+				break;
+			case MATRIX:
+				this.successors = new BitSetNeighbors[nbits];
+				this.predecessors = new BitSetNeighbors[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.successors[i] = new BitSetNeighbors(nbits);
+					this.predecessors[i] = new BitSetNeighbors(nbits);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException();
 		}
 		this.activeIdx = new ActiveNodes(nbits);
 		for (int i = 0; i < nbits; i++) {
@@ -242,6 +254,9 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addArc(int from, int to) {
+//		System.out.println(from+" - "+to);
+//		System.out.println(successors[from]+" mm "+predecessors[to]);
+//		System.out.println(successors[from].contain(to)+" and "+predecessors[to].contain(from));
 		if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))){
 			successors[from].add(to);
 			predecessors[to].add(from);

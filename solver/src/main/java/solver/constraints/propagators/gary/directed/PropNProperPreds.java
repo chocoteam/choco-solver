@@ -71,7 +71,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 			V graph,
 			Solver solver,
 			Constraint<V, Propagator<V>> constraint, IntVar nbPreds) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, true);
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
 		nPreds = nbPreds;
 		rem = new RemProc(this);

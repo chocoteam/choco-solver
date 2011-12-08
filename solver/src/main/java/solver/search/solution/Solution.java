@@ -88,7 +88,7 @@ public class Solution implements ICause {
             	if(!vars[i].instantiated()){
             		System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
             		System.out.println(((GraphVar) vars[i]).getKernelGraph());
-            		throw new UnsupportedOperationException("error ");
+            		throw new UnsupportedOperationException("solution graph not instantiated");
             	}
             	graphValues.add(((GraphVar) vars[i]).getValue());break;
             }
@@ -105,12 +105,16 @@ public class Solution implements ICause {
             	switch(vars[i].getType()){
                 case Variable.INTEGER : 
                 	((IntVar) vars[i]).instantiateTo(intvalues[i], this, false);break;
-                case Variable.GRAPH : 
-                	((GraphVar) vars[i]).instantiateTo(graphValues.get(nbGV++), this);break;
+                case Variable.GRAPH :
+					boolean[][] gv = graphValues.get(nbGV);
+                	((GraphVar) vars[i]).instantiateTo(gv, this);
+					nbGV++;
+					break;
                 }
                 
             }
         } catch (ContradictionException ex) {
+			ex.printStackTrace();
             LoggerFactory.getLogger("solver").error("BUG in restoring solution !!");
             throw new SolverException("Restored solution not consistent !!");
         }

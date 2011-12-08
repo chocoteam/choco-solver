@@ -70,8 +70,8 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph, Solver solver, Constraint mixtedAllDiff, PropagatorPriority storeThreshold, boolean b, int[] v, TIntIntHashMap vH) {
-        super((V[]) ArrayUtils.append(vars, new Variable[]{graph}), solver, mixtedAllDiff, storeThreshold, b);
+    public PropIntVarsGraphChanneling(IntVar[] vars, UndirectedGraphVar graph, Solver solver, Constraint mixtedAllDiff, int[] v, TIntIntHashMap vH) {
+        super((V[]) ArrayUtils.append(vars, new Variable[]{graph}), solver, mixtedAllDiff, PropagatorPriority.QUADRATIC);
         g = graph;
         intVars = vars;
         this.values = v;
@@ -87,6 +87,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     //***********************************************************************************
     // PROPAGATIONS
     //***********************************************************************************
+
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -108,13 +109,13 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
+        Variable variable = vars[idxVarInProp];
+        if (variable.getType() == Variable.GRAPH) {
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(var).forEach(arcEnforced, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(var).forEach(arcRemoved, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
             }
         } else {
             if (EventType.anInstantiationEvent(mask)) {
@@ -122,7 +123,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             }
             if ((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) != 0) {
                 valRemoved.set(idxVarInProp);
-                eventRecorder.getDeltaMonitor(var).forEach(valRemoved, EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(variable).forEach(valRemoved, EventType.REMOVE);
             }
         }
     }
