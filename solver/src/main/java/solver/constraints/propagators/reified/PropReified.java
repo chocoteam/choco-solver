@@ -34,7 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -73,11 +73,9 @@ public class PropReified extends Propagator<Variable> {
 
         for (int i = 0; i < left.length; i++) {
             left[i].setActive();
-            left[i].unlinkVariables();
         }
         for (int i = 0; i < right.length; i++) {
             right[i].setActive();
-            right[i].unlinkVariables();
         }
     }
 
@@ -87,7 +85,7 @@ public class PropReified extends Propagator<Variable> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<Variable> variableIFineRequest, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         filter();
     }
 

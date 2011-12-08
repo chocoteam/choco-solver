@@ -53,7 +53,7 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition request, EventType event) {
+    void update(ArcEventRecorderWithCondition recorder, EventType event) {
 //        if (EventType.isRemove(evtMask)) {
         /*int last = request.getLast();
         try {

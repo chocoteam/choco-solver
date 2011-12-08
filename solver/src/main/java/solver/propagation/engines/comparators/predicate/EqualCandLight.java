@@ -26,9 +26,8 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 /**
  * <br/>
@@ -45,23 +44,23 @@ public class EqualCandLight implements Predicate {
         this.cstr = cstr;
     }
 
-    public boolean eval(IRequest request) {
-        return this.cstr == request.getPropagator().getConstraint() && request.getVariable() != null;
+    public boolean eval(IEventRecorder evtrec) {
+        return false;// this.cstr == evtrec.getPropagator().getConstraint() && evtrec.getVariable() != null;
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < cstr.propagators.length; j++) {
                 //-1 is the big request, so we can skip it easily
-                for (int k = 0; k < cstr.propagators[j].nbRequests(); k++) {
-                    IRequest r = cstr.propagators[j].getRequest(k);
+                for (int k = 0; k < cstr.propagators[j].nbRecorders(); k++) {
+                    IRequest r = cstr.propagators[j].getRecorder(k);
                     tmp.add(r.getIndex(IRequest.IN_GROUP));
                 }
             }
             cached = tmp.toArray();
-        }
+        }*/
         return cached;
     }
 

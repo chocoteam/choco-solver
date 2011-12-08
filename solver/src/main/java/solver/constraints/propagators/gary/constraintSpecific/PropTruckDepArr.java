@@ -35,12 +35,10 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -88,16 +86,15 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
 			if ((mask & EventType.ENFORCENODE.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-				d.forEach(enforceProc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
+				eventRecorder.getDeltaMonitor(var).forEach(enforceProc, EventType.ENFORCENODE);
 			}
 			if ((mask & EventType.REMOVENODE.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeRemovalDelta();
-				d.forEach(removeProc, gv.fromNodeRemoval(), gv.toNodeRemoval());
+                eventRecorder.getDeltaMonitor(var).forEach(removeProc, EventType.REMOVENODE);
 			}
 		}else{
 			if ((mask & EventType.DECUPP.mask) != 0){

@@ -27,7 +27,7 @@
 
 package choco.kernel.common.util.tools;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 
 import java.util.*;
 
@@ -283,22 +283,6 @@ public enum ArrayUtils {
         return ret;
     }
 
-    /**
-     * create a new array which contains sorted distinct values;
-     *
-     * @param values
-     * @return
-     */
-    public static int[] getNonRedundantSortedValues(int[] values) {
-        return createNonRedundantSortedValues(new TIntArrayList(values));
-    }
-
-    /**
-     * create an array which contains sorted distinct values. do not modify the original list
-     */
-    public static int[] getNonRedundantSortedValues(TIntArrayList values) {
-        return createNonRedundantSortedValues((TIntArrayList) values.clone());
-    }
 
     public static int[] createNonRedundantSortedValues(TIntArrayList values) {
         values.sort();
@@ -312,7 +296,7 @@ public enum ArrayUtils {
             }
             offset++;
         }
-        return values.toNativeArray();
+        return values.toArray();
     }
 
 

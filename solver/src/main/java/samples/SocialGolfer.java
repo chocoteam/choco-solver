@@ -32,12 +32,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.Lex;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -151,7 +145,7 @@ public class SocialGolfer extends AbstractProblem {
     public void configureSolver() {
         BoolVar[] vars = ArrayUtils.flatten(P);
         solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         engine.setDeal(IPropagationEngine.Deal.QUEUE);
         Predicate inVARS = Predicates.member(vars);
         Predicate ALL = Predicates.all();
@@ -168,7 +162,7 @@ public class SocialGolfer extends AbstractProblem {
                         new IncrOrderV(vars),
                         Policy.FIXPOINT
                 )
-        );
+        );*/
 
     }
 

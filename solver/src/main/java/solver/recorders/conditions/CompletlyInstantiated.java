@@ -34,7 +34,7 @@ import solver.variables.EventType;
 
 /**
  * A simple condition based on number of instantiated variables.
- * Requests are posted when each variable is instantiated.
+ * Recorder are scheduled on variable instantiation.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -62,15 +62,15 @@ public class CompletlyInstantiated extends AbstractCondition{
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition request, EventType event) {
+    void update(ArcEventRecorderWithCondition recorder, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             nbVarInstantiated.add(1);
         }
     }
 
     @Override
-    public void linkRequest(ArcEventRecorderWithCondition request) {
-        super.linkRequest(request);
+    public void linkRecorder(ArcEventRecorderWithCondition recorder) {
+        super.linkRecorder(recorder);
         /*if (request.getVariable().instantiated()) {
             nbVarInstantiated.add(1);
         }*/

@@ -44,11 +44,16 @@ public final class NoDelta implements IntDelta {
     }
 
     @Override
+    public IDeltaMonitor getMonitor() {
+        return IDeltaMonitor.Default.NONE;
+    }
+
+    @Override
     public void add(int value) {
     }
 
     @Override
-    public int get(int idx){
+    public int get(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
 

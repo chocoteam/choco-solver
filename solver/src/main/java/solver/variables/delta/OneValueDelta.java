@@ -30,6 +30,7 @@ package solver.variables.delta;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
+import solver.variables.delta.monitor.OneIntDeltaMonitor;
 
 /**
  * <br/>
@@ -45,11 +46,16 @@ public final class OneValueDelta implements IntDelta {
     int timestamp = -1;
 
 
-    protected void lazyClear(){
-        if(timestamp - AbstractSearchLoop.timeStamp != 0){
+    protected void lazyClear() {
+        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
             set = false;
             timestamp = AbstractSearchLoop.timeStamp;
         }
+    }
+
+    @Override
+    public IDeltaMonitor<IntDelta> getMonitor() {
+        return new OneIntDeltaMonitor(this);
     }
 
     @Override
@@ -60,10 +66,10 @@ public final class OneValueDelta implements IntDelta {
     }
 
     @Override
-    public int get(int idx){
-        if(idx < 1){
+    public int get(int idx) {
+        if (idx < 1) {
             return value;
-        }else{
+        } else {
             throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
         }
     }
@@ -78,6 +84,5 @@ public final class OneValueDelta implements IntDelta {
         if (to == 1) {
             proc.execute(value);
         }
-        //throw new UnsupportedOperationException();
     }
 }

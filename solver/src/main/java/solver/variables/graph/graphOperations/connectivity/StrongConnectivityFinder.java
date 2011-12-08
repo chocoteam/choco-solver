@@ -27,7 +27,7 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.BitSet;
 import solver.variables.graph.GraphType;

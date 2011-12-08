@@ -27,10 +27,8 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 
 public class EqualC implements Predicate {
@@ -41,24 +39,24 @@ public class EqualC implements Predicate {
         this.cstr = cstr;
     }
 
-    public boolean eval(IRequest request) {
-        return this.cstr == request.getPropagator().getConstraint();
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//this.cstr == evtrec.getPropagator().getConstraint();
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < cstr.propagators.length; j++) {
                 Propagator p = cstr.propagators[j];
-                for (int k = 0; k < p.nbRequests(); k++) {
-                    tmp.add(cstr.propagators[j].getRequest(k).getIndex(IRequest.IN_GROUP));
+                for (int k = 0; k < p.nbRecorders(); k++) {
+                    tmp.add(cstr.propagators[j].getRecorder(k).getIndex(IRequest.IN_GROUP));
                 }
                 //-1 is the PropRequest in a propagator
-                tmp.add(p.getRequest(-1).getIndex(IRequest.IN_GROUP));
+                tmp.add(p.getRecorder(-1).getIndex(IRequest.IN_GROUP));
             }
             cached = tmp.toArray();
-        }
+        }*/
         return cached;
     }
 

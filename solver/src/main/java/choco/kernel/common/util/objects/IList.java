@@ -27,27 +27,28 @@
 
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.procedure.Procedure;
 import solver.exception.ContradictionException;
+import solver.variables.IVariableMonitor;
+import solver.variables.Variable;
 
 import java.io.Serializable;
 
 /**
- *
  * A IList is a container of elements.
  * An element in this list has particular behavior: it can change of state (from active to passive),
  * this container must consider this information.
- * Restoring the previous state of requests must be done upon backtracking.
+ * Restoring the previous state of elements must be done upon backtracking.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public interface IList<E extends MultiDimensionIndex> extends Serializable{
+public interface IList<V extends Variable, E extends IVariableMonitor<V>> extends Serializable {
 
     /**
-     * Add a new <code>request</code>
+     * Add a new <code>element</code>
+     *
      * @param element to add
      * @param dynamic
      */
@@ -55,36 +56,41 @@ public interface IList<E extends MultiDimensionIndex> extends Serializable{
 
     /**
      * Activate a element
+     *
      * @param element the modified element
      */
     void setActive(E element);
 
     /**
-     * Desactivate a request
+     * Desactivate a element
+     *
      * @param element the modified element
      */
     void setPassive(E element);
 
     /**
-     * Permanently delete <code>request</code>
+     * Permanently delete <code>element</code>
+     *
      * @param element to delete
      */
     void remove(E element);
 
     /**
      * Returns the total number of element contained.
+     *
      * @return the total number of element contained.
      */
     int size();
 
     /**
      * Returns the number of active elements.
+     *
      * @return the number of active elements.
      */
     int cardinality();
 
     /**
-     * This method loops over active requests matching the event to execute the procedure in parameter.
+     * This method loops over active elements matching the event to execute the procedure in parameter.
      */
     void forEach(Procedure proc) throws ContradictionException;
 

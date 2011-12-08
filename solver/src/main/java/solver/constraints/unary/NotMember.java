@@ -28,8 +28,7 @@
 package solver.constraints.unary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntHashSet;
-import solver.Solver;
+import gnu.trove.set.hash.TIntHashSet;import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.unary.PropNotMemberBound;

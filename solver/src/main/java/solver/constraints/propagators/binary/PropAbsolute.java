@@ -34,7 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -78,14 +78,14 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) { // filter from X to Y
             if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
                 updateLowerBoundofY();
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
-                intVarIRequest.forEach(rem_proc.set(idxVarInProp));
+                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
 //                updateHolesinY();
             }
         } else { // filter from Y to X
@@ -98,7 +98,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
-                intVarIRequest.forEach(rem_proc.set(idxVarInProp));
+                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
 //                updateHolesinX();
             }
         }

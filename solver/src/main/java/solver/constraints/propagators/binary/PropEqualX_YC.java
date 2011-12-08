@@ -39,7 +39,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -115,8 +115,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
 
     @Override
-    public void propagateOnRequest
-            (IRequest<IntVar> request, int varIdx,
+    public void propagate
+            (AbstractFineEventRecorder eventRecorder, int varIdx,
              int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
@@ -128,7 +128,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                 this.awakeOnUpp(varIdx);
             }
             if (EventType.isRemove(mask)) {
-                request.forEach(rem_proc.set(varIdx));
+                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
             }
         }
     }

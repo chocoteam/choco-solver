@@ -32,12 +32,9 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.AbstractRequestWithVar;
-import solver.requests.ViewRequestWrapper;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -76,15 +73,6 @@ public final class SqrView extends View<IntVar> {
                 var.getDelta().add(-value);
             }
         };
-    }
-
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //todo : ugly
-        ViewRequestWrapper req = new ViewRequestWrapper((AbstractRequestWithVar)propagator.makeRequest(var, idxInProp),
-                ViewRequestWrapper.Modifier.ABS);
-        propagator.addRequest(req);
-        var.addMonitor(req);
     }
 
     @Override

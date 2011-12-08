@@ -29,8 +29,8 @@ package solver.propagation.engines.comparators.predicate;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TIntHashSet;
-import solver.requests.IRequest;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.recorders.IEventRecorder;
 import solver.variables.Variable;
 
 import java.util.*;
@@ -51,22 +51,23 @@ public class MemberV<V extends Variable> implements Predicate {
         this(ArrayUtils.append((V[]) new Variable[]{vars0}, vars));
     }
 
-    public boolean eval(IRequest request) {
+    public boolean eval(IEventRecorder evtrec) {
         if (s_cons == null) {
             s_cons = new HashSet<V>(Arrays.asList(vars));
         }
-        return this.s_cons.contains(request.getVariable());
+        return false;//this.s_cons.contains(evtrec.getVariable());
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
+    public int[] extract(IEventRecorder[] all) {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < vars.length; i++) {
                 IList rlist = vars[i].getMonitors();
                 for (int k = 0; k < rlist.cardinality(); k++) {
-                    int idx = rlist.get(k).getIndex(IRequest.IN_GROUP);
-                    tmp.add(idx);
+                    /*int idx = rlist.get(k).(IRequest.IN_GROUP);
+                    tmp.add(idx);*/
+                    throw new UnsupportedOperationException("refactor");
                 }
             }
             cached = tmp.toArray();

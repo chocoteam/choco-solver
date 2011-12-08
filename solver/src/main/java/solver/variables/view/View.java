@@ -35,6 +35,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.recorders.fine.IModifier;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
@@ -67,6 +68,19 @@ public abstract class View<IV extends IntVar> implements IntVar {
         this.name = name;
         this.var = var;
         this.solver = solver;
+    }
+
+    public IV getVariable(){
+        return var;
+    }
+
+    /**
+     * Return the modifier, if any, to consider during the event recordre creation.
+     *
+     * @return an event modifier or null, if not required
+     */
+    public IModifier getModifier() {
+        return IModifier.Default.NO;
     }
 
     public int getUniqueID() {
@@ -158,11 +172,6 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public void deletePropagator(Propagator observer) {
-        var.deletePropagator(observer);
-    }
-
-    @Override
     public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
         var.notifyMonitors(event, cause);
     }
@@ -170,11 +179,6 @@ public abstract class View<IV extends IntVar> implements IntVar {
     @Override
     public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
         var.notifyViews(event, cause);
-    }
-
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        var.attachPropagator(propagator, idxInProp);
     }
 
     @Override

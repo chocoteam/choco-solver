@@ -27,14 +27,14 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import gnu.trove.TIntArrayList;
 
-import java.util.BitSet;
-import java.util.LinkedList;
-
+import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
+
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**Class containing algorithms to find all connected components and articulation points of graph by performing one dfs
  * it uses Tarjan algorithm in a non recursive way and can be performed in O(M+N) time c.f. Gondrand Minoux

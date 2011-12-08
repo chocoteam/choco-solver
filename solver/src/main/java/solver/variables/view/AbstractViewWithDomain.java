@@ -38,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -56,7 +55,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public abstract class AbstractViewWithDomain extends AbstractVariable implements IntVar, IView, Serializable, ICause {
+public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> implements IntVar, IView, Serializable, ICause {
 
     final IntVar A, B;
 
@@ -76,6 +75,7 @@ public abstract class AbstractViewWithDomain extends AbstractVariable implements
 
         A.subscribeView(this);
         B.subscribeView(this);
+        this.makeList(this);
     }
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
@@ -92,18 +92,11 @@ public abstract class AbstractViewWithDomain extends AbstractVariable implements
     public void updatePropagationConditions(Propagator propagator, int idxInProp) {
     }
 
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequestWithVariable<AbstractViewWithDomain> request = propagator.makeRequest(this, idxInProp);
-        propagator.addRequest(request);
-        this.addMonitor(request);
-    }
-
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(onContradiction.set(this, event, cause));
-        engine.fails(cause, this, message);
+        records.forEach(onContradiction.set(this, event, cause));
+        solver.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -137,7 +130,7 @@ public abstract class AbstractViewWithDomain extends AbstractVariable implements
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
-        requests.forEach(afterModification.set(this, event, cause));
+        records.forEach(afterModification.set(this, event, cause));
     }
 
     @Override

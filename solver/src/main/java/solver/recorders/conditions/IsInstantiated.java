@@ -35,7 +35,7 @@ import solver.variables.IntVar;
 
 /**
  * A simple condition based on number of instantiated variables.
- * Requests are posted when each variable is instantiated.
+ * Recorders are scheduled on variable instantiation.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -63,6 +63,6 @@ public class IsInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition request, EventType event) {
+    void update(ArcEventRecorderWithCondition recorder, EventType event) {
     }
 }

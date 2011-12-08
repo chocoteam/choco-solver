@@ -41,8 +41,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.*;
+import solver.recorders.IEventRecorder;
+import solver.recorders.coarse.CoarseEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -93,13 +94,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected V[] vars;
 
     /**
-     * List of requests of <code>this</code>
+     * List of records of <code>this</code>
      */
-    protected IRequestWithVariable[] requests;
+    private AbstractFineEventRecorder[] fineER;
 
-    protected int lastRequest;
+    protected int lastER;
 
-    protected PropRequest propRequest;
+    protected CoarseEventRecorder coarseER;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -112,9 +113,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected IStateBool isActive;
 
-    protected int nbRequestEnqued = 0; // counter of enqued requests -- usable as trigger for complex algorithm
+    protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
-    public long eventCalls, propCalls;  // statistics of calls to filter
+    public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
     protected final IStateInt arity; // arity of this -- number of uninstantiated variables
 
@@ -129,39 +130,29 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final boolean reactOnPromotion;
 
-    protected final IPropagationEngine engine;
+    protected final Solver solver;
 
     @SuppressWarnings({"unchecked"})
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
         this.vars = vars;
+        this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.engine = solver.getEngine();
         this.isActive = environment.makeBool(false);
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        this.propRequest = new PropRequest(this);
+        this.coarseER = new CoarseEventRecorder(this, solver);
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
+            vars[v].updatePropagationConditions(this, v);
             if (!vars[v].instantiated()) {
                 nbNi++;
             }
         }
         arity = environment.makeInt(nbNi);
         fails = 0;
-        requests = new IRequestWithVariable[vars.length];
-        lastRequest = 0;
-    }
-
-    /**
-     * Create the dedicated request
-     *
-     * @param var associated variable
-     * @param idx idx of the variable in <code>this</code>
-     * @return a request
-     */
-    public IRequestWithVariable<V> makeRequest(V var, int idx) {
-        return new EventRequest<V>(this, var, idx);
+        fineER = new AbstractFineEventRecorder[vars.length];
+        lastER = 0;
     }
 
     /**
@@ -192,29 +183,30 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * <br/>
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
-     * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
+     *
      * @param evtmask type of propagation event <code>this</code> must consider.
+     * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
     public abstract void propagate(int evtmask) throws ContradictionException;
 
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param request      request to propagate
+     * @param eventRecorder a fine event recorder
      * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
      * @param mask         type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
-    public abstract void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException;
+    public abstract void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException;
 
     /**
-     * Add the PropRequest to be added into the engine
+     * Add the coarse event recorder into the engine
      *
-     * @param evt
+     * @param evt event type
      */
     public final void forcePropagate(EventType evt) {
-        propRequest.update(evt);
+        coarseER.update(evt);
     }
 
     public void setActive() {
@@ -222,8 +214,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         isActive.set(true);
 //        this.constraint.updateActivity(this);
         //then notify the linked variables
-        for (int i = 0; i < lastRequest; i++) {
-            requests[i].activate();
+        for (int i = 0; i < lastER; i++) {
+            fineER[i].activate();
         }
     }
 
@@ -233,8 +225,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         isActive.set(false);
         this.constraint.updateActivity(this);
         //then notify the linked variables
-        for (int i = 0; i < lastRequest; i++) {
-            requests[i].desactivate();
+        for (int i = 0; i < lastER; i++) {
+            fineER[i].desactivate();
         }
     }
 
@@ -269,48 +261,40 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars.length;
     }
 
-    public int nbRequests() {
-        return lastRequest;
+    public int nbRecorders() {
+        return lastER;
     }
 
-    public IRequest getRequest(int i) {
-        if (i >= 0 && i < lastRequest) {
-            return requests[i];
+    public IEventRecorder getRecorder(int i) {
+        if (i >= 0 && i < lastER) {
+            return fineER[i];
         } else if (i == -1) {
-            return propRequest;
+            return coarseER;
         }
         throw new IndexOutOfBoundsException();
     }
 
-    public void addRequest(IRequestWithVariable request) {
-        if (lastRequest >= requests.length) {
-            IRequestWithVariable[] tmp = requests;
-            requests = new IRequestWithVariable[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, requests, 0, tmp.length);
+    public void addRecorder(AbstractFineEventRecorder recorder) {
+        if (lastER >= fineER.length) {
+            AbstractFineEventRecorder[] tmp = fineER;
+            fineER = new AbstractFineEventRecorder[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, fineER, 0, tmp.length);
         }
-        requests[lastRequest++] = request;
+        fineER[lastER++] = recorder;
     }
 
-    @SuppressWarnings({"unchecked"})
-    public void linkToVariables() {
-        for (int i = 0; i < vars.length; i++) {
-            vars[i].updatePropagationConditions(this, i);
-            vars[i].attachPropagator(this, i);
-        }
-    }
-
-    /**
-     * BEWARE: this method should not be removed!!
-     * It is called by reflection within ReifiedConstraint
-     */
-    @SuppressWarnings({"UnusedDeclaration", "unchecked"})
-    public void unlinkVariables() {
-        for (; lastRequest > 0; lastRequest--) {
-            IRequestWithVariable request = requests[lastRequest - 1];
-            request.getVariable().removeMonitor(request);
-            requests[lastRequest - 1] = null;
-        }
-    }
+//    /**
+//     * BEWARE: this method should not be removed!!
+//     * It is called by reflection within ReifiedConstraint
+//     */
+//    @SuppressWarnings({"UnusedDeclaration", "unchecked"})
+//    public void unlinkVariables() {
+//        for (; lastER > 0; lastER--) {
+//            AbstractFineEventRecorder recorder = fineER[lastER - 1];
+//            recorder.getVariable().removeMonitor(recorder);
+//            fineER[lastER - 1] = null;
+//        }
+//    }
 
     /**
      * Returns the constraint including this propagator
@@ -358,18 +342,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return true;
     }
 
-    public int getNbRequestEnqued() {
-        return nbRequestEnqued;
+    public int getNbPendingER() {
+        return nbPendingER;
     }
 
-    public void incNbRequestEnqued() {
-        assert (nbRequestEnqued >= 0) : "number of enqued requests is < 0";
-        nbRequestEnqued++;
+    public void incNbRecorderEnqued() {
+        assert (nbPendingER >= 0) : "number of enqued records is < 0";
+        nbPendingER++;
     }
 
-    public void decNbRequestEnqued() {
-        assert (nbRequestEnqued > 0) : "number of enqued requests is < 0";
-        nbRequestEnqued--;
+    public void decNbRecrodersEnqued() {
+        assert (nbPendingER > 0) : "number of enqued records is < 0";
+        nbPendingER--;
     }
 
     /**
@@ -402,6 +386,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws ContradictionException expected behavior
      */
     public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
-        engine.fails(this, variable, message);
+        solver.getEngine().fails(this, variable, message);
     }
 }

@@ -27,8 +27,8 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
-import solver.requests.IRequest;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.recorders.IEventRecorder;
 import solver.variables.Variable;
 
 
@@ -42,17 +42,18 @@ public class EqualV implements Predicate {
     }
 
     @Override
-    public boolean eval(IRequest request) {
-        return this.var == request.getVariable();
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//this.var == evtrec.getVariable();
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
+    public int[] extract(IEventRecorder[] all) {
         if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int j = 0; j < var.getMonitors().size(); j++) {
-                int idx = var.getMonitors().get(j).getIndex(IRequest.IN_GROUP);
-                tmp.add(idx);
+                /*int idx = var.getMonitors().get(j).getIndex(IRequest.IN_GROUP);
+                tmp.add(idx);*/
+                throw new UnsupportedOperationException("refactor");
             }
             cached = tmp.toArray();
         }

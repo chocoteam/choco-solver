@@ -29,6 +29,7 @@ package solver.variables.delta;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 public class GraphDelta implements IGraphDelta {
 
@@ -47,6 +48,11 @@ public class GraphDelta implements IGraphDelta {
         nodeRem = new Delta();
         arcEnf = new Delta();
         arcRem = new Delta();
+    }
+
+    @Override
+    public GraphDeltaMonitor getMonitor() {
+        return new GraphDeltaMonitor(this);
     }
 
     //***********************************************************************************

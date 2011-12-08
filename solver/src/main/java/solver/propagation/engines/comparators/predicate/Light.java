@@ -26,8 +26,7 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 /**
  * <br/>
@@ -43,13 +42,13 @@ public final class Light implements Predicate {
     }
 
     @Override
-    public boolean eval(IRequest request) {
-        return request.getVariable() != null;
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//evtrec.getVariable() != null;
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getVariable() != null) {
@@ -58,7 +57,7 @@ public final class Light implements Predicate {
                 }
             }
             cached = tmp.toArray();
-        }
+        }*/
         return cached;
     }
 }

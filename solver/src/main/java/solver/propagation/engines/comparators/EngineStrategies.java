@@ -28,14 +28,6 @@
 package solver.propagation.engines.comparators;
 
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
-import solver.variables.Variable;
 
 /**
  * <br/>
@@ -45,7 +37,7 @@ import solver.variables.Variable;
  */
 public enum EngineStrategies {
 
-    OLDEST {
+   /* OLDEST {
         @Override
         public void defineIn(Solver solver) {
             IPropagationEngine engine = solver.getEngine();
@@ -141,7 +133,7 @@ public enum EngineStrategies {
                 );
             }
         }
-    },
+    },*/
     SHUFFLE {
         @Override
         public void defineIn(Solver solver) {

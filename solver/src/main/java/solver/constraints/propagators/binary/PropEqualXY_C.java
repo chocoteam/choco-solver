@@ -39,10 +39,9 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ValueRemoval;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
 
 /**
  * X + Y = C
@@ -115,57 +114,50 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
         }
     }
 
-/*    @Override
-   public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        propagate();
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        if (EventType.isInstantiate(mask)) {
+            this.awakeOnInst(varIdx);
+        } else {
+            if (EventType.isBound(mask)) {
+                if (EventType.isInclow(mask)) {
+                    this.awakeOnLow(varIdx);
+
+                }
+                if (EventType.isDecupp(mask)) {
+                    this.awakeOnUpp(varIdx);
+
+                }
+            }
+            if (EventType.isRemove(mask)) {
+                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            }
+        }
     }
-*/
 
-        @Override
-        public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-            IntDelta delta = request.getVariable().getDelta();
-            if (EventType.isInstantiate(mask)) {
-                this.awakeOnInst(varIdx);
-            } else {
-                if (EventType.isBound(mask)) {
-                    if (EventType.isInclow(mask)) {
-                        this.awakeOnLow(varIdx);
+    void awakeOnInst(int index) throws ContradictionException {
+        if (index == 0) y.instantiateTo(cste - x.getValue(), this, false);
+        else x.instantiateTo(cste - y.getValue(), this, false);
+    }
 
-                    }
-                    if (EventType.isDecupp(mask)) {
-                        this.awakeOnUpp(varIdx);
+    void awakeOnLow(int index) throws ContradictionException {
+        if (index == 0) updateSupV1();
+        else updateSupV0();
+    }
 
-                    }
-                }
-                if (EventType.isRemove(mask)) {
-                    request.forEach(rem_proc.set(varIdx));
-                }
-            }
+    void awakeOnUpp(int index) throws ContradictionException {
+        if (index == 0) updateInfV1();
+        else updateInfV0();
+    }
+
+
+    void awakeOnRem(int index, int val) throws ContradictionException {
+        if (index == 0) {
+            y.removeValue(cste - val, this, false);
+        } else {
+            x.removeValue(cste - val, this, false);
         }
-
-        void awakeOnInst(int index) throws ContradictionException {
-            if (index == 0) y.instantiateTo(cste - x.getValue(), this, false);
-            else x.instantiateTo(cste - y.getValue(), this, false);
-        }
-
-        void awakeOnLow(int index) throws ContradictionException {
-            if (index == 0) updateSupV1();
-            else updateSupV0();
-        }
-
-        void awakeOnUpp(int index) throws ContradictionException {
-            if (index == 0) updateInfV1();
-            else updateInfV0();
-        }
-
-
-        void awakeOnRem(int index, int val) throws ContradictionException {
-            if (index == 0) {
-                y.removeValue(cste - val, this, false);
-            } else {
-                x.removeValue(cste - val, this, false);
-            }
-        }
+    }
 
     @Override
     public ESat isEntailed() {
@@ -186,23 +178,20 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
         if (d.getVar() == x) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add(y.explain(VariableState.REM,cste - ((ValueRemoval) d).getVal()));
-            }
-            else {
+                explanation.add(y.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal()));
+            } else {
                 throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
             }
             return explanation;
         } else if (d.getVar() == y) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add(x.explain(VariableState.REM,cste - ((ValueRemoval) d).getVal()));
-            }
-            else {
+                explanation.add(x.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal()));
+            } else {
                 throw new UnsupportedOperationException("PropEqualXY_C only knows how to explain ValueRemovals");
             }
             return explanation;
-        }
-        else {
+        } else {
             return super.explain(d);
         }
     }

@@ -33,57 +33,57 @@ import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
 /**
- * An abstract class to declare a specific conditions to be satisfied for a conditionnal request.
+ * An abstract class to declare a specific conditions to be satisfied for a conditionnal recorder.
  * <br/>
- * It provides 2 services: one to check validity, another to keep informed of event occuring on related request(s).
+ * It provides 2 services: one to check validity, another to keep informed of event occuring on related recorder(s).
  * </br>
- * In basic behaviour (no condition requests), events are propagated automatically after popping.
- * In conditionnal requests, previously popped (but not propagated) events should be propagated.
- * That's why on a newly validation, modified variable request must be "added" to the propagation engine,
- * request should act like "no condition one".
+ * In basic behaviour (no condition recorder), events are propagated automatically after popping.
+ * In conditionnal recorder, previously popped (but not propagated) events should be propagated.
+ * That's why on a newly validation, modified fine event recorder must be "added" to the propagation engine,
+ * recorder should act like "no condition one".
  *
  * @author Charles Prud'homme
  * @since 22/03/11
  */
 public abstract class AbstractCondition implements ICondition<ArcEventRecorderWithCondition> {
 
-    ArcEventRecorderWithCondition[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
-    int idxLastRequest; // index of the last not null request in relatedRequests
+    ArcEventRecorderWithCondition[] relatedRecorder; // array of conditionnal records declaring this -- size >= number of elements!
+    int idxLastRecorder; // index of the last not null recorder in relatedRecorder
     final IStateBool wasValid;
     ICondition<ArcEventRecorderWithCondition> next = Default.NO_CONDITION;
 
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedRequests = new ArcEventRecorderWithCondition[8];
+        relatedRecorder = new ArcEventRecorderWithCondition[8];
     }
 
     /**
-     * Keep informed the condition of the modification of one of its related requests.
-     * If the condition is newly validate, push all related requests in the propagation engine.
+     * Keep informed the condition of the modification of one of its related recorders.
+     * If the condition is newly validate, push all related records in the propagation engine.
      * todo: preciser les raisons
      *
-     * @param request recently modified request
+     * @param recorder recently modified recorder
      * @param event
      */
-    public final boolean validateScheduling(ArcEventRecorderWithCondition request, EventType event) {
+    public final boolean validateScheduling(ArcEventRecorderWithCondition recorder, EventType event) {
         if (wasValid.get()) {
             return true;
         } else {
-            update(request, event);
+            update(recorder, event);
             if (isValid()) {
-                for (int i = 0; i < idxLastRequest; i++) {
-                    ArcEventRecorderWithCondition crequest = relatedRequests[i];
+                for (int i = 0; i < idxLastRecorder; i++) {
+                    ArcEventRecorderWithCondition crecorder = relatedRecorder[i];
                     /*if (crequest.hasChanged()) {
                         crequest.schedule(); // TODO: do not add request in parameter...
                     }*/
                 }
                 wasValid.set(alwaysValid());
-                next.validateScheduling(request, event);
+                next.validateScheduling(recorder, event);
                 return true;
             }
             //return false;
-            return next.validateScheduling(request, event);
+            return next.validateScheduling(recorder, event);
         }
     }
 
@@ -102,33 +102,33 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
     /**
      * Return true if the condition, once validate, won't change anymore in the current branch,
      * avoiding validation computation each time.
-     * This simulates "no condition" request behaviour.
+     * This simulates "no condition" recorder behaviour.
      *
      * @return true if the condition, once validate, won't change anymore in the current branch
      */
     abstract boolean alwaysValid();
 
     /**
-     * Updates the current condition on the modification of one its related requests.
+     * Updates the current condition on the modification of one its related records.
      *
-     * @param request recently modified request
+     * @param recorder recently modified recorder
      * @param event
      */
-    abstract void update(ArcEventRecorderWithCondition request, EventType event);
+    abstract void update(ArcEventRecorderWithCondition recorder, EventType event);
 
     /**
-     * Link the <code>request</code> to the condition
+     * Link the <code>recorder</code> to the condition
      *
-     * @param request condition request
+     * @param recorder condition recorder
      */
-    public void linkRequest(ArcEventRecorderWithCondition request) {
-        if (idxLastRequest >= relatedRequests.length) {
-            ArcEventRecorderWithCondition[] tmp = relatedRequests;
-            relatedRequests = new ArcEventRecorderWithCondition[tmp.length * 2];
-            System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
+    public void linkRecorder(ArcEventRecorderWithCondition recorder) {
+        if (idxLastRecorder >= relatedRecorder.length) {
+            ArcEventRecorderWithCondition[] tmp = relatedRecorder;
+            relatedRecorder = new ArcEventRecorderWithCondition[tmp.length * 2];
+            System.arraycopy(tmp, 0, relatedRecorder, 0, tmp.length);
         }
-        relatedRequests[idxLastRequest++] = request;
-        next.linkRequest(request);
+        relatedRecorder[idxLastRecorder++] = recorder;
+        next.linkRecorder(recorder);
     }
 
 

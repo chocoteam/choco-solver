@@ -30,7 +30,7 @@ package choco.kernel.common.util.objects;
 import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.iterators.ArrayIterator;
 import choco.kernel.common.util.iterators.DisposableIterator;
-import gnu.trove.TLongIntHashMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 
 import java.io.Serializable;
 import java.util.Arrays;

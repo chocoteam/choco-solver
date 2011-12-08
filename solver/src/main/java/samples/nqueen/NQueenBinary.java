@@ -30,11 +30,6 @@ package samples.nqueen;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -78,15 +73,26 @@ public class NQueenBinary extends AbstractNQueen {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.all(),
                         new IncrOrderV(orderedVars),
                         Policy.FIXPOINT
-                ));
+                ));*/
 
+    }
+
+    @Override
+    public void solve() {
+
+        Solver s1 = Solver.serializeClone(solver);
+        solver.set(StrategyFactory.random(vars, solver.getEnvironment(),91011));
+        Solver s2 = Solver.serializeClone(solver);
+
+        s1.findAllSolutions();
+        s2.findAllSolutions();
     }
 
     public static void main(String[] args) {

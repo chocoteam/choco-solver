@@ -27,7 +27,7 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 
@@ -35,17 +35,19 @@ public interface Predicate extends Serializable {
 
     /**
      * Evaluate a request regarding <code>this</code>
-     * @param request a given request
+     *
+     * @param evtrec an event recorder
      * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
      * false otherwise
      */
-    public boolean eval(IRequest request);
+    public boolean eval(IEventRecorder evtrec);
 
     /**
      * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
      * <p/>This allows using cached structures.
-     * @param all arrays of requests
-     * @return list of indices, wihtin <code>all</code>, of requests corresponding to <code>this</code>, unsorted.
+     *
+     * @param all arrays of records
+     * @return list of indices, wihtin <code>all</code>, of records corresponding to <code>this</code>, unsorted.
      */
-    public int[] extract(IRequest[] all);
+    public int[] extract(IEventRecorder[] all);
 }

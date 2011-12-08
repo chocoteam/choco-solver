@@ -34,10 +34,9 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
+import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -86,18 +85,16 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 
 	
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		long time = System.currentTimeMillis();
-		if( request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
-			}
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
+			if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(var).forEach(arcEnforced, EventType.ENFORCEARC);
+            }
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(var).forEach(arcRemoved, EventType.REMOVEARC);
+            }
 		}else{
 			throw new UnsupportedOperationException("error ");
 		}

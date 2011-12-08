@@ -27,7 +27,7 @@
 
 package solver.propagation.engines.comparators;
 
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -38,7 +38,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrPriorityP implements Comparator<IRequest>, Serializable {
+public class IncrPriorityP implements Comparator<IEventRecorder>, Serializable {
 
     private static final IncrPriorityP singleton = new IncrPriorityP();
 
@@ -49,8 +49,8 @@ public class IncrPriorityP implements Comparator<IRequest>, Serializable {
     private IncrPriorityP() {
     }
 
-    public int compare(IRequest v1, IRequest v2) {
-        return v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
+    public int compare(IEventRecorder v1, IEventRecorder v2) {
+        return 0;//v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
     }
 
     public String toString() {

@@ -31,11 +31,11 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.engines.queues.FixSizeCircularQueue;
-import solver.requests.IEventRecorder;
-import solver.requests.coarse.CoarseEventRecorder;
-import solver.requests.fine.AbstractFineEventRecorder;
-import solver.requests.fine.ArcEventRecorder;
-import solver.requests.fine.ViewEventRecorderWrapper;
+import solver.recorders.IEventRecorder;
+import solver.recorders.coarse.CoarseEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.recorders.fine.ArcEventRecorder;
+import solver.recorders.fine.ViewEventRecorderWrapper;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.view.View;
@@ -82,7 +82,7 @@ public class QueuePropagationEngine extends PropagationEngine {
                         } else {
                             er = new ArcEventRecorder(variable, propagators[p], v, solver);
                         }
-                        propagators[p].addRequest(er);
+                        propagators[p].addRecorder(er);
                         variable.addMonitor(er);
                         er.setScheduler(this);
                         count++;
@@ -93,7 +93,7 @@ public class QueuePropagationEngine extends PropagationEngine {
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] propagators = constraints[c].propagators;
                 for (int p = 0; p < propagators.length; p++) {
-                    CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRequest(-1);
+                    CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRecorder(-1);
                     cer.setScheduler(this);
                     cer.update(EventType.FULL_PROPAGATION);
                 }

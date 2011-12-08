@@ -36,7 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -89,7 +89,7 @@ public class PropElementV extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int vIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(vIdx);
         }
@@ -100,7 +100,7 @@ public class PropElementV extends Propagator<IntVar> {
             awakeOnSup(vIdx);
         }
         if (EventType.isRemove(mask)) {
-            request.forEach(rem_proc.set(vIdx));
+            eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
         }
     }
 

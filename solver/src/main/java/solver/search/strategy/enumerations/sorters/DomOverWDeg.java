@@ -27,11 +27,10 @@
 package solver.search.strategy.enumerations.sorters;
 
 import choco.kernel.common.util.objects.IList;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
+import solver.propagation.IPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
 /**
@@ -53,14 +52,15 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     }
 
     private int weight(IntVar v) {
-        IList<IRequest> requests = v.getMonitors();
+        IList<IntVar, IVariableMonitor<IntVar>> records = v.getMonitors();
         int w = 0;
-        int card = requests.cardinality();
+        int card = records.cardinality();
         for (int i = 0; i < card; i++) {
-            Propagator prop = requests.get(i).getPropagator();
+            /*Propagator prop = records.get(i).getPropagator();
             if (prop.arity() > 1) {
                 w += prop.getFails();
-            }
+            }*/
+            throw new UnsupportedOperationException("refactor");
         }
         return w;
     }

@@ -28,23 +28,23 @@
 package solver.propagation.engines.comparators;
 
 import solver.propagation.engines.comparators.predicate.Predicate;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class Cond implements Comparator<IRequest>, Serializable {
+public class Cond implements Comparator<IEventRecorder>, Serializable {
     Predicate p;
-    Comparator<IRequest> c1;
-    Comparator<IRequest> c2;
+    Comparator<IEventRecorder> c1;
+    Comparator<IEventRecorder> c2;
 
-    public Cond(Predicate p, Comparator<IRequest> c1, Comparator<IRequest> c2) {
+    public Cond(Predicate p, Comparator<IEventRecorder> c1, Comparator<IEventRecorder> c2) {
         this.p = p;
         this.c1 = c1;
         this.c2 = c2;
     }
 
-    public int compare(IRequest v1, IRequest v2) {
+    public int compare(IEventRecorder v1, IEventRecorder v2) {
         boolean b1 = p.eval(v1);
         boolean b2 = p.eval(v2);
         if (b1 && b2) {

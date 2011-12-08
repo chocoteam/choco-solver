@@ -28,6 +28,8 @@ package solver.variables.delta.view;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
+import solver.variables.delta.IDelta;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
 /**
@@ -43,6 +45,12 @@ public abstract class ViewDelta implements IntDelta {
     public ViewDelta(IntDelta original) {
         this.original = original;
     }
+
+    @Override
+    public <D extends IDelta> IDeltaMonitor<D> getMonitor() {
+        return original.getMonitor();
+    }
+
     @Override
     public int get(int idx) throws IndexOutOfBoundsException {
         return original.get(idx);

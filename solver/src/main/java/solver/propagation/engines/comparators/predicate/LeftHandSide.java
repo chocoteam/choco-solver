@@ -26,8 +26,7 @@
  */
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 /**
  * <br/>
@@ -42,13 +41,13 @@ public class LeftHandSide implements Predicate {
     }
 
     @Override
-    public boolean eval(IRequest request) {
-        return request.getVariable() != null && request.getIndex(IRequest.VAR_IN_PROP) == 0;
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//evtrec.getVariable() != null && evtrec.getIndex(IRequest.VAR_IN_PROP) == 0;
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < all.length; i++) {
                 if (all[i].getIndex(IRequest.VAR_IN_PROP) == 0) {
@@ -57,7 +56,7 @@ public class LeftHandSide implements Predicate {
                 }
                 cached = tmp.toArray();
             }
-        }
+        }*/
         return cached;
     }
 }

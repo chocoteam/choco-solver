@@ -54,11 +54,11 @@ public abstract class PropagationEngine implements IPropagationEngine {
 //        if (engine != null) {
 //            throw new SolverException("PropagationEngine.init() has already been called once");
 //        }
-//        final IRequest[] tmp = requests;
-//        requests = new IRequest[size];
-//        System.arraycopy(tmp, 0, requests, 0, size);
+//        final IRequest[] tmp = records;
+//        records = new IRequest[size];
+//        System.arraycopy(tmp, 0, records, 0, size);
 //
-//        // FIRST: sort requests, give them a unique group
+//        // FIRST: sort records, give them a unique group
 //        // build a default group
 //        addGroup(Group.buildQueue(Predicates.all(), Policy.FIXPOINT));
 //
@@ -76,9 +76,9 @@ public abstract class PropagationEngine implements IPropagationEngine {
 //        }
 //        engine.setGroups(Arrays.copyOfRange(groups, 0, nbGroup));
 //
-//        // FINALLY, post initial propagation event for every heavy requests
+//        // FINALLY, post initial propagation event for every heavy records
 //        for (int i = offset; i < size; i++) {
-//            requests[i].update(EventType.FULL_PROPAGATION); // post initial propagation
+//            records[i].update(EventType.FULL_PROPAGATION); // post initial propagation
 //        }
 //
 //    }
@@ -86,13 +86,13 @@ public abstract class PropagationEngine implements IPropagationEngine {
 //    private void eval() {
 //        int i, j;
 //        for (i = 0; i < size; i++) {
-//            lastPoppedRequest = requests[i];
+//            lastPoppedRequest = records[i];
 //            j = 0;
 //            // look for the first right group
 //            while (!groups[j].getPredicate().eval(lastPoppedRequest)) {
 //                j++;
 //            }
-//            groups[j].addRequest(lastPoppedRequest);
+//            groups[j].addRecorder(lastPoppedRequest);
 //        }
 //        for (j = 0; j < nbGroup; j++) {
 //            if (groups[j].isEmpty()) {
@@ -111,14 +111,14 @@ public abstract class PropagationEngine implements IPropagationEngine {
 //    private void extract() {
 //        int i, j;
 //        for (i = 0; i < size; i++) {
-//            requests[i].setIndex(IRequest.IN_GROUP,i);
+//            records[i].setIndex(IRequest.IN_GROUP,i);
 //        }
 //        for (j = 0; j < nbGroup; j++) {
-//            int[] indices = groups[j].getPredicate().extract(requests);
+//            int[] indices = groups[j].getPredicate().extract(records);
 //            Arrays.sort(indices);
 //            for (i = 0; i < indices.length; i++) {
-//                if (requests[indices[i]].getIndex(IRequest.GROUP_ID) < 0) {
-//                    groups[j].addRequest(requests[indices[i]]);
+//                if (records[indices[i]].getIndex(IRequest.GROUP_ID) < 0) {
+//                    groups[j].addRecorder(records[indices[i]]);
 //                }
 //            }
 //            if (groups[j].isEmpty()) {

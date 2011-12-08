@@ -36,159 +36,153 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.util.LinkedList;
 
 /**
- * @author Jean-Guillaume Fages
- * Ensures that each node in the kernel has exactly NLOOPS loops in NTree constraint
- *
  * @param <V>
+ * @author Jean-Guillaume Fages
+ *         Ensures that each node in the kernel has exactly NLOOPS loops in NTree constraint
  */
-public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
+public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g; 
-	IntVar nLoops;
-	IntProcedure removeProc;
-	IntProcedure enforceProc;
-	IStateInt nbKerLoop;
-	IStateInt nbEnvLoop;
-	
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    DirectedGraphVar g;
+    IntVar nLoops;
+    IntProcedure removeProc;
+    IntProcedure enforceProc;
+    IStateInt nbKerLoop;
+    IStateInt nbEnvLoop;
 
-	public PropNLoopsTree(
-			DirectedGraphVar graph, IntVar nL,
-			Solver sol,
-			Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph,nL}, sol, constraint, priority, reactOnPromotion);
-		g = graph;
-		nLoops = nL;
-		removeProc = new RemProc(this);
-		enforceProc = new EnfLoop(this);
-		nbEnvLoop = environment.makeInt();
-		nbKerLoop = environment.makeInt();
-	}
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    public PropNLoopsTree(
+            DirectedGraphVar graph, IntVar nL,
+            Solver sol,
+            Constraint<V, Propagator<V>> constraint,
+            PropagatorPriority priority, boolean reactOnPromotion) {
+        super((V[]) new Variable[]{graph, nL}, sol, constraint, priority, reactOnPromotion);
+        g = graph;
+        nLoops = nL;
+        removeProc = new RemProc(this);
+        enforceProc = new EnfLoop(this);
+        nbEnvLoop = environment.makeInt();
+        nbKerLoop = environment.makeInt();
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		int ker = 0;
-		int env = 0;
-		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if (g.getEnvelopGraph().arcExists(node, node)){
-				env++;
-				if (g.getKernelGraph().arcExists(node, node)){
-					ker++;
-				}
-			}			
-		}
-		nLoops.updateLowerBound(ker, this, false);
-		nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
-		nLoops.updateUpperBound(env, this, false);
-		int added = 0;
-		if(env==nLoops.getLB()){
-			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-				if (g.getEnvelopGraph().arcExists(node, node)){
-					g.enforceArc(node, node, this, false);
-					added ++;
-				}			
-			}
-			setPassive();
-		}
-		nbEnvLoop.set(env);
-		nbKerLoop.set(ker+added);
-	}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
-			if ((mask & EventType.REMOVEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(removeProc, gv.fromArcRemoval(), gv.toArcRemoval());
-			}
-			if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				int nbKer = nbKerLoop.get();
-				d.forEach(enforceProc, gv.fromArcEnforcing(), gv.toArcEnforcing());
-				if(nbKer<nbKerLoop.get()){
-					nLoops.updateLowerBound(nbKerLoop.get(), this, false);//recently added
-					checkAllLoopsFound();
-				}
-			}
-			if ((mask & EventType.REMOVENODE.mask) != 0){
-				nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+        int ker = 0;
+        int env = 0;
+        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+            if (g.getEnvelopGraph().arcExists(node, node)) {
+                env++;
+                if (g.getKernelGraph().arcExists(node, node)) {
+                    ker++;
+                }
+            }
+        }
+        nLoops.updateLowerBound(ker, this, false);
+        nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
+        nLoops.updateUpperBound(env, this, false);
+        int added = 0;
+        if (env == nLoops.getLB()) {
+            for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+                if (g.getEnvelopGraph().arcExists(node, node)) {
+                    g.enforceArc(node, node, this, false);
+                    added++;
+                }
+            }
+            setPassive();
+        }
+        nbEnvLoop.set(env);
+        nbKerLoop.set(ker + added);
+    }
 
-	private void checkAllLoopsFound() throws ContradictionException {
-		int loopsInKer = nbKerLoop.get();
-		int loopsInEnv = nbEnvLoop.get();
-		if(loopsInKer>nLoops.getUB()){
-			this.contradiction(g, "too many loops");
-		}else{
-			IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-			LinkedList<Integer> loopOutOfKer = new LinkedList<Integer>();
-			for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-				if (!g.getKernelGraph().arcExists(node, node)){
-					if (g.getEnvelopGraph().arcExists(node, node)){
-						loopOutOfKer.addFirst(node);
-					}
-				}
-			}
-			if(loopsInKer==nLoops.getUB()){
-				for(int l:loopOutOfKer){
-					g.removeArc(l, l, this, false);
-				}
-			}else{
-				if (loopsInEnv==nLoops.getValue()){
-					for(int l:loopOutOfKer){
-						g.enforceArc(l, l, this, false);
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask+EventType.REMOVENODE.mask;
-	}
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
-	
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
+            eventRecorder.getDeltaMonitor(g).forEach(removeProc, EventType.REMOVEARC);
+        }
+        if ((mask & EventType.ENFORCEARC.mask) != 0) {
+            int nbKer = nbKerLoop.get();
+            eventRecorder.getDeltaMonitor(g).forEach(enforceProc, EventType.ENFORCEARC);
+            if (nbKer < nbKerLoop.get()) {
+                nLoops.updateLowerBound(nbKerLoop.get(), this, false);//recently added
+                checkAllLoopsFound();
+            }
+        }
+        if ((mask & EventType.REMOVENODE.mask) != 0) {
+            nLoops.updateUpperBound(g.getEnvelopOrder(), this, false);
+        }
+    }
 
-	/**
-	 * @author Jean-Guillaume Fages
-	 * Checks if a loop has been removed
-	 */
-	private static class RemProc implements IntProcedure {
+    private void checkAllLoopsFound() throws ContradictionException {
+        int loopsInKer = nbKerLoop.get();
+        int loopsInEnv = nbEnvLoop.get();
+        if (loopsInKer > nLoops.getUB()) {
+            this.contradiction(g, "too many loops");
+        } else {
+            IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+            LinkedList<Integer> loopOutOfKer = new LinkedList<Integer>();
+            for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+                if (!g.getKernelGraph().arcExists(node, node)) {
+                    if (g.getEnvelopGraph().arcExists(node, node)) {
+                        loopOutOfKer.addFirst(node);
+                    }
+                }
+            }
+            if (loopsInKer == nLoops.getUB()) {
+                for (int l : loopOutOfKer) {
+                    g.removeArc(l, l, this, false);
+                }
+            } else {
+                if (loopsInEnv == nLoops.getValue()) {
+                    for (int l : loopOutOfKer) {
+                        g.enforceArc(l, l, this, false);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.REMOVENODE.mask;
+    }
+
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
+
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
+
+    /**
+     * @author Jean-Guillaume Fages
+     *         Checks if a loop has been removed
+     */
+    private static class RemProc implements IntProcedure {
 
         private final PropNLoopsTree p;
 
@@ -198,37 +192,37 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
         @Override
         public void execute(int i) throws ContradictionException {
-    		int n = p.g.getEnvelopGraph().getNbNodes();
-        	if (i>=n){
-        		int from = i/n-1;
-        		int to   = i%n;
-        		if (from == to){
-        			p.nbEnvLoop.set(p.nbEnvLoop.get()-1);
-        			int env = p.nbEnvLoop.get();
-        			int ker = p.nbKerLoop.get();
-        			IActiveNodes act;
-        			p.nLoops.updateUpperBound(env, p, false);
-        			p.nLoops.updateLowerBound(ker, p, false);
-        			if(p.nLoops.getLB() == env && env>ker){
-        				act = p.g.getEnvelopGraph().getActiveNodes();
-        				for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-            				if (p.g.getEnvelopGraph().arcExists(node, node)){
-            					p.g.enforceArc(node, node, p, false);
-            				}
-            			}
-        			}
-        		}
-        	}else{
-        		throw new UnsupportedOperationException();
-        	}
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i >= n) {
+                int from = i / n - 1;
+                int to = i % n;
+                if (from == to) {
+                    p.nbEnvLoop.set(p.nbEnvLoop.get() - 1);
+                    int env = p.nbEnvLoop.get();
+                    int ker = p.nbKerLoop.get();
+                    IActiveNodes act;
+                    p.nLoops.updateUpperBound(env, p, false);
+                    p.nLoops.updateLowerBound(ker, p, false);
+                    if (p.nLoops.getLB() == env && env > ker) {
+                        act = p.g.getEnvelopGraph().getActiveNodes();
+                        for (int node = act.getFirstElement(); node >= 0; node = act.getNextElement()) {
+                            if (p.g.getEnvelopGraph().arcExists(node, node)) {
+                                p.g.enforceArc(node, node, p, false);
+                            }
+                        }
+                    }
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
-	
-	/**
-	 * @author Jean-Guillaume Fages
-	 * Checks if a loop has been enforced
-	 */
-	private static class EnfLoop implements IntProcedure {
+
+    /**
+     * @author Jean-Guillaume Fages
+     *         Checks if a loop has been enforced
+     */
+    private static class EnfLoop implements IntProcedure {
 
         private final PropNLoopsTree p;
 
@@ -238,16 +232,16 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
         @Override
         public void execute(int i) throws ContradictionException {
-    		int n = p.g.getEnvelopGraph().getNbNodes();
-        	if (i>=n){
-        		int from = i/n-1;
-        		int to   = i%n;
-        		if (from == to){
-        			p.nbKerLoop.set(p.nbKerLoop.get()+1);
-        		}
-        	}else{
-        		throw new UnsupportedOperationException();
-        	}
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i >= n) {
+                int from = i / n - 1;
+                int to = i % n;
+                if (from == to) {
+                    p.nbKerLoop.set(p.nbKerLoop.get() + 1);
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
 }

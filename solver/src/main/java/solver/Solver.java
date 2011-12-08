@@ -40,8 +40,8 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.PropagationEngine;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.QueuePropagationEngine;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
@@ -70,7 +70,7 @@ import java.util.Properties;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
- * @see solver.propagation.engines.IPropagationEngine
+ * @see solver.propagation.PropagationEngine
  * @see choco.kernel.memory.IEnvironment
  * @see solver.search.loop.AbstractSearchLoop
  * @since 0.01
@@ -161,8 +161,9 @@ public class Solver implements Serializable {
         }
         this.measures = new MeasuresRecorder(this); // required for event recorder
         this.creationTime -= System.nanoTime();
-        this.engine = new PropagationEngine();
-        this.search = SearchLoops.preset(this, engine);
+        this.search = SearchLoops.preset(this);
+        this.engine = new QueuePropagationEngine();
+        this.search.setPropEngine(engine);
         this.setExplainer(new ExplanationEngine(this));
     }
 
@@ -213,7 +214,7 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        engine.addConstraint(c);
+        c.declare();
     }
 
     /**
@@ -233,7 +234,7 @@ public class Solver implements Serializable {
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            engine.addConstraint(cs[i]);
+            cs[i].declare();
         }
     }
 
@@ -244,12 +245,12 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        engine.addConstraint(c);
+        c.declare();
 
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            engine.addConstraint(cs[i]);
+            cs[i].declare();
         }
     }
 
@@ -344,9 +345,9 @@ public class Solver implements Serializable {
 
     public void propagate() throws ContradictionException {
         if (!engine.initialized()) {
-            engine.init();
+            engine.init(this);
         }
-        engine.fixPoint();
+        engine.iterateAndExecute();
     }
 
     /**
@@ -376,7 +377,7 @@ public class Solver implements Serializable {
         return vIdx;
     }
 
-    public Variable getVar(int i){
+    public Variable getVar(int i) {
         return vars[i];
     }
 
@@ -526,6 +527,26 @@ public class Solver implements Serializable {
         return model;
     }
 
+    public static Solver serializeClone(Solver solver) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(baos);
+            out.writeObject(solver);
+            out.close();
+            byte[] buf = baos.toByteArray();
+
+            ByteArrayInputStream bin = new ByteArrayInputStream(buf);
+            ObjectInputStream in = new ObjectInputStream(bin);
+            return (Solver) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Explanation engine for the solver
      */
@@ -540,7 +561,6 @@ public class Solver implements Serializable {
     public void set(ExplanationEngine explainer) {
         this.setExplainer(explainer);
     }
-
 
 
 }

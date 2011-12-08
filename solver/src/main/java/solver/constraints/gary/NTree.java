@@ -28,7 +28,7 @@
 package solver.constraints.gary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;

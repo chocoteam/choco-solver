@@ -30,8 +30,9 @@ package solver.constraints.nary.automata.structure.regular;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSetWithOffset;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntStack;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.propagators.Propagator;
@@ -51,7 +52,7 @@ public class StoredDirectedMultiGraph {
 
     int[] starts;
     int[] offsets;
-    TIntStack stack = new TIntStack();
+    TIntStack stack = new TIntArrayStack();
 
 
     StoredIndexedBipartiteSetWithOffset[] supports;

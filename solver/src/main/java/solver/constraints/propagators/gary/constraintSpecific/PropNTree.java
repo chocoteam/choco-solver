@@ -28,15 +28,14 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -48,45 +47,46 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.FlowGraphManager;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.LinkedList;
 
-public class PropNTree<V extends Variable> extends GraphPropagator<V>{
+public class PropNTree<V extends Variable> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	IntVar nTree;
-	int minTree = 0;
-	private LinkedList<TIntArrayList> sinks;
-	private LinkedList<TIntArrayList> nonSinks;
+    DirectedGraphVar g;
+    IntVar nTree;
+    int minTree = 0;
+    private LinkedList<TIntArrayList> sinks;
+    private LinkedList<TIntArrayList> nonSinks;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropNTree(DirectedGraphVar graph, IntVar nT,Solver solver,
-			Constraint<V, Propagator<V>> constraint,
-			PropagatorPriority priority, boolean reactOnPromotion) {
-		super((V[]) new Variable[]{graph,nT}, solver, constraint, priority, reactOnPromotion);
-		g = graph;
-		nTree = nT;
-	}
+    public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
+                     Constraint<V, Propagator<V>> constraint,
+                     PropagatorPriority priority, boolean reactOnPromotion) {
+        super((V[]) new Variable[]{graph, nT}, solver, constraint, priority, reactOnPromotion);
+        g = graph;
+        nTree = nT;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	private boolean checkFeasibility() throws ContradictionException {
+    private boolean checkFeasibility() throws ContradictionException {
 //		int n = g.getEnvelopGraph().getNbNodes();
-		computeSinks();
-		int MINTREE = minTree;
-		int MAXTREE = calcMaxTree();
+        computeSinks();
+        int MINTREE = minTree;
+        int MAXTREE = calcMaxTree();
 //		INeighbors nei;
-		if (nTree.getLB()<=MAXTREE && nTree.getUB()>=MINTREE){
+        if (nTree.getLB() <= MAXTREE && nTree.getUB() >= MINTREE) {
 //			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 //			DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());//ATENTION TYPE
 //			for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
@@ -108,209 +108,210 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 //					g.removeNode(node, this);
 //				}
 //			}
-		}else{
-			return false;
-		}
-		return true;
-	}
+        } else {
+            return false;
+        }
+        return true;
+    }
 
-	private int calcMaxTree() {
-		int ct = 0;
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			if (g.getEnvelopGraph().arcExists(node, node)){
-				ct++;
-			}
-		}
-		return ct;
-	}
+    private int calcMaxTree() {
+        int ct = 0;
+        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        for (int node = env.getFirstElement(); node >= 0; node = env.getNextElement()) {
+            if (g.getEnvelopGraph().arcExists(node, node)) {
+                ct++;
+            }
+        }
+        return ct;
+    }
 
-	private void filtering() throws ContradictionException{
-		computeSinks();
-		//1) Bound pruning
-		minTreePruning(); // MAXTREE pruning is done by PropNLoops
-		//2) structural pruning
-		structuralPruning();
-	}
+    private void filtering() throws ContradictionException {
+        computeSinks();
+        //1) Bound pruning
+        minTreePruning(); // MAXTREE pruning is done by PropNLoops
+        //2) structural pruning
+        structuralPruning();
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if(!checkFeasibility()){
-			this.contradiction(g, "infeasible");
-		}else{
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if (!checkFeasibility()) {
+            this.contradiction(g, "infeasible");
+        } else {
 //			structuralPruning();
-			filtering();
-		}
-	}
+            filtering();
+        }
+    }
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			if(!checkFeasibility()){
-				this.contradiction(g, "infeasible");
-			}else{
-				filtering();
-			}
-		}
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
+            if (!checkFeasibility()) {
+                this.contradiction(g, "infeasible");
+            } else {
+                filtering();
+            }
+        }
+    }
 
-	private void structuralPruning() throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
-		INeighbors nei;
-		for (int node = 0; node<n; node++) {
-			if(env.isActive(node)){
-				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-				for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
-					Grs.addArc(suc, node);
-					if(suc==node){
-						Grs.addArc(node, n);
-						Grs.addArc(n, node);
-					}
-				}
-			} else{ // enables to manage deleted nodes
-				Grs.desactivateNode(node);
-			}
-		}
-		// for subgraphs
-		int[] numDFS = GraphTools.performDFS(n, Grs);
-		INeighbors tr = Grs.getActiveNodes();
-		for (int node=tr.getFirstElement();node>=0;node=tr.getNextElement()){
-			if(numDFS[node]==0 && node !=n){
-				Grs.desactivateNode(node);
-				g.removeNode(node, this, false);
-			}
-		}
-		//dominators
-		FlowGraphManager flowGM = new FlowGraphManager(n, Grs); 
-		
-		//LCA preprocessing
-		DirectedGraph dominatorGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST);
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
-		}
-		
-		//PREPROCESSING
-		int[] in = new int[n+1];
-		int[] out = new int[n+1];
-		int[] father = new int[n+1];
-		INeighbors[] successors = new INeighbors[n+1];
-		BitSet notFirsts = new BitSet(n+1);
-		for (int i=0; i<n+1; i++){
-			father[i] = -1;
-			successors[i] = dominatorGraph.getSuccessorsOf(i);
-		}
-		int time = 0;
-		int currentNode = n;
-		int nextNode;
-		father[n] = n;
-		in[n] = 0;
-		boolean notFinished = true;
-		while(notFinished){
-			if(notFirsts.get(currentNode)){
-				nextNode = successors[currentNode].getNextElement();
-			}else{
-				notFirsts.set(currentNode);
-				nextNode = successors[currentNode].getFirstElement();
-			}
-			if(nextNode<0){
-				time++;
-				out[currentNode] = time;
-				if(currentNode==n){
-					notFinished = false;
-					break;
-				}
-				currentNode = father[currentNode];
-			}else{
-				if (father[nextNode]==-1) {
-					time++;
-					in[nextNode] = time;
-					father[nextNode] = currentNode;
-					currentNode = nextNode;
-				}
-			}
-		}
-		time++;
-		out[n] = time;
-		//END_PREPROCESSING
-		//queries
-		for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
-			nei = g.getEnvelopGraph().getSuccessorsOf(node);
-			for(int suc = nei.getFirstElement(); suc>=0; suc = nei.getNextElement()){
-				//--- STANDART PRUNING
-				if (node != suc && in[suc]>in[node] && out[suc]<out[node]){
-					g.removeArc(node, suc, this, false);
-				}
-			}
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        int n = g.getEnvelopGraph().getNbNodes();
+        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType());
+        INeighbors nei;
+        for (int node = 0; node < n; node++) {
+            if (env.isActive(node)) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+                for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
+                    Grs.addArc(suc, node);
+                    if (suc == node) {
+                        Grs.addArc(node, n);
+                        Grs.addArc(n, node);
+                    }
+                }
+            } else { // enables to manage deleted nodes
+                Grs.desactivateNode(node);
+            }
+        }
+        // for subgraphs
+        int[] numDFS = GraphTools.performDFS(n, Grs);
+        INeighbors tr = Grs.getActiveNodes();
+        for (int node = tr.getFirstElement(); node >= 0; node = tr.getNextElement()) {
+            if (numDFS[node] == 0 && node != n) {
+                Grs.desactivateNode(node);
+                g.removeNode(node, this, false);
+            }
+        }
+        //dominators
+        FlowGraphManager flowGM = new FlowGraphManager(n, Grs);
 
-	private void minTreePruning() throws ContradictionException {
-		nTree.updateLowerBound(minTree, this, false);
-		if (nTree.getUB()==minTree){
-			int node;
-			for (TIntArrayList scc:nonSinks){
-				for(int x=0;x<scc.size();x++){
-					node = scc.get(x);
-					if(g.getEnvelopGraph().arcExists(node, node)){
-						g.removeArc(node, node, this, false);
-					}
-				}
-			}
-		}
-	}
+        //LCA preprocessing
+        DirectedGraph dominatorGraph = new DirectedGraph(n + 1, GraphType.LINKED_LIST);
+        for (int node = env.getFirstElement(); node >= 0; node = env.getNextElement()) {
+            dominatorGraph.addArc(flowGM.getImmediateDominatorsOf(node), node);
+        }
 
-	private void computeSinks() {
-		int n = g.getEnvelopGraph().getNbNodes();
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
-		int[] sccOf = new int[n];
-		int sccNum = 0;
-		int node;
-		for (TIntArrayList scc:allSCC){
-			for(int x=0;x<scc.size();x++){
-				sccOf[scc.get(x)] = sccNum;
-			}
-			sccNum++;
-		}
-		sinks = new LinkedList<TIntArrayList>();
-		nonSinks = new LinkedList<TIntArrayList>();
-		boolean looksSink = true;
-		INeighbors nei;
-		for (TIntArrayList scc:allSCC){
-			looksSink = true;
-			boolean inKer = false;
-			for(int x=0;x<scc.size();x++){
-				node = scc.get(x);
-				if(g.getKernelGraph().getActiveNodes().isActive(node)){
-					inKer = true;
-				}
-				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-				for(int suc = nei.getFirstElement(); suc>=0 && looksSink; suc = nei.getNextElement()){
-					if (sccOf[suc]!=sccOf[node]){
-						looksSink = false;
-					}
-				}
-				if(!looksSink){
-					x = scc.size();
-				}
-			}
-			if(looksSink && inKer){
-				sinks.add(scc);
-			}else{
-				nonSinks.add(scc);
-			}
-		}
-		minTree = sinks.size();
-	}
+        //PREPROCESSING
+        int[] in = new int[n + 1];
+        int[] out = new int[n + 1];
+        int[] father = new int[n + 1];
+        INeighbors[] successors = new INeighbors[n + 1];
+        BitSet notFirsts = new BitSet(n + 1);
+        for (int i = 0; i < n + 1; i++) {
+            father[i] = -1;
+            successors[i] = dominatorGraph.getSuccessorsOf(i);
+        }
+        int time = 0;
+        int currentNode = n;
+        int nextNode;
+        father[n] = n;
+        in[n] = 0;
+        boolean notFinished = true;
+        while (notFinished) {
+            if (notFirsts.get(currentNode)) {
+                nextNode = successors[currentNode].getNextElement();
+            } else {
+                notFirsts.set(currentNode);
+                nextNode = successors[currentNode].getFirstElement();
+            }
+            if (nextNode < 0) {
+                time++;
+                out[currentNode] = time;
+                if (currentNode == n) {
+                    notFinished = false;
+                    break;
+                }
+                currentNode = father[currentNode];
+            } else {
+                if (father[nextNode] == -1) {
+                    time++;
+                    in[nextNode] = time;
+                    father[nextNode] = currentNode;
+                    currentNode = nextNode;
+                }
+            }
+        }
+        time++;
+        out[n] = time;
+        //END_PREPROCESSING
+        //queries
+        for (int node = env.getFirstElement(); node >= 0; node = env.getNextElement()) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(node);
+            for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
+                //--- STANDART PRUNING
+                if (node != suc && in[suc] > in[node] && out[suc] < out[node]) {
+                    g.removeArc(node, suc, this, false);
+                }
+            }
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
-	}
+    private void minTreePruning() throws ContradictionException {
+        nTree.updateLowerBound(minTree, this, false);
+        if (nTree.getUB() == minTree) {
+            int node;
+            for (TIntArrayList scc : nonSinks) {
+                for (int x = 0; x < scc.size(); x++) {
+                    node = scc.get(x);
+                    if (g.getEnvelopGraph().arcExists(node, node)) {
+                        g.removeArc(node, node, this, false);
+                    }
+                }
+            }
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    private void computeSinks() {
+        int n = g.getEnvelopGraph().getNbNodes();
+        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+        int[] sccOf = new int[n];
+        int sccNum = 0;
+        int node;
+        for (TIntArrayList scc : allSCC) {
+            for (int x = 0; x < scc.size(); x++) {
+                sccOf[scc.get(x)] = sccNum;
+            }
+            sccNum++;
+        }
+        sinks = new LinkedList<TIntArrayList>();
+        nonSinks = new LinkedList<TIntArrayList>();
+        boolean looksSink = true;
+        INeighbors nei;
+        for (TIntArrayList scc : allSCC) {
+            looksSink = true;
+            boolean inKer = false;
+            for (int x = 0; x < scc.size(); x++) {
+                node = scc.get(x);
+                if (g.getKernelGraph().getActiveNodes().isActive(node)) {
+                    inKer = true;
+                }
+                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+                for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
+                    if (sccOf[suc] != sccOf[node]) {
+                        looksSink = false;
+                    }
+                }
+                if (!looksSink) {
+                    x = scc.size();
+                }
+            }
+            if (looksSink && inKer) {
+                sinks.add(scc);
+            } else {
+                nonSinks.add(scc);
+            }
+        }
+        minTree = sinks.size();
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
+    }
+
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 }

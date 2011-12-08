@@ -82,7 +82,7 @@ public interface IMeasures extends ISearchMonitor, Serializable {
     long getRestartCount();
 
     /**
-     * Get the number of call to IRequest.propagate()
+     * Get the number of call to event recorder execution
      *
      * @return propagations count
      */

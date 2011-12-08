@@ -28,13 +28,13 @@
 package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -178,7 +178,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 	
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		long time = System.currentTimeMillis();
 		int n = g.getEnvelopGraph().getNbNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();

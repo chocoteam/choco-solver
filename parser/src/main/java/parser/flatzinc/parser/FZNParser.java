@@ -27,7 +27,7 @@
 
 package parser.flatzinc.parser;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;

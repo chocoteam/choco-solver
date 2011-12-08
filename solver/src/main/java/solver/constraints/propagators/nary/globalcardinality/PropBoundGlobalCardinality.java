@@ -34,7 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -234,7 +234,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int idx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             int val = vars[idx].getValue();
             forcePropagate(EventType.CUSTOM_PROPAGATION);
@@ -267,7 +267,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
         }
         if (idx < nbVars) {
-            request.forEach(rem_proc);
+            eventRecorder.getDeltaMonitor(vars[idx]).forEach(rem_proc, EventType.REMOVE);
         }
     }
 

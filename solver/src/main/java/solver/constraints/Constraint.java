@@ -36,7 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
-import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.IPropagationEngine;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
@@ -201,7 +201,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
         this.lastPropagatorActive.set(propagators.length);
-        setUpPropagator(propagators);
     }
 
     /**
@@ -213,19 +212,20 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public final void addPropagators(P... mPropagators) {
         // add the new propagators at the end of the current array
         P[] tmp = this.propagators;
-        this.propagators = (P[])new Propagator[tmp.length + mPropagators.length];
+        this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
         System.arraycopy(tmp, 0, propagators, 0, tmp.length);
         System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
 
         this.lastPropagatorActive.add(mPropagators.length);
-        setUpPropagator(mPropagators);
     }
 
-    private void setUpPropagator(P... propagators){
-        for (int p = 0; p < propagators.length; p++) {
-            Propagator prop = propagators[p];
-            prop.linkToVariables();
-            staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
+    /**
+     * Link propagators with variables.
+     */
+    public void declare() {
+        int last = lastPropagatorActive.get();
+        for (int p = 0; p < last; p++) {
+            staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
         }
     }
 
@@ -266,7 +266,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     /**
      * Throws a contradiction exception based on <variable, message>
      *
-     * @param cause ICause object causes the exception
+     * @param cause    ICause object causes the exception
      * @param variable involved variable
      * @param message  detailed message
      * @throws ContradictionException expected behavior

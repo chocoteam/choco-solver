@@ -49,7 +49,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
     protected final GraphDelta delta;
 
     protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
-    protected int[] frozenFirst, frozenLast; // same as previous while the request is frozen, to allow "concurrent modifications"
+    protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
 
     public GraphDeltaMonitor(GraphDelta delta) {
         this.delta = delta;
@@ -62,7 +62,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
     @Override
     public void update(EventType evt) {
-        switch (evt) {//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
+        switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
             case REMOVENODE:
                 last[NR] = delta.getNodeRemovalDelta().size();
                 break;
@@ -99,7 +99,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
     @Override
     public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-        switch (evt) {//Otherwise the request will do a snapshot of a delta that may have not been cleared yet
+        switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
             case REMOVENODE:
                 delta.getNodeRemovalDelta().forEach(proc, frozenFirst[NR], frozenLast[NR]);
                 break;

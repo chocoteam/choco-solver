@@ -27,8 +27,8 @@
 
 package solver.search.strategy.enumerations.values.heuristics.zeroary;
 
-import gnu.trove.THashMap;
-import gnu.trove.TIntArrayList;
+import gnu.trove.map.hash.THashMap;
+import gnu.trove.list.array.TIntArrayList;
 import solver.search.strategy.enumerations.values.heuristics.Action;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 

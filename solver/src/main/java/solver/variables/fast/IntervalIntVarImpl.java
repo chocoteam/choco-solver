@@ -42,7 +42,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
 import solver.explanations.VariableState;
-import solver.requests.IRequestWithVariable;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -58,7 +57,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable implements IntVar {
+public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -82,6 +81,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         this.LB = env.makeInt(min);
         this.UB = env.makeInt(max);
         this.SIZE = env.makeInt(max - min + 1);
+        this.makeList(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,7 +116,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
-        requests.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;
@@ -440,17 +440,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         }
     }
 
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequestWithVariable<IntVar> request = propagator.makeRequest(this, idxInProp);
-        propagator.addRequest(request);
-        this.addMonitor(request);
-    }
-
-
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            requests.forEach(afterModification.set(this, event, cause));
+            records.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
     }
@@ -482,8 +474,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(onContradiction.set(this, event, cause));
-        engine.fails(cause, this, message);
+        records.forEach(onContradiction.set(this, event, cause));
+        solver.getEngine().fails(cause, this, message);
     }
 
 

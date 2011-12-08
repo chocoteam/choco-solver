@@ -28,11 +28,12 @@
 package solver.propagation.engines.comparators.predicate;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TIntHashSet;
 import solver.constraints.propagators.Propagator;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MemberP implements Predicate {
@@ -49,25 +50,25 @@ public class MemberP implements Predicate {
         this(ArrayUtils.append(new Propagator[]{prop0}, props));
     }
 
-    public boolean eval(IRequest request) {
+    public boolean eval(IEventRecorder evtrec) {
         if (s_props == null) {
             s_props = new HashSet<Propagator>(Arrays.asList(props));
         }
-        return this.s_props.contains(request.getPropagator());
+        return false;//this.s_props.contains(evtrec.getPropagator());
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < props.length; i++) {
-                for (int k = 0; k < props[i].nbRequests(); k++) {
-                    int idx = props[i].getRequest(k).getIndex(IRequest.IN_GROUP);
+                for (int k = 0; k < props[i].nbRecorders(); k++) {
+                    int idx = props[i].getRecorder(k).getIndex(IRequest.IN_GROUP);
                     tmp.add(idx);
                 }
             }
             cached = tmp.toArray();
-        }
+        }*/
         return cached;
     }
 

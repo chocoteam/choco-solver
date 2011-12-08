@@ -34,7 +34,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.matching.FlowStructure;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
@@ -124,16 +124,16 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
-        IntVar var = request.getVariable();
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        IntVar var = vars[varIdx];
         IntDelta delta = var.getDelta();
 
         if (EventType.isInstantiate(mask)) {
             struct.setMatch(varIdx, var.getValue());
         } else {
-            request.forEach(rem_proc.set(varIdx));
+            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
-//        if (getNbRequestEnqued() == 0) {
+//        if (getNbPendingER() == 0) {
 //            struct.removeUselessEdges(this);
 //        }
         forcePropagate(EventType.CUSTOM_PROPAGATION);

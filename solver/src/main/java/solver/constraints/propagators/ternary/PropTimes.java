@@ -35,7 +35,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -73,7 +73,7 @@ public class PropTimes extends Propagator<IntVar> {
     }
 
     @Override
-    public final void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public final void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {

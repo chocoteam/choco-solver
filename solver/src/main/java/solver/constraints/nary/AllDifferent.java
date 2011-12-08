@@ -28,8 +28,8 @@
 package solver.constraints.nary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;

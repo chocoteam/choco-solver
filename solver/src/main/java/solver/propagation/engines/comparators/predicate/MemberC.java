@@ -28,12 +28,12 @@
 package solver.propagation.engines.comparators.predicate;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TIntHashSet;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MemberC implements Predicate {
@@ -52,28 +52,28 @@ public class MemberC implements Predicate {
         this(ArrayUtils.append(new Constraint[]{cons0}, cons));
     }
 
-    public boolean eval(IRequest request) {
-        return this.s_cons.contains(request.getPropagator().getConstraint());
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//this.s_cons.contains(evtrec.getPropagator().getConstraint());
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
             for (int i = 0; i < cons.length; i++) {
                 Constraint c = cons[i];
                 for (int j = 0; j < c.propagators.length; j++) {
                     Propagator p = c.propagators[j];
-                    for (int k = 0; k < p.nbRequests(); k++) {
-                        int idx = p.getRequest(k).getIndex(IRequest.IN_GROUP);
+                    for (int k = 0; k < p.nbRecorders(); k++) {
+                        int idx = p.getRecorder(k).getIndex(IRequest.IN_GROUP);
                         tmp.add(idx);
                     }
                     //-1 is the PropRequest in a propagator
-                    tmp.add(p.getRequest(-1).getIndex(IRequest.IN_GROUP));
+                    tmp.add(p.getRecorder(-1).getIndex(IRequest.IN_GROUP));
                 }
             }
             cached = tmp.toArray();
-        }
+        }*/
         return cached;
     }
 

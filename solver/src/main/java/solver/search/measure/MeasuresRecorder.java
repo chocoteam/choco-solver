@@ -224,8 +224,8 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         for (int i = 0; i < cstrs.length; i++) {
             Propagator[] propagators = cstrs[i].propagators;
             for (int j = 0; j < propagators.length; j++) {
-                propagationCount += propagators[j].propCalls;
-                eventCount += propagators[j].eventCalls;
+                propagationCount += propagators[j].coarseERcalls;
+                eventCount += propagators[j].fineERcalls;
             }
         }
 
@@ -333,7 +333,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRequests: %,d",
+                "Restarts: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
                 readingTimeCount / IN_MS,
                 initialisationTimeCount / IN_MS,
                 initialPropagationTimeCount / IN_MS,
@@ -348,7 +348,10 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
                 usedMemory,
                 solver.getVars().length,
                 solver.getCstrs().length,
-                solver.getEngine().getNbRequests()));
+//                solver.getEngine().getNbRequests()
+                0
+                ));
+
         return st.toString();
     }
 

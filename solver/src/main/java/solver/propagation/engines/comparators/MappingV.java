@@ -27,9 +27,9 @@
 
 package solver.propagation.engines.comparators;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import solver.recorders.IEventRecorder;
 import solver.variables.Variable;
-import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -40,7 +40,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 15/04/11
  */
-public class MappingV implements Comparator<IRequest>, Serializable {
+public class MappingV implements Comparator<IEventRecorder>, Serializable {
     final TObjectIntHashMap<Variable> criteria;
 
     public MappingV(Variable[] variables, int[] ranks) {
@@ -51,8 +51,8 @@ public class MappingV implements Comparator<IRequest>, Serializable {
     }
 
     @Override
-    public int compare(IRequest o1, IRequest o2) {
-        return criteria.get(o1.getVariable()) - criteria.get(o2.getVariable());
+    public int compare(IEventRecorder o1, IEventRecorder o2) {
+        return 0;//criteria.get(o1.getVariable()) - criteria.get(o2.getVariable());
     }
 
     public String toString() {

@@ -285,16 +285,6 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //void
-    }
-
-    @Override
-    public void deletePropagator(Propagator observer) {
-        //void
-    }
-
-    @Override
     public String toString() {
         return name + "=" + String.valueOf(constante);
     }

@@ -29,7 +29,8 @@ package choco.kernel.memory.copy;
 
 import choco.kernel.memory.*;
 import choco.kernel.memory.structure.Operation;
-import gnu.trove.TIntStack;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 
 import static choco.kernel.memory.copy.RecomputableElement.*;
 
@@ -68,7 +69,7 @@ public class EnvironmentCopying extends AbstractEnvironment {
         elementsD = new RcDouble[64];
         elementsO = new RcObject[64];
         indices = new int[NB_TYPE];
-        clonedWorldIdxStack = new TIntStack();
+        clonedWorldIdxStack = new TIntArrayStack();
     }
 
 

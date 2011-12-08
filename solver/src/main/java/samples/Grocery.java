@@ -32,12 +32,8 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.ternary.Times;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrOrderC;
-import solver.propagation.engines.comparators.IncrOrderV;
 import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -104,7 +100,7 @@ public class Grocery extends AbstractProblem {
         //FIRST propagators on tmp, natural order
         Predicate inVARS = Predicates.member(vars);
         Predicate ALL = Predicates.all();
-        solver.getEngine().addGroup(
+        /*solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicates.but(ALL, inVARS),
                         new IncrOrderC(TMP),
@@ -123,7 +119,7 @@ public class Grocery extends AbstractProblem {
                 Group.buildQueue(
                         inVARS, Policy.FIXPOINT
                 )
-        );
+        );*/
     }
 
     @Override

@@ -28,7 +28,7 @@
 package solver.constraints.nary;
 
 import choco.kernel.ESat;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.sum.PropSumEq;

@@ -26,7 +26,7 @@
  */
 package solver.search.strategy.selectors.graph.arcs;
 
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import java.util.Random;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.variables.graph.GraphVar;

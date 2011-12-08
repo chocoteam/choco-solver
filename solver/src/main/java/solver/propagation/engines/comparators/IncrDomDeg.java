@@ -27,8 +27,8 @@
 
 package solver.propagation.engines.comparators;
 
+import solver.recorders.IEventRecorder;
 import solver.variables.IntVar;
-import solver.requests.IRequest;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -39,7 +39,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 30/03/11
  */
-public class IncrDomDeg<V extends IntVar> implements Comparator<IRequest<V>>, Serializable {
+public class IncrDomDeg<V extends IntVar> implements Comparator<IEventRecorder>, Serializable {
 
     private static final IncrDomDeg singleton = new IncrDomDeg();
 
@@ -51,15 +51,16 @@ public class IncrDomDeg<V extends IntVar> implements Comparator<IRequest<V>>, Se
     }
 
     @Override
-    public int compare(IRequest<V> o1, IRequest<V> o2) {
-        if (o1.getVariable().nbMonitors() == 0) {
+    public int compare(IEventRecorder o1, IEventRecorder o2) {
+        /*if (o1.getVariable().nbMonitors() == 0) {
             return 1;
         } else if (o2.getVariable().nbMonitors() == 0) {
             return -1;
         } else {
             return o1.getVariable().getDomainSize() / o1.getVariable().nbMonitors()
                     - o2.getVariable().getDomainSize() / o2.getVariable().nbMonitors();
-        }
+        }*/
+        return 0;
     }
 
     @Override

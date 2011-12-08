@@ -45,12 +45,12 @@ import java.io.Serializable;
  * User: xlorca
  */
 public interface Variable<D extends IDelta> extends Serializable {
-	
 
-	public final static int INTEGER = 0;
-	public final static int SET = 1;
-	public final static int META = 2;
-	public final static int GRAPH = 3;
+
+    public final static int INTEGER = 0;
+    public final static int SET = 1;
+    public final static int META = 2;
+    public final static int GRAPH = 3;
 
 
     /**
@@ -70,18 +70,21 @@ public interface Variable<D extends IDelta> extends Serializable {
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
      * The monitor is inactive at the creation and must be activated (by the engine propagation).
+     *
      * @param monitor a variable monitor
      */
     void addMonitor(IVariableMonitor monitor);
 
     /**
      * Activate a IVariableMonitor
+     *
      * @param monitor a variable monitor
      */
     void activate(IVariableMonitor monitor);
 
     /**
      * Desactivate a monitor, the monitor is reactivate upon backtracking.
+     *
      * @param monitor a variable monitor
      */
     void desactivate(IVariableMonitor monitor);
@@ -89,7 +92,7 @@ public interface Variable<D extends IDelta> extends Serializable {
     //todo : to complete
     void removeMonitor(IVariableMonitor monitor);
 
-    IList getMonitors();
+    <V extends Variable> IList<V, IVariableMonitor<V>> getMonitors();
 
     int nbMonitors();
 
@@ -112,29 +115,18 @@ public interface Variable<D extends IDelta> extends Serializable {
      */
 
     Explanation explain(VariableState what);
+
     Explanation explain(VariableState what, int val);
 
     D getDelta();
 
     /**
      * Regarding the propagator in parameter, update the propagation conditions of the variable
+     *
      * @param propagator a newly added propagator
-     * @param idxInProp index of the variable in the propagator
+     * @param idxInProp  index of the variable in the propagator
      */
     void updatePropagationConditions(Propagator propagator, int idxInProp);
-
-    /**
-     * Deletes an observers from the set of observers for this object.
-     * @param observer the observer to delete
-     */
-    void deletePropagator(Propagator observer);
-
-    /**
-     * attach a propagator to the variable
-     * @param propagator a propagator
-     * @param idxInProp index of the variable within the propagator
-     */
-    void attachPropagator(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
@@ -142,7 +134,8 @@ public interface Variable<D extends IDelta> extends Serializable {
      *
      * @param event event on this object
      * @param cause object which leads to the modification of this object
-     * @throws solver.exception.ContradictionException if a contradiction occurs during notification
+     * @throws solver.exception.ContradictionException
+     *          if a contradiction occurs during notification
      */
     void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
 
@@ -151,12 +144,14 @@ public interface Variable<D extends IDelta> extends Serializable {
 
     /**
      * The solver attributes a unique ID to the variable (used as hashCode)
+     *
      * @param id unique ID
      */
     void setUniqueID(int id);
 
     /**
      * Returns the ID of the variable
+     *
      * @return the ID
      */
     int getUniqueID();
@@ -164,20 +159,21 @@ public interface Variable<D extends IDelta> extends Serializable {
     /**
      * Throws a contradiction exception based on <cause, message>
      *
-     * @param cause ICause causing the exception
+     * @param cause   ICause causing the exception
      * @param event
-     *@param message the detailed message  @throws ContradictionException expected behavior
+     * @param message the detailed message  @throws ContradictionException expected behavior
      */
     void contradiction(@NotNull ICause cause, EventType event, String message) throws ContradictionException;
 
     /**
      * Return the associated solver
+     *
      * @return a Solver object
      */
     Solver getSolver();
 
-	/**
-	 * @return an int representing the type of the variable
-	 */
-	int getType();
+    /**
+     * @return an int representing the type of the variable
+     */
+    int getType();
 }

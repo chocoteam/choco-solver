@@ -56,4 +56,10 @@ public interface IDelta extends Serializable{
      * @throws ContradictionException if a contradiction occurs.
      */
     void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
+
+    /**
+     * Create and return a dedicated monitor for this.
+     * @return a monitor
+     */
+    <D extends IDelta>IDeltaMonitor<D> getMonitor();
 }

@@ -33,9 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.lex.Lex;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.*;
-import solver.propagation.engines.group.Group;
+import solver.propagation.engines.comparators.predicate.Predicate;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -46,7 +44,7 @@ import solver.variables.VariableFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static solver.propagation.engines.comparators.predicate.Predicates.*;
+import static solver.propagation.engines.comparators.predicate.Predicates.light;
 
 /**
  * Orthogonal latin square
@@ -144,7 +142,7 @@ public class OrthoLatinSquare extends AbstractProblem {
                 solver.getEnvironment()));
         //TODO: propagation
         Predicate light = light();
-        solver.getEngine().addGroup(
+        /*solver.getEngine().addGroup(
                 Group.buildQueue(
                         but(light, member(ALLDIFFS)),
                         Policy.FIXPOINT
@@ -159,7 +157,7 @@ public class OrthoLatinSquare extends AbstractProblem {
                 Group.buildQueue(
                         all(),
                         Policy.ONE
-                ));
+                ));*/
     }
 
     @Override

@@ -30,7 +30,8 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.TIntStack;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
@@ -38,7 +39,7 @@ import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGra
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -52,7 +53,7 @@ public class PropRegular extends Propagator<IntVar> {
 
     final StoredDirectedMultiGraph graph;
     final IAutomaton automaton;
-    final TIntStack temp = new TIntStack();
+    final TIntStack temp = new TIntArrayStack();
 
     protected final RemProc rem_proc;
 
@@ -89,9 +90,9 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp,
-                                   int mask) throws ContradictionException {
-        intVarIRequest.forEach(rem_proc.set(idxVarInProp));
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp,
+                          int mask) throws ContradictionException {
+        eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
     }
 
     @Override

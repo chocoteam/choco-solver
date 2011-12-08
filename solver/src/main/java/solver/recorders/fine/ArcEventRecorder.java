@@ -152,13 +152,13 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void enqueue() {
         enqueued = true;
-        propagator.incNbRequestEnqued();
+        propagator.incNbRecorderEnqued();
     }
 
     @Override
     public void deque() {
         enqueued = false;
-        propagator.decNbRequestEnqued();
+        propagator.decNbRecrodersEnqued();
     }
 
     @Override

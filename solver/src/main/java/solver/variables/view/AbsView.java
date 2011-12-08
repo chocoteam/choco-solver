@@ -32,11 +32,11 @@ import choco.kernel.common.util.iterators.DisposableValueIterator;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.ViewRequestWrapper;
+import solver.recorders.fine.IModifier;
+import solver.recorders.fine.IntModifiers;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -79,13 +79,10 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //todo : ugly
-        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
-                ViewRequestWrapper.Modifier.ABS);
-        propagator.addRequest(req);
-        var.addMonitor(req);
+    public IModifier getModifier() {
+        return IntModifiers.ABS;
     }
+
 
     @Override
     public void setHeuristicVal(HeuristicVal heuristicVal) {

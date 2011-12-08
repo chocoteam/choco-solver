@@ -103,45 +103,45 @@ public class RequestListTest {
         VariableMonitorListBuilder._DEFAULT = 0;
         IList<MockRequest> list = VariableMonitorListBuilder.preset(env, IRequest.IN_VAR);
 
-        MockRequest[] requests = new MockRequest[3];
-        for (int i = 0; i < requests.length; i++) {
-            requests[i] = new MockRequest(new MockPropagator(solver, 2), i);
-            list.add(requests[i], false);
+        MockRequest[] records = new MockRequest[3];
+        for (int i = 0; i < records.length; i++) {
+            records[i] = new MockRequest(new MockPropagator(solver, 2), i);
+            list.add(records[i], false);
         }
 
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 2);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
 
         env.worldPush();
-        list.setPassive(requests[0]);
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 0);
+        list.setPassive(records[0]);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 0);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPush();
-        list.setPassive(requests[2]);
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        list.setPassive(records[2]);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 1);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
     }
@@ -153,45 +153,45 @@ public class RequestListTest {
         VariableMonitorListBuilder._DEFAULT = 1;
         IList<MockRequest> list = VariableMonitorListBuilder.preset(env, IRequest.IN_VAR);
 
-        MockRequest[] requests = new MockRequest[3];
-        for (int i = 0; i < requests.length; i++) {
-            requests[i] = new MockRequest(new MockPropagator(solver, 2), i);
-            list.add(requests[i], false);
+        MockRequest[] records = new MockRequest[3];
+        for (int i = 0; i < records.length; i++) {
+            records[i] = new MockRequest(new MockPropagator(solver, 2), i);
+            list.add(records[i], false);
         }
 
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 2);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
 
         env.worldPush();
-        list.setPassive(requests[0]);
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 1);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 0);
+        list.setPassive(records[0]);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 0);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPush();
-        list.setPassive(requests[2]);
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        list.setPassive(records[2]);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 1);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 2);
 
         env.worldPop();
-        Assert.assertEquals(requests[0].getIndex(IRequest.IN_VAR), 2);
-        Assert.assertEquals(requests[1].getIndex(IRequest.IN_VAR), 0);
-        Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
+        Assert.assertEquals(records[0].getIndex(IRequest.IN_VAR), 2);
+        Assert.assertEquals(records[1].getIndex(IRequest.IN_VAR), 0);
+        Assert.assertEquals(records[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
     }*/

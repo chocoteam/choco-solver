@@ -27,9 +27,8 @@
 
 package solver.propagation.engines.comparators.predicate;
 
-import gnu.trove.TIntHashSet;
 import solver.constraints.propagators.Propagator;
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 
 public class EqualP implements Predicate {
@@ -42,21 +41,21 @@ public class EqualP implements Predicate {
     }
 
     @Override
-    public boolean eval(IRequest request) {
-        return this.prop == request.getVariable();
+    public boolean eval(IEventRecorder evtrec) {
+        return false;//this.prop == evtrec.getVariable();
     }
 
     @Override
-    public int[] extract(IRequest[] all) {
-        if (cached == null) {
+    public int[] extract(IEventRecorder[] all) {
+        /*if (cached == null) {
             TIntHashSet tmp = new TIntHashSet();
-            for (int j = 0; j < prop.nbRequests(); j++) {
-                int idx = prop.getRequest(j).getIndex(IRequest.IN_GROUP);
+            for (int j = 0; j < prop.nbRecorders(); j++) {
+                int idx = prop.getRecorder(j).getIndex(IRequest.IN_GROUP);
                 tmp.add(idx);
             }
             cached = tmp.toArray();
         }
-
+*/
         return cached;
     }
 

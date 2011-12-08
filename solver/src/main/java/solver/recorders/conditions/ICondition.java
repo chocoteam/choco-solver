@@ -33,9 +33,9 @@ import solver.variables.EventType;
 import java.io.Serializable;
 
 /**
- * A condition on request scheduling.
- * #validateScheduling can react on a request updating to compute (or update) a condition
- * that validates (or not) the scheduling of the request
+ * A condition on recorder scheduling.
+ * #validateScheduling can react on a recorder updating to compute (or update) a condition
+ * that validates (or not) the scheduling of the recorder
  * <p/>
  * <br/>
  *
@@ -45,13 +45,13 @@ import java.io.Serializable;
 public interface ICondition<R extends IEventRecorder> extends Serializable {
 
     /**
-     * Keep informed the condition of the modification of one of its related requests.
-     * If the condition is newly validate, schedule all related requests, if any.
+     * Keep informed the condition of the modification of one of its related recorders.
+     * If the condition is newly validate, schedule all related recorders, if any.
      *
-     * @param request recently modified request
+     * @param recorder recently modified recorder
      * @param event   event requiring a validation
      */
-    boolean validateScheduling(R request, EventType event);
+    boolean validateScheduling(R recorder, EventType event);
 
     /**
      * Return the next condition to check, if <code>this</code> is not valid </br>
@@ -62,17 +62,17 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
     ICondition next();
 
     /**
-     * Link the <code>request</code> to the condition
+     * Link the <code>recorder</code> to the condition
      *
-     * @param request condition request
+     * @param recorder condition recorder
      */
-    public void linkRequest(R request);
+    public void linkRecorder(R recorder);
 
     public static enum Default implements ICondition<ArcEventRecorderWithCondition> {
         NO_CONDITION;
 
         @Override
-        public boolean validateScheduling(ArcEventRecorderWithCondition request, EventType event) {
+        public boolean validateScheduling(ArcEventRecorderWithCondition recorder, EventType event) {
             return false;
         }
 
@@ -82,7 +82,7 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
         }
 
         @Override
-        public void linkRequest(ArcEventRecorderWithCondition request) {
+        public void linkRecorder(ArcEventRecorderWithCondition recorder) {
         }
 
 

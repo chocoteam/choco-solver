@@ -27,7 +27,7 @@
 
 package choco.checker;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import solver.Solver;
@@ -111,9 +111,9 @@ public class CorrectnessChecker {
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
         Solver ref = modeler.model(nbVar, domains, map, parameters);
-        ref.getSearchLoop().propEngine.init();
+        ref.getSearchLoop().propEngine.init(ref);
         try {
-            ref.getSearchLoop().propEngine.fixPoint();
+            ref.getSearchLoop().propEngine.iterateAndExecute();
         } catch (ContradictionException e) {
             LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
             return null;

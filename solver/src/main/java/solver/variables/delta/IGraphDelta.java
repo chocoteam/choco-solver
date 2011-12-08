@@ -28,13 +28,13 @@
 package solver.variables.delta;
 
 
-public interface IGraphDelta extends IDelta{
+public interface IGraphDelta extends IDelta {
 
-	IntDelta getNodeRemovalDelta();
-	
-	IntDelta getNodeEnforcingDelta();
-	
-	IntDelta getArcRemovalDelta();
-	
-	IntDelta getArcEnforcingDelta();
+    IntDelta getNodeRemovalDelta();
+
+    IntDelta getNodeEnforcingDelta();
+
+    IntDelta getArcRemovalDelta();
+
+    IntDelta getArcEnforcingDelta();
 }

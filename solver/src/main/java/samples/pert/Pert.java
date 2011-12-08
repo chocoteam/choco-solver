@@ -34,15 +34,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.Cond;
-import solver.propagation.engines.comparators.Decr;
-import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.MappingV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -136,7 +127,7 @@ public class Pert extends AbstractProblem {
             }
         }
 
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.priority(PropagatorPriority.TERNARY),
@@ -151,7 +142,7 @@ public class Pert extends AbstractProblem {
                         Predicates.all(),
                         IncrArityP.get(),
                         Policy.FIXPOINT
-                ));
+                ));*/
 
 
     }

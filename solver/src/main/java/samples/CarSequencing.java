@@ -31,12 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.IncrDomDeg;
-import solver.propagation.engines.comparators.Seq;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -128,7 +122,7 @@ public class CarSequencing extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
-        solver.getEngine().addGroup(
+        /*solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicates.light(),
                         new Seq(IncrArityP.get(),
@@ -138,7 +132,7 @@ public class CarSequencing extends AbstractProblem {
                 Group.buildGroup(
                         Predicates.all(),
                         IncrArityP.get(),
-                        Policy.ONE));
+                        Policy.ONE));*/
 
     }
 

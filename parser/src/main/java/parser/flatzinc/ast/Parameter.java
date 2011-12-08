@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.declaration.DArray;
 import parser.flatzinc.ast.declaration.DInt2;

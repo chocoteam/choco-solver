@@ -111,7 +111,7 @@ public abstract class VarEventRecorder<V extends Variable> extends AbstractFineE
     public void enqueue() {
         enqueued = true;
         for (int i = 0; i < propagators.size(); i++) {
-            propagators.get(i).incNbRequestEnqued();
+            propagators.get(i).incNbRecorderEnqued();
         }
     }
 
@@ -119,7 +119,7 @@ public abstract class VarEventRecorder<V extends Variable> extends AbstractFineE
     public void deque() {
         enqueued = false;
         for (int i = 0; i < propagators.size(); i++) {
-            propagators.get(i).decNbRequestEnqued();
+            propagators.get(i).decNbRecrodersEnqued();
         }
     }
 

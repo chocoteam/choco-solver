@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;

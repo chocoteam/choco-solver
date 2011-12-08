@@ -27,7 +27,7 @@
 
 package solver.propagation.engines.comparators;
 
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -39,7 +39,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 29/03/11
  */
-public class Shuffle implements Comparator<IRequest>, Serializable {
+public class Shuffle implements Comparator<IEventRecorder>, Serializable {
 
     private final Random random;
 
@@ -52,7 +52,7 @@ public class Shuffle implements Comparator<IRequest>, Serializable {
     }
 
     @Override
-    public int compare(IRequest o1, IRequest o2) {
+    public int compare(IEventRecorder o1, IEventRecorder o2) {
         return random.nextInt();
     }
 

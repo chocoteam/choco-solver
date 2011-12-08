@@ -58,12 +58,12 @@ import java.util.Random;
  */
 public class ConditionnalRecorderTest {
 
-    private static void castRequests(Constraint[] constraints, Solver solver, IEnvironment environment, int threshold) {
+    private static void castRecords(Constraint[] constraints, Solver solver, IEnvironment environment, int threshold) {
         try {
-            Field f_requests = Propagator.class.getDeclaredField("fineER");
+            Field fineER = Propagator.class.getDeclaredField("fineER");
             Field f_vars = Propagator.class.getDeclaredField("vars");
 
-            f_requests.setAccessible(true);
+            fineER.setAccessible(true);
             f_vars.setAccessible(true);
 
             for (Constraint cstr : constraints) {
@@ -71,19 +71,19 @@ public class ConditionnalRecorderTest {
                 for (Propagator prop : propagators) {
                     IntVar[] ivars = (IntVar[]) f_vars.get(prop);
                     AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
-                    ArcEventRecorderWithCondition[] requests = new ArcEventRecorderWithCondition[ivars.length];
+                    ArcEventRecorderWithCondition[] records = new ArcEventRecorderWithCondition[ivars.length];
                     for (int i = 0; i < ivars.length; i++) {
                         ivars[i].updatePropagationConditions(prop, i);
-                        requests[i] = new ArcEventRecorderWithCondition(ivars[i], prop, i, cond, solver);
-                        prop.addRecorder(requests[i]);
-                        ivars[i].addMonitor(requests[i]);
-                        cond.linkRecorder(requests[i]);
+                        records[i] = new ArcEventRecorderWithCondition(ivars[i], prop, i, cond, solver);
+                        prop.addRecorder(records[i]);
+                        ivars[i].addMonitor(records[i]);
+                        cond.linkRecorder(records[i]);
                     }
-                    f_requests.set(prop, requests);
+                    fineER.set(prop, records);
                 }
             }
 
-            f_requests.setAccessible(false);
+            fineER.setAccessible(false);
             f_vars.setAccessible(false);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -114,7 +114,7 @@ public class ConditionnalRecorderTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
         IntVar[] vars = new IntVar[]{x, y, z};
 
-        castRequests(cstrs, solver, solver.getEnvironment(), 2);
+        castRecords(cstrs, solver, solver.getEnvironment(), 2);
 
         solver.post(cstrs);
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
@@ -135,7 +135,7 @@ public class ConditionnalRecorderTest {
 
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
 
-            castRequests(cstrs, solver, solver.getEnvironment(), n / 2);
+            castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));

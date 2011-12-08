@@ -34,12 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
+import solver.propagation.IPropagationEngine;
 import solver.propagation.engines.comparators.EngineStrategies;
-import solver.propagation.engines.comparators.Shuffle;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -115,7 +111,7 @@ public abstract class AbstractProblem {
                 break;
             case SHUFFLE:
                 engine.deleteGroups();
-                solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), new Shuffle(seed), Policy.FIXPOINT));
+//                solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), new Shuffle(seed), Policy.FIXPOINT));
                 break;
             default:
                 engine.deleteGroups();
@@ -136,7 +132,6 @@ public abstract class AbstractProblem {
         this.configureSolver();
 
         overrideExplanation();
-
         overridePolicy();
 
         if (level.getLevel() > Level.QUIET.getLevel()) {

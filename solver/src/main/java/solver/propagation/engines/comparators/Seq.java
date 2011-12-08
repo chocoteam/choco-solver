@@ -27,21 +27,21 @@
 
 package solver.propagation.engines.comparators;
 
-import solver.requests.IRequest;
+import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class Seq implements Comparator<IRequest>, Serializable {
-    Comparator<IRequest> c1;
-    Comparator<IRequest> c2;
+public class Seq implements Comparator<IEventRecorder>, Serializable {
+    Comparator<IEventRecorder> c1;
+    Comparator<IEventRecorder> c2;
 
-    public Seq(Comparator<IRequest> c1, Comparator<IRequest> c2) {
+    public Seq(Comparator<IEventRecorder> c1, Comparator<IEventRecorder> c2) {
         this.c1 = c1;
         this.c2 = c2;
     }
 
-    public int compare(IRequest v1, IRequest v2) {
+    public int compare(IEventRecorder v1, IEventRecorder v2) {
         int cmp1 = c1.compare(v1, v2);
         if (cmp1 == 0) {
             return c2.compare(v1, v2);

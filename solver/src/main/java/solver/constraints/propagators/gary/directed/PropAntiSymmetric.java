@@ -35,115 +35,110 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @author Jean-Guillaume Fages
- * 
- * Ensures that the final graph is antisymmetric
- *
  * @param <V>
+ * @author Jean-Guillaume Fages
+ *         <p/>
+ *         Ensures that the final graph is antisymmetric
  */
-public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V>{
+public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	EnfProc enf;
+    DirectedGraphVar g;
+    EnfProc enf;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropAntiSymmetric(
-			V graph,
-			Solver solver,
-			Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, false);
-		g = graph;
-		enf = new EnfProc(this);
-	}
+    public PropAntiSymmetric(
+            V graph,
+            Solver solver,
+            Constraint<V, Propagator<V>> constraint) {
+        super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY, false);
+        g = graph;
+        enf = new EnfProc(this);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				g.removeArc(j, i, this, false);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+        INeighbors succ;
+        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
+            succ = g.getKernelGraph().getSuccessorsOf(i);
+            for (int j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
+                g.removeArc(j, i, this, false);
+            }
+        }
+    }
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
-			if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
-			}
-		}
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        if ((mask & EventType.ENFORCEARC.mask) != 0) {
+            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ENFORCEARC.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		INeighbors succ;
-		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
-			succ = g.getKernelGraph().getSuccessorsOf(i);
-			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				if(g.getKernelGraph().arcExists(j, i)){
-					return ESat.FALSE;
-				}
-			}
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+        INeighbors succ;
+        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
+            succ = g.getKernelGraph().getSuccessorsOf(i);
+            for (int j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
+                if (g.getKernelGraph().arcExists(j, i)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        return ESat.UNDEFINED;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	/** Enable to remove the opposite arc */
-	private static class EnfProc implements IntProcedure {
+    /**
+     * Enable to remove the opposite arc
+     */
+    private static class EnfProc implements IntProcedure {
 
-		private final PropAntiSymmetric p;
+        private final PropAntiSymmetric p;
 
-		public EnfProc(PropAntiSymmetric p) {
-			this.p = p;
-		}
+        public EnfProc(PropAntiSymmetric p) {
+            this.p = p;
+        }
 
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>=n){
-				int from = i/n-1;
-				int to   = i%n;
-				if(from!=to){
-					p.g.removeArc(to, from, p, false);
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-	}
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i >= n) {
+                int from = i / n - 1;
+                int to = i % n;
+                if (from != to) {
+                    p.g.removeArc(to, from, p, false);
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+    }
 }

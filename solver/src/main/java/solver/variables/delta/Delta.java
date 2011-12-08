@@ -30,6 +30,7 @@ package solver.variables.delta;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
+import solver.variables.delta.monitor.IntDeltaMonitor;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -37,7 +38,7 @@ import solver.search.loop.AbstractSearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class Delta implements IntDelta{
+public final class Delta implements IntDelta {
 
     int[] rem;
     int last;
@@ -45,6 +46,11 @@ public final class Delta implements IntDelta{
 
     public Delta() {
         rem = new int[16];
+    }
+
+    @Override
+    public IntDeltaMonitor getMonitor() {
+        return new IntDeltaMonitor(this);
     }
 
     private static int[] ensureCapacity(int idx, int[] values) {
@@ -56,8 +62,8 @@ public final class Delta implements IntDelta{
         return values;
     }
 
-    protected void lazyClear(){
-        if(timestamp - AbstractSearchLoop.timeStamp != 0){
+    protected void lazyClear() {
+        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
             last = 0;
             timestamp = AbstractSearchLoop.timeStamp;
         }
@@ -75,7 +81,7 @@ public final class Delta implements IntDelta{
     }
 
     @Override
-    public int get(int idx){
+    public int get(int idx) {
         return rem[idx];
     }
 
@@ -92,7 +98,6 @@ public final class Delta implements IntDelta{
      */
     @Override
     public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-    	to = Math.min(to, rem.length);
         for (int i = from; i < to; i++) {
             proc.execute(rem[i]);
         }

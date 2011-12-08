@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -128,7 +128,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             //val = the current value
             final int val = vars[idxVarInProp].getValue();
@@ -162,7 +162,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 oldsup.set(vars[idxVarInProp].getUB());
             }
             if (EventType.isRemove(mask)) {
-                request.forEach(rem_proc);
+                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc, EventType.REMOVE);
             }
         }
 

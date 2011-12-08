@@ -29,17 +29,15 @@ package solver.constraints.propagators.gary.constraintSpecific;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -282,7 +280,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (nbBks != solver.getMeasures().getBackTrackCount()) {
             for (int i = 0; i < n; i++) {
                 matching[i] = storedMatching[i].get();
@@ -290,12 +288,11 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
             nbBks = solver.getMeasures().getBackTrackCount();
         }
         if (mask != EventType.REMOVEARC.mask) return;
-        if (request instanceof GraphRequest) {
-            GraphRequest gv = (GraphRequest) request;
-            IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-            // maintient du COUPLAGE et des SCC
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
+			// maintient du COUPLAGE et des SCC
             obsoleteMatching = false;
-            d.forEach(maintain_matching, gv.fromArcRemoval(), gv.toArcRemoval());
+            eventRecorder.getDeltaMonitor(g).forEach(maintain_matching, EventType.REMOVEARC);
             if (obsoleteMatching) {
                 repairMatching();
                 buildSCC();
@@ -305,7 +302,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
                 }
             } else {
                 repairedSCC.clear();
-                d.forEach(maintain_scc, gv.fromArcRemoval(), gv.toArcRemoval());
+                eventRecorder.getDeltaMonitor(g).forEach(maintain_scc, EventType.REMOVEARC);
                 filter();
             }
         }

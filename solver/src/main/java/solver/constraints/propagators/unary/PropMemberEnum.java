@@ -28,15 +28,14 @@
 package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntHashSet;
-import solver.Solver;
+import gnu.trove.set.hash.TIntHashSet;import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -83,7 +82,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         propagate(EventType.FULL_PROPAGATION.mask);
     }
 

@@ -32,13 +32,13 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K edges belong to the final undirected graph
  * 
@@ -109,8 +109,8 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		super.propagateOnRequest(request, idxVarInProp, mask);
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		super.propagate(eventRecorder, idxVarInProp, mask);
 		if(k.instantiated()){
 			if(nbInKer.get()==nbInEnv.get()){
 				setPassive();

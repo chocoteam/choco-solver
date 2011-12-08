@@ -29,11 +29,9 @@ package solver.constraints.propagators;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.requests.EventRequest;
-import solver.requests.GraphRequest;
-import solver.requests.IRequestWithVariable;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.recorders.fine.ArcEventRecorder;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
 
 public abstract class GraphPropagator<V extends Variable> extends Propagator<V> {
 
@@ -49,14 +47,8 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
     // METHODS
     //***********************************************************************************
 
-
-    @Override
-    public IRequestWithVariable<V> makeRequest(V var, int idx) {
-        if (var instanceof GraphVar) {
-            return new GraphRequest(this, (GraphVar) var, idx);
-        } else {
-            return new EventRequest<V>(this, var, idx);
-        }
+    public AbstractFineEventRecorder makeRequest(V var, int idx, Solver solver) {
+        return new ArcEventRecorder(var, this, idx, solver);
     }
 
 }

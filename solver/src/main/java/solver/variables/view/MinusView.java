@@ -30,12 +30,11 @@ import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.AbstractRequestWithVar;
-import solver.requests.ViewRequestWrapper;
+import solver.recorders.fine.IModifier;
+import solver.recorders.fine.IntModifiers;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -72,12 +71,8 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //todo : ugly
-        ViewRequestWrapper req = new ViewRequestWrapper((AbstractRequestWithVar)propagator.makeRequest(var, idxInProp),
-                ViewRequestWrapper.Modifier.MINUS);
-        propagator.addRequest(req);
-        var.addMonitor(req);
+    public IModifier getModifier() {
+        return IntModifiers.MINUS;
     }
 
     @Override

@@ -69,7 +69,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
             elements[i].setIdxInV(parent, i);
         }
         if (first < i) {
-            throw new UnsupportedOperationException("Cannot reactivate a request");
+            throw new UnsupportedOperationException("Cannot reactivate an IActivate");
         }
         firstActive.add(-1);
     }
