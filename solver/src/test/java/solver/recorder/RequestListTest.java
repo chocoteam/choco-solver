@@ -25,21 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests;
-
-import choco.kernel.ESat;
-import choco.kernel.common.util.objects.IList;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IEnvironment;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.requests.list.VariableMonitorListBuilder;
-import solver.variables.EventType;
-import solver.variables.IntVar;
+package solver.recorder;
 
 /**
  * <br/>
@@ -49,7 +35,7 @@ import solver.variables.IntVar;
  */
 public class RequestListTest {
 
-    private static class MockRequest extends AbstractRequestWithVar {
+    /*private static class MockRequest extends AbstractRequestWithVar {
 
         Propagator p;
         int vidx;
@@ -96,7 +82,7 @@ public class RequestListTest {
         }
 
         @Override
-        public void propagateOnRequest(IRequest iRequest, int idxVarInProp, int mask) throws ContradictionException {
+        public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         }
 
         @Override
@@ -208,5 +194,5 @@ public class RequestListTest {
         Assert.assertEquals(requests[2].getIndex(IRequest.IN_VAR), 1);
         Assert.assertEquals(list.size(), 3);
         Assert.assertEquals(list.cardinality(), 3);
-    }
+    }*/
 }

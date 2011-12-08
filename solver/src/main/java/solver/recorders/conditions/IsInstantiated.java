@@ -24,67 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.requests.conditions;
 
-import solver.requests.AbstractRequestWithVar;
-import solver.requests.ConditionnalRequest;
+package solver.recorders.conditions;
+
+import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateInt;
+import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
-
-import java.io.Serializable;
+import solver.variables.IntVar;
 
 /**
- * A condition on request scheduling.
- * #validateScheduling can react on a request updating to compute (or update) a condition
- * that validates (or not) the scheduling of the request
- * <p/>
+ * A simple condition based on number of instantiated variables.
+ * Requests are posted when each variable is instantiated.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 17/11/11
+ * @since 22/03/11
  */
-public interface ICondition<R extends AbstractRequestWithVar> extends Serializable {
+public class IsInstantiated extends AbstractCondition {
 
-    /**
-     * Keep informed the condition of the modification of one of its related requests.
-     * If the condition is newly validate, schedule all related requests, if any.
-     *
-     * @param request recently modified request
-     * @param event   event requiring a validation
-     */
-    boolean validateScheduling(R request, EventType event);
+    final IStateInt nbVarInstantiated;
+    final IntVar variable;
 
-    /**
-     * Return the next condition to check, if <code>this</code> is not valid </br>
-     * Default value is ICondition.NO_CONDITION
-     *
-     * @return
-     */
-    ICondition next();
+    public IsInstantiated(IEnvironment environment, IntVar variable) {
+        super(environment);
+        nbVarInstantiated = environment.makeInt();
+        this.variable = variable;
+    }
 
-    /**
-     * Link the <code>request</code> to the condition
-     *
-     * @param request condition request
-     */
-    public void linkRequest(R request);
+    @Override
+    boolean isValid() {
+        return variable.instantiated();
+    }
 
-    public static enum Default implements ICondition<ConditionnalRequest> {
-        NO_CONDITION;
+    @Override
+    boolean alwaysValid() {
+        return true;
+    }
 
-        @Override
-        public boolean validateScheduling(ConditionnalRequest request, EventType event) {
-            return false;
-        }
-
-        @Override
-        public ICondition next() {
-            return NO_CONDITION;
-        }
-
-        @Override
-        public void linkRequest(ConditionnalRequest request) {
-        }
-
-
+    @Override
+    void update(ArcEventRecorderWithCondition request, EventType event) {
     }
 }

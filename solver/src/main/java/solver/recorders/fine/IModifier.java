@@ -24,51 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.recorders.fine;
 
-package solver.requests.list;
-
-import choco.kernel.common.util.objects.HalfBactrackableList;
-import choco.kernel.common.util.objects.IList;
-import choco.kernel.common.util.objects.RequestArrayList;
-import choco.kernel.memory.IEnvironment;
-import solver.variables.IVariableMonitor;
+import solver.variables.EventType;
+import solver.variables.Variable;
 
 /**
- * A class declaring builder for IList<IVariableMonitor>.
+ * An interface to allow description of event modifier.
+ * Required for views.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24/02/11
+ * @since 06/12/11
  */
-public class VariableMonitorListBuilder {
-
-    public static int _DEFAULT = 0; // 0: RequestArrayList, 1: HalfBactrackableList
-
-    protected VariableMonitorListBuilder() {
-    }
+public interface IModifier<V extends Variable> {
 
     /**
-     * Builds and returns the preset IRequestList object.
-     *
-     * @param environment bracktrackable environment
-     * @param dim         dimension to set and get index
-     * @param <M>         type of element, should extends IVariableMonitor
-     * @return a implementation of IRequestList
+     * Update the event by applying rules implied by the view.
+     * @param var the viewed variable
+     * @param e the original event
+     * @return a modified event.
      */
-    public static <M extends IVariableMonitor> IList<M> preset(IEnvironment environment, int dim) {
-        switch (_DEFAULT) {
-            case 1:
-                return halfBacktracakbleList(environment, dim);
-            default:
-                return arraylist(environment, dim);
+    EventType update(V var, EventType e);
+
+    public static enum Default implements IModifier<Variable>{
+
+        /**
+         * return the event, without transformation.
+         */
+        NO{
+            @Override
+            public EventType update(Variable var, EventType e) {
+                return e;
+            }
         }
-    }
-
-    public static <M extends IVariableMonitor> IList<M> arraylist(IEnvironment environment, int dim) {
-        return new RequestArrayList<M>(environment, dim);
-    }
-
-    public static <M extends IVariableMonitor> IList<M> halfBacktracakbleList(IEnvironment environment, int dim) {
-        return new HalfBactrackableList<M>(environment, dim);
     }
 }

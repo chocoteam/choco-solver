@@ -24,55 +24,22 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation;
 
-package solver.requests.conditions;
-
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import solver.requests.ConditionnalRequest;
-import solver.variables.EventType;
+import solver.exception.ContradictionException;
 
 /**
- * A simple condition based on number of instantiated variables.
- * Requests are posted when each variable is instantiated.
+ * An interface for executable classes.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/03/11
+ * @since 01/12/11
  */
-public class CompletlyInstantiated extends AbstractCondition{
+public interface IExecutable {
 
-    final IStateInt nbVarInstantiated;
-    final int threshold;
-
-    public CompletlyInstantiated(IEnvironment environment, int threshold) {
-        super(environment);
-        nbVarInstantiated = environment.makeInt();
-        this.threshold = threshold;
-    }
-
-    @Override
-    boolean isValid() {
-        return nbVarInstantiated.get() >= threshold;
-    }
-
-    @Override
-    boolean alwaysValid() {
-        return true;
-    }
-
-    @Override
-    void update(ConditionnalRequest request, EventType event) {
-        if (EventType.isInstantiate(event.mask)) {
-            nbVarInstantiated.add(1);
-        }
-    }
-
-    @Override
-    public void linkRequest(ConditionnalRequest request) {
-        super.linkRequest(request);
-        if (request.getVariable().instantiated()) {
-            nbVarInstantiated.add(1);
-        }
-    }
+    /**
+     * Main execution method
+     * @throws ContradictionException when contradiction occurs.
+     */
+    void execute() throws ContradictionException;
 }

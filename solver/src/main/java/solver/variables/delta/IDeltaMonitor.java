@@ -24,17 +24,53 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.requests;
+package solver.variables.delta;
+
+import choco.kernel.common.util.procedure.IntProcedure;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
 
 /**
- * An interface for schedulable object
+ * A delta monitor.
+ * It is based on a specific delta and stores some specific informations about it.
+ * It can freeze it.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/11/11
+ * @since 07/12/11
  */
-public interface ISchedulable {
+public interface IDeltaMonitor<D extends IDelta> {
 
-    void schedule();
+    void update(EventType evt);
+
+    void freeze();
+
+    void unfreeze();
+
+    void clear();
+
+    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
+
+    public static enum Default implements IDeltaMonitor<IDelta> {
+        NONE() {
+            @Override
+            public void update(EventType evt) {}
+
+            @Override
+            public void freeze() {}
+
+            @Override
+            public void unfreeze() {
+            }
+
+            @Override
+            public void clear() {
+            }
+
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+            }
+        }
+    }
 
 }

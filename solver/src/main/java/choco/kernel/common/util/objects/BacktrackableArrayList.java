@@ -27,11 +27,12 @@
 
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
+import solver.variables.IVariableMonitor;
+import solver.variables.Variable;
 
 /**
  * [<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -39,33 +40,33 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class RequestArrayList<E extends MultiDimensionIndex> implements IList<E> {
+public final class BacktrackableArrayList<V extends Variable, E extends IVariableMonitor<V>> implements IList<V, E> {
 
     protected E[] elements;
 
     protected IStateInt firstActive;
     protected IStateInt firstPassive;
 
-    protected final int DIMENSION;
+    protected final V parent;
 
-    public RequestArrayList(IEnvironment environment, int dim) {
-        elements = (E[]) new MultiDimensionIndex[0];
+    public BacktrackableArrayList(V variable, IEnvironment environment) {
+        this.parent = variable;
+        elements = (E[]) new IVariableMonitor[0];
         firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
-        this.DIMENSION = dim;
     }
 
     @Override
     public void setActive(E element) {
         int first = this.firstActive.get();
-        int i = element.getIndex(DIMENSION);
+        int i = element.getIdxInV(parent);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = elements[--first];
             elements[first] = elements[i];
-            elements[first].setIndex(DIMENSION, first);
+            elements[first].setIdxInV(parent, first);
             elements[i] = tmp1;
-            elements[i].setIndex(DIMENSION, i);
+            elements[i].setIdxInV(parent, i);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate a request");
@@ -76,14 +77,14 @@ public final class RequestArrayList<E extends MultiDimensionIndex> implements IL
     @Override
     public void setPassive(E element) {
         int last = this.firstPassive.get();
-        int i = element.getIndex(DIMENSION);
+        int i = element.getIdxInV(parent);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = elements[--last];
             elements[last] = elements[i];
-            elements[last].setIndex(DIMENSION, last);
+            elements[last].setIdxInV(parent, last);
             elements[i] = tmp1;
-            elements[i].setIndex(DIMENSION, i);
+            elements[i].setIdxInV(parent, i);
         }
         firstPassive.add(-1);
     }
@@ -95,10 +96,10 @@ public final class RequestArrayList<E extends MultiDimensionIndex> implements IL
             throw new UnsupportedOperationException("Can not add an element: activation has already started");
         }
         E[] tmp = elements;
-        elements = (E[]) new MultiDimensionIndex[tmp.length + 1];
+        elements = (E[]) new IVariableMonitor[tmp.length + 1];
         System.arraycopy(tmp, 0, elements, 0, tmp.length);
         elements[tmp.length] = element;
-        element.setIndex(DIMENSION, tmp.length);
+        element.setIdxInV(parent, tmp.length);
         this.firstActive.add(1);
         this.firstPassive.add(1);
     }
@@ -110,11 +111,11 @@ public final class RequestArrayList<E extends MultiDimensionIndex> implements IL
         }
         if (i == elements.length) return;
         E[] tmp = elements;
-        elements = (E[]) new MultiDimensionIndex[tmp.length - 1];
+        elements = (E[]) new IVariableMonitor[tmp.length - 1];
         System.arraycopy(tmp, 0, elements, 0, i);
         System.arraycopy(tmp, i + 1, elements, i, tmp.length - i - 1);
         for (int j = i; j < elements.length; j++) {
-            elements[j].setIndex(DIMENSION, j);
+            elements[j].setIdxInV(parent, j);
         }
         assert (this.firstPassive.getEnvironment().getWorldIndex() == 0);
         if (i < firstActive.get()) {

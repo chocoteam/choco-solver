@@ -24,36 +24,53 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.recorders.fine;
 
-package solver.probabilities.monitors;
-
-import choco.kernel.memory.IEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.constraints.nary.AllDifferent;
-import solver.probabilities.IProbabilisticComputation;
-import solver.requests.IRequest;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
- * Created by IntelliJ IDEA.
- * User: xlorca
+ * An event adaptor, that permits to transform and adapt , on the fly, an event for views.
+ * For instance, the view MINUS requires to inverse bound events.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 06/12/11
  */
-public class ProbabilisticAllDiffMonitoring implements IProbabilisticComputation {
+public interface EventAdaptor<V extends Variable> {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ProbabilisticAllDiffMonitoring.class);
+    abstract EventType update(V var, EventType e);
 
-
-    public ProbabilisticAllDiffMonitoring(AllDifferent constraint, IRequest[] requests, IEnvironment environment) {
-
+    public static enum IntFactory implements EventAdaptor<IntVar> {
+        NONE() {
+            @Override
+            public EventType update(IntVar var, EventType e) {
+                return e;
+            }
+        },
+        MINUS() {
+            @Override
+            public EventType update(IntVar var, EventType eventType) {
+                if (eventType == EventType.INCLOW || eventType == EventType.DECUPP) {
+                    return (eventType == EventType.INCLOW ? EventType.DECUPP : EventType.INCLOW);
+                }
+                return eventType;
+            }
+        },
+        ABS {
+            @Override
+            public EventType update(IntVar var, EventType eventType) {
+                if (var.instantiated()) {
+                    return EventType.INSTANTIATE;
+                } else {
+                    if (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB()) {
+                        return EventType.INSTANTIATE;
+                    }
+                }
+                return eventType;
+            }
+        };
     }
 
-
-    @Override
-    public double satisfiability(int n, int unionSize, int[] domSize) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    public double consistency(int[] domSize, int unionSize, int minDomSize) {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 }

@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests.conditions;
+package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import solver.requests.ConditionnalRequest;
+import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
 /**
@@ -45,17 +45,17 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractCondition implements ICondition<ConditionnalRequest> {
+public abstract class AbstractCondition implements ICondition<ArcEventRecorderWithCondition> {
 
-    ConditionnalRequest[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
+    ArcEventRecorderWithCondition[] relatedRequests; // array of conditionnal requests declaring this -- size >= number of elements!
     int idxLastRequest; // index of the last not null request in relatedRequests
     final IStateBool wasValid;
-    ICondition<ConditionnalRequest> next = Default.NO_CONDITION;
+    ICondition<ArcEventRecorderWithCondition> next = Default.NO_CONDITION;
 
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedRequests = new ConditionnalRequest[8];
+        relatedRequests = new ArcEventRecorderWithCondition[8];
     }
 
     /**
@@ -66,17 +66,17 @@ public abstract class AbstractCondition implements ICondition<ConditionnalReques
      * @param request recently modified request
      * @param event
      */
-    public final boolean validateScheduling(ConditionnalRequest request, EventType event) {
+    public final boolean validateScheduling(ArcEventRecorderWithCondition request, EventType event) {
         if (wasValid.get()) {
             return true;
         } else {
             update(request, event);
             if (isValid()) {
                 for (int i = 0; i < idxLastRequest; i++) {
-                    ConditionnalRequest crequest = relatedRequests[i];
-                    if (crequest.hasChanged()) {
+                    ArcEventRecorderWithCondition crequest = relatedRequests[i];
+                    /*if (crequest.hasChanged()) {
                         crequest.schedule(); // TODO: do not add request in parameter...
-                    }
+                    }*/
                 }
                 wasValid.set(alwaysValid());
                 next.validateScheduling(request, event);
@@ -114,17 +114,17 @@ public abstract class AbstractCondition implements ICondition<ConditionnalReques
      * @param request recently modified request
      * @param event
      */
-    abstract void update(ConditionnalRequest request, EventType event);
+    abstract void update(ArcEventRecorderWithCondition request, EventType event);
 
     /**
      * Link the <code>request</code> to the condition
      *
      * @param request condition request
      */
-    public void linkRequest(ConditionnalRequest request) {
+    public void linkRequest(ArcEventRecorderWithCondition request) {
         if (idxLastRequest >= relatedRequests.length) {
-            ConditionnalRequest[] tmp = relatedRequests;
-            relatedRequests = new ConditionnalRequest[tmp.length * 2];
+            ArcEventRecorderWithCondition[] tmp = relatedRequests;
+            relatedRequests = new ArcEventRecorderWithCondition[tmp.length * 2];
             System.arraycopy(tmp, 0, relatedRequests, 0, tmp.length);
         }
         relatedRequests[idxLastRequest++] = request;

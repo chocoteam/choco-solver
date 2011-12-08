@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.requests;
+package solver.recorder;
 
 import choco.kernel.common.util.tools.MathUtils;
 import choco.kernel.memory.IEnvironment;
@@ -38,15 +38,14 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.Propagator;
-import solver.requests.conditions.AbstractCondition;
-import solver.requests.conditions.CompletlyInstantiated;
+import solver.recorders.conditions.AbstractCondition;
+import solver.recorders.conditions.CompletlyInstantiated;
+import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -57,43 +56,35 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class ConditionnalRequestTest {
+public class ConditionnalRecorderTest {
 
-    private static void castRequests(Constraint[] constraints, IEnvironment environment, int threshold) {
+    private static void castRequests(Constraint[] constraints, Solver solver, IEnvironment environment, int threshold) {
         try {
-            Method m_unlink = Propagator.class.getDeclaredMethod("unlinkVariables");
-            Field f_requests = Propagator.class.getDeclaredField("requests");
+            Field f_requests = Propagator.class.getDeclaredField("fineER");
             Field f_vars = Propagator.class.getDeclaredField("vars");
 
-            m_unlink.setAccessible(true);
             f_requests.setAccessible(true);
             f_vars.setAccessible(true);
 
             for (Constraint cstr : constraints) {
                 Propagator[] propagators = cstr.propagators;
                 for (Propagator prop : propagators) {
-                    m_unlink.invoke(prop);
                     IntVar[] ivars = (IntVar[]) f_vars.get(prop);
                     AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
-                    ConditionnalRequest[] requests = new ConditionnalRequest[ivars.length];
+                    ArcEventRecorderWithCondition[] requests = new ArcEventRecorderWithCondition[ivars.length];
                     for (int i = 0; i < ivars.length; i++) {
                         ivars[i].updatePropagationConditions(prop, i);
-                        requests[i] = new ConditionnalRequest(prop, ivars[i], i, cond, environment);
-                        prop.addRequest(requests[i]);
+                        requests[i] = new ArcEventRecorderWithCondition(ivars[i], prop, i, cond, solver);
+                        prop.addRecorder(requests[i]);
                         ivars[i].addMonitor(requests[i]);
-                        cond.linkRequest(requests[i]);
+                        cond.linkRecorder(requests[i]);
                     }
                     f_requests.set(prop, requests);
                 }
             }
 
-            m_unlink.setAccessible(false);
             f_requests.setAccessible(false);
             f_vars.setAccessible(false);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -104,7 +95,7 @@ public class ConditionnalRequestTest {
     public final void execute(Solver solver) {
         Logger log = LoggerFactory.getLogger("bench");
         solver.findAllSolutions();
-        System.out.println(solver.getMeasures()+"\n");
+        System.out.println(solver.getMeasures() + "\n");
     }
 
     @Test(groups = "1s")
@@ -123,7 +114,7 @@ public class ConditionnalRequestTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
         IntVar[] vars = new IntVar[]{x, y, z};
 
-        castRequests(cstrs, solver.getEnvironment(), 2);
+        castRequests(cstrs, solver, solver.getEnvironment(), 2);
 
         solver.post(cstrs);
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
@@ -144,7 +135,7 @@ public class ConditionnalRequestTest {
 
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
 
-            castRequests(cstrs, solver.getEnvironment(), n / 2);
+            castRequests(cstrs, solver, solver.getEnvironment(), n / 2);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));

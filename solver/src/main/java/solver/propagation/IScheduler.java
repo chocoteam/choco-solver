@@ -24,21 +24,43 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.requests;
+package solver.propagation;
 
-import solver.propagation.IQueable;
-
-import java.io.Serializable;
+import solver.exception.ContradictionException;
 
 /**
- * An interface for EventRecorder.
- * An EventRecorder is required to revise propagators (or propagate events).
- * This is the finest grained element that can be scheduled in propagation engines (bigger ones are groups).
- * EventRecorders are schedulable, queuable.
+ * An interface for objects that can schedule element.
+ * An element is schedulable when it implements ISchedulable.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 01/12/11
+ * @since 05/12/11
  */
-public interface IEventRecorder extends IQueable, ISchedulable, IExecutable, IGroupable, Serializable {
+public interface IScheduler {
+
+    /**
+     * Schedule an element
+     *
+     * @param element to schedule
+     */
+    void schedule(ISchedulable element);
+
+
+    /**
+     * Remove a scheduled element
+     *
+     * @param element to remove
+     */
+    void remove(ISchedulable element);
+
+    /**
+     * Iterate over scheduled element and execute them.
+     * @throws ContradictionException if an execution encounters a contradiction
+     */
+    boolean iterateAndExecute() throws ContradictionException;
+
+    /**
+     * Flush all the scheduled elements
+     */
+    void flush();
 }

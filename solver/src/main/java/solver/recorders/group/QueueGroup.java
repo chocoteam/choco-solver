@@ -24,45 +24,80 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.recorders.group;
 
-package solver.requests.conditions;
-
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
-import solver.requests.ConditionnalRequest;
-import solver.variables.EventType;
-import solver.variables.IntVar;
+import solver.Solver;
+import solver.exception.ContradictionException;
+import solver.propagation.ISchedulable;
+import solver.propagation.engines.queues.FixSizeCircularQueue;
+import solver.recorders.Group;
+import solver.recorders.IEventRecorder;
 
 /**
- * A simple condition based on number of instantiated variables.
- * Requests are posted when each variable is instantiated.
+ * A Queue-like (fifo) group for ISchedulable objects.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 22/03/11
+ * @since 05/12/11
  */
-public class IsInstantiated extends AbstractCondition {
+public class QueueGroup extends Group {
 
-    final IStateInt nbVarInstantiated;
-    final IntVar variable;
 
-    public IsInstantiated(IEnvironment environment, IntVar variable) {
-        super(environment);
-        nbVarInstantiated = environment.makeInt();
-        this.variable = variable;
+    protected ISchedulable lastPopped;
+
+    protected FixSizeCircularQueue<ISchedulable> toPropagate;
+
+    public QueueGroup(int nbElements, Solver solver) {
+        super(solver);
+        toPropagate = new FixSizeCircularQueue<ISchedulable>(nbElements);
     }
 
     @Override
-    boolean isValid() {
-        return variable.instantiated();
+    public void execute() throws ContradictionException {
+        iterateAndExecute();
     }
 
     @Override
-    boolean alwaysValid() {
+    public void attach(IEventRecorder element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void schedule(ISchedulable element) {
+        toPropagate.add(element);
+        element.enqueue();
+        if (!this.enqueued) {
+            scheduler.schedule(this);
+        }
+    }
+
+    @Override
+    public void remove(ISchedulable element) {
+        element.deque();
+        toPropagate.remove(element);
+        if (this.enqueued && toPropagate.isEmpty()) {
+            scheduler.remove(this);
+        }
+    }
+
+    @Override
+    public boolean iterateAndExecute() throws ContradictionException {
+        while (!toPropagate.isEmpty()) {
+            lastPopped = toPropagate.pop();
+            lastPopped.deque();
+            lastPopped.execute();
+        }
         return true;
     }
 
     @Override
-    void update(ConditionnalRequest request, EventType event) {
+    public void flush() {
+        while (!toPropagate.isEmpty()) {
+            lastPopped = toPropagate.pop();
+            if (IEventRecorder.LAZY) {
+                lastPopped.flush();
+            }
+            lastPopped.deque();
+        }
     }
 }

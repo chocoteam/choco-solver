@@ -1,13 +1,11 @@
-package solver.requests.conditions;
+package solver.recorders.conditions;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.requests.ConditionnalRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -55,9 +53,9 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ConditionnalRequest request, EventType event) {
+    void update(ArcEventRecorderWithCondition request, EventType event) {
 //        if (EventType.isRemove(evtMask)) {
-        int last = request.getLast();
+        /*int last = request.getLast();
         try {
             request.forEach(rem_proc,
                     fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].get(),
@@ -65,8 +63,8 @@ public class CondAllDiffBC extends AbstractCondition {
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBC#update encounters an exception");
         }
-        fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].set(last);
-        /*if (request.getPropagator().getNbRequestEnqued() == 0
+        fromDelta[request.getIndex(IRequest.VAR_IN_PROP)].set(last);*/
+        /*if (request.getPropagator().getNbPendingER() == 0
                 && !checkUnion()) {
             throw new SolverException("CondAllDiffBC#checkUnion is not valid");
         }*/
