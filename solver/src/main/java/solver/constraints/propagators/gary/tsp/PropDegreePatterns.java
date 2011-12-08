@@ -43,12 +43,11 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -88,8 +87,9 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 //		checkPattern();
 		INeighbors nei;
 		int x,y;
@@ -115,15 +115,13 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(true){
-			propagate();
+			propagate(EventType.FULL_PROPAGATION.mask);
 			return;
 		}
-		GraphRequest gr = (GraphRequest) request;
-		IntDelta d = g.getDelta().getArcRemovalDelta();
-		d.forEach(remArcs, gr.fromArcRemoval(), gr.toArcRemoval());
+        eventRecorder.getDeltaMonitor(g).forEach(remArcs, EventType.REMOVEARC);
 	}
 
 	private void checkPattern() throws ContradictionException {

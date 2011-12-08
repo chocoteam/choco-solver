@@ -209,7 +209,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new GraphDelta(solver);
+            delta = new GraphDelta();
         }
     }
 

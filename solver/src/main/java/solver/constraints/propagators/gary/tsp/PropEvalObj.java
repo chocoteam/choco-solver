@@ -30,211 +30,207 @@ package solver.constraints.propagators.gary.tsp;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.TIntArrayList;
-import solver.Cause;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
-import java.util.BitSet;
 
 /**
  * Compute the cost of the graph by summing arcs costs
  * BEWARE - Assume that the last node has no successor
- * 		  - For minimization problem
- * */
-public class PropEvalObj<V extends Variable> extends GraphPropagator<V>{
+ * - For minimization problem
+ */
+public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	int n;
-	IntVar sum;
-	int[][] distMatrix;
-	IStateInt[] minCostSucc;
-	IntProcedure arcEnforced,arcRemoved;
-	IStateInt minSum;
-	TIntArrayList toCompute;
+    DirectedGraphVar g;
+    int n;
+    IntVar sum;
+    int[][] distMatrix;
+    IStateInt[] minCostSucc;
+    IntProcedure arcEnforced, arcRemoved;
+    IStateInt minSum;
+    TIntArrayList toCompute;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	/**
-	 * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
-	 * BEWARE - Assume that the last node has no successor
- 	 * 		  - For minimization problem
-	 *
-	 * @param graph
-	 * @param obj
-	 * @param costMatrix
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new Variable[]{graph,obj}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
-		sum = obj;
-		n = g.getEnvelopGraph().getNbNodes();
-		distMatrix = costMatrix;
-		arcEnforced = new EnfArc(this);
-		arcRemoved  = new RemArc(this);
-		minSum = environment.makeInt(0);
-		toCompute = new TIntArrayList();
-		minCostSucc = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			minCostSucc[i] = environment.makeInt(-1);
-		}
-	}
+    /**
+     * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
+     * BEWARE - Assume that the last node has no successor
+     * - For minimization problem
+     *
+     * @param graph
+     * @param obj
+     * @param costMatrix
+     * @param constraint
+     * @param solver
+     */
+    public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
+        super((V[]) new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
+        sum = obj;
+        n = g.getEnvelopGraph().getNbNodes();
+        distMatrix = costMatrix;
+        arcEnforced = new EnfArc(this);
+        arcRemoved = new RemArc(this);
+        minSum = environment.makeInt(0);
+        toCompute = new TIntArrayList();
+        minCostSucc = new IStateInt[n];
+        for (int i = 0; i < n; i++) {
+            minCostSucc[i] = environment.makeInt(-1);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
-		INeighbors succ;
-		for(int i=0;i<n-1;i++){
-			succ = g.getEnvelopGraph().getSuccessorsOf(i);
-			int min  = succ.getFirstElement();
-			int minC = distMatrix[i][min];
-			for (int s=min; s>=0; s=succ.getNextElement()){
-				if(distMatrix[i][s]<minC){
-					minC = distMatrix[i][s];
-					min = s;
-				}
-			}
-			minSum.add(minC);
-			minCostSucc[i].set(min);
-		}
-		sum.updateLowerBound(minSum.get(),this,false);
-		// filter the graph
-		INeighbors succs;
-		int delta = minSum.get()-sum.getUB();
-		int curMin;
-		for(int i=0; i<n-1;i++){
-			succs = g.getEnvelopGraph().getSuccessorsOf(i);
-			curMin= distMatrix[i][minCostSucc[i].get()];
-			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
-				if(delta>curMin-distMatrix[i][j]){
-					g.removeArc(i,j, this,false);
-				}
-			}
-		}
-	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		toCompute.clear();
-		int oldMin = minSum.get();
-		if(request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
-			}
-			for(int i=toCompute.size()-1;i>=0;i--){
-				findMin(toCompute.get(i));
-			}
-			sum.updateLowerBound(minSum.get(),this,false);
-		}
-		if((minSum.get()>oldMin) || ((mask & EventType.DECUPP.mask) !=0)){
-			// filter the graph
-			INeighbors succs;
-			int delta = minSum.get()-sum.getUB();
-			int curMin;
-			for(int i=0; i<n-1;i++){
-				succs = g.getEnvelopGraph().getSuccessorsOf(i);
-				curMin= distMatrix[i][minCostSucc[i].get()];
-				for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
-					if(delta>curMin-distMatrix[i][j]){
-						g.removeArc(i,j, this,false);
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        INeighbors succ;
+        for (int i = 0; i < n - 1; i++) {
+            succ = g.getEnvelopGraph().getSuccessorsOf(i);
+            int min = succ.getFirstElement();
+            int minC = distMatrix[i][min];
+            for (int s = min; s >= 0; s = succ.getNextElement()) {
+                if (distMatrix[i][s] < minC) {
+                    minC = distMatrix[i][s];
+                    min = s;
+                }
+            }
+            minSum.add(minC);
+            minCostSucc[i].set(min);
+        }
+        sum.updateLowerBound(minSum.get(), this, false);
+        // filter the graph
+        INeighbors succs;
+        int delta = minSum.get() - sum.getUB();
+        int curMin;
+        for (int i = 0; i < n - 1; i++) {
+            succs = g.getEnvelopGraph().getSuccessorsOf(i);
+            curMin = distMatrix[i][minCostSucc[i].get()];
+            for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                if (delta > curMin - distMatrix[i][j]) {
+                    g.removeArc(i, j, this, false);
+                }
+            }
+        }
+    }
 
-	private void findMin(int i) throws ContradictionException {
-		INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
-		int min  = succ.getFirstElement();
-		if(min==-1){
-			System.out.println(g.getEnvelopGraph());
-			System.out.println(i);
-			System.exit(0);
-		}
-		int minC = distMatrix[i][min];
-		for (int s=min; s>=0; s=succ.getNextElement()){
-			if(distMatrix[i][s]<minC){
-				minC = distMatrix[i][s];
-				min = s;
-			}
-		}
-		minSum.add(minC-distMatrix[i][minCostSucc[i].get()]);
-		minCostSucc[i].set(min);
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        toCompute.clear();
+        int oldMin = minSum.get();
+        Variable variable = vars[idxVarInProp];
+        if (variable.getType() == Variable.GRAPH) {
+            if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+            }
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+            }
+            for (int i = toCompute.size() - 1; i >= 0; i--) {
+                findMin(toCompute.get(i));
+            }
+            sum.updateLowerBound(minSum.get(), this, false);
+        }
+        if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
+            // filter the graph
+            INeighbors succs;
+            int delta = minSum.get() - sum.getUB();
+            int curMin;
+            for (int i = 0; i < n - 1; i++) {
+                succs = g.getEnvelopGraph().getSuccessorsOf(i);
+                curMin = distMatrix[i][minCostSucc[i].get()];
+                for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                    if (delta > curMin - distMatrix[i][j]) {
+                        g.removeArc(i, j, this, false);
+                    }
+                }
+            }
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
-	}
+    private void findMin(int i) throws ContradictionException {
+        INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
+        int min = succ.getFirstElement();
+        if (min == -1) {
+            System.out.println(g.getEnvelopGraph());
+            System.out.println(i);
+            System.exit(0);
+        }
+        int minC = distMatrix[i][min];
+        for (int s = min; s >= 0; s = succ.getNextElement()) {
+            if (distMatrix[i][s] < minC) {
+                minC = distMatrix[i][s];
+                min = s;
+            }
+        }
+        minSum.add(minC - distMatrix[i][minCostSucc[i].get()]);
+        minCostSucc[i].set(min);
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-		private EnfArc(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to = i%n;
-			if(to!=minCostSucc[from].get()){
-				minSum.add(distMatrix[from][to]-distMatrix[from][minCostSucc[from].get()]);
-				minCostSucc[from].set(to);
-			}
-		}
-	}
+    private class EnfArc implements IntProcedure {
+        private GraphPropagator p;
 
-	private class RemArc implements IntProcedure{
-		private GraphPropagator p;
+        private EnfArc(GraphPropagator p) {
+            this.p = p;
+        }
 
-		private RemArc(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to = i%n;
-			if(to==minCostSucc[from].get()){
-				toCompute.add(from);
-			}
-		}
-	}
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int from = i / n - 1;
+            int to = i % n;
+            if (to != minCostSucc[from].get()) {
+                minSum.add(distMatrix[from][to] - distMatrix[from][minCostSucc[from].get()]);
+                minCostSucc[from].set(to);
+            }
+        }
+    }
+
+    private class RemArc implements IntProcedure {
+        private GraphPropagator p;
+
+        private RemArc(GraphPropagator p) {
+            this.p = p;
+        }
+
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int from = i / n - 1;
+            int to = i % n;
+            if (to == minCostSucc[from].get()) {
+                toCompute.add(from);
+            }
+        }
+    }
 }
