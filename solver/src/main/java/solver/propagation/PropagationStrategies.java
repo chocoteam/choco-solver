@@ -26,8 +26,6 @@
  */
 package solver.propagation;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -55,85 +53,41 @@ public enum PropagationStrategies {
     ONE_QUEUE_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public Group make(Solver solver) {
-            Constraint[] constraints = solver.getCstrs();
-            List<ISchedulable> erecorders = new ArrayList<ISchedulable>();
-            TIntList coarseIdx = new TIntArrayList();
-            for (int c = 0; c < constraints.length; c++) {
-                Propagator[] propagators = constraints[c].propagators;
-                for (int p = 0; p < propagators.length; p++) {
-                    // 1. the fine event recorders
-                    int nbV = propagators[p].getNbVars();
-                    for (int v = 0; v < nbV; v++) {
-                        Variable variable = propagators[p].getVar(v);
-                        AbstractFineEventRecorder fer;
-                        if (variable.getType() == Variable.VIEW) {
-                            View view = (View) variable;
-                            fer = new ViewEventRecorderWrapper(
-                                    new ArcEventRecorder(view.getVariable(), propagators[p], v, solver),
-                                    view.getModifier(),
-                                    solver);
-                        } else {
-                            fer = new ArcEventRecorder(variable, propagators[p], v, solver);
-                        }
-                        propagators[p].addRecorder(fer);
-                        variable.addMonitor(fer);
-                        erecorders.add(fer);
-                    }
-                    // 2. the coarse event recorder
-                    CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRecorder(-1);
-                    erecorders.add(cer);
-                    coarseIdx.add(erecorders.size() - 1);
-                }
+            List<ISchedulable> all = new ArrayList<ISchedulable>();
+            all.addAll(makeArcs(solver));
+            int fines = all.size();
+            all.addAll(makeCoarses(solver));
+
+            Group queue = new QueueGroup(Group.Iteration.CLEAR_OUT,
+                    all.toArray(new ISchedulable[all.size()]));
+            for (int i = fines; i < all.size(); i++) {
+                queue.schedule(all.get(i));
             }
-            return new QueueGroup(Group.Iteration.CLEAR_OUT, erecorders, coarseIdx);
+            return queue;
         }
     },
     TWO_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public Group make(Solver solver) {
-            Constraint[] constraints = solver.getCstrs();
-            List<ISchedulable> frecorders = new ArrayList<ISchedulable>();
-            List<ISchedulable> crecorders = new ArrayList<ISchedulable>();
-            TIntList coarseIdx = new TIntArrayList();
-            for (int c = 0; c < constraints.length; c++) {
-                Propagator[] propagators = constraints[c].propagators;
-                for (int p = 0; p < propagators.length; p++) {
-                    // 1. the fine event recorders
-                    int nbV = propagators[p].getNbVars();
-                    for (int v = 0; v < nbV; v++) {
-                        Variable variable = propagators[p].getVar(v);
-                        AbstractFineEventRecorder fer;
-                        if (variable.getType() == Variable.VIEW) {
-                            View view = (View) variable;
-                            fer = new ViewEventRecorderWrapper(
-                                    new ArcEventRecorder(view.getVariable(), propagators[p], v, solver),
-                                    view.getModifier(),
-                                    solver);
-                        } else {
-                            fer = new ArcEventRecorder(variable, propagators[p], v, solver);
-                        }
-                        propagators[p].addRecorder(fer);
-                        variable.addMonitor(fer);
-                        frecorders.add(fer);
-                    }
-                    // 2. the coarse event recorder
-                    CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRecorder(-1);
-                    crecorders.add(cer);
-                    coarseIdx.add(crecorders.size() - 1);
-                }
-            }
-            final TIntArrayList empty = new TIntArrayList();
-            final ISchedulable q1 = new QueueGroup(Group.Iteration.CLEAR_OUT, frecorders, empty);
-            final ISchedulable q2 = new QueueGroup(Group.Iteration.PICK_ONE, crecorders, coarseIdx);
-            return new QueueGroup(
+            List<AbstractFineEventRecorder> ars = makeArcs(solver);
+            List<AbstractCoarseEventRecorder> coarses = makeCoarses(solver);
+
+            final ISchedulable q1 = new QueueGroup(Group.Iteration.CLEAR_OUT,
+                    ars.toArray(new ISchedulable[ars.size()]));
+            final ISchedulable q2 = new QueueGroup(Group.Iteration.PICK_ONE,
+                    coarses.toArray(new ISchedulable[coarses.size()]));
+
+            Group queues = new QueueGroup(
                     Group.Iteration.CLEAR_OUT,
                     new ArrayList<ISchedulable>() {{
                         add(q1);
                         add(q2);
-                    }}, new TIntArrayList() {{
-                add(1);
-            }}
-            );
+                    }}.toArray(new ISchedulable[2]));
+            for (int i = 0; i < coarses.size(); i++) {
+                queues.schedule(coarses.get(i));
+            }
+
+            return queues;
         }
     };
 
@@ -146,7 +100,6 @@ public enum PropagationStrategies {
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].propagators;
             for (int p = 0; p < propagators.length; p++) {
-                // 1. the fine event recorders
                 int nbV = propagators[p].getNbVars();
                 for (int v = 0; v < nbV; v++) {
                     Variable variable = propagators[p].getVar(v);

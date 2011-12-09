@@ -26,13 +26,10 @@
  */
 package solver.propagation.strategy;
 
-import gnu.trove.list.TIntList;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.FixSizeCircularQueue;
 import solver.recorders.IEventRecorder;
-
-import java.util.List;
 
 /**
  * A specific group that works like a queue (fifo).
@@ -41,26 +38,23 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public class QueueGroup extends Group {
+public class QueueGroup<S extends ISchedulable> extends Group<S> {
 
-    protected ISchedulable lastPopped;
+    protected S lastPopped;
 
-    protected FixSizeCircularQueue<ISchedulable> toPropagate;
+    protected FixSizeCircularQueue<S> toPropagate;
 
-    public QueueGroup(Iteration iteration, List<ISchedulable> schedulables, TIntList coarseIdx) {
+    public QueueGroup(Iteration iteration, S... schedulables) {
         super(iteration);
-        toPropagate = new FixSizeCircularQueue<ISchedulable>(schedulables.size());
-        for (int i = 0; i < schedulables.size(); i++) {
-            ISchedulable er = schedulables.get(i);
+        toPropagate = new FixSizeCircularQueue<S>(schedulables.length);
+        for (int i = 0; i < schedulables.length; i++) {
+            ISchedulable er = schedulables[i];
             er.setScheduler(this, 0);
-        }
-        for (int i = 0; i < coarseIdx.size(); i++) {
-            schedule(schedulables.get(coarseIdx.get(i)));
         }
     }
 
     @Override
-    public void schedule(ISchedulable element) {
+    public void schedule(S element) {
         toPropagate.add(element);
         element.enqueue();
         if (!this.enqueued) {
@@ -69,7 +63,7 @@ public class QueueGroup extends Group {
     }
 
     @Override
-    public void remove(ISchedulable element) {
+    public void remove(S element) {
         element.deque();
         toPropagate.remove(element);
         if (this.enqueued && toPropagate.isEmpty()) {
@@ -82,7 +76,7 @@ public class QueueGroup extends Group {
         if (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pop();
             lastPopped.deque();
-            if(!lastPopped.execute()){
+            if (!lastPopped.execute()) {
                 schedule(lastPopped);
             }
         }
@@ -98,7 +92,7 @@ public class QueueGroup extends Group {
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pop();
             lastPopped.deque();
-            if(!lastPopped.execute()){
+            if (!lastPopped.execute()) {
                 schedule(lastPopped);
             }
         }

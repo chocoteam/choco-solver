@@ -42,7 +42,7 @@ import solver.propagation.IScheduler;
  * @author Charles Prud'homme
  * @since 08/12/11
  */
-public abstract class Group implements IScheduler, ISchedulable {
+public abstract class Group<S extends ISchedulable> implements IScheduler<S>, ISchedulable {
 
     public static enum Iteration {
         PICK_ONE, SWEEP_UP, CLEAR_OUT
@@ -64,6 +64,7 @@ public abstract class Group implements IScheduler, ISchedulable {
         return scheduler;
     }
 
+    @SuppressWarnings({"unchecked"})
     @Override
     public void setScheduler(IScheduler scheduler, int idxInS) {
         this.scheduler = scheduler;

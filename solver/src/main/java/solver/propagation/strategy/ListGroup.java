@@ -30,7 +30,9 @@ import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.recorders.IEventRecorder;
 
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Comparator;
 
 /**
  * A specific propagation engine that works like a list, each element has a fixed index.
@@ -39,23 +41,25 @@ import java.util.BitSet;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public class ListGroup extends Group {
+public class ListGroup<S extends ISchedulable> extends Group<S> {
 
-    protected ISchedulable lastPopped;
+    protected S lastPopped;
 
-    protected final ISchedulable[] elements;
+    protected final S[] elements;
     protected final BitSet toPropagate;
-
     protected boolean init = false;
+
 
     /**
      * Build a list to store schedulable elements
      *
+     * @param iteration iteration policy
      * @param schedulables sorted schedulable elements
      */
-    public ListGroup(Iteration iteration, ISchedulable... schedulables) {
+    public ListGroup(Iteration iteration, Comparator<S> comparator, S... schedulables) {
         super(iteration);
         this.elements = schedulables.clone();
+        Arrays.sort(elements, comparator);
         this.toPropagate = new BitSet(elements.length);
         for (int i = 0; i < elements.length; i++) {
             elements[i].setScheduler(this, i);

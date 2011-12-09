@@ -36,14 +36,14 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface IScheduler extends IExecutable{
+public interface IScheduler<S extends ISchedulable> extends IExecutable{
 
     /**
      * Schedule an element
      *
      * @param element to schedule
      */
-    void schedule(ISchedulable element);
+    void schedule(S element);
 
 
     /**
@@ -51,7 +51,7 @@ public interface IScheduler extends IExecutable{
      *
      * @param element to remove
      */
-    void remove(ISchedulable element);
+    void remove(S element);
 
     /**
      * Flush all the scheduled elements
