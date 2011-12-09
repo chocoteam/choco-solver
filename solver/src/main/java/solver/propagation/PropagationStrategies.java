@@ -33,6 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.propagation.strategy.Group;
 import solver.propagation.strategy.QueueGroup;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.ArcEventRecorder;
@@ -137,4 +138,48 @@ public enum PropagationStrategies {
     };
 
     public abstract Group make(Solver solver);
+
+    public static List<AbstractFineEventRecorder> makeArcs(Solver solver) {
+        Constraint[] constraints = solver.getCstrs();
+        List<AbstractFineEventRecorder> fers = new ArrayList<AbstractFineEventRecorder>();
+
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].propagators;
+            for (int p = 0; p < propagators.length; p++) {
+                // 1. the fine event recorders
+                int nbV = propagators[p].getNbVars();
+                for (int v = 0; v < nbV; v++) {
+                    Variable variable = propagators[p].getVar(v);
+                    AbstractFineEventRecorder fer;
+                    if (variable.getType() == Variable.VIEW) {
+                        View view = (View) variable;
+                        fer = new ViewEventRecorderWrapper(
+                                new ArcEventRecorder(view.getVariable(), propagators[p], v, solver),
+                                view.getModifier(),
+                                solver);
+                    } else {
+                        fer = new ArcEventRecorder(variable, propagators[p], v, solver);
+                    }
+                    propagators[p].addRecorder(fer);
+                    variable.addMonitor(fer);
+                    fers.add(fer);
+                }
+            }
+        }
+        return fers;
+    }
+
+    public static List<AbstractCoarseEventRecorder> makeCoarses(Solver solver) {
+        Constraint[] constraints = solver.getCstrs();
+        List<AbstractCoarseEventRecorder> cers = new ArrayList<AbstractCoarseEventRecorder>();
+
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].propagators;
+            for (int p = 0; p < propagators.length; p++) {
+                CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRecorder(-1);
+                cers.add(cer);
+            }
+        }
+        return cers;
+    }
 }

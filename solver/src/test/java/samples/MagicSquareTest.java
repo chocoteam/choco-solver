@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.comparators.EngineStrategies;
+import solver.propagation.comparators.EngineStrategies;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 

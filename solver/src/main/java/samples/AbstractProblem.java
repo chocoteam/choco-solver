@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.engines.comparators.EngineStrategies;
+import solver.propagation.comparators.EngineStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**

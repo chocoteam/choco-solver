@@ -29,7 +29,7 @@ package solver.propagation.strategy;
 import gnu.trove.list.TIntList;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.engines.queues.FixSizeCircularQueue;
+import solver.propagation.queues.FixSizeCircularQueue;
 import solver.recorders.IEventRecorder;
 
 import java.util.List;
