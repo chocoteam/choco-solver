@@ -63,8 +63,8 @@ public class ViewEventRecorderWrapper<V extends Variable> extends AbstractFineEv
     }
 
     @Override
-    public void setScheduler(IScheduler scheduler) {
-        original.setScheduler(scheduler);
+    public void setScheduler(IScheduler scheduler, int idxInS) {
+        original.setScheduler(scheduler, 0);
     }
 
     @Override
@@ -98,8 +98,8 @@ public class ViewEventRecorderWrapper<V extends Variable> extends AbstractFineEv
     }
 
     @Override
-    public void execute() throws ContradictionException {
-        original.execute();
+    public boolean execute() throws ContradictionException {
+        return original.execute();
     }
 
     @Override

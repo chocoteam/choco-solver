@@ -101,7 +101,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     int stateAfterSolution = UP_BRANCH;
 
     /* Reference to the propagation pilot */
-    public IPropagationEngine propEngine;
+    protected IPropagationEngine propEngine;
 
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
@@ -262,9 +262,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        if (!propEngine.initialized()) {
-            propEngine.init(solver);
-        }
         this.nextState = INITIAL_PROPAGATION;
     }
 

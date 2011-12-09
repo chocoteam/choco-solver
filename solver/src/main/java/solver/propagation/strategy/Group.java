@@ -24,29 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders;
+package solver.propagation.strategy;
 
-import solver.Solver;
-import solver.propagation.*;
+import solver.exception.ContradictionException;
+import solver.propagation.ISchedulable;
+import solver.propagation.IScheduler;
 
 /**
- * A Group is a scheduler, because it stores elements to execute.
- * A Group is also schedulable in a master scheduler (the propagation engine).
- * A Group embeds two or more IEventRecorder.
+ * An interface to describe strategies for propagation.
+ * It is an extension of group defined in: <br/>
+ * "Propagator Groups", M.Z. Lagerkvist and C. Schulte -- 2009.
  * <br/>
+ * A Group is a scheduler, because it stores elements to execute.
+ * A Group is also schedulable in a master scheduler.
+ * A Group embeds two or more IEventRecorder or groups (or both).
  *
  * @author Charles Prud'homme
- * @since 05/12/11
+ * @since 08/12/11
  */
-public abstract class Group implements IScheduler, solver.propagation.ISchedulable {
+public abstract class Group implements IScheduler, ISchedulable {
 
-    protected final IScheduler scheduler;
+    public static enum Iteration {
+        PICK_ONE, SWEEP_UP, CLEAR_OUT
+    }
+
+    protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued; // to check wether this is enqueud or not.
 
-    public Group(Solver solver) {
-        this.scheduler = solver.getEngine();
+    protected final Iteration iteration;
+
+    public Group(Iteration iteration) {
         this.enqueued = false;
+        this.iteration = iteration;
     }
 
     @Override
@@ -55,8 +65,10 @@ public abstract class Group implements IScheduler, solver.propagation.ISchedulab
     }
 
     @Override
-    public void setScheduler(IScheduler scheduler) {
-        throw new UnsupportedOperationException("a Group can not overidde its scheduler");
+    public void setScheduler(IScheduler scheduler, int idxInS) {
+        this.scheduler = scheduler;
+        this.schedulerIdx = idxInS;
+
     }
 
     @Override
@@ -68,13 +80,6 @@ public abstract class Group implements IScheduler, solver.propagation.ISchedulab
     public void setIndexInScheduler(int sIdx) {
         this.schedulerIdx = sIdx;
     }
-
-    /**
-     * Attach an element to this group.
-     *
-     * @param element to attach
-     */
-    public abstract void attach(IEventRecorder element);
 
     @Override
     public boolean enqueued() {
@@ -89,5 +94,24 @@ public abstract class Group implements IScheduler, solver.propagation.ISchedulab
     @Override
     public void deque() {
         enqueued = false;
+    }
+
+    protected abstract boolean pickOne() throws ContradictionException;
+
+    protected abstract boolean sweepUp() throws ContradictionException;
+
+    protected abstract boolean clearOut() throws ContradictionException;
+
+    @Override
+    public final boolean execute() throws ContradictionException {
+        switch (iteration) {
+            case PICK_ONE:
+                return pickOne();
+            case SWEEP_UP:
+                return sweepUp();
+            case CLEAR_OUT:
+            default:
+                return clearOut();
+        }
     }
 }

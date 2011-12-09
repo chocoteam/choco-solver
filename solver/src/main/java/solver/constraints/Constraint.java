@@ -78,7 +78,7 @@ import java.io.Serializable;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.propagators.Propagator
- * @see solver.propagation.engines.IPropagationEngine
+ * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
 public abstract class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {

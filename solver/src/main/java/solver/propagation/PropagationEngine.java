@@ -28,6 +28,7 @@ package solver.propagation;
 
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.propagation.strategy.Group;
 import solver.variables.Variable;
 
 /**
@@ -38,15 +39,53 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public abstract class PropagationEngine implements IPropagationEngine {
+public class PropagationEngine implements IPropagationEngine {
 
     protected final ContradictionException exception;
+
+    protected Group master;
+
+    protected boolean initialized = false;
 
     public PropagationEngine() {
         this.exception = new ContradictionException();
     }
 
-//    /**
+    @Override
+    public void set(Group group) {
+        this.master = group;
+    }
+
+    @Override
+    public Group getGroup() {
+        return master;
+    }
+
+    @Override
+    public void propagate() throws ContradictionException {
+        master.execute();
+    }
+
+    @Override
+    public void flush() {
+        master.flush();
+    }
+
+    @Override
+    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
+        throw exception.set(cause, variable, message);
+    }
+
+    @Override
+    public ContradictionException getContradictionException() {
+        return exception;
+    }
+
+    @Override
+    public void deleteGroups() {
+    }
+
+    //    /**
 //     * Initialize this <code>IPropagationEngine</code> object with the array of <code>Constraint</code> and <code>Variable</code> objects.
 //     * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
 //     */
@@ -132,15 +171,4 @@ public abstract class PropagationEngine implements IPropagationEngine {
 //            }
 //        }
 //    }
-
-
-    @Override
-    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-        throw exception.set(cause, variable, message);
-    }
-
-    @Override
-    public ContradictionException getContradictionException() {
-        return exception;
-    }
 }

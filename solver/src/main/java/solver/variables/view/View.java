@@ -31,6 +31,7 @@ import choco.kernel.common.util.objects.IList;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -70,8 +71,18 @@ public abstract class View<IV extends IntVar> implements IntVar {
         this.solver = solver;
     }
 
-    public IV getVariable(){
+    public IV getVariable() {
         return var;
+    }
+
+    @Override
+    public Constraint[] getConstraints() {
+        return var.getConstraints();
+    }
+
+    @Override
+    public void declareIn(Constraint constraint) {
+        var.declareIn(constraint);
     }
 
     /**
@@ -195,5 +206,10 @@ public abstract class View<IV extends IntVar> implements IntVar {
     @Override
     public Solver getSolver() {
         return solver;
+    }
+
+    @Override
+    public int getType() {
+        return VIEW;
     }
 }

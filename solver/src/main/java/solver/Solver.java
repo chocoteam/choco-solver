@@ -41,7 +41,9 @@ import solver.explanations.ExplanationEngine;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.QueuePropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationStrategies;
+import solver.propagation.strategy.Group;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
@@ -162,7 +164,7 @@ public class Solver implements Serializable {
         this.measures = new MeasuresRecorder(this); // required for event recorder
         this.creationTime -= System.nanoTime();
         this.search = SearchLoops.preset(this);
-        this.engine = new QueuePropagationEngine();
+        this.engine = new PropagationEngine();
         this.search.setPropEngine(engine);
         this.setExplainer(new ExplanationEngine(this));
     }
@@ -180,6 +182,16 @@ public class Solver implements Serializable {
 
     public void set(AbstractStrategy strategies) {
         this.search.set(strategies);
+    }
+
+    /**
+     * Set a propagation strategy to the propagation engine attached in <code>this</code>.
+     * It overrides the previously defined one, if any.
+     *
+     * @param group a propagation strategy
+     */
+    public void set(Group group) {
+        this.engine.set(group);
     }
 
     /**
@@ -334,6 +346,10 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
+        if (engine.getGroup() == null) {
+            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
+            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
+        }
         if (search.getStrategy() == null) {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
             set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(getVars()), this));
@@ -344,10 +360,11 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (!engine.initialized()) {
-            engine.init(this);
+        if (engine.getGroup() == null) {
+            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
+            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
         }
-        engine.iterateAndExecute();
+        engine.propagate();
     }
 
     /**

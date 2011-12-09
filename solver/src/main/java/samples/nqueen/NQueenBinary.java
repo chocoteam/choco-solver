@@ -84,17 +84,6 @@ public class NQueenBinary extends AbstractNQueen {
 
     }
 
-    @Override
-    public void solve() {
-
-        Solver s1 = Solver.serializeClone(solver);
-        solver.set(StrategyFactory.random(vars, solver.getEnvironment(),91011));
-        Solver s2 = Solver.serializeClone(solver);
-
-        s1.findAllSolutions();
-        s2.findAllSolutions();
-    }
-
     public static void main(String[] args) {
         new NQueenBinary().execute(args);
     }

@@ -56,7 +56,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     }
 
     @Override
-    public void execute() throws ContradictionException {
+    public boolean execute() throws ContradictionException {
         // on a pris le parti de ne pas mémoriser les événements fins,
         // partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
         // que de lancer directement la propag' lourde

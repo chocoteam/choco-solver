@@ -212,7 +212,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert !isActive() : "the propagator is already active, it cannot set active";
         isActive.set(true);
-//        this.constraint.updateActivity(this);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
             fineER[i].activate();
@@ -223,11 +222,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setPassive() {
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
         isActive.set(false);
-        this.constraint.updateActivity(this);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
             fineER[i].desactivate();
         }
+        coarseER.getScheduler().remove(coarseER);
     }
 
     public boolean isActive() {

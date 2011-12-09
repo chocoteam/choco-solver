@@ -31,6 +31,7 @@ import choco.kernel.common.util.objects.IList;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -48,7 +49,7 @@ public interface Variable<D extends IDelta> extends Serializable {
 
 
     public final static int INTEGER = 0;
-    public final static int SET = 1;
+    public final static int VIEW = 1;
     public final static int META = 2;
     public final static int GRAPH = 3;
 
@@ -66,6 +67,18 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @return a String reprensenting the name of <code>this</code>
      */
     String getName();
+
+    /**
+     * Returns the array of constraints <code>this</code> appears in.
+     * @return array of constraints
+     */
+    Constraint[] getConstraints();
+
+    /**
+     * Link a constraint within a variable
+     * @param constraint a constraint
+     */
+    void declareIn(Constraint constraint);
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.

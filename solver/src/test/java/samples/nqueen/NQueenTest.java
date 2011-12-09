@@ -205,23 +205,15 @@ public class NQueenTest {
         ((IntVar) vars[4]).instantiateTo(12, Cause.Null, false);
         ((IntVar) vars[5]).instantiateTo(16, Cause.Null, false);
         ((IntVar) vars[6]).instantiateTo(4, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         LoggerFactory.getLogger("test").error("*******************************************");
         System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7]).instantiateTo(7, Cause.Null, false);
         try {
-            solver.getSearchLoop().propEngine.iterateAndExecute();
+            solver.propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
             System.out.printf("%s\n", ex.getMessage());
         }
     }
-
-    @Test(groups = "1s")
-    public void testInit1() {
-        Solver solver = modeler(new NQueenBinaryGlobal(), 16);
-        solver.getEngine().init(solver);
-        solver.getEngine().init(solver);
-    }
-
 }

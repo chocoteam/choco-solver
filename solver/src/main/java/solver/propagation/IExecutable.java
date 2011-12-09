@@ -41,5 +41,5 @@ public interface IExecutable {
      * Main execution method
      * @throws ContradictionException when contradiction occurs.
      */
-    void execute() throws ContradictionException;
+    boolean execute() throws ContradictionException;
 }

@@ -83,8 +83,7 @@ public class MagicSquareTest {
         //== >square0,2  ==  12 (0)
         Solver solver = modeler(4);
         Variable[] vars = solver.getVars();
-        solver.getSearchLoop().propEngine.init(solver);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         ((IntVar) vars[0]).instantiateTo(3, Cause.Null, false);
         ((IntVar) vars[15]).instantiateTo(4, Cause.Null, false);
         ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null, false);
@@ -92,11 +91,11 @@ public class MagicSquareTest {
         ((IntVar) vars[9]).removeInterval(1, 2, Cause.Null, false);
         ((IntVar) vars[13]).removeInterval(1, 2, Cause.Null, false);
         ((IntVar) vars[1]).instantiateTo(6, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         LoggerFactory.getLogger("test").error("************************");
         ((IntVar) vars[2]).instantiateTo(12, Cause.Null, false);
         try {
-            solver.getSearchLoop().propEngine.iterateAndExecute();
+            solver.propagate();
             LoggerFactory.getLogger("test").error("************************");
             Assert.fail("should fail");
         } catch (ContradictionException e) {
@@ -112,22 +111,21 @@ public class MagicSquareTest {
         // square3,0={14,15} square3,1={1,4,5,6,7,8...,8} square3,2={4,5,6,7,8,9...,10} square3,3={8,9,10,11,12,14...,15}
         //[R]!square3,0  ==  14 (1)
         Solver solver = modeler(4);
-        solver.getSearchLoop().propEngine.init(solver);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         Variable[] vars = solver.getVars();
         ((IntVar) vars[0]).instantiateTo(2, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         ((IntVar) vars[3]).instantiateTo(3, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         ((IntVar) vars[1]).instantiateTo(13, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
 
         ((IntVar) vars[6]).removeValue(1, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         ((IntVar) vars[14]).removeValue(1, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         ((IntVar) vars[12]).removeInterval(9, 14, Cause.Null, false);
-        solver.getSearchLoop().propEngine.iterateAndExecute();
+        solver.propagate();
         Assert.assertTrue(((IntVar) vars[13]).instantiatedTo(1));
 
     }

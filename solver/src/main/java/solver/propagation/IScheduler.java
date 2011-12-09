@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface IScheduler {
+public interface IScheduler extends IExecutable{
 
     /**
      * Schedule an element
@@ -54,13 +54,29 @@ public interface IScheduler {
     void remove(ISchedulable element);
 
     /**
-     * Iterate over scheduled element and execute them.
-     * @throws ContradictionException if an execution encounters a contradiction
-     */
-    boolean iterateAndExecute() throws ContradictionException;
-
-    /**
      * Flush all the scheduled elements
      */
     void flush();
+
+    public static enum Default implements IScheduler {
+        NONE() {
+            @Override
+            public void schedule(ISchedulable element) {
+            }
+
+            @Override
+            public void remove(ISchedulable element) {
+            }
+
+            @Override
+            public boolean execute() throws ContradictionException {
+                return true;
+            }
+
+            @Override
+            public void flush() {
+            }
+        }
+
+    }
 }

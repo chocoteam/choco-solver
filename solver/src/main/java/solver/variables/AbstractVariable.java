@@ -32,12 +32,14 @@ import choco.kernel.common.util.procedure.TernaryProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Class used to factorise code
@@ -65,6 +67,9 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
      * Reference to the solver containing this variable.
      */
     protected final Solver solver;
+
+    protected Constraint[] constraints = new Constraint[8];
+    protected int cLast = 0;
 
     protected final String name;
 
@@ -100,6 +105,32 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
 
     protected void makeList(V variable) {
         this.records = VariableMonitorListBuilder.preset(variable, solver.getEnvironment());
+    }
+
+    /**
+     * Returns the array of constraints <code>this</code> appears in.
+     *
+     * @return array of constraints
+     */
+    public Constraint[] getConstraints() {
+        if(cLast < constraints.length){
+            constraints = Arrays.copyOfRange(constraints, 0, cLast);
+        }
+        return constraints;
+    }
+
+    /**
+     * Link a constraint within a variable
+     *
+     * @param constraint a constraint
+     */
+    public void declareIn(Constraint constraint) {
+        if (cLast >= constraints.length) {
+            Constraint[] tmp = constraints;
+            constraints = new Constraint[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, constraints, 0, cLast);
+        }
+        constraints[cLast++] = constraint;
     }
 
     public abstract IDelta getDelta();

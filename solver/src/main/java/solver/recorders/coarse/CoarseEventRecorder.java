@@ -47,9 +47,9 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
     int evtmask; // reference to events occuring -- inclusive OR over event mask
 
     public CoarseEventRecorder(Propagator propagator, Solver solver) {
-        super(solver);
+        super();
         this.propagator = propagator;
-        this.evtmask = 0;
+        this.evtmask = EventType.FULL_PROPAGATION.mask; // initialize with full propagation event
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
     }
 
     @Override
-    public void execute() throws ContradictionException {
+    public boolean execute() throws ContradictionException {
         if (!propagator.isActive()) {
             //propagator.initialize();
             //promote event to top level event FULL_PROPAGATION
@@ -91,6 +91,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             evtmask = 0;
             propagator.propagate(_evt);
         }
+        return true;
     }
 
     @Override

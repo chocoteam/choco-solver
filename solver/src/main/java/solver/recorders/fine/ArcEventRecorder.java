@@ -92,7 +92,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void execute() throws ContradictionException {
+    public boolean execute() throws ContradictionException {
         if (evtmask > 0) {
             int evtmask_ = evtmask;
             // for concurrent modification..
@@ -103,6 +103,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
             propagator.propagate(this, idxVinP, evtmask_);
             deltamon.unfreeze();
         }
+        return true;
     }
 
     @Override

@@ -27,8 +27,8 @@
 package solver.propagation;
 
 import solver.ICause;
-import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.propagation.strategy.Group;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -40,11 +40,32 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface IPropagationEngine extends IScheduler, Serializable {
+public interface IPropagationEngine extends Serializable {
 
-    boolean initialized();
+    /**
+     * Attach a strategy to <code>this</code>.
+     * Override previously defined one.
+     *
+     * @param pStrategy
+     */
+    void set(Group pStrategy);
 
-    void init(Solver solver);
+    /**
+     * Return the current propagtion strategy.
+     * @return current propagation strategy
+     */
+    Group getGroup();
+
+    /**
+     * Reach a fixpoint
+     * @throws ContradictionException if a contradiction occurrs
+     */
+    void propagate() throws ContradictionException;
+
+    /**
+     * Flush <code>this</code>, ie. remove every pending events
+     */
+    void flush();
 
     void fails(ICause cause, Variable variable, String message) throws ContradictionException;
 

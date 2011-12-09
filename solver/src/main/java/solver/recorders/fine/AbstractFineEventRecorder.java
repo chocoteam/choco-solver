@@ -47,13 +47,12 @@ import solver.variables.delta.IDeltaMonitor;
  */
 public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>, IActivable {
 
-    protected IScheduler scheduler;
-    protected final IMeasures measures; // for timestamp
+    protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
+    protected final IMeasures measures; // for timestamp
     protected boolean enqueued; // to check wether this is enqueud or not.
 
     protected AbstractFineEventRecorder(Solver solver) {
-        this.scheduler = solver.getEngine();
         measures = solver.getMeasures();
         enqueued = false;
         schedulerIdx = -1;
@@ -61,6 +60,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
 
     /**
      * Return the delta monitor declared in <code>this</code> the variable given in parameter
+     *
      * @param variable a variable
      * @return its deltamonitor in <code>this</code>
      */
@@ -72,8 +72,9 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     }
 
     @Override
-    public void setScheduler(IScheduler scheduler) {
+    public void setScheduler(IScheduler scheduler, int idxInS) {
         this.scheduler = scheduler;
+        this.schedulerIdx = idxInS;
     }
 
     @Override

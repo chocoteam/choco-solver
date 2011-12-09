@@ -39,8 +39,9 @@ public interface ISchedulable extends IQueable, IExecutable {
      * Override the default scheduler with <code>scheduler</code>
      *
      * @param scheduler the new scheduler
+     * @param idxInS index in the scheduler
      */
-    void setScheduler(IScheduler scheduler);
+    void setScheduler(IScheduler scheduler, int idxInS);
 
     /**
      * Return the current scheduler

@@ -29,8 +29,6 @@ package solver.recorder;
 
 import choco.kernel.common.util.tools.MathUtils;
 import choco.kernel.memory.IEnvironment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -93,9 +91,7 @@ public class ConditionnalRecorderTest {
     }
 
     public final void execute(Solver solver) {
-        Logger log = LoggerFactory.getLogger("bench");
         solver.findAllSolutions();
-        System.out.println(solver.getMeasures() + "\n");
     }
 
     @Test(groups = "1s")

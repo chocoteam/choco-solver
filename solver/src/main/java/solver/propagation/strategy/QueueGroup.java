@@ -24,17 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.group;
+package solver.propagation.strategy;
 
-import solver.Solver;
+import gnu.trove.list.TIntList;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.engines.queues.FixSizeCircularQueue;
-import solver.recorders.Group;
 import solver.recorders.IEventRecorder;
 
+import java.util.List;
+
 /**
- * A Queue-like (fifo) group for ISchedulable objects.
+ * A specific group that works like a queue (fifo).
  * <br/>
  *
  * @author Charles Prud'homme
@@ -42,24 +43,20 @@ import solver.recorders.IEventRecorder;
  */
 public class QueueGroup extends Group {
 
-
     protected ISchedulable lastPopped;
 
     protected FixSizeCircularQueue<ISchedulable> toPropagate;
 
-    public QueueGroup(int nbElements, Solver solver) {
-        super(solver);
-        toPropagate = new FixSizeCircularQueue<ISchedulable>(nbElements);
-    }
-
-    @Override
-    public void execute() throws ContradictionException {
-        iterateAndExecute();
-    }
-
-    @Override
-    public void attach(IEventRecorder element) {
-        throw new UnsupportedOperationException();
+    public QueueGroup(Iteration iteration, List<ISchedulable> schedulables, TIntList coarseIdx) {
+        super(iteration);
+        toPropagate = new FixSizeCircularQueue<ISchedulable>(schedulables.size());
+        for (int i = 0; i < schedulables.size(); i++) {
+            ISchedulable er = schedulables.get(i);
+            er.setScheduler(this, 0);
+        }
+        for (int i = 0; i < coarseIdx.size(); i++) {
+            schedule(schedulables.get(coarseIdx.get(i)));
+        }
     }
 
     @Override
@@ -81,17 +78,36 @@ public class QueueGroup extends Group {
     }
 
     @Override
-    public boolean iterateAndExecute() throws ContradictionException {
+    protected boolean pickOne() throws ContradictionException {
+        if (!toPropagate.isEmpty()) {
+            lastPopped = toPropagate.pop();
+            lastPopped.deque();
+            if(!lastPopped.execute()){
+                schedule(lastPopped);
+            }
+        }
+        return toPropagate.isEmpty();
+    }
+
+    @Override
+    protected boolean sweepUp() throws ContradictionException {
+        return clearOut();
+    }
+
+    protected boolean clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pop();
             lastPopped.deque();
-            lastPopped.execute();
+            if(!lastPopped.execute()){
+                schedule(lastPopped);
+            }
         }
         return true;
     }
 
     @Override
     public void flush() {
+        lastPopped.flush();
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pop();
             if (IEventRecorder.LAZY) {
@@ -100,4 +116,5 @@ public class QueueGroup extends Group {
             lastPopped.deque();
         }
     }
+
 }

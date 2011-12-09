@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.QueuePropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -98,7 +98,7 @@ public class SerializableTest {
 
     @Test(groups = {"1s"})
     public void testEngine() {
-        IPropagationEngine eng = new QueuePropagationEngine();
+        IPropagationEngine eng = new PropagationEngine();
         File file = null;
         try {
             file = write(eng);

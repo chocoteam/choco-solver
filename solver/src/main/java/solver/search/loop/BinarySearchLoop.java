@@ -54,7 +54,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            propEngine.iterateAndExecute();
+            propEngine.propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);
@@ -149,7 +149,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             objectivemanager.apply(decision);
             objectivemanager.postDynamicCut();
 
-            propEngine.iterateAndExecute();
+            propEngine.propagate();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
             propEngine.flush();
@@ -192,7 +192,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         restaureRootNode();
         try {
             objectivemanager.postDynamicCut();
-            propEngine.iterateAndExecute();
+            propEngine.propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
             interrupt();
