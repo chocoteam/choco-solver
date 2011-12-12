@@ -116,8 +116,8 @@ public final class SqrView extends View<IntVar> {
             } else if (value == sup) {
                 evt = EventType.DECUPP;
             }
-            boolean done = var.removeValue(-rootV, cause, informCause);
-            done |= var.removeValue(rootV, cause, informCause);
+            boolean done = var.removeValue(-rootV, this, informCause);
+            done |= var.removeValue(rootV, this, informCause);
             if (done) {
                 notifyMonitors(evt, cause);
             }
@@ -152,8 +152,8 @@ public final class SqrView extends View<IntVar> {
         }
         int v = floor_sqrt(value);
         if (v * v == value) { // is a perfect square ?
-            boolean done = var.updateLowerBound(-v, cause, informCause);
-            done |= var.updateUpperBound(v, cause, informCause);
+            boolean done = var.updateLowerBound(-v, this, informCause);
+            done |= var.updateUpperBound(v, this, informCause);
             EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
                 done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
@@ -178,7 +178,7 @@ public final class SqrView extends View<IntVar> {
             return false;
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.removeInterval(-floorV + 1, floorV - 1, cause, informCause);
+        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this, informCause);
         if (done) {
             notifyMonitors(EventType.INCLOW, cause);
         }
@@ -193,8 +193,8 @@ public final class SqrView extends View<IntVar> {
             this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.updateLowerBound(-floorV, cause, informCause);
-        done |= var.updateUpperBound(floorV, cause, informCause);
+        boolean done = var.updateLowerBound(-floorV, this, informCause);
+        done |= var.updateUpperBound(floorV, this, informCause);
         if (done) {
             notifyMonitors(EventType.DECUPP, cause);
         }

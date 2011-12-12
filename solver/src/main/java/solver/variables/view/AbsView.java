@@ -110,8 +110,8 @@ public final class AbsView extends View<IntVar> {
         } else if (value == sup) {
             evt = EventType.DECUPP;
         }
-        boolean done = var.removeValue(-value, cause, informCause);
-        done |= var.removeValue(value, cause, informCause);
+        boolean done = var.removeValue(-value, this, informCause);
+        done |= var.removeValue(value, this, informCause);
 
         if (done) {
             notifyMonitors(evt, cause);
@@ -126,8 +126,8 @@ public final class AbsView extends View<IntVar> {
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
-            boolean done = var.removeInterval(-to, -from, cause, informCause);
-            done |= var.removeInterval(from, to, cause, informCause);
+            boolean done = var.removeInterval(-to, -from, this, informCause);
+            done |= var.removeInterval(from, to, this, informCause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -140,14 +140,14 @@ public final class AbsView extends View<IntVar> {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?
-            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, cause, informCause);
-        done |= var.updateUpperBound(v, cause, informCause);
+        boolean done = var.updateLowerBound(-v, this, informCause);
+        done |= var.updateUpperBound(v, this, informCause);
         EventType evt = EventType.DECUPP;
         if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
+            done |= var.removeInterval(-v + 1, v - 1, this, informCause);
             evt = EventType.INSTANTIATE;
         }
         if (done) {
@@ -162,7 +162,7 @@ public final class AbsView extends View<IntVar> {
         if (value <= 0) {
             return false;
         }
-        boolean done = var.removeInterval(-value + 1, value - 1, cause, informCause);
+        boolean done = var.removeInterval(-value + 1, value - 1, this, informCause);
         if (done) {
             notifyMonitors(EventType.INCLOW, cause);
         }
@@ -174,10 +174,10 @@ public final class AbsView extends View<IntVar> {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
-            this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
+            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, cause, informCause);
-        done |= var.updateUpperBound(value, cause, informCause);
+        boolean done = var.updateLowerBound(-value, this, informCause);
+        done |= var.updateUpperBound(value, this, informCause);
         if (done) {
             notifyMonitors(EventType.DECUPP, cause);
         }

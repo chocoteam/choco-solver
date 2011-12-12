@@ -210,10 +210,6 @@ public final class BitsetXYSumView extends AbstractSumView {
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         boolean change;
         int lb = this.getLB();
         if (lb < value) {
@@ -252,10 +248,6 @@ public final class BitsetXYSumView extends AbstractSumView {
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         boolean change;
         int ub = this.getUB();
         if (ub > value) {

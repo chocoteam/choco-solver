@@ -90,40 +90,27 @@ public final class OffsetView extends View<IntVar> {
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, antipromo);
+            solver.getExplainer().removeValue(this, value, cause);
             this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(value - cste, cause, informCause);
+                boolean done = var.removeValue(value - cste, this, informCause);
                 if (done) {
                     if (value == inf) {
                         e = EventType.INCLOW;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
                     } else if (value == sup) {
                         e = EventType.DECUPP;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
                     }
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
-                        if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
-                        }
                     }
                     this.notifyMonitors(e, cause);
-                    solver.getExplainer().removeValue(this, value, antipromo);
+                    solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
             }
@@ -150,9 +137,6 @@ public final class OffsetView extends View<IntVar> {
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -161,10 +145,9 @@ public final class OffsetView extends View<IntVar> {
         } else if (contains(value)) {
             EventType e = EventType.INSTANTIATE;
 
-            boolean done = var.instantiateTo(value - cste, cause, informCause);
+            boolean done = var.instantiateTo(value - cste, this, informCause);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
-                this.notifyMonitors(e, cause);
                 return true;
             }
 
@@ -177,27 +160,20 @@ public final class OffsetView extends View<IntVar> {
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                solver.getExplainer().updateLowerBound(this, old, value, cause);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(value - cste, cause, informCause);
+                boolean done = var.updateLowerBound(value - cste, this, informCause);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
             }
