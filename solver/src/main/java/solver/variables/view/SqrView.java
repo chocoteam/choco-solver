@@ -102,6 +102,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
         }
@@ -144,6 +145,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
@@ -171,6 +173,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
         }
@@ -184,6 +187,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);

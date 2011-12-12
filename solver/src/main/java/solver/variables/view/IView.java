@@ -36,7 +36,7 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView {
+public interface IView extends ICause{
 
     void backPropagate(EventType evt, ICause cause) throws ContradictionException;
 

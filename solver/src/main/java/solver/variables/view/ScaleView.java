@@ -86,6 +86,7 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
 //        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
         ICause antipromo = cause;
         if (informCause) {
@@ -148,6 +149,7 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
 //        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
         solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
@@ -177,6 +179,7 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;
@@ -207,6 +210,7 @@ public final class ScaleView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
 //        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
         ICause antipromo = cause;
         if (informCause) {

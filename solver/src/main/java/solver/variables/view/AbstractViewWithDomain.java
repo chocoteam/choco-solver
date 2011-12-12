@@ -32,22 +32,14 @@ import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.Delta;
-import solver.variables.delta.IntDelta;
-import solver.variables.delta.NoDelta;
-
-import java.io.Serializable;
 
 /**
  * An abstract view for SumView, to avoid duplicate methods
@@ -56,21 +48,15 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> implements IntVar, IView, Serializable, ICause {
+public abstract class AbstractViewWithDomain extends AbstractView {
 
     final IntVar A, B;
-
-    IntDelta delta;
 
     final IStateInt LB, UB, SIZE;
 
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
-
-    protected HeuristicVal heuristicVal;
-
-    protected boolean reactOnRemoval;
 
     public AbstractViewWithDomain(IntVar a, IntVar b, Solver solver) {
         super(solver);
@@ -79,8 +65,7 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         this.LB = solver.getEnvironment().makeInt(0);
         this.UB = solver.getEnvironment().makeInt(0);
         this.SIZE = solver.getEnvironment().makeInt(0);
-        this.delta = NoDelta.singleton;
-        this.reactOnRemoval = false;
+
         A.subscribeView(this);
         B.subscribeView(this);
         this.makeList(this);
@@ -88,23 +73,12 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
-    public IntDelta getDelta() {
-        return delta;
-    }
-
     public void updatePropagationConditions(Propagator propagator, int idxInProp) {
         modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             delta = new Delta();
             reactOnRemoval = true;
         }
-    }
-
-
-    @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
-        solver.getEngine().fails(cause, this, message);
     }
 
     @Override
@@ -144,24 +118,6 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         notifyViews(event, cause);
     }
 
-    public Solver getSolver() {
-        return solver;
-    }
-
-    public int getType() {
-        return Variable.INTEGER;
-    }
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
-    }
-
     @Override
     public Explanation explain(VariableState what) {
         Explanation explanation = new Explanation();
@@ -178,12 +134,6 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         return explanation;
     }
 
-    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
-    @Override
-    public Constraint getConstraint() {
-        return null;
-    }
-
     @Override
     public Explanation explain(Deduction d) {
         Explanation explanation = A.explain(VariableState.DOM);
@@ -192,26 +142,5 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         // return A.explain(VariableState.DOM).add(B.explain(VariableState.DOM));
         // throw new UnsupportedOperationException("AbstractView (as a cause)::can not be explained");
     }
-
-
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
-    }
-
 
 }

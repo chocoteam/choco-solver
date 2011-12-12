@@ -89,6 +89,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;
@@ -147,6 +148,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (informCause) {
             cause = Cause.Null;
@@ -174,6 +176,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;
@@ -204,6 +207,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;

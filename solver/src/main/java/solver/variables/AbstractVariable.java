@@ -60,7 +60,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
-    private static final String NO_NAME = "";
+    protected static final String NO_NAME = "";
 
     /**
      * Reference to the solver containing this variable.

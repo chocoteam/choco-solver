@@ -24,84 +24,96 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.variables.view;
 
-import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.explanations.VariableState;
+import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
 /**
- * "A view implements the same operations as a variable. A view stores a reference to a variable.
- * Invoking an operation on the view exectutes the appropriate operation on the view's varaible."
- * <p/>
- * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
- * C. Shulte and G. Tack.<br/>
- * Eleventh International Conference on Principles and Practice of Constraint Programming
+ * An abstract class for common services of a view
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18/03/11
+ * @since 12/12/11
  */
-public abstract class View<IV extends IntVar> extends AbstractView {
+public abstract class AbstractView extends AbstractVariable<IntVar> implements IntVar, IView {
 
-    protected final IV var;
+    protected IntDelta delta;
 
-    public View(String name, IV var, Solver solver) {
+    protected HeuristicVal heuristicVal;
+
+    protected boolean reactOnRemoval;
+
+    protected AbstractView(String name, Solver solver) {
         super(name, solver);
-        this.var = var;
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
-        makeList(this);
-        this.var.subscribeView(this);
     }
 
-    public IV getVariable() {
-        return var;
+    protected AbstractView(Solver solver) {
+        this(AbstractVariable.NO_NAME, solver);
     }
 
-    @Override
-    public int getDomainSize() {
-        return var.getDomainSize();
+    public IntDelta getDelta() {
+        return delta;
     }
 
     @Override
-    public boolean hasEnumeratedDomain() {
-        return var.hasEnumeratedDomain();
+    public void setHeuristicVal(HeuristicVal heuristicVal) {
+        this.heuristicVal = heuristicVal;
     }
 
     @Override
-    public boolean instantiated() {
-        return var.instantiated();
+    public HeuristicVal getHeuristicVal() {
+        return heuristicVal;
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
-        }
-        notifyViews(event, cause);
+    public String getName() {
+        return name;
     }
 
     @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
-        notifyMonitors(evt, cause);
+    public int getType() {
+        return VIEW;
     }
 
     @Override
-    public Explanation explain(VariableState what) {
-        return var.explain(what);
+    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+        records.forEach(onContradiction.set(this, event, cause));
+        solver.getEngine().fails(cause, this, message);
+    }
+
+    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
+    @Override
+    public Constraint getConstraint() {
+        return null;
     }
 
     @Override
-    public Explanation explain(@Nullable Deduction d) {
-        return var.explain(VariableState.DOM);
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
+    public void incFail() {
+    }
+
+    @Override
+    public long getFails() {
+        return 0;
     }
 }
