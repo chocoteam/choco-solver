@@ -101,16 +101,24 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
     public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
         switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
             case REMOVENODE:
-                delta.getNodeRemovalDelta().forEach(proc, frozenFirst[NR], frozenLast[NR]);
+                for (int i = frozenFirst[NR]; i < frozenLast[NR]; i++) {
+                    proc.execute(delta.getNodeRemovalDelta().get(i));
+                }
                 break;
             case ENFORCENODE:
-                delta.getNodeEnforcingDelta().forEach(proc, frozenFirst[NE], frozenLast[NE]);
+                for (int i = frozenFirst[NE]; i < frozenLast[NE]; i++) {
+                    proc.execute(delta.getNodeEnforcingDelta().get(i));
+                }
                 break;
             case REMOVEARC:
-                delta.getArcRemovalDelta().forEach(proc, frozenFirst[AR], frozenLast[AR]);
+                for (int i = frozenFirst[AR]; i < frozenLast[AR]; i++) {
+                    proc.execute(delta.getArcRemovalDelta().get(i));
+                }
                 break;
             case ENFORCEARC:
-                delta.getArcEnforcingDelta().forEach(proc, frozenFirst[AE], frozenLast[AE]);
+                for (int i = frozenFirst[AE]; i < frozenLast[AE]; i++) {
+                    proc.execute(delta.getArcEnforcingDelta().get(i));
+                }
                 break;
         }
     }

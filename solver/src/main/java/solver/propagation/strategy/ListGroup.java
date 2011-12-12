@@ -122,7 +122,9 @@ public class ListGroup<S extends ISchedulable> extends Group<S> {
 
     @Override
     public void flush() {
-        lastPopped.flush();
+        if(lastPopped!= null){
+            lastPopped.flush();
+        }
         for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
             lastPopped = elements[i];
             if (IEventRecorder.LAZY) {

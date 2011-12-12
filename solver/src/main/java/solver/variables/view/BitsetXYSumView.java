@@ -473,9 +473,9 @@ public final class BitsetXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
 
     @Override
-    public void backPropagate(int mask) throws ContradictionException {
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
         // one of the variable as changed externally, this involves a complete update of this
-        if (!EventType.isRemove(mask)) {
+        if (evt != EventType.REMOVE) {
             int elb = A.getLB() + B.getLB();
             int eub = A.getUB() + B.getUB();
             int ilb = LB.get();
@@ -512,10 +512,10 @@ public final class BitsetXYSumView extends AbstractSumView {
             if (ilb > iub) {
                 this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
             }
-            if (down || size == 1) {
+            if (down || size == 1 || elb < ilb) {
                 filterOnGeq(this, ilb);
             }
-            if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
+            if (up || size == 1 || eub > iub) { // size == 1 means instantiation, then force filtering algo
                 filterOnLeq(this, iub);
             }
             if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo

@@ -43,6 +43,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -59,11 +60,17 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
 
     final IntVar A, B;
 
+    IntDelta delta;
+
     final IStateInt LB, UB, SIZE;
 
     protected DisposableValueIterator _viterator;
 
     protected DisposableRangeIterator _riterator;
+
+    protected HeuristicVal heuristicVal;
+
+    protected boolean reactOnRemoval;
 
     public AbstractViewWithDomain(IntVar a, IntVar b, Solver solver) {
         super(solver);
@@ -72,7 +79,8 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         this.LB = solver.getEnvironment().makeInt(0);
         this.UB = solver.getEnvironment().makeInt(0);
         this.SIZE = solver.getEnvironment().makeInt(0);
-
+        this.delta = NoDelta.singleton;
+        this.reactOnRemoval = false;
         A.subscribeView(this);
         B.subscribeView(this);
         this.makeList(this);
@@ -80,16 +88,16 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
-    public void subscribeView(IView view) {
-        A.subscribeView(view);
-        B.subscribeView(view);
-    }
-
     public IntDelta getDelta() {
-        return NoDelta.singleton;
+        return delta;
     }
 
     public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+            delta = new Delta();
+            reactOnRemoval = true;
+        }
     }
 
 
@@ -130,12 +138,10 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
-        records.forEach(afterModification.set(this, event, cause));
-    }
-
-    @Override
-    public void notifyViews(EventType event, ICause cause) throws ContradictionException {
-        throw new UnsupportedOperationException();
+        if ((modificationEvents & event.mask) != 0) {
+            records.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     public Solver getSolver() {
@@ -146,13 +152,14 @@ public abstract class AbstractViewWithDomain extends AbstractVariable<IntVar> im
         return Variable.INTEGER;
     }
 
+    @Override
     public void setHeuristicVal(HeuristicVal heuristicVal) {
-        //TODO: allow branching
-        throw new UnsupportedOperationException("AbsView#setHeuristicVal: wrong usage");
+        this.heuristicVal = heuristicVal;
     }
 
+    @Override
     public HeuristicVal getHeuristicVal() {
-        throw new UnsupportedOperationException();
+        return heuristicVal;
     }
 
     @Override

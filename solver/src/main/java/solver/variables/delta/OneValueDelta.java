@@ -27,8 +27,6 @@
 
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.OneIntDeltaMonitor;
 
@@ -77,12 +75,5 @@ public final class OneValueDelta implements IntDelta {
     @Override
     public int size() {
         return set ? 1 : 0;
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        if (to == 1) {
-            proc.execute(value);
-        }
     }
 }

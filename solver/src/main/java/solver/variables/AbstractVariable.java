@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
-import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -133,8 +132,6 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         constraints[cLast++] = constraint;
     }
 
-    public abstract IDelta getDelta();
-
     public int getUniqueID() {
         return uniqueID;
     }
@@ -162,12 +159,12 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(event.mask);
+                views[i].backPropagate(event, cause);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(event.mask);
+                    views[i].backPropagate(event, cause);
                 }
             }
         }

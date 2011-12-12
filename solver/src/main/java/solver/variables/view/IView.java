@@ -26,7 +26,9 @@
  */
 package solver.variables.view;
 
+import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
 
 /**
  * <br/>
@@ -36,6 +38,6 @@ import solver.exception.ContradictionException;
  */
 public interface IView {
 
-    void backPropagate(int mask) throws ContradictionException;
+    void backPropagate(EventType evt, ICause cause) throws ContradictionException;
 
 }

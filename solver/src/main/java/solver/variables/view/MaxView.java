@@ -63,60 +63,50 @@ public class MaxView extends AbstractViewWithDomain {
     /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
 
     @Override
-    public void backPropagate(int mask) throws ContradictionException {
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
         // one of the variable as changed externally, this involves a complete update of this
-        // one of the variable as changed externally, this involves a complete update of this
-        if (!EventType.isRemove(mask)) {
-            int lA = A.getLB(), uA = A.getUB();
-            int lB = B.getLB(), uB = B.getUB();
+//        if (evt != EventType.REMOVE) {
+        int lA = A.getLB(), uA = A.getUB();
+        int lB = B.getLB(), uB = B.getUB();
 
-            int elb = Math.max(lA, lB);
-            int eub = Math.max(uA, uB);
+        int elb = Math.max(lA, lB);
+        int eub = Math.max(uA, uB);
 
-            int ilb = LB.get();
-            int iub = UB.get();
-            boolean change = false;
-            EventType e = EventType.VOID;
-            if (elb > ilb) {
-                if (elb > iub) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                SIZE.add(elb - ilb);
-                ilb = elb;
-                LB.set(ilb);
-                e = EventType.INCLOW;
-                change = true;
+        int ilb = LB.get();
+        int iub = UB.get();
+        if (elb > ilb) {
+            updateLowerBound(elb, cause, false);
+        } else if (elb < ilb) {
+            if (A.getLB() >= B.getUB()) {
+                A.updateLowerBound(ilb, cause, false);
             }
-            if (eub < iub) {
-                if (eub < ilb) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                SIZE.add(eub - iub);
-                iub = eub;
-                UB.set(iub);
-                if (e != EventType.VOID) {
-                    e = EventType.BOUND;
-                } else {
-                    e = EventType.DECUPP;
-                }
-                change |= true;
-            }
-            if (ilb > iub) {
-                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
-            }
-            if (change) {
-                if (ilb == iub) {
-                    notifyMonitors(EventType.INSTANTIATE, this);
-                } else {
-                    notifyMonitors(e, this);
-                }
+            if (B.getLB() >= A.getUB()) {
+                B.updateLowerBound(ilb, cause, false);
             }
         }
+        if (eub < iub) {
+            updateUpperBound(eub, cause, false);
+        } else if (eub > iub) {
+            A.updateUpperBound(eub, cause, false);
+            B.updateUpperBound(eub, cause, false);
+        }
+//        }
     }
 
     @Override
     public String getName() {
         return String.format("max(%s,%s)", A, B);
+    }
+
+    @Override
+    public String toString() {
+        if (instantiated()) {
+            return String.format("max(%s,%s) = %d", A, B, getValue());
+        } else {
+            StringBuilder s = new StringBuilder(20);
+            s.append('[').append(getLB()).append(",").append(getUB()).append(']');
+            return String.format("max(%s,%s) = %s", A, B, s.toString());
+        }
     }
 
     @Override
@@ -134,6 +124,7 @@ public class MaxView extends AbstractViewWithDomain {
             if (value == inf) {
                 // todo: delta...
                 LB.set(value + 1);
+                SIZE.add(-1);
                 e = EventType.INCLOW;
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
@@ -147,6 +138,7 @@ public class MaxView extends AbstractViewWithDomain {
             } else {
                 // todo: delta...
                 UB.set(value - 1);
+                SIZE.add(-1);
                 e = EventType.DECUPP;
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
@@ -156,6 +148,15 @@ public class MaxView extends AbstractViewWithDomain {
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
+                    int val = getValue();
+                    A.updateUpperBound(val, this, false);
+                    B.updateUpperBound(val, this, false);
+                    if (!A.contains(val)) {
+                        B.instantiateTo(val, this, false);
+                    }
+                    if (!B.contains(val)) {
+                        A.instantiateTo(val, this, false);
+                    }
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
                         cause = Cause.Null;

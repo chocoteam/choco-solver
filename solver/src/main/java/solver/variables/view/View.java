@@ -27,21 +27,17 @@
 
 package solver.variables.view;
 
-import choco.kernel.common.util.objects.IList;
-import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.fine.IModifier;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.AbstractVariable;
 import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IntDelta;
+import solver.variables.delta.NoDelta;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
@@ -55,51 +51,27 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class View<IV extends IntVar> implements IntVar {
-
-    protected final String name;
+public abstract class View<IV extends IntVar> extends AbstractVariable<IntVar> implements IntVar, IView {
 
     protected final IV var;
 
-    protected int uniqueID;
+    protected IntDelta delta;
 
-    protected final Solver solver;
+    protected HeuristicVal heuristicVal;
+
+    protected boolean reactOnRemoval;
 
     public View(String name, IV var, Solver solver) {
-        this.name = name;
+        super(name, solver);
         this.var = var;
-        this.solver = solver;
+        this.delta = NoDelta.singleton;
+        this.reactOnRemoval = false;
+        makeList(this);
+        this.var.subscribeView(this);
     }
 
     public IV getVariable() {
         return var;
-    }
-
-    @Override
-    public Constraint[] getConstraints() {
-        return var.getConstraints();
-    }
-
-    @Override
-    public void declareIn(Constraint constraint) {
-        var.declareIn(constraint);
-    }
-
-    /**
-     * Return the modifier, if any, to consider during the event recordre creation.
-     *
-     * @return an event modifier or null, if not required
-     */
-    public IModifier getModifier() {
-        return IModifier.Default.NO;
-    }
-
-    public int getUniqueID() {
-        return uniqueID;
-    }
-
-    public void setUniqueID(int uniqueID) {
-        this.uniqueID = uniqueID;
     }
 
     @Override
@@ -109,12 +81,12 @@ public abstract class View<IV extends IntVar> implements IntVar {
 
     @Override
     public void setHeuristicVal(HeuristicVal heuristicVal) {
-        //useless: based on var heuristic val
+        this.heuristicVal = heuristicVal;
     }
 
     @Override
     public HeuristicVal getHeuristicVal() {
-        return var.getHeuristicVal();
+        return heuristicVal;
     }
 
     @Override
@@ -123,48 +95,8 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public IntDelta getDelta() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void activate(IVariableMonitor monitor) {
-        var.activate(monitor);
-    }
-
-    @Override
-    public void desactivate(IVariableMonitor monitor) {
-        var.desactivate(monitor);
-    }
-
-    @Override
     public boolean instantiated() {
         return var.instantiated();
-    }
-
-    @Override
-    public void addMonitor(IVariableMonitor monitor) {
-        var.addMonitor(monitor);
-    }
-
-    @Override
-    public void removeMonitor(IVariableMonitor monitor) {
-        var.removeMonitor(monitor);
-    }
-
-    @Override
-    public void subscribeView(IView view) {
-        var.subscribeView(view);
-    }
-
-    @Override
-    public IList getMonitors() {
-        return var.getMonitors();
-    }
-
-    @Override
-    public int nbConstraints() {
-        return var.nbConstraints();
     }
 
     @Override
@@ -173,28 +105,21 @@ public abstract class View<IV extends IntVar> implements IntVar {
     }
 
     @Override
-    public int nbMonitors() {
-        return var.nbMonitors();
-    }
-
-    @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        var.updatePropagationConditions(propagator, idxInProp);
-    }
-
-    @Override
     public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
-        var.notifyMonitors(event, cause);
-    }
-
-    @Override
-    public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
-        var.notifyViews(event, cause);
+        if ((modificationEvents & event.mask) != 0) {
+            records.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public final IntDelta getDelta() {
+        return delta;
     }
 
     @Override
@@ -211,5 +136,10 @@ public abstract class View<IV extends IntVar> implements IntVar {
     @Override
     public int getType() {
         return VIEW;
+    }
+
+    @Override
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+        notifyMonitors(evt, cause);
     }
 }

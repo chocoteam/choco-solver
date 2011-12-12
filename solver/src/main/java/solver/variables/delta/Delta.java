@@ -27,8 +27,6 @@
 
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 
@@ -91,16 +89,6 @@ public final class Delta implements IntDelta {
     @Override
     public int size() {
         return last;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        for (int i = from; i < to; i++) {
-            proc.execute(rem[i]);
-        }
     }
 
 }

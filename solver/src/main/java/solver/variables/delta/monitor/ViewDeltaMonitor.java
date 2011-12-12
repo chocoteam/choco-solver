@@ -24,39 +24,43 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.variables.delta.monitor;
 
 import solver.variables.EventType;
-import solver.variables.Variable;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 
 /**
- * An interface to allow description of event modifier.
- * Required for views.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 06/12/11
+ * @since 12/12/11
  */
-public interface IModifier<V extends Variable> {
+public abstract class ViewDeltaMonitor implements IDeltaMonitor<IntDelta> {
 
-    /**
-     * Update the event by applying rules implied by the view.
-     * @param var the viewed variable
-     * @param e the original event
-     * @return a modified event.
-     */
-    EventType update(V var, EventType e);
+    final IDeltaMonitor<IntDelta> original;
 
-    public static enum Default implements IModifier<Variable>{
+    public ViewDeltaMonitor(IDeltaMonitor<IntDelta> original) {
+        this.original = original;
+    }
 
-        /**
-         * return the event, without transformation.
-         */
-        NO{
-            @Override
-            public EventType update(Variable var, EventType e) {
-                return e;
-            }
-        }
+    @Override
+    public final void update(EventType evt) {
+        original.update(evt);
+    }
+
+    @Override
+    public final void freeze() {
+        original.freeze();
+    }
+
+    @Override
+    public final void unfreeze() {
+        original.unfreeze();
+    }
+
+    @Override
+    public final void clear() {
+        original.clear();
     }
 }

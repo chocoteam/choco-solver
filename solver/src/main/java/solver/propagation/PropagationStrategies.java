@@ -35,9 +35,7 @@ import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.ArcEventRecorder;
-import solver.recorders.fine.ViewEventRecorderWrapper;
 import solver.variables.Variable;
-import solver.variables.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,16 +101,7 @@ public enum PropagationStrategies {
                 int nbV = propagators[p].getNbVars();
                 for (int v = 0; v < nbV; v++) {
                     Variable variable = propagators[p].getVar(v);
-                    AbstractFineEventRecorder fer;
-                    if (variable.getType() == Variable.VIEW) {
-                        View view = (View) variable;
-                        fer = new ViewEventRecorderWrapper(
-                                new ArcEventRecorder(view.getVariable(), propagators[p], v, solver),
-                                view.getModifier(),
-                                solver);
-                    } else {
-                        fer = new ArcEventRecorder(variable, propagators[p], v, solver);
-                    }
+                    AbstractFineEventRecorder fer = new ArcEventRecorder(variable, propagators[p], v, solver);
                     propagators[p].addRecorder(fer);
                     variable.addMonitor(fer);
                     fers.add(fer);

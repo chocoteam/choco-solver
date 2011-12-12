@@ -27,9 +27,6 @@
 
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
-
 /**
  * <br/>
  *
@@ -51,13 +48,4 @@ public interface IntDelta extends IDelta{
      * @throws IndexOutOfBoundsException if idx is out of the bounds
      */
     int get(int idx) throws IndexOutOfBoundsException;
-
-    /**
-     * Iterates over the values and apply <code>proc</code> for each value
-     * @param proc procedure to apply
-     * @param from (included)
-     * @param to (excluded)
-     * @throws solver.exception.ContradictionException  if a contradiction occurs
-     */
-    void forEach(IntProcedure proc, int from, int to) throws ContradictionException;
 }

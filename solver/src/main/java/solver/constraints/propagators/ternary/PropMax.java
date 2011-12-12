@@ -144,19 +144,21 @@ public class PropMax extends Propagator<IntVar> {
             }
         } else if (idx == 1) {
             val = v1.getValue();
-            if (val > v2.getUB()) {
+            if (val >= v2.getUB()) {
                 v0.instantiateTo(val, this, false);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v2.getUB()), this, false);
+                v0.updateLowerBound(Math.max(val, v2.getLB()), this, false);
             }
         } else if (idx == 2) {
             val = v2.getValue();
-            if (val > v1.getUB()) {
+            if (val >= v1.getUB()) {
                 v0.instantiateTo(val, this, false);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v1.getUB()), this, false);
+                v0.updateLowerBound(Math.max(val, v1.getLB()), this, false);
             }
         }
     }

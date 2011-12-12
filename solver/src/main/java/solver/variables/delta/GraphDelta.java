@@ -27,8 +27,6 @@
 
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 public class GraphDelta implements IGraphDelta {
@@ -61,11 +59,6 @@ public class GraphDelta implements IGraphDelta {
 
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

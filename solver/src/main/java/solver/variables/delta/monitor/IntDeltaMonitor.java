@@ -77,7 +77,9 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     @Override
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
         if (EventType.isRemove(eventType.mask)) {
-            delta.forEach(proc, frozenFirst, frozenLast);
+            for (int i = frozenFirst; i < frozenLast; i++) {
+                proc.execute(delta.get(i));
+            }
         }
     }
 }

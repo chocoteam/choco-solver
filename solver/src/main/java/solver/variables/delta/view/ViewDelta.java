@@ -26,43 +26,42 @@
  */
 package solver.variables.delta.view;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
-import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
 /**
+ * A view delta is designed to store nothing (like NoDelta),
+ * but a delta monitor based on the variable observed.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public abstract class ViewDelta implements IntDelta {
+public final class ViewDelta implements IntDelta {
 
-    final IntDelta original;
+    protected final IDeltaMonitor<IntDelta> deltaMonitor;
 
-    public ViewDelta(IntDelta original) {
-        this.original = original;
+    public ViewDelta(IDeltaMonitor<IntDelta> deltaMonitor) {
+        this.deltaMonitor = deltaMonitor;
     }
 
     @Override
-    public <D extends IDelta> IDeltaMonitor<D> getMonitor() {
-        return original.getMonitor();
+    public IDeltaMonitor<IntDelta> getMonitor() {
+        return deltaMonitor;
+    }
+
+    @Override
+    public void add(int value) {
+        throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
     }
 
     @Override
     public int get(int idx) throws IndexOutOfBoundsException {
-        return original.get(idx);
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
-        original.forEach(proc, from, to);
+        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
     }
 
     @Override
     public int size() {
-        return original.size();
+        return 0;
     }
 }

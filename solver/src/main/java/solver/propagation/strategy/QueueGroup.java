@@ -101,7 +101,9 @@ public class QueueGroup<S extends ISchedulable> extends Group<S> {
 
     @Override
     public void flush() {
-        lastPopped.flush();
+        if(lastPopped!= null){
+            lastPopped.flush();
+        }
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.pop();
             if (IEventRecorder.LAZY) {
