@@ -30,6 +30,7 @@ package solver;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.buffer.EnvironmentBuffering;
 import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,10 @@ import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.PropagationEngine;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationStrategies;
+import solver.propagation.strategy.Group;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
@@ -69,7 +72,7 @@ import java.util.Properties;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.Constraint
- * @see solver.propagation.engines.IPropagationEngine
+ * @see solver.propagation.PropagationEngine
  * @see choco.kernel.memory.IEnvironment
  * @see solver.search.loop.AbstractSearchLoop
  * @since 0.01
@@ -79,7 +82,8 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 3L;
 
-    public static int _DEFAULT_ENV = 0; // 1 :copying, other: trailing
+    // 1 :copying, 2: buffering, 3: buffering unsafe,other: trailing
+    public static int _DEFAULT_ENV = 0;
 
     /**
      * Properties of the solver
@@ -148,13 +152,20 @@ public class Solver implements Serializable {
             case 1:
                 this.environment = new EnvironmentCopying();
                 break;
+            case 2:
+                this.environment = new EnvironmentBuffering(false);
+                break;
+            case 3:
+                this.environment = new EnvironmentBuffering(true);
+                break;
             default:
                 this.environment = new EnvironmentTrailing();
         }
-        this.measures = new MeasuresRecorder(this);
+        this.measures = new MeasuresRecorder(this); // required for event recorder
         this.creationTime -= System.nanoTime();
+        this.search = SearchLoops.preset(this);
         this.engine = new PropagationEngine();
-        this.search = SearchLoops.preset(this, engine);
+        this.search.setPropEngine(engine);
         this.setExplainer(new ExplanationEngine(this));
     }
 
@@ -171,6 +182,16 @@ public class Solver implements Serializable {
 
     public void set(AbstractStrategy strategies) {
         this.search.set(strategies);
+    }
+
+    /**
+     * Set a propagation strategy to the propagation engine attached in <code>this</code>.
+     * It overrides the previously defined one, if any.
+     *
+     * @param group a propagation strategy
+     */
+    public void set(Group group) {
+        this.engine.set(group);
     }
 
     /**
@@ -205,7 +226,7 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        engine.addConstraint(c);
+        c.declare();
     }
 
     /**
@@ -225,7 +246,7 @@ public class Solver implements Serializable {
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            engine.addConstraint(cs[i]);
+            cs[i].declare();
         }
     }
 
@@ -236,12 +257,12 @@ public class Solver implements Serializable {
             System.arraycopy(tmp, 0, cstrs, 0, cIdx);
         }
         cstrs[cIdx++] = c;
-        engine.addConstraint(c);
+        c.declare();
 
         System.arraycopy(cs, 0, cstrs, cIdx, cs.length);
         cIdx += cs.length;
         for (int i = 0; i < cs.length; i++) {
-            engine.addConstraint(cs[i]);
+            cs[i].declare();
         }
     }
 
@@ -325,6 +346,10 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
+        if (engine.getGroup() == null) {
+            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
+            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
+        }
         if (search.getStrategy() == null) {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
             set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(getVars()), this));
@@ -335,10 +360,11 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (!engine.initialized()) {
-            engine.init();
+        if (engine.getGroup() == null) {
+            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
+            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
         }
-        engine.fixPoint();
+        engine.propagate();
     }
 
     /**
@@ -368,7 +394,7 @@ public class Solver implements Serializable {
         return vIdx;
     }
 
-    public Variable getVar(int i){
+    public Variable getVar(int i) {
         return vars[i];
     }
 
@@ -518,6 +544,26 @@ public class Solver implements Serializable {
         return model;
     }
 
+    public static Solver serializeClone(Solver solver) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream out;
+        try {
+            out = new ObjectOutputStream(baos);
+            out.writeObject(solver);
+            out.close();
+            byte[] buf = baos.toByteArray();
+
+            ByteArrayInputStream bin = new ByteArrayInputStream(buf);
+            ObjectInputStream in = new ObjectInputStream(bin);
+            return (Solver) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /**
      * Explanation engine for the solver
      */
@@ -532,7 +578,6 @@ public class Solver implements Serializable {
     public void set(ExplanationEngine explainer) {
         this.setExplainer(explainer);
     }
-
 
 
 }

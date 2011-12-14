@@ -30,13 +30,13 @@ package solver.constraints.propagators.gary.constraintSpecific;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TIntIntHashMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -91,12 +91,12 @@ public class PropGraphAllDiffBC<V extends Variable> extends GraphPropagator<V> {
     //***********************************************************************************
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
     }
 
     @Override
-    public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         valRemoved.execute(idxVarInProp);
     }
 

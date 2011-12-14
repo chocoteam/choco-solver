@@ -36,6 +36,7 @@ import solver.constraints.propagators.reified.PropReified;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.BoolVar;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -103,11 +104,6 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void filter() throws ContradictionException {
-        propagators[0].propagate();
     }
 
     @Override

@@ -180,7 +180,7 @@ public interface IEnvironment extends Serializable{
 
     public IStateLong makeLong();
 
-    public IStateLong makeLong(int init);
+    public IStateLong makeLong(long init);
 
 
     /**

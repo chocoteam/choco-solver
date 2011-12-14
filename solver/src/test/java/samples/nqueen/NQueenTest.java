@@ -35,8 +35,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.propagation.engines.comparators.EngineStrategies;
+import solver.propagation.comparators.EngineStrategies;
 import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -206,23 +205,15 @@ public class NQueenTest {
         ((IntVar) vars[4]).instantiateTo(12, Cause.Null, false);
         ((IntVar) vars[5]).instantiateTo(16, Cause.Null, false);
         ((IntVar) vars[6]).instantiateTo(4, Cause.Null, false);
-        solver.getSearchLoop().propEngine.fixPoint();
+        solver.propagate();
         LoggerFactory.getLogger("test").error("*******************************************");
         System.out.printf("%s\n", solver.toString());
         ((IntVar) vars[7]).instantiateTo(7, Cause.Null, false);
         try {
-            solver.getSearchLoop().propEngine.fixPoint();
+            solver.propagate();
             Assert.fail();
         } catch (ContradictionException ex) {
             System.out.printf("%s\n", ex.getMessage());
         }
     }
-
-    @Test(groups = "1s", expectedExceptions = SolverException.class)
-    public void testInit1() {
-        Solver solver = modeler(new NQueenBinaryGlobal(), 16);
-        solver.getEngine().init();
-        solver.getEngine().init();
-    }
-
 }

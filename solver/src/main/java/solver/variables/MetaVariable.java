@@ -35,7 +35,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.NoDelta;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable implements Variable<NoDelta> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVariable> implements Variable<NoDelta> {
 
     protected V[] components;
     protected int dim;
@@ -44,6 +44,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
         super(name, sol);
         components = vars;
         dim = vars.length;
+        this.makeList(this);
     }
 
     @Override
@@ -60,13 +61,9 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
         modificationEvents |= observer.getPropagationConditions(idxInProp);
     }
 
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-    }
-
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            requests.forEach(afterModification.set(this, event, cause));
+            records.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
     }
@@ -101,8 +98,8 @@ public class MetaVariable<V extends Variable> extends AbstractVariable implement
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(onContradiction.set(this, event, cause));
-        engine.fails(cause, this, message);
+        records.forEach(onContradiction.set(this, event, cause));
+        solver.getEngine().fails(cause, this, message);
     }
 
     @Override

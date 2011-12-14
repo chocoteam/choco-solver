@@ -27,20 +27,18 @@
 
 package solver.variables.delta;
 
-import choco.kernel.common.util.procedure.IntProcedure;
-import solver.exception.ContradictionException;
-
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 10/02/11
  */
-public final class NoDelta implements IntDelta {
+public enum NoDelta implements IntDelta {
+    singleton;
 
-    public static NoDelta singleton = new NoDelta();
-
-    protected NoDelta() {
+    @Override
+    public IDeltaMonitor getMonitor() {
+        return IDeltaMonitor.Default.NONE;
     }
 
     @Override
@@ -48,16 +46,12 @@ public final class NoDelta implements IntDelta {
     }
 
     @Override
-    public int get(int idx){
+    public int get(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
 
     @Override
     public int size() {
         return 0;
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, int from, int to) throws ContradictionException {
     }
 }

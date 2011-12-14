@@ -36,8 +36,7 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -87,8 +86,9 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	// PROPAGATIONS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		long tps = System.currentTimeMillis();
 		for(int i=0; i<n; i++){
 			for(int j = 0; j<n; j++){
@@ -123,18 +123,16 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 		duration+=System.currentTimeMillis()-tps;
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		long tps = System.currentTimeMillis();
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = (IntDelta) graph.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
+                eventRecorder.getDeltaMonitor(var).forEach(enf, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) graph.getDelta().getArcRemovalDelta();
-				d.forEach(rem, gv.fromArcRemoval(), gv.toArcRemoval());
+                eventRecorder.getDeltaMonitor(var).forEach(rem, EventType.REMOVEARC);
 			}
 		}
 		else{

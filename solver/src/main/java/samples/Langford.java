@@ -31,10 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.unary.Relation;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -91,7 +87,7 @@ public class Langford extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
-        IPropagationEngine peng = solver.getEngine();
+        /*IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
         peng.addGroup(Group.buildQueue(
                 Predicates.light(),
@@ -100,7 +96,7 @@ public class Langford extends AbstractProblem {
         peng.addGroup(Group.buildQueue(
                 Predicates.all(),
                 Policy.ONE
-        ));
+        ));*/
     }
 
     @Override

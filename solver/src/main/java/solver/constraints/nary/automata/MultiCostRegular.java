@@ -29,7 +29,7 @@ package solver.constraints.nary.automata;
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -178,8 +178,7 @@ public class MultiCostRegular extends IntConstraint<IntVar> {
             this.pmcr = pmcr;
             this.map2idx = new TObjectIntHashMap<IntVar>();
             for (int i = 0; i < pmcr.getNbVars(); i++) {
-                IntVar var = pmcr.getVar(i);
-                map2idx.put(var, i);
+                map2idx.put(pmcr.getVar(i), i);
             }
         }
 

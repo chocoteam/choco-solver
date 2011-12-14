@@ -34,7 +34,7 @@ import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 
@@ -138,7 +138,7 @@ public class PropClause extends Propagator<BoolVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         if (vars.length == 1) {
             if (firstNotPosLit == 1) {
                 vars[0].instantiateTo(1, this, false);
@@ -185,7 +185,7 @@ public class PropClause extends Propagator<BoolVar> {
 
 
     @Override
-    public void propagateOnRequest(IRequest<BoolVar> boolVarIFineRequest, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         }

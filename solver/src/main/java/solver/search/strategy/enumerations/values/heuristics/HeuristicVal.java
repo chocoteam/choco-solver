@@ -28,7 +28,7 @@
 package solver.search.strategy.enumerations.values.heuristics;
 
 import choco.kernel.common.util.iterators.IntIterator;
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 
 public abstract class HeuristicVal implements IntIterator {
 

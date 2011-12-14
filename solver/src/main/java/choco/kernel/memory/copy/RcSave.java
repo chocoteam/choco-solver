@@ -27,7 +27,7 @@
 
 package choco.kernel.memory.copy;
 
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /*
  * Created by IntelliJ IDEA.

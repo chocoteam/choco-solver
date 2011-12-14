@@ -38,7 +38,6 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -307,8 +306,7 @@ public class InverseChannelingTest {
         s.set(strategy);
 
         try {
-            s.getSearchLoop().propEngine.init();
-            s.getSearchLoop().propEngine.fixPoint();
+            s.propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -340,7 +338,6 @@ public class InverseChannelingTest {
     }
 
     private String testNode(Solver solver) throws ContradictionException {
-        IPropagationEngine propagator = solver.getSearchLoop().propEngine;
         Variable[] vars = solver.getVars();
         List<IntVar> Q = new ArrayList<IntVar>(22);
         for (int i = 0; i < vars.length; i++) {
@@ -348,8 +345,7 @@ public class InverseChannelingTest {
                 Q.add((IntVar) vars[i]);
             }
         }
-        propagator.init();
-        propagator.fixPoint();
+        solver.propagate();
 
         Q.get(0).instantiateTo(1, Cause.Null, false);
         Q.get(2).instantiateTo(5, Cause.Null, false);
@@ -361,9 +357,9 @@ public class InverseChannelingTest {
         Q.get(7).instantiateTo(14, Cause.Null, false);
         Q.get(8).instantiateTo(17, Cause.Null, false);
         Q.get(9).instantiateTo(19, Cause.Null, false);
-        propagator.fixPoint();
+        solver.propagate();
         Q.get(10).instantiateTo(6, Cause.Null, false);
-        propagator.fixPoint();
+        solver.propagate();
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
             IntVar var = (IntVar) vars[i];
@@ -378,7 +374,6 @@ public class InverseChannelingTest {
     }
 
     private String testNode2(Solver solver) throws ContradictionException {
-        IPropagationEngine propagator = solver.getSearchLoop().propEngine;
         Variable[] vars = solver.getVars();
         List<IntVar> Q = new ArrayList<IntVar>(22);
         for (int i = 0; i < vars.length; i++) {
@@ -386,8 +381,7 @@ public class InverseChannelingTest {
                 Q.add((IntVar) vars[i]);
             }
         }
-        propagator.init();
-        propagator.fixPoint();
+        solver.propagate();
 
         Q.get(0).instantiateTo(1, Cause.Null, false);
         Q.get(1).instantiateTo(3, Cause.Null, false);
@@ -403,9 +397,9 @@ public class InverseChannelingTest {
         Q.get(11).instantiateTo(20, Cause.Null, false);
         Q.get(12).instantiateTo(18, Cause.Null, false);
         Q.get(13).instantiateTo(7, Cause.Null, false);
-        propagator.fixPoint();
+        solver.propagate();
         Q.get(14).instantiateTo(10, Cause.Null, false);
-        propagator.fixPoint();
+        solver.propagate();
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
             IntVar var = (IntVar) vars[i];

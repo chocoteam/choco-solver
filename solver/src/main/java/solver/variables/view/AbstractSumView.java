@@ -70,28 +70,26 @@ public abstract class AbstractSumView extends AbstractViewWithDomain {
     void filterOnLeq(ICause cause, int ub) throws ContradictionException {
         int lbA = A.getLB(), lbB = B.getLB();
         int sumLB = lbA + lbB - ub;
-        if (-sumLB < 0) contradiction(cause, EventType.PROPAGATE, MSG_EMPTY);
+        if (-sumLB < 0) contradiction(cause, EventType.FULL_PROPAGATION, MSG_EMPTY);
         int ubA = A.getUB(), ubB = B.getUB();
         if (ubA - lbA + sumLB > 0) {
-            A.updateUpperBound(-sumLB + lbA, cause, true);
+            A.updateUpperBound(-sumLB + lbA, this, true);
         }
         if (ubB - lbB + sumLB > 0) {
-            B.updateUpperBound(-sumLB + lbB, cause, true);
+            B.updateUpperBound(-sumLB + lbB, this, true);
         }
-        //TODO: back propager?
     }
 
     void filterOnGeq(ICause cause, int lb) throws ContradictionException {
         int ubA = A.getUB(), ubB = B.getUB();
         int sumUB = ubA + ubB - lb;
-        if (-sumUB > 0) contradiction(cause, EventType.PROPAGATE, MSG_EMPTY);
+        if (-sumUB > 0) contradiction(cause, EventType.FULL_PROPAGATION, MSG_EMPTY);
         int lbA = A.getLB(), lbB = B.getLB();
         if (ubA - lbA - sumUB > 0) {
-            A.updateLowerBound(-sumUB + ubA, cause, true);
+            A.updateLowerBound(-sumUB + ubA, this, true);
         }
         if (ubB - lbB - sumUB > 0) {
-            B.updateLowerBound(-sumUB + ubB, cause, true);
+            B.updateLowerBound(-sumUB + ubB, this, true);
         }
-        //TODO: back propager?
     }
 }

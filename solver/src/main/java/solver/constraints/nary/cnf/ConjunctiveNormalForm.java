@@ -83,7 +83,7 @@ public class ConjunctiveNormalForm extends IntConstraint<BoolVar> {
                 // create the propagator, based on the i^th clause
                 propClauses[i] = new PropClause(clause, solver, this);
                 // create the link between the variables and the propagator,
-                // required for #filterOnRequest() step
+                // required for #propagate() step
                 BoolVar[] bvars = clause.flattenBoolVar();
                 for (int j = 0; j < bvars.length; j++) {
                     BoolVar v = bvars[j];

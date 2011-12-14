@@ -34,11 +34,11 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
-import solver.requests.IRequest;
 
 /**Propagator that ensures that K nodes belong to the final graph
  * 
@@ -75,7 +75,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		k.updateLowerBound(g.getKernelOrder(), this, false);
 		k.updateUpperBound(g.getEnvelopOrder(), this, false);
 		if(k.instantiated()){
@@ -102,7 +102,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		k.updateLowerBound(g.getKernelOrder(), this, false);
 		k.updateUpperBound(g.getEnvelopOrder(), this, false);
 		if(k.instantiated()){

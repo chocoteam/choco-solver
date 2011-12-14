@@ -31,7 +31,7 @@ import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.propagation.engines.comparators.EngineStrategies;
+import solver.propagation.comparators.EngineStrategies;
 import solver.variables.IntVar;
 
 /**

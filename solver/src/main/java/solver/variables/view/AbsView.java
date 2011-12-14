@@ -29,20 +29,18 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import org.slf4j.LoggerFactory;
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.ViewRequestWrapper;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
 
@@ -59,43 +57,31 @@ import solver.variables.delta.view.ViewDelta;
  */
 public final class AbsView extends View<IntVar> {
 
-    final IntDelta delta;
-
-    protected HeuristicVal heuristicVal;
-
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;
 
     public AbsView(final IntVar var, Solver solver) {
         super("|" + var.getName() + "|", var, solver);
-        delta = new ViewDelta(var.getDelta()) {
-
-            @Override
-            public void add(int value) {
-                var.getDelta().add(value);
-                var.getDelta().add(-value);
-            }
-        };
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //todo : ugly
-        ViewRequestWrapper req = new ViewRequestWrapper(propagator.makeRequest(var, idxInProp),
-                ViewRequestWrapper.Modifier.ABS);
-        propagator.addRequest(req);
-        var.addMonitor(req);
-    }
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+            var.updatePropagationConditions(propagator, idxInProp); // to ensure var has a delta
+            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
 
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        LoggerFactory.getLogger("solver").warn("AbsView#setHeuristicVal: wrong usage");
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
+                @Override
+                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                    if (EventType.isRemove(eventType.mask)) {
+                        for (int i = frozenFirst; i < frozenLast; i++) {
+                            proc.execute(Math.abs(delta.get(i)));
+                        }
+                    }
+                }
+            });
+            reactOnRemoval = true;
+        }
     }
 
     @Override
@@ -112,53 +98,89 @@ public final class AbsView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
         }
-        boolean done = var.removeValue(-value, cause, informCause);
-        done |= var.removeValue(value, cause, informCause);
+        int inf = getLB();
+        int sup = getUB();
+        EventType evt = EventType.REMOVE;
+        if (value == inf) {
+            evt = EventType.INCLOW;
+        } else if (value == sup) {
+            evt = EventType.DECUPP;
+        }
+        boolean done = var.removeValue(-value, this, informCause);
+        done |= var.removeValue(value, this, informCause);
+
+        if (done) {
+            notifyMonitors(evt, cause);
+        }
         return done;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
-        if (to < 0) {
-            return false;
+        if (from <= getLB()) {
+            return updateLowerBound(to + 1, cause, informCause);
+        } else if (getUB() <= to) {
+            return updateUpperBound(from - 1, cause, informCause);
+        } else {
+            boolean done = var.removeInterval(-to, -from, this, informCause);
+            done |= var.removeInterval(from, to, this, informCause);
+            if (done) {
+                notifyMonitors(EventType.REMOVE, cause);
+            }
+            return done;
         }
-        if (from < 0) {
-            from = 0;
-        }
-        boolean done = var.removeInterval(-to, -from, cause, informCause);
-        done |= var.removeInterval(from, to, cause, informCause);
-        return done;
     }
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
-            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
+            //TODO: explication?
+            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, cause, informCause);
-        done |= var.updateUpperBound(v, cause, informCause);
+        boolean done = var.updateLowerBound(-v, this, informCause);
+        done |= var.updateUpperBound(v, this, informCause);
+        EventType evt = EventType.DECUPP;
         if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
+            done |= var.removeInterval(-v + 1, v - 1, this, informCause);
+            evt = EventType.INSTANTIATE;
+        }
+        if (done) {
+            notifyMonitors(evt, cause);
         }
         return done;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        return value > 0 && var.removeInterval(-value + 1, value - 1, cause, informCause);
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        if (value <= 0) {
+            return false;
+        }
+        boolean done = var.removeInterval(-value + 1, value - 1, this, informCause);
+        if (done) {
+            notifyMonitors(EventType.INCLOW, cause);
+        }
+        return done;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
-            this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
+            //TODO: explication?
+            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, cause, informCause);
-        done |= var.updateUpperBound(value, cause, informCause);
+        boolean done = var.updateLowerBound(-value, this, informCause);
+        done |= var.updateUpperBound(value, this, informCause);
+        if (done) {
+            notifyMonitors(EventType.DECUPP, cause);
+        }
         return done;
     }
 
@@ -257,11 +279,6 @@ public final class AbsView extends View<IntVar> {
     @Override
     public String toString() {
         return "|" + this.var.toString() + "| = [" + getLB() + "," + getUB() + "]";
-    }
-
-    @Override
-    public IntDelta getDelta() {
-        return delta;
     }
 
     @Override
@@ -649,5 +666,33 @@ public final class AbsView extends View<IntVar> {
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+    @Override
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+        if (evt == EventType.INCLOW) {
+            int lb = var.getLB();
+            if (lb > 0) {
+                notifyMonitors(EventType.INCLOW, cause);
+                return;
+            }
+            int ub = var.getUB();
+            if (ub >= 0) {
+                notifyMonitors(EventType.DECUPP, cause);
+                return;
+            } // else, keep original event
+        } else if (evt == EventType.DECUPP) {
+            int ub = var.getUB();
+            if (ub < 0) {
+                notifyMonitors(EventType.INCLOW, cause);
+                return;
+            }
+            int lb = var.getLB();
+            if (lb <= 0) {
+                notifyMonitors(EventType.DECUPP, cause);
+                return;
+            } // else, keep original event
+        }
+        notifyMonitors(evt, cause);
     }
 }

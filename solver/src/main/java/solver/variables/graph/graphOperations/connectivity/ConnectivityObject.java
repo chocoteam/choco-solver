@@ -27,7 +27,9 @@
 
 package solver.variables.graph.graphOperations.connectivity;
 
-import gnu.trove.TIntArrayList;
+
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.LinkedList;
 
 /**Class which encapsulates Isthmus, Articulation Points (AP) and Connected Components (CC)

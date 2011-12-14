@@ -32,7 +32,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -65,13 +65,13 @@ public class PropLargeCSP extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter();
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate();
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     @Override

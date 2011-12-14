@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.IPropagationEngine;
 import solver.variables.IntVar;
 
 import java.io.Serializable;

@@ -30,7 +30,6 @@ package solver.search.loop;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
 import solver.search.strategy.decision.Decision;
 
 /**
@@ -43,8 +42,8 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
 
     private IStateInt nbPrevisouDecisions;
 
-    AdvancedBinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
-        super(solver, propEngine);
+    AdvancedBinarySearchLoop(Solver solver) {
+        super(solver);
         nbPrevisouDecisions = env.makeInt();
     }
 
@@ -75,11 +74,11 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                         previous.apply();
                         previous = previous.getPrevious();
                     }
-                    propEngine.fixPoint();
+                    propEngine.propagate();
                 }
                 recordSolution();
             } catch (ContradictionException e) {
-                propEngine.flushAll();
+                propEngine.flush();
                 moveTo(UP_BRANCH);
                 jumpTo = 1;
                 smList.onContradiction(e);
@@ -106,11 +105,11 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                 prev.apply();
                 prev = prev.getPrevious();
             }
-            propEngine.fixPoint();
+            propEngine.propagate();
             nbPrevisouDecisions.set(0);
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flushAll();
+            propEngine.flush();
             nbPrevisouDecisions.add(1);
             moveTo(UP_BRANCH);
             jumpTo = 1;

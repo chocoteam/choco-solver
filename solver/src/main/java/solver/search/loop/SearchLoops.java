@@ -28,7 +28,6 @@
 package solver.search.loop;
 
 import solver.Solver;
-import solver.propagation.engines.IPropagationEngine;
 
 /**
  * <br/>
@@ -42,22 +41,22 @@ public class SearchLoops {
 
     protected SearchLoops() {}
 
-    public static AbstractSearchLoop preset(Solver solver, IPropagationEngine propEngine) {
+    public static AbstractSearchLoop preset(Solver solver) {
         switch (_DEFAULT) {
             case 1:
-                return advancedBinarySearchLoop(solver, propEngine);
+                return advancedBinarySearchLoop(solver);
             default:
-                return binarySearchLoop(solver, propEngine);
+                return binarySearchLoop(solver);
         }
     }
 
 
-    public static AbstractSearchLoop binarySearchLoop(Solver solver, IPropagationEngine propEngine) {
-        return new BinarySearchLoop(solver, propEngine);
+    public static AbstractSearchLoop binarySearchLoop(Solver solver) {
+        return new BinarySearchLoop(solver);
     }
 
-    public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
-        return new AdvancedBinarySearchLoop(solver, propEngine);
+    public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver) {
+        return new AdvancedBinarySearchLoop(solver);
     }
 
 }

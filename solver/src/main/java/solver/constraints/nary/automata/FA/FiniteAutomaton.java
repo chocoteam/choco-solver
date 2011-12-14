@@ -29,7 +29,11 @@ package solver.constraints.nary.automata.FA;
 
 import choco.kernel.common.util.tools.StringUtils;
 import dk.brics.automaton.*;
-import gnu.trove.*;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;

@@ -28,8 +28,8 @@ package solver.constraints.nary.automata;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.hash.TIntHashSet;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;

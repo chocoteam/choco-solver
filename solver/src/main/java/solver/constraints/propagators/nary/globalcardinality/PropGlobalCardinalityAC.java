@@ -34,7 +34,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.matching.FlowStructure;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -89,12 +89,22 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     }
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         for (int i = 0; i < maxFlow.length; i++) {
             vars[i].updateLowerBound(minValue, this, false);
             vars[i].updateUpperBound(maxValue, this, false);
@@ -102,24 +112,28 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         // On suppose que la structure struct est deja ete initialisee par la contrainte
         // car elle est partagee entre tous les propagateurs
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            initialize();
+        }
         struct.removeUselessEdges(this);
+
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         IntVar var = vars[varIdx];
         if (EventType.isInstantiate(mask)) {
             struct.setMatch(varIdx, var.getValue());
         } else {
-            request.forEach(rem_proc.set(varIdx));
+            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
-//        if (getNbRequestEnqued() == 0) {
+//        if (getNbPendingER() == 0) {
 //            struct.removeUselessEdges(this);
 //        }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

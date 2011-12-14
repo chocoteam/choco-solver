@@ -36,7 +36,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequestWithVariable;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -49,7 +48,7 @@ import solver.variables.delta.IGraphDelta;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable implements Variable<IGraphDelta>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<GraphVar> implements Variable<IGraphDelta>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -68,6 +67,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
     public GraphVar(Solver solver) {
         super("G", solver);
         this.environment = solver.getEnvironment();
+        this.makeList(this);
     }
 
     //***********************************************************************************
@@ -209,28 +209,21 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable 
         modificationEvents |= propagator.getPropagationConditions(idxInProp);
         if (!reactOnModification) {
             reactOnModification = true;
-            delta = new GraphDelta(solver);
+            delta = new GraphDelta();
         }
-    }
-
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        IRequestWithVariable<GraphVar> request = propagator.makeRequest(this, idxInProp);
-        propagator.addRequest(request);
-        this.addMonitor(request);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            requests.forEach(afterModification.set(this, event, cause));
+            records.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
     }
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        requests.forEach(onContradiction.set(this, event, cause));
-        engine.fails(cause, this, message);
+        records.forEach(onContradiction.set(this, event, cause));
+        solver.getEngine().fails(cause, this, message);
     }
 
     public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {

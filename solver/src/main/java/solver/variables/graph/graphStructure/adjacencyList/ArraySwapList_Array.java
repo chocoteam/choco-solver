@@ -27,8 +27,6 @@
 
 package solver.variables.graph.graphStructure.adjacencyList;
 
-import gnu.trove.TIntIntHashMap;
-
 /**
  * List of m elements based on Array int_swaping with an additionnal array
  * add : O(1)

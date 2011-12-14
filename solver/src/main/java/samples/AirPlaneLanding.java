@@ -28,8 +28,7 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -37,11 +36,6 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.*;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -201,7 +195,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
         solver.getSearchLoop().getLimitsBox().setNodeLimit(500000);
 
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
                 Group.buildGroup(
@@ -214,7 +208,7 @@ public class AirPlaneLanding extends AbstractProblem {
                                 new MappingV(planes, costLAT)
                         ),
                         Policy.FIXPOINT
-                ));
+                ));*/
 
     }
 

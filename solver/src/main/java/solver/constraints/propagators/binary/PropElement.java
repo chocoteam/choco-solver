@@ -37,7 +37,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -134,13 +134,13 @@ public class PropElement extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         this.updateIndexFromValue(false);
         this.updateValueFromIndex(false);
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             awakeOnInst(varIdx);
         }

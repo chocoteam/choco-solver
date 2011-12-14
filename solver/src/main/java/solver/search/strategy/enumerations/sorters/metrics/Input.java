@@ -26,7 +26,8 @@
  */
 package solver.search.strategy.enumerations.sorters.metrics;
 
-import gnu.trove.TObjectIntHashMap;
+
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.variables.Variable;
 
 /**

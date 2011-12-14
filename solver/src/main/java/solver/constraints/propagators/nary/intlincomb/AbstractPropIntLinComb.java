@@ -35,7 +35,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.intlincomb.policy.AbstractCoeffPolicy;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -176,13 +176,14 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
      *
      * @throws ContradictionException if a domain empties or a contradiction is
      *                                infered
+     * @param evtmask
      */
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(true, 2);
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx, this.constraint);
         } else {
@@ -238,7 +239,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
      *          infered
      */
     void awakeOnInst(final int idx, Constraint constraint) throws ContradictionException {
-        propagate();
+        filter(true, 2);
     }
 
     /**

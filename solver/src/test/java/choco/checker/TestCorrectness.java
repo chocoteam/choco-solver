@@ -164,4 +164,20 @@ public class TestCorrectness {
             CorrectnessChecker.checkCorrectness(Modeler.modelCountAC, n, -n / 2, 2 * n, seed, new int[]{1, 1});
         }
     }
+
+    @Test(groups = "1m")
+    public void testLEX1() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2*n, seed, true);
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testLEX2() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2*n, seed, false);
+        }
+    }
 }

@@ -35,180 +35,180 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @author Jean-Guillaume Fages
- * 
- * Ensures that each node in the kernel has exactly NSUCCS successor
- *
  * @param <V>
+ * @author Jean-Guillaume Fages
+ *         <p/>
+ *         Ensures that each node in the kernel has exactly NSUCCS successor
  */
-public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
-	DirectedGraphVar g;
-	int nSuccs;
-	IntProcedure enforceNodeProc;
-	RemProc rem;
-	EnfProc enf;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    DirectedGraphVar g;
+    int nSuccs;
+    IntProcedure enforceNodeProc;
+    RemProc rem;
+    EnfProc enf;
 
-	public PropNSuccs(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nbSuccs) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
-		nSuccs = nbSuccs;
-		rem = new RemProc(this);
-		enf = new EnfProc(this);
-		enforceNodeProc = new EnfNode(this);
-	}
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    public PropNSuccs(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nbSuccs) {
+        super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+        g = graph;
+        nSuccs = nbSuccs;
+        rem = new RemProc(this);
+        enf = new EnfProc(this);
+        enforceNodeProc = new EnfNode(this);
+    }
 
-	@Override
-	public void propagate() throws ContradictionException {check();}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
-			if ((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(rem, gv.fromArcRemoval(), gv.toArcRemoval());
-			}if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
-			}if ((mask & EventType.ENFORCENODE.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-				d.forEach(enforceNodeProc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        check();
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask+EventType.ENFORCENODE.mask;
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
+            eventRecorder.getDeltaMonitor(g).forEach(rem, EventType.REMOVEARC);
+        }
+        if ((mask & EventType.ENFORCEARC.mask) != 0) {
+            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
+        }
+        if ((mask & EventType.ENFORCENODE.mask) != 0) {
+            eventRecorder.getDeltaMonitor(g).forEach(enforceNodeProc, EventType.ENFORCENODE);
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if(g.instantiated()){
-			try{
-				check();
-			}catch (Exception e){
-				return ESat.FALSE;
-			}
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.ENFORCENODE.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        if (g.instantiated()) {
+            try {
+                check();
+            } catch (Exception e) {
+                return ESat.FALSE;
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 
-	/** Enable to add arcs to the kernel when only NSUCCS arcs remain in the envelop */
-	private static class RemProc implements IntProcedure {
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-		private final PropNSuccs p;
+    /**
+     * Enable to add arcs to the kernel when only NSUCCS arcs remain in the envelop
+     */
+    private static class RemProc implements IntProcedure {
 
-		public RemProc(PropNSuccs p) {
-			this.p = p;
-		}
+        private final PropNSuccs p;
 
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>=n){
-				int from = i/n-1;
-				INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
-				if(p.g.getKernelGraph().getActiveNodes().isActive(from) && succs.neighborhoodSize()==p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()!=p.nSuccs){
-					for(int j= succs.getFirstElement(); j>=0; j=succs.getNextElement()){
-						p.g.enforceArc(from, j, p, false);
-					}
-				}
-				if(succs.neighborhoodSize()<p.nSuccs){
-					p.g.removeNode(from, p, false);
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-	}
+        public RemProc(PropNSuccs p) {
+            this.p = p;
+        }
 
-	/** Enable to remove useless outgoing arcs of a node when the kernel contains NSUCCS outgoing arcs */
-	private static class EnfProc implements IntProcedure {
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i >= n) {
+                int from = i / n - 1;
+                INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
+                if (p.g.getKernelGraph().getActiveNodes().isActive(from) && succs.neighborhoodSize() == p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize() != p.nSuccs) {
+                    for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
+                        p.g.enforceArc(from, j, p, false);
+                    }
+                }
+                if (succs.neighborhoodSize() < p.nSuccs) {
+                    p.g.removeNode(from, p, false);
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+    }
 
-		private final PropNSuccs p;
+    /**
+     * Enable to remove useless outgoing arcs of a node when the kernel contains NSUCCS outgoing arcs
+     */
+    private static class EnfProc implements IntProcedure {
 
-		public EnfProc(PropNSuccs p) {
-			this.p = p;
-		}
+        private final PropNSuccs p;
 
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>=n){
-				int from = i/n-1;
-				int eto   = i%n;
-				INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
-				if(succs.neighborhoodSize()>p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()==p.nSuccs){
-					for(eto = succs.getFirstElement(); eto>=0; eto = succs.getNextElement()){
-						if (!p.g.getKernelGraph().arcExists(from, eto)){
-							p.g.removeArc(from, eto, p, false);
-						}
-					}
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-	}
+        public EnfProc(PropNSuccs p) {
+            this.p = p;
+        }
 
-	private void check() throws ContradictionException {
-		int k;
-		INeighbors nei;
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
-			k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-			if(k>nSuccs){
-				this.contradiction(g, "more than one successor");
-			}
-			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<nSuccs){
-				g.removeNode(i, this, false);
-			}
-			if(k==nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() != k){
-				nei = g.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-					if (!g.getKernelGraph().arcExists(i, j)){
-						g.removeArc(i, j, this, false);
-					}
-				}
-			}
-			if(k<nSuccs && g.getKernelGraph().getActiveNodes().isActive(i) && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == nSuccs){
-				nei = g.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-					g.enforceArc(i, j, this, false);
-				}
-			}
-		}
-	}
-	
-	private static class EnfNode implements IntProcedure {
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i >= n) {
+                int from = i / n - 1;
+                int eto = i % n;
+                INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
+                if (succs.neighborhoodSize() > p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize() == p.nSuccs) {
+                    for (eto = succs.getFirstElement(); eto >= 0; eto = succs.getNextElement()) {
+                        if (!p.g.getKernelGraph().arcExists(from, eto)) {
+                            p.g.removeArc(from, eto, p, false);
+                        }
+                    }
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+    }
+
+    private void check() throws ContradictionException {
+        int k;
+        INeighbors nei;
+        IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+        for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+            k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+            if (k > nSuccs) {
+                this.contradiction(g, "more than one successor");
+            }
+            if (g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() < nSuccs) {
+                g.removeNode(i, this, false);
+            }
+            if (k == nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() != k) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(i);
+                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                    if (!g.getKernelGraph().arcExists(i, j)) {
+                        g.removeArc(i, j, this, false);
+                    }
+                }
+            }
+            if (k < nSuccs && g.getKernelGraph().getActiveNodes().isActive(i) && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == nSuccs) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(i);
+                for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
+                    g.enforceArc(i, j, this, false);
+                }
+            }
+        }
+    }
+
+    private static class EnfNode implements IntProcedure {
 
         private final PropNSuccs p;
 
@@ -218,17 +218,17 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
         @Override
         public void execute(int i) throws ContradictionException {
-    		int n = p.g.getEnvelopGraph().getNbNodes();
-        	if (i<n){
-        		INeighbors suc = p.g.getEnvelopGraph().getSuccessorsOf(i);
-        		if(suc.neighborhoodSize() == p.nSuccs){
-        			for(int j=suc.getFirstElement(); j>=0;j=suc.getNextElement()){
-        				p.g.enforceArc(i, j, p, false);
-        			}
-        		}
-        	}else{
-        		throw new UnsupportedOperationException();
-        	}
+            int n = p.g.getEnvelopGraph().getNbNodes();
+            if (i < n) {
+                INeighbors suc = p.g.getEnvelopGraph().getSuccessorsOf(i);
+                if (suc.neighborhoodSize() == p.nSuccs) {
+                    for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                        p.g.enforceArc(i, j, p, false);
+                    }
+                }
+            } else {
+                throw new UnsupportedOperationException();
+            }
         }
     }
 }

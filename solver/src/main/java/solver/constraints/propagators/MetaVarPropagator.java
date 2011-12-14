@@ -29,7 +29,7 @@ package solver.constraints.propagators;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
@@ -54,10 +54,10 @@ public class MetaVarPropagator extends Propagator {
 	}
 
 	@Override
-	public void propagate() throws ContradictionException {}
+	public void propagate(int evtmask) throws ContradictionException {}
 
 	@Override
-	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		meta.notifyMonitors(EventType.META, this);
 	}
 

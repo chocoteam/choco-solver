@@ -37,20 +37,20 @@ package solver.constraints.propagators.gary.tsp;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.*;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.directedGraph.IDirectedGraph;
+import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
@@ -120,8 +120,8 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return EventType.REMOVEARC.mask;
 	}
 
-	@Override
-	public void propagate() throws ContradictionException {
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph());
 		int s = allSCC.size();
 		n_R.set(s);
@@ -198,12 +198,10 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return visit(next,last)+1;
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> r, int idxVarInProp, int mask) throws ContradictionException {
-		GraphRequest gr = (GraphRequest) r;
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		sccComputed.clear();
-		IntDelta d = (IntDelta) G.getDelta().getArcRemovalDelta();
-		d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
+        eventRecorder.getDeltaMonitor(G).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override

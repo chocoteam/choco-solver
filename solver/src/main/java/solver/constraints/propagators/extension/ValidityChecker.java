@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.extension;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
