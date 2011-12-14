@@ -90,5 +90,4 @@ public final class Delta implements IntDelta {
     public int size() {
         return last;
     }
-
 }
