@@ -84,13 +84,14 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 	private INeighbors[] outArcs;
 	private IStateInt[] sccOf;
 	private int[] minCostOutArcs;
+	int[][] map;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	public PropBST(DirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
+		super((V[]) new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		obj = cost;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -113,6 +114,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		indexOfArc = new int[n][n];
 		lca = new LCAGraphManager(ccN);
 		sortArcs(costMatrix);
+		map = new int[n][n];
 	}
 
 	private void sortArcs(int[][] costMatrix){
@@ -187,41 +189,22 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		propagate();
 	}
 
-	private void pruning(int fi) throws ContradictionException {
-		int[] next = new int[n];
-		for(int i=0;i<n;i++){
-			next[i] = -1;
-		}
-		int k=0;
-		next[0]=0;
-		LinkedList<Integer> list = new LinkedList<Integer>();
-		list.add(k);
-		INeighbors nei;
-		while(!list.isEmpty()){
-			k = list.removeFirst();
-			nei = Tree.getNeighborsOf(k);
-			for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-				if(next[s]==-1){
-					next[s] = k;
-					list.addFirst(s);
-				}
-			}
-		}
-		TIntIntHashMap map = new TIntIntHashMap();
-
+	private void pruning(int fi, int delta) throws ContradictionException {
 		int repCost,i,j;
-		int delta = obj.getUB()-treeCost;
 		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i,j)){
 				if(sccOf[i].get()==sccOf[j].get()){
+					if(cctRoot==-1){
+						throw new UnsupportedOperationException("no LCA preprocessing done");
+					}
 					repCost = costs[ccTGedge[lca.getLCA(i,j)]];
-					truc(map,next,i,j, costs[arc]);
+//					markTreeEdges(ccTp,i,j, costs[i*n+j]);
 				}else{
 					repCost = costs[minCostOutArcs[sccOf[i].get()]];
 				}
-				if(repCost + costs[i*n+j] > delta){
+				if(costs[i*n+j]-repCost > delta){
 					g.removeArc(i,j,this,false);
 					activeArcs.clear(arc);
 				}
@@ -231,22 +214,32 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 				activeArcs.clear(arc);
 			}
 		}
+		INeighbors nei;
 		for(i=0;i<n;i++){
 			nei = Tree.getNeighborsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(Tree.arcExists(i,j) && !activeArcs.get(indexOfArc[j][i])){
-					if(sccOf[i].get()==sccOf[j].get()){
-						repCost = map.get(i*n+j);
-						if(repCost-costs[i*n+j]>delta){
-							g.enforceArc(i,j,this,false);
-						}
+				if(sccOf[i].get()==sccOf[j].get() && !activeArcs.get(indexOfArc[j][i])){
+					repCost = map[i][j];
+					if(repCost-costs[i*n+j]>delta){
+						g.enforceArc(i,j,this,false);
 					}
 				}
 			}
 		}
 	}
 
-	private void truc(TIntIntHashMap map, int[] next, int i, int j, int cost) {
+	private void markTreeEdges(int[] next, int i, int j, int cost) {
+		if(next[i]==next[j]){
+			if(map[i][next[i]]==-1){
+				map[i][next[i]] = cost;
+				map[next[i]][i] = cost;
+			}
+			if(map[j][next[j]]==-1){
+				map[j][next[j]] = cost;
+				map[next[j]][j] = cost;
+			}
+			return;
+		}
 		BitSet visited = new BitSet(n);
 		int meeting = j;
 		int tmp;
@@ -259,15 +252,19 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		for(int b=j;b!=meeting;){
 			tmp = next[b];
 			next[b] = meeting;
-			map.put(b*n+tmp,cost);
-			map.put(tmp*n+b,cost);
+			if(map[b][tmp]==-1){
+				map[b][tmp] = cost;
+				map[tmp][b] = cost;
+			}
 			b = tmp;
 		}
 		for(a=i;a!=meeting;){
 			tmp = next[a];
 			next[a] = meeting;
-			map.put(a*n+tmp,cost);
-			map.put(tmp*n+a,cost);
+			if(map[a][tmp]==-1){
+				map[a][tmp] = cost;
+				map[tmp][a] = cost;
+			}
 			a = tmp;
 		}
 	}
@@ -295,6 +292,8 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		treeCost = 0;
 		// add mandatory arcs first
 		cctRoot = n-1;
+		maxTArc = Integer.MIN_VALUE;
+		minTArc = Integer.MAX_VALUE;
 		int tSize = addMandatoryArcs();
 		if(tSize==n-1){
 			return;// problem solved
@@ -303,15 +302,45 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		if(tSize==n-1){
 			return;// problem solved
 		}
+		if(tSize>n-1){
+			throw new UnsupportedOperationException("bst computation failed");
+		}
 		// finish the MST with other arcs
 		connectMST(tSize);
 		// bound
 		obj.updateLowerBound(treeCost, this,false);
 		int delta = obj.getUB()-treeCost;
+		prepareMandArcDetection();
 		// select relevant arcs
 		if(selectRelevantArcs(delta)){
-			lca.preprocess(cctRoot, ccTree);
-			pruning(fromInterest);
+			if(cctRoot!=-1){
+				lca.preprocess(cctRoot, ccTree);
+			}
+			pruning(fromInterest,delta);
+		}
+	}
+
+	private void prepareMandArcDetection(){
+		// RECYCLING ccTp is used to model the compressed path
+		INeighbors nei;
+		for(int i=0;i<n;i++){
+			ccTp[i] = -1;
+		}
+		int k=0;
+		ccTp[0]=0;
+		LinkedList<Integer> list = new LinkedList<Integer>();
+		list.add(k);
+		while(!list.isEmpty()){
+			k = list.removeFirst();
+			nei = Tree.getNeighborsOf(k);
+			for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+				if(ccTp[s]==-1){
+					ccTp[s] = k;
+					map[s][k] = -1;
+					map[k][s] = -1;
+					list.addLast(s);
+				}
+			}
 		}
 	}
 
@@ -326,7 +355,6 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 				if(rFrom != rTo){
 					LINK(rFrom,rTo,rank,p);
 					Tree.addEdge(i, next);
-					updateCCTree(rFrom, rTo, i,next);
 					treeCost += costs[i*n+next];
 					tSize++;
 				}else{
@@ -342,7 +370,8 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		int tSize = 0;
 		INeighbors nei;
 		int minArc;
-		for(int i=nR.get();i>=0;i--){
+		int cost;
+		for(int i=nR.get()-1;i>=0;i--){
 			nei = outArcs[i];
 			if(nei.neighborhoodSize()>1){
 				minArc = minCostOutArcs[i];
@@ -353,7 +382,14 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 				if(rFrom != rTo){
 					LINK(rFrom, rTo, rank, p);
 					Tree.addEdge(from, to);
-					treeCost += costs[minArc];
+					cost = costs[minArc];
+					treeCost += cost;
+					if (maxTArc < cost){
+						maxTArc = cost;
+					}
+					if (minTArc > cost){
+						minTArc = cost;
+					}
 					tSize++;
 				}else{
 					throw new UnsupportedOperationException("strange...");
@@ -365,8 +401,6 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 
 	private void connectMST(int tSize) throws ContradictionException {
 		int from,to,rFrom,rTo;
-		maxTArc = 0;
-		minTArc = -1;
 		int idx = activeArcs.nextSetBit(0);
 		int cost;
 		while(tSize < n-1){
@@ -386,7 +420,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 				if (maxTArc < cost){
 					maxTArc = cost;
 				}
-				if (minTArc == -1 || minTArc > cost){
+				if (minTArc > cost){
 					minTArc = cost;
 				}
 				tSize++;
@@ -398,7 +432,13 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 	private boolean selectRelevantArcs(int delta) throws ContradictionException {
 		// Trivially no inference
 		int idx = activeArcs.nextSetBit(0);
+		int a,b;
 		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
+			a = sortedArcs[idx]/n;
+			b = sortedArcs[idx]%n;
+			if((!Tree.arcExists(a,b)) && sccOf[a].get()==sccOf[b].get()){
+				markTreeEdges(ccTp,a,b, costs[sortedArcs[idx]]);
+			}
 			idx = activeArcs.nextSetBit(idx+1);
 		}
 		if(idx==-1){
@@ -410,6 +450,11 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		while(idx>=0 && costs[sortedArcs[idx]]-maxTArc <= delta){
 			useful.set(sortedArcs[idx]/n);
 			useful.set(sortedArcs[idx]%n);
+			a = sortedArcs[idx]/n;
+			b = sortedArcs[idx]%n;
+			if((!Tree.arcExists(a,b)) && sccOf[a].get()==sccOf[b].get()){
+				markTreeEdges(ccTp,a,b, costs[sortedArcs[idx]]);
+			}
 			idx = activeArcs.nextSetBit(idx+1);
 		}
 		// Trivially infeasible arcs
@@ -444,11 +489,17 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		}
 		cctRoot = -1;
 		for(int i=ccTree.getActiveNodes().getFirstElement();i>=0;i=ccTree.getActiveNodes().getNextElement()){
-			p = ccTree.getPredecessorsOf(i).getFirstElement();
-			if(p==-1){
+			if(i>=n && ccTree.getPredecessorsOf(i).getFirstElement()==-1){
 				if(cctRoot==-1){
 					cctRoot = i;
 				}else{
+					ccTree.addArc(cctRoot,i);
+				}
+			}
+		}
+		if(cctRoot!=-1){
+			for(int i=ccTree.getActiveNodes().getFirstElement();i>=0 && i<n;i=ccTree.getActiveNodes().getNextElement()){
+				if(ccTree.getPredecessorsOf(i).getFirstElement()==-1){
 					ccTree.addArc(cctRoot,i);
 				}
 			}
