@@ -141,22 +141,22 @@ public class TSP extends AbstractProblem{
 
 		// ID anti arborescence?
 
-//		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
-//		gc.addAdHocProp(RP);
-//		IStateInt nR = RP.getNSCC();
-//		IStateInt[] sccOf = RP.getSCCOF();
-//		INeighbors[] outArcs = RP.getOutArcs();
-
-		// BST-based HK
-//		PropHeldKarp propHK = new PropHeldKarp(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
-//		PropHeldKarp propHK = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
 		// MST-based HK
-		PropHeldKarp propHK = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
-		gc.addAdHocProp(propHK);
-
+		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
+		gc.addAdHocProp(propHK_mst);
+		// RG
+		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+		gc.addAdHocProp(RP);
+		IStateInt nR = RP.getNSCC();
+		IStateInt[] sccOf = RP.getSCCOF();
+		INeighbors[] outArcs = RP.getOutArcs();
 //		PropBST BST = new PropBST(graph, totalCost, distanceMatrix, gc, solver);
 //		gc.addAdHocProp(BST);
 //		BST.setRGStructure(nR, sccOf, outArcs);
+
+		// BST-based HK
+		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
+		gc.addAdHocProp(propHK_bst);
 
 		Constraint[] cstrs = new Constraint[]{gc, new AllDifferent(intVars,solver,AllDifferent.Type.AC)};
 		solver.post(cstrs);
@@ -301,18 +301,18 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		clearFile(outFile);
-//		clearFile("/Users/jfages07/Documents/GOD_EXISTS");
-//		writeTextInto("instance;fails;time;status;greedyUB;obj;best;\n", outFile);
-//		randomHeur = false;
-//		outFile = "resultsATSP_"+randomHeur+".csv";
-//		bench();
-//		randomHeur = !randomHeur;
-//		outFile = "resultsATSP_"+randomHeur+".csv";
-//		bench();
-//		writeTextInto(LastHope,"/Users/jfages07/Documents/GOD_EXISTS");
-//		randomHeur = true;
-		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv70.atsp";
+		clearFile(outFile);
+		clearFile("/Users/jfages07/Documents/GOD_EXISTS");
+		writeTextInto("instance;fails;time;status;greedyUB;obj;best;\n", outFile);
+		randomHeur = false;
+		outFile = "resultsATSP_"+randomHeur+".csv";
+		bench();
+		randomHeur = !randomHeur;
+		outFile = "resultsATSP_"+randomHeur+".csv";
+		bench();
+		writeTextInto(LastHope,"/Users/jfages07/Documents/GOD_EXISTS");
+		randomHeur = true;
+		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv33.atsp";
 		testInstance(instance);
 	}
 

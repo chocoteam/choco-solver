@@ -44,13 +44,7 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
-import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
-import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
-import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
 import java.util.BitSet;
 import java.util.Random;
 
@@ -226,7 +220,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 					forceTourInstantiation();
 					return;
 				}
-				HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
+				//HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
 				updateStep(hkb,alpha);
 				HKPenalities();
 				updateCostMatrix();
