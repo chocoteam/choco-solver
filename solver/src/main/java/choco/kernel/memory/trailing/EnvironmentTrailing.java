@@ -249,7 +249,7 @@ public final class EnvironmentTrailing extends AbstractEnvironment {
      * {@inheritDoc}
      */
     @Override
-    public IStateLong makeLong(final int init) {
+    public IStateLong makeLong(final long init) {
         return new StoredLong(this, init);
     }
 

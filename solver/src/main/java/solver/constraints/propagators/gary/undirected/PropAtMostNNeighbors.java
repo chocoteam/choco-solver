@@ -35,19 +35,17 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**Propagator that ensures that a node has at most N neighbors
- * 
- * @author Jean-Guillaume Fages
+/**
+ * Propagator that ensures that a node has at most N neighbors
  *
  * @param <V>
+ * @author Jean-Guillaume Fages
  */
 public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
 
@@ -125,8 +123,9 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	// PROPAGATIONS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;
@@ -142,13 +141,9 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
-			IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-			d.forEach(enf_proc, gv.fromArcEnforcing(), gv.toArcEnforcing());
-		}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		eventRecorder.getDeltaMonitor(g).forEach(enf_proc, EventType.ENFORCEARC);
 	}
 
 	//***********************************************************************************

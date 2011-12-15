@@ -41,6 +41,12 @@ public interface IMeasures extends ISearchMonitor, Serializable {
     String toString();
 
     /**
+     * Get current world unique id
+     * @return
+     */
+    long timestamp();
+
+    /**
      * Get the time count in milliseconds of the measure
      *
      * @return time count
@@ -76,7 +82,7 @@ public interface IMeasures extends ISearchMonitor, Serializable {
     long getRestartCount();
 
     /**
-     * Get the number of call to IRequest.propagate()
+     * Get the number of call to event recorder execution
      *
      * @return propagations count
      */

@@ -35,6 +35,7 @@ import solver.constraints.propagators.nary.intlincomb.*;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
+import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
@@ -104,7 +105,7 @@ public class IntLinCombDecision extends IntLinComb implements Decision {
         }
         int last = lastPropagatorActive.get();
         for (int p = 0; p < last; p++) {
-            propagators[p].propagate();
+            propagators[p].propagate(EventType.FULL_PROPAGATION.mask);
         }
     }
 

@@ -33,8 +33,9 @@ import choco.kernel.memory.IStateDoubleVector;
 import choco.kernel.memory.IStateIntVector;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSetWithOffset;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntStack;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.constraints.nary.automata.structure.Node;
 import solver.constraints.propagators.Propagator;
@@ -107,8 +108,8 @@ public class StoredValuedDirectedMultiGraph {
         this.layers = layers;
         this.sourceIndex = layers[0][0];
         this.tinkIndex = layers[layers.length - 1][0];
-        this.toUpdateLeft = new TIntStack();
-        this.toUpdateRight = new TIntStack();
+        this.toUpdateLeft = new TIntArrayStack();
+        this.toUpdateRight = new TIntArrayStack();
 
         this.GNodes = new Nodes();
         this.GArcs = new Arcs();

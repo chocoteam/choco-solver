@@ -31,11 +31,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
@@ -60,14 +55,14 @@ public abstract class AbstractNQueen extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.all(),
                         new IncrOrderV(orderedVars),
                         Policy.ITERATE
-                ));
+                ));*/
     }
 
     protected IntVar[] orederIt1() {
@@ -127,7 +122,7 @@ public abstract class AbstractNQueen extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        solver.findAllSolutions();
     }
 
     @Override

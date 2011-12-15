@@ -39,10 +39,6 @@ import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrPriorityP;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -277,7 +273,8 @@ public class TSP extends AbstractProblem{
 		}
 //		AbstractStrategy strategy = StrategyFactory.graphLexico(graph);
 		solver.set(strategy);
-		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
+        //TODO: cpru > refactor prop engine
+//		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}

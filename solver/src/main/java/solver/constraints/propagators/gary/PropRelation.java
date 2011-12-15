@@ -35,11 +35,9 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.GraphPropagator;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 
@@ -85,7 +83,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		long time = System.currentTimeMillis();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		for(int i=0; i<n; i++){
@@ -113,22 +111,19 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		long time = System.currentTimeMillis();
-		if (request instanceof GraphRequest) {
-			GraphRequest gr = (GraphRequest) request;
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+		Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
+			if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(var).forEach(arcEnforced, EventType.ENFORCEARC);
+            }
+            if((mask & EventType.ENFORCENODE.mask) !=0){
+				eventRecorder.getDeltaMonitor(var).forEach(nodeEnforced, EventType.ENFORCENODE);
 			}
-			if((mask & EventType.ENFORCENODE.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-				d.forEach(nodeEnforced, gr.fromNodeEnforcing(), gr.toNodeEnforcing());
-			}
-			if((mask & EventType.REMOVEARC.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
-			}
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(var).forEach(arcRemoved, EventType.REMOVEARC);
+            }
 		}
 		else{
 			checkVar(idxVarInProp);

@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;

@@ -46,7 +46,7 @@ public class PropFalse extends PropClause {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         this.contradiction(null, "FALSE");
     }
 

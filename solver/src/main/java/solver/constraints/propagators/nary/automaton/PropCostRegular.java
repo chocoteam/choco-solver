@@ -31,7 +31,8 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.TIntStack;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -40,7 +41,7 @@ import solver.constraints.nary.automata.structure.costregular.StoredValuedDirect
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -74,10 +75,15 @@ public class PropCostRegular extends Propagator<IntVar> {
         this.solver = solver;
         this.rem_proc = new RemProc(this);
         this.environment = solver.getEnvironment();
-        this.toRemove = new TIntStack();
+        this.toRemove = new TIntArrayStack();
         this.boundChange = environment.makeBool(false);
         this.graph = graph;
         this.cautomaton = cautomaton;
+    }
+
+    @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
     }
 
     @Override
@@ -85,8 +91,13 @@ public class PropCostRegular extends Propagator<IntVar> {
         return (vIdx != zIdx ? EventType.INT_ALL_MASK() : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
         vars[zIdx].updateLowerBound(bounds.min.value, this, false);
         vars[zIdx].updateUpperBound(bounds.max.value, this, false);
@@ -94,19 +105,22 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         checkWorld();
         if (idxVarInProp == zIdx) { // z only deals with bound events
             boundChange.set(true);
         } else { // other variables only deals with removal events
-            intVarIRequest.forEach(rem_proc.set(idxVarInProp));
+            eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
         }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override
@@ -187,10 +201,10 @@ public class PropCostRegular extends Propagator<IntVar> {
                 }
             } while (toRemove.size() > 0);
         } catch (ContradictionException e) {
-            toRemove.reset();
+            toRemove.clear();
             this.graph.inStack.clear();
-            this.graph.toUpdateLeft.reset();
-            this.graph.toUpdateRight.reset();
+            this.graph.toUpdateLeft.clear();
+            this.graph.toUpdateRight.clear();
 
             throw e;
         }
@@ -201,10 +215,10 @@ public class PropCostRegular extends Propagator<IntVar> {
         long currentbt = solver.getMeasures().getBackTrackCount();
         long currentrestart = solver.getMeasures().getRestartCount();
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
-            this.toRemove.reset();
+            this.toRemove.clear();
             this.graph.inStack.clear();
-            this.graph.toUpdateLeft.reset();
-            this.graph.toUpdateRight.reset();
+            this.graph.toUpdateLeft.clear();
+            this.graph.toUpdateRight.clear();
         }
         lastWorld = currentworld;
         lastNbOfBacktracks = currentbt;

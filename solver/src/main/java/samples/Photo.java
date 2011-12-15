@@ -34,10 +34,6 @@ import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -91,7 +87,7 @@ public class Photo extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
             engine.addGroup(Group.buildQueue(
                 Predicates.member(viols),
@@ -105,7 +101,7 @@ public class Photo extends AbstractProblem {
         engine.addGroup(Group.buildQueue(
                 Predicates.all(),
                 Policy.ONE
-        ));
+        ));*/
 
     }
 

@@ -27,7 +27,8 @@
 
 package solver.constraints.nary.automata.FA;
 
-import gnu.trove.TIntHashSet;
+
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Created by IntelliJ IDEA.

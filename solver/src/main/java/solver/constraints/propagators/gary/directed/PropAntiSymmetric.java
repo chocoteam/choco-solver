@@ -35,20 +35,17 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @author Jean-Guillaume Fages
- * 
- * Ensures that the final graph is antisymmetric
- *
  * @param <V>
+ * @author Jean-Guillaume Fages
+ *         <p/>
+ *         Ensures that the final graph is antisymmetric
  */
 public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V>{
 
@@ -77,7 +74,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		INeighbors succ;
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
@@ -89,15 +86,11 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
+            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
 			}
 		}
-	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {

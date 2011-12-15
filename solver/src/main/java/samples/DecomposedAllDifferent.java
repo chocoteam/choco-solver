@@ -35,12 +35,6 @@ import solver.constraints.nary.IntLinComb;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.IncrArityV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -130,7 +124,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.member(B),
@@ -144,7 +138,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                         Predicates.all(),
                         IncrArityP.get(),
                         Policy.ITERATE
-                ));
+                ));*/
     }
 
     @Override

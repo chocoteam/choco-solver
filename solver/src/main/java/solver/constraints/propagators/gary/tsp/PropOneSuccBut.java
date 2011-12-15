@@ -42,11 +42,8 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
-import solver.search.loop.AbstractSearchLoop;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -87,8 +84,8 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		INeighbors succs;
 		int next;
 		for(int i=0;i<n;i++){
@@ -115,22 +112,19 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		GraphRequest gr = (GraphRequest) request;
-		if((mask & EventType.ENFORCEARC.fullmask) !=0){
-			IntDelta d = g.getDelta().getArcEnforcingDelta();
-			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if((mask & EventType.ENFORCEARC.mask) !=0){
+            eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 		}
-		if((mask & EventType.REMOVEARC.fullmask)!=0){
-			IntDelta d = g.getDelta().getArcRemovalDelta();
-			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
+		if((mask & EventType.REMOVEARC.mask)!=0){
+            eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.fullmask + EventType.ENFORCEARC.fullmask;
+		return EventType.REMOVEARC.strengthened_mask + EventType.ENFORCEARC.strengthened_mask;
 	}
 
 	@Override

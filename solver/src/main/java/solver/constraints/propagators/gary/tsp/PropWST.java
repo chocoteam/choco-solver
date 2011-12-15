@@ -30,7 +30,6 @@ package solver.constraints.propagators.gary.tsp;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateBitSet;
-import choco.kernel.memory.IStateInt;
 import choco.kernel.memory.structure.S64BitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,14 +37,11 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
@@ -155,19 +151,17 @@ public class PropWST<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		INIT();
 		computeMST();
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if(request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
-			IntDelta d = g.getDelta().getArcRemovalDelta();
-			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(vars[idxVarInProp].getType() == Variable.GRAPH){
+			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 		}
-		propagate();
+		propagate(EventType.FULL_PROPAGATION.mask);
 	}
 
 	private void pruning(int fi) throws ContradictionException {

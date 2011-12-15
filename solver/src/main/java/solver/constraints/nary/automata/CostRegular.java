@@ -30,9 +30,8 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.TIntArrayList;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;import gnu.trove.iterator.TIntIterator;
 import org.jgrapht.graph.DirectedMultigraph;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -172,7 +171,7 @@ public class CostRegular extends IntConstraint<IntVar> {
         }
         int[][] lays = new int[layers.length][];
         for (int i = 0; i < lays.length; i++) {
-            lays[i] = layers[i].toNativeArray();
+            lays[i] = layers[i].toArray();
         }
         return new StoredValuedDirectedMultiGraph(solver.getEnvironment(), graph, lays, starts, offsets, totalSizes);
     }

@@ -37,8 +37,7 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -84,8 +83,8 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		int ker = 0;
 		int env = 0;
 		for (int node = 0; node<n; node++) {
@@ -122,18 +121,18 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(!active.get())return;
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
+
+        Variable variable = vars[idxVarInProp];
+
+        if(variable.getType() == Variable.GRAPH){
 			if ((mask & EventType.REMOVEARC.mask) != 0){
-				IntDelta d = g.getDelta().getArcRemovalDelta();
-				d.forEach(removeProc, gv.fromArcRemoval(), gv.toArcRemoval());
+                eventRecorder.getDeltaMonitor(g).forEach(removeProc, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = g.getDelta().getArcEnforcingDelta();
-				d.forEach(enforceProc, gv.fromArcEnforcing(), gv.toArcEnforcing());
+                eventRecorder.getDeltaMonitor(g).forEach(enforceProc, EventType.ENFORCEARC);
 			}
 			nLoops.updateUpperBound(nbEnvLoop.get(), this, false);
 			nLoops.updateLowerBound(nbKerLoop.get(), this, false);

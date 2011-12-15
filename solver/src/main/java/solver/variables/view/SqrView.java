@@ -29,21 +29,18 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import org.slf4j.LoggerFactory;
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.AbstractRequestWithVar;
-import solver.requests.ViewRequestWrapper;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
 
@@ -59,43 +56,30 @@ import solver.variables.delta.view.ViewDelta;
  */
 public final class SqrView extends View<IntVar> {
 
-    final IntDelta delta;
-
-    protected HeuristicVal heuristicVal;
-
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;
 
     public SqrView(final IntVar var, Solver solver) {
         super("(" + var.getName() + "^2)", var, solver);
-        delta = new ViewDelta(var.getDelta()) {
-
-            @Override
-            public void add(int value) {
-                var.getDelta().add(value);
-                var.getDelta().add(-value);
-            }
-        };
     }
 
     @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //todo : ugly
-        ViewRequestWrapper req = new ViewRequestWrapper((AbstractRequestWithVar)propagator.makeRequest(var, idxInProp),
-                ViewRequestWrapper.Modifier.ABS);
-        propagator.addRequest(req);
-        var.addMonitor(req);
-    }
-
-    @Override
-    public void setHeuristicVal(HeuristicVal heuristicVal) {
-        LoggerFactory.getLogger("solver").warn("AbsView#setHeuristicVal: wrong usage");
-        this.heuristicVal = heuristicVal;
-    }
-
-    @Override
-    public HeuristicVal getHeuristicVal() {
-        return heuristicVal;
+    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+            var.updatePropagationConditions(propagator, idxInProp); // to ensure var has a delta
+            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
+                @Override
+                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                    if (EventType.isRemove(eventType.mask)) {
+                        for (int i = frozenFirst; i < frozenLast; i++) {
+                            proc.execute(delta.get(i) * delta.get(i));
+                        }
+                    }
+                }
+            });
+            reactOnRemoval = true;
+        }
     }
 
     @Override
@@ -110,118 +94,110 @@ public final class SqrView extends View<IntVar> {
         return false;
     }
 
-    // http://stackoverflow.com/questions/295579/fastest-way-to-determine-if-an-integers-square-root-is-an-integer
     private static int floor_sqrt(int n) {
         if (n < 0)
             return 0;
         return (int) Math.sqrt(n);
-        /*
-        switch (n & 0x3F) {
-            case 0x00:
-            case 0x01:
-            case 0x04:
-            case 0x09:
-            case 0x10:
-            case 0x11:
-            case 0x19:
-            case 0x21:
-            case 0x24:
-            case 0x29:
-            case 0x31:
-            case 0x39:
-                int sqrt;
-                if (n < 410881) {
-                    //John Carmack hack, converted to Java.
-                    // See: http://www.codemaestro.com/reviews/9
-                    int i;
-                    float x2, y;
-
-                    x2 = n * 0.5F;
-                    y = n;
-                    i = Float.floatToRawIntBits(y);
-                    i = 0x5f3759df - (i >> 1);
-                    y = Float.intBitsToFloat(i);
-                    y = y * (1.5F - (x2 * y * y));
-
-                    sqrt = (int) (1.0F / y);
-                } else {
-                    //Carmack hack gives incorrect answer for n >= 410881.
-                    sqrt = (int) Math.sqrt(n);
-                }
-                return sqrt;
-
-            default:
-                return  (int) Math.sqrt(n);
-        }*/
     }
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
         }
         int rootV = floor_sqrt(value);
-        boolean done = false;
         if (rootV * rootV == value) { // is a perfect square ?
-            done = var.removeValue(-rootV, cause, informCause);
-            done |= var.removeValue(rootV, cause, informCause);
+            int inf = getLB();
+            int sup = getUB();
+            EventType evt = EventType.REMOVE;
+            if (value == inf) {
+                evt = EventType.INCLOW;
+            } else if (value == sup) {
+                evt = EventType.DECUPP;
+            }
+            boolean done = var.removeValue(-rootV, this, informCause);
+            done |= var.removeValue(rootV, this, informCause);
+            if (done) {
+                notifyMonitors(evt, cause);
+            }
         }
-        return done;
+        return false;
     }
 
     @Override
     public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
-        if (to < 0) {
-            return false;
+        if (from <= getLB()) {
+            return updateLowerBound(to + 1, cause, informCause);
+        } else if (getUB() <= to) {
+            return updateUpperBound(from - 1, cause, informCause);
+        } else {
+            from = floor_sqrt(from);
+            to = floor_sqrt(to);
+            boolean done = var.removeInterval(-to, -from, cause, informCause);
+            done |= var.removeInterval(from, to, cause, informCause);
+            if (done) {
+                notifyMonitors(EventType.REMOVE, cause);
+            }
+            return done;
         }
-        if (from < 0) {
-            from = 0;
-        }
-        int from_fX = floor_sqrt(from);
-        int to_fX = floor_sqrt(to);
-        boolean done = var.removeInterval(-to_fX, -from_fX, cause, informCause);
-        done |= var.removeInterval(from_fX, to_fX, cause, informCause);
-        return done;
     }
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
+            //TODO: explication?
             this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = floor_sqrt(value);
-        boolean done = false;
         if (v * v == value) { // is a perfect square ?
-            done = var.updateLowerBound(-v, cause, informCause);
-            done |= var.updateUpperBound(v, cause, informCause);
+            boolean done = var.updateLowerBound(-v, this, informCause);
+            done |= var.updateUpperBound(v, this, informCause);
+            EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
                 done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
+                evt = EventType.INSTANTIATE;
             }
+            if (done) {
+                notifyMonitors(evt, cause);
+            }
+            return done;
         } else { //otherwise, impossible value for instantiation
+            //TODO: explication?
             this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
 
-        return done;
+        return false;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        boolean done = false;
-        if (value > 0) {
-            int floorV = floor_sqrt(value);
-            done = var.removeInterval(-floorV + 1, floorV - 1, cause, informCause);
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+        if (value <= 0) {
+            return false;
+        }
+        int floorV = floor_sqrt(value);
+        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this, informCause);
+        if (done) {
+            notifyMonitors(EventType.INCLOW, cause);
         }
         return done;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
+            //TODO: explication?
             this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.updateLowerBound(-floorV, cause, informCause);
-        done |= var.updateUpperBound(floorV, cause, informCause);
+        boolean done = var.updateLowerBound(-floorV, this, informCause);
+        done |= var.updateUpperBound(floorV, this, informCause);
+        if (done) {
+            notifyMonitors(EventType.DECUPP, cause);
+        }
         return done;
     }
 
@@ -324,11 +300,6 @@ public final class SqrView extends View<IntVar> {
     @Override
     public String toString() {
         return "(" + this.var.toString() + "^2) = [" + getLB() + "," + getUB() + "]";
-    }
-
-    @Override
-    public IntDelta getDelta() {
-        return delta;
     }
 
     @Override
@@ -750,5 +721,34 @@ public final class SqrView extends View<IntVar> {
             _riterator.topDownInit();
         }
         return _riterator;
+    }
+
+
+    @Override
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+        if (evt == EventType.INCLOW) {
+            int lb = var.getLB();
+            if (lb > 0) {
+                notifyMonitors(EventType.INCLOW, cause);
+                return;
+            }
+            int ub = var.getUB();
+            if (ub >= 0) {
+                notifyMonitors(EventType.DECUPP, cause);
+                return;
+            } // else, keep original event
+        } else if (evt == EventType.DECUPP) {
+            int ub = var.getUB();
+            if (ub < 0) {
+                notifyMonitors(EventType.INCLOW, cause);
+                return;
+            }
+            int lb = var.getLB();
+            if (lb <= 0) {
+                notifyMonitors(EventType.DECUPP, cause);
+                return;
+            } // else, keep original event
+        }
+        notifyMonitors(evt, cause);
     }
 }

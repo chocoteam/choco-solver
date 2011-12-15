@@ -26,7 +26,8 @@
  */
 package solver.search.strategy.enumerations.sorters.metrics;
 
-import gnu.trove.THashSet;
+
+import gnu.trove.set.hash.THashSet;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.variables.Variable;

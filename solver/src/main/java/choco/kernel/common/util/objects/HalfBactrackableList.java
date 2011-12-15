@@ -26,11 +26,12 @@
  */
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.MultiDimensionIndex;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
+import solver.variables.IVariableMonitor;
+import solver.variables.Variable;
 
 /**
  * STATIC.......[<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -41,7 +42,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public class HalfBactrackableList<E extends MultiDimensionIndex> implements IList<E> {
+public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor<V>> implements IList<V, E> {
 
     private static final int OFFSET = 100000;
     private static final int SIZE = 8;
@@ -54,20 +55,18 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
     protected final IStateInt dFirstActive;
     protected final IStateInt dFirstPassive;
     protected int world; // world of first adding in dynamic structure
-
     protected E[] sElements, dElements; // null at creation
 
-    protected final int DIMENSION;
+    protected final V parent;
 
-
-    public HalfBactrackableList(IEnvironment environment, int dim) {
+    public HalfBactrackableList(V variable, IEnvironment environment) {
+        this.parent = variable;
         sIdx = 0;
         dIdx = environment.makeInt();
         sFirstActive = environment.makeInt();
         sFirstPassive = environment.makeInt();
         dFirstActive = environment.makeInt();
         dFirstPassive = environment.makeInt();
-        DIMENSION = dim;
     }
 
     @Override
@@ -80,7 +79,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
     }
 
     public void setActive(E element) {
-        if (element.getIndex(DIMENSION) < OFFSET) {
+        if (element.getIdxInV(parent) < OFFSET) {
             sActivate(element);
         } else {
             dActivate(element);
@@ -88,7 +87,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
     }
 
     public void setPassive(E element) {
-        if (element.getIndex(DIMENSION) < OFFSET) {
+        if (element.getIdxInV(parent) < OFFSET) {
             sPassivate(element);
         } else {
             dPassivate(element);
@@ -96,7 +95,7 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
     }
 
     public void remove(E element) {
-        if (element.getIndex(DIMENSION) < OFFSET) {
+        if (element.getIdxInV(parent) < OFFSET) {
             sRemove(element);
         } else {
             dRemove(element);
@@ -140,14 +139,14 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     private void sAdd(E element) {
         if (sElements == null) {
-            sElements = (E[]) new MultiDimensionIndex[SIZE];
+            sElements = (E[]) new IVariableMonitor[SIZE];
         }
         if (sElements.length <= sIdx) {
             E[] tmp = sElements;
-            sElements = (E[]) new MultiDimensionIndex[3 / 2 * sElements.length + 1];
+            sElements = (E[]) new IVariableMonitor[3 / 2 * sElements.length + 1];
             System.arraycopy(tmp, 0, sElements, 0, sIdx);
         }
-        element.setIndex(DIMENSION, sIdx);
+        element.setIdxInV(parent, sIdx);
         sElements[sIdx++] = element;
         this.sFirstActive.add(1);
         this.sFirstPassive.add(1);
@@ -155,16 +154,16 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     private void dAdd(E element) {
         if (dElements == null) {
-            dElements = (E[]) new MultiDimensionIndex[SIZE];
+            dElements = (E[]) new IVariableMonitor[SIZE];
             world = dIdx.getEnvironment().getWorldIndex();
         }
         int idx = dIdx.get();
         if (dElements.length <= idx) {
             E[] tmp = dElements;
-            dElements = (E[]) new MultiDimensionIndex[3 / 2 * sElements.length + 1];
+            dElements = (E[]) new IVariableMonitor[3 / 2 * sElements.length + 1];
             System.arraycopy(tmp, 0, dElements, 0, idx);
         }
-        element.setIndex(DIMENSION, idx + OFFSET);
+        element.setIdxInV(parent, idx + OFFSET);
         dElements[idx++] = element;
         dIdx.add(1);
         this.dFirstActive.add(1);
@@ -173,14 +172,14 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     private void sActivate(E element) {
         int first = this.sFirstActive.get();
-        int i = element.getIndex(DIMENSION);
+        int i = element.getIdxInV(parent);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = sElements[--first];
             sElements[first] = sElements[i];
-            sElements[first].setIndex(DIMENSION, first);
+            sElements[first].setIdxInV(parent, first);
             sElements[i] = tmp1;
-            sElements[i].setIndex(DIMENSION, i);
+            sElements[i].setIdxInV(parent, i);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
@@ -191,14 +190,14 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     private void dActivate(E element) {
         int first = this.dFirstActive.get();
-        int i = element.getIndex(DIMENSION) - OFFSET;
+        int i = element.getIdxInV(parent) - OFFSET;
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = dElements[--first];
             dElements[first] = dElements[i];
-            dElements[first].setIndex(DIMENSION, first + OFFSET);
+            dElements[first].setIdxInV(parent, first + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIndex(DIMENSION, i + OFFSET);
+            dElements[i].setIdxInV(parent, i + OFFSET);
         }
         if (first < i) {
             throw new UnsupportedOperationException("Cannot reactivate " + element);
@@ -208,14 +207,14 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     private void sPassivate(E element) {
         int last = this.sFirstPassive.get();
-        int i = element.getIndex(DIMENSION);
+        int i = element.getIdxInV(parent);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = sElements[--last];
             sElements[last] = sElements[i];
-            sElements[last].setIndex(DIMENSION, last);
+            sElements[last].setIdxInV(parent, last);
             sElements[i] = tmp1;
-            sElements[i].setIndex(DIMENSION, i);
+            sElements[i].setIdxInV(parent, i);
         }
         sFirstPassive.add(-1);
 
@@ -223,26 +222,26 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
 
     public void dPassivate(E element) {
         int last = this.dFirstPassive.get();
-        int i = element.getIndex(DIMENSION) - OFFSET;
+        int i = element.getIdxInV(parent) - OFFSET;
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = dElements[--last];
             dElements[last] = dElements[i];
-            dElements[last].setIndex(DIMENSION, last + OFFSET);
+            dElements[last].setIdxInV(parent, last + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIndex(DIMENSION, i + OFFSET);
+            dElements[i].setIdxInV(parent, i + OFFSET);
         }
         dFirstPassive.add(-1);
     }
 
     private void sRemove(E e) {
-        int i = e.getIndex(DIMENSION);
+        int i = e.getIdxInV(parent);
         E[] tmp = sElements;
-        sElements = (E[]) new MultiDimensionIndex[tmp.length - 1];
+        sElements = (E[]) new IVariableMonitor[tmp.length - 1];
         System.arraycopy(tmp, 0, sElements, 0, i);
         System.arraycopy(tmp, i + 1, sElements, i, tmp.length - i - 1);
         for (int j = i; j < sElements.length; j++) {
-            sElements[j].setIndex(DIMENSION, j);
+            sElements[j].setIdxInV(parent, j);
         }
         if (i < sFirstActive.get()) {
             this.sFirstActive.add(-1);
@@ -251,13 +250,13 @@ public class HalfBactrackableList<E extends MultiDimensionIndex> implements ILis
     }
 
     private void dRemove(E e) {
-        int i = e.getIndex(DIMENSION) - OFFSET;
+        int i = e.getIdxInV(parent) - OFFSET;
         E[] tmp = dElements;
-        dElements = (E[]) new MultiDimensionIndex[tmp.length - 1];
+        dElements = (E[]) new IVariableMonitor[tmp.length - 1];
         System.arraycopy(tmp, 0, dElements, 0, i);
         System.arraycopy(tmp, i + 1, dElements, i, tmp.length - i - 1);
         for (int j = i; j < dElements.length; j++) {
-            dElements[j].setIndex(DIMENSION, j + OFFSET);
+            dElements[j].setIdxInV(parent, j + OFFSET);
         }
         assert (this.dFirstPassive.getEnvironment().getWorldIndex() == world);
         if (i < dFirstActive.get()) {

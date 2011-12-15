@@ -35,21 +35,19 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**Propagator that ensures that a node has at least N neighbors
- * 
+/**
+ * Propagator that ensures that a node has at least N neighbors
+ * <p/>
  * BEWARE : the case where N=1 is useless because it is ensured by default
- * 
- * @author Jean-Guillaume Fages
  *
  * @param <V>
+ * @author Jean-Guillaume Fages
  */
 public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
 
@@ -82,8 +80,9 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 	// PROPAGATIONS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
 		int next;
 		INeighbors nei;
@@ -101,16 +100,14 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		GraphRequest gv = (GraphRequest) request;
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+
 		if((mask & EventType.REMOVEARC.mask) != 0){
-			IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-			d.forEach(rem_proc, gv.fromArcRemoval(), gv.toArcRemoval());
+            eventRecorder.getDeltaMonitor(g).forEach(rem_proc, EventType.REMOVEARC);
 		}
 		if((mask & EventType.ENFORCENODE.mask) != 0){
-			IntDelta d = (IntDelta) g.getDelta().getNodeEnforcingDelta();
-			d.forEach(enf_nodes_proc, gv.fromNodeEnforcing(), gv.toNodeEnforcing());
+            eventRecorder.getDeltaMonitor(g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
 		}
 	}
 

@@ -31,7 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -88,19 +88,22 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             }
         }
         if (directInconsistentCount())
-            engine.fails(this, null, MSG_INCONSISTENT);
+            contradiction(null, MSG_INCONSISTENT);
 
         l.compute(minOccurrences);
         u.compute(maxOccurrences);
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            initialize();
+        }
         filter();
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int idx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             int val = vars[idx].getValue();
             // if a value has been instantiated to its max number of occurrences
@@ -120,14 +123,14 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             }
             if (EventType.isRemove(mask)) {
                 if (idx < nbVars) {
-                    request.forEach(rem_proc);
+                    eventRecorder.getDeltaMonitor(vars[idx]).forEach(rem_proc, EventType.REMOVE);
                 }
             }
         }
-//        if (getNbRequestEnqued() == 0) {
+//        if (getNbPendingER() == 0) {
 //            filter();
 //        }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     boolean directInconsistentCount() {
@@ -159,7 +162,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
         if ((l.sum(l.minValue(), minsorted[0].var.getLB() - 1) > 0) ||
                 (l.sum(maxsorted[getNbVars() - 1].var.getUB() + 1, l.maxValue()) > 0)) {
-            engine.fails(this, null, MSG_INCONSISTENT);
+            contradiction(null, MSG_INCONSISTENT);
         }
         filterLowerMax();
         filterLowerMin();

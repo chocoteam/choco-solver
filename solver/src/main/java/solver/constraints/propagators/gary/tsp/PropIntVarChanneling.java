@@ -42,12 +42,10 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -96,7 +94,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		INeighbors nei;
 		IntVar v;
 		for(int i=0;i<n;i++){
@@ -124,23 +122,20 @@ public class PropIntVarChanneling extends GraphPropagator {
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest request, int idxVarInProp, int mask) throws ContradictionException {
-		if(request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(vars[idxVarInProp].getType() == Variable.GRAPH){
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+				eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
+				eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 			}
 		}else{
 			if((mask & EventType.INSTANTIATE.mask)!=0){
 				g.enforceArc(varIdx,intVars[varIdx].getValue(),this,false);
 			}
 			varIdx = idxVarInProp;
-			request.forEach(valRemoved);
+			eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
 		}
 	}
 

@@ -38,13 +38,11 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.measure.IMeasures;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -172,26 +170,23 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		INIT();
 		computeMST();
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if( request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(vars[idxVarInProp].getType() == Variable.GRAPH){
 			treeBroken = false;
-			IntDelta d = g.getDelta().getArcRemovalDelta();
-			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
+			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 			if(treeBroken){
-				propagate(); // RECOMPUTE from oldT
+				propagate(EventType.FULL_PROPAGATION.mask); // RECOMPUTE from oldT
 			}else{
 				newEnf = false;
-				d = g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+				eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 				if(newEnf){
-					propagate();
+					propagate(EventType.FULL_PROPAGATION.mask);
 				}else{
 					int delta = obj.getUB()-treeCost.get();
 					selectRelevantArcs(delta);
@@ -200,7 +195,7 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 		}else{
-			propagate();
+			propagate(EventType.FULL_PROPAGATION.mask);
 		}
 	}
 

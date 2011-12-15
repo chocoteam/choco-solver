@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
 import solver.objective.NoObjectiveManager;
-import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.IPropagationEngine;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -101,7 +101,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     int stateAfterSolution = UP_BRANCH;
 
     /* Reference to the propagation pilot */
-    public IPropagationEngine propEngine;
+    protected IPropagationEngine propEngine;
 
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
@@ -151,7 +151,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public Decision decision;
 
     @SuppressWarnings({"unchecked"})
-    public AbstractSearchLoop(Solver solver, IPropagationEngine propEngine) {
+    public AbstractSearchLoop(Solver solver) {
         this.solver = solver;
         this.env = solver.getEnvironment();
         this.measures = solver.getMeasures();
@@ -159,8 +159,11 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         smList.add(this.measures);
         this.nextState = INIT;
         this.limitsfactory = new LimitBox(this);
-        this.propEngine = propEngine;
         loadProperties(solver.properties);
+    }
+
+    public void setPropEngine(IPropagationEngine propEngine) {
+        this.propEngine = propEngine;
     }
 
     protected void loadProperties(Properties properties) {
@@ -259,9 +262,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        if (!propEngine.initialized()) {
-            propEngine.init();
-        }
         this.nextState = INITIAL_PROPAGATION;
     }
 
@@ -294,9 +294,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     /**
      * Close the search
+     *
      * @return <code>true</code> if at least one solution has been found, <br/>
-     *  <code>null</code> if a limit has been reached before finding one solution, <br/>
-     *  <code>false</code> otherwise
+     *         <code>null</code> if a limit has been reached before finding one solution, <br/>
+     *         <code>false</code> otherwise
      */
     public Boolean close() {
         if (solutionpool.size() > 0 && objectivemanager.isOptimization()) {

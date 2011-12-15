@@ -34,12 +34,15 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.*;
+import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
+
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -92,8 +95,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
 			g.enforceNode(i,this,false);
 			g.removeArc(i,i,this,false);
@@ -102,8 +105,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 		structuralPruning();
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		structuralPruning();
 	}
 

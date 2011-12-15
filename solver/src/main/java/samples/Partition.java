@@ -32,13 +32,10 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.unary.Relation;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.*;
-import solver.propagation.engines.comparators.predicate.*;
-import solver.propagation.engines.group.Group;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.comparators.predicate.Predicate;
+import solver.propagation.comparators.predicate.Predicates;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -134,7 +131,7 @@ public class Partition extends AbstractProblem {
 
         IPropagationEngine engine = solver.getEngine();
         Predicate light = Predicates.light();
-        engine.addGroup(
+        /*engine.addGroup(
                 Group.buildGroup(
                         Predicates.priority_light(PropagatorPriority.TERNARY),
                         new Cond(
@@ -152,7 +149,7 @@ public class Partition extends AbstractProblem {
                                 new Decr(IncrDomDeg.get())
                         ),
                         Policy.FIXPOINT
-                ));
+                ));*/
 
     }
 

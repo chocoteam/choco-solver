@@ -35,11 +35,10 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IntDelta;
+import solver.variables.Variable;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -85,7 +84,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		int np=0;
 		for(int i=0; i<n ; i++){
 			INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(i);
@@ -108,16 +107,14 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 	}
 
 	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if (request instanceof GraphRequest) {
-			GraphRequest gv = (GraphRequest) request;
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
 			if ((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(rem, gv.fromArcRemoval(), gv.toArcRemoval());
+                eventRecorder.getDeltaMonitor(g).forEach(rem, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(enf, gv.fromArcEnforcing(), gv.toArcEnforcing());
+                eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
 			}
 		}else{
 			//TODO

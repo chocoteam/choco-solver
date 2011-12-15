@@ -29,11 +29,6 @@ package samples.nqueen;
 
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.IncrOrderV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -71,14 +66,14 @@ public class NQueenGlobal extends AbstractNQueen {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.all(),
                         new IncrOrderV(orderedVars),
                         Policy.ITERATE
-                ));
+                ));*/
     }
 
     public static void main(String[] args) {

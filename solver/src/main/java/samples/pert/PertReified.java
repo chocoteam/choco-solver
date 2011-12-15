@@ -30,16 +30,7 @@ package samples.pert;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.Cond;
-import solver.propagation.engines.comparators.Decr;
-import solver.propagation.engines.comparators.IncrArityP;
-import solver.propagation.engines.comparators.MappingV;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -129,7 +120,7 @@ public class PertReified extends Pert {
             }
         }
 
-        IPropagationEngine engine = solver.getEngine();
+        /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
                         Predicates.member(reifieds.toArray(new Propagator[reifieds.size()])),
@@ -152,7 +143,7 @@ public class PertReified extends Pert {
                         Predicates.all(),
                         IncrArityP.get(),
                         Policy.FIXPOINT
-                ));
+                ));*/
     }
 
     public static void main(String[] args) {

@@ -30,11 +30,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.propagation.engines.Policy;
-import solver.propagation.engines.comparators.Decr;
-import solver.propagation.engines.comparators.IncrDomDeg;
-import solver.propagation.engines.comparators.predicate.Predicates;
-import solver.propagation.engines.group.Group;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -98,12 +93,12 @@ public class Alpha extends AbstractProblem {
         solver.set(StrategyFactory.minDomMinVal(letters, solver.getEnvironment()));
 
         // TODO chercher un meilleur ordre de propagation
-        solver.getEngine().addGroup(
+        /*solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicates.light(),
                         new Decr(IncrDomDeg.get()),
                         Policy.FIXPOINT
-                ));
+                ));*/
     }
 
     @Override

@@ -28,7 +28,7 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
-import gnu.trove.TLongArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;

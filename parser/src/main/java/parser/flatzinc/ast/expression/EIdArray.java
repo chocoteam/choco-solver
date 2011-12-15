@@ -27,7 +27,7 @@
 
 package parser.flatzinc.ast.expression;
 
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;

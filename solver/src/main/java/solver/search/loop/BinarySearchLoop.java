@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.propagation.engines.IPropagationEngine;
 import solver.search.strategy.decision.Decision;
 
 /**
@@ -45,8 +44,8 @@ import solver.search.strategy.decision.Decision;
 public class BinarySearchLoop extends AbstractSearchLoop {
 
     @SuppressWarnings({"unchecked"})
-    BinarySearchLoop(Solver solver, IPropagationEngine propEngine) {
-        super(solver, propEngine);
+    BinarySearchLoop(Solver solver) {
+        super(solver);
     }
 
     /**
@@ -55,11 +54,11 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            propEngine.fixPoint();
+            propEngine.propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);
-            propEngine.flushAll();
+            propEngine.flush();
             interrupt();
         }
         this.searchWorldIndex = env.getWorldIndex();
@@ -150,10 +149,10 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             objectivemanager.apply(decision);
             objectivemanager.postDynamicCut();
 
-            propEngine.fixPoint();
+            propEngine.propagate();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flushAll();
+            propEngine.flush();
             moveTo(UP_BRANCH);
             jumpTo = 1;
             smList.onContradiction(e);
@@ -193,7 +192,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         restaureRootNode();
         try {
             objectivemanager.postDynamicCut();
-            propEngine.fixPoint();
+            propEngine.propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
             interrupt();

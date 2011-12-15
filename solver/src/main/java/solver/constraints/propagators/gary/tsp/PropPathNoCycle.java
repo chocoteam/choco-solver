@@ -43,11 +43,8 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IntDelta;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
@@ -91,8 +88,8 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate() throws ContradictionException {
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		int j,start,last;
 		for(int i=0;i<n;i++){
 			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
@@ -106,12 +103,10 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 		}
 	}
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		GraphRequest gr = (GraphRequest) request;
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if((mask & EventType.ENFORCEARC.mask) !=0){
-			IntDelta d = g.getDelta().getArcEnforcingDelta();
-			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
+            eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 		}
 	}
 

@@ -7,7 +7,7 @@
 package samples.nsp;
 
 import choco.kernel.common.util.tools.ArrayUtils;
-import gnu.trove.THashMap;
+import gnu.trove.map.hash.THashMap;
 import solver.Solver;
 import solver.constraints.nary.automata.CostRegular;
 import solver.search.loop.monitors.SearchMonitorFactory;

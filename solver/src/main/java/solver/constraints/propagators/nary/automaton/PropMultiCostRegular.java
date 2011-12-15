@@ -32,10 +32,10 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
-import gnu.trove.TIntStack;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;import gnu.trove.iterator.TIntIterator;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.stack.array.TIntArrayStack;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
 import solver.Constant;
@@ -52,7 +52,7 @@ import solver.constraints.nary.automata.structure.multicostregular.StoredDirecte
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -234,13 +234,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             this.map.put(vars[i], i);
         }
-        this.toRemove = new TIntStack();
-        this.toUpdateLeft = new TIntStack[nbR + 1];
-        this.toUpdateRight = new TIntStack[nbR + 1];
+        this.toRemove = new TIntArrayStack();
+        this.toUpdateLeft = new TIntArrayStack[nbR + 1];
+        this.toUpdateRight = new TIntArrayStack[nbR + 1];
 
         for (int i = 0; i <= nbR; i++) {
-            this.toUpdateLeft[i] = new TIntStack();
-            this.toUpdateRight[i] = new TIntStack();
+            this.toUpdateLeft[i] = new TIntArrayStack();
+            this.toUpdateRight[i] = new TIntArrayStack();
         }
         this.boundUpdate = new TIntHashSet();
         this.pi = cauto;
@@ -249,13 +249,23 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
 
     @Override
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    }
+
+    @Override
     public int getPropagationConditions(int vIdx) {
 //TODO        return (vIdx < vs.length ? EventType.REMOVE.mask : EventType.BOUND.mask + EventType.INSTANTIATE.mask);
         return EventType.INT_ALL_MASK();
     }
 
-    @Override
-    public void initialize() throws ContradictionException {
+    /**
+     * Build internal structure of the propagator, if necessary
+     *
+     * @throws solver.exception.ContradictionException
+     *          if initialisation encounters a contradiction
+     */
+    protected void initialize() throws ContradictionException {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
@@ -279,23 +289,26 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
+        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+            initialize();
+        }
         filter();
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int vIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
         if (vIdx < offset) {
             checkWorld();
-            request.forEach(rem_proc.set(vIdx));
+            eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
         } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(vIdx - offset);
             computed = false;
         }
-//        if (getNbRequestEnqued() == 0 && toRemove.size() > 0) {
+//        if (getNbPendingER() == 0 && toRemove.size() > 0) {
 //            filter();
 //        }
-        forcePropagate();
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -730,11 +743,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (currentworld < lastWorld || currentbt != lastNbOfBacktracks || currentrestart > lastNbOfRestarts) {
 
             for (int i = 0; i <= nbR; i++) {
-                this.toUpdateLeft[i].reset();
-                this.toUpdateRight[i].reset();
+                this.toUpdateLeft[i].clear();
+                this.toUpdateRight[i].clear();
             }
 
-            this.toRemove.reset();
+            this.toRemove.clear();
             this.graph.inStack.clear();
 
 
@@ -813,7 +826,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
 
     private boolean remContains(int e) {
-        int[] element = toRemove.toNativeArray();
+        int[] element = toRemove.toArray();
         for (int i = 0; i < toRemove.size(); i++)
             if (element[i] == e)
                 return true;

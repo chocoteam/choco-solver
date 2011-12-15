@@ -27,7 +27,7 @@
 
 package solver.constraints;
 
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
 import solver.constraints.binary.NotEqualX_YC;

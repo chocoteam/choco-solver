@@ -35,7 +35,7 @@ import solver.constraints.propagators.extension.FastBooleanValidityChecker;
 import solver.constraints.propagators.extension.FastValidityChecker;
 import solver.constraints.propagators.extension.ValidityChecker;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -120,14 +120,14 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         initSupports();
         for (int indexVar = 0; indexVar < arity; indexVar++)
             reviseVar(indexVar);
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int vIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
         filter(vIdx);
     }
 

@@ -85,7 +85,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
-        requests.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         if (informCause) {
             cause = Cause.Null;
@@ -172,6 +172,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (informCause) {
             cause = Cause.Null;
         }
@@ -208,10 +209,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
+        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         boolean change;
         int lb = this.getLB();
         if (lb < value) {
@@ -249,10 +247,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
+        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         boolean change;
         int ub = this.getUB();
         if (ub > value) {
@@ -473,9 +468,9 @@ public final class BitsetXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
 
     @Override
-    public void backPropagate(int mask) throws ContradictionException {
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
         // one of the variable as changed externally, this involves a complete update of this
-        if (!EventType.isRemove(mask)) {
+        if (evt != EventType.REMOVE) {
             int elb = A.getLB() + B.getLB();
             int eub = A.getUB() + B.getUB();
             int ilb = LB.get();
@@ -485,7 +480,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             EventType e = EventType.VOID;
             if (elb > ilb) {
                 if (elb > iub) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 VALUES.clear(ilb - OFFSET, elb - OFFSET);
                 ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
@@ -495,7 +490,7 @@ public final class BitsetXYSumView extends AbstractSumView {
             }
             if (eub < iub) {
                 if (eub < ilb) {
-                    this.contradiction(this, EventType.PROPAGATE, MSG_LOW);
+                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
                 }
                 VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
                 iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
@@ -510,12 +505,12 @@ public final class BitsetXYSumView extends AbstractSumView {
             int size = VALUES.cardinality();
             SIZE.set(size);
             if (ilb > iub) {
-                this.contradiction(this, EventType.PROPAGATE, MSG_EMPTY);
+                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
             }
-            if (down || size == 1) {
+            if (down || size == 1 || elb < ilb) {
                 filterOnGeq(this, ilb);
             }
-            if (up || size == 1) { // size == 1 means instantiation, then force filtering algo
+            if (up || size == 1 || eub > iub) { // size == 1 means instantiation, then force filtering algo
                 filterOnLeq(this, iub);
             }
             if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo

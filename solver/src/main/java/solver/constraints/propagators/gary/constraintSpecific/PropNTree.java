@@ -28,50 +28,53 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.*;
+import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class PropNTree<V extends Variable> extends GraphPropagator<V>{
+public class PropNTree<V extends Variable> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	DirectedGraphVar g;
-	IntVar nTree;
-	int minTree = 0;
-	private LinkedList<TIntArrayList> sinks;
-	private LinkedList<TIntArrayList> nonSinks;
+    DirectedGraphVar g;
+    IntVar nTree;
+    int minTree = 0;
+    private LinkedList<TIntArrayList> sinks;
+    private LinkedList<TIntArrayList> nonSinks;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropNTree(DirectedGraphVar graph, IntVar nT,Solver solver,
-					 Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new Variable[]{graph,nT}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		nTree = nT;
-	}
+    public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
+                     Constraint<V, Propagator<V>> constraint) {
+        super((V[]) new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
+        g = graph;
+        nTree = nT;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
 //	private boolean checkFeasibility() throws ContradictionException {
 //		int n = g.getEnvelopGraph().getNbNodes();
@@ -118,128 +121,129 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V>{
 //		return ct;
 //	}
 
-	private void filtering() throws ContradictionException{
-		computeSinks();
-		//1) Bound pruning
-		minTreePruning();
-		//2) structural pruning
-		structuralPruning();
-	}
+    private void filtering() throws ContradictionException {
+        computeSinks();
+        //1) Bound pruning
+        minTreePruning();
+        //2) structural pruning
+        structuralPruning();
+    }
 
-	@Override
-	public void propagate() throws ContradictionException {
-		filtering();
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        filtering();
+    }
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		filtering();
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        filtering();
+    }
 
-	private void structuralPruning() throws ContradictionException {
-		int n = g.getEnvelopGraph().getNbNodes();
-		DirectedGraph Grs = new DirectedGraph(n+1, g.getEnvelopGraph().getType());
-		INeighbors nei;
-		for (int node = 0; node<n; node++) {
-			nei = g.getEnvelopGraph().getSuccessorsOf(node);
-			for(int suc = nei.getFirstElement() ; suc>=0; suc = nei.getNextElement()){
-				if(suc==node){
-					Grs.addArc(n, node);
-				}else{
-					Grs.addArc(suc, node);
-				}
-			}
-		}
-		//dominators
-		AbstractLengauerTarjanDominatorsFinder dominatorsFinder = new SimpleDominatorsFinder(n,Grs);
-		if(dominatorsFinder.findDominators()){
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(dominatorsFinder.isDomminatedBy(y,x)){
-						g.removeArc(x,y,this,false);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
-	}
+    private void structuralPruning() throws ContradictionException {
+        int n = g.getEnvelopGraph().getNbNodes();
+        DirectedGraph Grs = new DirectedGraph(n + 1, g.getEnvelopGraph().getType());
+        INeighbors nei;
+        for (int node = 0; node < n; node++) {
+            nei = g.getEnvelopGraph().getSuccessorsOf(node);
+            for (int suc = nei.getFirstElement(); suc >= 0; suc = nei.getNextElement()) {
+                if (suc == node) {
+                    Grs.addArc(n, node);
+                } else {
+                    Grs.addArc(suc, node);
+                }
+            }
+        }
+        //dominators
+        AbstractLengauerTarjanDominatorsFinder dominatorsFinder = new SimpleDominatorsFinder(n, Grs);
+        if (dominatorsFinder.findDominators()) {
+            for (int x = 0; x < n; x++) {
+                nei = g.getEnvelopGraph().getSuccessorsOf(x);
+                for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
+                    //--- STANDART PRUNING
+                    if (dominatorsFinder.isDomminatedBy(y, x)) {
+                        g.removeArc(x, y, this, false);
+                    }
+                    // ENFORCE ARC-DOMINATORS (redondant)
+                }
+            }
+        } else {
+            contradiction(g, "the source cannot reach all nodes");
+        }
+    }
 
-	private void minTreePruning() throws ContradictionException {
-		nTree.updateLowerBound(minTree, this, false);
-		if (nTree.getUB()==minTree){
-			int node;
-			for (TIntArrayList scc:nonSinks){
-				for(int x=0;x<scc.size();x++){
-					node = scc.get(x);
-					if(g.getEnvelopGraph().arcExists(node, node)){
-						g.removeArc(node, node, this, false);
-					}
-				}
-			}
-		}
-	}
+    private void minTreePruning() throws ContradictionException {
+        nTree.updateLowerBound(minTree, this, false);
+        if (nTree.getUB() == minTree) {
+            int node;
+            for (TIntArrayList scc : nonSinks) {
+                for (int x = 0; x < scc.size(); x++) {
+                    node = scc.get(x);
+                    if (g.getEnvelopGraph().arcExists(node, node)) {
+                        g.removeArc(node, node, this, false);
+                    }
+                }
+            }
+        }
+    }
 
-	private void computeSinks() {
-		int n = g.getEnvelopGraph().getNbNodes();
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
-		int[] sccOf = new int[n];
-		int sccNum = 0;
-		int node;
-		for (TIntArrayList scc:allSCC){
-			for(int x=0;x<scc.size();x++){
-				sccOf[scc.get(x)] = sccNum;
-			}
-			sccNum++;
-		}
-		sinks = new LinkedList<TIntArrayList>();
-		nonSinks = new LinkedList<TIntArrayList>();
-		boolean looksSink = true;
-		INeighbors nei;
-		for (TIntArrayList scc:allSCC){
-			looksSink = true;
-			boolean inKer = false;
-			for(int x=0;x<scc.size();x++){
-				node = scc.get(x);
-				if(g.getKernelGraph().getActiveNodes().isActive(node)){
-					inKer = true;
-				}
-				nei = g.getEnvelopGraph().getSuccessorsOf(node);
-				for(int suc = nei.getFirstElement(); suc>=0 && looksSink; suc = nei.getNextElement()){
-					if (sccOf[suc]!=sccOf[node]){
-						looksSink = false;
-					}
-				}
-				if(!looksSink){
-					x = scc.size();
-				}
-			}
-			if(looksSink && inKer){
-				sinks.add(scc);
-			}else{
-				nonSinks.add(scc);
-			}
-		}
-		minTree = sinks.size();
-	}
+    private void computeSinks() {
+        int n = g.getEnvelopGraph().getNbNodes();
+        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+        int[] sccOf = new int[n];
+        int sccNum = 0;
+        int node;
+        for (TIntArrayList scc : allSCC) {
+            for (int x = 0; x < scc.size(); x++) {
+                sccOf[scc.get(x)] = sccNum;
+            }
+            sccNum++;
+        }
+        sinks = new LinkedList<TIntArrayList>();
+        nonSinks = new LinkedList<TIntArrayList>();
+        boolean looksSink = true;
+        INeighbors nei;
+        for (TIntArrayList scc : allSCC) {
+            looksSink = true;
+            boolean inKer = false;
+            for (int x = 0; x < scc.size(); x++) {
+                node = scc.get(x);
+                if (g.getKernelGraph().getActiveNodes().isActive(node)) {
+                    inKer = true;
+                }
+                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+                for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
+                    if (sccOf[suc] != sccOf[node]) {
+                        looksSink = false;
+                    }
+                }
+                if (!looksSink) {
+                    x = scc.size();
+                }
+            }
+            if (looksSink && inKer) {
+                sinks.add(scc);
+            } else {
+                nonSinks.add(scc);
+            }
+        }
+        minTree = sinks.size();
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask;
+    }
 
-	@Override
-	public ESat isEntailed() {
-		if(g.instantiated()){
-			try{
-				structuralPruning();
-			}catch (Exception e){
-				return ESat.FALSE;
-			}return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        if (g.instantiated()) {
+            try {
+                structuralPruning();
+            } catch (Exception e) {
+                return ESat.FALSE;
+            }
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

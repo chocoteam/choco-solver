@@ -33,8 +33,8 @@ import samples.nqueen.NQueenBinary;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.engines.IPropagationEngine;
-import solver.propagation.engines.PropagationEngine;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 

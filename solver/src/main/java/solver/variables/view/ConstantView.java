@@ -34,6 +34,7 @@ import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
@@ -79,6 +80,13 @@ public class ConstantView implements IntVar {
         this.constante = constante;
         this.domain = new CsteDomain(constante);
         this.empty = solver.getEnvironment().makeBool(false);
+    }
+
+    public Constraint[] getConstraints() {
+        return new Constraint[0];
+    }
+
+    public void declareIn(Constraint constraint) {
     }
 
     public int getUniqueID() {
@@ -281,16 +289,6 @@ public class ConstantView implements IntVar {
 
     @Override
     public void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException {
-        //void
-    }
-
-    @Override
-    public void attachPropagator(Propagator propagator, int idxInProp) {
-        //void
-    }
-
-    @Override
-    public void deletePropagator(Propagator observer) {
         //void
     }
 

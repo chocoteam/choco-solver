@@ -29,14 +29,14 @@ package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.TIntArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -415,13 +415,14 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 	//***********************************************************************************
 
 	@Override
-	public void propagate() throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		HK_algorithm();
 		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * n)) + "%)");
 		System.out.println("current lower bound : "+obj.getLB());
 	}
+
 	@Override
-	public void propagateOnRequest(IRequest<V> viRequest, int idxVarInProp, int mask) throws ContradictionException {
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		HK_algorithm();
 	}
 	@Override

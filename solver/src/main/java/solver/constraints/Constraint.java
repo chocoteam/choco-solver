@@ -33,11 +33,10 @@ import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
-import solver.propagation.engines.IPropagationEngine;
+import solver.propagation.IPropagationEngine;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
@@ -79,20 +78,16 @@ import java.io.Serializable;
  * @version 0.01, june 2010
  * @see solver.variables.Variable
  * @see solver.constraints.propagators.Propagator
- * @see solver.propagation.engines.IPropagationEngine
+ * @see solver.propagation.IPropagationEngine
  * @since 0.01
  */
 public abstract class Constraint<V extends Variable, P extends Propagator<V>> implements Serializable, IPriority {
 
     private static final long serialVersionUID = 1L;
 
-    public static PropagatorPriority _DEFAULT_THRESHOLD = PropagatorPriority.TERNARY;
-
     public static final String VAR_DEFAULT = "var_default";
     public static final String VAL_DEFAULT = "val_default";
     public static final String METRIC_DEFAULT = "met_default";
-
-    public static final String MSG_ENTAILED = "Entailed false";
 
     protected final Solver solver;
 
@@ -102,15 +97,12 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
 
     protected int staticPropagationPriority;
 
-    protected transient boolean initialize = false;
-
     protected final IPropagationEngine engine;
 
     public Constraint(V[] vars, Solver solver) {
         this.vars = vars.clone();
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        this.initialize = false;
         this.engine = solver.getEngine();
     }
 
@@ -119,7 +111,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public Constraint(Solver solver) {
         this.solver = solver;
         this.lastPropagatorActive = solver.getEnvironment().makeInt();
-        initialize = false;
         this.engine = solver.getEngine();
     }
 
@@ -211,7 +202,6 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public final void setPropagators(P... propagators) {
         this.propagators = propagators;
         this.lastPropagatorActive.set(propagators.length);
-        setUpPropagator(propagators);
     }
 
     /**
@@ -223,53 +213,21 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     public final void addPropagators(P... mPropagators) {
         // add the new propagators at the end of the current array
         P[] tmp = this.propagators;
-        this.propagators = (P[])new Propagator[tmp.length + mPropagators.length];
+        this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
         System.arraycopy(tmp, 0, propagators, 0, tmp.length);
         System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
 
         this.lastPropagatorActive.add(mPropagators.length);
-        setUpPropagator(mPropagators);
-    }
-
-    private void setUpPropagator(P... propagators){
-        for (int p = 0; p < propagators.length; p++) {
-            Propagator prop = propagators[p];
-            prop.linkToVariables();
-            staticPropagationPriority = Math.max(staticPropagationPriority, prop.getPriority().priority);
-        }
     }
 
     /**
-     * Initial propagation of the constraint
-     *
-     * @throws ContradictionException when a contradiction occurs during filtering
+     * Link propagators with variables.
      */
-    public void filter() throws ContradictionException {
+    public void declare() {
         int last = lastPropagatorActive.get();
-        Propagator prop;
         for (int p = 0; p < last; p++) {
-            prop = propagators[p];
-            ESat entailed = prop.isEntailed();
-            switch (entailed) {
-                case FALSE:
-                    this.contradiction(prop, null, MSG_ENTAILED);
-                    break;
-                case TRUE:
-                    prop.setPassive();
-                    p--;
-                    last--;
-                    break;
-                case UNDEFINED:
-                    prop.propagate();
-                    if (!prop.isActive()) {
-                        p--;
-                        last--;
-                    }
-                    break;
-
-            }
+            staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
         }
-        initialize = true;
     }
 
     /**
@@ -309,7 +267,7 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
     /**
      * Throws a contradiction exception based on <variable, message>
      *
-     * @param cause ICause object causes the exception
+     * @param cause    ICause object causes the exception
      * @param variable involved variable
      * @param message  detailed message
      * @throws ContradictionException expected behavior

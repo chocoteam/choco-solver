@@ -34,7 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -68,14 +68,14 @@ public class PropMax extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(0);
         filter(1);
         filter(2);
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> request, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else if (EventType.isInclow(mask)) {
@@ -83,7 +83,7 @@ public class PropMax extends Propagator<IntVar> {
         } else if (EventType.isDecupp(mask)) {
             this.awakeOnUpp(varIdx);
         } else if (EventType.isRemove(mask)) {
-            request.forEach(rem_proc.set(varIdx));
+            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
     }
 
@@ -144,19 +144,21 @@ public class PropMax extends Propagator<IntVar> {
             }
         } else if (idx == 1) {
             val = v1.getValue();
-            if (val > v2.getUB()) {
+            if (val >= v2.getUB()) {
                 v0.instantiateTo(val, this, false);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v2.getUB()), this, false);
+                v0.updateLowerBound(Math.max(val, v2.getLB()), this, false);
             }
         } else if (idx == 2) {
             val = v2.getValue();
-            if (val > v1.getUB()) {
+            if (val >= v1.getUB()) {
                 v0.instantiateTo(val, this, false);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v1.getUB()), this, false);
+                v0.updateLowerBound(Math.max(val, v1.getLB()), this, false);
             }
         }
     }

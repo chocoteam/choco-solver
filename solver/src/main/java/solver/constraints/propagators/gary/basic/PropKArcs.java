@@ -35,37 +35,35 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.GraphRequest;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphVar;
 
-/**Propagator that ensures that K arcs belong to the final graph
- * 
- * @author Jean-Guillaume Fages
+/**
+ * Propagator that ensures that K arcs belong to the final graph
  *
+ * @author Jean-Guillaume Fages
  */
-public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends GraphPropagator<V>{
+public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends GraphPropagator<V> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected G g;
-	protected IntVar k;
-	protected IStateInt nbInKer, nbInEnv;
-	protected int n;
-	protected IntProcedure arcEnforced;
-	protected IntProcedure arcRemoved;
+    protected G g;
+    protected IntVar k;
+    protected IStateInt nbInKer, nbInEnv;
+    protected int n;
+    protected IntProcedure arcEnforced;
+    protected IntProcedure arcRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropKArcs(G graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
+    public PropKArcs(G graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
 		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
@@ -76,58 +74,56 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
 		arcRemoved  = new RemArc();
 	}
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if( request instanceof GraphRequest){
-			GraphRequest gr = (GraphRequest) request;
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcEnforcingDelta();
-				d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				IntDelta d = (IntDelta) g.getDelta().getArcRemovalDelta();
-				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
-			}
-			k.updateLowerBound(nbInKer.get(), this, false);
-			k.updateUpperBound(nbInEnv.get(), this, false);
-		}
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        Variable var = vars[idxVarInProp];
+        if (var.getType() == Variable.GRAPH) {
+            if ((mask & EventType.ENFORCEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+            }
+            if ((mask & EventType.REMOVEARC.mask) != 0) {
+                eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+            }
+            k.updateLowerBound(nbInKer.get(), this, false);
+            k.updateUpperBound(nbInEnv.get(), this, false);
+        }
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class EnfArc implements IntProcedure{
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
-			if(from == to){
-				nbInKer.set(nbInKer.get()+1);
-			}
-		}
-	}
-	private class RemArc implements IntProcedure{
-		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
-			if(from == to){
-				nbInEnv.set(nbInEnv.get()-1);
-			}
-		}
-	}
+    private class EnfArc implements IntProcedure {
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int from = i / n - 1;
+            int to = i % n;
+            if (from == to) {
+                nbInKer.set(nbInKer.get() + 1);
+            }
+        }
+    }
+    private class RemArc implements IntProcedure {
+        @Override
+        public void execute(int i) throws ContradictionException {
+            int from = i / n - 1;
+            int to = i % n;
+            if (from == to) {
+                nbInEnv.set(nbInEnv.get() - 1);
+            }
+        }
+    }
 }

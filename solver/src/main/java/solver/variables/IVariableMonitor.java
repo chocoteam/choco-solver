@@ -26,8 +26,8 @@
  */
 package solver.variables;
 
-import choco.kernel.common.MultiDimensionIndex;
 import solver.ICause;
+import solver.recorders.IActivable;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -37,7 +37,7 @@ import solver.ICause;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends MultiDimensionIndex {
+public interface IVariableMonitor<V extends Variable> extends IActivable {
 
     /**
      * Operations to execute before updating the domain variable
@@ -65,5 +65,21 @@ public interface IVariableMonitor<V extends Variable> extends MultiDimensionInde
      * @param cause origin of the modification
      */
     void contradict(V var, EventType evt, ICause cause);
+
+    /**
+     * Return the index of <code>this</code> in <code>variable</code>
+     *
+     * @param variable a variable, must be a known <code>this</code>
+     * @return index index of <code>this</code> in <code>variable</code> list of event recorder
+     */
+    public abstract int getIdxInV(V variable);
+
+    /**
+     * Return the index of <code>this</code> in <code>variable</code>
+     *
+     * @param variable a variable, must be a known <code>this</code>
+     * @param idx      index of <code>this</code> in <code>variable</code> list of event recorder
+     */
+    public abstract void setIdxInV(V variable, int idx);
 
 }

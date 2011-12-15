@@ -27,11 +27,13 @@
 
 package solver.variables.graph.graphOperations.coupling;
 
-import gnu.trove.TIntIntHashMap;
-import gnu.trove.TIntStack;
-import java.util.BitSet;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.stack.TIntStack;
+import gnu.trove.stack.array.TIntArrayStack;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+
+import java.util.BitSet;
 
 public class BipartiteMaxCardMatching {
 
@@ -96,7 +98,7 @@ public class BipartiteMaxCardMatching {
 		if(freeInA.cardinality()==0){
 			return false;
 		}
-		TIntStack stack = new TIntStack();
+		TIntStack stack = new TIntArrayStack();
 		//nodes
 		int v,w;
 		int dv;
@@ -150,7 +152,7 @@ public class BipartiteMaxCardMatching {
 			pred[i] = -1;
 		}
 		// not edges but nodes (path)
-		TIntStack lasts = new TIntStack();
+		TIntStack lasts = new TIntArrayStack();
 		int origin,w,e,last;
 		INeighbors nei;
 		for (origin=freeInA.nextSetBit(0); origin>=0; origin = freeInA.nextSetBit(origin+1)){

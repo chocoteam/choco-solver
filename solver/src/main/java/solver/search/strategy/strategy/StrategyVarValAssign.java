@@ -30,7 +30,7 @@ package solver.search.strategy.strategy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import gnu.trove.TLongObjectHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;

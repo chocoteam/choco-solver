@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -82,7 +82,7 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         if (x.instantiated()) {
             removeValV1();
         } else if (y.instantiated()) {
@@ -91,11 +91,11 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIFineRequest, int varIdx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else if (EventType.isBound(mask)) {
-            propagate();
+            propagate(EventType.FULL_PROPAGATION.mask);
         }
     }
 

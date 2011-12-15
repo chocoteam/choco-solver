@@ -33,7 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.requests.IRequest;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -103,7 +103,7 @@ public class PropSumEq extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate() throws ContradictionException {
+    public void propagate(int evtmask) throws ContradictionException {
         filter(true, 2);
     }
 
@@ -210,7 +210,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagateOnRequest(IRequest<IntVar> intVarIRequest, int i, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int i, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             filter(true, 2);
         }else if (EventType.isInclow(mask)) {

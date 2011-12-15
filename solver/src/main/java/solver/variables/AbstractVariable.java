@@ -32,15 +32,13 @@ import choco.kernel.common.util.procedure.TernaryProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.propagation.engines.IPropagationEngine;
-import solver.requests.IRequest;
-import solver.requests.list.VariableMonitorListBuilder;
-import solver.variables.delta.IDelta;
+import solver.recorders.list.VariableMonitorListBuilder;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * Class used to factorise code
@@ -50,7 +48,7 @@ import java.io.Serializable;
  * @author Jean-Guillaume Fages
  * @since 30 june 2011
  */
-public abstract class AbstractVariable implements Serializable {
+public abstract class AbstractVariable<V extends Variable> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -62,19 +60,22 @@ public abstract class AbstractVariable implements Serializable {
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
-    private static final String NO_NAME = "";
+    protected static final String NO_NAME = "";
 
     /**
      * Reference to the solver containing this variable.
      */
     protected final Solver solver;
 
+    protected Constraint[] constraints = new Constraint[8];
+    protected int cLast = 0;
+
     protected final String name;
 
     /**
-     * List of requests
+     * List of variable monitors
      */
-    protected final IList<IVariableMonitor> requests;
+    protected IList<V, IVariableMonitor<V>> records;
 
 
     protected IView[] views; // views to inform of domain modification
@@ -84,8 +85,6 @@ public abstract class AbstractVariable implements Serializable {
     protected int modificationEvents;
 
     protected int uniqueID;
-
-    protected final IPropagationEngine engine;
 
     protected final OnBeforeProc beforeModification = new OnBeforeProc();
     protected final OnAfterProc afterModification = new OnAfterProc();
@@ -100,12 +99,38 @@ public abstract class AbstractVariable implements Serializable {
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        this.engine = solver.getEngine();
-        this.requests = VariableMonitorListBuilder.preset(solver.getEnvironment(), IRequest.IN_VAR);
         views = new IView[2];
     }
 
-    public abstract IDelta getDelta();
+    protected void makeList(V variable) {
+        this.records = VariableMonitorListBuilder.preset(variable, solver.getEnvironment());
+    }
+
+    /**
+     * Returns the array of constraints <code>this</code> appears in.
+     *
+     * @return array of constraints
+     */
+    public Constraint[] getConstraints() {
+        if(cLast < constraints.length){
+            constraints = Arrays.copyOfRange(constraints, 0, cLast);
+        }
+        return constraints;
+    }
+
+    /**
+     * Link a constraint within a variable
+     *
+     * @param constraint a constraint
+     */
+    public void declareIn(Constraint constraint) {
+        if (cLast >= constraints.length) {
+            Constraint[] tmp = constraints;
+            constraints = new Constraint[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, constraints, 0, cLast);
+        }
+        constraints[cLast++] = constraint;
+    }
 
     public int getUniqueID() {
         return uniqueID;
@@ -116,11 +141,11 @@ public abstract class AbstractVariable implements Serializable {
     }
 
     public void activate(IVariableMonitor monitor) {
-        requests.setActive(monitor);
+        records.setActive(monitor);
     }
 
     public void desactivate(IVariableMonitor monitor) {
-        requests.setPassive(monitor);
+        records.setPassive(monitor);
     }
 
     public String getName() {
@@ -131,30 +156,26 @@ public abstract class AbstractVariable implements Serializable {
     ///// 	methodes 		de 	  l'interface 	  Variable	   /////
     ////////////////////////////////////////////////////////////////
 
-    public void deletePropagator(Propagator observer) {
-        throw new UnsupportedOperationException();
-    }
-
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(event.mask);
+                views[i].backPropagate(event, cause);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(event.mask);
+                    views[i].backPropagate(event, cause);
                 }
             }
         }
     }
 
     public void addMonitor(IVariableMonitor monitor) {
-        requests.add(monitor, false);
+        records.add(monitor, false);
     }
 
     public void removeMonitor(IVariableMonitor monitor) {
-        requests.remove(monitor);
+        records.remove(monitor);
     }
 
     public void subscribeView(IView view) {
@@ -167,15 +188,15 @@ public abstract class AbstractVariable implements Serializable {
     }
 
     public IList getMonitors() {
-        return requests;
+        return records;
     }
 
     public int nbConstraints() {
-        return requests.size();
+        return records.size();
     }
 
     public int nbMonitors() {
-        return requests.cardinality();
+        return records.cardinality();
     }
 
     public Solver getSolver() {
