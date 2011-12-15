@@ -63,8 +63,8 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 
 	DirectedGraphVar g;
 	int n;
-	private IStateBitSet computed;
 	private IntProcedure remArcs;
+	private BitSet tocheck;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -80,8 +80,8 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		remArcs = new RemArc(this);
-		computed = environment.makeBitSet(n);
+		remArcs = new RemArc();
+		tocheck = new BitSet(n);
 	}
 
 	//***********************************************************************************
@@ -90,82 +90,46 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 
 	@Override
 	public void propagate() throws ContradictionException {
-//		checkPattern();
-		INeighbors nei;
-		int x,y;
-		boolean hasChanged = true;
-		while(hasChanged){
-			hasChanged = false;
-			for(int i=0;i<n;i++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(nei.neighborhoodSize()==2){
-					x=nei.getFirstElement();
-					y=nei.getNextElement();
-					hasChanged |= g.removeArc(x,y,this,false);
-					hasChanged |= g.removeArc(y,x,this,false);
-				}
-				nei = g.getEnvelopGraph().getPredecessorsOf(i);
-				if(nei.neighborhoodSize()==2){
-					x=nei.getFirstElement();
-					y=nei.getNextElement();
-					hasChanged |= g.removeArc(x,y,this,false);
-					hasChanged |= g.removeArc(y,x,this,false);
-				}
-			}
-		}
+		checkPattern(-1,-1);
 	}
 
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
-			propagate();
-			return;
-		}
 		GraphRequest gr = (GraphRequest) request;
 		IntDelta d = g.getDelta().getArcRemovalDelta();
-		d.forEach(remArcs, gr.fromArcRemoval(), gr.toArcRemoval());
+		if(gr.toArcRemoval()-gr.fromArcRemoval()>(n-2)/2){
+			checkPattern(-1,-1);
+		}else{
+			d.forEach(remArcs, gr.fromArcRemoval(), gr.toArcRemoval());
+		}
 	}
 
-	private void checkPattern() throws ContradictionException {
-		BitSet notInList = new BitSet(n);
-		LinkedList<Integer> list = new LinkedList<Integer>();
-		INeighbors suc,pred;
-		int j,k;
-		notInList.clear();
-		for(int i=0; i<n;i++){
-			list.add(i);
+	private void checkPattern(int idx1, int idx2) throws ContradictionException {
+		tocheck.clear();
+		if(idx1==-1 && idx2==-1){
+			tocheck.flip(0,n);
+		}else{
+			tocheck.set(idx1);
+			tocheck.set(idx2);
 		}
-		int i;
-		while(!list.isEmpty()){
-			i = list.pop();
-			notInList.set(i);
-			suc = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(suc.neighborhoodSize()==2){
-				j = suc.getFirstElement();
-				k = suc.getNextElement() ;
-				if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
-					if(notInList.get(j)){
-						list.add(j);
-					}
-					if(notInList.get(k)){
-						list.add(k);
-					}
-				}
-			}else{
-				pred = g.getEnvelopGraph().getPredecessorsOf(i);
-				if(pred.neighborhoodSize()==2){
-					j = pred.getFirstElement();
-					k = pred.getNextElement() ;
-					if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
-						if(notInList.get(j)){
-							list.add(j);
-						}
-						if(notInList.get(k)){
-							list.add(k);
-						}
+		int i = tocheck.nextSetBit(0);
+		INeighbors nei;
+		int x,y;
+		while(i>=0){
+			tocheck.clear(i);
+			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<=2
+			&& g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<=2){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				x=nei.getFirstElement();
+				y=nei.getNextElement();
+				if(nei.getNextElement()==-1 && x!=-1 && y!=-1){
+					if(g.removeArc(x,y,this,false) || g.removeArc(y,x,this,false)){
+						tocheck.set(i);
+						tocheck.set(i);
 					}
 				}
 			}
+			i = tocheck.nextSetBit(0);
 		}
 	}
 
@@ -184,56 +148,9 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 	//***********************************************************************************
 
 	private class RemArc implements IntProcedure {
-		private GraphPropagator p;
-		private INeighbors nei;
-
-		private RemArc(GraphPropagator p){
-			this.p = p;
-		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int to = i%n;
-			int from = i/n-1;
-			checkSuccs(from);
-			checkPreds(to);
-		}
-
-		private void checkPreds(int i) throws ContradictionException {
-			if(!computed.get(i)){
-				nei = g.getEnvelopGraph().getPredecessorsOf(i);
-				if(nei.neighborhoodSize()==2){
-					computed.set(i);
-					int j = nei.getFirstElement();
-					int k = nei.getNextElement() ;
-					if(g.removeArc(j,k,p,false)){
-						checkPreds(k);
-						checkSuccs(j);
-					}
-					if(g.removeArc(k,j,p,false)){
-						checkSuccs(k);
-						checkPreds(j);
-					}
-				}
-			}
-		}
-
-		private void checkSuccs(int i) throws ContradictionException {
-			if(!computed.get(i)){
-				nei = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(nei.neighborhoodSize()==2){
-					computed.set(i);
-					int j = nei.getFirstElement();
-					int k = nei.getNextElement() ;
-					if(g.removeArc(j,k,p,false)){
-						checkPreds(k);
-						checkSuccs(j);
-					}
-					if(g.removeArc(k,j,p,false)){
-						checkSuccs(k);
-						checkPreds(j);
-					}
-				}
-			}
+			checkPattern(i/n-1,i%n);
 		}
 	}
 }

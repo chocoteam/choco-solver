@@ -44,6 +44,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.requests.GraphRequest;
 import solver.requests.IRequest;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IntDelta;
 import solver.variables.graph.INeighbors;
@@ -89,14 +90,26 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	@Override
 	public void propagate() throws ContradictionException {
 		INeighbors succs;
+		int next;
 		for(int i=0;i<n;i++){
 			if(i!=but){
 				succs = g.getEnvelopGraph().getSuccessorsOf(i);
+				next = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 				if (succs.neighborhoodSize()==0){
 					this.contradiction(g,i+" has no successor");
 				}
-				if (succs.neighborhoodSize()==1){
+				else if (succs.neighborhoodSize()==1){
 					g.enforceArc(i,succs.getFirstElement(),this,false);
+				}
+				else if(next!=-1){
+					if(g.getKernelGraph().getSuccessorsOf(i).getNextElement()!=-1){
+						contradiction(g,"too many successors");
+					}
+					for(int j=succs.getFirstElement();j>=0;j=succs.getNextElement()){
+						if(j!=next){
+							g.removeArc(i,j,this,false);
+						}
+					}
 				}
 			}
 		}
@@ -105,11 +118,11 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	@Override
 	public void propagateOnRequest(IRequest<V> request, int idxVarInProp, int mask) throws ContradictionException {
 		GraphRequest gr = (GraphRequest) request;
-		if((mask & EventType.ENFORCEARC.mask) !=0){
+		if((mask & EventType.ENFORCEARC.fullmask) !=0){
 			IntDelta d = g.getDelta().getArcEnforcingDelta();
 			d.forEach(arcEnforced, gr.fromArcEnforcing(), gr.toArcEnforcing());
 		}
-		if((mask & EventType.REMOVEARC.mask)!=0){
+		if((mask & EventType.REMOVEARC.fullmask)!=0){
 			IntDelta d = g.getDelta().getArcRemovalDelta();
 			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 		}
@@ -117,7 +130,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.fullmask + EventType.ENFORCEARC.fullmask;
 	}
 
 	@Override

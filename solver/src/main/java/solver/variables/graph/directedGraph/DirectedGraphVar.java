@@ -27,6 +27,7 @@
 
 package solver.variables.graph.directedGraph;
 
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -75,36 +76,37 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			}
 			EventType e = EventType.REMOVEARC;
 			notifyMonitors(e, cause);
-			int px = getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize();
-			int py = getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize();
-			int sx = getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize();
-			int sy = getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize();
-			if(px+sx<2){
-				if(px==0 && sx==0){
-					removeNode(x, cause, informCause);
-				}
-				if(getKernelGraph().getActiveNodes().isActive(x)){
-					if(px==1 && sx==0){
-						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause,informCause);
-					}
-					if(px==0 && sx==1){
-						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause,informCause);
-					}
-				}
-			}
-			if(py+sy<2){
-				if(py==0 && sy==0){
-					removeNode(y, cause, informCause);
-				}
-				if(getKernelGraph().getActiveNodes().isActive(y)){
-					if(py==1 && sy==0){
-						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause,informCause);
-					}
-					if(py==0 && sy==1){
-						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause,informCause);
-					}
-				}
-			}
+//			cause = Cause.Null;
+//			int px = getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize();
+//			int py = getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize();
+//			int sx = getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize();
+//			int sy = getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize();
+//			if(px+sx<2){
+//				if(px==0 && sx==0){
+//					removeNode(x, cause, informCause);
+//				}
+//				if(getKernelGraph().getActiveNodes().isActive(x)){
+//					if(px==1 && sx==0){
+//						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause,informCause);
+//					}
+//					if(px==0 && sx==1){
+//						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause,informCause);
+//					}
+//				}
+//			}
+//			if(py+sy<2){
+//				if(py==0 && sy==0){
+//					removeNode(y, cause, informCause);
+//				}
+//				if(getKernelGraph().getActiveNodes().isActive(y)){
+//					if(py==1 && sy==0){
+//						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause,informCause);
+//					}
+//					if(py==0 && sy==1){
+//						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause,informCause);
+//					}
+//				}
+//			}
 			return true;
 		}return false;
 	}

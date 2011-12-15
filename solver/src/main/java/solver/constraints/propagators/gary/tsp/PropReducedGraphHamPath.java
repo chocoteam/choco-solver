@@ -140,7 +140,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			}
 		}
 		INeighbors succs;
-		int x, minCA;
+		int x;
 		for(int i=0;i<n;i++){
 			x = sccOf[i].get();
 			succs = G.getEnvelopGraph().getSuccessorsOf(i);
@@ -226,7 +226,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			IntDelta d = G.getDelta().getArcRemovalDelta();
 			d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 		}
-		int to,x,minCA;
+		int to,x;
 		for(int i=0;i<n;i++){
 			to = G.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 			x  = sccOf[i].get();

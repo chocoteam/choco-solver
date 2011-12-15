@@ -54,7 +54,7 @@ public class ArraySwapList_Array extends ArraySwapList{
 	@Override
 	public boolean contain(int element) {
 		if(map[element]>=0){
-			return array[map[element]]==element && map[element]<getSize();
+			return map[element]<getSize() && array[map[element]]==element;
 		}
 		return false;
 	}
@@ -70,8 +70,9 @@ public class ArraySwapList_Array extends ArraySwapList{
 		int size = getSize();
 		if(getSize()==arrayLength){
 			int[] tmp = array;
-			int ns = Math.max(sizeMax,tmp.length+1+(tmp.length*2)/3);
+			int ns = Math.min(sizeMax,tmp.length+1+(tmp.length*2)/3);
 			array = new int[ns];
+			arrayLength = ns;
 			System.arraycopy(tmp,0,array,0,size);
 		}
 		array[size] = element;

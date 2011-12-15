@@ -136,6 +136,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 				d.forEach(arcRemoved, gr.fromArcRemoval(), gr.toArcRemoval());
 			}
 		}else{
+			if((mask & EventType.INSTANTIATE.mask)!=0){
+				g.enforceArc(varIdx,intVars[varIdx].getValue(),this,false);
+			}
 			varIdx = idxVarInProp;
 			request.forEach(valRemoved);
 		}

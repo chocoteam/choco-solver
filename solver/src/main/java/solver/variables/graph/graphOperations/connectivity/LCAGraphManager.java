@@ -157,8 +157,8 @@ public class LCAGraphManager {
 	 * 		o	The head of a run is identified when computing I values. v is identified as the head of its run if the I value of v's parent is not I(v).
 	 *		o	After this step, the head of a run containing an arbitrary node v can be located in constant time. First compute I(v) then look up the value L(I(v)).
 	 * 3.	Given a complete binary tree with node-depth ceiling(log n)-1, map each node v in the general tree to I(v) in the binary tree (Fig 4).
-	 * 4.	For each node v in the general tree create on O(log n) bit number A v. Bit A v(i) is set to 1 if and only if node v has an ancestor 
-	 * 		in the general tree that maps to height i in the binary tree. i.e. iff v has an ancestor u such that h(I(u)) = i. 
+	 * 4.	For each node v in the general tree create on O(log n) bit number A v. Bit A v(i) is set to 1 if and only if node v has an ancestor
+	 * 		in the general tree that maps to height i in the binary tree. i.e. iff v has an ancestor u such that h(I(u)) = i.
 	 */
 	private void performLCAPreprocessing() {
 		// step 1 : DFS already done
@@ -203,7 +203,7 @@ public class LCAGraphManager {
 
 	/**Get the lowest common ancestor of two nodes in O(1) time
 	 * Query by Chris Lewis 
-	 * 1.	Find the lowest common ancestor b in the binary tree of nodes I(x) and I(y). 
+	 * 1.	Find the lowest common ancestor b in the binary tree of nodes I(x) and I(y).
 	 * 2.	Find the smallest position j ³ h(b) such that both numbers A x and A y have 1-bits in position j. 
 	 * 		This gives j = h(I(z)).
 	 * 3.	Find node x', the closest node to x on the same run as z:

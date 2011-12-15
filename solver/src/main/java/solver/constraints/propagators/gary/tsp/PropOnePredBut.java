@@ -89,14 +89,26 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	@Override
 	public void propagate() throws ContradictionException {
 		INeighbors preds;
+		int pre;
 		for(int i=0;i<n;i++){
 			if(i!=but){
+				pre = g.getKernelGraph().getPredecessorsOf(i).getFirstElement();
 				preds = g.getEnvelopGraph().getPredecessorsOf(i);
 				if (preds.neighborhoodSize()==0){
 					this.contradiction(g,i+" has no predecessor");
 				}
-				if (preds.neighborhoodSize()==1){
+				else if (preds.neighborhoodSize()==1){
 					g.enforceArc(preds.getFirstElement(),i,this,false);
+				}
+				else if (pre!=-1){
+					if(g.getKernelGraph().getPredecessorsOf(i).getNextElement()!=-1){
+						contradiction(g,i+" has >1 predecessors");
+					}
+					for(int j=preds.getFirstElement();j>=0;j=preds.getNextElement()){
+						if(j!=pre){
+							g.removeArc(j,i,this,false);
+						}
+					}
 				}
 			}
 		}
@@ -117,7 +129,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.fullmask + EventType.ENFORCEARC.fullmask;
 	}
 
 	@Override
