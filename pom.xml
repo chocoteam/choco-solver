@@ -61,6 +61,11 @@
             <version>2.0.12</version>
             <scope>compile</scope>
         </dependency>
+        <!--<dependency>
+            <groupId>uk.com.robust-it</groupId>
+            <artifactId>cloning</artifactId>
+            <version>1.7.5-SNAPSHOT</version>
+        </dependency>-->
     </dependencies>
     <repositories>
         <repository>

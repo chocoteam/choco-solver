@@ -26,9 +26,19 @@
  */
 package solver.propagation;
 
+
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 import solver.ICause;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.strategy.Group;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
@@ -43,7 +53,13 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected final ContradictionException exception;
 
-    protected Group master;
+    protected PropagationStrategy propagationStrategy;
+
+    protected TIntHashSet watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
+
+    protected int pivot;
+
+    protected TIntObjectHashMap map;
 
     protected boolean initialized = false;
 
@@ -52,23 +68,110 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void set(Group group) {
-        this.master = group;
+    public boolean initialized() {
+        return initialized;
     }
 
     @Override
-    public Group getGroup() {
-        return master;
+    public boolean hasStrategy() {
+        return propagationStrategy != null;
     }
+
+    @Override
+    public void set(PropagationStrategy propagationStrategy) {
+        this.propagationStrategy = propagationStrategy;
+    }
+
+    public void init(Solver solver) {
+        if (!initialized) {
+            pivot = solver.getNbIdElt();
+            Constraint[] constraints = solver.getCstrs();
+            // 1. water mark every couple variable-propagator of the solver
+            waterMark(constraints);
+            // 2. add default strategy, default group => arc and unary in a queue
+            propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
+            // 3. build groups based on the strategy defined
+            propagationStrategy.populate(this, solver);
+            if (watermarks.size() > 0) {
+                throw new RuntimeException("default strategy has encountered a problem :: "+watermarks);
+            }
+            // 4. remove default if empty
+            ///cpru a faire
+            //Then, schedule constraints for initial propagation
+            for (int c = 0; c < constraints.length; c++) {
+                Propagator[] propagators = constraints[c].propagators;
+                for (int p = 0; p < propagators.length; p++) {
+                    propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
+                }
+            }
+
+        }
+        initialized = true;
+    }
+
+    private void waterMark(Constraint[] constraints) {
+        long nbe2 = pivot * pivot;
+        if (nbe2 > Integer.MAX_VALUE) {
+            throw new RuntimeException("too much elements in the solver");
+        }
+        watermarks = new TIntHashSet();
+        map = new TIntObjectHashMap(pivot);
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].propagators;
+            for (int p = 0; p < propagators.length; p++) {
+                Propagator propagator = propagators[p];
+                int idP = propagator.getId();
+                watermarks.add(idP);
+                map.putIfAbsent(idP, propagator);
+                int nbV = propagator.getNbVars();
+                for (int v = 0; v < nbV; v++) {
+                    Variable variable = propagator.getVar(v);
+                    int idV = variable.getId();
+                    map.putIfAbsent(idV, variable);
+                    int id = _id(idV, idP);
+                    //System.out.printf("%d - %d => %s\n", idV, idP, id);
+                    if (watermarks.contains(id)) {
+                        throw new RuntimeException("error in computing id for couple (V,P)");
+                    }
+                    watermarks.add(id);
+                }
+            }
+        }
+    }
+
+    private int _id(int id1, int id2) {
+        if (id1 < id2) {
+            return id1 * pivot + id2;
+        } else {
+            return id2 * pivot + id1;
+        }
+    }
+
+    public void clearWatermark(int id1, int id2) {
+        watermarks.remove(_id(id1, id2));
+    }
+
+    public boolean isMarked(int id1, int id2) {
+        return watermarks.contains(_id(id1, id2));
+    }
+
+    protected PropagationStrategy buildDefault(Solver solver) {
+        Constraint[] cstrs = solver.getCstrs();
+        Primitive arcs = Primitive.arcs(cstrs);
+        Primitive coarses = Primitive.unary(cstrs);
+        return Queue.build(arcs, coarses).pickOne();
+    }
+
 
     @Override
     public void propagate() throws ContradictionException {
-        master.execute();
+        propagationStrategy.execute();
+        assert propagationStrategy.isEmpty();
     }
 
     @Override
     public void flush() {
-        master.flush();
+        propagationStrategy.flush();
     }
 
     @Override
@@ -82,7 +185,9 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void deleteGroups() {
+    public void clear() {
+        propagationStrategy = null;
+        initialized = false;
     }
 
     //    /**

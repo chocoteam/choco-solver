@@ -27,8 +27,9 @@
 package solver.propagation;
 
 import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.strategy.Group;
+import solver.propagation.generator.PropagationStrategy;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -43,21 +44,37 @@ import java.io.Serializable;
 public interface IPropagationEngine extends Serializable {
 
     /**
+     * Return <code>true</code> if a strategy has been defined and attached to <code>this</code>.
+     *
+     * @return <code>true</code> if a strategy has been defined and attached to <code>this</code>
+     */
+    boolean hasStrategy();
+
+    /**
+     * Is <code>this</code> initialized ?
+     *
+     * @return <code>true</code> if <code>this</code> is initialized
+     */
+    boolean initialized();
+
+    /**
+     * Initializes <code>this</code>
+     *
+     * @param solver the solver
+     */
+    void init(Solver solver);
+
+    /**
      * Attach a strategy to <code>this</code>.
      * Override previously defined one.
      *
-     * @param pStrategy
+     * @param propagationStrategy a group
      */
-    void set(Group pStrategy);
-
-    /**
-     * Return the current propagtion strategy.
-     * @return current propagation strategy
-     */
-    Group getGroup();
+    void set(PropagationStrategy propagationStrategy);
 
     /**
      * Reach a fixpoint
+     *
      * @throws ContradictionException if a contradiction occurrs
      */
     void propagate() throws ContradictionException;
@@ -73,6 +90,6 @@ public interface IPropagationEngine extends Serializable {
 
     //TODO: to remove
 
-    void deleteGroups();
+    void clear();
 
 }

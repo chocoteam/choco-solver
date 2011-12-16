@@ -30,6 +30,7 @@ package solver.variables;
 import choco.kernel.common.util.objects.IList;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
+import solver.Identity;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -45,7 +46,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends Serializable {
+public interface Variable<D extends IDelta> extends Identity, Serializable {
 
 
     public final static int INTEGER = 0;
@@ -79,6 +80,19 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @param constraint a constraint
      */
     void declareIn(Constraint constraint);
+
+    /**
+     * Return the arrau of propagators this
+     * @return
+     */
+    Propagator[] getPropagators();
+
+    /**
+     * Return the index of <code>this</code> in <code>propagator</code>
+     * @param propagator a propagator
+     * @return index of this in propagator
+     */
+    int getIndexInPropagator(Propagator propagator);
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -139,7 +153,7 @@ public interface Variable<D extends IDelta> extends Serializable {
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
      */
-    void updatePropagationConditions(Propagator propagator, int idxInProp);
+    void attach(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
@@ -154,20 +168,6 @@ public interface Variable<D extends IDelta> extends Serializable {
 
 
     void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;
-
-    /**
-     * The solver attributes a unique ID to the variable (used as hashCode)
-     *
-     * @param id unique ID
-     */
-    void setUniqueID(int id);
-
-    /**
-     * Returns the ID of the variable
-     *
-     * @return the ID
-     */
-    int getUniqueID();
 
     /**
      * Throws a contradiction exception based on <cause, message>

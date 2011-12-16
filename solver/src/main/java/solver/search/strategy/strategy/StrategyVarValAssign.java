@@ -103,7 +103,7 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         }
         this.firstSelection = new TLongObjectHashMap<IStateBool>(vars.length);
         for (int i = 0; i < vars.length; i++) {
-            firstSelection.put(vars[i].getUniqueID(), env.makeBool(false));
+            firstSelection.put(vars[i].getId(), env.makeBool(false));
         }
         this.assignment = assignment;
         decisionPool = new PoolManager<FastDecision>();
@@ -122,9 +122,9 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         if (varColl.hasNext()) {
             IntVar var = varColl.next();
             // test on first selection of the variable
-            if (!firstSelection.get(var.getUniqueID()).get()) {
+            if (!firstSelection.get(var.getId()).get()) {
                 var.getHeuristicVal().update(Action.first_selection);
-                firstSelection.get(var.getUniqueID()).set(true);
+                firstSelection.get(var.getId()).set(true);
             }
             var.getHeuristicVal().update(Action.open_node);
             if (var.getHeuristicVal().hasNext()) {

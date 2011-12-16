@@ -66,7 +66,7 @@ public class ConstantView implements IntVar {
     protected final IIntDomain domain;
     protected final Solver solver;
 
-    protected int uniqueID;
+    protected int ID;
 
     protected IStateBool empty;
 
@@ -80,6 +80,7 @@ public class ConstantView implements IntVar {
         this.constante = constante;
         this.domain = new CsteDomain(constante);
         this.empty = solver.getEnvironment().makeBool(false);
+        ID = solver.nextId();
     }
 
     public Constraint[] getConstraints() {
@@ -89,12 +90,19 @@ public class ConstantView implements IntVar {
     public void declareIn(Constraint constraint) {
     }
 
-    public int getUniqueID() {
-        return uniqueID;
+    @Override
+    public Propagator[] getPropagators() {
+        return new Propagator[0];
     }
 
-    public void setUniqueID(int uniqueID) {
-        this.uniqueID = uniqueID;
+    @Override
+    public int getIndexInPropagator(Propagator propagator) {
+        return 0;
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     @Override
@@ -279,7 +287,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
+    public void attach(Propagator propagator, int idxInProp) {
     }
 
     @Override

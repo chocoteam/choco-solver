@@ -34,6 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
@@ -72,9 +73,11 @@ public class PropReified extends Propagator<Variable> {
         lastActiveR = environment.makeInt(right.length);
 
         for (int i = 0; i < left.length; i++) {
+            left[i].addRecorder(new CoarseEventRecorder(left[i], solver));
             left[i].setActive();
         }
         for (int i = 0; i < right.length; i++) {
+            right[i].addRecorder(new CoarseEventRecorder(right[i], solver));
             right[i].setActive();
         }
     }

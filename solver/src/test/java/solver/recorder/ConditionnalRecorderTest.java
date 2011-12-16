@@ -28,14 +28,16 @@
 package solver.recorder;
 
 import choco.kernel.common.util.tools.MathUtils;
-import choco.kernel.memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.Propagator;
+import solver.propagation.generator.Flatten;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.generator.Queue;
 import solver.recorders.conditions.AbstractCondition;
 import solver.recorders.conditions.CompletlyInstantiated;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
@@ -55,40 +57,6 @@ import java.util.Random;
  * @since 22/03/11
  */
 public class ConditionnalRecorderTest {
-
-    private static void castRecords(Constraint[] constraints, Solver solver, IEnvironment environment, int threshold) {
-        try {
-            Field fineER = Propagator.class.getDeclaredField("fineER");
-            Field f_vars = Propagator.class.getDeclaredField("vars");
-
-            fineER.setAccessible(true);
-            f_vars.setAccessible(true);
-
-            for (Constraint cstr : constraints) {
-                Propagator[] propagators = cstr.propagators;
-                for (Propagator prop : propagators) {
-                    IntVar[] ivars = (IntVar[]) f_vars.get(prop);
-                    AbstractCondition cond = new CompletlyInstantiated(environment, threshold);
-                    ArcEventRecorderWithCondition[] records = new ArcEventRecorderWithCondition[ivars.length];
-                    for (int i = 0; i < ivars.length; i++) {
-                        ivars[i].updatePropagationConditions(prop, i);
-                        records[i] = new ArcEventRecorderWithCondition(ivars[i], prop, i, cond, solver);
-                        prop.addRecorder(records[i]);
-                        ivars[i].addMonitor(records[i]);
-                        cond.linkRecorder(records[i]);
-                    }
-                    fineER.set(prop, records);
-                }
-            }
-
-            fineER.setAccessible(false);
-            f_vars.setAccessible(false);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-    }
 
     public final void execute(Solver solver) {
         solver.findAllSolutions();
@@ -110,7 +78,10 @@ public class ConditionnalRecorderTest {
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
         IntVar[] vars = new IntVar[]{x, y, z};
 
-        castRecords(cstrs, solver, solver.getEnvironment(), 2);
+        //castRecords(cstrs, solver, solver.getEnvironment(), 2);
+        AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), 2);
+        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+        solver.set(q);
 
         solver.post(cstrs);
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
@@ -131,7 +102,10 @@ public class ConditionnalRecorderTest {
 
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
 
-            castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
+            //castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
+            AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), n/2);
+            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+            solver.set(q);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));
