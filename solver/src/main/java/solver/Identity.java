@@ -24,30 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver;
 
-package solver.propagation.comparators.predicate;
+/**
+ * An interface to provide an identity to object, using a positive int to caracterize the object.
+ * It allows definition of , 2 147 483 647 different objects.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 14/12/11
+ */
+public interface Identity {
 
-import solver.recorders.IEventRecorder;
-
-import java.io.Serializable;
-
-public interface Predicate<E extends IEventRecorder> extends Serializable {
-
-    /**
-     * Evaluate a request regarding <code>this</code>
-     *
-     * @param evtrec an event recorder
-     * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
-     * false otherwise
-     */
-    public boolean eval(E evtrec);
-
-    /**
-     * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
-     * <p/>This allows using cached structures.
-     *
-     * @param all arrays of records
-     * @return list of indices, wihtin <code>all</code>, of records corresponding to <code>this</code>, unsorted.
-     */
-    public int[] extract(IEventRecorder[] all);
+    int getId();
 }

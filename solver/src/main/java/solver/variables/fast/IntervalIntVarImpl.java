@@ -431,8 +431,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             //TODO:  LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
             delta = new Delta();

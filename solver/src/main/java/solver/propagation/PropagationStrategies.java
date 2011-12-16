@@ -28,17 +28,7 @@ package solver.propagation;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.propagation.strategy.Group;
-import solver.propagation.strategy.QueueGroup;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
-import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.recorders.fine.ArcEventRecorder;
-import solver.variables.Variable;
-
-import java.util.ArrayList;
-import java.util.List;
+import solver.propagation.generator.*;
 
 /**
  * <br/>
@@ -50,78 +40,23 @@ public enum PropagationStrategies {
 
     ONE_QUEUE_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
-        public Group make(Solver solver) {
-            List<ISchedulable> all = new ArrayList<ISchedulable>();
-            all.addAll(makeArcs(solver));
-            int fines = all.size();
-            all.addAll(makeCoarses(solver));
-
-            Group queue = new QueueGroup(Group.Iteration.CLEAR_OUT,
-                    all.toArray(new ISchedulable[all.size()]));
-            for (int i = fines; i < all.size(); i++) {
-                queue.schedule(all.get(i));
-            }
-            return queue;
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Primitive arcs = Primitive.arcs(constraints);
+            Primitive coarses = Primitive.unary(constraints);
+            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
         }
     },
     TWO_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
-        public Group make(Solver solver) {
-            List<AbstractFineEventRecorder> ars = makeArcs(solver);
-            List<AbstractCoarseEventRecorder> coarses = makeCoarses(solver);
-
-            final ISchedulable q1 = new QueueGroup(Group.Iteration.CLEAR_OUT,
-                    ars.toArray(new ISchedulable[ars.size()]));
-            final ISchedulable q2 = new QueueGroup(Group.Iteration.PICK_ONE,
-                    coarses.toArray(new ISchedulable[coarses.size()]));
-
-            Group queues = new QueueGroup(
-                    Group.Iteration.CLEAR_OUT,
-                    new ArrayList<ISchedulable>() {{
-                        add(q1);
-                        add(q2);
-                    }}.toArray(new ISchedulable[2]));
-            for (int i = 0; i < coarses.size(); i++) {
-                queues.schedule(coarses.get(i));
-            }
-
-            return queues;
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Queue arcs = Queue.build(Primitive.arcs(constraints));
+            Queue coarses = Queue.build(Primitive.unary(constraints));
+            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     };
 
-    public abstract Group make(Solver solver);
-
-    public static List<AbstractFineEventRecorder> makeArcs(Solver solver) {
-        Constraint[] constraints = solver.getCstrs();
-        List<AbstractFineEventRecorder> fers = new ArrayList<AbstractFineEventRecorder>();
-
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].propagators;
-            for (int p = 0; p < propagators.length; p++) {
-                int nbV = propagators[p].getNbVars();
-                for (int v = 0; v < nbV; v++) {
-                    Variable variable = propagators[p].getVar(v);
-                    AbstractFineEventRecorder fer = new ArcEventRecorder(variable, propagators[p], v, solver);
-                    propagators[p].addRecorder(fer);
-                    variable.addMonitor(fer);
-                    fers.add(fer);
-                }
-            }
-        }
-        return fers;
-    }
-
-    public static List<AbstractCoarseEventRecorder> makeCoarses(Solver solver) {
-        Constraint[] constraints = solver.getCstrs();
-        List<AbstractCoarseEventRecorder> cers = new ArrayList<AbstractCoarseEventRecorder>();
-
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].propagators;
-            for (int p = 0; p < propagators.length; p++) {
-                CoarseEventRecorder cer = (CoarseEventRecorder) propagators[p].getRecorder(-1);
-                cers.add(cer);
-            }
-        }
-        return cers;
-    }
+    public abstract PropagationStrategy make(Solver solver);
 }

@@ -73,8 +73,8 @@ public abstract class AbstractViewWithDomain extends AbstractView {
 
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             delta = new Delta();
             reactOnRemoval = true;
