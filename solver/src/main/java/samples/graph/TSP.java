@@ -39,6 +39,9 @@ import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
+import solver.propagation.comparators.IncrPriorityP;
+import solver.propagation.comparators.predicate.Predicates;
+import solver.propagation.strategy.Group;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -52,6 +55,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.io.*;
+import java.security.Policy;
 import java.util.BitSet;
 
 /**
@@ -63,7 +67,7 @@ public class TSP extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 1800000;
+	private static final long TIMELIMIT = 10000;
 	private static String outFile = "/Users/jfages07/Documents/code/results/results_atsp";
 	static int seed = 0;
 	// instance
@@ -132,27 +136,28 @@ public class TSP extends AbstractProblem{
 		gc.addAdHocProp(new PropPathNoCycle(graph,gc,solver));
 		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
 		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
-		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,false));
+		gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
 		gc.addAdHocProp(new PropIntVarChanneling(intVars,graph,gc,solver));
 
 		// ID anti arborescence?
 
 		// MST-based HK
-		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
-		gc.addAdHocProp(propHK_mst);
-		// RG
-		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
-		gc.addAdHocProp(RP);
-		IStateInt nR = RP.getNSCC();
-		IStateInt[] sccOf = RP.getSCCOF();
-		INeighbors[] outArcs = RP.getOutArcs();
+//		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
+//		gc.addAdHocProp(propHK_mst);
+//		// RG
+//		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+//		gc.addAdHocProp(RP);
+//		IStateInt nR = RP.getNSCC();
+//		IStateInt[] sccOf = RP.getSCCOF();
+//		INeighbors[] outArcs = RP.getOutArcs();
 //		PropBST BST = new PropBST(graph, totalCost, distanceMatrix, gc, solver);
 //		gc.addAdHocProp(BST);
 //		BST.setRGStructure(nR, sccOf, outArcs);
 
 		// BST-based HK
-		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
-		gc.addAdHocProp(propHK_bst);
+//		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
+//		gc.addAdHocProp(propHK_bst);
 
 		Constraint[] cstrs = new Constraint[]{gc, new AllDifferent(intVars,solver,AllDifferent.Type.AC)};
 		solver.post(cstrs);
@@ -274,7 +279,8 @@ public class TSP extends AbstractProblem{
 //		AbstractStrategy strategy = StrategyFactory.graphLexico(graph);
 		solver.set(strategy);
         //TODO: cpru > refactor prop engine
-//		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
+//		solver.getEngine().set(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
+		
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}

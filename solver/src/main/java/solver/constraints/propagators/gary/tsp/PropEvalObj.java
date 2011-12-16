@@ -170,9 +170,8 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
         INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
         int min = succ.getFirstElement();
         if (min == -1) {
-            System.out.println(g.getEnvelopGraph());
-            System.out.println(i);
-            System.exit(0);
+//			throw new UnsupportedOperationException("n'a pas fait le point fixe");
+			contradiction(g,"");
         }
         int minC = distMatrix[i][min];
         for (int s = min; s >= 0; s = succ.getNextElement()) {
