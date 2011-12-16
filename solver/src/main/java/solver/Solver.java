@@ -43,7 +43,7 @@ import solver.objective.MinObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.propagation.strategy.Group;
+import solver.propagation.generator.PropagationStrategy;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
@@ -135,6 +135,7 @@ public class Solver implements Serializable {
 
     protected long creationTime;
 
+    protected int id = 1;
 
     public Solver() {
         this(Reflection.getCallerClass(2).getSimpleName());
@@ -188,10 +189,10 @@ public class Solver implements Serializable {
      * Set a propagation strategy to the propagation engine attached in <code>this</code>.
      * It overrides the previously defined one, if any.
      *
-     * @param group a propagation strategy
+     * @param propagationStrategy a propagation strategy
      */
-    public void set(Group group) {
-        this.engine.set(group);
+    public void set(PropagationStrategy propagationStrategy) {
+        this.engine.set(propagationStrategy);
     }
 
     /**
@@ -207,7 +208,6 @@ public class Solver implements Serializable {
             vars = new Variable[tmp.length * 2];
             System.arraycopy(tmp, 0, vars, 0, vIdx);
         }
-        variable.setUniqueID(vIdx);
         vars[vIdx++] = variable;
     }
 
@@ -346,7 +346,7 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
-        if (engine.getGroup() == null) {
+        if (!engine.hasStrategy()) {
             LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
             set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
         }
@@ -360,9 +360,12 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (engine.getGroup() == null) {
+        if (!engine.hasStrategy()) {
             LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
             set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
+        }
+        if (!engine.initialized()) {
+            engine.init(this);
         }
         engine.propagate();
     }
@@ -485,6 +488,14 @@ public class Solver implements Serializable {
             st.append(cstrs[c].toString()).append('\n');
         }
         return st.toString();
+    }
+
+    public int getNbIdElt() {
+        return id;
+    }
+
+    public int nextId() {
+        return id++;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

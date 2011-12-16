@@ -64,6 +64,8 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
         this.propagator = propagator;
         this.idxVinP = idxVinP;
         this.deltamon = variable.getDelta().getMonitor();
+        variable.addMonitor(this);
+        propagator.addRecorder(this);
     }
 
     @Override
@@ -94,6 +96,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public boolean execute() throws ContradictionException {
         if (evtmask > 0) {
+//            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
             int evtmask_ = evtmask;
             // for concurrent modification..
             deltamon.freeze();
@@ -115,6 +118,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+//            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
             // 1. clear the structure if necessary
             if (LAZY) {
                 if (timestamp - AbstractSearchLoop.timeStamp != 0) {

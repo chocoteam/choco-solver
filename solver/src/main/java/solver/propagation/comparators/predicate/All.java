@@ -36,9 +36,11 @@ import solver.recorders.IEventRecorder;
  */
 public class All implements Predicate {
 
+    public static All singleton = new All();
+
     int[] cached;
 
-    All() {
+    protected All() {
     }
 
     @Override

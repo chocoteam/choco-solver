@@ -35,6 +35,7 @@ import com.sun.istack.internal.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
+import solver.Identity;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -42,7 +43,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.IEventRecorder;
-import solver.recorders.coarse.CoarseEventRecorder;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -82,12 +83,13 @@ import java.io.Serializable;
  * @see solver.constraints.Constraint
  * @since 0.01
  */
-public abstract class Propagator<V extends Variable> implements Serializable, ICause {
+public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity {
 
     private static final long serialVersionUID = 2L;
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
 
+    private final int ID; // unique id of this
     /**
      * List of <code>variable</code> objects
      */
@@ -100,7 +102,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int lastER;
 
-    protected CoarseEventRecorder coarseER;
+    protected AbstractCoarseEventRecorder coarseER;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -141,10 +143,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        this.coarseER = new CoarseEventRecorder(this, solver);
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
-            vars[v].updatePropagationConditions(this, v);
+            vars[v].attach(this, v);
             if (!vars[v].instantiated()) {
                 nbNi++;
             }
@@ -153,6 +154,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         fails = 0;
         fineER = new AbstractFineEventRecorder[vars.length];
         lastER = 0;
+        ID = solver.nextId();
+    }
+
+    @Override
+    public int getId() {
+        return ID;
     }
 
     /**
@@ -273,13 +280,17 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         throw new IndexOutOfBoundsException();
     }
 
-    public void addRecorder(AbstractFineEventRecorder recorder) {
-        if (lastER >= fineER.length) {
-            AbstractFineEventRecorder[] tmp = fineER;
-            fineER = new AbstractFineEventRecorder[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, fineER, 0, tmp.length);
+    public void addRecorder(IEventRecorder recorder) {
+        if (recorder instanceof AbstractFineEventRecorder) {
+            if (lastER >= fineER.length) {
+                AbstractFineEventRecorder[] tmp = fineER;
+                fineER = new AbstractFineEventRecorder[tmp.length * 3 / 2 + 1];
+                System.arraycopy(tmp, 0, fineER, 0, tmp.length);
+            }
+            fineER[lastER++] = (AbstractFineEventRecorder) recorder;
+        } else {
+            coarseER = (AbstractCoarseEventRecorder) recorder;
         }
-        fineER[lastER++] = recorder;
     }
 
 //    /**
@@ -301,7 +312,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return Constraint
      */
     @Override
-    public final Constraint getConstraint() {
+    public final Constraint getConstraint
+    () {
         return constraint;
     }
 
