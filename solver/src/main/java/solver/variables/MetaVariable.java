@@ -57,8 +57,8 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVaria
         return true;
     }
 
-    public void updatePropagationConditions(Propagator observer, int idxInProp) {
-        modificationEvents |= observer.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

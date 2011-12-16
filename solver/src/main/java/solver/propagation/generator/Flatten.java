@@ -24,30 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator;
 
-package solver.propagation.comparators.predicate;
 
+import solver.Solver;
+import solver.propagation.ISchedulable;
+import solver.propagation.PropagationEngine;
 import solver.recorders.IEventRecorder;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public interface Predicate<E extends IEventRecorder> extends Serializable {
+/**
+ * A generator specific that flattens elements of n generators
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 15/12/11
+ */
+public class Flatten<E extends ISchedulable> extends Generator<E> {
 
-    /**
-     * Evaluate a request regarding <code>this</code>
-     *
-     * @param evtrec an event recorder
-     * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
-     * false otherwise
-     */
-    public boolean eval(E evtrec);
+    private Flatten(List<Generator> generators) {
+        super(generators);
+    }
 
-    /**
-     * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
-     * <p/>This allows using cached structures.
-     *
-     * @param all arrays of records
-     * @return list of indices, wihtin <code>all</code>, of records corresponding to <code>this</code>, unsorted.
-     */
-    public int[] extract(IEventRecorder[] all);
+    public static Flatten build(Generator... generators) {
+        if (generators.length == 0) {
+            throw new RuntimeException("Sort::Empty generators array");
+        }
+        return new Flatten(Arrays.asList(generators));
+    }
+
+    @Override
+    public List<E> populate(PropagationEngine propagationEngine, Solver solver) {
+        List<E> elements = new ArrayList<E>();
+        for (int g = 0; g < generators.size(); g++) {
+            Generator gen = generators.get(g);
+            elements.addAll(gen.populate(propagationEngine, solver));
+        }
+        return elements;
+    }
 }

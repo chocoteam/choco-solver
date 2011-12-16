@@ -29,10 +29,12 @@ package solver.variables;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
+import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
 import solver.variables.view.IView;
@@ -51,7 +53,6 @@ import java.util.Arrays;
 public abstract class AbstractVariable<V extends Variable> implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
     public static final String
             MSG_REMOVE = "remove last value";
     public static final String MSG_EMPTY = "empty domain";
@@ -59,24 +60,20 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     public static final String MSG_UNKNOWN = "unknown value";
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
-
     protected static final String NO_NAME = "";
 
-    /**
-     * Reference to the solver containing this variable.
-     */
-    protected final Solver solver;
+
+    private final int ID; // unique id of this
+    protected final Solver solver; // Reference to the solver containing this variable.
 
     protected Constraint[] constraints = new Constraint[8];
     protected int cLast = 0;
 
     protected final String name;
 
-    /**
-     * List of variable monitors
-     */
-    protected IList<V, IVariableMonitor<V>> records;
+    protected IList<V, IVariableMonitor<V>> records; // List of variable monitors
 
+    protected TObjectIntHashMap<Propagator> propagators;
 
     protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
@@ -100,6 +97,12 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         this.name = name;
         this.solver = solver;
         views = new IView[2];
+        propagators = new TObjectIntHashMap<Propagator>();
+        ID = solver.nextId();
+    }
+
+    public int getId() {
+        return ID;
     }
 
     protected void makeList(V variable) {
@@ -112,7 +115,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
      * @return array of constraints
      */
     public Constraint[] getConstraints() {
-        if(cLast < constraints.length){
+        if (cLast < constraints.length) {
             constraints = Arrays.copyOfRange(constraints, 0, cLast);
         }
         return constraints;
@@ -132,12 +135,25 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         constraints[cLast++] = constraint;
     }
 
-    public int getUniqueID() {
+    public int getID() {
         return uniqueID;
     }
 
-    public void setUniqueID(int uniqueID) {
+    public void setID(int uniqueID) {
         this.uniqueID = uniqueID;
+    }
+
+    public void attach(Propagator propagator, int idxInProp) {
+        propagators.putIfAbsent(propagator, idxInProp);
+        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    }
+
+    public Propagator[] getPropagators() {
+        return propagators.keys(new Propagator[propagators.size()]);
+    }
+
+    public int getIndexInPropagator(Propagator propagator) {
+        return propagators.get(propagator);
     }
 
     public void activate(IVariableMonitor monitor) {

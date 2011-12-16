@@ -110,11 +110,11 @@ public abstract class AbstractProblem {
             case DEFAULT:
                 break;
             case SHUFFLE:
-                engine.deleteGroups();
+                engine.clear();
 //                solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), new Shuffle(seed), Policy.FIXPOINT));
                 break;
             default:
-                engine.deleteGroups();
+                engine.clear();
                 policy.defineIn(solver);
                 break;
         }

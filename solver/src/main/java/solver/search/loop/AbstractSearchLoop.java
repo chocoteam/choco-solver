@@ -262,6 +262,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
+        propEngine.init(solver);
         this.nextState = INITIAL_PROPAGATION;
     }
 

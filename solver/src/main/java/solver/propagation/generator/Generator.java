@@ -24,30 +24,45 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator;
 
-package solver.propagation.comparators.predicate;
+import solver.Solver;
+import solver.propagation.ISchedulable;
+import solver.propagation.PropagationEngine;
 
-import solver.recorders.IEventRecorder;
+import java.util.Collections;
+import java.util.List;
 
-import java.io.Serializable;
+/**
+ * An abstract class to help defining a propagation strategy,
+ * based on the DSL.
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 15/12/11
+ */
+public abstract class Generator<S extends ISchedulable> {
 
-public interface Predicate<E extends IEventRecorder> extends Serializable {
+    protected final List<? extends Generator> generators;
+
+    public Generator() {
+        this.generators = Collections.singletonList(this);
+    }
+
+    public <G extends Generator> Generator(List<G> generators) {
+        this.generators = generators;
+    }
+
+    public List<? extends Generator> getGenerators() {
+        return generators;
+    }
 
     /**
-     * Evaluate a request regarding <code>this</code>
+     * Create explicitly elements
      *
-     * @param evtrec an event recorder
-     * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
-     * false otherwise
+     * @param propagationEngine a propagation engine
+     * @param solver            a solver
      */
-    public boolean eval(E evtrec);
+    public abstract <E extends ISchedulable> List<E> populate(PropagationEngine propagationEngine, Solver solver);
 
-    /**
-     * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
-     * <p/>This allows using cached structures.
-     *
-     * @param all arrays of records
-     * @return list of indices, wihtin <code>all</code>, of records corresponding to <code>this</code>, unsorted.
-     */
-    public int[] extract(IEventRecorder[] all);
 }

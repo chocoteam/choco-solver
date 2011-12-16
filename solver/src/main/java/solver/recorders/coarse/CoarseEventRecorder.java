@@ -50,6 +50,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
         super();
         this.propagator = propagator;
         this.evtmask = EventType.FULL_PROPAGATION.mask; // initialize with full propagation event
+        propagator.addRecorder(this);
     }
 
     @Override
@@ -59,6 +60,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
     public void update(EventType e) {
         if ((e.mask & propagator.getPropagationConditions()) != 0) {
+//            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
             // 1. clear the structure if necessar
             if (LAZY) {
                 if (timestamp - AbstractSearchLoop.timeStamp != 0) {
@@ -86,6 +88,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             propagator.setActive();
         }
         if (evtmask > 0) {
+//            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
             propagator.coarseERcalls++;
             int _evt = evtmask;
             evtmask = 0;

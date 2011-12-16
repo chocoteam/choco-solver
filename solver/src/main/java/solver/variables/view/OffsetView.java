@@ -68,10 +68,10 @@ public final class OffsetView extends View<IntVar> {
 
 
     @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.updatePropagationConditions(propagator, idxInProp); // to ensure var has a delta
+            var.attach(propagator, idxInProp); // to ensure var has a delta
             delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
 
                 @Override

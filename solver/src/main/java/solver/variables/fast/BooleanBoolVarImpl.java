@@ -365,8 +365,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             delta = new OneValueDelta();
             reactOnRemoval = true;

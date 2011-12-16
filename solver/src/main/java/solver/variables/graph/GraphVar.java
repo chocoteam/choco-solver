@@ -205,8 +205,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 
     @Override
-    public void updatePropagationConditions(Propagator propagator, int idxInProp) {
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+    public void attach(Propagator propagator, int idxInProp) {
+        super.attach(propagator, idxInProp);
         if (!reactOnModification) {
             reactOnModification = true;
             delta = new GraphDelta();

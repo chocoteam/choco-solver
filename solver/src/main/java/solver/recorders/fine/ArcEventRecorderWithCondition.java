@@ -30,7 +30,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.recorders.conditions.AbstractCondition;
+import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -47,12 +47,13 @@ import solver.variables.Variable;
  */
 public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
 
-    final AbstractCondition condition; // condition to run the filtering algorithm of the propagator
+    final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
-                                         AbstractCondition condition, Solver solver) {
+                                         ICondition condition, Solver solver) {
         super(variable, propagator, idxInProp, solver);
         this.condition = condition;
+        condition.linkRecorder(this);
     }
 
     @Override
