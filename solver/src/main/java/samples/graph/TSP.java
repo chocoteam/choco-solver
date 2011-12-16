@@ -28,7 +28,6 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.IStateInt;
 import samples.AbstractProblem;
 import solver.Cause;
 import solver.Solver;
@@ -36,9 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
 import solver.constraints.propagators.gary.tsp.*;
-import solver.exception.ContradictionException;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -52,7 +49,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 import java.io.*;
-import java.security.Policy;
 import java.util.BitSet;
 
 /**
@@ -277,6 +273,9 @@ public class TSP extends AbstractProblem{
 		solver.set(strategy);
         //TODO: cpru > refactor prop engine
 //		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
+
+        //solver.set(Sort.build(Primitive.arcs(graph.getConstraints())).clearOut());
+
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}
