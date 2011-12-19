@@ -112,7 +112,9 @@ public final class AbsView extends View<IntVar> {
         }
         boolean done = var.removeValue(-value, this, informCause);
         done |= var.removeValue(value, this, informCause);
-
+        if(instantiated()){
+            evt = EventType.INSTANTIATE;
+        }
         if (done) {
             notifyMonitors(evt, cause);
         }

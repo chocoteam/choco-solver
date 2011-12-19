@@ -337,14 +337,15 @@ public final class BitsetXYSumView extends AbstractSumView {
             StringBuilder s = new StringBuilder(20);
             s.append('{').append(getLB());
             int nb = 5;
-            for (int i = nextValue(getLB()); i < Integer.MAX_VALUE && nb > 0; i = nextValue(i)) {
+            int i = nextValue(getLB());
+            for (; i < Integer.MAX_VALUE && nb > 0; i = nextValue(i)) {
                 s.append(',').append(i);
                 nb--;
             }
-            if (nb == 0) {
-                s.append("...,").append(this.getUB());
+            if (nb == 0 && i < getUB()) {
+                s.append("...,");
             }
-            s.append('}');
+            s.append(this.getUB()).append('}');
 
             return String.format("(%s + %s) = %s", A, B, s.toString());
         }
