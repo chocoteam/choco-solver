@@ -118,6 +118,9 @@ public final class SqrView extends View<IntVar> {
             }
             boolean done = var.removeValue(-rootV, this, informCause);
             done |= var.removeValue(rootV, this, informCause);
+            if (instantiated()) {
+                evt = EventType.INSTANTIATE;
+            }
             if (done) {
                 notifyMonitors(evt, cause);
             }
