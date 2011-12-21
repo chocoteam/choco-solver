@@ -124,7 +124,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.strengthened_mask + EventType.ENFORCEARC.strengthened_mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 
 	@Override

@@ -28,6 +28,7 @@
 package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.IStateInt;
 import samples.AbstractProblem;
 import solver.Cause;
 import solver.Solver;
@@ -35,7 +36,11 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -75,6 +80,7 @@ public class TSP extends AbstractProblem{
 	private Boolean status;
 	static boolean randomHeur = false;
 	static String LastHope="";
+	private GraphConstraint gc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -94,65 +100,116 @@ public class TSP extends AbstractProblem{
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void buildModel() {
-		// first solution
-		getGreedyFirstSolution();
-		greedyUB = bestSol;//getGreedyBound();
-		System.out.println("\nBOUND : "+greedyUB+"\n");
-		//permutNodes();// relabeling of nodes to optimize boundAllDiff
-		// create model
-		IntVar[] intVars = new IntVar[n];
-		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
-		totalCost = VariableFactory.enumerated("total cost ", 0, greedyUB, solver);
-		try{
-			intVars[n-1] = VariableFactory.enumerated("vlast", n, n, solver);
-			for(int i=0; i<n-1; i++){
-				intVars[i] = VariableFactory.bounded("v" + i, 1, n - 1, solver);
-				graph.getKernelGraph().activateNode(i);
-				for(int j=0; j<n ;j++){
-					if(distanceMatrix[i][j]!=noVal){
-						graph.getEnvelopGraph().addArc(i,j);
-					}else{
-						intVars[i].removeValue(j,Cause.Null,false);
-					}
-				}
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-			System.exit(0);
-		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		// CHECKED
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph,gc,solver));
-		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
-		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
-		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,false));
-		gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
-		gc.addAdHocProp(new PropIntVarChanneling(intVars,graph,gc,solver));
-
-		// ID anti arborescence?
-
-		// MST-based HK
-//		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
-//		gc.addAdHocProp(propHK_mst);
+//	@Override
+//	public void buildModel() {
+//		// first solution
+//		getGreedyFirstSolution();
+//		greedyUB = bestSol;//getGreedyBound();
+//		System.out.println("\nBOUND : "+greedyUB+"\n");
+//		//permutNodes();// relabeling of nodes to optimize boundAllDiff
+//		// create model
+////		IntVar[] intVars = new IntVar[n];
+//		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
+//		totalCost = VariableFactory.enumerated("total cost ", 0, greedyUB, solver);
+//		try{
+////			intVars[n-1] = VariableFactory.bounded("vlast", n, n, solver);
+////			intVars[n-1] = VariableFactory.enumerated("vlast", n, n, solver);
+//			for(int i=0; i<n-1; i++){
+////				intVars[i] = VariableFactory.enumerated("v" + i, 1, n - 1, solver);
+////				intVars[i] = VariableFactory.bounded("v" + i, 1, n - 1, solver);
+//				graph.getKernelGraph().activateNode(i);
+//				for(int j=0; j<n ;j++){
+//					if(distanceMatrix[i][j]!=noVal){
+//						graph.getEnvelopGraph().addArc(i,j);
+//					}else{
+////						intVars[i].removeValue(j,Cause.Null,false);
+//					}
+//				}
+//			}
+//		}catch(Exception e){
+//			e.printStackTrace();
+//			System.exit(0);
+//		}
+//		gc = GraphConstraintFactory.makeConstraint(graph, solver);
+//		// CHECKED
+//		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
+//		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
+//		gc.addAdHocProp(new PropPathNoCycle(graph,gc,solver));
+////		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
+//		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+////		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+////		gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+////		gc.addAdHocProp(new PropIntVarChanneling(intVars,graph,gc,solver));
+//		gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+//
+//		// ID anti arborescence?
+//
+//		// MST-based HK
+////		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
+////		gc.addAdHocProp(propHK_mst);
 //		// RG
 //		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
 //		gc.addAdHocProp(RP);
 //		IStateInt nR = RP.getNSCC();
 //		IStateInt[] sccOf = RP.getSCCOF();
 //		INeighbors[] outArcs = RP.getOutArcs();
-//		PropBST BST = new PropBST(graph, totalCost, distanceMatrix, gc, solver);
-//		gc.addAdHocProp(BST);
-//		BST.setRGStructure(nR, sccOf, outArcs);
-
-		// BST-based HK
+////		PropBST BST = new PropBST(graph, totalCost, distanceMatrix, gc, solver);
+////		gc.addAdHocProp(BST);
+////		BST.setRGStructure(nR, sccOf, outArcs);
+//
+//		// BST-based HK
 //		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
 //		gc.addAdHocProp(propHK_bst);
+//
+////		Constraint[] cstrs = new Constraint[]{gc, new AllDifferent(intVars,solver,AllDifferent.Type.AC)};
+//		Constraint[] cstrs = new Constraint[]{gc};
+//		solver.post(cstrs);
+//	}
 
-		Constraint[] cstrs = new Constraint[]{gc, new AllDifferent(intVars,solver,AllDifferent.Type.AC)};
+	@Override
+	public void buildModel() {
+		// first solution
+		getGreedyFirstSolution();
+		greedyUB = bestSol;
+		// create model
+		graph = new DirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
+		totalCost = VariableFactory.bounded("total cost ", 0, greedyUB, solver);
+		try{
+			for(int i=0; i<n-1; i++){
+				graph.getKernelGraph().activateNode(i);
+				for(int j=0; j<n ;j++){
+					if(distanceMatrix[i][j]!=noVal){
+						graph.getEnvelopGraph().addArc(i,j);
+					}
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();System.exit(0);
+		}
+		gc = GraphConstraintFactory.makeConstraint(graph, solver);
+		// CHECKED
+		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,gc,solver));
+//		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
+		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+//		gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+//		gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+//		gc.addAdHocProp(new PropIntVarChanneling(intVars,graph,gc,solver));
+//		gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+		// MST-based HK
+//		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
+//		gc.addAdHocProp(propHK_mst);
+		// RG
+		PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+		gc.addAdHocProp(RP);
+		IStateInt nR = RP.getNSCC();
+		IStateInt[] sccOf = RP.getSCCOF();
+		INeighbors[] outArcs = RP.getOutArcs();
+		// BST-based HK
+		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
+		gc.addAdHocProp(propHK_bst);
+		Constraint[] cstrs = new Constraint[]{gc};
 		solver.post(cstrs);
 	}
 
@@ -165,8 +222,8 @@ public class TSP extends AbstractProblem{
 	}
 
 	private void permutNodes() {
-//		permutFirstSol();
-		permutMinCost();
+		permutFirstSol();
+//		permutMinCost();
 	}
 
 	private void permutFirstSol() {
@@ -269,12 +326,9 @@ public class TSP extends AbstractProblem{
 		}else{
 			strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
 		}
-//		AbstractStrategy strategy = StrategyFactory.graphLexico(graph);
 		solver.set(strategy);
-        //TODO: cpru > refactor prop engine
-//		solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), IncrPriorityP.get(), Policy.FIXPOINT));
 
-        //solver.set(Sort.build(Primitive.arcs(graph.getConstraints())).clearOut());
+//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
@@ -299,18 +353,20 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		clearFile(outFile);
-		clearFile("/Users/jfages07/Documents/GOD_EXISTS");
-		writeTextInto("instance;fails;time;status;greedyUB;obj;best;\n", outFile);
-		randomHeur = false;
-		outFile = "resultsATSP_"+randomHeur+".csv";
-		bench();
-		randomHeur = !randomHeur;
-		outFile = "resultsATSP_"+randomHeur+".csv";
-		bench();
-		writeTextInto(LastHope,"/Users/jfages07/Documents/GOD_EXISTS");
-		randomHeur = true;
-		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv33.atsp";
+//		clearFile("/Users/jfages07/Documents/GOD_EXISTS");
+//		randomHeur = false;
+//		outFile = "resultsATSP_MinCost.csv";
+//		clearFile(outFile);
+//		writeTextInto("instance;fails;time;status;greedyUB;obj;best;\n", outFile);
+//		bench();
+//		randomHeur = !randomHeur;
+//		outFile = "resultsATSP_Rd.csv";
+//		clearFile(outFile);
+//		writeTextInto("instance;fails;time;status;greedyUB;obj;best;\n", outFile);
+//		bench();
+//		writeTextInto(LastHope,"/Users/jfages07/Documents/GOD_EXISTS");
+//		randomHeur = true;
+		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv44.atsp";
 		testInstance(instance);
 	}
 

@@ -131,10 +131,11 @@ public class PropIntVarChanneling extends GraphPropagator {
 				eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 			}
 		}else{
-			if((mask & EventType.INSTANTIATE.mask)!=0){
-				g.enforceArc(varIdx,intVars[varIdx].getValue(),this,false);
-			}
 			varIdx = idxVarInProp;
+			int val = intVars[varIdx].getLB();
+			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
+				g.enforceArc(varIdx,val,this,false);
+			}
 			eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
 		}
 	}
@@ -146,7 +147,22 @@ public class PropIntVarChanneling extends GraphPropagator {
 
 	@Override
 	public ESat isEntailed() {
-		return ESat.UNDEFINED;
+		for(int i=0;i<vars.length;i++){
+			if(!vars[i].instantiated()){
+				return ESat.UNDEFINED;
+			}
+		}
+		int val;
+		for(int i=0;i<n;i++){
+			val = intVars[i].getValue();
+			if(val<n && !g.getEnvelopGraph().arcExists(i,val)){
+				return ESat.FALSE;
+			}
+			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+				return ESat.FALSE;
+			}
+		}
+		return ESat.TRUE;
 	}
 
 	//***********************************************************************************

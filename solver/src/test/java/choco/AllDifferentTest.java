@@ -229,12 +229,12 @@ public class AllDifferentTest {
 						ac.findAllSolutions();
 						Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+						Assert.assertTrue(ac.getMeasures().getFailCount()==0 || b==0, "nb nod incorrect"+ seed);
 
 						Solver graph = alldiffs(domains, 4, b==0);
 						graph.findAllSolutions();
 						Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(graph.getMeasures().getFailCount() == 0 || b==0, "gac failed"+ seed);
-						Assert.assertTrue(graph.getMeasures().getNodeCount() == ac.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 						
 						LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
 								neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
