@@ -96,11 +96,11 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		GraphDeltaMonitor gdm = (GraphDeltaMonitor)eventRecorder.getDeltaMonitor(g);
 
-		if(gdm.toArcRemoval() - gdm.fromArcRemoval()>(n-2)/2){
+//		if(gdm.toArcRemoval() - gdm.fromArcRemoval()>(n-2)/2){
 			checkPattern(-1,-1);
-		}else{
-			gdm.forEach(remArcs, EventType.REMOVEARC);
-		}
+//		}else{
+//			gdm.forEach(remArcs, EventType.REMOVEARC);
+//		}
 	}
 
 	private void checkPattern(int idx1, int idx2) throws ContradictionException {
@@ -139,6 +139,14 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 
 	@Override
 	public ESat isEntailed() {
+		if(g.instantiated()){
+			for(int i=0;i<n-1;i++){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()!=1){
+					return ESat.FALSE;
+				}
+			}
+			return ESat.TRUE;
+		}
 		return ESat.UNDEFINED;
 	}
 

@@ -272,6 +272,10 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return sccOf;
 	}
 
+	public IDirectedGraph getReducedGraph() {
+		return G_R;
+	}
+
 	//***********************************************************************************
 	// PROCEDURES
 	//***********************************************************************************

@@ -25,7 +25,7 @@ public class GraphGenerator {
      * @param seed uniform random distribution from a given integer
      * @param prop property insured by the generator
      */
-    public GraphGenerator(int size, int seed, InitialProperty prop) {
+    public GraphGenerator(int size, long seed, InitialProperty prop) {
         this.size = size;
         this.rand = new Random(seed);
         this.graph = new boolean[size][size];

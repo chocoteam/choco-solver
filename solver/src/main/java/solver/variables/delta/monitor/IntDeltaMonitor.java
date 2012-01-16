@@ -60,13 +60,13 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     @Override
     public void freeze() {
         this.frozenFirst = first; // freeze indices
-        this.first = this.frozenLast = last;
+        this.first = this.frozenLast = last = delta.size();
     }
 
     @Override
     public void unfreeze() {
         //if propagator is idempotent...
-//        this.first = this.last = delta.size();
+        this.first = this.last = delta.size();
     }
 
     @Override
@@ -80,6 +80,8 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
             for (int i = frozenFirst; i < frozenLast; i++) {
                 proc.execute(delta.get(i));
             }
-        }
+        }else{
+			throw new UnsupportedOperationException();
+		}
     }
 }

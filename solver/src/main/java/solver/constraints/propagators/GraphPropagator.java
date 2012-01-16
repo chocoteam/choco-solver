@@ -29,6 +29,8 @@ package solver.constraints.propagators;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.recorders.IEventRecorder;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.ArcEventRecorder;
 import solver.variables.Variable;
@@ -47,8 +49,8 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
     // METHODS
     //***********************************************************************************
 
-    public AbstractFineEventRecorder makeRequest(V var, int idx, Solver solver) {
-        return new ArcEventRecorder(var, this, idx, solver);
-    }
+//    public AbstractFineEventRecorder makeRequest(V var, int idx, Solver solver) {
+//        return new ArcEventRecorder(var, this, idx, solver);
+//    }
 
 }

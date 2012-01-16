@@ -46,7 +46,7 @@ public abstract class AbstractBSTFinder extends AbstractMSTFinder{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractBSTFinder(int nbNodes, PropHeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public AbstractBSTFinder(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		super(nbNodes,propagator);
 		this.nR = nR;
 		this.sccOf = sccOf;

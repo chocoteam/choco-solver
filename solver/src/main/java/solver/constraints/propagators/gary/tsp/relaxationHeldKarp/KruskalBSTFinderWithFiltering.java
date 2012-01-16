@@ -68,7 +68,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalBSTFinderWithFiltering(int nbNodes, PropHeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public KruskalBSTFinderWithFiltering(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		super(nbNodes,propagator,nR,sccOf,outArcs);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];

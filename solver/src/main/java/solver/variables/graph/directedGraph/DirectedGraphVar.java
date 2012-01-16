@@ -63,48 +63,17 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 
 	@Override
 	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
 		if(kernel.arcExists(x, y)){
-			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
+			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc "+x+"->"+y);
 			return false;
 		}
 		if (envelop.removeArc(x, y)){
 			if (reactOnModification){
 				delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 			}
+//			System.out.println("REMOVE "+x+" -> "+y+ " G "+cause.getClass().getSimpleName());
 			EventType e = EventType.REMOVEARC;
 			notifyMonitors(e, cause);
-//			cause = Cause.Null;
-//			int px = getEnvelopGraph().getPredecessorsOf(x).neighborhoodSize();
-//			int py = getEnvelopGraph().getPredecessorsOf(y).neighborhoodSize();
-//			int sx = getEnvelopGraph().getSuccessorsOf(x).neighborhoodSize();
-//			int sy = getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize();
-//			if(px+sx<2){
-//				if(px==0 && sx==0){
-//					removeNode(x, cause, informCause);
-//				}
-//				if(getKernelGraph().getActiveNodes().isActive(x)){
-//					if(px==1 && sx==0){
-//						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause,informCause);
-//					}
-//					if(px==0 && sx==1){
-//						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause,informCause);
-//					}
-//				}
-//			}
-//			if(py+sy<2){
-//				if(py==0 && sy==0){
-//					removeNode(y, cause, informCause);
-//				}
-//				if(getKernelGraph().getActiveNodes().isActive(y)){
-//					if(py==1 && sy==0){
-//						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause,informCause);
-//					}
-//					if(py==0 && sy==1){
-//						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause,informCause);
-//					}
-//				}
-//			}
 			return true;
 		}return false;
 	}
@@ -118,6 +87,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				if (reactOnModification){
 					delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 				}
+//				System.out.println("ENFORCE "+x+" -> "+y+ " G");
 				EventType e = EventType.ENFORCEARC;
 				notifyMonitors(e, cause);
 				return true;

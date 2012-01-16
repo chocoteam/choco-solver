@@ -29,6 +29,7 @@ package solver.recorders.fine;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.gary.tsp.PropPathNoCycle;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;

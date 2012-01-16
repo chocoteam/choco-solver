@@ -53,6 +53,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
     public final static int VIEW = 1;
     public final static int META = 2;
     public final static int GRAPH = 3;
+    public final static int REAL = 4;
 
 
     /**

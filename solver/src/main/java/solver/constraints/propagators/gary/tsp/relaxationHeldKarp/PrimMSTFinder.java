@@ -52,7 +52,7 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimMSTFinder(int nbNodes, PropHeldKarp propagator) {
+	public PrimMSTFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 		heap = new VerySimpleHeap(nbNodes);
 		inTree = new BitSet(n);

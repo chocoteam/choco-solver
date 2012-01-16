@@ -48,7 +48,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.BitSet;
 import java.util.Random;
 
-public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
+public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -72,6 +72,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 	private IStateDouble totalPenalities;
 	private AbstractMSTFinder HKfilter, HK;
 	private long nbRem;
+	private final static boolean forceTour = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -113,7 +114,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 	public static PropHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n2,phk,nR,sccOf,outArcs);
-		phk.HK = new PrimMSTFinder(phk.n2,phk);
+		phk.HK = new PrimBSTFinder(phk.n2,phk,from,nR,sccOf,outArcs);
 		return phk;
 	}
 
@@ -214,6 +215,9 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 				}
 				obj.updateLowerBound((int)Math.ceil(hkb), this, false);
 				if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
+					if(true){
+						throw new UnsupportedOperationException("test");
+					}
 					if(ConnectivityFinder.findCCOf(mst).size()!=1){
 						throw new UnsupportedOperationException("mst disconnected");
 					}
@@ -237,7 +241,11 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 				hkb = Math.floor(hkb);
 			}
 			obj.updateLowerBound((int)Math.ceil(hkb), this, false);
+
 			if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
+				if(true){
+					throw new UnsupportedOperationException("test");
+				}
 				if(ConnectivityFinder.findCCOf(mst).size()!=1){
 					throw new UnsupportedOperationException("mst disconnected");
 				}
@@ -357,6 +365,9 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 		}
 	}
 	private boolean tourFound() {
+		if(!forceTour){
+			return false;
+		}
 		for(int i=0;i<n2;i++){
 			if(i!=source2 && i!=sink2){
 				if(2!=mst.getNeighborsOf(i).neighborhoodSize()){
@@ -380,7 +391,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> {
 				next = nei.getNextElement();
 			}
 			if(next<0){
-				System.out.println("error tour not found");System.exit(0);
+				throw new UnsupportedOperationException("error tour not found");
 			}
 			next -= n;
 			g.enforceArc(i,next,this,false);

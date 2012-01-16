@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropInverseChanneling;
+import solver.constraints.propagators.nary.PropInverseChannelingJGTEST;
 import solver.variables.IntVar;
 
 /**
@@ -74,9 +75,10 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         Oy = -_oY;
 
         setPropagators(
-                new PropAllDiffAC(this.X, this, solver),
-                new PropAllDiffAC(this.Y, this, solver),
-                new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver, this));
+//                new PropAllDiffAC(this.X, this, solver),
+//                new PropAllDiffAC(this.Y, this, solver),
+//                new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver, this));
+                new PropInverseChannelingJGTEST(this.X, this.Y,solver, this));
     }
 
     /**

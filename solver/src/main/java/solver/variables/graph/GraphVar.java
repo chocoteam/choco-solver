@@ -131,16 +131,6 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
                 }
                 EventType e = EventType.ENFORCENODE;
                 notifyMonitors(e, cause);
-                INeighbors succ = getEnvelopGraph().getSuccessorsOf(x);
-				INeighbors pred = getEnvelopGraph().getPredecessorsOf(x);
-				if(succ.neighborhoodSize()==0 && pred.neighborhoodSize()==1){
-					enforceArc(pred.getFirstElement(),x,cause,informCause);
-				}else if(succ.neighborhoodSize()==1 && pred.neighborhoodSize()==0){
-					enforceArc(x,succ.getFirstElement(),cause,informCause);
-				}
-                if (succ.neighborhoodSize()==0 && pred.neighborhoodSize()==0) {
-                    this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no incident arcs");
-                }
                 return true;
             }
             return false;

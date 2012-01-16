@@ -39,6 +39,7 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.explanations.ExplanationEngine;
 import solver.objective.MaxObjectiveManager;
+import solver.objective.MinDoubleObjectiveManager;
 import solver.objective.MinObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
@@ -50,6 +51,7 @@ import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.variables.DoubleVar;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
@@ -338,6 +340,25 @@ public class Solver implements Serializable {
                 break;
             case MINIMIZE:
                 MinObjectiveManager miom = new MinObjectiveManager(objective);
+                miom.setMeasures(this.measures);
+                this.search.setObjectivemanager(miom);
+                break;
+        }
+        return solve();
+    }
+
+	public Boolean findOptimalSolution(ResolutionPolicy policy, DoubleVar objective) {
+        search.stopAtFirstSolution(false);
+        //search.setSolutionPoolCapacity(1);
+        if (search.getSolutionPoolCapacity() < 1) {
+            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
+            search.setSolutionPoolCapacity(1);
+        }
+        switch (policy) {
+            case MAXIMIZE:
+               throw new UnsupportedOperationException("not implemented yet");
+            case MINIMIZE:
+                MinDoubleObjectiveManager miom = new MinDoubleObjectiveManager(objective);
                 miom.setMeasures(this.measures);
                 this.search.setObjectivemanager(miom);
                 break;

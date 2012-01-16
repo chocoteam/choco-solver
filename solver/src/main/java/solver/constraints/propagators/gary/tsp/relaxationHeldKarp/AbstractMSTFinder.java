@@ -44,13 +44,13 @@ public abstract class AbstractMSTFinder {
 	protected UndirectedGraph Tree;
 	protected double treeCost;
 	// PROPAGATOR
-	protected PropHeldKarp propHK;
+	protected HeldKarp propHK;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractMSTFinder(int nbNodes, PropHeldKarp propagator) {
+	public AbstractMSTFinder(int nbNodes, HeldKarp propagator) {
 		n = nbNodes;
 		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
 		propHK = propagator;

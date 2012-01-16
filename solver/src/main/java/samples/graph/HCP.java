@@ -141,7 +141,7 @@ public class HCP extends AbstractProblem{
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph, gc, solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
 //		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
 	}
 

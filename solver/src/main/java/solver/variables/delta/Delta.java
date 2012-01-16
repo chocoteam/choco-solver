@@ -65,6 +65,7 @@ public final class Delta implements IntDelta {
             last = 0;
             timestamp = AbstractSearchLoop.timeStamp;
         }
+		throw new UnsupportedOperationException();
     }
 
     /**
@@ -73,7 +74,7 @@ public final class Delta implements IntDelta {
      * @param value value to add
      */
     public void add(int value) {
-        lazyClear();
+//        lazyClear();
         rem = ensureCapacity(last, rem);
         rem[last++] = value;
     }
@@ -89,5 +90,11 @@ public final class Delta implements IntDelta {
     @Override
     public int size() {
         return last;
+    }
+
+	@Override
+    public void clear() {
+        last = 0;
+		timestamp = AbstractSearchLoop.timeStamp;
     }
 }

@@ -85,4 +85,26 @@ public class GraphDelta implements IGraphDelta {
     public IntDelta getArcEnforcingDelta() {
         return arcEnf;
     }
+
+	@Override
+    public void clear() {
+        arcEnf.clear();
+		arcRem.clear();
+		nodeEnf.clear();
+		nodeRem.clear();
+    }
+
+	public int getSize(int i) {
+		switch (i) {
+			case GraphDeltaMonitor.NR:
+					return nodeRem.size();
+			case GraphDeltaMonitor.NE:
+					return nodeEnf.size();
+			case GraphDeltaMonitor.AR:
+					return arcRem.size();
+			case GraphDeltaMonitor.AE:
+					return arcEnf.size();
+			default: throw new UnsupportedOperationException();
+		}
+	}
 }

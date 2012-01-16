@@ -29,8 +29,11 @@ package solver.recorders.coarse;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.recorders.IEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -40,71 +43,83 @@ import solver.variables.EventType;
  */
 public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
-    int timestamp; // timestamp of the last clear call -- for lazy clear
+	int timestamp; // timestamp of the last clear call -- for lazy clear
 
-    protected final Propagator propagator;
+	protected final Propagator propagator;
 
-    int evtmask; // reference to events occuring -- inclusive OR over event mask
+	int evtmask; // reference to events occuring -- inclusive OR over event mask
 
-    public CoarseEventRecorder(Propagator propagator, Solver solver) {
-        super();
-        this.propagator = propagator;
-        this.evtmask = EventType.FULL_PROPAGATION.mask; // initialize with full propagation event
-        propagator.addRecorder(this);
-    }
+	public CoarseEventRecorder(Propagator propagator, Solver solver) {
+		super();
+		this.propagator = propagator;
+		this.evtmask = EventType.FULL_PROPAGATION.mask; // initialize with full propagation event
+		propagator.addRecorder(this);
+	}
 
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[]{propagator};
-    }
+	@Override
+	public Propagator[] getPropagators() {
+		return new Propagator[]{propagator};
+	}
 
-    public void update(EventType e) {
-        if ((e.mask & propagator.getPropagationConditions()) != 0) {
+	public void update(EventType e) {
+		if ((e.mask & propagator.getPropagationConditions()) != 0) {
 //            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
-            // 1. clear the structure if necessar
-            if (LAZY) {
-                if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-                    this.evtmask = 0;
-                    timestamp = AbstractSearchLoop.timeStamp;
-                }
-            }
-            // 2. store information concerning event
-            if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                evtmask |= e.strengthened_mask;
-            }
-            // 3. schedule this
-            if (!enqueued) {
-                scheduler.schedule(this);
-            }
-        }
-    }
+			// 1. clear the structure if necessar
+			if (LAZY) {
+				if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+					this.evtmask = 0;
+					timestamp = AbstractSearchLoop.timeStamp;
+				}
+			}
+			// 2. store information concerning event
+			if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+				evtmask |= e.strengthened_mask;
+			}
+			// 3. schedule this
+			if (!enqueued) {
+				scheduler.schedule(this);
+			}
+		}
+	}
 
-    @Override
-    public boolean execute() throws ContradictionException {
-        if (!propagator.isActive()) {
-            //propagator.initialize();
-            //promote event to top level event FULL_PROPAGATION
-            evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
-            propagator.setActive();
-        }
-        if (evtmask > 0) {
+	@Override
+	public boolean execute() throws ContradictionException {
+		if (!propagator.isActive()) {
+			//propagator.initialize();
+			//promote event to top level event FULL_PROPAGATION
+			evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
+			propagator.setActive();
+		}
+		if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-            propagator.coarseERcalls++;
-            int _evt = evtmask;
-            evtmask = 0;
-            propagator.propagate(_evt);
-        }
-        return true;
-    }
+			propagator.coarseERcalls++;
+			int _evt = evtmask;
+			evtmask = 0;
+			// DEBUT MODIF JG
+			int nbR = propagator.nbRecorders();
+			IEventRecorder rec;
+			for(int i=0;i<nbR;i++){
+				rec = propagator.getRecorder(i);
+				if(rec instanceof AbstractFineEventRecorder){
+					for(Variable v:rec.getVariables()){
+						((AbstractFineEventRecorder) rec).getDeltaMonitor(v).unfreeze();
+					}
+				}
+			}
+			// FIN MODIFS JG
+			propagator.propagate(_evt);
+		}
+		return true;
+	}
 
-    @Override
-    public void flush() {
-        this.evtmask = 0;
-    }
+	@Override
+	public void flush() {
+		this.evtmask = 0;
+	}
 
 
-    @Override
-    public String toString() {
-        return propagator.toString();
-    }
+	@Override
+	public String toString() {
+		return propagator.toString();
+	}
 }

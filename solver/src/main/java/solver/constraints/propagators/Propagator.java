@@ -98,7 +98,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * List of records of <code>this</code>
      */
-    private AbstractFineEventRecorder[] fineER;
+    protected AbstractFineEventRecorder[] fineER;
 
     protected int lastER;
 
@@ -227,6 +227,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
+//		if(true){
+//			return;
+//		}
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
         isActive.set(false);
         //then notify the linked variables

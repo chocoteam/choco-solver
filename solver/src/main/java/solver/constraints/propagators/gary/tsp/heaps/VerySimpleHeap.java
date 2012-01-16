@@ -19,6 +19,7 @@ public class VerySimpleHeap implements Heap{
 		mate = new int[n];
 		keys = new double[n];
 		path = new DirectedGraph(n, GraphType.LINKED_LIST);
+		clear();
 	}
 
 	@Override

@@ -76,4 +76,9 @@ public final class OneValueDelta implements IntDelta {
     public int size() {
         return set ? 1 : 0;
     }
+
+	@Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
 }

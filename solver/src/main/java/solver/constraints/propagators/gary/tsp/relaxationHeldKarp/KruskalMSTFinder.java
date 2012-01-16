@@ -55,7 +55,7 @@ public class KruskalMSTFinder extends AbstractMSTFinder{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalMSTFinder(int nbNodes, PropHeldKarp propagator) {
+	public KruskalMSTFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];

@@ -43,7 +43,9 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -84,8 +86,8 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// METHODS
 	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		INeighbors succs;
 		int next;
 		for(int i=0;i<n;i++){
@@ -112,14 +114,26 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if((mask & EventType.ENFORCEARC.mask) !=0){
-            eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-		}
-		if((mask & EventType.REMOVEARC.mask)!=0){
-            eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
-		}
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+//		if(true){
+//			propagate(0);return;
+//		}
+//		System.out.println("propag");
+//		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(g);
+//		System.out.println("delta : "+gdm.fromArcEnforcing()+" -> "+gdm.toArcEnforcing()+"  /// "+g.getDelta().getArcEnforcingDelta().size());
+//		try{
+//			System.out.println("SUCCESSIRS");
+//			for(int i=0;i<n;i++){
+//				System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
+//			}
+		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+//			}
+//		catch(Exception e){
+//			e.printStackTrace();
+//			throw new UnsupportedOperationException();
+//		}
 	}
 
 	@Override
@@ -159,6 +173,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
+//			System.out.println("ENFORCE "+from+" -> "+(i%n));
 			if(from!=but){
 				int to   = i%n;
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
@@ -180,6 +195,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
+//			System.out.println("REMOVE "+from+" -> "+(i%n));
 			if(from!=but){
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
 				if (succs.neighborhoodSize()==0){
