@@ -85,10 +85,10 @@ public class MaxView extends AbstractViewWithDomain {
             }
         }
         if (eub < iub) {
-            updateUpperBound(eub, cause, false);
+            updateUpperBound(eub, cause);
         } else if (eub > iub) {
-            A.updateUpperBound(eub, cause, false);
-            B.updateUpperBound(eub, cause, false);
+            A.updateUpperBound(eub, cause);
+            B.updateUpperBound(eub, cause);
         }
 //        }
     }
@@ -140,14 +140,14 @@ public class MaxView extends AbstractViewWithDomain {
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
                 }
-                A.updateUpperBound(value - 1, this, false);
-                B.updateUpperBound(value - 1, this, false);
+                A.updateUpperBound(value - 1, this);
+                B.updateUpperBound(value - 1, this);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
                     int val = getValue();
-                    A.updateUpperBound(val, this, false);
-                    B.updateUpperBound(val, this, false);
+                    A.updateUpperBound(val, this);
+                    B.updateUpperBound(val, this);
                     if (!A.contains(val)) {
                         B.instantiateTo(val, this);
                     }
@@ -173,7 +173,7 @@ public class MaxView extends AbstractViewWithDomain {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         }
         return false;
     }
@@ -192,8 +192,8 @@ public class MaxView extends AbstractViewWithDomain {
             this.UB.set(value);
             this.SIZE.set(1);
 
-            A.updateUpperBound(value, this, false);
-            B.updateUpperBound(value, this, false);
+            A.updateUpperBound(value, this);
+            B.updateUpperBound(value, this);
             if (!A.contains(value)) {
                 B.instantiateTo(value, this);
             }
@@ -244,7 +244,7 @@ public class MaxView extends AbstractViewWithDomain {
     }
 
     @Override
-    public boolean updateUpperBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int aValue, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > aValue) {
@@ -256,8 +256,8 @@ public class MaxView extends AbstractViewWithDomain {
                 SIZE.add(aValue - old);
                 UB.set(aValue);
 
-                A.updateUpperBound(aValue, this, false);
-                B.updateUpperBound(aValue, this, false);
+                A.updateUpperBound(aValue, this);
+                B.updateUpperBound(aValue, this);
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;

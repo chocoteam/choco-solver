@@ -140,7 +140,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this, false);
+        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this);
 
     }
 
@@ -179,7 +179,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].previousValue(value);
             }
-            vars[0].updateUpperBound(nub, this, false);
+            vars[0].updateUpperBound(nub, this);
         }
     }
 
@@ -194,7 +194,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(vars[0].getUB(), this, false);
+        vars[1].updateUpperBound(vars[0].getUB(), this);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -232,7 +232,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].previousValue(value);
             }
-            vars[1].updateUpperBound(nub, this, false);
+            vars[1].updateUpperBound(nub, this);
         }
     }
 

@@ -62,7 +62,7 @@ public class PropMemberBound extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         // with views such as abs(...), the prop can be not entailed after initial propagation
         boolean change = vars[0].updateLowerBound(lb, this);
-        change &= vars[0].updateUpperBound(ub, this, false);
+        change &= vars[0].updateUpperBound(ub, this);
         if(change){
             this.setPassive();
         }

@@ -70,7 +70,7 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
-            Y.updateUpperBound(-2, Cause.Null, false);
+            Y.updateUpperBound(-2, Cause.Null);
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 

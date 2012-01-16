@@ -142,7 +142,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.DECUPP, "outside domain update bound");

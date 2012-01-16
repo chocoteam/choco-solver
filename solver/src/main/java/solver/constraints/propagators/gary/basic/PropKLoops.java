@@ -136,7 +136,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 			}
 		}
 		k.updateLowerBound(nbKer, this);
-		k.updateUpperBound(nbEnv, this, false);
+		k.updateUpperBound(nbEnv, this);
 		if(k.instantiated()){
 			if(nbInEnv.get()==k.getValue()){
 				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();

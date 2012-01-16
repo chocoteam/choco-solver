@@ -63,7 +63,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         // with views such as abs(...), the prop can be not entailed after initial propagation
-        if(vars[0].updateUpperBound(constant, this, false)|| vars[0].getUB()<=constant){
+        if(vars[0].updateUpperBound(constant, this)|| vars[0].getUB()<=constant){
             this.setPassive();
         }
     }
@@ -71,7 +71,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         // with views such as abs(...), the prop can be not entailed after initial propagation
-        if(vars[0].updateUpperBound(constant, this, false)|| vars[0].getUB()<=constant){
+        if(vars[0].updateUpperBound(constant, this)|| vars[0].getUB()<=constant){
             this.setPassive();
         }
     }

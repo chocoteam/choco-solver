@@ -123,7 +123,7 @@ public class TSP extends AbstractProblem{
 		// find a first solution with a greedy algorithm
 		greedyUB = getGreedyBound();
 		try {
-			totalCost.updateUpperBound(greedyUB, Cause.Null, false);
+			totalCost.updateUpperBound(greedyUB, Cause.Null);
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 			System.exit(0);

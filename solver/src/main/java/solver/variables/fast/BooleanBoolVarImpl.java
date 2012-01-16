@@ -146,7 +146,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
@@ -238,12 +238,11 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       new upper bound (included)
      * @param cause       update releaser
-     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         return value < 1 && instantiateTo(value, cause);
     }
 

@@ -133,7 +133,7 @@ public final class SqrView extends View<IntVar> {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
             from = floor_sqrt(from);
             to = floor_sqrt(to);
@@ -156,7 +156,7 @@ public final class SqrView extends View<IntVar> {
         int v = floor_sqrt(value);
         if (v * v == value) { // is a perfect square ?
             boolean done = var.updateLowerBound(-v, this);
-            done |= var.updateUpperBound(v, this, informCause);
+            done |= var.updateUpperBound(v, this);
             EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
                 done |= var.removeInterval(-v + 1, v - 1, cause);
@@ -189,7 +189,7 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
@@ -197,7 +197,7 @@ public final class SqrView extends View<IntVar> {
         }
         int floorV = floor_sqrt(value);
         boolean done = var.updateLowerBound(-floorV, this);
-        done |= var.updateUpperBound(floorV, this, informCause);
+        done |= var.updateUpperBound(floorV, this);
         if (done) {
             notifyMonitors(EventType.DECUPP, cause);
         }

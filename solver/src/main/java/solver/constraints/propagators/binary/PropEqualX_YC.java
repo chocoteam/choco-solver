@@ -83,11 +83,11 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateSupX() throws ContradictionException {
-        x.updateUpperBound(y.getUB() + cste, this, false);
+        x.updateUpperBound(y.getUB() + cste, this);
     }
 
     private void updateSupY() throws ContradictionException {
-        y.updateUpperBound(x.getUB() - cste, this, false);
+        y.updateUpperBound(x.getUB() - cste, this);
     }
 
     @Override

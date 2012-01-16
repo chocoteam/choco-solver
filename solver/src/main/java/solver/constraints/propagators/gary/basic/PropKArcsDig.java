@@ -74,7 +74,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 			max += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
 		k.updateLowerBound(min, this);
-		k.updateUpperBound(max, this, false);
+		k.updateUpperBound(max, this);
 		nbInEnv.set(max);
 		nbInKer.set(min);
 		if(k.instantiated()){

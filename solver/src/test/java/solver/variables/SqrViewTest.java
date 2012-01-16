@@ -68,7 +68,7 @@ public class SqrViewTest {
             Assert.assertEquals(X.getLB(), -4);
             Assert.assertEquals(X.getUB(), 12);
 
-            Z.updateUpperBound(100, Cause.Null, false);
+            Z.updateUpperBound(100, Cause.Null);
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(X.getLB(), -4);
 

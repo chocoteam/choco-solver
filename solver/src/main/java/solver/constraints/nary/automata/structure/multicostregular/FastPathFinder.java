@@ -560,12 +560,12 @@ public class FastPathFinder {
         }
 
         modified[0] = z[0].updateLowerBound((int) Math.ceil(spft[graph.sourceIndex][0]), propagator);//this.graph.constraint, false);
-        modified[1] = z[0].updateUpperBound((int) Math.floor(lpft[graph.sourceIndex][0]), propagator, false);//this.graph.constraint, false);
+        modified[1] = z[0].updateUpperBound((int) Math.floor(lpft[graph.sourceIndex][0]), propagator);//this.graph.constraint, false);
 
 
         for (int i = 1; i < nbr; i++) {
             z[i].updateLowerBound((int) Math.ceil(spft[graph.sourceIndex][i]), propagator);//this.graph.constraint, false);
-            z[i].updateUpperBound((int) Math.floor(lpft[graph.sourceIndex][i]), propagator, false);//this.graph.constraint, false);
+            z[i].updateUpperBound((int) Math.floor(lpft[graph.sourceIndex][i]), propagator);//this.graph.constraint, false);
         }
 
         return modified;

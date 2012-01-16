@@ -140,12 +140,12 @@ public class PropLexChain extends Propagator<IntVar> {
         int i = 0;
         while (i < N && a[i] == b[i]) {
             x[i].updateLowerBound(a[i], this);
-            x[i].updateUpperBound(b[i], this, false);
+            x[i].updateUpperBound(b[i], this);
             i++;
         }
         if (i < N) {
             x[i].updateLowerBound(a[i], this);
-            x[i].updateUpperBound(b[i], this, false);
+            x[i].updateUpperBound(b[i], this);
         }
         if (i == N || x[i].nextValue(a[i]) < b[i]) {
             return;

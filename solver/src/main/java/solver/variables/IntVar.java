@@ -142,11 +142,10 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value new upper bound (included)
      * @param cause update releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateUpperBound(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean updateUpperBound(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>

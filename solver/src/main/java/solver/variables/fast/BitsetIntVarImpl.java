@@ -212,7 +212,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         else {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
@@ -349,17 +349,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       new upper bound (included)
      * @param cause       update releaser
-     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {

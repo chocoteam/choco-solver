@@ -97,7 +97,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		nbEnvLoop.set(env);
 		nbKerLoop.set(ker);
 		nLoops.updateLowerBound(ker, this);
-		nLoops.updateUpperBound(env, this, false);
+		nLoops.updateUpperBound(env, this);
 		if(nLoops.getLB() == env && env!=ker){
 			for (int node=0;node<n;node++) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
@@ -133,7 +133,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
                 eventRecorder.getDeltaMonitor(g).forEach(enforceProc, EventType.ENFORCEARC);
 			}
-			nLoops.updateUpperBound(nbEnvLoop.get(), this, false);
+			nLoops.updateUpperBound(nbEnvLoop.get(), this);
 			nLoops.updateLowerBound(nbKerLoop.get(), this);
 		}
 		int env = nbEnvLoop.get();

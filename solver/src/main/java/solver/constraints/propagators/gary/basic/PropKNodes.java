@@ -77,7 +77,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		k.updateLowerBound(g.getKernelOrder(), this);
-		k.updateUpperBound(g.getEnvelopOrder(), this, false);
+		k.updateUpperBound(g.getEnvelopOrder(), this);
 		if(k.instantiated()){
 			if(g.getEnvelopOrder()==g.getKernelOrder()){
 				setPassive();
@@ -104,7 +104,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		k.updateLowerBound(g.getKernelOrder(), this);
-		k.updateUpperBound(g.getEnvelopOrder(), this, false);
+		k.updateUpperBound(g.getEnvelopOrder(), this);
 		if(k.instantiated()){
 			if(g.getEnvelopOrder()==g.getKernelOrder()){
 				setPassive();

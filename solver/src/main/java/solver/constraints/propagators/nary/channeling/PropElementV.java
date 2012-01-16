@@ -77,7 +77,7 @@ public class PropElementV extends Propagator<IntVar> {
         int n = vars.length;
         IntVar idxVar = getIndexVar();
         idxVar.updateLowerBound(0 - offset, this);
-        idxVar.updateUpperBound(n - 3 - offset, this, false);
+        idxVar.updateUpperBound(n - 3 - offset, this);
         if (indexUpdateNeeded.get()) {
             updateIndexFromValue();
         }
@@ -163,7 +163,7 @@ public class PropElementV extends Propagator<IntVar> {
         // I should consider for the min, the minimum value in domain(c.vars[feasibleIndex) that is >= to valVar.inf
         // (it can be greater than valVar.inf if there are holes in domain(c.vars[feasibleIndex]))
         valVar.updateLowerBound(minval, this);
-        valVar.updateUpperBound(maxval, this, false);
+        valVar.updateUpperBound(maxval, this);
         // v1.0: propagate on holes when valVar has an enumerated domain
         if (valVar.hasEnumeratedDomain()) {
             int ubV = valVar.getUB();
@@ -202,7 +202,7 @@ public class PropElementV extends Propagator<IntVar> {
                 (VariableUtilities.emptyUnion(valVar, vars[maxFeasibleIndex + offset]))) {
             maxFeasibleIndex--;
         }
-        idxVar.updateUpperBound(maxFeasibleIndex, this, false);
+        idxVar.updateUpperBound(maxFeasibleIndex, this);
 
         if (idxVar.hasEnumeratedDomain()) { //those remVal would be ignored for variables using an interval approximation for domain
             for (int i = minFeasibleIndex + 1; i < maxFeasibleIndex - 1; i++) {
@@ -227,9 +227,9 @@ public class PropElementV extends Propagator<IntVar> {
         IntVar targetVar = vars[indexVal + offset];
         // code similar to awake@Equalxyc
         valVar.updateLowerBound(targetVar.getLB(), this);
-        valVar.updateUpperBound(targetVar.getUB(), this, false);
+        valVar.updateUpperBound(targetVar.getUB(), this);
         targetVar.updateLowerBound(valVar.getLB(), this);
-        targetVar.updateUpperBound(valVar.getUB(), this, false);
+        targetVar.updateUpperBound(valVar.getUB(), this);
         if (targetVar.hasEnumeratedDomain()) {
             int left = Integer.MIN_VALUE;
             int right = left;
@@ -323,7 +323,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].updateUpperBound(valVar.getUB(), this, false);
+                vars[idxVal + offset].updateUpperBound(valVar.getUB(), this);
             } else {
                 updateIndexFromValue();
             }
@@ -331,7 +331,7 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.updateUpperBound(vars[idx].getUB(), this, false);
+                    valVar.updateUpperBound(vars[idx].getUB(), this);
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
@@ -346,7 +346,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         maxval = Math.max(maxval, vars[feasibleIndex].getUB());
                     }
-                    valVar.updateUpperBound(maxval, this, true);//CPRU not idempotent
+                    valVar.updateUpperBound(maxval, this);//CPRU not idempotent
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }

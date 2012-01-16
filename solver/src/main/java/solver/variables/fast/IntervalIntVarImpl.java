@@ -172,7 +172,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
         if (from <= getLB())
             return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         return false;
     }
 
@@ -290,15 +290,11 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      *
      * @param value       new upper bound (included)
      * @param cause       update releaser
-     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {

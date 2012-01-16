@@ -146,7 +146,7 @@ public final class BitsetXYSumView extends AbstractSumView {
         }
         int ub = getUB();
         if (from <= ub && ub <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         }
         //otherwise, it's a hole in the middle:
 //        boolean change = false;
@@ -239,7 +239,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         boolean change;
         int ub = this.getUB();

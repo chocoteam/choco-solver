@@ -107,7 +107,7 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
     protected void initialize() throws ContradictionException {
         for (int i = 0; i < maxFlow.length; i++) {
             vars[i].updateLowerBound(minValue, this);
-            vars[i].updateUpperBound(maxValue, this, false);
+            vars[i].updateUpperBound(maxValue, this);
         }
     }
 

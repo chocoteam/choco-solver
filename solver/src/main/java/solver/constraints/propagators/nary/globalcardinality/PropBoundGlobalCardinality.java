@@ -171,11 +171,11 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         int j = 0;
         for(; j < nbVars; j++){
             vars[j].updateLowerBound(offset, this);
-            vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this, false);
+            vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this);
         }
         for(;j < vars.length; j++){
             vars[j].updateLowerBound(0, this);
-            vars[j].updateUpperBound(nbVars, this, false);
+            vars[j].updateUpperBound(nbVars, this);
         }
         initBackDataStruct();
         initCard();
@@ -494,7 +494,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] < x) {
                 w = pathmin(h, h[x]);
 //                updateUpperBound(minsorted[i].var, bounds[w] - 1, minsorted[i].idx);
-                minsorted[i].var.updateUpperBound(bounds[w] - 1, this, false);
+                minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[z], bounds[y] - 1)) {
@@ -673,7 +673,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             int y = minsorted[i].maxrank;
             if ((stableInterval[x] <= x) || (y > stableInterval[x])) {
 //                updateUpperBound(minsorted[i].var, l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), minsorted[i].idx);
-                minsorted[i].var.updateUpperBound(l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), this, false);
+                minsorted[i].var.updateUpperBound(l.skipNonNullElementsLeft(bounds[newMin[i]] - 1), this);
             }
         }
 
@@ -740,7 +740,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbSup--;
         }
         if (nbSup == getMaxOcc(sup - offset)) {
-            vars[i].updateUpperBound(sup - 1, this, true);//CPRU not idempotent
+            vars[i].updateUpperBound(sup - 1, this);//CPRU not idempotent
         }
     }
 
@@ -782,7 +782,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
             }
             for (int i = 0; i < range; i++) {
-                fixpoint |= card[i].updateUpperBound(nbVars - (lb - card[i].getLB()), this, false);
+                fixpoint |= card[i].updateUpperBound(nbVars - (lb - card[i].getLB()), this);
                 fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), this);
             }
         }
@@ -800,7 +800,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         public void execute(int i) throws ContradictionException {
             int o = p.offset;
             p.val_maxOcc[i - o].add(-1);
-            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), this.p, true);//CPRU not idempotent
+            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), this.p);//CPRU not idempotent
         }
     }
 

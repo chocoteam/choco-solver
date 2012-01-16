@@ -77,7 +77,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateSupY() throws ContradictionException {
-        y.updateUpperBound(x.getUB() - this.cste, this, false);
+        y.updateUpperBound(x.getUB() - this.cste, this);
     }
 
     @Override

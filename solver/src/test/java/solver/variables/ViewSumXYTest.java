@@ -73,7 +73,7 @@ public class ViewSumXYTest {
             Assert.assertEquals(Y.getLB(), 3);
             Assert.assertEquals(Y.getUB(), 8);
 
-            Y.updateUpperBound(-2, Cause.Null, false);
+            Y.updateUpperBound(-2, Cause.Null);
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 

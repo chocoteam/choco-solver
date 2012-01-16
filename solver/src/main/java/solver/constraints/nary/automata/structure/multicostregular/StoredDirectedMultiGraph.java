@@ -422,10 +422,10 @@ public class StoredDirectedMultiGraph {
         if (nid == sourceIndex) {
             if (dim == 0) {
                 modBound[0] |= z[0].updateLowerBound((int) Math.ceil(tempPval), propagator);//, false);
-                modBound[1] |= z[0].updateUpperBound((int) Math.floor(tempPval2), propagator, false);//, false);
+                modBound[1] |= z[0].updateUpperBound((int) Math.floor(tempPval2), propagator);//, false);
             } else {
                 z[dim].updateLowerBound((int) Math.ceil(tempPval), propagator);//, false);
-                z[dim].updateUpperBound((int) Math.floor(tempPval2), propagator, false);//, false);
+                z[dim].updateUpperBound((int) Math.floor(tempPval2), propagator);//, false);
             }
         }
 
@@ -499,10 +499,10 @@ public class StoredDirectedMultiGraph {
         if (nid == tinIndex) {
             if (dim == 0) {
                 modBound[0] |= z[0].updateLowerBound((int) Math.ceil(tempPval), propagator);//, false);
-                modBound[1] |= z[0].updateUpperBound((int) Math.floor(tempPval2), propagator, false);//, false);
+                modBound[1] |= z[0].updateUpperBound((int) Math.floor(tempPval2), propagator);//, false);
             } else {
                 z[dim].updateLowerBound((int) Math.ceil(tempPval), propagator);//, false);
-                z[dim].updateUpperBound((int) Math.floor(tempPval2), propagator, false);//, false);
+                z[dim].updateUpperBound((int) Math.floor(tempPval2), propagator);//, false);
             }
 
         }

@@ -76,8 +76,8 @@ public class Eq_Int extends GraphRelation<IntVar> {
 			IntVar y = vars[var2];
 			x.updateLowerBound(y.getLB(), cause);
 			y.updateLowerBound(x.getLB(), cause);
-			x.updateUpperBound(y.getUB(), cause, informCause);
-			y.updateUpperBound(x.getUB(), cause, informCause);
+			x.updateUpperBound(y.getUB(), cause);
+			y.updateUpperBound(x.getUB(), cause);
 			// ensure that, in case of enumerated domains,  holes are also propagated
 			if (y.hasEnumeratedDomain() && x.hasEnumeratedDomain()) {
 				int ub = x.getUB();

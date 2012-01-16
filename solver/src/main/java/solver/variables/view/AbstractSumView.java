@@ -73,10 +73,10 @@ public abstract class AbstractSumView extends AbstractViewWithDomain {
         if (-sumLB < 0) contradiction(cause, EventType.FULL_PROPAGATION, MSG_EMPTY);
         int ubA = A.getUB(), ubB = B.getUB();
         if (ubA - lbA + sumLB > 0) {
-            A.updateUpperBound(-sumLB + lbA, this, true);//CPRU not idempotent
+            A.updateUpperBound(-sumLB + lbA, this);//CPRU not idempotent
         }
         if (ubB - lbB + sumLB > 0) {
-            B.updateUpperBound(-sumLB + lbB, this, true);//CPRU not idempotent
+            B.updateUpperBound(-sumLB + lbB, this);//CPRU not idempotent
         }
     }
 

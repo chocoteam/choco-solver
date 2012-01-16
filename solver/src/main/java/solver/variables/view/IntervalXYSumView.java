@@ -110,7 +110,7 @@ public final class IntervalXYSumView extends AbstractSumView {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         }
         return false;
     }
@@ -171,12 +171,8 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateUpperBound(int aValue, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int aValue, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getUB();
         if (old > aValue) {
             if (this.getLB() > aValue) {
