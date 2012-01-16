@@ -695,7 +695,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     void initCard() throws ContradictionException {
         for (int i = 0; i < range; i++) {
             if (val_maxOcc[i].get() == 0) {
-                card[i].instantiateTo(0, this, false);
+                card[i].instantiateTo(0, this);
             } else {
                 card[i].updateLowerBound(val_minOcc[i].get(), this, false);
             }

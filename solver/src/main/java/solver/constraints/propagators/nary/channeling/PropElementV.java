@@ -362,7 +362,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].instantiateTo(valVar.getValue(), this, false);
+                vars[idxVal + offset].instantiateTo(valVar.getValue(), this);
             } else {
                 updateIndexFromValue();
             }
@@ -370,7 +370,7 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.instantiateTo(vars[idx].getValue(), this, false);
+                    valVar.instantiateTo(vars[idx].getValue(), this);
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {

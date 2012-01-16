@@ -134,7 +134,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
 //        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
         solver.getExplainer().instantiateTo(this, value, cause);
@@ -145,7 +145,7 @@ public final class ScaleView extends View<IntVar> {
             return false;
         }
         if (contains(value)) {
-            boolean done = var.instantiateTo(value / cste, this, informCause);
+            boolean done = var.instantiateTo(value / cste, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;

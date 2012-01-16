@@ -137,15 +137,15 @@ public class PropMax extends Propagator<IntVar> {
             v1.updateUpperBound(val, this, false);
             v2.updateUpperBound(val, this, false);
             if (!v1.contains(val)) {
-                v2.instantiateTo(val, this, false);
+                v2.instantiateTo(val, this);
             }
             if (!v2.contains(val)) {
-                v1.instantiateTo(val, this, false);
+                v1.instantiateTo(val, this);
             }
         } else if (idx == 1) {
             val = v1.getValue();
             if (val >= v2.getUB()) {
-                v0.instantiateTo(val, this, false);
+                v0.instantiateTo(val, this);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v2.getUB()), this, false);
@@ -154,7 +154,7 @@ public class PropMax extends Propagator<IntVar> {
         } else if (idx == 2) {
             val = v2.getValue();
             if (val >= v1.getUB()) {
-                v0.instantiateTo(val, this, false);
+                v0.instantiateTo(val, this);
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v1.getUB()), this, false);

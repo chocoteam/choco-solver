@@ -168,10 +168,10 @@ public class PropTimes extends Propagator<IntVar> {
      */
     protected void awakeOnX() throws ContradictionException {
         if (v0.instantiatedTo(0)) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
         }
         if ((v2.instantiatedTo(0)) && (!v0.contains(0))) {
-            v1.instantiateTo(0, this, false);
+            v1.instantiateTo(0, this);
         } else if (!v2.contains(0)) {
             updateYandX();
         } else if (!(v2.instantiatedTo(0))) {
@@ -187,10 +187,10 @@ public class PropTimes extends Propagator<IntVar> {
 
     protected void awakeOnY() throws ContradictionException {
         if (v1.instantiatedTo(0)) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
         }
         if ((v2.instantiatedTo(0)) && (!v1.contains(0))) {
-            v0.instantiateTo(0, this, false);
+            v0.instantiateTo(0, this);
         } else if (!v2.contains(0)) {
             updateXandY();
         } else if (!(v2.instantiatedTo(0))) {
@@ -490,10 +490,10 @@ public class PropTimes extends Propagator<IntVar> {
      */
     protected final void propagateZero() throws ContradictionException {
         if (!(v1.contains(0))) {
-            v0.instantiateTo(0, this, false);
+            v0.instantiateTo(0, this);
         }
         if (!(v0.contains(0))) {
-            v1.instantiateTo(0, this, false);
+            v1.instantiateTo(0, this);
         }
     }
 
@@ -535,7 +535,7 @@ public class PropTimes extends Propagator<IntVar> {
         int xmin = Math.max(getXminIfNonZero(), MIN);
         int xmax = Math.min(getXmaxIfNonZero(), MAX);
         if ((xmin > v0.getUB()) || (xmax < v0.getLB())) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
@@ -549,7 +549,7 @@ public class PropTimes extends Propagator<IntVar> {
         int ymin = Math.max(getYminIfNonZero(), MIN);
         int ymax = Math.min(getYmaxIfNonZero(), MAX);
         if ((ymin > v1.getUB()) || (ymax < v1.getLB())) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {

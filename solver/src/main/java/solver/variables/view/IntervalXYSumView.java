@@ -116,11 +116,8 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);

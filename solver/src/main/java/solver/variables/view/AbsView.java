@@ -138,7 +138,7 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?

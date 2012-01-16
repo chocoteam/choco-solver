@@ -134,7 +134,7 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
@@ -145,7 +145,7 @@ public final class OffsetView extends View<IntVar> {
         } else if (contains(value)) {
             EventType e = EventType.INSTANTIATE;
 
-            boolean done = var.instantiateTo(value - cste, this, informCause);
+            boolean done = var.instantiateTo(value - cste, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;

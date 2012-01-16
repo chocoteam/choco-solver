@@ -41,7 +41,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -106,7 +105,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 			nbKerLoop.set(env);
-			nLoops.instantiateTo(env, this, false);
+			nLoops.instantiateTo(env, this);
 			active.set(false);
 		}
 		if(nLoops.getUB() == ker && env!=ker){
@@ -116,7 +115,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 			nbEnvLoop.set(ker);
-			nLoops.instantiateTo(ker, this, false);
+			nLoops.instantiateTo(ker, this);
 			active.set(false);
 		}
 	}
@@ -147,7 +146,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 					}
 				}
 				nbKerLoop.set(env);
-				nLoops.instantiateTo(env, this, false);
+				nLoops.instantiateTo(env, this);
 				active.set(false);
 			}else if(nLoops.getUB() == ker){
 				for (int node = 0; node<n;node++) {
@@ -156,11 +155,11 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 					}
 				}
 				nbEnvLoop.set(ker);
-				nLoops.instantiateTo(ker, this, false);
+				nLoops.instantiateTo(ker, this);
 				active.set(false);
 			}
 		}else {
-			nLoops.instantiateTo(env,this,false);
+			nLoops.instantiateTo(env,this);
 			active.set(false);
 		}
 	}

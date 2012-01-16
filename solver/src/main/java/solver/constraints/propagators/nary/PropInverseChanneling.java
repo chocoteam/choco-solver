@@ -175,7 +175,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         if (index < nbX) {
             int i = index;
             int j = X[i].getValue() + Ox;
-            modified = Y[j].instantiateTo(i - Oy, this, false);
+            modified = Y[j].instantiateTo(i - Oy, this);
             // j" =\= j, Y[j"] =\= i - Oy[j"]
             for (int jj = 0; jj < nbY; jj++) {
                 if (jj != j) {
@@ -187,7 +187,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         else {
             int j = index - nbX;
             int i = Y[j].getValue() + Oy;
-            modified = X[i].instantiateTo(j - Ox, this, false);
+            modified = X[i].instantiateTo(j - Ox, this);
             // i" =\= i, X[i"] =\= j - Ox[i"]
             for (int ii = 0; ii < nbX; ii++) {
                 if (ii != i) {

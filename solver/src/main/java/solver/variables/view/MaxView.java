@@ -149,10 +149,10 @@ public class MaxView extends AbstractViewWithDomain {
                     A.updateUpperBound(val, this, false);
                     B.updateUpperBound(val, this, false);
                     if (!A.contains(val)) {
-                        B.instantiateTo(val, this, false);
+                        B.instantiateTo(val, this);
                     }
                     if (!B.contains(val)) {
-                        A.instantiateTo(val, this, false);
+                        A.instantiateTo(val, this);
                     }
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
@@ -179,7 +179,7 @@ public class MaxView extends AbstractViewWithDomain {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -195,10 +195,10 @@ public class MaxView extends AbstractViewWithDomain {
             A.updateUpperBound(value, this, false);
             B.updateUpperBound(value, this, false);
             if (!A.contains(value)) {
-                B.instantiateTo(value, this, false);
+                B.instantiateTo(value, this);
             }
             if (!B.contains(value)) {
-                A.instantiateTo(value, this, false);
+                A.instantiateTo(value, this);
             }
 
             this.notifyMonitors(EventType.INSTANTIATE, cause);

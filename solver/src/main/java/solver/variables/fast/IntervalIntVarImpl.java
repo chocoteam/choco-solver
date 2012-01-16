@@ -189,15 +189,11 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      *
      * @param value       instantiation value (int)
      * @param cause       instantiation releaser
-     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         solver.getExplainer().instantiateTo(this, value, cause);
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);

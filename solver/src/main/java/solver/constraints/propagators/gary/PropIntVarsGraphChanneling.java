@@ -100,7 +100,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             if (g.getKernelGraph().getNeighborsOf(i).neighborhoodSize() == 1) {
                 if (i < intVars.length) {
-                    intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this, false);
+                    intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
                 }
             }
         }
@@ -207,9 +207,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             int from = i / n - 1;
             int to = i % n;
             if (from < to) {
-                intVars[from].instantiateTo(values[to], p, false);
+                intVars[from].instantiateTo(values[to], p);
             } else {
-                intVars[to].instantiateTo(values[from], p, false);
+                intVars[to].instantiateTo(values[from], p);
             }
         }
 

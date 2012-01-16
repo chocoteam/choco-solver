@@ -84,7 +84,7 @@ public class SqrViewTest {
             Assert.assertEquals(X.getDomainSize(), 5);
             Assert.assertEquals(Z.getDomainSize(), X.getDomainSize());
 
-            Z.instantiateTo(25, Cause.Null, false);
+            Z.instantiateTo(25, Cause.Null);
             Assert.assertTrue(X.instantiated());
             Assert.assertEquals(X.getValue(), 5);
 

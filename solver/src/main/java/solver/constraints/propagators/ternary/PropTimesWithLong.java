@@ -61,10 +61,10 @@ public class PropTimesWithLong extends PropTimes {
     @Override
     protected void awakeOnX() throws ContradictionException {
         if (v0.instantiatedTo(0)) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
         }
         if ((v2.instantiatedTo(0)) && (!v0.contains(0))) {
-            v1.instantiateTo(0, this, false);
+            v1.instantiateTo(0, this);
         } else if (!v2.contains(0)) {
             updateYandX();
         } else if (!(v2.instantiatedTo(0))) {
@@ -81,10 +81,10 @@ public class PropTimesWithLong extends PropTimes {
     @Override
     protected void awakeOnY() throws ContradictionException {
         if (v1.instantiatedTo(0)) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
         }
         if ((v2.instantiatedTo(0)) && (!v1.contains(0))) {
-            v0.instantiateTo(0, this, false);
+            v0.instantiateTo(0, this);
         } else if (!v2.contains(0)) {
             updateXandY();
         } else if (!(v2.instantiatedTo(0))) {
@@ -400,7 +400,7 @@ public class PropTimesWithLong extends PropTimes {
         int xmin = (int)Math.max(getXminIfNonZero(), MIN);
         int xmax = (int)Math.min(getXmaxIfNonZero(), MAX);
         if ((xmin > v0.getUB()) || (xmax < v0.getLB())) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
@@ -414,7 +414,7 @@ public class PropTimesWithLong extends PropTimes {
         int ymin = (int)Math.max(getYminIfNonZero(), MIN);
         int ymax = (int)Math.min(getYmaxIfNonZero(), MAX);
         if ((ymin > v1.getUB()) || (ymax < v1.getLB())) {
-            v2.instantiateTo(0, this, false);
+            v2.instantiateTo(0, this);
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {

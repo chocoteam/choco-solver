@@ -92,7 +92,7 @@ public class ViewSumXYTest {
             Assert.assertEquals(X.getDomainSize(), 4);
             Assert.assertEquals(Y.getDomainSize(), 4);
 
-            Y.instantiateTo(-5, Cause.Null, false);
+            Y.instantiateTo(-5, Cause.Null);
             Assert.assertTrue(X.instantiated());
             Assert.assertTrue(Y.instantiated());
             Assert.assertEquals(X.getValue(), 5);

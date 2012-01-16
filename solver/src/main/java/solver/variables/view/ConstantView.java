@@ -124,7 +124,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");

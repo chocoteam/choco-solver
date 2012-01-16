@@ -167,11 +167,8 @@ public final class BitsetXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int lb = LB.get();
         if (this.instantiated()) {
             if (value != lb) {

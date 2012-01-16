@@ -133,9 +133,9 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == 0)
-            return instantiateTo(1, cause, informCause);
+            return instantiateTo(1, cause);
         else if (value == 1)
-            return instantiateTo(0, cause, informCause);
+            return instantiateTo(0, cause);
         return false;
     }
 
@@ -172,18 +172,14 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       instantiation value (int)
      * @param cause       instantiation releaser
-     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -227,7 +223,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *          if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        return value > 0 && instantiateTo(value, cause, informCause);
+        return value > 0 && instantiateTo(value, cause);
     }
 
     /**
@@ -250,17 +246,17 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *          if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        return value < 1 && instantiateTo(value, cause, informCause);
+        return value < 1 && instantiateTo(value, cause);
     }
 
     @Override
     public boolean setToTrue(ICause cause, boolean informCause) throws ContradictionException {
-        return instantiateTo(1, cause, informCause);
+        return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause, boolean informCause) throws ContradictionException {
-        return instantiateTo(0, cause, informCause);
+        return instantiateTo(0, cause);
     }
 
     public boolean instantiated() {

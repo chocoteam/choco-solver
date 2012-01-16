@@ -235,17 +235,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       instantiation value (int)
      * @param cause       instantiation releaser
-     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);

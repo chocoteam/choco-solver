@@ -56,12 +56,12 @@ public class BoundGlobalCardinlityTest {
 
         solver.post(GlobalCardinality.make(vars, card, 0, solver));
 
-        vars[0].instantiateTo(0, Cause.Null, false);
-        vars[1].instantiateTo(1, Cause.Null, false);
-        vars[2].instantiateTo(3, Cause.Null, false);
-        vars[3].instantiateTo(2, Cause.Null, false);
-        vars[4].instantiateTo(0, Cause.Null, false);
-        vars[5].instantiateTo(0, Cause.Null, false);
+        vars[0].instantiateTo(0, Cause.Null);
+        vars[1].instantiateTo(1, Cause.Null);
+        vars[2].instantiateTo(3, Cause.Null);
+        vars[3].instantiateTo(2, Cause.Null);
+        vars[4].instantiateTo(0, Cause.Null);
+        vars[5].instantiateTo(0, Cause.Null);
 
         solver.set(StrategyFactory.presetI(ArrayUtils.append(vars, card), solver.getEnvironment()));
         solver.findAllSolutions();

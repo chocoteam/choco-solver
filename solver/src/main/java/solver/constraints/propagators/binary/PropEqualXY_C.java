@@ -136,8 +136,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     }
 
     void awakeOnInst(int index) throws ContradictionException {
-        if (index == 0) y.instantiateTo(cste - x.getValue(), this, false);
-        else x.instantiateTo(cste - y.getValue(), this, false);
+        if (index == 0) y.instantiateTo(cste - x.getValue(), this);
+        else x.instantiateTo(cste - y.getValue(), this);
     }
 
     void awakeOnLow(int index) throws ContradictionException {

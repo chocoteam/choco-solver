@@ -231,7 +231,7 @@ public class PropCount extends Propagator<IntVar> {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
                         //nbSure.add(1); // must be dealed by the event listener not here !!
-                        aRelevantVar.instantiateTo(occval,  this, true);//CPRU not idempotent
+                        aRelevantVar.instantiateTo(occval,  this);//CPRU not idempotent
                     }
                 }
             }

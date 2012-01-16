@@ -86,7 +86,7 @@ public class MaxViewTest {
             Assert.assertEquals(X.getDomainSize(), 11);
             Assert.assertEquals(Y.getDomainSize(), 29);
 
-            Z.instantiateTo(5, Cause.Null, false);
+            Z.instantiateTo(5, Cause.Null);
             Assert.assertEquals(X.getUB(), 5);
             Assert.assertEquals(Y.getUB(), 5);
 

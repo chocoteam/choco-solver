@@ -129,7 +129,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
@@ -138,7 +138,7 @@ public class MinusView extends View<IntVar> {
             }
             return false;
         } else if (contains(value)) {
-            boolean done = var.instantiateTo(-value, this, informCause);
+            boolean done = var.instantiateTo(-value, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;

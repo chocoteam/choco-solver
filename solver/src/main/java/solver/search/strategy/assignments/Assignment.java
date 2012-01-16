@@ -54,7 +54,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause, false);
+            var.instantiateTo(value, cause);
         }
 
         @Override
@@ -77,7 +77,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause, false);
+            var.instantiateTo(value, cause);
         }
 
         @Override

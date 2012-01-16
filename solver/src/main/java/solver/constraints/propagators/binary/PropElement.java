@@ -120,7 +120,7 @@ public class PropElement extends Propagator<IntVar> {
 
     void awakeOnInst(int index) throws ContradictionException {
         if (index == 1) {  // index (should be only that)
-            this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], this, false);
+            this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], this);
             this.setPassive();
         }
     }
