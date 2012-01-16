@@ -70,7 +70,7 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
@@ -97,7 +97,7 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	}
 	
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];

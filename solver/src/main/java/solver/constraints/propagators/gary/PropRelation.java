@@ -150,14 +150,14 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	private void apply(int x, int y) throws ContradictionException{
-		relation.applyTrue(x,y, solver, this, true);//CPRU not idempotent
+		relation.applyTrue(x,y, solver, this);//CPRU not idempotent
 	}
 
 	private void unapply(int x, int y) throws ContradictionException{
 		if(relation.isDirected() && !g.getEnvelopGraph().arcExists(y,x)){
-			relation.applySymmetricFalse(x,y, solver, this, true);//CPRU not idempotent
+			relation.applySymmetricFalse(x,y, solver, this);//CPRU not idempotent
 		}else{
-			relation.applyFalse(x,y, solver, this, true); //CPRU not idempotent
+			relation.applyFalse(x,y, solver, this); //CPRU not idempotent
 		}
 	}
 
