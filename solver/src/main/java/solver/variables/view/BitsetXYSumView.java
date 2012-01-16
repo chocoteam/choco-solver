@@ -58,6 +58,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     public BitsetXYSumView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
+        this.reactOnRemoval = true;
         int lbA = A.getLB();
         int ubA = A.getUB();
         int lbB = B.getLB();
@@ -336,9 +337,9 @@ public final class BitsetXYSumView extends AbstractSumView {
                 nb--;
             }
             if (nb == 0 && i < getUB()) {
-                s.append("...,");
+                s.append("...,").append(this.getUB());
             }
-            s.append(this.getUB()).append('}');
+            s.append('}');
 
             return String.format("(%s + %s) = %s", A, B, s.toString());
         }
