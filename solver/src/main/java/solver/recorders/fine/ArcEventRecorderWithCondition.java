@@ -67,6 +67,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
+        assert cause != propagator: cause +" is not idempotent";
         if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
             // 1. if instantiation, then decrement arity of the propagator
             if (EventType.anInstantiationEvent(evt.mask)) {

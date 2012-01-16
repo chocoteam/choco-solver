@@ -117,6 +117,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
+        assert cause != propagator: cause +" is not idempotent";
         if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
 //            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
             // 1. clear the structure if necessary
