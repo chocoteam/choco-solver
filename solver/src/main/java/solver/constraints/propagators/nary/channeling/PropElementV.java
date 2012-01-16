@@ -292,7 +292,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);
+                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getLB() > valVar.getLB()) {
@@ -303,7 +303,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         minval = Math.min(minval, vars[feasibleIndex].getLB());
                     }
-                    valVar.updateLowerBound(minval, this, true);
+                    valVar.updateLowerBound(minval, this, true);//CPRU not idempotent
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -335,7 +335,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);
+                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getUB() < valVar.getUB()) {
@@ -346,7 +346,7 @@ public class PropElementV extends Propagator<IntVar> {
                         int feasibleIndex = val + this.offset;
                         maxval = Math.max(maxval, vars[feasibleIndex].getUB());
                     }
-                    valVar.updateUpperBound(maxval, this, true);
+                    valVar.updateUpperBound(maxval, this, true);//CPRU not idempotent
                     // NOCAUSE because if valVar takes a new min, then it can have consequence
                     // on the constraint itself (ie remove indices such that l[i].sup < value.inf)
                 }
@@ -374,7 +374,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);
+                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else {
@@ -412,7 +412,7 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!existsSupport) {
-                    valVar.removeValue(x, this, true);
+                    valVar.removeValue(x, this, true);//CPRU not idempotent
                 }
             }
         }

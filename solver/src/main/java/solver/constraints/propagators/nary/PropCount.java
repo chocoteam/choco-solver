@@ -224,14 +224,14 @@ public class PropCount extends Propagator<IntVar> {
 
     public void checkNbPossible() throws ContradictionException {
         if (constrainOnInfNumber) {
-            vars[nbListVars].updateUpperBound(nbPossible.get(), this, true);
+            vars[nbListVars].updateUpperBound(nbPossible.get(), this, true);//CPRU not idempotent
             if (vars[nbListVars].instantiatedTo(nbPossible.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
                     //for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
                         //nbSure.add(1); // must be dealed by the event listener not here !!
-                        aRelevantVar.instantiateTo(occval,  this, true);
+                        aRelevantVar.instantiateTo(occval,  this, true);//CPRU not idempotent
                     }
                 }
             }
@@ -240,14 +240,14 @@ public class PropCount extends Propagator<IntVar> {
 
     public void checkNbSure() throws ContradictionException {
         if (constrainOnSupNumber) {
-            vars[nbListVars].updateLowerBound(nbSure.get(), this, true);
+            vars[nbListVars].updateLowerBound(nbSure.get(), this, true); //CPRU not idempotent
             if (vars[nbListVars].instantiatedTo(nbSure.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
 //                for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
                         //nbPossible.add(-1);
-                        aRelevantVar.removeValue(occval,  this, true);
+                        aRelevantVar.removeValue(occval,  this, true); //CPRU not idempotent
                     }
                 }
             }

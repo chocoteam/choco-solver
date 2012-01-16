@@ -81,7 +81,7 @@ public class MinObjectiveManager extends IObjectiveManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        this.objective.updateUpperBound(bestKnownUpperBound - 1, this, true);
+        this.objective.updateUpperBound(bestKnownUpperBound - 1, this, false);
     }
 
     @Override

@@ -458,7 +458,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] > x) {
                 w = pathmax(h, h[x]);
 //                updateLowerBound(maxsorted[i].var, bounds[w], maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(bounds[w], this, true);
+                maxsorted[i].var.updateLowerBound(bounds[w], this, true); //CPRU not idempotent
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[y], bounds[z] - 1)) {
@@ -728,7 +728,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbInf--;
         }
         if (nbInf == getMaxOcc(inf - offset)) {
-            vars[i].updateLowerBound(inf + 1, this, true);
+            vars[i].updateLowerBound(inf + 1, this, true);//CPRU not idempotent
         }
     }
 
@@ -740,7 +740,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbSup--;
         }
         if (nbSup == getMaxOcc(sup - offset)) {
-            vars[i].updateUpperBound(sup - 1, this, true);
+            vars[i].updateUpperBound(sup - 1, this, true);//CPRU not idempotent
         }
     }
 
@@ -759,7 +759,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         } else if (nbvalsure == getMaxOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (!vars[j].instantiatedTo(val)) {
-                    vars[j].removeValue(val, this, true);// not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].removeValue(val, this, true);//CPRU not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }
@@ -800,7 +800,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         public void execute(int i) throws ContradictionException {
             int o = p.offset;
             p.val_maxOcc[i - o].add(-1);
-            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), this.p, true);
+            p.card[i - o].updateUpperBound(p.val_maxOcc[i - o].get(), this.p, true);//CPRU not idempotent
         }
     }
 

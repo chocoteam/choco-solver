@@ -293,19 +293,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
     }
 
-//    /**
-//     * BEWARE: this method should not be removed!!
-//     * It is called by reflection within ReifiedConstraint
-//     */
-//    @SuppressWarnings({"UnusedDeclaration", "unchecked"})
-//    public void unlinkVariables() {
-//        for (; lastER > 0; lastER--) {
-//            AbstractFineEventRecorder recorder = fineER[lastER - 1];
-//            recorder.getVariable().removeMonitor(recorder);
-//            fineER[lastER - 1] = null;
-//        }
-//    }
-
     /**
      * Returns the constraint including this propagator
      *
