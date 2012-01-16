@@ -122,14 +122,14 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
-            boolean done = var.removeInterval(-to, -from, this, informCause);
-            done |= var.removeInterval(from, to, this, informCause);
+            boolean done = var.removeInterval(-to, -from, this);
+            done |= var.removeInterval(from, to, this);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -149,7 +149,7 @@ public final class AbsView extends View<IntVar> {
         done |= var.updateUpperBound(v, this, informCause);
         EventType evt = EventType.DECUPP;
         if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, this, informCause);
+            done |= var.removeInterval(-v + 1, v - 1, this);
             evt = EventType.INSTANTIATE;
         }
         if (done) {
@@ -164,7 +164,7 @@ public final class AbsView extends View<IntVar> {
         if (value <= 0) {
             return false;
         }
-        boolean done = var.removeInterval(-value + 1, value - 1, this, informCause);
+        boolean done = var.removeInterval(-value + 1, value - 1, this);
         if (done) {
             notifyMonitors(EventType.INCLOW, cause);
         }

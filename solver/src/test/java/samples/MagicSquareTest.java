@@ -86,10 +86,10 @@ public class MagicSquareTest {
         solver.propagate();
         ((IntVar) vars[0]).instantiateTo(3, Cause.Null, false);
         ((IntVar) vars[15]).instantiateTo(4, Cause.Null, false);
-        ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null, false);
+        ((IntVar) vars[5]).removeInterval(11, 15, Cause.Null);
         ((IntVar) vars[1]).removeValue(2, Cause.Null);
-        ((IntVar) vars[9]).removeInterval(1, 2, Cause.Null, false);
-        ((IntVar) vars[13]).removeInterval(1, 2, Cause.Null, false);
+        ((IntVar) vars[9]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[13]).removeInterval(1, 2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(6, Cause.Null, false);
         solver.propagate();
         LoggerFactory.getLogger("test").error("************************");
@@ -124,7 +124,7 @@ public class MagicSquareTest {
         solver.propagate();
         ((IntVar) vars[14]).removeValue(1, Cause.Null);
         solver.propagate();
-        ((IntVar) vars[12]).removeInterval(9, 14, Cause.Null, false);
+        ((IntVar) vars[12]).removeInterval(9, 14, Cause.Null);
         solver.propagate();
         Assert.assertTrue(((IntVar) vars[13]).instantiatedTo(1));
 

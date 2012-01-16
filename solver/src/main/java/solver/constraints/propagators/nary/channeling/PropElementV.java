@@ -239,14 +239,14 @@ public class PropElementV extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        valVar.removeInterval(left, right, this, false);
+                        valVar.removeInterval(left, right, this);
                         left = val;
                         right = val;
                     }
                     //valVar.removeValue(val, this);
                 }
             }
-            valVar.removeInterval(left, right, this, false);
+            valVar.removeInterval(left, right, this);
         }
         if (valVar.hasEnumeratedDomain()) {
             int left = Integer.MIN_VALUE;
@@ -257,14 +257,14 @@ public class PropElementV extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        targetVar.removeInterval(left, right, this, false);
+                        targetVar.removeInterval(left, right, this);
                         left = val;
                         right = val;
                     }
 //                    targetVar.removeValue(val, this);
                 }
             }
-            targetVar.removeInterval(left, right, this, false);
+            targetVar.removeInterval(left, right, this);
         }
     }
 

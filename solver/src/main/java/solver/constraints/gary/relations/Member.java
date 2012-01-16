@@ -90,10 +90,10 @@ public class Member extends GraphRelation<IntVar> {
 		}
 		IntVar x = vars[var1];
 		if(x.getLB()<firstVal){
-			x.removeInterval(x.getLB(), firstVal-1, cause, informCause);
+			x.removeInterval(x.getLB(), firstVal-1, cause);
 		}
 		if(x.getUB()>lastVal){
-			x.removeInterval(lastVal+1, x.getUB(), cause, informCause);
+			x.removeInterval(lastVal+1, x.getUB(), cause);
 		}
 		if(x.hasEnumeratedDomain()){
 			int up = x.getUB();
@@ -120,7 +120,7 @@ public class Member extends GraphRelation<IntVar> {
 				}
 			}
 		}else{
-			x.removeInterval(firstVal, lastVal, cause, informCause);
+			x.removeInterval(firstVal, lastVal, cause);
 		}
 	}
 	

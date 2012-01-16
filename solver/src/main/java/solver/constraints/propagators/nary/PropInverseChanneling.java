@@ -143,12 +143,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        X[i].removeInterval(left, right, this, false);
+                        X[i].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            X[i].removeInterval(left, right, this, false);
+            X[i].removeInterval(left, right, this);
         }
         // Y[j] = i' && i' = i - Oy[j] => 0 <= i < nbX
         for (int j = 0; j < nbY; j++) {
@@ -160,12 +160,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        Y[j].removeInterval(left, right, this, false);
+                        Y[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            Y[j].removeInterval(left, right, this, false);
+            Y[j].removeInterval(left, right, this);
         }
     }
 

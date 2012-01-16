@@ -79,7 +79,7 @@ public class MaxViewTest {
             Assert.assertEquals(X.getUB(), 9);
             Assert.assertEquals(Y.getUB(), 9);
 
-            Z.removeInterval(7, 9, Cause.Null, false);
+            Z.removeInterval(7, 9, Cause.Null);
             Assert.assertEquals(X.getUB(), 6);
             Assert.assertEquals(Y.getUB(), 6);
 

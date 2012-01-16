@@ -153,13 +153,13 @@ public class PropLexChain extends Propagator<IntVar> {
         i += 1;
         while (i < N && x[i].getLB() == b[i] && x[i].getUB() == a[i]) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, this, false);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
             i++;
         }
         if (i < N) {
             if (x[i].hasEnumeratedDomain()) {
-                x[i].removeInterval(b[i] + 1, a[i] - 1, this, false);
+                x[i].removeInterval(b[i] + 1, a[i] - 1, this);
             }
         }
     }

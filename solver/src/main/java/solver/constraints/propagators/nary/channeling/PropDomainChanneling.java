@@ -101,7 +101,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 if (i == right + 1) {
                     right = i;
                 } else {
-                    vars[dsize].removeInterval(left, right, this, false);
+                    vars[dsize].removeInterval(left, right, this);
                     left = i;
                     right = i;
                 }
@@ -113,7 +113,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 clearBoolean(i);
             }
         }
-        vars[dsize].removeInterval(left, right, this, false);
+        vars[dsize].removeInterval(left, right, this);
         if (vars[dsize].instantiated()) {
             final int value = vars[dsize].getValue();
             clearBooleanExcept(value);

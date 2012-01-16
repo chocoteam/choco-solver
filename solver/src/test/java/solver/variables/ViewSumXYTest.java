@@ -81,7 +81,7 @@ public class ViewSumXYTest {
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
-            Y.removeInterval(-8, -6, Cause.Null, false);
+            Y.removeInterval(-8, -6, Cause.Null);
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));

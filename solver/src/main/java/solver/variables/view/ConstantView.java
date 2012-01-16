@@ -115,7 +115,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");

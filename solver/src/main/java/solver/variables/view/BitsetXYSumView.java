@@ -139,7 +139,7 @@ public final class BitsetXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         int lb = getLB();
         if (from <= lb && lb <= to) {
             return updateLowerBound(to + 1, cause, informCause);

@@ -118,14 +118,14 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
 //        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
-            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
+            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }

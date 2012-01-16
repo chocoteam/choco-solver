@@ -130,7 +130,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[j].removeInterval(left, right, this, false);
+                        vars[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
@@ -141,12 +141,12 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[j].removeInterval(left, right, this, false);
+                        vars[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            vars[j].removeInterval(left, right, this, false);
+            vars[j].removeInterval(left, right, this);
         }
     }
 

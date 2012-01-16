@@ -129,7 +129,7 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
@@ -137,8 +137,8 @@ public final class SqrView extends View<IntVar> {
         } else {
             from = floor_sqrt(from);
             to = floor_sqrt(to);
-            boolean done = var.removeInterval(-to, -from, cause, informCause);
-            done |= var.removeInterval(from, to, cause, informCause);
+            boolean done = var.removeInterval(-to, -from, cause);
+            done |= var.removeInterval(from, to, cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -159,7 +159,7 @@ public final class SqrView extends View<IntVar> {
             done |= var.updateUpperBound(v, this, informCause);
             EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
-                done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
+                done |= var.removeInterval(-v + 1, v - 1, cause);
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
@@ -181,7 +181,7 @@ public final class SqrView extends View<IntVar> {
             return false;
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this, informCause);
+        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this);
         if (done) {
             notifyMonitors(EventType.INCLOW, cause);
         }

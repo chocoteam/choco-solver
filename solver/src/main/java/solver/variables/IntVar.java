@@ -82,12 +82,11 @@ public interface IntVar extends Variable<IntDelta> {
      * @param from  lower bound of the interval to remove (int)
      * @param to    upper bound of the interval to remove(int)
      * @param cause removal releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean removeInterval(int from, int to, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeInterval(int from, int to, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.

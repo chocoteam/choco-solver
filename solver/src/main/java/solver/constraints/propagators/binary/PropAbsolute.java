@@ -154,12 +154,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[0].removeInterval(left, right, this, false);
+                        vars[0].removeInterval(left, right, this);
                         left = right = value;
                     }
                 }
             }
-            vars[0].removeInterval(left, right, this, false);
+            vars[0].removeInterval(left, right, this);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -207,12 +207,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[1].removeInterval(left, right, this, false);
+                        vars[1].removeInterval(left, right, this);
                         left = right = value;
                     }
                 }
             }
-            vars[1].removeInterval(left, right, this, false);
+            vars[1].removeInterval(left, right, this);
         }else{
             int value = vars[1].getLB();
             int nlb = value - 1;

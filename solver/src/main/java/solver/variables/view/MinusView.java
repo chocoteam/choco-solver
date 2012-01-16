@@ -114,13 +114,13 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause, informCause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
-            boolean done = var.removeInterval(-to, -from, cause, informCause);
+            boolean done = var.removeInterval(-to, -from, cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }

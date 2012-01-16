@@ -278,12 +278,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                     if (j == right + 1) {
                         right = j;
                     } else {
-                        vs[i].removeInterval(left, right, this, false);//, false);
+                        vs[i].removeInterval(left, right, this);//, false);
                         left = right = j;
                     }
                 }
             }
-            vs[i].removeInterval(left, right, this, false);//, false);
+            vs[i].removeInterval(left, right, this);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }

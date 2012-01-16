@@ -76,7 +76,7 @@ public class SqrViewTest {
             Assert.assertFalse(X.contains(-4));
             Assert.assertFalse(X.contains(4));
 
-            Z.removeInterval(36, 64, Cause.Null, false);
+            Z.removeInterval(36, 64, Cause.Null);
             Assert.assertFalse(X.contains(6));
             Assert.assertFalse(X.contains(7));
             Assert.assertFalse(X.contains(8));

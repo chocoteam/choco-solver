@@ -168,7 +168,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      * {@inheritDoc}
      */
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB())
             return updateLowerBound(to + 1, cause, informCause);
         else if (getUB() <= to)
