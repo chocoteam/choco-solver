@@ -185,7 +185,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(Math.abs(remVal), this, false);
+            vars[0].removeValue(Math.abs(remVal), this);
         }
     }
 
@@ -238,8 +238,8 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
         if (!vars[0].contains(-remVal)) {
-        vars[1].removeValue(remVal, this, false);
-        vars[1].removeValue(-remVal, this, false);
+        vars[1].removeValue(remVal, this);
+        vars[1].removeValue(-remVal, this);
     }
     }
 

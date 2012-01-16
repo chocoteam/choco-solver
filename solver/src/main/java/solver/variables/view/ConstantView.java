@@ -106,7 +106,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");

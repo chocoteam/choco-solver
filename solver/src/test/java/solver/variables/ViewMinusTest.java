@@ -74,7 +74,7 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
-            Y.removeValue(-4, Cause.Null, false);
+            Y.removeValue(-4, Cause.Null);
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 

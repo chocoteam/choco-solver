@@ -281,7 +281,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         int val = vars[i].getValue();
         for (int j = 0; j < vars.length; j++) {
             if (j != i) {
-                vars[j].removeValue(val, this, false);
+                vars[j].removeValue(val, this);
             }
         }
         /*int idx = ivIdx.get();

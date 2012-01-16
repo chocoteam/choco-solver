@@ -60,12 +60,9 @@ public final class IntervalXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {

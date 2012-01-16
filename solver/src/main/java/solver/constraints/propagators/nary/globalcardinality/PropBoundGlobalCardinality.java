@@ -759,7 +759,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         } else if (nbvalsure == getMaxOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (!vars[j].instantiatedTo(val)) {
-                    vars[j].removeValue(val, this, true);//CPRU not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].removeValue(val, this);//CPRU not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }

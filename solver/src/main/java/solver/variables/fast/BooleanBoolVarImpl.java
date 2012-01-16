@@ -124,14 +124,14 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
+     *
      * @param value       value to remove from the domain (int)
      * @param cause       removal releaser
-     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == 0)
             return instantiateTo(1, cause, informCause);
         else if (value == 1)
@@ -151,7 +151,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause, informCause);
+                anyChange |= removeValue(v, cause);
             }
             return anyChange;
         } else {

@@ -298,7 +298,7 @@ public class StoredDirectedMultiGraph {
 
             if (support.isEmpty()) {
                 IntVar var = propagator.getVar(layer);
-                var.removeValue(value, propagator, false);//, false);
+                var.removeValue(value, propagator);//, false);
             }
         }
 

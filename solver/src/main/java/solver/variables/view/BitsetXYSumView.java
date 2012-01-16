@@ -84,12 +84,8 @@ public final class BitsetXYSumView extends AbstractSumView {
     /////////////// SERVICES REQUIRED FROM INTVAR //////////////////////////
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
-        ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         boolean change = false;
         int inf = getLB();
         int sup = getUB();
@@ -165,7 +161,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 //        return change;
         boolean anyChange = false;
         for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-            anyChange |= removeValue(v, cause, false);
+            anyChange |= removeValue(v, cause);
         }
         return anyChange;
     }

@@ -95,7 +95,7 @@ public class PropMax extends Propagator<IntVar> {
             if (v0.hasEnumeratedDomain()) {
                 for (int valeur = v0.getLB(); valeur <= v0.getUB(); valeur = v0.nextValue(valeur)) {
                     if (!v1.contains(valeur) && !v2.contains(valeur)) {
-                        v0.removeValue(valeur, this, false);
+                        v0.removeValue(valeur, this);
                     }
                 }
             }
@@ -109,7 +109,7 @@ public class PropMax extends Propagator<IntVar> {
             if (v1.hasEnumeratedDomain()) {
                 for (int valeur = v1.getLB(); valeur <= v1.getUB(); valeur = v1.nextValue(valeur)) {
                     if (!v0.contains(valeur) && valeur > v2.getUB()) {
-                        v1.removeValue(valeur, this, false);
+                        v1.removeValue(valeur, this);
                     }
                 }
             }
@@ -123,7 +123,7 @@ public class PropMax extends Propagator<IntVar> {
             if (v2.hasEnumeratedDomain()) {
                 for (int valeur = v2.getLB(); valeur <= v2.getUB(); valeur = v2.nextValue(valeur)) {
                     if (!v0.contains(valeur) && valeur > v1.getUB()) {
-                        v2.removeValue(valeur, this, false);
+                        v2.removeValue(valeur, this);
                     }
                 }
             }
@@ -188,15 +188,15 @@ public class PropMax extends Propagator<IntVar> {
     public void awakeOnRem(int idx, int x) throws ContradictionException {
         if (idx == 0) {
             if (x > v2.getUB()) {
-                v1.removeValue(x, this, false);
+                v1.removeValue(x, this);
             }
 
             if (x > v1.getUB()) {
-                v2.removeValue(x, this, false);
+                v2.removeValue(x, this);
             }
         } else {
             if (!v1.contains(x) && !v2.contains(x)) {
-                v0.removeValue(x, this, false);
+                v0.removeValue(x, this);
             }
         }
     }

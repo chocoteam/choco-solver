@@ -101,13 +101,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val - cste))) {
-                    x.removeValue(val, this, false);
+                    x.removeValue(val, this);
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val + cste))) {
-                    y.removeValue(val, this, false);
+                    y.removeValue(val, this);
                 }
             }
         }
@@ -152,9 +152,9 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     void awakeOnRem(int index, int val) throws ContradictionException {
-        if (index == 0) y.removeValue(val - cste, this, false);
+        if (index == 0) y.removeValue(val - cste, this);
         else {
-            x.removeValue(val + cste, this, false);
+            x.removeValue(val + cste, this);
         }
     }
 

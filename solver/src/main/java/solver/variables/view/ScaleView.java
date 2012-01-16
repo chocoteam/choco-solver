@@ -84,7 +84,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
 //        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
         if (value % cste == 0) {
@@ -97,7 +97,7 @@ public final class ScaleView extends View<IntVar> {
                 if (inf <= value && value <= sup) {
                     EventType e = EventType.REMOVE;
 
-                    boolean done = var.removeValue(value / cste, this, informCause);
+                    boolean done = var.removeValue(value / cste, this);
                     if (done) {
                         if (value == inf) {
                             e = EventType.INCLOW;

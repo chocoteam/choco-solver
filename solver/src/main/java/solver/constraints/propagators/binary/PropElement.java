@@ -110,7 +110,7 @@ public class PropElement extends Propagator<IntVar> {
             if (this.vars[1].hasEnumeratedDomain()) {
                 for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
                     if (this.vars[1].contains(i) && !(this.vars[0].contains(this.lval[i - this.cste])))
-                        hasChange |= this.vars[1].removeValue(i, this, repropag);
+                        hasChange |= this.vars[1].removeValue(i, this); // CPRU not idempotent
                 }
             }
         } while (hasChange && !this.vars[0].hasEnumeratedDomain());

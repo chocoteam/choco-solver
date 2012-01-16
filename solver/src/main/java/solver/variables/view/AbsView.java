@@ -97,7 +97,7 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
@@ -110,8 +110,8 @@ public final class AbsView extends View<IntVar> {
         } else if (value == sup) {
             evt = EventType.DECUPP;
         }
-        boolean done = var.removeValue(-value, this, informCause);
-        done |= var.removeValue(value, this, informCause);
+        boolean done = var.removeValue(-value, this);
+        done |= var.removeValue(value, this);
         if(instantiated()){
             evt = EventType.INSTANTIATE;
         }

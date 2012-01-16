@@ -135,21 +135,18 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code></li>
      * </ul>
      *
+     *
      * @param value       value to remove from the domain (int)
      * @param cause       removal releaser
-     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         boolean change = false;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -219,7 +216,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         else {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause, informCause);
+                anyChange |= removeValue(v, cause);
             }
             return anyChange;
         }

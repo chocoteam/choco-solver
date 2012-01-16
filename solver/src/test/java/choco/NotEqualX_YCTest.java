@@ -100,7 +100,7 @@ public class NotEqualX_YCTest {
             s.propagate();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 2);
-            vars[1].removeValue(2, Cause.Null, false);
+            vars[1].removeValue(2, Cause.Null);
             s.propagate();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 0);

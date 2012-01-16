@@ -233,9 +233,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             int from = i / n - 1;
             int to = i % n;
             if (from < to) {
-                intVars[from].removeValue(values[to], p, false);
+                intVars[from].removeValue(values[to], p);
             } else {
-                intVars[to].removeValue(values[from], p, false);
+                intVars[to].removeValue(values[from], p);
             }
         }
 

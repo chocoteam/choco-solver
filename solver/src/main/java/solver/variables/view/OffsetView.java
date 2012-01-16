@@ -88,7 +88,7 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -99,7 +99,7 @@ public final class OffsetView extends View<IntVar> {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(value - cste, this, informCause);
+                boolean done = var.removeValue(value - cste, this);
                 if (done) {
                     if (value == inf) {
                         e = EventType.INCLOW;

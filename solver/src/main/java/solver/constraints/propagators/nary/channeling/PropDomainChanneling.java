@@ -146,7 +146,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                     //Next line should be useless ?
                     clearBooleanExcept(idxVarInProp);
                 } else {
-                    vars[dsize].removeValue(idxVarInProp, this, false);
+                    vars[dsize].removeValue(idxVarInProp, this);
                     if (vars[dsize].instantiated()) {
                         vars[vars[dsize].getValue()].instantiateTo(1, this, false);
                     }

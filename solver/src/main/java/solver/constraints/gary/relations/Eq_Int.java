@@ -83,13 +83,13 @@ public class Eq_Int extends GraphRelation<IntVar> {
 				int ub = x.getUB();
 				for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
 					if (!(y.contains(val))) {
-						x.removeValue(val, cause, informCause);
+						x.removeValue(val, cause);
 					}
 				}
 				ub = y.getUB();
 				for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
 					if (!(x.contains(val))) {
-						y.removeValue(val, cause, informCause);
+						y.removeValue(val, cause);
 					}
 				}
 			}
@@ -102,9 +102,9 @@ public class Eq_Int extends GraphRelation<IntVar> {
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue(), cause, informCause);
+	            y.removeValue(x.getValue(), cause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue(), cause, informCause);
+	        	x.removeValue(y.getValue(), cause);
 	        }
 		}else{
 			vars[var1].contradiction(cause, EventType.REMOVE, "x != x");

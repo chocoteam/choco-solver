@@ -193,7 +193,7 @@ public class IntLinCombTest {
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null, false);
         sum.propagate();
         AbstractSearchLoop.timeStamp++;
-        ((IntVar) vars[2]).removeValue(-2, Cause.Null, false);
+        ((IntVar) vars[2]).removeValue(-2, Cause.Null);
         sum.propagate();
         Assert.assertTrue(vars[2].instantiated());
     }

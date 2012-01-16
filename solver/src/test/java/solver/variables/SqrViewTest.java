@@ -72,7 +72,7 @@ public class SqrViewTest {
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(X.getLB(), -4);
 
-            Z.removeValue(16, Cause.Null, false);
+            Z.removeValue(16, Cause.Null);
             Assert.assertFalse(X.contains(-4));
             Assert.assertFalse(X.contains(4));
 

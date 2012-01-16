@@ -99,7 +99,7 @@ public class Member extends GraphRelation<IntVar> {
 			int up = x.getUB();
 			for(int v=x.getLB(); v<=up; v = x.nextValue(v)){
 				if(!values.get(v-firstVal)){
-					x.removeValue(v, cause, informCause);
+					x.removeValue(v, cause);
 				}
 			}
 		}
@@ -116,7 +116,7 @@ public class Member extends GraphRelation<IntVar> {
 			int lb = Math.max(firstVal,x.getLB());
 			for(int v=lb; v<=up; v = x.nextValue(v)){
 				if(values.get(v-firstVal)){
-					x.removeValue(v, cause, informCause);
+					x.removeValue(v, cause);
 				}
 			}
 		}else{

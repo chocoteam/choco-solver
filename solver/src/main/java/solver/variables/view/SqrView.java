@@ -101,7 +101,7 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
@@ -116,8 +116,8 @@ public final class SqrView extends View<IntVar> {
             } else if (value == sup) {
                 evt = EventType.DECUPP;
             }
-            boolean done = var.removeValue(-rootV, this, informCause);
-            done |= var.removeValue(rootV, this, informCause);
+            boolean done = var.removeValue(-rootV, this);
+            done |= var.removeValue(rootV, this);
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
             }

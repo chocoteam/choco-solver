@@ -90,9 +90,9 @@ public class Dist_Int extends GraphRelation<IntVar> {
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
 			if (x.instantiated()) {
-	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause, informCause);
+	            y.removeValue(x.getValue()+distanceMatrix[var1][var2], cause);
 	        } else if (y.instantiated()) {
-	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause, informCause);
+	        	x.removeValue(y.getValue()-distanceMatrix[var1][var2], cause);
 	        }
 		}else if(distanceMatrix[var1][var2]==0){
 //			vars[var1].contradiction(prop, "x != x"); 

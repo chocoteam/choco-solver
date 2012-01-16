@@ -178,7 +178,7 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!possibleV) {
-                    valVar.removeValue(v, this, false);
+                    valVar.removeValue(v, this);
                 }
             }
         }
@@ -207,7 +207,7 @@ public class PropElementV extends Propagator<IntVar> {
         if (idxVar.hasEnumeratedDomain()) { //those remVal would be ignored for variables using an interval approximation for domain
             for (int i = minFeasibleIndex + 1; i < maxFeasibleIndex - 1; i++) {
                 if (idxVar.contains(i) && VariableUtilities.emptyUnion(valVar, vars[i + offset])) {
-                    idxVar.removeValue(i, this, false);
+                    idxVar.removeValue(i, this);
                 }
             }
         }
@@ -292,7 +292,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getLB() > valVar.getLB()) {
@@ -335,7 +335,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else if (vars[idx].getUB() < valVar.getUB()) {
@@ -374,7 +374,7 @@ public class PropElementV extends Propagator<IntVar> {
                 }
             } else if (idxVar.contains(idx - offset)) {  //otherwise the variable is not in scope
                 if (VariableUtilities.emptyUnion(valVar, vars[idx])) {
-                    idxVar.removeValue(idx - offset, this, true);//CPRU not idempotent
+                    idxVar.removeValue(idx - offset, this);//CPRU not idempotent
                     // NOCAUSE because if it changes the domain of IndexVar (what is not sure if idxVar
                     // uses an interval approximated domain) then it must cause updateValueFromIndex(c)
                 } else {
@@ -392,7 +392,7 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (idx == vars.length - 1) {  // the event concerns valVar
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
-                vars[idxVal + offset].removeValue(x, this, false);
+                vars[idxVal + offset].removeValue(x, this);
             } else {
                 updateIndexFromValue();
             }
@@ -400,7 +400,7 @@ public class PropElementV extends Propagator<IntVar> {
             if (idxVar.instantiated()) {
                 int idxVal = idxVar.getValue();
                 if (idx == idxVal + offset) {
-                    valVar.removeValue(x, this, false);
+                    valVar.removeValue(x, this);
                 }
             } else if ((idxVar.contains(idx - offset)) && (valVar.hasEnumeratedDomain())) {
                 boolean existsSupport = false;
@@ -412,7 +412,7 @@ public class PropElementV extends Propagator<IntVar> {
                     }
                 }
                 if (!existsSupport) {
-                    valVar.removeValue(x, this, true);//CPRU not idempotent
+                    valVar.removeValue(x, this);//CPRU not idempotent
                 }
             }
         }
