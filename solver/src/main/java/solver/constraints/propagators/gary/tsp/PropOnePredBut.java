@@ -94,7 +94,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 					this.contradiction(g,i+" has no predecessor");
 				}
 				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),i,this,false);
+					g.enforceArc(preds.getFirstElement(),i,this);
 				}
 			}
 		}
@@ -175,7 +175,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 					p.contradiction(g,to+" has no predecessor");
 				}
 				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),to,p,false);
+					g.enforceArc(preds.getFirstElement(),to,p);
 				}
 			}
 		}

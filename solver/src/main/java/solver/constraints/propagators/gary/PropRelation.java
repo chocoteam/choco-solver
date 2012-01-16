@@ -95,7 +95,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(i) && ker.isActive(j)){
-								g.enforceArc(i, j, this, true);//CPRU not idempotent
+								g.enforceArc(i, j, this);//CPRU not idempotent
 							}break;
 						case FALSE: g.removeArc(i, j, this);break; //CPRU not idempotent
 						}
@@ -171,7 +171,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 					switch(relation.isEntail(i,j)){
 					case TRUE: 
 						if(ker.isActive(i) && ker.isActive(j)){
-							g.enforceArc(i, j, this, true); //CPRU not idempotent
+							g.enforceArc(i, j, this); //CPRU not idempotent
 						}break;
 					case FALSE: g.removeArc(i, j, this);break; //CPRU not idempotent
 					}
@@ -213,7 +213,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(j)){
-								g.enforceArc(i, j, p, true);//CPRU not idempotent
+								g.enforceArc(i, j, p);//CPRU not idempotent
 							}break;
 						case FALSE: g.removeArc(i, j, p);break;//CPRU not idempotent
 						}

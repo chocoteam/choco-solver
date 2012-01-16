@@ -136,7 +136,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                 INeighbors succs = p.g.getEnvelopGraph().getSuccessorsOf(from);
                 if (p.g.getKernelGraph().getActiveNodes().isActive(from) && succs.neighborhoodSize() == p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize() != p.nSuccs) {
                     for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
-                        p.g.enforceArc(from, j, p, false);
+                        p.g.enforceArc(from, j, p);
                     }
                 }
                 if (succs.neighborhoodSize() < p.nSuccs) {
@@ -202,7 +202,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
             if (k < nSuccs && g.getKernelGraph().getActiveNodes().isActive(i) && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() == nSuccs) {
                 nei = g.getEnvelopGraph().getSuccessorsOf(i);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
-                    g.enforceArc(i, j, this, false);
+                    g.enforceArc(i, j, this);
                 }
             }
         }
@@ -223,7 +223,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                 INeighbors suc = p.g.getEnvelopGraph().getSuccessorsOf(i);
                 if (suc.neighborhoodSize() == p.nSuccs) {
                     for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-                        p.g.enforceArc(i, j, p, false);
+                        p.g.enforceArc(i, j, p);
                     }
                 }
             } else {

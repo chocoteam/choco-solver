@@ -93,7 +93,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         // BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
         for (int i = 0; i < intVars.length; i++) {
             if (intVars[i].instantiated()) {
-                g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this, false);
+                g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this);
             }
         }
         IActiveNodes act = g.getKernelGraph().getActiveNodes();
@@ -118,7 +118,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             }
         } else {
             if (EventType.anInstantiationEvent(mask)) {
-                g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this, false);
+                g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
             }
             if ((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) != 0) {
                 valRemoved.set(idxVarInProp);

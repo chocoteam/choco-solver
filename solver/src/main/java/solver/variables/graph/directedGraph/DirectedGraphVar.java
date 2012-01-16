@@ -83,10 +83,10 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				}
 				if(getKernelGraph().getActiveNodes().isActive(x)){
 					if(px==1 && sx==0){
-						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause,informCause);
+						enforceArc(getEnvelopGraph().getPredecessorsOf(x).getFirstElement(),x,cause);
 					}
 					if(px==0 && sx==1){
-						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause,informCause);
+						enforceArc(x,getEnvelopGraph().getSuccessorsOf(x).getFirstElement(),cause);
 					}
 				}
 			}
@@ -96,10 +96,10 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 				}
 				if(getKernelGraph().getActiveNodes().isActive(y)){
 					if(py==1 && sy==0){
-						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause,informCause);
+						enforceArc(getEnvelopGraph().getPredecessorsOf(y).getFirstElement(),y,cause);
 					}
 					if(py==0 && sy==1){
-						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause,informCause);
+						enforceArc(y,getEnvelopGraph().getSuccessorsOf(y).getFirstElement(),cause);
 					}
 				}
 			}
@@ -107,7 +107,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		}return false;
 	}
 	@Override
-	public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+	public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
 		enforceNode(x, cause);
 		enforceNode(y, cause);
 		if(envelop.arcExists(x, y)){

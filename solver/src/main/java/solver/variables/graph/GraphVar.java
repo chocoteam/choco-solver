@@ -132,9 +132,9 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
                 INeighbors succ = getEnvelopGraph().getSuccessorsOf(x);
 				INeighbors pred = getEnvelopGraph().getPredecessorsOf(x);
 				if(succ.neighborhoodSize()==0 && pred.neighborhoodSize()==1){
-					enforceArc(pred.getFirstElement(),x,cause,informCause);
+					enforceArc(pred.getFirstElement(),x,cause);
 				}else if(succ.neighborhoodSize()==1 && pred.neighborhoodSize()==0){
-					enforceArc(x,succ.getFirstElement(),cause,informCause);
+					enforceArc(x,succ.getFirstElement(),cause);
 				}
                 if (succ.neighborhoodSize()==0 && pred.neighborhoodSize()==0) {
                     this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no incident arcs");
@@ -229,7 +229,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (value[i][j]) {
-                    enforceArc(i, j, cause, false);
+                    enforceArc(i, j, cause);
                 } else {
                     removeArc(i, j, cause);
                 }

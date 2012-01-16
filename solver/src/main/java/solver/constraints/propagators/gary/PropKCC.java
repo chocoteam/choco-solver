@@ -163,13 +163,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					if(g instanceof DirectedGraphVar){
 						DirectedGraphVar dig = (DirectedGraphVar) g;
 						if (dig.getEnvelopGraph().arcExists(from, to) && !dig.getEnvelopGraph().arcExists(to, from) ){
-							g.enforceArc(from, to, this, false);
+							g.enforceArc(from, to, this);
 						}else {
-							g.enforceArc(to, from, this, false);
+							g.enforceArc(to, from, this);
 						}
 						throw new UnsupportedOperationException("check that case ");
 					}else{
-						g.enforceArc(from, to, this, false);
+						g.enforceArc(from, to, this);
 					}
 				}
 			}
@@ -257,13 +257,13 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					if(g instanceof DirectedGraphVar){
 						DirectedGraphVar dig = (DirectedGraphVar) g;
 						if (dig.getEnvelopGraph().arcExists(from, to) && !dig.getEnvelopGraph().arcExists(to, from) ){
-							g.enforceArc(from, to, this, false);
+							g.enforceArc(from, to, this);
 						}else {
-							g.enforceArc(to, from, this, false);
+							g.enforceArc(to, from, this);
 						}
 						throw new UnsupportedOperationException("check that case ");
 					}else{
-						g.enforceArc(from, to, this, false);
+						g.enforceArc(from, to, this);
 					}
 				}
 			}

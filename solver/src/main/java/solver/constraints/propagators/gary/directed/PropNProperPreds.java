@@ -95,7 +95,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 			if(np==nPreds.getLB()){
 				for(int j=preds.getFirstElement(); j>=0; j=preds.getNextElement()){
 					if(i!=j){
-						g.enforceArc(j,i, this, false);
+						g.enforceArc(j,i, this);
 					}
 				}
 			}
@@ -175,7 +175,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 					if(kerSize != np){
 						for(int j=prds.getFirstElement(); j>=0; j=prds.getNextElement()){
 							if(j!=to) {
-								p.g.enforceArc(j,to, p, false);
+								p.g.enforceArc(j,to, p);
 							}
 						}
 					}

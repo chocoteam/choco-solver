@@ -141,7 +141,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 			INeighbors envMate = g.getEnvelopGraph().getNeighborsOf(mate);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
 				if(ker.contain(i)){
-					g.enforceArc(i, mate, p, false);
+					g.enforceArc(i, mate, p);
 				}else if (!envMate.contain(i)){
 					g.removeArc(i, node, p);
 				}
@@ -169,11 +169,11 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 		private void apply(int node, int mate) throws ContradictionException {
 			INeighbors ker = g.getKernelGraph().getPredecessorsOf(node);
 			for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
-				g.enforceArc(i, mate, p, false);
+				g.enforceArc(i, mate, p);
 			}
 			ker = g.getKernelGraph().getSuccessorsOf(mate);
 			for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
-				g.enforceArc(node,i, p, false);
+				g.enforceArc(node,i, p);
 			}
 		}
 	}

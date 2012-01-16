@@ -319,7 +319,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
                 for (j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (nodeSCCref[node].get() != nodeSCCref[j].get()) {
                         if (matching[node] == j && matching[j] == node) {
-                            g.enforceArc(node, j, this, false);
+                            g.enforceArc(node, j, this);
                         } else {
                             g.removeArc(node, j, this);
                         }

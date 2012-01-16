@@ -80,20 +80,20 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 				if(nx==0){
 					removeNode(x, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(x)){
-					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause,true); //CPRU not idempotent
+					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause); //CPRU not idempotent
 				}
 			}
 			if(ny<2){
 				if(ny==0){
 					removeNode(y, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(y)){
-					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause,true); //CPRU not idempotent
+					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause); //CPRU not idempotent
 				}
 			}
         	return true;
         }return false;
     }
-    public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
     	enforceNode(x, cause);
     	enforceNode(y, cause);
     	if(envelop.edgeExists(x, y)){

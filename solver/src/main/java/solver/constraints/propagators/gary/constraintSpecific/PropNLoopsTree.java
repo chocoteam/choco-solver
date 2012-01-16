@@ -101,7 +101,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		if(nLoops.getLB() == env && env!=ker){
 			for (int node=0;node<n;node++) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
-					g.enforceArc(node, node, this, false);
+					g.enforceArc(node, node, this);
 				}
 			}
 			nbKerLoop.set(env);
@@ -142,7 +142,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 			if(nLoops.getLB() == env){
 				for (int node =0; node<n ; node++) {
 					if (g.getEnvelopGraph().arcExists(node, node)){
-						g.enforceArc(node, node, this, false);
+						g.enforceArc(node, node, this);
 					}
 				}
 				nbKerLoop.set(env);

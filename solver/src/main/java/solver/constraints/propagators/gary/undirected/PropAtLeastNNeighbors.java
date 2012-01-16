@@ -94,7 +94,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 					&& g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()<n_neighbors){
 				nei = g.getEnvelopGraph().getNeighborsOf(node);
 				for(next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(node, next, this, false);
+					g.enforceArc(node, next, this);
 				}
 			}
 		}
@@ -152,7 +152,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 			if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(i);
 				for(int next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(i, next, p, false);
+					g.enforceArc(i, next, p);
 				}
 			}
 		}
@@ -188,7 +188,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 					g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(from);
 				for(int next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
-					g.enforceArc(from, next, p, false);
+					g.enforceArc(from, next, p);
 				}
 			}
 		}

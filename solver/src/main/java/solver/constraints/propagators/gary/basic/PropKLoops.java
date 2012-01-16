@@ -142,7 +142,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 				for (int node=env.getFirstElement();node>=0;node=env.getNextElement()){
 					if(g.getEnvelopGraph().edgeExists(node, node)){
-						g.enforceArc(node,node, this, false);
+						g.enforceArc(node,node, this);
 					}
 				}
 				setPassive();

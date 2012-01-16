@@ -87,7 +87,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();
@@ -121,7 +121,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();

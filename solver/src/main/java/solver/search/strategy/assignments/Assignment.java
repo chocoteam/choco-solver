@@ -131,7 +131,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             	int from = value/n-1;
             	int to   = value%n;
 //            	System.out.println("enf "+value + " : "+from +" : "+to);
-            	var.enforceArc(from, to, cause, false);
+            	var.enforceArc(from, to, cause);
             }else{
 //            	System.out.println("enf "+value);
             	var.enforceNode(value, cause);

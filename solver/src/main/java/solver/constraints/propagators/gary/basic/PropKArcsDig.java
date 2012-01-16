@@ -85,7 +85,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();
@@ -119,7 +119,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();

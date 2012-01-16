@@ -82,7 +82,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
         IActiveNodes ker = g.getKernelGraph().getActiveNodes();
         for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
             if (concernedNodes.contain(i)) {
-                g.enforceArc(i, i, this, false);
+                g.enforceArc(i, i, this);
             }
         }
     }
@@ -132,7 +132,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
         @Override
         public void execute(int i) throws ContradictionException {
             if (p.concernedNodes.contain(i)) {
-                g.enforceArc(i, i, p, false);
+                g.enforceArc(i, i, p);
             }
         }
     }
