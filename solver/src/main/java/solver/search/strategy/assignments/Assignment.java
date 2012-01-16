@@ -147,7 +147,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             	var.removeArc(from, to, cause, false);
             }else{
 //            	System.out.println("rem "+value);
-            	var.removeNode(value, cause, false);
+            	var.removeNode(value, cause);
             }
         }
         

@@ -146,7 +146,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
-						g.removeNode(cc.get(i), this, false);
+						g.removeNode(cc.get(i), this);
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel
@@ -240,7 +240,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- remove nodes of CC with no T-Vertex
 				for(TIntArrayList cc:ccWithNoTV){
 					for(int i=0; i<cc.size(); i++){
-						g.removeNode(cc.get(i), this, false);
+						g.removeNode(cc.get(i), this);
 					}
 				}
 				// --- add articulation points that split at least two TVertices to the kernel

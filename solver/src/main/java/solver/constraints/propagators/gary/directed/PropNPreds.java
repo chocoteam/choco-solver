@@ -91,7 +91,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
                         g.enforceArc(j, i, this, false);
                     }
                 } else if (preds.neighborhoodSize() < nPreds) {
-                    g.removeNode(i, this, false);
+                    g.removeNode(i, this);
                 }
             }
         }
@@ -140,7 +140,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
                 if (p.concernedNodes.contain(to)) {
                     INeighbors prds = p.g.getEnvelopGraph().getPredecessorsOf(to);
                     if (prds.neighborhoodSize() < p.nPreds) {
-                        p.g.removeNode(to, p, false);
+                        p.g.removeNode(to, p);
                     }
                     if (prds.neighborhoodSize() == p.nPreds && p.g.getKernelGraph().getActiveNodes().isActive(to) && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize() != p.nPreds) {
                         for (int j = prds.getFirstElement(); j >= 0; j = prds.getNextElement()) {

@@ -100,7 +100,7 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if ((mask & EventType.DECUPP.mask) != 0){
 				int ub = 2*nbtrucks.getUB();
 				for(int i=ub;i<nbMaxTrucks;i++){
-					g.removeNode(i, this, false);
+					g.removeNode(i, this);
 				}
 			}
 			if ((mask & EventType.INCLOW.mask) != 0){
@@ -141,13 +141,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if(i<2*p.nbMaxTrucks){
 				int j = i+1;
 				if(i%2==0){
-					p.g.removeNode(i+1, p, false);
+					p.g.removeNode(i+1, p);
 					j++;
 				}else{
-					p.g.removeNode(i-1, p, false);
+					p.g.removeNode(i-1, p);
 				}
 				for(;j<p.nbMaxTrucks;j++){
-					p.g.removeNode(j, p, false);
+					p.g.removeNode(j, p);
 				}
 			}
 		}

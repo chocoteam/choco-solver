@@ -147,7 +147,7 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
             int from = i / p.n + 1;
             int to = i % p.n;
             if (from == to && p.concernedNodes.contain(to)) {
-                p.g.removeNode(i, p, false);
+                p.g.removeNode(i, p);
             }
         }
     }

@@ -78,14 +78,14 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 			int ny = getEnvelopGraph().getNeighborsOf(y).neighborhoodSize();
 			if(nx<2){
 				if(nx==0){
-					removeNode(x, cause, true); //CPRU not idempotent
+					removeNode(x, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(x)){
 					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause,true); //CPRU not idempotent
 				}
 			}
 			if(ny<2){
 				if(ny==0){
-					removeNode(y, cause, true); //CPRU not idempotent
+					removeNode(y, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(y)){
 					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause,true); //CPRU not idempotent
 				}

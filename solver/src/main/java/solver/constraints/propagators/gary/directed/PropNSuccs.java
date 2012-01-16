@@ -140,7 +140,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                     }
                 }
                 if (succs.neighborhoodSize() < p.nSuccs) {
-                    p.g.removeNode(from, p, false);
+                    p.g.removeNode(from, p);
                 }
             } else {
                 throw new UnsupportedOperationException();
@@ -189,7 +189,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                 this.contradiction(g, "more than one successor");
             }
             if (g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() < nSuccs) {
-                g.removeNode(i, this, false);
+                g.removeNode(i, this);
             }
             if (k == nSuccs && g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize() != k) {
                 nei = g.getEnvelopGraph().getSuccessorsOf(i);

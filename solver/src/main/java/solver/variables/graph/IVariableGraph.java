@@ -42,10 +42,9 @@ public interface IVariableGraph {
      *
      * @param x node's index
      * @param cause algorithm which is related to the removal
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true iff the removal has an effect
      */
-    boolean removeNode(int x, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeNode(int x, @NotNull ICause cause) throws ContradictionException;
     
     /**
      * Enforce the node x to belong to any partial subgraph

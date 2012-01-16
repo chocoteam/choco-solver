@@ -31,7 +31,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -81,7 +80,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			int sy = getEnvelopGraph().getSuccessorsOf(y).neighborhoodSize();
 			if(px+sx<2){
 				if(px==0 && sx==0){
-					removeNode(x, cause, informCause);
+					removeNode(x, cause);
 				}
 				if(getKernelGraph().getActiveNodes().isActive(x)){
 					if(px==1 && sx==0){
@@ -94,7 +93,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			}
 			if(py+sy<2){
 				if(py==0 && sy==0){
-					removeNode(y, cause, informCause);
+					removeNode(y, cause);
 				}
 				if(getKernelGraph().getActiveNodes().isActive(y)){
 					if(py==1 && sy==0){
