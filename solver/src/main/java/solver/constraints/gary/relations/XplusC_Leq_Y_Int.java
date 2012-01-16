@@ -78,7 +78,7 @@ public class XplusC_Leq_Y_Int extends GraphRelation<IntVar> {
             IntVar x = vars[var1];
             IntVar y = vars[var2];
             x.updateUpperBound(y.getUB() - distanceMatrix[var1][var2], cause, informCause);
-            y.updateLowerBound(x.getLB() + distanceMatrix[var1][var2], cause, informCause);
+            y.updateLowerBound(x.getLB() + distanceMatrix[var1][var2], cause);
         }
     }
 

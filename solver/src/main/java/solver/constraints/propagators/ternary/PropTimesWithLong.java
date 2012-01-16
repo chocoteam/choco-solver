@@ -72,7 +72,7 @@ public class PropTimesWithLong extends PropTimes {
         }
         if (!(v2.instantiatedTo(0))) {
             int r = (int) Math.max(getZmin(), MIN);
-            v2.updateLowerBound(r, this, false);
+            v2.updateLowerBound(r, this);
             r = (int) Math.min(getZmax(), MAX);
             v2.updateUpperBound(r, this, false);
         }
@@ -92,7 +92,7 @@ public class PropTimesWithLong extends PropTimes {
         }
         if (!(v2.instantiatedTo(0))) {
             int r = (int) Math.max(getZmin(), MIN);
-            v2.updateLowerBound(r, this, false);
+            v2.updateLowerBound(r, this);
             r = (int) Math.min(getZmax(), MAX);
             v2.updateUpperBound(r, this, false);
         }
@@ -382,7 +382,7 @@ public class PropTimesWithLong extends PropTimes {
      */
     protected boolean updateX() throws ContradictionException {
         int r = (int) Math.max(getXminIfNonZero(), MIN);
-        boolean infChange = v0.updateLowerBound(r, this, false);
+        boolean infChange = v0.updateLowerBound(r, this);
         r = (int) Math.min(getXmaxIfNonZero(), MAX);
         boolean supChange = v0.updateUpperBound(r, this, false);
         return (infChange || supChange);
@@ -390,7 +390,7 @@ public class PropTimesWithLong extends PropTimes {
 
     protected boolean updateY() throws ContradictionException {
         int r = (int) Math.max(getYminIfNonZero(), MIN);
-        boolean infChange = v1.updateLowerBound(r, this, false);
+        boolean infChange = v1.updateLowerBound(r, this);
         r = (int) Math.min(getYmaxIfNonZero(), MAX);
         boolean supChange = v1.updateUpperBound(r, this, false);
         return (infChange || supChange);
@@ -404,7 +404,7 @@ public class PropTimesWithLong extends PropTimes {
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
-            boolean infChange = (!(v1.contains(0)) && v0.updateLowerBound(Math.min(0, xmin), this, false));
+            boolean infChange = (!(v1.contains(0)) && v0.updateLowerBound(Math.min(0, xmin), this));
             boolean supChange = (!(v1.contains(0)) && v0.updateUpperBound(Math.max(0, xmax), this, false));
             return (infChange || supChange);
         }
@@ -418,7 +418,7 @@ public class PropTimesWithLong extends PropTimes {
             propagateZero();    // make one of X,Y be 0 if the other cannot be
             return false;       //no more shaving need to be performed
         } else {
-            boolean infChange = (!(v0.contains(0)) && v1.updateLowerBound(Math.min(0, ymin), this, false));
+            boolean infChange = (!(v0.contains(0)) && v1.updateLowerBound(Math.min(0, ymin), this));
             boolean supChange = (!(v0.contains(0)) && v1.updateUpperBound(Math.max(0, ymax), this, false));
             return (infChange || supChange);
         }

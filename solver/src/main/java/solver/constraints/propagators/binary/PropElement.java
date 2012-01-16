@@ -80,8 +80,8 @@ public class PropElement extends Propagator<IntVar> {
             if (minVal > this.lval[index - cste]) minVal = this.lval[index - cste];
             if (maxVal < this.lval[index - cste]) maxVal = this.lval[index - cste];
         }
-        this.vars[0].updateLowerBound(minVal, this, repropag);
-        this.vars[0].updateUpperBound(maxVal, this, repropag);
+        this.vars[0].updateLowerBound(minVal, this); //CPRU not idempotent
+        this.vars[0].updateUpperBound(maxVal, this, repropag); //CPRU not idempotent
         // todo : <hcambaza> : why it does not perform AC on the value variable ?
         // <nj> perhaps because it is possible to have several times the same value in VALUES
     }
@@ -99,7 +99,7 @@ public class PropElement extends Propagator<IntVar> {
                     && !(this.vars[0].contains(lval[minFeasibleIndex - this.cste]))) {
                 minFeasibleIndex++;
             }
-            hasChange = this.vars[1].updateLowerBound(minFeasibleIndex, this, repropag);
+            hasChange = this.vars[1].updateLowerBound(minFeasibleIndex, this);//CPRU not idempotent
 
             while ((this.vars[1].contains(maxFeasibleIndex))
                     && !(this.vars[0].contains(lval[maxFeasibleIndex - this.cste]))) {

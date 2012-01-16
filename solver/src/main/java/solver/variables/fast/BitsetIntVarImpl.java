@@ -210,7 +210,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause, informCause);
         else {     // TODO: really ugly .........
@@ -290,17 +290,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       new lower bound (included)
      * @param cause       updating releaser
-     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {

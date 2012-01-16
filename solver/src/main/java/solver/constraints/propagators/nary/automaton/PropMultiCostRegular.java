@@ -711,7 +711,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (realsp - z[0].getLB() >= Constant.MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
             double rsp = (realsp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : realsp;
-            z[0].updateLowerBound((int) Math.ceil(rsp), this, false);//, false);
+            z[0].updateLowerBound((int) Math.ceil(rsp), this);//, false);
             modifiedBound[0] = true;
         }
     }
@@ -839,7 +839,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, this, false);//, false);
+            z.updateLowerBound(bounds.min.value, this);//, false);
             z.updateUpperBound(bounds.max.value, this, false);//, false);
 
         }

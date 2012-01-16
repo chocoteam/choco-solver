@@ -135,7 +135,7 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 				nbKer++;
 			}
 		}
-		k.updateLowerBound(nbKer, this, false);
+		k.updateLowerBound(nbKer, this);
 		k.updateUpperBound(nbEnv, this, false);
 		if(k.instantiated()){
 			if(nbInEnv.get()==k.getValue()){

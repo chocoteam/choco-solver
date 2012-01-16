@@ -124,7 +124,7 @@ public final class AbsView extends View<IntVar> {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
@@ -145,7 +145,7 @@ public final class AbsView extends View<IntVar> {
             this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, this, informCause);
+        boolean done = var.updateLowerBound(-v, this);
         done |= var.updateUpperBound(v, this, informCause);
         EventType evt = EventType.DECUPP;
         if (var.hasEnumeratedDomain()) {
@@ -159,7 +159,7 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
@@ -178,7 +178,7 @@ public final class AbsView extends View<IntVar> {
             //TODO: explication?
             this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, this, informCause);
+        boolean done = var.updateLowerBound(-value, this);
         done |= var.updateUpperBound(value, this, informCause);
         if (done) {
             notifyMonitors(EventType.DECUPP, cause);

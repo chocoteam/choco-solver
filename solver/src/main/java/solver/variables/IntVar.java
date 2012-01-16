@@ -122,11 +122,10 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value new lower bound (included)
      * @param cause updating releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean updateLowerBound(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.

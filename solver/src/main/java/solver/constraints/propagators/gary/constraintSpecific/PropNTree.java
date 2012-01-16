@@ -172,7 +172,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
     }
 
     private void minTreePruning() throws ContradictionException {
-        nTree.updateLowerBound(minTree, this, false);
+        nTree.updateLowerBound(minTree, this);
         if (nTree.getUB() == minTree) {
             int node;
             for (TIntArrayList scc : nonSinks) {

@@ -142,7 +142,7 @@ public final class BitsetXYSumView extends AbstractSumView {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         int lb = getLB();
         if (from <= lb && lb <= to) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         }
         int ub = getUB();
         if (from <= ub && ub <= to) {
@@ -201,7 +201,7 @@ public final class BitsetXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         boolean change;
         int lb = this.getLB();

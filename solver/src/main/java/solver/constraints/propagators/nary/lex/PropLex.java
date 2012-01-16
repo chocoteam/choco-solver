@@ -148,12 +148,12 @@ public class PropLex extends Propagator<IntVar> {
 
     public void ACleq(int i) throws ContradictionException {
         x[i].updateUpperBound(y[i].getUB(), this, false);
-        y[i].updateLowerBound(x[i].getLB(), this, false);
+        y[i].updateLowerBound(x[i].getLB(), this);
     }
 
     public void ACless(int i) throws ContradictionException {
         x[i].updateUpperBound(y[i].getUB() - 1, this, false);
-        y[i].updateLowerBound(x[i].getLB() + 1, this, false);
+        y[i].updateLowerBound(x[i].getLB() + 1, this);
     }
 
     public void updateAlpha(int i) throws ContradictionException {

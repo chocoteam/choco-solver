@@ -52,7 +52,7 @@ public class AbsViewTest {
         Solver solver = new Solver();
         IntVar Y = VariableFactory.bounded("Y", yl, yu, solver);
         IntVar X = Views.abs(Y);
-        X.updateLowerBound(xl, Cause.Null, false);
+        X.updateLowerBound(xl, Cause.Null);
         X.updateUpperBound(xu, Cause.Null, false);
         solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};

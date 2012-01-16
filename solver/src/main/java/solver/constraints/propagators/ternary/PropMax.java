@@ -90,7 +90,7 @@ public class PropMax extends Propagator<IntVar> {
     public void filter(int idx) throws ContradictionException {
         if (idx == 0) {
             v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this, false);
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this, false);
+            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
 
             if (v0.hasEnumeratedDomain()) {
                 for (int valeur = v0.getLB(); valeur <= v0.getUB(); valeur = v0.nextValue(valeur)) {
@@ -102,8 +102,8 @@ public class PropMax extends Propagator<IntVar> {
         } else if (idx == 1) {
             v1.updateUpperBound(v0.getUB(), this, false);
             if (v1.getLB() > v2.getUB()) {
-                v0.updateLowerBound(v1.getLB(), this, false);
-                v1.updateLowerBound(v0.getLB(), this, false);
+                v0.updateLowerBound(v1.getLB(), this);
+                v1.updateLowerBound(v0.getLB(), this);
             }
 
             if (v1.hasEnumeratedDomain()) {
@@ -117,8 +117,8 @@ public class PropMax extends Propagator<IntVar> {
         } else if (idx == 2) {
             v2.updateUpperBound(v0.getUB(), this, false);
             if (v2.getLB() > v1.getUB()) {
-                v0.updateLowerBound(v2.getLB(), this, false);
-                v2.updateLowerBound(v0.getLB(), this, false);
+                v0.updateLowerBound(v2.getLB(), this);
+                v2.updateLowerBound(v0.getLB(), this);
             }
             if (v2.hasEnumeratedDomain()) {
                 for (int valeur = v2.getLB(); valeur <= v2.getUB(); valeur = v2.nextValue(valeur)) {
@@ -149,7 +149,7 @@ public class PropMax extends Propagator<IntVar> {
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v2.getUB()), this, false);
-                v0.updateLowerBound(Math.max(val, v2.getLB()), this, false);
+                v0.updateLowerBound(Math.max(val, v2.getLB()), this);
             }
         } else if (idx == 2) {
             val = v2.getValue();
@@ -158,7 +158,7 @@ public class PropMax extends Propagator<IntVar> {
                 setPassive();
             } else {
                 v0.updateUpperBound(Math.max(val, v1.getUB()), this, false);
-                v0.updateLowerBound(Math.max(val, v1.getLB()), this, false);
+                v0.updateLowerBound(Math.max(val, v1.getLB()), this);
             }
         }
     }
@@ -175,13 +175,13 @@ public class PropMax extends Propagator<IntVar> {
     public void awakeOnLow(int idx) throws ContradictionException {
         if (idx == 0) {
             if (v1.getLB() > v2.getUB()) {
-                v1.updateLowerBound(v0.getLB(), this, false);
+                v1.updateLowerBound(v0.getLB(), this);
             }
             if (v2.getLB() > v1.getUB()) {
-                v2.updateLowerBound(v0.getLB(), this, false);
+                v2.updateLowerBound(v0.getLB(), this);
             }
         } else {
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this, false);
+            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
         }
     }
 

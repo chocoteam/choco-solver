@@ -75,7 +75,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 		}
 		min = min / 2;
 		max = max / 2;
-		k.updateLowerBound(min, this, false);
+		k.updateLowerBound(min, this);
 		k.updateUpperBound(max, this, false);
 		nbInEnv.set(max);
 		nbInKer.set(min);

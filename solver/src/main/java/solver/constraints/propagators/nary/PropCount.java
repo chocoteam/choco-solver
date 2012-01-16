@@ -240,7 +240,7 @@ public class PropCount extends Propagator<IntVar> {
 
     public void checkNbSure() throws ContradictionException {
         if (constrainOnSupNumber) {
-            vars[nbListVars].updateLowerBound(nbSure.get(), this, true); //CPRU not idempotent
+            vars[nbListVars].updateLowerBound(nbSure.get(), this); //CPRU not idempotent
             if (vars[nbListVars].instantiatedTo(nbSure.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
 //                for (IntDomainVar aRelevantVar : relevantVar) {

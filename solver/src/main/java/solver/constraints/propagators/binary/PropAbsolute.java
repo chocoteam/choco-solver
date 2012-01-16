@@ -136,7 +136,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(a0, -b0), this, false);
+        vars[0].updateLowerBound(Math.min(a0, -b0), this);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
@@ -169,7 +169,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].nextValue(value);
             }
-            vars[0].updateLowerBound(nlb, this, false);
+            vars[0].updateLowerBound(nlb, this);
 
             value = vars[0].getUB();
             int nub = value + 1;
@@ -190,7 +190,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-vars[0].getUB(), this, false);
+        vars[1].updateLowerBound(-vars[0].getUB(), this);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
@@ -222,7 +222,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].nextValue(value);
             }
-            vars[1].updateLowerBound(nlb, this, false);
+            vars[1].updateLowerBound(nlb, this);
 
             value = vars[1].getUB();
             int nub = value + 1;

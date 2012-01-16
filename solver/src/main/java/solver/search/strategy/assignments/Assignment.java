@@ -95,7 +95,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value + 1, cause, false);
+            var.updateLowerBound(value + 1, cause);
         }
 
         @Override
@@ -108,7 +108,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause, false);
+            var.updateLowerBound(value, cause);
         }
 
         @Override

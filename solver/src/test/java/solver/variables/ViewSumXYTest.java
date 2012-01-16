@@ -67,7 +67,7 @@ public class ViewSumXYTest {
             Assert.assertEquals(Z.previousValue(10), 9);
             Assert.assertEquals(Z.previousValue(4), Integer.MIN_VALUE);
 
-            Z.updateLowerBound(12, Cause.Null, false);
+            Z.updateLowerBound(12, Cause.Null);
             Assert.assertEquals(X.getLB(), 4);
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(Y.getLB(), 3);

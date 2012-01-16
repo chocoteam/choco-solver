@@ -77,9 +77,9 @@ public class Dist_Int extends GraphRelation<IntVar> {
 		if(var1 != var2){
 			IntVar x = vars[var1];
 			IntVar y = vars[var2];
-			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause, informCause);
+			x.updateLowerBound(y.getLB()-distanceMatrix[var1][var2], cause);
 			x.updateUpperBound(y.getUB()-distanceMatrix[var1][var2], cause, informCause);
-			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause, informCause);
+			y.updateLowerBound(x.getLB()+distanceMatrix[var1][var2], cause);
 			y.updateUpperBound(x.getUB()+distanceMatrix[var1][var2], cause, informCause);
 		}
 	}

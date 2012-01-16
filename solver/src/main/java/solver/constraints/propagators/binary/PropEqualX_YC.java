@@ -75,11 +75,11 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateInfX() throws ContradictionException {
-        x.updateLowerBound(y.getLB() + cste, this, false);
+        x.updateLowerBound(y.getLB() + cste, this);
     }
 
     private void updateInfY() throws ContradictionException {
-        y.updateLowerBound(x.getLB() - cste, this, false);
+        y.updateLowerBound(x.getLB() - cste, this);
     }
 
     private void updateSupX() throws ContradictionException {

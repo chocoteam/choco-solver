@@ -121,7 +121,7 @@ public final class ScaleView extends View<IntVar> {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
 //        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause, informCause);
         } else {
@@ -157,7 +157,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -166,7 +166,7 @@ public final class ScaleView extends View<IntVar> {
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this, informCause);
+                boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                 }

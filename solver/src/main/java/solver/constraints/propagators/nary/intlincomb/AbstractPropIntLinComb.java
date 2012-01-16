@@ -270,7 +270,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         }
         for (i = nbPosVars; i < nbVars; i++) {
             int newInfi = coeffPolicy.getInfNV(i, mylb);//MathUtils.divCeil(mylb, -(coeffs[i])) + vars[i].getUB();
-            if (vars[i].updateLowerBound(newInfi, this, false)) {
+            if (vars[i].updateLowerBound(newInfi, this)) {
                 anyChange = true;
             }
         }
@@ -299,7 +299,7 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         int i;
         for (i = 0; i < nbPosVars; i++) {
             int newInfi = coeffPolicy.getInfPV(i, myub);//MathUtils.divCeil(-(myub), coeffs[i]) + vars[i].getUB();
-            if (vars[i].updateLowerBound(newInfi, this, false)) {
+            if (vars[i].updateLowerBound(newInfi, this)) {
                 anyChange = true;
             }
         }

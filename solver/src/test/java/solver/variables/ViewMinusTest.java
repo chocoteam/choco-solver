@@ -66,7 +66,7 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.previousValue(-4), -5);
             Assert.assertEquals(Y.previousValue(-10), Integer.MIN_VALUE);
 
-            Y.updateLowerBound(-9, Cause.Null, false);
+            Y.updateLowerBound(-9, Cause.Null);
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 

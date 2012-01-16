@@ -69,7 +69,7 @@ public class MaxViewTest {
             Assert.assertEquals(Z.previousValue(1), 0);
             Assert.assertEquals(Z.previousValue(-4), Integer.MIN_VALUE);
 
-            Z.updateLowerBound(2, Cause.Null, false);
+            Z.updateLowerBound(2, Cause.Null);
             Assert.assertEquals(X.getLB(), -4);
             Assert.assertEquals(X.getUB(), 12);
             Assert.assertEquals(Y.getLB(), -22);

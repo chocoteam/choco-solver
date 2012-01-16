@@ -170,11 +170,11 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     protected void initialize() throws ContradictionException {
         int j = 0;
         for(; j < nbVars; j++){
-            vars[j].updateLowerBound(offset, this, false);
+            vars[j].updateLowerBound(offset, this);
             vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this, false);
         }
         for(;j < vars.length; j++){
-            vars[j].updateLowerBound(0, this, false);
+            vars[j].updateLowerBound(0, this);
             vars[j].updateUpperBound(nbVars, this, false);
         }
         initBackDataStruct();
@@ -243,7 +243,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (idx < nbVars) {
                 //update lower bounds of cardinalities
                 val_minOcc[val - offset].add(1);
-                card[val - offset].updateLowerBound(val_minOcc[val - offset].get(), this, false);
+                card[val - offset].updateLowerBound(val_minOcc[val - offset].get(), this);
                 filterBCOnInst(val);
             } else {
                 filterBCOnInst(idx - nbVars + offset);
@@ -458,7 +458,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (h[x] > x) {
                 w = pathmax(h, h[x]);
 //                updateLowerBound(maxsorted[i].var, bounds[w], maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(bounds[w], this, true); //CPRU not idempotent
+                maxsorted[i].var.updateLowerBound(bounds[w], this); //CPRU not idempotent
                 pathset(h, x, w, w);
             }
             if (d[z] == u.sum(bounds[y], bounds[z] - 1)) {
@@ -604,7 +604,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             y = maxsorted[i].maxrank;
             if ((stableInterval[x] <= x) || (y > stableInterval[x])) {
 //                updateLowerBound(maxsorted[i].var, l.skipNonNullElementsRight(bounds[newMin[i]]), maxsorted[i].idx);
-                maxsorted[i].var.updateLowerBound(l.skipNonNullElementsRight(bounds[newMin[i]]), this, false);
+                maxsorted[i].var.updateLowerBound(l.skipNonNullElementsRight(bounds[newMin[i]]), this);
             }
         }
     }
@@ -697,7 +697,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             if (val_maxOcc[i].get() == 0) {
                 card[i].instantiateTo(0, this);
             } else {
-                card[i].updateLowerBound(val_minOcc[i].get(), this, false);
+                card[i].updateLowerBound(val_minOcc[i].get(), this);
             }
         }
     }
@@ -728,7 +728,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             nbInf--;
         }
         if (nbInf == getMaxOcc(inf - offset)) {
-            vars[i].updateLowerBound(inf + 1, this, true);//CPRU not idempotent
+            vars[i].updateLowerBound(inf + 1, this);//CPRU not idempotent
         }
     }
 
@@ -783,7 +783,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
             for (int i = 0; i < range; i++) {
                 fixpoint |= card[i].updateUpperBound(nbVars - (lb - card[i].getLB()), this, false);
-                fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), this, false);
+                fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), this);
             }
         }
     }

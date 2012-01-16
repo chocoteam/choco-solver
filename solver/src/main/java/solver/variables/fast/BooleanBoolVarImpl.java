@@ -34,7 +34,6 @@ import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -145,7 +144,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
             return updateUpperBound(from - 1, cause, informCause);
         else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
@@ -217,12 +216,11 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       new lower bound (included)
      * @param cause       updating releaser
-     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         return value > 0 && instantiateTo(value, cause);
     }
 

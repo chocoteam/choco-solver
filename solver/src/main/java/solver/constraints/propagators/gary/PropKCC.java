@@ -125,7 +125,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		// TODO couplage generalise
 		// PRUNING
 		// --- Bounds
-		k.updateLowerBound(min, this, false);
+		k.updateLowerBound(min, this);
 		k.updateUpperBound(max, this, false);
 		if(k.instantiated()){
 			// --- Max
@@ -219,7 +219,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 		// PRUNING
 		// --- Bounds
-		k.updateLowerBound(min, this, false);
+		k.updateLowerBound(min, this);
 		k.updateUpperBound(max, this, false);
 		if(k.instantiated()){
 			// --- Max
