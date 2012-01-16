@@ -95,7 +95,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 					if(relations[i][j].getBooleanValue() == ESat.TRUE){
 						graph.enforceArc(i, j, this, false);
 					}else{
-						graph.removeArc(i, j, this, false);
+						graph.removeArc(i, j, this);
 					}
 				}else{
 					if (graph instanceof DirectedGraphVar) {
@@ -226,7 +226,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			if(v){
 				g.enforceArc(i, j, p, false);
 			}else{
-				g.removeArc(i, j, p, false);
+				g.removeArc(i, j, p);
 			}
 		}
 	}

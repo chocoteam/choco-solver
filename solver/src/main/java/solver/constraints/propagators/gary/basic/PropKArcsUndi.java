@@ -98,7 +98,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}
@@ -132,7 +132,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}

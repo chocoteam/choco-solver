@@ -153,7 +153,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
-						g.removeArc(i,to,p,false);
+						g.removeArc(i,to,p);
 					}
 				}
 			}

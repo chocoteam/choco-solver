@@ -136,7 +136,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
-							g.removeArc(i, j, this, false);
+							g.removeArc(i, j, this);
 						}
 					}
 				}
@@ -230,7 +230,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 					nei = g.getEnvelopGraph().getNeighborsOf(i);
 					for(int j = nei.getFirstElement(); j>=0; j = nei.getNextElement()){
 						if(ccOf[i]!=ccOf[j]){
-							g.removeArc(i, j, this, false);
+							g.removeArc(i, j, this);
 						}
 					}
 				}

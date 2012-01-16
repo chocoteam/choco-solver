@@ -96,7 +96,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 						kernei = g.getKernelGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}
@@ -130,7 +130,7 @@ public class PropKArcsDig<V extends Variable, G extends DirectedGraphVar> extend
 						kernei = g.getKernelGraph().getSuccessorsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}

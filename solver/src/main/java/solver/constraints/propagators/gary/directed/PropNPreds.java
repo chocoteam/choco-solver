@@ -172,7 +172,7 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
                     if (prds.neighborhoodSize() > p.nPreds && p.g.getKernelGraph().getPredecessorsOf(to).neighborhoodSize() == p.nPreds) {
                         for (int from = prds.getFirstElement(); from >= 0; from = prds.getNextElement()) {
                             if (!p.g.getKernelGraph().arcExists(from, to)) {
-                                p.g.removeArc(from, to, p, false);
+                                p.g.removeArc(from, to, p);
                             }
                         }
                     }

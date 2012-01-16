@@ -99,15 +99,15 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 				if(nei.neighborhoodSize()==2){
 					x=nei.getFirstElement();
 					y=nei.getNextElement();
-					hasChanged |= g.removeArc(x,y,this,false);
-					hasChanged |= g.removeArc(y,x,this,false);
+					hasChanged |= g.removeArc(x,y,this);
+					hasChanged |= g.removeArc(y,x,this);
 				}
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
 				if(nei.neighborhoodSize()==2){
 					x=nei.getFirstElement();
 					y=nei.getNextElement();
-					hasChanged |= g.removeArc(x,y,this,false);
-					hasChanged |= g.removeArc(y,x,this,false);
+					hasChanged |= g.removeArc(x,y,this);
+					hasChanged |= g.removeArc(y,x,this);
 				}
 			}
 		}
@@ -139,7 +139,7 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 			if(suc.neighborhoodSize()==2){
 				j = suc.getFirstElement();
 				k = suc.getNextElement() ;
-				if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
+				if(g.removeArc(j,k,this) || g.removeArc(k,j,this)){
 					if(notInList.get(j)){
 						list.add(j);
 					}
@@ -152,7 +152,7 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 				if(pred.neighborhoodSize()==2){
 					j = pred.getFirstElement();
 					k = pred.getNextElement() ;
-					if(g.removeArc(j,k,this,false) || g.removeArc(k,j,this,false)){
+					if(g.removeArc(j,k,this) || g.removeArc(k,j,this)){
 						if(notInList.get(j)){
 							list.add(j);
 						}
@@ -201,11 +201,11 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 					computed.set(i);
 					int j = nei.getFirstElement();
 					int k = nei.getNextElement() ;
-					if(g.removeArc(j,k,p,false)){
+					if(g.removeArc(j,k,p)){
 						checkPreds(k);
 						checkSuccs(j);
 					}
-					if(g.removeArc(k,j,p,false)){
+					if(g.removeArc(k,j,p)){
 						checkSuccs(k);
 						checkPreds(j);
 					}
@@ -220,11 +220,11 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 					computed.set(i);
 					int j = nei.getFirstElement();
 					int k = nei.getNextElement() ;
-					if(g.removeArc(j,k,p,false)){
+					if(g.removeArc(j,k,p)){
 						checkPreds(k);
 						checkSuccs(j);
 					}
-					if(g.removeArc(k,j,p,false)){
+					if(g.removeArc(k,j,p)){
 						checkSuccs(k);
 						checkPreds(j);
 					}

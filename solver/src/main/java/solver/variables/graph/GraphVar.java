@@ -105,8 +105,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         if (reactOnModification) {
             INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause, informCause);
-                removeArc(i, x, cause, informCause);
+                removeArc(x, i, cause);
+                removeArc(i, x, cause);
             }
         }
         if (envelop.desactivateNode(x)) {
@@ -231,7 +231,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
                 if (value[i][j]) {
                     enforceArc(i, j, cause, false);
                 } else {
-                    removeArc(i, j, cause, false);
+                    removeArc(i, j, cause);
                 }
             }
         }

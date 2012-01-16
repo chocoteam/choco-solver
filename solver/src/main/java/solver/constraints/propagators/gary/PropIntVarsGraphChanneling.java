@@ -185,7 +185,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         public void execute(int i) throws ContradictionException {
             int from = idx;
             int to = valuesHash.get(i);
-            g.removeArc(from, to, p, false);
+            g.removeArc(from, to, p);
         }
     }
 

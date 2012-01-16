@@ -80,7 +80,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
 			succ = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				g.removeArc(j, i, this, false);
+				g.removeArc(j, i, this);
 			}
 		}
 	}
@@ -132,7 +132,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 				int from = i/n-1;
 				int to   = i%n;
 				if(from!=to){
-					p.g.removeArc(to, from, p, false);
+					p.g.removeArc(to, from, p);
 				}
 			}else{
 				throw new UnsupportedOperationException();

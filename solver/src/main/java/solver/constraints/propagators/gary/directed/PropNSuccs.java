@@ -169,7 +169,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                 if (succs.neighborhoodSize() > p.nSuccs && p.g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize() == p.nSuccs) {
                     for (eto = succs.getFirstElement(); eto >= 0; eto = succs.getNextElement()) {
                         if (!p.g.getKernelGraph().arcExists(from, eto)) {
-                            p.g.removeArc(from, eto, p, false);
+                            p.g.removeArc(from, eto, p);
                         }
                     }
                 }
@@ -195,7 +195,7 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
                 nei = g.getEnvelopGraph().getSuccessorsOf(i);
                 for (int j = nei.getFirstElement(); j >= 0; j = nei.getNextElement()) {
                     if (!g.getKernelGraph().arcExists(i, j)) {
-                        g.removeArc(i, j, this, false);
+                        g.removeArc(i, j, this);
                     }
                 }
             }

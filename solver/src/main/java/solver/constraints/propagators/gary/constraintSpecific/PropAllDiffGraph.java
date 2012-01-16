@@ -321,7 +321,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
                         if (matching[node] == j && matching[j] == node) {
                             g.enforceArc(node, j, this, false);
                         } else {
-                            g.removeArc(node, j, this, false);
+                            g.removeArc(node, j, this);
                         }
                     }
                 }

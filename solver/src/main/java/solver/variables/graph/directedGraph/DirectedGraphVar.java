@@ -62,8 +62,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	//***********************************************************************************
 
 	@Override
-	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
+	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
 			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
 			return false;

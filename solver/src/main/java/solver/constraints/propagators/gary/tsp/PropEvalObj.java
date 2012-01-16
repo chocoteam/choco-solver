@@ -126,7 +126,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             curMin = distMatrix[i][minCostSucc[i].get()];
             for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                 if (delta > curMin - distMatrix[i][j]) {
-                    g.removeArc(i, j, this, false);
+                    g.removeArc(i, j, this);
                 }
             }
         }
@@ -159,7 +159,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
                 curMin = distMatrix[i][minCostSucc[i].get()];
                 for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                     if (delta > curMin - distMatrix[i][j]) {
-                        g.removeArc(i, j, this, false);
+                        g.removeArc(i, j, this);
                     }
                 }
             }

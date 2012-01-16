@@ -144,7 +144,7 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             if (value>=n){
             	int from = value/n-1;
             	int to   = value%n;
-            	var.removeArc(from, to, cause, false);
+            	var.removeArc(from, to, cause);
             }else{
 //            	System.out.println("rem "+value);
             	var.removeNode(value, cause);

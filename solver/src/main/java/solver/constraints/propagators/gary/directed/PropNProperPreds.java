@@ -214,7 +214,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 				if(envSize>np && kerSize==np){
 					for(from=prds.getFirstElement(); from>=0; from=prds.getNextElement()){
 						if (from!=to && !p.g.getKernelGraph().arcExists(from, to)){
-							p.g.removeArc(from,to, p, false);
+							p.g.removeArc(from,to, p);
 						}
 					}
 				}
