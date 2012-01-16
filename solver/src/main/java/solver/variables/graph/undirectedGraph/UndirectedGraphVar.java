@@ -94,8 +94,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         }return false;
     }
     public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-    	enforceNode(x, cause, informCause);
-    	enforceNode(y, cause, informCause);
+    	enforceNode(x, cause);
+    	enforceNode(y, cause);
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){

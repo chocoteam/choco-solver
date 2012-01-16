@@ -85,7 +85,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				if(g.getEnvelopOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this, false);
+						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){
@@ -112,7 +112,7 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				if(g.getEnvelopOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this, false);
+						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){

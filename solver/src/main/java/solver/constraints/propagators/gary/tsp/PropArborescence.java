@@ -103,7 +103,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			g.enforceNode(i,this,false);
+			g.enforceNode(i,this);
 			g.removeArc(i,i,this,false);
 			g.removeArc(i,source,this,false);
 		}

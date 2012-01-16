@@ -109,9 +109,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	}
 	@Override
 	public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
-		enforceNode(x, cause, informCause);
-		enforceNode(y, cause, informCause);
+		enforceNode(x, cause);
+		enforceNode(y, cause);
 		if(envelop.arcExists(x, y)){
 			if (kernel.addArc(x, y)){
 				if (reactOnModification){

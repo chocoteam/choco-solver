@@ -152,7 +152,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- add articulation points that split at least two TVertices to the kernel
 				TIntArrayList ap = envCcObj.getArticulationPoints();
 				for(int i=0;i<ap.size();i++){
-					g.enforceNode(ap.get(i), this, false);
+					g.enforceNode(ap.get(i), this);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();
@@ -246,7 +246,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				// --- add articulation points that split at least two TVertices to the kernel
 				TIntArrayList ap = envCcObj.getArticulationPoints();
 				for(int i=0;i<ap.size();i++){
-					g.enforceNode(ap.get(i), this, false);
+					g.enforceNode(ap.get(i), this);
 				}
 				// --- add isthmus that split at least two TVertices to the kernel
 				TIntArrayList isthmus = envCcObj.getIsthmus();

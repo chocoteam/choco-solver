@@ -77,11 +77,11 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=2*nbMaxTrucks;i<g.getEnvelopGraph().getNbNodes();i++){
-			g.enforceNode(i, this, false);
+			g.enforceNode(i, this);
 		}
 		int min = 2*nbtrucks.getLB();
 		for(int i=0;i<min;i++){
-			g.enforceNode(i, this, false);
+			g.enforceNode(i, this);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if ((mask & EventType.INCLOW.mask) != 0){
 				int lb = 2*nbtrucks.getLB();
 				for(int i=0;i<lb;i++){
-					g.enforceNode(i, this, false);
+					g.enforceNode(i, this);
 				}
 			}
 		}
@@ -168,13 +168,13 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 			if(i<2*p.nbMaxTrucks){
 				int j = i-1;
 				if(i%2==0){
-					p.g.enforceNode(i+1, p, false);
+					p.g.enforceNode(i+1, p);
 				}else{
-					p.g.enforceNode(i-1, p, false);
+					p.g.enforceNode(i-1, p);
 					j--;
 				}
 				for(;j>=0;j--){
-					p.g.enforceNode(j, p, false);
+					p.g.enforceNode(j, p);
 				}
 			}
 		}

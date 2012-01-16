@@ -121,8 +121,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 
     @Override
-    public boolean enforceNode(int x, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
+    public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
