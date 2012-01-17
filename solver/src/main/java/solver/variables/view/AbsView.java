@@ -30,6 +30,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -112,8 +113,11 @@ public final class AbsView extends View<IntVar> {
         }
         boolean done = var.removeValue(-value, this);
         done |= var.removeValue(value, this);
-        if(instantiated()){
+        if (instantiated()) {
             evt = EventType.INSTANTIATE;
+            if (cause.reactOnPromotion()) {
+                cause = Cause.Null;
+            }
         }
         if (done) {
             notifyMonitors(evt, cause);
@@ -151,6 +155,9 @@ public final class AbsView extends View<IntVar> {
         if (var.hasEnumeratedDomain()) {
             done |= var.removeInterval(-v + 1, v - 1, this);
             evt = EventType.INSTANTIATE;
+            if (cause.reactOnPromotion()) {
+                cause = Cause.Null;
+            }
         }
         if (done) {
             notifyMonitors(evt, cause);

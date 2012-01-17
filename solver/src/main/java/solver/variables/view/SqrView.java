@@ -30,6 +30,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -113,13 +114,22 @@ public final class SqrView extends View<IntVar> {
             EventType evt = EventType.REMOVE;
             if (value == inf) {
                 evt = EventType.INCLOW;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             } else if (value == sup) {
                 evt = EventType.DECUPP;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             }
             boolean done = var.removeValue(-rootV, this);
             done |= var.removeValue(rootV, this);
             if (instantiated()) {
                 evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             }
             if (done) {
                 notifyMonitors(evt, cause);

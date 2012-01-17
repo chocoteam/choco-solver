@@ -29,6 +29,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -97,8 +98,14 @@ public class MinusView extends View<IntVar> {
 
                 if (value == inf) {
                     e = EventType.INCLOW;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 } else if (value == sup) {
                     e = EventType.DECUPP;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     if (this.instantiated()) {
@@ -162,6 +169,9 @@ public class MinusView extends View<IntVar> {
                 boolean done = var.updateUpperBound(-value, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
@@ -186,6 +196,9 @@ public class MinusView extends View<IntVar> {
                 boolean done = var.updateLowerBound(-value, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);

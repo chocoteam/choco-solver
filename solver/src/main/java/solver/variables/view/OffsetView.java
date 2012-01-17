@@ -103,11 +103,20 @@ public final class OffsetView extends View<IntVar> {
                 if (done) {
                     if (value == inf) {
                         e = EventType.INCLOW;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     } else if (value == sup) {
                         e = EventType.DECUPP;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     this.notifyMonitors(e, cause);
                     solver.getExplainer().removeValue(this, value, cause);
@@ -170,6 +179,9 @@ public final class OffsetView extends View<IntVar> {
                 boolean done = var.updateLowerBound(value - cste, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
