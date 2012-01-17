@@ -151,6 +151,14 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
         // nothing required here
     }
 
+    public void virtuallyExecuted(){
+        this.evtmask = 0;
+        deltamon.unfreeze();
+        if(enqueued){
+            scheduler.remove(this);
+        }
+    }
+
     @Override
     public void flush() {
         this.evtmask = 0;

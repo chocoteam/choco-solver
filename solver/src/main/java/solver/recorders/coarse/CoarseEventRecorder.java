@@ -82,10 +82,14 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
     @Override
     public boolean execute() throws ContradictionException {
         if (!propagator.isActive()) {
-            //propagator.initialize();
             //promote event to top level event FULL_PROPAGATION
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
             propagator.setActive();
+        }
+        // if there is at least one fine event scheduled,
+        if (propagator.getNbPendingER() > 0) {
+            //promote event to top level event FULL_PROPAGATION
+            evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
         }
         if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
@@ -93,6 +97,9 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             int _evt = evtmask;
             evtmask = 0;
             propagator.propagate(_evt);
+            // the propagator is now localy consistent,
+            // then remove every fine event attached to this propagator to avoid multiple propagation
+            propagator.forEachFineEvent(virtExec);
         }
         return true;
     }

@@ -26,8 +26,11 @@
  */
 package solver.recorders.coarse;
 
+import choco.kernel.common.util.procedure.Procedure;
+import solver.exception.ContradictionException;
 import solver.propagation.IScheduler;
 import solver.recorders.IEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -42,6 +45,13 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder {
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued; // to check wether this is enqueud or not.
+
+    protected static final Procedure<AbstractFineEventRecorder> virtExec = new Procedure<AbstractFineEventRecorder>() {
+        @Override
+        public void execute(AbstractFineEventRecorder abstractFineEventRecorder) throws ContradictionException {
+            abstractFineEventRecorder.virtuallyExecuted();
+        }
+    };
 
     protected AbstractCoarseEventRecorder() {
         this.enqueued = false;

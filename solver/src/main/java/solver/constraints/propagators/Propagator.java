@@ -28,6 +28,7 @@
 package solver.constraints.propagators;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
@@ -190,7 +191,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * <br/>
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
-     *
      * @param evtmask type of propagation event <code>this</code> must consider.
      * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
@@ -200,8 +200,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
      * @param eventRecorder a fine event recorder
-     * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
-     * @param mask         type of event
+     * @param idxVarInProp  index of the variable <code>var</code> in <code>this</code>
+     * @param mask          type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
@@ -269,6 +269,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public int nbRecorders() {
         return lastER;
+    }
+
+    public void forEachFineEvent(Procedure<AbstractFineEventRecorder<V>> procedure) throws ContradictionException {
+        for (int i = 0; i < lastER; i++) { // could be improved by storing active fine ER
+            procedure.execute(fineER[i]);
+        }
     }
 
     public IEventRecorder getRecorder(int i) {
