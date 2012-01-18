@@ -173,7 +173,14 @@ public final class AbsView extends View<IntVar> {
         }
         boolean done = var.removeInterval(-value + 1, value - 1, this);
         if (done) {
-            notifyMonitors(EventType.INCLOW, cause);
+            EventType evt = EventType.INCLOW;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }
@@ -188,7 +195,14 @@ public final class AbsView extends View<IntVar> {
         boolean done = var.updateLowerBound(-value, this);
         done |= var.updateUpperBound(value, this);
         if (done) {
-            notifyMonitors(EventType.DECUPP, cause);
+            EventType evt = EventType.DECUPP;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }

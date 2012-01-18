@@ -193,7 +193,14 @@ public final class SqrView extends View<IntVar> {
         int floorV = floor_sqrt(value);
         boolean done = var.removeInterval(-floorV + 1, floorV - 1, this);
         if (done) {
-            notifyMonitors(EventType.INCLOW, cause);
+            EventType evt = EventType.INCLOW;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }
@@ -209,7 +216,14 @@ public final class SqrView extends View<IntVar> {
         boolean done = var.updateLowerBound(-floorV, this);
         done |= var.updateUpperBound(floorV, this);
         if (done) {
-            notifyMonitors(EventType.DECUPP, cause);
+            EventType evt = EventType.DECUPP;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }
