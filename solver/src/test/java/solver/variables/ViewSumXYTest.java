@@ -128,7 +128,37 @@ public class ViewSumXYTest {
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
+
+        }
+    }
+
+    @Test(groups = "10s")
+    public void test3() {
+        Random random = new Random();
+        for (int seed = 0; seed < 2000; seed++) {
+            random.setSeed(seed);
+            Solver ref = new Solver();
+            {
+                IntVar[] xs = new IntVar[3];
+                xs[0] = VariableFactory.enumerated("x", 1, 5, ref);
+                xs[1] = VariableFactory.enumerated("y", 1, 5, ref);
+                xs[2] = VariableFactory.enumerated("z", 2, 10, ref);
+                ref.post(Sum.eq(xs, new int[]{1, 1, -1}, 0, ref));
+                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+            }
+            Solver solver = new Solver();
+            {
+                IntVar[] xs = new IntVar[2];
+                xs[0] = VariableFactory.enumerated("x", 1, 5, solver);
+                xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
+                IntVar sum = Views.sum(xs[0], xs[1]);
+//                SearchMonitorFactory.log(solver, true, true);
+                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+            }
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "seed:"+seed);
 
         }
     }

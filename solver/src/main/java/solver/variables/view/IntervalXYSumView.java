@@ -63,6 +63,7 @@ public final class IntervalXYSumView extends AbstractSumView {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
+        boolean uInf = false;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -75,10 +76,10 @@ public final class IntervalXYSumView extends AbstractSumView {
                 LB.set(value + 1);
                 SIZE.add(-1);
                 e = EventType.INCLOW;
+                uInf = true;
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
                 }
-                filterOnGeq(cause, value + 1);
             } else {
                 // todo: delta...
                 UB.set(value - 1);
@@ -87,7 +88,6 @@ public final class IntervalXYSumView extends AbstractSumView {
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
                 }
-                filterOnLeq(cause, value - 1);
             }
             if (SIZE.get() > 0) {
                 if (this.instantiated()) {
@@ -97,6 +97,7 @@ public final class IntervalXYSumView extends AbstractSumView {
                     }
                 }
                 this.notifyMonitors(e, cause);
+                filter(cause, uInf, cause == Cause.Null ? 2 : 1);
             } else if (SIZE.get() == 0) {
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
@@ -129,10 +130,8 @@ public final class IntervalXYSumView extends AbstractSumView {
             this.UB.set(value);
             this.SIZE.set(1);
 
-            filterOnLeq(cause, value);
-            filterOnGeq(cause, value);
-
             this.notifyMonitors(EventType.INSTANTIATE, cause);
+            filter(cause, true, 2);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -141,7 +140,15 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateLowerBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        if (_updateLowerBound(value, cause)) {
+            filter(cause, true, cause == Cause.Null ? 2 : 1);
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean _updateLowerBound(int aValue, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < aValue) {
@@ -152,8 +159,6 @@ public final class IntervalXYSumView extends AbstractSumView {
                 //todo delta
                 SIZE.add(old - aValue);
                 LB.set(aValue);
-
-                filterOnGeq(cause, aValue);
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
@@ -171,7 +176,16 @@ public final class IntervalXYSumView extends AbstractSumView {
     }
 
     @Override
-    public boolean updateUpperBound(int aValue, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        if (_updateUpperBound(value, cause)) {
+            filter(cause, false, cause == Cause.Null ? 2 : 1);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean _updateUpperBound(int aValue, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > aValue) {
@@ -182,8 +196,6 @@ public final class IntervalXYSumView extends AbstractSumView {
                 //todo delta
                 SIZE.add(aValue - old);
                 UB.set(aValue);
-
-                filterOnLeq(cause, aValue);
 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
@@ -280,59 +292,6 @@ public final class IntervalXYSumView extends AbstractSumView {
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
-
-    @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
-        // one of the variable as changed externally, this involves a complete update of this
-        if (evt != EventType.REMOVE) {
-            int elb = A.getLB() + B.getLB();
-            int eub = A.getUB() + B.getUB();
-            int ilb = LB.get();
-            int iub = UB.get();
-            boolean up = false, down = false;
-            EventType e = EventType.VOID;
-            if (elb > ilb) {
-                if (elb > iub) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                SIZE.add(ilb - elb);
-                ilb = elb;
-                LB.set(ilb);
-                e = EventType.INCLOW;
-                down = true;
-            }
-            if (eub < iub) {
-                if (eub < ilb) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                SIZE.add(eub - iub);
-                iub = eub;
-                UB.set(iub);
-                if (e != EventType.VOID) {
-                    e = EventType.BOUND;
-                } else {
-                    e = EventType.DECUPP;
-                }
-                up = true;
-            }
-            if (ilb > iub) {
-                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
-            }
-            if (down || ilb == iub || elb < ilb) { // ilb == iub means instantiation, then force filtering algo
-                filterOnGeq(this, ilb);
-            }
-            if (up || ilb == iub|| eub > iub) { // ilb == iub means instantiation, then force filtering algo
-                filterOnLeq(this, iub);
-            }
-            if (ilb == iub) {
-                notifyMonitors(EventType.INSTANTIATE, this);
-            } else {
-                notifyMonitors(e, this);
-            }
-        }
     }
 }
 

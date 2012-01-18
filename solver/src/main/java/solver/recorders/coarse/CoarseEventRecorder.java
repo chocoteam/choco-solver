@@ -96,10 +96,12 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             propagator.coarseERcalls++;
             int _evt = evtmask;
             evtmask = 0;
-            propagator.propagate(_evt);
-            // the propagator is now localy consistent,
-            // then remove every fine event attached to this propagator to avoid multiple propagation
+            // the propagator will be localy consistent,
+            // then remove every fine event attached to this propagator generated BEFORE calling this
+            // if views schedule event, they will be considered after
             propagator.forEachFineEvent(virtExec);
+
+            propagator.propagate(_evt);
         }
         return true;
     }

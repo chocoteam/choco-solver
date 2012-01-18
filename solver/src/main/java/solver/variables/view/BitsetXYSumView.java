@@ -58,7 +58,7 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     public BitsetXYSumView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
-        this.reactOnRemoval = true;
+        //this.reactOnRemoval = true;
         int lbA = A.getLB();
         int ubA = A.getUB();
         int lbB = B.getLB();
@@ -88,6 +88,7 @@ public final class BitsetXYSumView extends AbstractSumView {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         boolean change = false;
+        boolean uInf = false, uSup = false;
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -108,15 +109,15 @@ public final class BitsetXYSumView extends AbstractSumView {
                     inf = VALUES.nextSetBit(aValue) + OFFSET;
                     LB.set(inf);
                     e = EventType.INCLOW;
-                    filterOnGeq(cause, inf);
+                    uInf = true;
                     if (cause.reactOnPromotion()) {
                         cause = Cause.Null;
                     }
                 } else if (value == sup) {
                     sup = VALUES.prevSetBit(aValue) + OFFSET;
                     UB.set(sup);
+                    uSup = true;
                     e = EventType.DECUPP;
-                    filterOnLeq(cause, sup);
                     if (cause.reactOnPromotion()) {
                         cause = Cause.Null;
                     }
@@ -129,6 +130,10 @@ public final class BitsetXYSumView extends AbstractSumView {
                         }
                     }
                     this.notifyMonitors(e, cause);
+
+                    if (uInf || uSup) {
+                        filter(cause, uInf, cause == Cause.Null ? 2 : 1);
+                    }
                 } else {
                     if (VALUES.isEmpty()) {
                         this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
@@ -189,11 +194,8 @@ public final class BitsetXYSumView extends AbstractSumView {
             if (VALUES.isEmpty()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-
-            filterOnLeq(cause, value);
-            filterOnGeq(cause, value);
-
             this.notifyMonitors(EventType.INSTANTIATE, cause);
+            filter(cause, true, 2);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -203,6 +205,14 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        if (_updateLowerBound(value, cause)) {
+            filter(cause, true, cause == Cause.Null ? 2 : 1);
+            return true;
+        }
+        return false;
+    }
+
+    protected boolean _updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         boolean change;
         int lb = this.getLB();
@@ -222,8 +232,6 @@ public final class BitsetXYSumView extends AbstractSumView {
                 SIZE.set(card);
                 change = _size - card > 0;
 
-                filterOnGeq(cause, lb);
-
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
@@ -241,6 +249,15 @@ public final class BitsetXYSumView extends AbstractSumView {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        if (_updateUpperBound(value, cause)) {
+            filter(cause, false, cause == Cause.Null ? 2 : 1);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean _updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         boolean change;
         int ub = this.getUB();
@@ -260,8 +277,6 @@ public final class BitsetXYSumView extends AbstractSumView {
                 SIZE.set(card);
                 change = _size - card > 0;
 
-                filterOnLeq(cause, ub);
-
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
@@ -274,7 +289,6 @@ public final class BitsetXYSumView extends AbstractSumView {
         }
         return false;
     }
-
 
     @Override
     public boolean contains(int aValue) {
@@ -458,63 +472,5 @@ public final class BitsetXYSumView extends AbstractSumView {
             _riterator.topDownInit();
         }
         return _riterator;
-    }
-
-    /////////////// SERVICES REQUIRED FROM VIEW //////////////////////////
-
-    @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
-        // one of the variable as changed externally, this involves a complete update of this
-        if (evt != EventType.REMOVE) {
-            int elb = A.getLB() + B.getLB();
-            int eub = A.getUB() + B.getUB();
-            int ilb = LB.get();
-            int iub = UB.get();
-            int old_size = iub - ilb; // is == 0, then the view is already instantiated
-            boolean up = false, down = false;
-            EventType e = EventType.VOID;
-            if (elb > ilb) {
-                if (elb > iub) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                VALUES.clear(ilb - OFFSET, elb - OFFSET);
-                ilb = VALUES.nextSetBit(ilb - OFFSET) + OFFSET;
-                LB.set(ilb);
-                e = EventType.INCLOW;
-                down = true;
-            }
-            if (eub < iub) {
-                if (eub < ilb) {
-                    this.contradiction(this, EventType.FULL_PROPAGATION, MSG_LOW);
-                }
-                VALUES.clear(eub - OFFSET + 1, iub - OFFSET + 1);
-                iub = VALUES.prevSetBit(iub - OFFSET + 1) + OFFSET;
-                UB.set(iub);
-                if (e != EventType.VOID) {
-                    e = EventType.BOUND;
-                } else {
-                    e = EventType.DECUPP;
-                }
-                up = true;
-            }
-            int size = VALUES.cardinality();
-            SIZE.set(size);
-            if (ilb > iub) {
-                this.contradiction(this, EventType.FULL_PROPAGATION, MSG_EMPTY);
-            }
-            if (down || size == 1 || elb < ilb) {
-                filterOnGeq(this, ilb);
-            }
-            if (up || size == 1 || eub > iub) { // size == 1 means instantiation, then force filtering algo
-                filterOnLeq(this, iub);
-            }
-            if (ilb == iub) {  // size == 1 means instantiation, then force filtering algo
-                if (old_size > 0) {
-                    notifyMonitors(EventType.INSTANTIATE, this);
-                }
-            } else {
-                notifyMonitors(e, this);
-            }
-        }
     }
 }

@@ -400,7 +400,7 @@ public class ViewsTest {
     public void test5() {
         // ~all-interval series
         int k = 5;
-        for (int seed = 0; seed < 999; seed ++) {
+        for (int seed = 5; seed < 99; seed ++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
@@ -429,7 +429,7 @@ public class ViewsTest {
                 solver.post(new GreaterOrEqualX_YC(t[0], t[k - 2], 1, solver));
                 solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
             }
-            check(ref, solver, k, true, false);
+            check(ref, solver, k, true, true);
         }
     }
 
