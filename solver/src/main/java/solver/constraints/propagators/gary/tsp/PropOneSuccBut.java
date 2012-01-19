@@ -94,7 +94,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 					this.contradiction(g,i+" has no successor");
 				}
 				if (succs.neighborhoodSize()==1){
-					g.enforceArc(i,succs.getFirstElement(),this,false);
+					g.enforceArc(i,succs.getFirstElement(),this);
 				}
 			}
 		}
@@ -152,7 +152,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
 				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
 					if(i!=to){
-						g.removeArc(from,i,p,false);
+						g.removeArc(from,i,p);
 					}
 				}
 			}
@@ -174,7 +174,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 					p.contradiction(g,from+" has no successor");
 				}
 				if (succs.neighborhoodSize()==1){
-					g.enforceArc(from,succs.getFirstElement(),p,false);
+					g.enforceArc(from,succs.getFirstElement(),p);
 				}
 			}
 		}

@@ -113,8 +113,8 @@ public class PropArborescenceNM<V extends GraphVar> extends GraphPropagator<V>{
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			g.enforceNode(i,this,false);
-			g.removeArc(i,i,this,false);
+			g.enforceNode(i,this);
+			g.removeArc(i,i,this);
 		}
 		filtering();
 	}
@@ -148,7 +148,7 @@ public class PropArborescenceNM<V extends GraphVar> extends GraphPropagator<V>{
 		for(int i=0;i<n;i++){
 			succ = domTrans.getSuccessorsOf(i);
 			for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-				g.removeArc(k,i,this,false);
+				g.removeArc(k,i,this);
 			}
 		}
 	}

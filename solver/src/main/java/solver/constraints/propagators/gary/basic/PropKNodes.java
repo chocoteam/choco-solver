@@ -76,8 +76,8 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		k.updateLowerBound(g.getKernelOrder(), this, false);
-		k.updateUpperBound(g.getEnvelopOrder(), this, false);
+		k.updateLowerBound(g.getKernelOrder(), this);
+		k.updateUpperBound(g.getEnvelopOrder(), this);
 		if(k.instantiated()){
 			if(g.getEnvelopOrder()==g.getKernelOrder()){
 				setPassive();
@@ -85,14 +85,14 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				if(g.getEnvelopOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this, false);
+						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-							g.removeNode(node, this, false);
+							g.removeNode(node, this);
 						}
 					}
 					setPassive();
@@ -103,8 +103,8 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		k.updateLowerBound(g.getKernelOrder(), this, false);
-		k.updateUpperBound(g.getEnvelopOrder(), this, false);
+		k.updateLowerBound(g.getKernelOrder(), this);
+		k.updateUpperBound(g.getEnvelopOrder(), this);
 		if(k.instantiated()){
 			if(g.getEnvelopOrder()==g.getKernelOrder()){
 				setPassive();
@@ -112,14 +112,14 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 				if(g.getEnvelopOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this, false);
+						g.enforceNode(node, this);
 					}
 					setPassive();
 				}else if(g.getKernelOrder()==k.getValue()){
 					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
 						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-							g.removeNode(node, this, false);
+							g.removeNode(node, this);
 						}
 					}
 					setPassive();

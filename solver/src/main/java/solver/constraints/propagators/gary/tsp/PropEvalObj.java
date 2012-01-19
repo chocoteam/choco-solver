@@ -116,7 +116,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             minSum.add(minC);
             minCostSucc[i].set(min);
         }
-        sum.updateLowerBound(minSum.get(), this, false);
+        sum.updateLowerBound(minSum.get(), this);
         // filter the graph
         INeighbors succs;
         int delta = minSum.get() - sum.getUB();
@@ -126,7 +126,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             curMin = distMatrix[i][minCostSucc[i].get()];
             for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                 if (delta > curMin - distMatrix[i][j]) {
-                    g.removeArc(i, j, this, false);
+                    g.removeArc(i, j, this);
                 }
             }
         }
@@ -147,7 +147,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             for (int i = toCompute.size() - 1; i >= 0; i--) {
                 findMin(toCompute.get(i));
             }
-            sum.updateLowerBound(minSum.get(), this, false);
+            sum.updateLowerBound(minSum.get(), this);
         }
         if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
             // filter the graph
@@ -159,7 +159,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
                 curMin = distMatrix[i][minCostSucc[i].get()];
                 for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                     if (delta > curMin - distMatrix[i][j]) {
-                        g.removeArc(i, j, this, false);
+                        g.removeArc(i, j, this);
                     }
                 }
             }

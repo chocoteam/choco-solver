@@ -135,21 +135,18 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * and the return value is <code>true</code></li>
      * </ul>
      *
+     *
      * @param value       value to remove from the domain (int)
      * @param cause       removal releaser
-     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         boolean change = false;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -211,15 +208,15 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      * {@inheritDoc}
      */
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         else {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause, informCause);
+                anyChange |= removeValue(v, cause);
             }
             return anyChange;
         }
@@ -238,17 +235,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       instantiation value (int)
      * @param cause       instantiation releaser
-     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -297,17 +290,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       new lower bound (included)
      * @param cause       updating releaser
-     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
@@ -360,17 +349,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *
      * @param value       new upper bound (included)
      * @param cause       update releaser
-     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         boolean change;
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {

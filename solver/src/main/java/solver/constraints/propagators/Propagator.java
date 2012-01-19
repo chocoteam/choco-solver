@@ -28,6 +28,7 @@
 package solver.constraints.propagators;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
@@ -190,7 +191,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * <br/>
      * It should initialized the internal data structure and apply filtering algorithm from scratch.
      *
-     *
      * @param evtmask type of propagation event <code>this</code> must consider.
      * @throws ContradictionException when a contradiction occurs, like domain wipe out or other incoherencies.
      */
@@ -200,8 +200,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
      * @param eventRecorder a fine event recorder
-     * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
-     * @param mask         type of event
+     * @param idxVarInProp  index of the variable <code>var</code> in <code>this</code>
+     * @param mask          type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
@@ -271,6 +271,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return lastER;
     }
 
+    public void forEachFineEvent(Procedure<AbstractFineEventRecorder<V>> procedure) throws ContradictionException {
+        for (int i = 0; i < lastER; i++) { // could be improved by storing active fine ER
+            procedure.execute(fineER[i]);
+        }
+    }
+
     public IEventRecorder getRecorder(int i) {
         if (i >= 0 && i < lastER) {
             return fineER[i];
@@ -292,19 +298,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             coarseER = (AbstractCoarseEventRecorder) recorder;
         }
     }
-
-//    /**
-//     * BEWARE: this method should not be removed!!
-//     * It is called by reflection within ReifiedConstraint
-//     */
-//    @SuppressWarnings({"UnusedDeclaration", "unchecked"})
-//    public void unlinkVariables() {
-//        for (; lastER > 0; lastER--) {
-//            AbstractFineEventRecorder recorder = fineER[lastER - 1];
-//            recorder.getVariable().removeMonitor(recorder);
-//            fineER[lastER - 1] = null;
-//        }
-//    }
 
     /**
      * Returns the constraint including this propagator

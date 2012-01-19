@@ -31,7 +31,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -63,7 +62,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// METHODS
 	//***********************************************************************************
 
-	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
     	if(kernel.edgeExists(x, y)){
     		this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
         	return false;
@@ -79,24 +78,24 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 			int ny = getEnvelopGraph().getNeighborsOf(y).neighborhoodSize();
 			if(nx<2){
 				if(nx==0){
-					removeNode(x, cause, true);
+					removeNode(x, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(x)){
-					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause,true);
+					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause); //CPRU not idempotent
 				}
 			}
 			if(ny<2){
 				if(ny==0){
-					removeNode(y, cause, true);
+					removeNode(y, cause); //CPRU not idempotent
 				}else if(getKernelGraph().getActiveNodes().isActive(y)){
-					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause,true);
+					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause); //CPRU not idempotent
 				}
 			}
         	return true;
         }return false;
     }
-    public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-    	enforceNode(x, cause, informCause);
-    	enforceNode(y, cause, informCause);
+    public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
+    	enforceNode(x, cause);
+    	enforceNode(y, cause);
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){

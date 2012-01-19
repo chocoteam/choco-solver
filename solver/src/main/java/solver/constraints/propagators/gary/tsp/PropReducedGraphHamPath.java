@@ -191,7 +191,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			to = e%n;
 			if(sccOf[to].get()!=next){
 				from = e/n-1;
-				G.removeArc(from,to,this,false);
+				G.removeArc(from,to,this);
 				mates[node].remove(e);
 			}
 		}

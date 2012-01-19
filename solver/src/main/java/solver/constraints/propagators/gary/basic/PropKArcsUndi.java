@@ -75,8 +75,8 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 		}
 		min = min / 2;
 		max = max / 2;
-		k.updateLowerBound(min, this, false);
-		k.updateUpperBound(max, this, false);
+		k.updateLowerBound(min, this);
+		k.updateUpperBound(max, this);
 		nbInEnv.set(max);
 		nbInKer.set(min);
 		if(k.instantiated()){
@@ -87,7 +87,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();
@@ -98,7 +98,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}
@@ -121,7 +121,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 					for (int i=env.getFirstElement();i>=0;i=env.getNextElement()){
 						nei = g.getEnvelopGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
-							g.enforceArc(i, j, this, false);
+							g.enforceArc(i, j, this);
 						}
 					}
 					setPassive();
@@ -132,7 +132,7 @@ public class PropKArcsUndi<V extends Variable, G extends UndirectedGraphVar> ext
 						kernei = g.getKernelGraph().getNeighborsOf(i);
 						for(int j=nei.getFirstElement(); j>=0; j=nei.getNextElement()){
 							if(!kernei.contain(j)){
-								g.removeArc(i, j, this, false);
+								g.removeArc(i, j, this);
 							}
 						}
 					}

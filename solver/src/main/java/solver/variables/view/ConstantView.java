@@ -106,7 +106,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
@@ -115,7 +115,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
@@ -124,7 +124,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
@@ -133,7 +133,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
@@ -142,7 +142,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
             solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.DECUPP, "outside domain update bound");

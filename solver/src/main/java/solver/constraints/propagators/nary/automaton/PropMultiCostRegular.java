@@ -278,12 +278,12 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                     if (j == right + 1) {
                         right = j;
                     } else {
-                        vs[i].removeInterval(left, right, this, false);//, false);
+                        vs[i].removeInterval(left, right, this);//, false);
                         left = right = j;
                     }
                 }
             }
-            vs[i].removeInterval(left, right, this, false);//, false);
+            vs[i].removeInterval(left, right, this);//, false);
         }
         this.slp.computeShortestAndLongestPath(toRemove, z, this);
     }
@@ -711,7 +711,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (realsp - z[0].getLB() >= Constant.MCR_DECIMAL_PREC) {
             double mr = Math.round(realsp);
             double rsp = (realsp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : realsp;
-            z[0].updateLowerBound((int) Math.ceil(rsp), this, false);//, false);
+            z[0].updateLowerBound((int) Math.ceil(rsp), this);//, false);
             modifiedBound[0] = true;
         }
     }
@@ -729,7 +729,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         if (reallp - z[0].getUB() <= -Constant.MCR_DECIMAL_PREC) {
             double mr = Math.round(reallp);
             double rsp = (reallp - mr <= Constant.MCR_DECIMAL_PREC) ? mr : reallp;
-            z[0].updateUpperBound((int) Math.floor(rsp), this, false);//, false);
+            z[0].updateUpperBound((int) Math.floor(rsp), this);//, false);
             modifiedBound[1] = true;
         }
     }
@@ -839,8 +839,8 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         for (int i = 0; i < nbCounters; i++) {
             IntVar z = this.z[i];
             Bounds bounds = counters.get(i).bounds();
-            z.updateLowerBound(bounds.min.value, this, false);//, false);
-            z.updateUpperBound(bounds.max.value, this, false);//, false);
+            z.updateLowerBound(bounds.min.value, this);//, false);
+            z.updateUpperBound(bounds.max.value, this);//, false);
 
         }
     }

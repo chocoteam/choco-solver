@@ -42,20 +42,18 @@ public interface IVariableGraph {
      *
      * @param x node's index
      * @param cause algorithm which is related to the removal
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true iff the removal has an effect
      */
-    boolean removeNode(int x, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeNode(int x, @NotNull ICause cause) throws ContradictionException;
     
     /**
      * Enforce the node x to belong to any partial subgraph
      *
      * @param x node's index
      * @param cause algorithm which is related to the modification
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true iff the node is effectively added to the mandatory structure
      */
-    boolean enforceNode(int x, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean enforceNode(int x, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Remove node y from the neighborhood of node x from the maximal partial subgraph
@@ -63,11 +61,10 @@ public interface IVariableGraph {
      * @param x node's index
      * @param y node's index
      * @param cause algorithm which is related to the removal
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true iff the removal has an effect
      * @throws ContradictionException 
      */
-    boolean removeArc(int x, int y, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Enforce the node y into the neighborhood of node x in any partial subgraph
@@ -75,10 +72,9 @@ public interface IVariableGraph {
      * @param x node's index
      * @param y node's index
      * @param cause algorithm which is related to the removal
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true iff the node y is effectively added in the neighborhooh of node x
      */
-    boolean enforceArc(int x, int y, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean enforceArc(int x, int y, @NotNull ICause cause) throws ContradictionException;
 
 
     /**

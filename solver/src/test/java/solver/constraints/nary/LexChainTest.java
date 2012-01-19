@@ -190,12 +190,12 @@ public class LexChainTest {
 
         try {
             solver.propagate();
-            X[0][0].updateLowerBound(1, Cause.Null, false);
-            X[0][1].updateLowerBound(1, Cause.Null, false);
-            X[1][0].updateLowerBound(1, Cause.Null, false);
-            X[2][1].updateLowerBound(1, Cause.Null, false);
+            X[0][0].updateLowerBound(1, Cause.Null);
+            X[0][1].updateLowerBound(1, Cause.Null);
+            X[1][0].updateLowerBound(1, Cause.Null);
+            X[2][1].updateLowerBound(1, Cause.Null);
             solver.propagate();
-            X[2][1].instantiateTo(1, Cause.Null, false);
+            X[2][1].instantiateTo(1, Cause.Null);
             solver.propagate();
         } catch (ContradictionException e) {
             Assert.fail();

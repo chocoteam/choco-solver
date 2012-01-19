@@ -103,9 +103,9 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			g.enforceNode(i,this,false);
-			g.removeArc(i,i,this,false);
-			g.removeArc(i,source,this,false);
+			g.enforceNode(i,this);
+			g.removeArc(i,i,this);
+			g.removeArc(i,source,this);
 		}
 		structuralPruning();
 	}
@@ -123,7 +123,7 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
 					//--- STANDART PRUNING
 					if(domFinder.isDomminatedBy(x,y)){
-						g.removeArc(x,y,this,false);
+						g.removeArc(x,y,this);
 					}
 					// ENFORCE ARC-DOMINATORS (redondant)
 				}

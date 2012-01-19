@@ -69,7 +69,7 @@ public class GlobalCardinalityTest {
             solver.propagate();
             assertEquals(bob.getLB(), 2);
             assertEquals(bob.getUB(), 2);
-            julia.removeValue(3, Cause.Null, false);
+            julia.removeValue(3, Cause.Null);
             solver.propagate();
         } catch (ContradictionException e) {
             Assert.fail();
