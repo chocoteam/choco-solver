@@ -53,6 +53,7 @@ public class MaxView extends AbstractViewWithDomain {
 
     public MaxView(IntVar a, IntVar b, Solver solver) {
         super(a, b, solver);
+        this.reactOnRemoval = true;
         int lb = Math.max(A.getLB(), B.getLB());
         int ub = Math.max(A.getUB(), B.getUB());
         LB.set(lb);
