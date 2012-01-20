@@ -99,28 +99,12 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             // if views schedule event, they will be considered after
             propagator.forEachFineEvent(virtExec);
         }
-
         if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
 			propagator.coarseERcalls++;
 			int _evt = evtmask;
 			evtmask = 0;
 			propagator.propagate(_evt);
-			// DEBUT MODIF JG
-			int nbR = propagator.nbRecorders();
-			IEventRecorder rec;
-			IDeltaMonitor request;
-			for(int i=0;i<nbR;i++){
-				rec = propagator.getRecorder(i);
-				if(rec instanceof AbstractFineEventRecorder){
-					for(Variable v:rec.getVariables()){
-						request = ((AbstractFineEventRecorder) rec).getDeltaMonitor(v);
-						rec.flush();
-						request.unfreeze();
-					}
-				}
-			}
-			// FIN MODIFS JG
 		}
 		return true;
 	}
