@@ -42,7 +42,7 @@ samples.Partition -n 64
 samples.Photo -d large
 ##
 ## FAMOUS NQUEEN, my favourite
-samples.nqueen.NQueenBinary -q 400
+samples.nqueen.NQueenBinary -q 12
 ##
 samples.nqueen.NQueenGlobal -q 400
 ##

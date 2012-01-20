@@ -39,8 +39,8 @@ def createTables(con):
 
     cur.execute(
         "CREATE TABLE IF NOT EXISTS PROBLEM(\
-            name VARCHAR(25) NOT NULL, parameters VARCHAR(200), id BINARY(36),\
-            PRIMARY KEY (name, parameters)\
+            name VARCHAR(100) NOT NULL, parameters VARCHAR(255), id BINARY(36),\
+            PRIMARY KEY (name(75), parameters(100))\
         )")
 
     cur.execute(
@@ -83,6 +83,11 @@ def openSession(con):
 # results: time and data in an array (in a matrix, of dim nx1
 ############################################
 def insertValues(con, ses_id, name, parameters, results):
+    print results
+    if len(results[0])  is 0 :
+        results = [[0 for x in range(1)] for x in range(len(results))]
+    print results
+
     #print results
     cur = con.cursor()
     # chech wether the problem already exists
