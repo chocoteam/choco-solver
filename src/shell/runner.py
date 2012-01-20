@@ -28,6 +28,7 @@ loop = 1 # can be override
 timelimit = 180 #in seconds => 10min
 name = 'runner'
 dir = '.'
+pwd = ''
 
 ## regexp for statisctics
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
@@ -43,6 +44,7 @@ def readParameters(paramlist):
     global timelimit
     global name
     global dir
+    global pwd
     if len(paramlist)>0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
@@ -50,8 +52,10 @@ def readParameters(paramlist):
             timelimit = int(paramlist[1]) # time limit before killing a process
         elif paramlist[0] == "-n": # subname of output files
             name = paramlist[1]
-        elif paramlist[0] == "-d": # subname of output files
+        elif paramlist[0] == "-d": # directory of output files
             dir = paramlist[1]
+        elif paramlist[0] == "-pwd": # user pwd for db connexion
+            pwd = paramlist[1]
         readParameters(paramlist[2:])
 
 
@@ -183,7 +187,7 @@ class runit(Thread):
 
 
 
-con = mdb.connect('localhost', 'perfuser', 'perf123', 'perfdb')
+con = mdb.connect('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
 #con = mdb.connect('localhost', 'testuser', 'test623', 'testdb')
 database.createTables(con)
 sid = database.openSession(con)
