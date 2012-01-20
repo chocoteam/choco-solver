@@ -71,7 +71,11 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INT_ALL_MASK();
+		int et = EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
+		if(vars[vIdx].hasEnumeratedDomain()){
+			et+=EventType.REMOVE.mask;
+		}
+        return et;
     }
 
     private void updateInfX() throws ContradictionException {

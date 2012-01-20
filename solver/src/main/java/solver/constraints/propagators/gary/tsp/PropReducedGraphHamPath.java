@@ -54,6 +54,8 @@ import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
+import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 
@@ -121,8 +123,15 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
 	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	int count = 0;
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		for(int i=0;i<n;i++){
+			sccFirst[i].set(-1);
+			sccNext[i].set(-1);
+			mates[i].clear();
+			G_R.getActiveNodes().desactivate(i);
+		}
 		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph());
 		int s = allSCC.size();
 		n_R.set(s);
@@ -130,8 +139,6 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		TIntArrayList list;
 		for(int i=0;i<s;i++){
 			list = allSCC.get(i);
-			mates[i].clear();
-			G_R.getActiveNodes().desactivate(i);
 			G_R.getActiveNodes().activate(i);
 			for(int j=list.size()-1;j>=0;j--){
 				elem = list.get(j);
@@ -160,6 +167,9 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			if(G_R.getSuccessorsOf(i).isEmpty()){
 				last = i;
 			}
+		}
+		if(first==-1 || last==-1 || first==last){
+			contradiction(G, "");
 		}
 		if(visit(first, last)!=n_R.get()){
 			contradiction(G, "");
@@ -218,8 +228,12 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return visit(next,last)+1;
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(true){
+			propagate(0);
+			return;
+		}
 		sccComputed.clear();
 		if((mask & EventType.REMOVEARC.mask)!=0){
 			eventRecorder.getDeltaMonitor(G).forEach(arcRemoved, EventType.REMOVEARC);
@@ -270,6 +284,14 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 
 	public IStateInt[] getSCCOF() {
 		return sccOf;
+	}
+
+	public IStateInt[] getSCCFirst() {
+		return sccFirst;
+	}
+
+	public IStateInt[] getSCCNext() {
+		return sccNext;
 	}
 
 	public IDirectedGraph getReducedGraph() {

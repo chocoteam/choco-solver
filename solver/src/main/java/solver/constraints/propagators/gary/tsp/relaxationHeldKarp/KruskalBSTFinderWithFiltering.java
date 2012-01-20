@@ -76,7 +76,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 		sortedArcs = new int[n*n];
 		indexOfArc = new int[n][n];
 		p = new int[n];
-		ccN = 2*n;
+		ccN = 2*n+1;
 		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
@@ -135,19 +135,27 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 		int smallN = n/2;
 		for(int x=nR.get()-1;x>=0;x--){
 			minCostOutArcs[x] = -1;
+			int mand = -1;
 			for(int a=outArcs[x].getFirstElement();a>=0;a=outArcs[x].getNextElement()){
 				f = a/smallN-1;
 				t = a%smallN;
 				edge = f*n+(t+smallN);
-				activeArcs.clear(indexOfArc[f][t+smallN]);
-				activeArcs.clear(indexOfArc[t+smallN][f]);
 				if(g.edgeExists(f,t+smallN)){
+					activeArcs.clear(indexOfArc[f][t+smallN]);
+					activeArcs.clear(indexOfArc[t+smallN][f]);
 					links.add(edge);
 					if(minCostOutArcs[x]==-1 || costs[minCostOutArcs[x]]>costs[edge]){
 						minCostOutArcs[x] = edge;
 					}
 				}
+				if(propHK.getMandatorySuccessorOf(f)==t){
+					mand = edge;
+				}
 			}
+			if(mand!=-1){
+				minCostOutArcs[x] = mand;
+			}
+
 		}
 	}
 
@@ -243,6 +251,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 
 	private void pruning(int fi, double delta) throws ContradictionException {
 		int i,j;
+		int smallN = n/2;
 		double repCost;
 		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
@@ -251,23 +260,24 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 				repCost = ccTEdgeCost[lca.getLCA(i,j)];
 				if(costs[i*n+j]-repCost > delta){
 					propHK.remove(i,j);
-					activeArcs.clear(arc);
 				}
 			}
 		}
 		int arc,x;
-		int smallN = n/2;
 		for(int k=links.size()-1;k>=0;k--){
 			arc = links.get(k);
 			i = arc/n;
 			j = arc%n;
 			if(!Tree.edgeExists(i, j)){
-				if(i>=smallN){
-					x = j;
+				if(i<smallN){
+					x = sccOf[i].get();
 				}else{
-					x = i;
+					x = sccOf[j].get();
 				}
-				repCost = costs[minCostOutArcs[sccOf[x].get()]];
+				if(minCostOutArcs[x]==-1){
+					throw new UnsupportedOperationException();
+				}
+				repCost = costs[minCostOutArcs[x]];
 				if(costs[i*n+j]-repCost > delta){
 					propHK.remove(i,j);
 				}
@@ -295,8 +305,6 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 				treeCost += costs[arc];
 				// ne peut pas etre utilise pour remplacer un autre arc
 				updateCCTree(rFrom, rTo, val);
-				activeArcs.clear(indexOfArc[from][to]);
-				activeArcs.clear(indexOfArc[to][from]);
 				tSize++;
 			}else{
 				propHK.contradiction();
@@ -313,7 +321,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder{
 		double cost;
 		for(int i=nR.get()-1;i>=0;i--){
 			minArc = minCostOutArcs[i];
-			if(minArc>=0){
+			if(minArc!=-1){
 				minArc = minCostOutArcs[i];
 				from = minArc/n;
 				to   = minArc%n;

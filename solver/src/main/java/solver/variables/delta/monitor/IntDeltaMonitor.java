@@ -60,7 +60,7 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     @Override
     public void freeze() {
         this.frozenFirst = first; // freeze indices
-        this.first = this.frozenLast = last = delta.size();
+        this.frozenLast = last = delta.size();
     }
 
     @Override

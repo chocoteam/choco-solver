@@ -321,4 +321,19 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 		}
 		return p[i];
 	}
+//	private int getLCA(int i, int j) {
+//		BitSet marked = new BitSet(ccN);
+//		marked.set(i);
+//		marked.set(j);
+//		int p = ccTree.getPredecessorsOf(i).getFirstElement();
+//		while(p!=-1){
+//			marked.set(p);
+//			p = ccTree.getPredecessorsOf(p).getFirstElement();
+//		}
+//		p = ccTree.getPredecessorsOf(j).getFirstElement();
+//		while(p!=-1 && !marked.get(p)){
+//			p = ccTree.getPredecessorsOf(p).getFirstElement();
+//		}
+//		return p;
+//	}
 }

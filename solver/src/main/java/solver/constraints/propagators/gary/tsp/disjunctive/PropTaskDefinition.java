@@ -32,21 +32,26 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.real;
+package solver.constraints.propagators.gary.tsp.disjunctive;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.DoubleVar;
 import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-public class PropTimeInTour extends GraphPropagator {
+import java.util.BitSet;
+
+public class PropTaskDefinition extends GraphPropagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -54,19 +59,27 @@ public class PropTimeInTour extends GraphPropagator {
 
 	DirectedGraphVar g;
 	int n;
-	DoubleVar[] intVars;
-	double[][] dist;
+	IntVar[] starts;
+	IntVar[] ends;
+	IntVar[] durations;
+	int[][] dist;
+	IntProcedure arcRemoved;
+	private BitSet nodeChanged;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTimeInTour(DoubleVar[] intVars, DirectedGraphVar graph, double[][] dist, Constraint constraint, Solver solver) {
-		super(intVars, solver, constraint, PropagatorPriority.BINARY);
+	public PropTaskDefinition(IntVar[] st, IntVar[] end, IntVar[] dur, DirectedGraphVar graph, int[][] dist, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(st,end,dur,new Variable[]{graph}), solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		this.intVars = intVars;
+		starts = st;
+		durations = dur;
+		ends = end;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.dist = dist;
+		arcRemoved = new RemArc();
+		nodeChanged = new BitSet(n);
 	}
 
 	//***********************************************************************************
@@ -76,24 +89,75 @@ public class PropTimeInTour extends GraphPropagator {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			upUB(i);
-			upLB(i);
+			setDuration(i);
+			updateBounds(i);
+			checkGraph(i);
+		}
+	}
+
+	private void setDuration(int i) throws ContradictionException {
+		INeighbors suc = g.getEnvelopGraph().getSuccessorsOf(i);
+		int min = suc.getFirstElement();
+		int max = min;
+		for(int s=suc.getFirstElement();s>=0;s=suc.getNextElement()){
+			if(dist[i][s]<dist[i][min]){
+				min = s;
+			}else if(dist[i][s]>dist[i][max]){
+				max = s;
+			}
+		}
+		if(min==-1){
+			durations[i].instantiateTo(0,this,false);
+		}else{
+			durations[i].updateLowerBound(dist[i][min],this,false);
+			durations[i].updateUpperBound(dist[i][max], this, false);
+		}
+	}
+
+	private void updateBounds(int i) throws ContradictionException {
+		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this, false);
+		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this, false);
+		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this,false);
+		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this,false);
+		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this,false);
+		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this,false);
+	}
+
+	private void checkGraph(int i) throws ContradictionException {
+		int min = durations[i].getLB();
+		int max = durations[i].getUB();
+		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+			if(dist[i][s]<min || dist[i][s]>max){
+				g.removeArc(i,s,this,false);
+			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if((mask & EventType.INCLOW.mask)!=0){
-			upLB(idxVarInProp);
+		if(true){
+			propagate(0);
+			return;
 		}
-		if((mask & EventType.DECUPP.mask)!=0){
-			upUB(idxVarInProp);
+		if(idxVarInProp<3*n){
+			int i = idxVarInProp%n;
+			updateBounds(i);
+			checkGraph(i);
+		}else{
+			nodeChanged.clear();
+			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved,EventType.REMOVEARC);
+			for(int i=nodeChanged.nextSetBit(0);i>=0;i=nodeChanged.nextSetBit(i+1)){
+				setDuration(i);
+				updateBounds(i);
+				checkGraph(i);
+			}
 		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.INSTANTIATE.mask;
+		return EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.REMOVEARC.mask;
 	}
 
 	@Override
@@ -105,37 +169,10 @@ public class PropTimeInTour extends GraphPropagator {
 	// PROCEDURES
 	//***********************************************************************************
 
-	private void upUB(int var) throws ContradictionException {
-		double val = intVars[var].getUB();
-		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
-		if(p!=-1){
-			if(intVars[p].updateUpperBound(val-dist[p][var],this,false)){
-				upUB(p);
-			}
-		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
-			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(intVars[p].getLB()>val-dist[p][var]){
-					g.removeArc(p,var,this,false);
-				}
-			}
+	private class RemArc implements IntProcedure{
+		@Override
+		public void execute(int i) throws ContradictionException {
+			nodeChanged.set(i/n-1);
 		}
 	}
-	private void upLB(int var) throws ContradictionException {
-		double val = intVars[var].getLB();
-		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
-		if(s!=-1){
-			if(intVars[s].updateLowerBound(val+dist[var][s],this,false)){
-				upLB(s);
-			}
-		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
-			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-				if(intVars[s].getUB()<val+dist[var][s]){
-					g.removeArc(var,s,this,false);
-				}
-			}
-		}
-	}
-
 }

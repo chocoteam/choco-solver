@@ -30,10 +30,15 @@ package samples.graph;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
 import samples.AbstractProblem;
+import solver.Cause;
 import solver.Solver;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskIntervals;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskSweep;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
@@ -63,7 +68,7 @@ public class TSPTW extends AbstractProblem{
 
 	private static final long TIMELIMIT = 60000;
 	private static String outFile = "atsptw";
-	static int seed = 0;
+	static long seed = 0;
 	// instance
 	private String instanceName;
 	private int[][] distanceMatrix;
@@ -79,6 +84,7 @@ public class TSPTW extends AbstractProblem{
 	private boolean arbo,antiArbo,rg,hk,bst;
 	private int p;
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph G_R;
+	private IntVar[] end,duration;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -102,7 +108,7 @@ public class TSPTW extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		// create model
-		graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, (int)Math.ceil(bestSol), solver);
 		time = new IntVar[n];
 		for(int i=0;i<n;i++){
@@ -143,7 +149,8 @@ public class TSPTW extends AbstractProblem{
 			gc.addAdHocProp(RP);
 			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
 			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
-		}else{
+		}
+		else{
 			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
 		}
 		if(hk){// MST-based HK
@@ -152,6 +159,25 @@ public class TSPTW extends AbstractProblem{
 		if(bst){// BST-based HK
 			gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs));
 		}
+
+		end = new IntVar[n];
+		duration = new IntVar[n];
+		for(int i=0;i<n;i++){
+			end[i] = VariableFactory.bounded("end "+i,0,totalCost.getUB(),solver);
+			duration[i] = VariableFactory.bounded("duration "+i,0,totalCost.getUB(),solver);
+		}
+		try{
+			time[0].instantiateTo(0, Cause.Null,false);
+			duration[n-1].instantiateTo(0, Cause.Null,false);
+		}catch (Exception e){
+			e.printStackTrace();
+			System.exit(0);
+		}
+		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
+		gc.addAdHocProp(new PropTaskSweep(time, end, duration, distanceMatrix, gc, solver));
+		gc.addAdHocProp(new PropTaskIntervals(time, end, duration, distanceMatrix, gc, solver));
+		solver.post(ConstraintFactory.eq(time[n-1],totalCost,solver));
+
 		solver.post(gc);
 	}
 
@@ -174,22 +200,26 @@ public class TSPTW extends AbstractProblem{
 	@Override
 	public void configureSolver() {
 		AbstractStrategy strategy;
-//		strategy = StrategyFactory.graphRandom(graph,seed);
+		strategy = StrategyFactory.graphRandom(graph,seed);
 //		if(nR==null){
-			strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
+//			strategy = StrategyFactory.graphLexico(graph);
+		strategy = StrategyFactory.graphStrategy(graph, null, new BuildPath(graph), GraphStrategy.NodeArcPriority.ARCS);
+//			strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinVal(graph), GraphStrategy.NodeArcPriority.ARCS);
+//		strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
 //		}else{
 //			strategy = StrategyFactory.graphStrategy(graph,null,new MinCostSCCBreak(graph), GraphStrategy.NodeArcPriority.ARCS);
 //		}
 		solver.set(strategy);
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+//		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
 		SearchMonitorFactory.log(solver, true, false);
 	}
 
 	@Override
 	public void solve() {
-		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
-//		status = solver.findSolution();
+//		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
+		status = solver.findSolution();
 		if(solver.getMeasures().getTimeCount()<TIMELIMIT && solver.getMeasures().getSolutionCount()==0){
 			throw new UnsupportedOperationException("no solution?");
 		}
@@ -201,9 +231,10 @@ public class TSPTW extends AbstractProblem{
 		String txt = instanceName+";"+solver.getMeasures().getSolutionCount()+";"+solver.getMeasures().getFailCount()+
 				";"+solver.getMeasures().getTimeCount()+";"+status+";"+bestSol+";"+bestCost+";"+p+";\n";
 		writeTextInto(txt, outFile);
-		for(int i=0;i<n;i++){
+//		System.out.println(graph.getEnvelopGraph());
+//		for(int i=0;i<n;i++){
 //			System.out.println(i+" -> "+graph.getEnvelopGraph().getSuccessorsOf(i)+" : "+time[i]);
-		}
+//		}
 	}
 
 	//***********************************************************************************
@@ -215,7 +246,7 @@ public class TSPTW extends AbstractProblem{
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;time;status;opt;obj;param;\n", outFile);
 		bench();
-//		String instance = "/Users/jfages07/github/In4Ga/tsptw/rc_201.1.txt";
+//		String instance = "/Users/jfages07/github/In4Ga/tsptw/rc_204.3.txt";
 //		testInstance(instance);
 	}
 
@@ -261,14 +292,21 @@ public class TSPTW extends AbstractProblem{
 			}
 			open[n-1] = open[0];
 			close[n-1]= close[0];
-//			int[] params = new int[]{0,1,4,7};
-//			for(int p:params){
+
 			lineNumbers = url.split("/");
 			String name = lineNumbers[lineNumbers.length-1];
-			TSPTW tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
-			tspRun.configParameters(9,false);
-			tspRun.execute();
-//			System.exit(0);
+
+			TSPTW tspRun;
+			int[] params = new int[]{0,4};
+//			for(int i=0;i<50;i++){
+//				seed = System.currentTimeMillis();
+				for(int p:params){
+					tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
+					tspRun.configParameters(p, false);
+					tspRun.execute();
+//					System.exit(0);
+				}
+//			}
 			if(true){
 				return;
 			}
@@ -330,32 +368,8 @@ public class TSPTW extends AbstractProblem{
 	// HEURISTICS
 	//***********************************************************************************
 
-//	private class MinArc extends ArcStrategy{
-//
-//		public MinArc(GraphVar graphVar) {
-//			super(graphVar);
-//		}
-//
-//		@Override
-//		public int nextArc() {
-//			int minArc = -1;
-//			int minCost= -1;
-//			INeighbors suc;
-//			for(int i=0;i<n;i++){
-//				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-//				for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-//					if(!g.getKernelGraph().arcExists(i,j)){
-//						if(minCost == -1 || minCost>distanceMatrix[i][j]){
-//							minCost = distanceMatrix[i][j];
-//							minArc  = (i+1)*n+j;
-//						}
-//					}
-//				}
-//			}
-//			return minArc;
-//		}
-//	}
-//
+	int[] dec = {498,622,596,565,416,449,461,319,513,368,53,76,105,131,157,184,208,229,260,287,392,339,-1};
+	int idx = -1;
 	private class MinDomMinCost extends ArcStrategy{
 
 		public MinDomMinCost(GraphVar graphVar) {
@@ -364,8 +378,10 @@ public class TSPTW extends AbstractProblem{
 
 		@Override
 		public int nextArc() {
-			int minArc = -1;
-			int minCost= -1;
+			if(true){
+				idx++;
+				return dec[idx];
+			}
 			INeighbors suc;
 			int from = -1;
 			int size = n+1;
@@ -377,9 +393,18 @@ public class TSPTW extends AbstractProblem{
 				}
 			}
 			if(from == -1){
+				if(!g.instantiated()){
+					throw new UnsupportedOperationException();
+				}
+				System.out.println("DECISION : "+-1);
 				return -1;
 			}
+			int minArc = -1;
+			int minCost= -1;
 			suc = g.getEnvelopGraph().getSuccessorsOf(from);
+			if(g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()>0){
+				throw new UnsupportedOperationException("error in branching");
+			}
 			for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
 				if(minCost == -1 || minCost>distanceMatrix[from][j]){
 					minCost = distanceMatrix[from][j];
@@ -392,7 +417,36 @@ public class TSPTW extends AbstractProblem{
 			if(g.getKernelGraph().arcExists(from,minArc%n)){
 				throw new UnsupportedOperationException("error in branching");
 			}
+			System.out.println("DECISION : "+minArc);
 			return minArc;
+		}
+	}
+	private class MinDomMinVal extends ArcStrategy{
+
+		public MinDomMinVal(GraphVar graphVar) {
+			super(graphVar);
+		}
+
+		@Override
+		public int nextArc() {
+			INeighbors suc;
+			int from = -1;
+			int size = n+1;
+			for(int i=0;i<n-1;i++){
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()<size && suc.neighborhoodSize()>1){
+					from = i;
+					size = suc.neighborhoodSize();
+				}
+			}
+			if(from == -1){
+				if(!g.instantiated()){
+					throw new UnsupportedOperationException();
+				}
+				System.out.println("DECISION : "+-1);
+				return -1;
+			}
+			return (from+1)*n+g.getEnvelopGraph().getSuccessorsOf(from).getFirstElement();
 		}
 	}
 	private class MinCostSCCBreak extends ArcStrategy{
@@ -426,50 +480,87 @@ public class TSPTW extends AbstractProblem{
 			return minArc;
 		}
 	}
-}
+	private class BuildPath extends ArcStrategy{
 
-//	private void getGreedyFirstSolution() {
-//		BitSet inTour = new BitSet(n);
-//		greedySol = new int[n];
-//		for(int i=0; i<n;i++){
-//			greedySol[i] = -1;
-//		}
-//		greedySol[0] = n-1;
-//		inTour.set(0);
-//		inTour.set(n-1);
-//		int nbNodesInTour = 2;
-//		while(nbNodesInTour<n){
-//			int nextNode = -1;
-//			int minDist  = noVal*2;
-//			int minGoBack;
-//			for(int i=inTour.nextClearBit(0); i<n;i=inTour.nextClearBit(i+1)){
-//				minGoBack = distanceMatrix[0][i]+ distanceMatrix[i][n-1];
-//				for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
-//					minGoBack = Math.min(minGoBack,distanceMatrix[a][i]+distanceMatrix[i][greedySol[a]]);
-//				}
-//				if(minDist > minGoBack){
-//					minDist = minGoBack;
-//					nextNode = i;
-//				}
-//			}
-//			if(nbNodesInTour==2){
-//				greedySol[nextNode] = n-1;
-//				greedySol[0]  =  nextNode;
-//			}else{
-//				minGoBack = noVal*2;
-//				int bestFrom = 0;
-//				int bestTo = 0;
-//				for(int a=0;a>=0 && a<n-1; a=greedySol[a]){
-//					if(minGoBack > distanceMatrix[a][nextNode]+distanceMatrix[nextNode][greedySol[a]]-distanceMatrix[a][greedySol[a]]){
-//						minGoBack = distanceMatrix[a][nextNode]+distanceMatrix[nextNode][greedySol[a]]-distanceMatrix[a][greedySol[a]];
-//						bestFrom = a;
-//						bestTo = greedySol[a];
-//					}
-//				}
-//				greedySol[nextNode] = bestTo;
-//				greedySol[bestFrom] = nextNode;
-//			}
-//			inTour.set(nextNode);
-//			nbNodesInTour++;
-//		}
-//	}
+		IStateInt currentNode;
+
+		public BuildPath(GraphVar graphVar) {
+			super(graphVar);
+			currentNode = solver.getEnvironment().makeInt(0);
+		}
+
+		@Override
+		public int nextArc() {
+			int node = currentNode.get();
+			INeighbors succ = graph.getKernelGraph().getSuccessorsOf(node);
+			while(succ.neighborhoodSize()==1){
+				if(graph.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()!=1){
+					throw new UnsupportedOperationException();
+				}
+				node = succ.getFirstElement();
+				succ = graph.getKernelGraph().getSuccessorsOf(node);
+			}
+			currentNode.set(node);
+			succ = graph.getEnvelopGraph().getSuccessorsOf(node);
+			int next = succ.getFirstElement();
+			if(next==-1){
+				return next;
+			}
+			next = selectNext(succ,node);
+			if(next == -1){
+				throw new UnsupportedOperationException();
+			}
+			return (node+1)*n+next;
+		}
+
+		private int selectNext(INeighbors succ, int from) {
+//			return minSuccs(succ);
+			return earliestTimeLB(succ,from);
+//			return earliestTimeUB(succ,from);
+		}
+
+		private int minSuccs(INeighbors succ) {
+			int next = -1;
+			int minSize = n+1;
+			for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
+				if(graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<minSize){
+					minSize = graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+					next = i;
+				}
+			}
+			return next;
+		}
+		private int earliestTimeLB(INeighbors succ, int from) {
+			if(succ.neighborhoodSize()==0){
+				throw new UnsupportedOperationException();
+			}
+			int next = -1;
+			int minTime = time[n-1].getUB()+1;
+			int tmp;
+			for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
+				tmp = Math.max(time[i].getLB(), time[from].getLB() + distanceMatrix[from][i]);
+				if(tmp<minTime){
+					minTime = tmp;
+					next = i;
+				}
+			}
+			return next;
+		}
+		private int earliestTimeUB(INeighbors succ, int from) {
+			if(succ.neighborhoodSize()==0){
+				throw new UnsupportedOperationException();
+			}
+			int next = -1;
+			int minTime = time[n-1].getUB()+1;
+			int tmp;
+			for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
+				tmp = time[i].getUB();
+				if(tmp<minTime){
+					minTime = tmp;
+					next = i;
+				}
+			}
+			return next;
+		}
+	}
+}

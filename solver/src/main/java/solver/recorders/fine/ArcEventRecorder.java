@@ -122,11 +122,11 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 //            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
             // 1. clear the structure if necessary
             if (LAZY) {
-                if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-                    this.evtmask = 0;
-                    deltamon.clear();
-                    timestamp = AbstractSearchLoop.timeStamp;
-                }
+//                if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+//                    this.evtmask = 0;
+//                    deltamon.clear();
+//                    timestamp = AbstractSearchLoop.timeStamp;
+//                }
             }
             // 2. if instantiation, then decrement arity of the propagator
             if (EventType.anInstantiationEvent(evt.mask)) {

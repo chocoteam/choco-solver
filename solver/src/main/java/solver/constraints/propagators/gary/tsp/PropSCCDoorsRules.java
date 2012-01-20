@@ -64,13 +64,15 @@ public class PropSCCDoorsRules extends GraphPropagator {
 	private TIntArrayList inDoors;
 	private TIntArrayList outDoors;
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph rg;
+	private IStateInt[] sccFirst, sccNext;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
-							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs, IDirectedGraph rg) {
+							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs,
+							 IDirectedGraph rg) {
 		super(new Variable[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
@@ -82,6 +84,14 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		sccComputed = new BitSet(n);
 		inDoors = new TIntArrayList();
 		outDoors = new TIntArrayList();
+	}
+
+	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
+							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs,
+							 IDirectedGraph rg, IStateInt[] sccFirst, IStateInt[] sccNext) {
+		this(graph,constraint,solver,nR,sccOf,outArcs,rg);
+		this.sccFirst = sccFirst;
+		this.sccNext  = sccNext;
 	}
 
 	//***********************************************************************************
@@ -97,6 +107,10 @@ public class PropSCCDoorsRules extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(true){
+			propagate(0);
+			return;
+		}
 		sccComputed.clear();
 		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
@@ -127,6 +141,31 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		}
 		if(outDoors.size()==1){
 			forceOutDoor(outDoors.get(0));
+		}
+		if(sccFirst!=null){
+			int sizeSCC = 0;
+			int idx = sccFirst[sccFrom].get();
+			while(idx!=-1){
+				sizeSCC++;
+				idx = sccNext[idx].get();
+			}
+			if(sizeSCC>2 && outDoors.size()==1){
+				int p = rg.getPredecessorsOf(sccFrom).getFirstElement();
+				if(p!=-1){
+					int in = -1;
+					for(int i=outArcs[p].getFirstElement();i>=0;i=outArcs[p].getNextElement()){
+						if(in == -1){
+							in = i%n;
+						}else if(in!=i%n){
+							return;
+						}
+					}
+					if(in==-1){
+						throw new UnsupportedOperationException();
+					}
+					g.removeArc(in,outDoors.get(0),this,false);
+				}
+			}
 		}
 	}
 

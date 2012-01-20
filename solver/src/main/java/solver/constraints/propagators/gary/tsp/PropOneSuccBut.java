@@ -116,9 +116,9 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-//		if(true){
-//			propagate(0);return;
-//		}
+		if(true){
+			propagate(0);return;
+		}
 //		System.out.println("propag");
 //		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(g);
 //		System.out.println("delta : "+gdm.fromArcEnforcing()+" -> "+gdm.toArcEnforcing()+"  /// "+g.getDelta().getArcEnforcingDelta().size());

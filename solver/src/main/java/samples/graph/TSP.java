@@ -29,18 +29,25 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
+import gnu.trove.list.array.TIntArrayList;
 import samples.AbstractProblem;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskIntervals;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskSweep;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
@@ -51,6 +58,8 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+import sun.jvm.hotspot.utilities.RobustOopDeterminator;
+
 import java.io.*;
 
 /**
@@ -62,7 +71,7 @@ public class TSP extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
+	private static final long TIMELIMIT = 10000;
 	private static String outFile = "atsp";
 	static int seed = 0;
 	// instance
@@ -76,6 +85,10 @@ public class TSP extends AbstractProblem{
 	private GraphConstraint gc;
 	private boolean arbo,antiArbo,rg,hk;
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph G_R;
+	private IStateInt[] sccFirst, sccNext;
+	boolean time;
+
+	IntVar[] start,end,duration;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -131,31 +144,64 @@ public class TSP extends AbstractProblem{
 			sccOf = RP.getSCCOF();
 			outArcs = RP.getOutArcs();
 			G_R = RP.getReducedGraph();
+			sccFirst = RP.getSCCFirst();
+			sccNext = RP.getSCCNext();
 			gc.addAdHocProp(RP);
-			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R,sccFirst,sccNext));
 		}
-		if(hk){
-			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
-			try{
-				pos[0].instantiateTo(0, Cause.Null, false);
-				pos[n-1].instantiateTo(n - 1, Cause.Null, false);
-			}catch(Exception e){
-				e.printStackTrace();System.exit(0);
-			}
-			gc.addAdHocProp(new PropPosInTour(pos,graph,gc,solver));
-			if(rg){
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver,nR,sccOf,outArcs,G_R));
-			}else{
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver));
-			}
-			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
-		}
+//		if(hk){
+//			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
+//			try{
+//				pos[0].instantiateTo(0, Cause.Null, false);
+//				pos[n-1].instantiateTo(n - 1, Cause.Null, false);
+//			}catch(Exception e){
+//				e.printStackTrace();System.exit(0);
+//			}
+//			gc.addAdHocProp(new PropPosInTour(pos,graph,gc,solver));
+//			if(rg){
+//				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver,nR,sccOf,outArcs,G_R));
+//			}else{
+//				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver));
+//			}
+//			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
+//		}
 		// MST-based HK
 		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
 		gc.addAdHocProp(propHK_mst);
+
 		// BST-based HK
 //		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
 //		gc.addAdHocProp(propHK_bst);
+
+//		if(time){
+//			start = new IntVar[n];
+//			end = new IntVar[n];
+//			duration = new IntVar[n];
+//			for(int i=0;i<n;i++){
+//				start[i] = VariableFactory.bounded("start "+i,0,totalCost.getUB(),solver);
+//				end[i] = VariableFactory.bounded("end "+i,0,totalCost.getUB(),solver);
+//				duration[i] = VariableFactory.bounded("duration "+i,0,totalCost.getUB(),solver);
+//			}
+//			try{
+//				start[0].instantiateTo(0,Cause.Null,false);
+//				duration[n-1].instantiateTo(0,Cause.Null,false);
+//			}catch (Exception e){
+//				e.printStackTrace();
+//				System.exit(0);
+//			}
+//			gc.addAdHocProp(new PropTimeInTour(start,graph,distanceMatrix,gc,solver));
+//			if(rg){
+//				gc.addAdHocProp(new PropTimeInTourGraphReactor(start,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+//			}else{
+//				gc.addAdHocProp(new PropTimeInTourGraphReactor(start,graph,distanceMatrix,gc,solver));
+//			}
+//			gc.addAdHocProp(new PropTaskDefinition(start, end, duration, graph, distanceMatrix, gc, solver));
+//			gc.addAdHocProp(new PropTaskSweep(start, end, duration, distanceMatrix, gc, solver));
+//			gc.addAdHocProp(new PropTaskIntervals(start, end, duration, distanceMatrix, gc, solver));
+//			gc.addAdHocProp(new PropTaskDefinition(start, end, duration, graph, distanceMatrix, gc, solver));
+//			solver.post(ConstraintFactory.eq(end[n-1],totalCost,solver));
+//		}
+
 		solver.post(gc);
 	}
 
@@ -165,8 +211,9 @@ public class TSP extends AbstractProblem{
 		this.rg	 = rg;
 		this.hk  = hk;
 	}
-	private void configParameters(int p) {
+	private void configParameters(int p, boolean ti) {
 		configParameters(p%2==1,(p>>1)%2==1,(p>>2)%2==1,(p>>3)%2==1);
+		time = ti;
 	}
 
 	@Override
@@ -183,6 +230,9 @@ public class TSP extends AbstractProblem{
 	public void solve() {
 		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
 //		status = solver.findSolution();
+		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIMELIMIT){
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	@Override
@@ -190,6 +240,12 @@ public class TSP extends AbstractProblem{
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName+";"+solver.getMeasures().getSolutionCount()+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"+status+";"+bestSol+";"+bestCost+";\n";
 		writeTextInto(txt, outFile);
+//		int tot = 0;
+//		for(int i=0;i<n;i++){
+//			System.out.println(i+" : "+start[i]+" + "+duration[i]+" = "+end[i]);
+//			tot += duration[i].getValue();
+//		}
+//		System.out.println("TOTAL = "+tot);
 	}
 
 	//***********************************************************************************
@@ -197,12 +253,12 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		outFile = "resultsATSP_POS.csv";
+		outFile = "resultsATSP_TIME.csv";
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;time;status;opt;obj;\n", outFile);
-//		bench();
-		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv70.atsp";
-		testInstance(instance);
+		bench();
+//		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
+//		testInstance(instance);
 	}
 
 	private static void testInstance(String url){
@@ -254,11 +310,25 @@ public class TSP extends AbstractProblem{
 			int best = Integer.parseInt(line.replaceAll(" ",""));
 //			int[] params = new int[]{0,1,4,7};
 //			for(int p:params){
-			for(int p=0;p<16;p++){
-				TSP tspRun = new TSP(dist,name,noVal,best);
-				tspRun.configParameters(p);
-				tspRun.execute();
-			}
+//			for(int p=4;p<16;p++){
+//				TSP tspRun = new TSP(dist,name,noVal,best);
+//				tspRun.configParameters(p);
+//				tspRun.execute();
+//				System.exit(0);
+//			}
+			TSP tspRun = new TSP(dist,name,noVal,best);
+			tspRun.configParameters(0,false);
+			tspRun.execute();
+//			System.exit(0);
+//			tspRun = new TSP(dist,name,noVal,best);
+//			tspRun.configParameters(0,true);
+//			tspRun.execute();
+//			tspRun = new TSP(dist,name,noVal,best);
+//			tspRun.configParameters(4,false);
+//			tspRun.execute();
+//			tspRun = new TSP(dist,name,noVal,best);
+//			tspRun.configParameters(4,true);
+//			tspRun.execute();
 		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(0);

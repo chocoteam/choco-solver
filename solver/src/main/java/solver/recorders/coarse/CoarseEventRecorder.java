@@ -34,6 +34,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.IDeltaMonitor;
 
 /**
  * <br/>
@@ -95,19 +96,22 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 			propagator.coarseERcalls++;
 			int _evt = evtmask;
 			evtmask = 0;
+			propagator.propagate(_evt);
 			// DEBUT MODIF JG
 			int nbR = propagator.nbRecorders();
 			IEventRecorder rec;
+			IDeltaMonitor request;
 			for(int i=0;i<nbR;i++){
 				rec = propagator.getRecorder(i);
 				if(rec instanceof AbstractFineEventRecorder){
 					for(Variable v:rec.getVariables()){
-						((AbstractFineEventRecorder) rec).getDeltaMonitor(v).unfreeze();
+						request = ((AbstractFineEventRecorder) rec).getDeltaMonitor(v);
+						rec.flush();
+						request.unfreeze();
 					}
 				}
 			}
 			// FIN MODIFS JG
-			propagator.propagate(_evt);
 		}
 		return true;
 	}

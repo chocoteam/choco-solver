@@ -49,4 +49,6 @@ public interface HeldKarp {
 	void remove(int i, int i1) throws ContradictionException;
 
 	double getMinArcVal();
+
+	int getMandatorySuccessorOf(int i);
 }

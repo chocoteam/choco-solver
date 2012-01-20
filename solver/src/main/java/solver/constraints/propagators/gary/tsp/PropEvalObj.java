@@ -103,9 +103,13 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         INeighbors succ;
+		minSum.set(0);
         for (int i = 0; i < n - 1; i++) {
             succ = g.getEnvelopGraph().getSuccessorsOf(i);
             int min = succ.getFirstElement();
+			if(min==-1){
+				contradiction(g,"");
+			}
             int minC = distMatrix[i][min];
             for (int s = min; s >= 0; s = succ.getNextElement()) {
                 if (distMatrix[i][s] < minC) {
@@ -134,7 +138,10 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        toCompute.clear();
+        if(true){
+			propagate(0);return;
+		}
+		toCompute.clear();
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];
         if (variable.getType() == Variable.GRAPH) {

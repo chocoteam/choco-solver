@@ -63,7 +63,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
 	@Override
 	public void update(EventType evt) {
-		throw new UnsupportedOperationException();
+		//TODO throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -83,7 +83,6 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
 	@Override
 	public void clear() {
-//		System.out.println("clear   = "+ AbstractSearchLoop.timeStamp);
 		for (int i = 0; i < 4; i++) {
 			first[i] = last[i] = 0;
 		}

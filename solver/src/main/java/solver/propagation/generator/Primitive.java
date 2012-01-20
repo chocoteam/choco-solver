@@ -39,11 +39,9 @@ import solver.propagation.comparators.predicate.Predicate;
 import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.coarse.GraphCoarseEventRecorder;
 import solver.recorders.conditions.ICondition;
 import solver.recorders.fine.ArcEventRecorder;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
-import solver.recorders.fine.GraphFineEventRecorder;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.Variable;
 
@@ -205,10 +203,6 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 	}
 
 	protected <V extends Variable> IEventRecorder arc(V var, Propagator<V> prop, int idVinP, Solver solver) {
-		if(true){//JG
-			return new GraphFineEventRecorder(var,prop,idVinP,solver);
-		}
-
 		//if(predicate.eval()){
 		if (condition != null) {
 			return new ArcEventRecorderWithCondition<V>(var, prop, idVinP, condition, solver);
@@ -236,9 +230,6 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 	}
 
 	protected AbstractCoarseEventRecorder _unary(Propagator prop, Solver solver) {
-		if(true){//JG
-			return new GraphCoarseEventRecorder(prop);
-		}
 		//if(predicate.eval()){
 		if (condition != null) {
 			//cpru :

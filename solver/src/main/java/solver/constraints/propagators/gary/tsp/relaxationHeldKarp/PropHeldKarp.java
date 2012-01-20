@@ -46,7 +46,6 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.BitSet;
-import java.util.Random;
 
 public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp{
 
@@ -73,6 +72,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	private AbstractMSTFinder HKfilter, HK;
 	private long nbRem;
 	private final static boolean forceTour = false;
+	private final static boolean DEBUG = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -136,51 +136,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 			costs[i][i+n] = nodePenalities[i].get() + nodePenalities[i+n].get();
 			costs[i+n][i] = costs[i][i+n];
 		}
-		//		HK_RandomRestarts();
 		HK_Pascals();
-	}
-
-	private void HK_RandomRestarts() throws ContradictionException {
-		double hkb;
-		int nbRestart = 15;
-		int nbConsecIterMax = 10;
-		int nbConsecIter = nbConsecIterMax;
-		boolean random = false;
-		while (true){
-			HKfilter.computeMST(costs,g2);
-			hkb = HKfilter.getBound()-totalPenalities.get();
-			mst = HKfilter.getMST();
-			checkExtremities();
-			if(hkb-Math.floor(hkb)<0.001){
-				hkb = Math.floor(hkb);
-			}
-			obj.updateLowerBound((int)Math.ceil(hkb), this, false);
-			if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
-				if(ConnectivityFinder.findCCOf(mst).size()!=1){
-					throw new UnsupportedOperationException("mst disconnected");
-				}
-				forceTourInstantiation();
-				return;
-			}
-			HKfilter.performPruning((double) obj.getUB() + totalPenalities.get() + 0.01);
-			if(random){
-				randomPenalities();
-				random = false;
-				nbConsecIter = nbConsecIterMax;
-				nbRestart--;
-				if(nbRestart==0){
-					return;
-				}
-			}else{
-				updateStep(hkb,0.5);
-				HKPenalities();
-				nbConsecIter--;
-				if(nbConsecIter==0){
-					random = true;
-				}
-			}
-			updateCostMatrix();
-		}
 	}
 
 	private void HK_Pascals() throws ContradictionException {
@@ -194,7 +150,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		hkb = HKfilter.getBound()-totalPenalities.get();
 		bestHKB = hkb;
 		mst = HKfilter.getMST();
-		if(hkb-Math.floor(hkb)<0.001){
+		if(hkb-Math.floor(hkb)<0.01){
 			hkb = Math.floor(hkb);
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this, false);
@@ -209,22 +165,27 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 					improved = true;
 				}
 				mst = HK.getMST();
-				checkExtremities();
+				if(DEBUG){
+					checkExtremities();
+				}
 				if(hkb-Math.floor(hkb)<0.001){
 					hkb = Math.floor(hkb);
 				}
 				obj.updateLowerBound((int)Math.ceil(hkb), this, false);
-				if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
-					if(true){
-						throw new UnsupportedOperationException("test");
+				if(DEBUG){
+					if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
+						if(true){
+							throw new UnsupportedOperationException("test");
+						}
+						if(ConnectivityFinder.findCCOf(mst).size()!=1){
+							throw new UnsupportedOperationException("mst disconnected");
+						}
+						forceTourInstantiation();
+						return;
 					}
-					if(ConnectivityFinder.findCCOf(mst).size()!=1){
-						throw new UnsupportedOperationException("mst disconnected");
-					}
-					forceTourInstantiation();
-					return;
 				}
-				//HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
+				// DO NOT FILTER HERE TO FASTEN CONVERGENCE
+				//	HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
 				updateStep(hkb,alpha);
 				HKPenalities();
 				updateCostMatrix();
@@ -236,21 +197,24 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				improved = true;
 			}
 			mst = HKfilter.getMST();
-			checkExtremities();
-			if(hkb-Math.floor(hkb)<0.001){
+			if(DEBUG){
+				checkExtremities();
+			}
+			if(hkb-Math.floor(hkb)<0.01){
 				hkb = Math.floor(hkb);
 			}
 			obj.updateLowerBound((int)Math.ceil(hkb), this, false);
-
-			if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
-				if(true){
-					throw new UnsupportedOperationException("test");
+			if(DEBUG){
+				if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
+					if(true){
+						throw new UnsupportedOperationException("test");
+					}
+					if(ConnectivityFinder.findCCOf(mst).size()!=1){
+						throw new UnsupportedOperationException("mst disconnected");
+					}
+					forceTourInstantiation();
+					return;
 				}
-				if(ConnectivityFinder.findCCOf(mst).size()!=1){
-					throw new UnsupportedOperationException("mst disconnected");
-				}
-				forceTourInstantiation();
-				return;
 			}
 			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
 			updateStep(hkb,alpha);
@@ -308,19 +272,6 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 			}
 		}
 		step = alpha*(target-hkb)/nb2viol;
-	}
-	private void randomPenalities() {
-		Random rd = new Random();
-		double totalPenalities = 0;
-		for(int i=0;i<n2;i++){
-			if(i!=source2 && i!=sink2){
-				nodePenalities[i].set(rd.nextDouble());
-				totalPenalities += nodePenalities[i].get()*2;
-			}else{
-				nodePenalities[i].set(0);
-			}
-		}
-		this.totalPenalities.set(totalPenalities);
 	}
 	private void HKPenalities() {
 		double totalPenalities = 0;
@@ -447,6 +398,11 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 
 	public double getMinArcVal() {
 		return -(((double)obj.getUB())+totalPenalities.get());
+	}
+
+	@Override
+	public int getMandatorySuccessorOf(int i) {
+		return g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 	}
 
 	public BitSet getMandatoryArcsBitSet() {

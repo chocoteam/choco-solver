@@ -32,7 +32,6 @@ import solver.exception.SolverException;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
-import solver.variables.fast.IntervalDoubleVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.view.Views;
 
@@ -96,18 +95,6 @@ public enum VariableFactory {
 			solver.associates(var);
 			return var;
 		}
-	}
-
-	public static DoubleVar bounded(String name, double min, double max, Solver solver) {
-		if (min - Double.MIN_VALUE == 0 || max - Double.MAX_VALUE == 0) {
-			throw new SolverException(name + ": consider reducing the bounds to avoid unexpected results");
-		}
-		if (min - max > 0) {
-			throw new SolverException(name + ": wrong domain definition, lower bound > upper bound");
-		}
-		DoubleVar var = new IntervalDoubleVarImpl(name, min, max, solver);
-		solver.associates(var);
-		return var;
 	}
 
 	public static IntVar[] boundedArray(String name, int size, int min, int max, Solver solver) {

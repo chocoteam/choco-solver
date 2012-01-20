@@ -99,6 +99,11 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	public void propagate(int evtmask) throws ContradictionException {
 		int j,start,last;
 		for(int i=0;i<n;i++){
+			end[i].set(i);
+			origin[i].set(i);
+			size[i].set(1);
+		}
+		for(int i=0;i<n;i++){
 			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 			if(j!=-1){
 //				System.out.println(i+"->"+j+" *");
@@ -132,9 +137,9 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	//	boolean firstTime = true;
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-//	if(true){
-//		propagate(0);return;
-//	}
+	if(true){
+		propagate(0);return;
+	}
 //		if(firstTime){
 //			System.out.println("First PROPAG");
 //			firstTime = false;

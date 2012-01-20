@@ -47,6 +47,7 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	private int tSize;
 	private double minVal;
 	double maxTArc;
+	private final static boolean FILTER = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -78,7 +79,9 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	}
 
 	private void prim() throws ContradictionException {
-		maxTArc = propHK.getMinArcVal();
+		if(FILTER){
+			maxTArc = propHK.getMinArcVal();
+		}
 		addNode(0);
 		int from,to;
 		while (tSize<n-1 && !heap.isEmpty()){
@@ -94,8 +97,10 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	private void addArc(int from, int to) {
 		Tree.addEdge(from,to);
 		treeCost += costs[from][to];
-		if(!(ma.get(from*n+to)||ma.get(from+to*n))){
-			maxTArc = Math.max(maxTArc, costs[from][to]);
+		if(FILTER){
+			if(!(ma.get(from*n+to)||ma.get(from+to*n))){
+				maxTArc = Math.max(maxTArc, costs[from][to]);
+			}
 		}
 		tSize++;
 		addNode(to);
@@ -118,16 +123,19 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	}
 
 	public void performPruning(double UB) throws ContradictionException{
-		double delta = UB-treeCost;
-		INeighbors nei;
-		for(int i=0;i<n;i++){
-			nei = g.getNeighborsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if((!Tree.edgeExists(i,j)) && costs[i][j]-maxTArc > delta){
-					propHK.remove(i,j);
+		if(FILTER){
+			double delta = UB-treeCost;
+			INeighbors nei;
+			for(int i=0;i<n;i++){
+				nei = g.getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if((!Tree.edgeExists(i,j)) && costs[i][j]-maxTArc > delta){
+						propHK.remove(i,j);
+					}
 				}
 			}
+		}else{
+			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
-		//throw new UnsupportedOperationException("bound computation only, no filtering!");
 	}
 }

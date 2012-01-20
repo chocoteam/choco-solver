@@ -112,6 +112,9 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(true){
+			propagate(0);return;
+		}
 		if(idxVarInProp == n){
 			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 		}

@@ -55,6 +55,7 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	protected double[] minCostOutArc;
 	protected int currentSCC;
 	private int start;
+	private final static boolean FILTER = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -91,11 +92,13 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	}
 
 	private void prim() throws ContradictionException {
-		maxTArc = propHK.getMinArcVal();
+		if(FILTER){
+			maxTArc = propHK.getMinArcVal();
+		}
 		currentSCC = sccOf[start].get();
 		addNode(start);
 		int from,to;
-		while (tSize<n-1){
+		while (tSize<n-1 && !heap.isEmpty()){
 			while (tSize<n-1 && !heap.isEmpty()){
 				to = heap.pop();
 				from = heap.getMate(to);
@@ -111,17 +114,19 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	}
 
 	private void nextSCC() throws ContradictionException {
-		double minVal = -propHK.getMinArcVal();
-		int minFrom = -1;
-		int minTo   = -1;
-		int from,to;
+		if(outArcs[currentSCC].neighborhoodSize()==0){
+			propHK.contradiction();
+		}
 		int smallN = n/2;
-		int mand = -1;
+		int from,to;
+		int firstArc = outArcs[currentSCC].getFirstElement();
+		int minFrom = firstArc/smallN-1;
+		int minTo   = firstArc%smallN+smallN;
+		double minVal = costs[minFrom][minTo];
 		for(int out=outArcs[currentSCC].getFirstElement();out>=0;out=outArcs[currentSCC].getNextElement()){
 			from = out/smallN-1;
 			to   = out%smallN+smallN;
-			if(ma.get(from*n+to)){
-				mand = out;
+			if(propHK.getMandatorySuccessorOf(from)==out%smallN){
 				minVal = costs[from][to];
 				minFrom = from;
 				minTo  = to;
@@ -132,18 +137,6 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 				minFrom = from;
 				minTo  = to;
 			}
-		}
-		if(mand!=-1){
-			for(int out=outArcs[currentSCC].getFirstElement();out>=0;out=outArcs[currentSCC].getNextElement()){
-				if(out!=mand){
-					from = out/smallN-1;
-					to   = out%smallN+smallN;
-					propHK.remove(from,to);
-				}
-			}
-		}
-		if(minFrom==-1){
-			propHK.contradiction();
 		}
 		minCostOutArc[currentSCC] = minVal;
 		Tree.addEdge(minFrom,minTo);
@@ -156,8 +149,10 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	private void addArc(int from, int to) {
 		Tree.addEdge(from,to);
 		treeCost += costs[from][to];
-		if(!(ma.get(from*n+to)||ma.get(from+to*n))){
-			maxTArc = Math.max(maxTArc, costs[from][to]);
+		if(FILTER){
+			if(!(ma.get(from*n+to)||ma.get(from+to*n))){
+				maxTArc = Math.max(maxTArc, costs[from][to]);
+			}
 		}
 		tSize++;
 		addNode(to);
@@ -175,7 +170,7 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 					y-=smallN;
 				}
 				if((!inTree.get(j)) && sccOf[y].get()==currentSCC){
-					if(ma.get(i*n+j)){
+					if(ma.get(i*n+j)||ma.get(i+j*n)){
 						heap.add(j,minVal,i);
 					}else{
 						heap.add(j,costs[i][j],i);
@@ -186,31 +181,34 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	}
 
 	public void performPruning(double UB) throws ContradictionException{
-		double delta = UB-treeCost;
-		INeighbors nei;
-		int x,y;
-		int smallN = n/2;
-		for(int i=0;i<n;i++){
-			nei = g.getNeighborsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if((!Tree.edgeExists(i,j))){
-					if(i>=smallN){
-						x=j;
-						y=i-smallN;
-					}else{
-						x=i;
-						y=j-smallN;
-					}
-					if(sccOf[x].get()==sccOf[y].get()){
-						if(costs[i][j]-maxTArc > delta){
+		if(FILTER){
+			double delta = UB-treeCost;
+			INeighbors nei;
+			int x,y;
+			int smallN = n/2;
+			for(int i=0;i<n;i++){
+				nei = g.getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if((!Tree.edgeExists(i,j))){
+						if(i>=smallN){
+							x=j;
+							y=i-smallN;
+						}else{
+							x=i;
+							y=j-smallN;
+						}
+						if(sccOf[x].get()==sccOf[y].get()){
+							if(costs[i][j]-maxTArc > delta){
+								propHK.remove(i,j);
+							}
+						}else if(costs[i][j]-minCostOutArc[sccOf[x].get()] > delta){
 							propHK.remove(i,j);
 						}
-					}else if(costs[i][j]-minCostOutArc[sccOf[x].get()] > delta){
-						propHK.remove(i,j);
 					}
 				}
 			}
+		}else{
+			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
-//		throw new UnsupportedOperationException("bound computation only, no filtering!");
 	}
 }
