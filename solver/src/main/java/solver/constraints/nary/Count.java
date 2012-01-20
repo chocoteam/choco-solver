@@ -95,7 +95,9 @@ public class Count extends IntConstraint<IntVar> {
                 geq = true;
                 break;
         }
-        setPropagators(new PropCount(value, this.vars, leq, geq, solver, this));
+        //CPRU  double to simulate idempotency
+        setPropagators(new PropCount(value, this.vars, leq, geq, solver, this),
+                new PropCount(value, this.vars, leq, geq, solver, this));
     }
 
     @Override

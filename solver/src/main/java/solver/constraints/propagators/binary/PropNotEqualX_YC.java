@@ -111,7 +111,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue() + this.cste, this, false)) {
+        if (x.removeValue(y.getValue() + this.cste, this)) {
             this.setPassive();
         } else if (!x.contains(y.getValue() + cste)) {
             this.setPassive();
@@ -119,7 +119,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue() - this.cste, this, false)) {
+        if (y.removeValue(x.getValue() - this.cste, this)) {
             this.setPassive();
         } else if (!y.contains(x.getValue() - cste)) {
             this.setPassive();

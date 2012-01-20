@@ -100,7 +100,7 @@ public abstract class AbstractView extends AbstractVariable<IntVar> implements I
 
     @Override
     public boolean reactOnPromotion() {
-        return false;
+        return reactOnRemoval;
     }
 
     @Override

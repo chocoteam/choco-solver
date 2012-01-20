@@ -141,9 +141,9 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 			INeighbors envMate = g.getEnvelopGraph().getNeighborsOf(mate);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
 				if(ker.contain(i)){
-					g.enforceArc(i, mate, p, false);
+					g.enforceArc(i, mate, p);
 				}else if (!envMate.contain(i)){
-					g.removeArc(i, node, p, false);
+					g.removeArc(i, node, p);
 				}
 			}
 		}
@@ -169,11 +169,11 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 		private void apply(int node, int mate) throws ContradictionException {
 			INeighbors ker = g.getKernelGraph().getPredecessorsOf(node);
 			for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
-				g.enforceArc(i, mate, p, false);
+				g.enforceArc(i, mate, p);
 			}
 			ker = g.getKernelGraph().getSuccessorsOf(mate);
 			for(int i=ker.getFirstElement(); i>=0; i = ker.getNextElement()){
-				g.enforceArc(node,i, p, false);
+				g.enforceArc(node,i, p);
 			}
 		}
 	}
@@ -200,7 +200,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(node);
 			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
 				if(g.getKernelGraph().edgeExists(i, mate)){
-					g.removeArc(node, i, p, false);
+					g.removeArc(node, i, p);
 				}
 			}
 		}
@@ -222,9 +222,9 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
 				for(i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
 					if(g.getKernelGraph().arcExists(from,i)){
-						g.removeArc(i, to, p, false);
+						g.removeArc(i, to, p);
 					}else if(g.getKernelGraph().arcExists(i, to)){
-						g.removeArc(from, i, p, false);
+						g.removeArc(from, i, p);
 					}
 				}
 			}

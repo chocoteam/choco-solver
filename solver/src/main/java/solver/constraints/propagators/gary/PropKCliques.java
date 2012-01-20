@@ -102,7 +102,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 			}
 			min ++;
 		}
-		k.updateLowerBound(min, this, false);
+		k.updateLowerBound(min, this);
 	}
 
 	//***********************************************************************************

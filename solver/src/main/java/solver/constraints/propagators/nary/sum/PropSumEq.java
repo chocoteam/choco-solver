@@ -144,7 +144,7 @@ public class PropSumEq extends Propagator<IntVar> {
                 if (I[i] - (b - sumLB) > 0) {
                     lb = x[i].getLB();
                     ub = x[i].getUB();
-                    if (x[i].updateUpperBound(b - sumLB + lb, this, false)) {
+                    if (x[i].updateUpperBound(b - sumLB + lb, this)) {
                         int nub = x[i].getUB();
                         sumUB -= ub - nub;
                         I[i] = nub - lb;
@@ -157,7 +157,7 @@ public class PropSumEq extends Propagator<IntVar> {
                 if (I[i] - (b - sumLB) > 0) {
                     lb = -x[i].getUB();
                     ub = -x[i].getLB();
-                    if (x[i].updateLowerBound(-(b - sumLB + lb), this, false)) {
+                    if (x[i].updateLowerBound(-(b - sumLB + lb), this)) {
                         int nub = -x[i].getLB();
                         sumUB -= ub - nub;
                         I[i] = nub - lb;
@@ -184,7 +184,7 @@ public class PropSumEq extends Propagator<IntVar> {
                 if (I[i] > -(b - sumUB)) {
                     lb = x[i].getLB();
                     ub = x[i].getUB();
-                    if (x[i].updateLowerBound(b - sumUB + ub, this, false)) {
+                    if (x[i].updateLowerBound(b - sumUB + ub, this)) {
                         int nlb = x[i].getLB();
                         sumLB += nlb - lb;
                         I[i] = ub - nlb;
@@ -197,7 +197,7 @@ public class PropSumEq extends Propagator<IntVar> {
                 if (I[i] > -(b - sumUB)) {
                     lb = -x[i].getUB();
                     ub = -x[i].getLB();
-                    if (x[i].updateUpperBound(-(b - sumUB + ub), this, false)) {
+                    if (x[i].updateUpperBound(-(b - sumUB + ub), this)) {
                         int nlb = -x[i].getUB();
                         sumLB += nlb - lb;
                         I[i] = ub - nlb;

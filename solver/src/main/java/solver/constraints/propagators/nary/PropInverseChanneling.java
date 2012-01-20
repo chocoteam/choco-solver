@@ -95,7 +95,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             int i = index;
             int j = val + Ox;
             if (0 <= j && j < nbY) {
-                Y[j].removeValue(i - Oy, this, false);
+                Y[j].removeValue(i - Oy, this);
                 if (Y[j].instantiated()) {
                     awakeOnInst(j + nbX);
                 }
@@ -106,7 +106,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             int j = index - nbX;
             int i = val + Oy;
             if (0 <= i && i < nbX) {
-                X[i].removeValue(j - Ox, this, false);
+                X[i].removeValue(j - Ox, this);
                 if (X[i].instantiated()) {
                     awakeOnInst(i);
                 }
@@ -143,12 +143,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        X[i].removeInterval(left, right, this, false);
+                        X[i].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            X[i].removeInterval(left, right, this, false);
+            X[i].removeInterval(left, right, this);
         }
         // Y[j] = i' && i' = i - Oy[j] => 0 <= i < nbX
         for (int j = 0; j < nbY; j++) {
@@ -160,12 +160,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        Y[j].removeInterval(left, right, this, false);
+                        Y[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            Y[j].removeInterval(left, right, this, false);
+            Y[j].removeInterval(left, right, this);
         }
     }
 
@@ -175,11 +175,11 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         if (index < nbX) {
             int i = index;
             int j = X[i].getValue() + Ox;
-            modified = Y[j].instantiateTo(i - Oy, this, false);
+            modified = Y[j].instantiateTo(i - Oy, this);
             // j" =\= j, Y[j"] =\= i - Oy[j"]
             for (int jj = 0; jj < nbY; jj++) {
                 if (jj != j) {
-                    modified |= Y[jj].removeValue(i - Oy, this, false);
+                    modified |= Y[jj].removeValue(i - Oy, this);
                 }
             }
         }
@@ -187,11 +187,11 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         else {
             int j = index - nbX;
             int i = Y[j].getValue() + Oy;
-            modified = X[i].instantiateTo(j - Ox, this, false);
+            modified = X[i].instantiateTo(j - Ox, this);
             // i" =\= i, X[i"] =\= j - Ox[i"]
             for (int ii = 0; ii < nbX; ii++) {
                 if (ii != i) {
-                    modified |= X[ii].removeValue(j - Ox, this, false);
+                    modified |= X[ii].removeValue(j - Ox, this);
                 }
             }
         }
@@ -228,7 +228,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             // 0 < j < Y, j = j' + Ox[i], X[i] =\= j' => Y[j] =\= i + Oy[j]
             for (int j = 0; j < nbY; j++) {
                 if (!X[i].contains(j - Ox)) {
-                    modified |= Y[j].removeValue(i - Oy, this, false);
+                    modified |= Y[j].removeValue(i - Oy, this);
                 }
             }
         }
@@ -251,7 +251,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             // 0 < i < X, i = i' + Oy[j], Y[j] =\= i' => X[i] =\= j + Ox[i]
             for (int i = 0; i < nbX; i++) {
                 if (!Y[j].contains(i - Oy)) {
-                    modified |= X[i].removeValue(j - Ox, this, false);
+                    modified |= X[i].removeValue(j - Ox, this);
                 }
             }
         }

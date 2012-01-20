@@ -96,7 +96,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 			if(j!=-1){
 				last = end[j].get();
 				start = origin[i].get();
-				g.removeArc(last,start,this,false);
+				g.removeArc(last,start,this);
 				origin[last].set(start);
 				end[start].set(last);
 			}
@@ -147,7 +147,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 			int to = i%n;
 			int last = end[to].get();
 			int start = origin[from].get();
-			g.removeArc(last,start,p,false);
+			g.removeArc(last,start,p);
 			origin[last].set(start);
 			end[start].set(last);
 		}

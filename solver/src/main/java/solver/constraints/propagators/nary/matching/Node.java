@@ -97,7 +97,7 @@ public class Node implements Serializable {
     }
 
     public boolean remove(int i, ICause cause) throws ContradictionException {
-        boolean change = var.removeValue(i, cause, false);
+        boolean change = var.removeValue(i, cause);
         if (change) {
             removeEdge(i);
         }

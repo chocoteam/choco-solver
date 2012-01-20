@@ -91,4 +91,10 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     public void setIndexInScheduler(int sIdx) {
         this.schedulerIdx = sIdx;
     }
+
+    /**
+     * Set the event recorder in the same state as the one after its execution.
+     * It is dequed, mask is void and delta monitor is unfreeze.
+     */
+    public abstract void virtuallyExecuted();
 }

@@ -67,18 +67,21 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
-        if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
-            // 1. if instantiation, then decrement arity of the propagator
-            if (EventType.anInstantiationEvent(evt.mask)) {
-                propagator.decArity();
-            }
-            // 2. record the event and values removed
-            if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                evtmask |= evt.strengthened_mask;
-            }
-            // 3. schedule this if condition is valid
-            if (condition.validateScheduling(this, evt)) {
-                propagator.forcePropagate(EventType.FULL_PROPAGATION);
+        assert cause != null : "should be Cause.Null instead";
+        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
+            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+                // 1. if instantiation, then decrement arity of the propagator
+                if (EventType.anInstantiationEvent(evt.mask)) {
+                    propagator.decArity();
+                }
+                // 2. record the event and values removed
+                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                    evtmask |= evt.strengthened_mask;
+                }
+                // 3. schedule this if condition is valid
+                if (condition.validateScheduling(this, evt)) {
+                    propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                }
             }
         }
     }

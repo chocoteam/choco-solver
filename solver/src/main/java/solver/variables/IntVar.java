@@ -61,12 +61,11 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value value to remove from the domain (int)
      * @param cause removal releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean removeValue(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeValue(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Removes values between [<code>from, to</code>] from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -83,12 +82,11 @@ public interface IntVar extends Variable<IntDelta> {
      * @param from  lower bound of the interval to remove (int)
      * @param to    upper bound of the interval to remove(int)
      * @param cause removal releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    boolean removeInterval(int from, int to, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean removeInterval(int from, int to, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
@@ -104,11 +102,10 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value instantiation value (int)
      * @param cause instantiation releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean instantiateTo(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean instantiateTo(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
@@ -125,11 +122,10 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value new lower bound (included)
      * @param cause updating releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean updateLowerBound(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
@@ -146,11 +142,10 @@ public interface IntVar extends Variable<IntDelta> {
      *
      * @param value new upper bound (included)
      * @param cause update releaser
-     * @param informCause should the cause also be informed of the modification -- when the cause is not idempotent
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateUpperBound(int value, @NotNull ICause cause, boolean informCause) throws ContradictionException;
+    boolean updateUpperBound(int value, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>

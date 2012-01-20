@@ -29,6 +29,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -82,7 +83,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -93,12 +94,18 @@ public class MinusView extends View<IntVar> {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(-value, this, informCause);
+                boolean done = var.removeValue(-value, this);
 
                 if (value == inf) {
                     e = EventType.INCLOW;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 } else if (value == sup) {
                     e = EventType.DECUPP;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     if (this.instantiated()) {
@@ -114,13 +121,13 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(-to, -from, cause, informCause);
+            boolean done = var.removeInterval(-to, -from, cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -129,7 +136,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
@@ -138,7 +145,7 @@ public class MinusView extends View<IntVar> {
             }
             return false;
         } else if (contains(value)) {
-            boolean done = var.instantiateTo(-value, this, informCause);
+            boolean done = var.instantiateTo(-value, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;
@@ -150,7 +157,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -159,9 +166,12 @@ public class MinusView extends View<IntVar> {
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                boolean done = var.updateUpperBound(-value, this, informCause);
+                boolean done = var.updateUpperBound(-value, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
@@ -174,7 +184,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > value) {
@@ -183,9 +193,12 @@ public class MinusView extends View<IntVar> {
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
-                boolean done = var.updateLowerBound(-value, this, informCause);
+                boolean done = var.updateLowerBound(-value, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);

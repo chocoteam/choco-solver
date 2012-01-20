@@ -130,7 +130,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[j].removeInterval(left, right, this, false);
+                        vars[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
@@ -141,12 +141,12 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[j].removeInterval(left, right, this, false);
+                        vars[j].removeInterval(left, right, this);
                         left = right = val;
                     }
                 }
             }
-            vars[j].removeInterval(left, right, this, false);
+            vars[j].removeInterval(left, right, this);
         }
     }
 
@@ -221,10 +221,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
-                    vars[i].updateLowerBound(val + 1, this, false);
+                    vars[i].updateLowerBound(val + 1, this);
                 }
                 if (val == vars[i].getUB()) {
-                    vars[i].updateUpperBound(val - 1, this, false);
+                    vars[i].updateUpperBound(val - 1, this);
                 }
             }
         }
@@ -245,7 +245,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getLB()) {
-                    vars[i].updateLowerBound(val + 1, this, false);
+                    vars[i].updateLowerBound(val + 1, this);
                 }
             }
         }
@@ -263,7 +263,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (j != i && vars[j].instantiated()) {
                 int val = vars[j].getValue();
                 if (val == vars[i].getUB()) {
-                    vars[i].updateUpperBound(val - 1, this, false);
+                    vars[i].updateUpperBound(val - 1, this);
                 }
             }
         }
@@ -281,7 +281,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         int val = vars[i].getValue();
         for (int j = 0; j < vars.length; j++) {
             if (j != i) {
-                vars[j].removeValue(val, this, false);
+                vars[j].removeValue(val, this);
             }
         }
         /*int idx = ivIdx.get();
@@ -400,7 +400,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
-                filter |= maxsorted[i].var.updateLowerBound(bounds[w], this, false);
+                filter |= maxsorted[i].var.updateLowerBound(bounds[w], this);
                 pathset(h, x, w, w);
             }
 
@@ -438,7 +438,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
-                filter |= minsorted[i].var.updateUpperBound(bounds[w] - 1, this, false);
+                filter |= minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
                 pathset(h, x, w, w);
             }
             if (d[z] == bounds[y] - bounds[z]) {

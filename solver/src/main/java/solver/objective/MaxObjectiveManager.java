@@ -81,7 +81,7 @@ public class MaxObjectiveManager extends IObjectiveManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        this.objective.updateLowerBound(bestKnownLowerBound+1, this, false);
+        this.objective.updateLowerBound(bestKnownLowerBound+1, this);
     }
 
     @Override

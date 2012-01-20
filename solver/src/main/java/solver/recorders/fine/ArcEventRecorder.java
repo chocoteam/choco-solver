@@ -117,28 +117,31 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
-        if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+        assert cause != null : "should be Cause.Null instead";
+        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
+            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
 //            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
-            // 1. clear the structure if necessary
-            if (LAZY) {
-                if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-                    this.evtmask = 0;
-                    deltamon.clear();
-                    timestamp = AbstractSearchLoop.timeStamp;
+                // 1. clear the structure if necessary
+                if (LAZY) {
+                    if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+                        this.evtmask = 0;
+                        deltamon.clear();
+                        timestamp = AbstractSearchLoop.timeStamp;
+                    }
                 }
-            }
-            // 2. if instantiation, then decrement arity of the propagator
-            if (EventType.anInstantiationEvent(evt.mask)) {
-                propagator.decArity();
-            }
-            // 3. record the event and values removed
-            if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                evtmask |= evt.strengthened_mask;
-            }
-            deltamon.update(evt);
-            // 4. schedule this
-            if (!enqueued()) {
-                scheduler.schedule(this);
+                // 2. if instantiation, then decrement arity of the propagator
+                if (EventType.anInstantiationEvent(evt.mask)) {
+                    propagator.decArity();
+                }
+                // 3. record the event and values removed
+                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                    evtmask |= evt.strengthened_mask;
+                }
+                deltamon.update(evt);
+                // 4. schedule this
+                if (!enqueued()) {
+                    scheduler.schedule(this);
+                }
             }
         }
     }
@@ -146,6 +149,14 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void contradict(V var, EventType evt, ICause cause) {
         // nothing required here
+    }
+
+    public void virtuallyExecuted(){
+        this.evtmask = 0;
+        deltamon.unfreeze();
+        if(enqueued){
+            scheduler.remove(this);
+        }
     }
 
     @Override

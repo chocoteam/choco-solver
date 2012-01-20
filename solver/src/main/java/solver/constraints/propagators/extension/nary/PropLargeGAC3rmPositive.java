@@ -161,14 +161,14 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[i].removeInterval(left, right, this, false);
+                        vars[i].removeInterval(left, right, this);
                         left = right = val;
                     }
                 } else {
                     setSupport(tab[i][nva][0]);
                 }
             }
-            vars[i].removeInterval(left, right, this, false);
+            vars[i].removeInterval(left, right, this);
         }
     }
 
@@ -216,7 +216,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[indexVar].removeInterval(left, right, this, false);
+                        vars[indexVar].removeInterval(left, right, this);
                         left = right = val;
                     }
                 } else {
@@ -224,7 +224,7 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
                 }
             }
         }
-        vars[indexVar].removeInterval(left, right, this, false);
+        vars[indexVar].removeInterval(left, right, this);
     }
 
 

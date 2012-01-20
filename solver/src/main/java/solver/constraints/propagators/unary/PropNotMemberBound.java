@@ -60,7 +60,7 @@ public class PropNotMemberBound extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].removeInterval(lb, ub, this, false)) {
+        if (vars[0].removeInterval(lb, ub, this)) {
             this.setPassive();
         }
     }

@@ -92,7 +92,9 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
         this.offset = offset;
         this.range = card.length + offset;
         maxOccurrences = minOccurrences = null;
-        setPropagators(new PropBoundGlobalCardinality(vars, card, offset, card.length - 1 + offset, solver, this));
+        //CPRU  double to simulate idempotency
+        setPropagators(new PropBoundGlobalCardinality(vars, card, offset, card.length - 1 + offset, solver, this),
+                new PropBoundGlobalCardinality(vars, card, offset, card.length - 1 + offset, solver, this));
     }
 
     public static GlobalCardinality make(IntVar[] vars, int[] values, IntVar[] card, Solver solver) {
@@ -138,7 +140,9 @@ public class GlobalCardinality extends IntConstraint<IntVar> {
                 throw new SolverException("!! GlobalCardinality + AC: bugs in filtering algorithm...");
             default:
             case BC:
-                setPropagators(new PropBoundGlobalCardinaltyLowUp(vars, minOccurrences, maxOccurrences, offset, offset + range - 1, solver, this));
+                //CPRU  double to simulate idempotency
+                setPropagators(new PropBoundGlobalCardinaltyLowUp(vars, minOccurrences, maxOccurrences, offset, offset + range - 1, solver, this),
+                        new PropBoundGlobalCardinaltyLowUp(vars, minOccurrences, maxOccurrences, offset, offset + range - 1, solver, this));
                 break;
         }
     }
