@@ -13,17 +13,9 @@ dir = '.'
 pwd = ''
 home = '../../'
 
-
-## java class-path for rocs
-#if CHOCO_SOLVER == '':
-CHOCO_SOLVER = join(home, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
-
-## correct class-path
-CP = '-cp .:'+CHOCO_SOLVER
-
 ## java command
 JAVA='java -Xmx1024m -Xms1024m '# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
-CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
+
 
 ## Number of time a problem is run
 loop = 1 # can be override
@@ -44,7 +36,8 @@ def readParameters(paramlist):
     global timelimit
     global name
     global dir
-    global pwd, home
+    global pwd
+    global home
     if len(paramlist)>0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
@@ -62,6 +55,13 @@ def readParameters(paramlist):
 
 
 readParameters(sys.argv[1:])
+print home
+
+# initialize env. variables
+CHOCO_SOLVER = join(home, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
+CP = '-cp .:'+CHOCO_SOLVER
+CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
+print CHOCO_SOLVER
 
 def buildLog(name, ext, level):
     hdlr = logging.FileHandler(join(dir, name+ext))
