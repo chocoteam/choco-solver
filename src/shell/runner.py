@@ -9,7 +9,7 @@ import MySQLdb as mdb
 
 ## ENVIRONMENT VARIABLES
 ## HOME
-CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/fi/'
+CHOCO_HOME = '../../'
 
 ## java class-path for rocs
 #if CHOCO_SOLVER == '':
