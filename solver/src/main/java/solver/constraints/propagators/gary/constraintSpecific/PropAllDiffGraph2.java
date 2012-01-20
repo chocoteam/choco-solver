@@ -190,9 +190,9 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 				for (j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
 					if (nodeSCC[node] != nodeSCC[j+n]) {
 						if (matching[node] == j+n && matching[j+n] == node) {
-							g.enforceArc(node, j, this, false);
+							g.enforceArc(node, j, this);
 						} else {
-							g.removeArc(node, j, this, false);
+							g.removeArc(node, j, this);
 						}
 					}
 				}

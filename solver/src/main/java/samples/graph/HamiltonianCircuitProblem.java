@@ -124,8 +124,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		if(hk){
 			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
 			try{
-				pos[0].instantiateTo(0, Cause.Null, false);
-				pos[n-1].instantiateTo(n - 1, Cause.Null, false);
+				pos[0].instantiateTo(0, Cause.Null);
+				pos[n-1].instantiateTo(n - 1, Cause.Null);
 			}catch(Exception e){
 				e.printStackTrace();System.exit(0);
 			}
@@ -426,7 +426,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 			for(int i=0;i<n;i++){
 				for(int j=0;j<n;j++){
 					if(!matrix[i][j]){
-						vars[i].removeValue(j,Cause.Null,false);
+						vars[i].removeValue(j,Cause.Null);
 					}
 				}
 			}

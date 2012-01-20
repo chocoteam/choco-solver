@@ -82,7 +82,7 @@ public class PropInverseChannelingJGTEST extends Propagator<IntVar> {
 		if(var>=n || val>=n){
 			throw new UnsupportedOperationException();
 		}
-		other(set)[val].instantiateTo(var,this,false);
+		other(set)[val].instantiateTo(var,this);
 //		if(other(set)[val].instantiateTo(var,this,false) && other(set)[val].instantiated()){
 //			awakeOnInst(other(set),val,other(set)[val].getValue());
 //		}
@@ -92,7 +92,7 @@ public class PropInverseChannelingJGTEST extends Propagator<IntVar> {
 		if(var>=n || val>=n){
 			throw new UnsupportedOperationException();
 		}
-		other(set)[val].removeValue(var,this,false);
+		other(set)[val].removeValue(var,this);
 //		if(other(set)[val].removeValue(var,this,false) && other(set)[val].instantiated()){
 //			awakeOnInst(other(set),val,other(set)[val].getValue());
 //		}
@@ -108,7 +108,7 @@ public class PropInverseChannelingJGTEST extends Propagator<IntVar> {
 			}else{
 				for(int j=v.getLB();j<=v.getUB();j=v.nextValue(j)){
 					if(!Y[j].contains(i)){
-						v.removeValue(j,this,false);
+						v.removeValue(j,this);
 						if(v.instantiated()){
 							awakeOnInst(X,i,v.getValue());
 						}
@@ -121,7 +121,7 @@ public class PropInverseChannelingJGTEST extends Propagator<IntVar> {
 			}else{
 				for(int j=v.getLB();j<=v.getUB();j=v.nextValue(j)){
 					if(!X[j].contains(i)){
-						v.removeValue(j,this,false);
+						v.removeValue(j,this);
 						if(v.instantiated()){
 							awakeOnInst(Y,i,v.getValue());
 						}

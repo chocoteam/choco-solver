@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -86,7 +85,7 @@ public class Tree extends AbstractProblem{
 		for(int i=0; i<n; i++){
 			for(int j=0; j<n ;j++){
 				if(!data[i].get(j)){
-					vars[i].removeValue(j, Cause.Null, false);
+					vars[i].removeValue(j, Cause.Null);
 				}
 			}
 		}

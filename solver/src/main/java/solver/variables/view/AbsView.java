@@ -30,6 +30,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -97,7 +98,7 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
@@ -110,9 +111,14 @@ public final class AbsView extends View<IntVar> {
         } else if (value == sup) {
             evt = EventType.DECUPP;
         }
-        boolean done = var.removeValue(-value, this, informCause);
-        done |= var.removeValue(value, this, informCause);
-
+        boolean done = var.removeValue(-value, this);
+        done |= var.removeValue(value, this);
+        if (instantiated()) {
+            evt = EventType.INSTANTIATE;
+            if (cause.reactOnPromotion()) {
+                cause = Cause.Null;
+            }
+        }
         if (done) {
             notifyMonitors(evt, cause);
         }
@@ -120,14 +126,14 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(-to, -from, this, informCause);
-            done |= var.removeInterval(from, to, this, informCause);
+            boolean done = var.removeInterval(-to, -from, this);
+            done |= var.removeInterval(from, to, this);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -136,19 +142,22 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
         int v = Math.abs(value);
-        boolean done = var.updateLowerBound(-v, this, informCause);
-        done |= var.updateUpperBound(v, this, informCause);
+        boolean done = var.updateLowerBound(-v, this);
+        done |= var.updateUpperBound(v, this);
         EventType evt = EventType.DECUPP;
         if (var.hasEnumeratedDomain()) {
-            done |= var.removeInterval(-v + 1, v - 1, this, informCause);
+            done |= var.removeInterval(-v + 1, v - 1, this);
             evt = EventType.INSTANTIATE;
+            if (cause.reactOnPromotion()) {
+                cause = Cause.Null;
+            }
         }
         if (done) {
             notifyMonitors(evt, cause);
@@ -157,29 +166,43 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
         }
-        boolean done = var.removeInterval(-value + 1, value - 1, this, informCause);
+        boolean done = var.removeInterval(-value + 1, value - 1, this);
         if (done) {
-            notifyMonitors(EventType.INCLOW, cause);
+            EventType evt = EventType.INCLOW;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
-        boolean done = var.updateLowerBound(-value, this, informCause);
-        done |= var.updateUpperBound(value, this, informCause);
+        boolean done = var.updateLowerBound(-value, this);
+        done |= var.updateUpperBound(value, this);
         if (done) {
-            notifyMonitors(EventType.DECUPP, cause);
+            EventType evt = EventType.DECUPP;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }

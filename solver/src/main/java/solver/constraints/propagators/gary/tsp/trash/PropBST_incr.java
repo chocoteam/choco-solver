@@ -210,12 +210,12 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 			if(!Tree.arcExists(i,j)){
 				repCost = costs[ccTGedge[lca.getLCA(i,j)].get()];
 				if(treeCost - repCost + costs[i*n+j] > obj.getUB()){
-					g.removeArc(i,j,this,false);
+					g.removeArc(i,j,this);
 					activeArcs.clear(arc);
 				}
 			}
 			else if(activeArcs.get(indexOfArc[j][i]) && treeCost-costs[j*n+i]+costs[i*n+j] > obj.getUB()) {
-				g.removeArc(i,j,this,false);
+				g.removeArc(i,j,this);
 				activeArcs.clear(arc);
 			}
 		}
@@ -252,7 +252,7 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 		int idx = connectMST(tSize);
 		cctRoot.set(nCCT);
 		// bound
-		obj.updateLowerBound(treeCost.get(), this,false);
+		obj.updateLowerBound(treeCost.get(), this);
 		int delta = obj.getUB()-treeCost.get();
 		// select relevant arcs
 		selectRelevantArcs(delta);
@@ -343,7 +343,7 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 		// Trivially infeasible arcs
 		while(idx>=0){
 			if(!Tree.arcExists(sortedArcs[idx]/n, sortedArcs[idx]%n)){
-				g.removeArc(sortedArcs[idx]/n, sortedArcs[idx]%n, this,false);
+				g.removeArc(sortedArcs[idx]/n, sortedArcs[idx]%n, this);
 				activeArcs.clear(idx);
 			}
 			idx = activeArcs.nextSetBit(idx+1);

@@ -167,8 +167,8 @@ public class TSPTW extends AbstractProblem{
 			duration[i] = VariableFactory.bounded("duration "+i,0,totalCost.getUB(),solver);
 		}
 		try{
-			time[0].instantiateTo(0, Cause.Null,false);
-			duration[n-1].instantiateTo(0, Cause.Null,false);
+			time[0].instantiateTo(0, Cause.Null);
+			duration[n-1].instantiateTo(0, Cause.Null);
 		}catch (Exception e){
 			e.printStackTrace();
 			System.exit(0);

@@ -96,7 +96,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 					this.contradiction(g,i+" has no predecessor");
 				}
 				else if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),i,this,false);
+					g.enforceArc(preds.getFirstElement(),i,this);
 				}
 				else if (pre!=-1){
 					if(g.getKernelGraph().getPredecessorsOf(i).getNextElement()!=-1){
@@ -104,7 +104,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 					}
 					for(int j=preds.getFirstElement();j>=0;j=preds.getNextElement()){
 						if(j!=pre){
-							g.removeArc(j,i,this,false);
+							g.removeArc(j,i,this);
 						}
 					}
 				}
@@ -175,7 +175,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
-						g.removeArc(i,to,p,false);
+						g.removeArc(i,to,p);
 					}
 				}
 			}
@@ -198,7 +198,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 					p.contradiction(g,to+" has no predecessor");
 				}
 				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),to,p,false);
+					g.enforceArc(preds.getFirstElement(),to,p);
 				}
 			}
 		}

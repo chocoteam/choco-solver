@@ -101,20 +101,20 @@ public class PropIntVarChanneling extends GraphPropagator {
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!intVars[i].contains(j)){
-					g.removeArc(i,j,this,false);
+					g.removeArc(i,j,this);
 				}
 			}
 			v = intVars[i];
 			int ub = v.getUB();
 			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
 				if(j<n && !g.getEnvelopGraph().arcExists(i,j)){
-					v.removeValue(j,this,false);
+					v.removeValue(j,this);
 				}
 			}
 			if(!v.hasEnumeratedDomain()){
 				ub = v.getUB();
 				while(ub>=0 && ub<n && !g.getEnvelopGraph().arcExists(i,ub)){
-					v.removeValue(ub,this,false);
+					v.removeValue(ub,this);
 					ub--;
 				}
 			}
@@ -134,7 +134,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 			varIdx = idxVarInProp;
 			int val = intVars[varIdx].getLB();
 			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
-				g.enforceArc(varIdx,val,this,false);
+				g.enforceArc(varIdx,val,this);
 			}
 			eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
 		}
@@ -177,7 +177,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			g.removeArc(varIdx,i,p,false);
+			g.removeArc(varIdx,i,p);
 		}
 	}
 
@@ -189,7 +189,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].instantiateTo(i%n,p,false);
+			intVars[i/n-1].instantiateTo(i%n,p);
 		}
 	}
 
@@ -201,7 +201,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].removeValue(i%n,p,false);
+			intVars[i/n-1].removeValue(i%n,p);
 		}
 	}
 
@@ -219,12 +219,12 @@ public class PropIntVarChanneling extends GraphPropagator {
 				while(to<n && !g.getEnvelopGraph().arcExists(from,to)){
 					to++;
 				}
-				intVars[from].updateLowerBound(to,p,false);
+				intVars[from].updateLowerBound(to,p);
 			}else if(to==intVars[from].getUB()){
 				while(to>=0 && !g.getEnvelopGraph().arcExists(from,to)){
 					to--;
 				}
-				intVars[from].updateUpperBound(to, p, false);
+				intVars[from].updateUpperBound(to, p);
 			}
 		}
 	}

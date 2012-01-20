@@ -163,7 +163,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 					if(in==-1){
 						throw new UnsupportedOperationException();
 					}
-					g.removeArc(in,outDoors.get(0),this,false);
+					g.removeArc(in,outDoors.get(0),this);
 				}
 			}
 		}
@@ -174,7 +174,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		int scc = sccOf[x].get();
 		for(int i=pred.getFirstElement();i>=0;i=pred.getNextElement()){
 			if(sccOf[i].get()==scc){
-				g.removeArc(i,x,this,false);
+				g.removeArc(i,x,this);
 			}
 		}
 	}
@@ -183,7 +183,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		int scc = sccOf[x].get();
 		for(int i=succ.getFirstElement();i>=0;i=succ.getNextElement()){
 			if(sccOf[i].get()==scc){
-				g.removeArc(x,i,this,false);
+				g.removeArc(x,i,this);
 			}
 		}
 	}

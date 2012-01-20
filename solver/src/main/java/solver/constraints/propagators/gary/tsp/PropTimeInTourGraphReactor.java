@@ -169,7 +169,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 				for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
 					nb = bound[x]+dist[x][i];
 					if(nb>time[i].getUB()){
-						g.removeArc(x,i,this,false);
+						g.removeArc(x,i,this);
 					}else if(nb<bound[i]){
 						if(done.get(i)){
 							throw new UnsupportedOperationException();
@@ -204,7 +204,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 			}
 		}
 		for(int i=0;i<n;i++){
-			time[i].updateLowerBound(bound[i],this,false);
+			time[i].updateLowerBound(bound[i],this);
 		}
 	}
 
@@ -237,7 +237,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 				for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
 					nb = bound[x]+dist[i][x];
 					if(nb>max-time[i].getLB()){
-						g.removeArc(i,x,this,false);
+						g.removeArc(i,x,this);
 					}else if(nb<bound[i]){
 						if(done.get(i)){
 							throw new UnsupportedOperationException();
@@ -272,7 +272,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 			}
 		}
 		for(int i=0;i<n;i++){
-			time[i].updateUpperBound(max - bound[i], this, false);
+			time[i].updateUpperBound(max - bound[i], this);
 		}
 	}
 
@@ -281,8 +281,8 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 	//***********************************************************************************
 
 	private void enfArc(int from, int to) throws ContradictionException {
-		time[from].updateUpperBound(time[to].getUB() - dist[from][to], this, false);
-		time[to].updateLowerBound(time[from].getLB() + dist[from][to], this, false);
+		time[from].updateUpperBound(time[to].getUB() - dist[from][to], this);
+		time[to].updateLowerBound(time[from].getLB() + dist[from][to], this);
 	}
 
 	private class EnfArc implements IntProcedure {

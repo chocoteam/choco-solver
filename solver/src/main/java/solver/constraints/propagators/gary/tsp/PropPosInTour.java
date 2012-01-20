@@ -114,27 +114,27 @@ public class PropPosInTour extends GraphPropagator {
 	private void enfVarPos(int var, int val) throws ContradictionException {
 		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
 		if(p!=-1){
-			if(intVars[p].instantiateTo(val-1,this,false)){
+			if(intVars[p].instantiateTo(val-1,this)){
 				enfVarPos(p,val-1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(!intVars[p].contains(val-1)){
-					g.removeArc(p,var,this,false);
+					g.removeArc(p,var,this);
 				}
 			}
 		}
 		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
 		if(s!=-1){
-			if(intVars[s].instantiateTo(val+1,this,false)){
+			if(intVars[s].instantiateTo(val+1,this)){
 				enfVarPos(s,val+1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(!intVars[s].contains(val+1)){
-					g.removeArc(var,s,this,false);
+					g.removeArc(var,s,this);
 				}
 			}
 		}
@@ -143,27 +143,27 @@ public class PropPosInTour extends GraphPropagator {
 	private void upUB(int var, int val) throws ContradictionException {
 		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
 		if(p!=-1){
-			if(intVars[p].updateUpperBound(val-1,this,false)){
+			if(intVars[p].updateUpperBound(val-1,this)){
 				upUB(p,val-1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getLB()>val-1){
-					g.removeArc(p,var,this,false);
+					g.removeArc(p,var,this);
 				}
 			}
 		}
 		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
 		if(s!=-1){
-			if(intVars[s].updateUpperBound(val+1,this,false)){
+			if(intVars[s].updateUpperBound(val+1,this)){
 				upUB(s,val+1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getLB()>val+1){
-					g.removeArc(var,s,this,false);
+					g.removeArc(var,s,this);
 				}
 			}
 		}
@@ -171,27 +171,27 @@ public class PropPosInTour extends GraphPropagator {
 	private void upLB(int var, int val) throws ContradictionException {
 		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
 		if(p!=-1){
-			if(intVars[p].updateLowerBound(val-1,this,false)){
+			if(intVars[p].updateLowerBound(val-1,this)){
 				upLB(p,val-1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getUB()<val-1){
-					g.removeArc(p,var,this,false);
+					g.removeArc(p,var,this);
 				}
 			}
 		}
 		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
 		if(s!=-1){
-			if(intVars[s].updateLowerBound(val+1,this,false)){
+			if(intVars[s].updateLowerBound(val+1,this)){
 				upLB(s,val+1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getUB()<val+1){
-					g.removeArc(var,s,this,false);
+					g.removeArc(var,s,this);
 				}
 			}
 		}
@@ -200,27 +200,27 @@ public class PropPosInTour extends GraphPropagator {
 	private void remVarPos(int var, int val) throws ContradictionException {
 		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
 		if(p!=-1){
-			if(intVars[p].removeValue(val-1,this,false)){
+			if(intVars[p].removeValue(val-1,this)){
 				remVarPos(p,val-1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].instantiatedTo(val-1)){
-					g.removeArc(p,var,this,false);
+					g.removeArc(p,var,this);
 				}
 			}
 		}
 		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
 		if(s!=-1){
-			if(intVars[s].removeValue(val+1,this,false)){
+			if(intVars[s].removeValue(val+1,this)){
 				remVarPos(s,val+1);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[s].instantiatedTo(val+1)){
-					g.removeArc(var,s,this,false);
+					g.removeArc(var,s,this);
 				}
 			}
 		}

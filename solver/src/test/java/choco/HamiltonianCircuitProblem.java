@@ -149,7 +149,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 				}
 				for(int j=1; j<n ;j++){
 					if(!adjacencyMatrix[i][j]){
-						integers[i].removeValue(j, Cause.Null,false);
+						integers[i].removeValue(j, Cause.Null);
 					}
 				}
 			}
@@ -319,7 +319,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 			for(int i=0;i<n;i++){
 				for(int j=0;j<n;j++){
 					if(!matrix[i][j]){
-						vars[i].removeValue(j,Cause.Null,false);
+						vars[i].removeValue(j,Cause.Null);
 					}
 				}
 			}

@@ -62,7 +62,7 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 	//***********************************************************************************
 
 	@Override
-	public boolean removeArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
+	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		if(kernel.arcExists(x, y)){
 			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc "+x+"->"+y);
 			return false;
@@ -71,23 +71,20 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 			if (reactOnModification){
 				delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 			}
-//			System.out.println("REMOVE "+x+" -> "+y+ " G "+cause.getClass().getSimpleName());
 			EventType e = EventType.REMOVEARC;
 			notifyMonitors(e, cause);
 			return true;
 		}return false;
 	}
 	@Override
-	public boolean enforceArc(int x, int y, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
-		enforceNode(x, cause, informCause);
-		enforceNode(y, cause, informCause);
+	public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
+		enforceNode(x, cause);
+		enforceNode(y, cause);
 		if(envelop.arcExists(x, y)){
 			if (kernel.addArc(x, y)){
 				if (reactOnModification){
 					delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
 				}
-//				System.out.println("ENFORCE "+x+" -> "+y+ " G");
 				EventType e = EventType.ENFORCEARC;
 				notifyMonitors(e, cause);
 				return true;

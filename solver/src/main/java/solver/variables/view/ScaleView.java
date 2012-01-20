@@ -31,6 +31,7 @@ import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.MathUtils;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -84,7 +85,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
 //        return value % cste == 0 && var.removeValue(value / cste, cause, informCause);
         if (value % cste == 0) {
@@ -97,15 +98,24 @@ public final class ScaleView extends View<IntVar> {
                 if (inf <= value && value <= sup) {
                     EventType e = EventType.REMOVE;
 
-                    boolean done = var.removeValue(value / cste, this, informCause);
+                    boolean done = var.removeValue(value / cste, this);
                     if (done) {
                         if (value == inf) {
                             e = EventType.INCLOW;
+                            if (cause.reactOnPromotion()) {
+                                cause = Cause.Null;
+                            }
                         } else if (value == sup) {
                             e = EventType.DECUPP;
+                            if (cause.reactOnPromotion()) {
+                                cause = Cause.Null;
+                            }
                         }
                         if (this.instantiated()) {
                             e = EventType.INSTANTIATE;
+                            if (cause.reactOnPromotion()) {
+                                cause = Cause.Null;
+                            }
                         }
                         this.notifyMonitors(e, cause);
                         solver.getExplainer().removeValue(this, value, cause);
@@ -118,14 +128,14 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
 //        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause, informCause);
+            boolean done = var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -134,7 +144,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
 //        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
         solver.getExplainer().instantiateTo(this, value, cause);
@@ -145,7 +155,7 @@ public final class ScaleView extends View<IntVar> {
             return false;
         }
         if (contains(value)) {
-            boolean done = var.instantiateTo(value / cste, this, informCause);
+            boolean done = var.instantiateTo(value / cste, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;
@@ -157,7 +167,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -166,9 +176,12 @@ public final class ScaleView extends View<IntVar> {
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this, informCause);
+                boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
@@ -181,7 +194,7 @@ public final class ScaleView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
 //        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
         int old = this.getUB();
@@ -191,9 +204,12 @@ public final class ScaleView extends View<IntVar> {
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
-                boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this, informCause);
+                boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);

@@ -89,12 +89,12 @@ public class PropTaskIntervals extends GraphPropagator {
 	}
 
 	private void updateBounds(int i) throws ContradictionException {
-		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this, false);
-		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this, false);
-		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this,false);
-		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this,false);
-		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this,false);
-		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this,false);
+		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this);
+		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this);
+		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this);
+		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this);
+		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this);
+		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this);
 	}
 
 	private void check(int i, int j) throws ContradictionException {
@@ -138,13 +138,13 @@ public class PropTaskIntervals extends GraphPropagator {
 			// can be done before the box
 			if(starts[i].getLB()+durations[i].getLB()<=mandFirst){
 				if(!right){
-					ends[i].updateUpperBound(mandFirst,this,false);
+					ends[i].updateUpperBound(mandFirst,this);
 				}
 			}
 			// cannot be done before the box
 			else{
 				if(right){
-						starts[i].updateLowerBound(mandLast, this, false);
+						starts[i].updateLowerBound(mandLast, this);
 				}else{
 					contradiction(starts[i],"sweep");
 				}

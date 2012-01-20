@@ -107,20 +107,20 @@ public class PropTaskDefinition extends GraphPropagator {
 			}
 		}
 		if(min==-1){
-			durations[i].instantiateTo(0,this,false);
+			durations[i].instantiateTo(0,this);
 		}else{
-			durations[i].updateLowerBound(dist[i][min],this,false);
-			durations[i].updateUpperBound(dist[i][max], this, false);
+			durations[i].updateLowerBound(dist[i][min],this);
+			durations[i].updateUpperBound(dist[i][max], this);
 		}
 	}
 
 	private void updateBounds(int i) throws ContradictionException {
-		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this, false);
-		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this, false);
-		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this,false);
-		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this,false);
-		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this,false);
-		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this,false);
+		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this);
+		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this);
+		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this);
+		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this);
+		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this);
+		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this);
 	}
 
 	private void checkGraph(int i) throws ContradictionException {
@@ -129,7 +129,7 @@ public class PropTaskDefinition extends GraphPropagator {
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 			if(dist[i][s]<min || dist[i][s]>max){
-				g.removeArc(i,s,this,false);
+				g.removeArc(i,s,this);
 			}
 		}
 	}

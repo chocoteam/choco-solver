@@ -64,19 +64,19 @@ public class SqrViewTest {
             Assert.assertEquals(Z.previousValue(118), 100);
             Assert.assertEquals(Z.previousValue(-1), Integer.MIN_VALUE);
 
-            Z.updateLowerBound(9, Cause.Null, false);
+            Z.updateLowerBound(9, Cause.Null);
             Assert.assertEquals(X.getLB(), -4);
             Assert.assertEquals(X.getUB(), 12);
 
-            Z.updateUpperBound(100, Cause.Null, false);
+            Z.updateUpperBound(100, Cause.Null);
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(X.getLB(), -4);
 
-            Z.removeValue(16, Cause.Null, false);
+            Z.removeValue(16, Cause.Null);
             Assert.assertFalse(X.contains(-4));
             Assert.assertFalse(X.contains(4));
 
-            Z.removeInterval(36, 64, Cause.Null, false);
+            Z.removeInterval(36, 64, Cause.Null);
             Assert.assertFalse(X.contains(6));
             Assert.assertFalse(X.contains(7));
             Assert.assertFalse(X.contains(8));
@@ -84,7 +84,7 @@ public class SqrViewTest {
             Assert.assertEquals(X.getDomainSize(), 5);
             Assert.assertEquals(Z.getDomainSize(), X.getDomainSize());
 
-            Z.instantiateTo(25, Cause.Null, false);
+            Z.instantiateTo(25, Cause.Null);
             Assert.assertTrue(X.instantiated());
             Assert.assertEquals(X.getValue(), 5);
 

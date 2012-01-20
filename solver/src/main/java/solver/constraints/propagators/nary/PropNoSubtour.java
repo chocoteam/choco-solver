@@ -122,10 +122,10 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
-                vars[last].instantiateTo(start, this, false);
+                vars[last].instantiateTo(start, this);
             }
             if (size[start].get() < n) {
-                vars[last].removeValue(start, this, false);
+                vars[last].removeValue(start, this);
             }
             origin[last].set(start);
             end[start].set(last);

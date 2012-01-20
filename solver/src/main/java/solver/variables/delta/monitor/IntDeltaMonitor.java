@@ -65,7 +65,7 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
 
     @Override
     public void unfreeze() {
-        //if propagator is idempotent...
+        //propagator is idempotent
         this.first = this.last = delta.size();
     }
 

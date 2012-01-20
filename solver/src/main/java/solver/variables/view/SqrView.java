@@ -30,6 +30,7 @@ package solver.variables.view;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -101,7 +102,7 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
@@ -113,11 +114,23 @@ public final class SqrView extends View<IntVar> {
             EventType evt = EventType.REMOVE;
             if (value == inf) {
                 evt = EventType.INCLOW;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             } else if (value == sup) {
                 evt = EventType.DECUPP;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
             }
-            boolean done = var.removeValue(-rootV, this, informCause);
-            done |= var.removeValue(rootV, this, informCause);
+            boolean done = var.removeValue(-rootV, this);
+            done |= var.removeValue(rootV, this);
+            if (instantiated()) {
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
             if (done) {
                 notifyMonitors(evt, cause);
             }
@@ -126,16 +139,16 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
             from = floor_sqrt(from);
             to = floor_sqrt(to);
-            boolean done = var.removeInterval(-to, -from, cause, informCause);
-            done |= var.removeInterval(from, to, cause, informCause);
+            boolean done = var.removeInterval(-to, -from, cause);
+            done |= var.removeInterval(from, to, cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -144,7 +157,7 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?
@@ -152,11 +165,11 @@ public final class SqrView extends View<IntVar> {
         }
         int v = floor_sqrt(value);
         if (v * v == value) { // is a perfect square ?
-            boolean done = var.updateLowerBound(-v, this, informCause);
-            done |= var.updateUpperBound(v, this, informCause);
+            boolean done = var.updateLowerBound(-v, this);
+            done |= var.updateUpperBound(v, this);
             EventType evt = EventType.DECUPP;
             if (var.hasEnumeratedDomain()) {
-                done |= var.removeInterval(-v + 1, v - 1, cause, informCause);
+                done |= var.removeInterval(-v + 1, v - 1, cause);
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
@@ -172,31 +185,45 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this, informCause);
+        boolean done = var.removeInterval(-floorV + 1, floorV - 1, this);
         if (done) {
-            notifyMonitors(EventType.INCLOW, cause);
+            EventType evt = EventType.INCLOW;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
         }
         int floorV = floor_sqrt(value);
-        boolean done = var.updateLowerBound(-floorV, this, informCause);
-        done |= var.updateUpperBound(floorV, this, informCause);
+        boolean done = var.updateLowerBound(-floorV, this);
+        done |= var.updateUpperBound(floorV, this);
         if (done) {
-            notifyMonitors(EventType.DECUPP, cause);
+            EventType evt = EventType.DECUPP;
+            if(instantiated()){
+                evt = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
+                }
+            }
+            notifyMonitors(evt, cause);
         }
         return done;
     }

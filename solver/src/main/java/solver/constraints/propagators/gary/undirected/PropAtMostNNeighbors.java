@@ -85,7 +85,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 					INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
 					for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
 						if (mate!=to){
-							g.removeArc(from, to, instance, false);
+							g.removeArc(from, to, instance);
 						}
 					}
 				}
@@ -110,7 +110,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
 						for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
 							if (!g.getKernelGraph().edgeExists(from, to)){
-								g.removeArc(from, to, instance, false);
+								g.removeArc(from, to, instance);
 							}
 						}
 					}
@@ -134,7 +134,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && nei.neighborhoodSize()>n_neighbors){
 				for(next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
 					if (!g.getKernelGraph().edgeExists(node, next)){
-						g.removeArc(node, next, this, false);
+						g.removeArc(node, next, this);
 					}
 				}
 			}

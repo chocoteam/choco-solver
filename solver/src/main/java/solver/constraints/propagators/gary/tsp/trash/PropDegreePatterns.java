@@ -86,7 +86,6 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
-
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		checkPattern(-1,-1);
@@ -122,7 +121,7 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 				x=nei.getFirstElement();
 				y=nei.getNextElement();
 				if(nei.getNextElement()==-1 && x!=-1 && y!=-1){
-					if(g.removeArc(x,y,this,false) || g.removeArc(y,x,this,false)){
+					if(g.removeArc(x,y,this) || g.removeArc(y,x,this)){
 						tocheck.set(i);
 						tocheck.set(i);
 					}

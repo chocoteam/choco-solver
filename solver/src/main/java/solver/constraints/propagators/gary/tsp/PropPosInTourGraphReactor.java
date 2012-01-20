@@ -156,7 +156,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 			nextSet.clear();
 			for(int i=currentSet.size()-1; i>=0; i--){
 				x = currentSet.get(i);
-				intVars[x].updateLowerBound(level,this,false);
+				intVars[x].updateLowerBound(level,this);
 				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!done.get(j)){
@@ -187,7 +187,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 				nextSet.clear();
 				for(int i=currentSet.size()-1; i>=0; i--){
 					x = currentSet.get(i);
-					intVars[x].updateLowerBound(level,this,false);
+					intVars[x].updateLowerBound(level,this);
 					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!done.get(j)){
@@ -225,7 +225,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 			nextSet.clear();
 			for(int i=currentSet.size()-1; i>=0; i--){
 				x = currentSet.get(i);
-				intVars[x].updateUpperBound(level, this, false);
+				intVars[x].updateUpperBound(level, this);
 				INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					if(!done.get(j)){
@@ -256,7 +256,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 				nextSet.clear();
 				for(int i=currentSet.size()-1; i>=0; i--){
 					x = currentSet.get(i);
-					intVars[x].updateUpperBound(level, this, false);
+					intVars[x].updateUpperBound(level, this);
 					INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!done.get(j)){
@@ -280,17 +280,17 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void enfArc(int from, int to) throws ContradictionException {
-		intVars[from].updateUpperBound(intVars[to].getUB() - 1, this, false);
-		intVars[to].updateLowerBound(intVars[from].getLB() + 1, this, false);
+		intVars[from].updateUpperBound(intVars[to].getUB() - 1, this);
+		intVars[to].updateLowerBound(intVars[from].getLB() + 1, this);
 	}
 
 	private void remArc(int from, int to) throws ContradictionException {
 		if(from!=to){
 			if(intVars[from].instantiated()){
-				intVars[to].removeValue(intVars[from].getValue()+1,this,false);
+				intVars[to].removeValue(intVars[from].getValue()+1,this);
 			}
 			if(intVars[to].instantiated()){
-				intVars[from].removeValue(intVars[to].getValue()-1,this,false);
+				intVars[from].removeValue(intVars[to].getValue()-1,this);
 			}
 		}
 	}

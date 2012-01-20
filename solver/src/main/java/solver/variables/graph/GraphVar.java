@@ -29,7 +29,6 @@ package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -95,8 +94,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 
     @Override
-    public boolean removeNode(int x, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
+    public boolean removeNode(int x, ICause cause) throws ContradictionException {
         if (kernel.getActiveNodes().isActive(x)) {
             this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
             return true;
@@ -106,8 +104,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         if (reactOnModification) {
             INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause, informCause);
-                removeArc(i, x, cause, informCause);
+                removeArc(x, i, cause);
+                removeArc(i, x, cause);
             }
         }
         if (envelop.desactivateNode(x)) {
@@ -122,8 +120,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 
     @Override
-    public boolean enforceNode(int x, ICause cause, boolean informCause) throws ContradictionException {
-		informCause = false;
+    public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
@@ -221,9 +218,9 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (value[i][j]) {
-                    enforceArc(i, j, cause, false);
+                    enforceArc(i, j, cause);
                 } else {
-                    removeArc(i, j, cause, false);
+                    removeArc(i, j, cause);
                 }
             }
         }

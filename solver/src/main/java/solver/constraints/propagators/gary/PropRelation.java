@@ -95,9 +95,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(i) && ker.isActive(j)){
-								g.enforceArc(i, j, this, true);
+								g.enforceArc(i, j, this);//CPRU not idempotent
 							}break;
-						case FALSE: g.removeArc(i, j, this, true);break;
+						case FALSE: g.removeArc(i, j, this);break; //CPRU not idempotent
 						}
 					}else{
 						if(ker.isActive(i) && ker.isActive(j)){
@@ -150,14 +150,14 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	//***********************************************************************************
 
 	private void apply(int x, int y) throws ContradictionException{
-		relation.applyTrue(x,y, solver, this, true);
+		relation.applyTrue(x,y, solver, this);//CPRU not idempotent
 	}
 
 	private void unapply(int x, int y) throws ContradictionException{
 		if(relation.isDirected() && !g.getEnvelopGraph().arcExists(y,x)){
-			relation.applySymmetricFalse(x,y, solver, this, true);
+			relation.applySymmetricFalse(x,y, solver, this);//CPRU not idempotent
 		}else{
-			relation.applyFalse(x,y, solver, this, true);
+			relation.applyFalse(x,y, solver, this); //CPRU not idempotent
 		}
 	}
 
@@ -171,9 +171,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 					switch(relation.isEntail(i,j)){
 					case TRUE: 
 						if(ker.isActive(i) && ker.isActive(j)){
-							g.enforceArc(i, j, this, true);
+							g.enforceArc(i, j, this); //CPRU not idempotent
 						}break;
-					case FALSE: g.removeArc(i, j, this, true);break;
+					case FALSE: g.removeArc(i, j, this);break; //CPRU not idempotent
 					}
 				}else{
 					if(ker.isActive(i) && ker.isActive(j)){
@@ -213,9 +213,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 						switch(relation.isEntail(i,j)){
 						case TRUE: 
 							if(ker.isActive(j)){
-								g.enforceArc(i, j, p, true);
+								g.enforceArc(i, j, p);//CPRU not idempotent
 							}break;
-						case FALSE: g.removeArc(i, j, p, true);break;
+						case FALSE: g.removeArc(i, j, p);break;//CPRU not idempotent
 						}
 					}else{
 						if(ker.isActive(j)){

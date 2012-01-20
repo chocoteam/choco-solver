@@ -264,13 +264,13 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         int i;
         for (i = 0; i < nbPosVars; i++) {
             int newSupi = coeffPolicy.getSupPV(i, mylb);//MathUtils.divFloor(-(mylb), coeffs[i]) + vars[i].getLB();
-            if (vars[i].updateUpperBound(newSupi, this, false)) {
+            if (vars[i].updateUpperBound(newSupi, this)) {
                 anyChange = true;
             }
         }
         for (i = nbPosVars; i < nbVars; i++) {
             int newInfi = coeffPolicy.getInfNV(i, mylb);//MathUtils.divCeil(mylb, -(coeffs[i])) + vars[i].getUB();
-            if (vars[i].updateLowerBound(newInfi, this, false)) {
+            if (vars[i].updateLowerBound(newInfi, this)) {
                 anyChange = true;
             }
         }
@@ -299,13 +299,13 @@ public abstract class AbstractPropIntLinComb extends Propagator<IntVar> {
         int i;
         for (i = 0; i < nbPosVars; i++) {
             int newInfi = coeffPolicy.getInfPV(i, myub);//MathUtils.divCeil(-(myub), coeffs[i]) + vars[i].getUB();
-            if (vars[i].updateLowerBound(newInfi, this, false)) {
+            if (vars[i].updateLowerBound(newInfi, this)) {
                 anyChange = true;
             }
         }
         for (i = nbPosVars; i < nbVars; i++) {
             int newSupi = coeffPolicy.getSupNV(i, myub);//MathUtils.divFloor(myub, -(coeffs[i])) + vars[i].getLB();
-            if (vars[i].updateUpperBound(newSupi, this, false)) {
+            if (vars[i].updateUpperBound(newSupi, this)) {
                 anyChange = true;
             }
         }

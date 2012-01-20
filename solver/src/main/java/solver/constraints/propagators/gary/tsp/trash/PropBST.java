@@ -201,14 +201,14 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 					repCost = costs[minCostOutArcs[sccOf[i].get()]];
 				}
 				if(costs[i*n+j]-repCost > delta){
-					g.removeArc(i, j, this, false);
+					g.removeArc(i, j, this);
 					activeArcs.clear(arc);
 				}else{
 					markTreeEdges(ccTp,i,j, costs[i*n+j]);
 				}
 			}
 			else if(activeArcs.get(indexOfArc[j][i]) && costs[i*n+j]-costs[j*n+i] > delta) {
-				g.removeArc(i,j,this,false);
+				g.removeArc(i,j,this);
 				activeArcs.clear(arc);
 			}
 		}
@@ -219,7 +219,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 				if(sccOf[i].get()==sccOf[j].get() && !activeArcs.get(indexOfArc[j][i])){
 					repCost = map[i][j];
 					if(repCost-costs[i*n+j]>delta){
-						g.enforceArc(i,j,this,false);
+						g.enforceArc(i,j,this);
 					}
 				}
 			}
@@ -306,7 +306,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		// finish the MST with other arcs
 		connectMST(tSize);
 		// bound
-		obj.updateLowerBound(treeCost, this,false);
+		obj.updateLowerBound(treeCost, this);
 		int delta = obj.getUB()-treeCost;
 		prepareMandArcDetection();
 		// select relevant arcs
@@ -451,7 +451,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 		// Trivially infeasible arcs
 		while(idx>=0){
 			if(!Tree.arcExists(sortedArcs[idx]/n, sortedArcs[idx]%n)){
-				g.removeArc(sortedArcs[idx]/n, sortedArcs[idx]%n, this,false);
+				g.removeArc(sortedArcs[idx]/n, sortedArcs[idx]%n, this);
 				activeArcs.clear(idx);
 			}
 			idx = activeArcs.nextSetBit(idx+1);

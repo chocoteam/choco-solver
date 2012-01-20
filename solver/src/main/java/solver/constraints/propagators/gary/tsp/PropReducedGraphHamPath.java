@@ -182,7 +182,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 				arc = (i+1)*n+to;
 				for(int a=mates[x].getFirstElement();a>=0;a=mates[x].getNextElement()){
 					if(a!=arc){
-						G.removeArc(a/n-1,a%n,this,false);
+						G.removeArc(a/n-1,a%n,this);
 					}
 				}
 				mates[x].clear();
@@ -221,7 +221,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			to = e%n;
 			if(sccOf[to].get()!=next){
 				from = e/n-1;
-				G.removeArc(from,to,this,false);
+				G.removeArc(from,to,this);
 				mates[node].remove(e);
 			}
 		}
@@ -246,7 +246,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 				int arc = (i+1)*n+to;
 				for(int a=mates[x].getFirstElement();a>=0;a=mates[x].getNextElement()){
 					if(a!=arc){
-						G.removeArc(a/n-1,a%n,this,false);
+						G.removeArc(a/n-1,a%n,this);
 					}
 				}
 				mates[x].clear();

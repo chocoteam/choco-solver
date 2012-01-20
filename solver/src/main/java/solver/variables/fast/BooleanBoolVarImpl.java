@@ -34,7 +34,6 @@ import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -124,18 +123,18 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
+     *
      * @param value       value to remove from the domain (int)
      * @param cause       removal releaser
-     * @param informCause
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == 0)
-            return instantiateTo(1, cause, informCause);
+            return instantiateTo(1, cause);
         else if (value == 1)
-            return instantiateTo(0, cause, informCause);
+            return instantiateTo(0, cause);
         return false;
     }
 
@@ -143,15 +142,15 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * {@inheritDoc}
      */
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB())
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         else if (getUB() <= to)
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         else if (hasEnumeratedDomain()) {     // TODO: really ugly .........
             boolean anyChange = false;
             for (int v = this.nextValue(from - 1); v <= to; v = nextValue(v)) {
-                anyChange |= removeValue(v, cause, informCause);
+                anyChange |= removeValue(v, cause);
             }
             return anyChange;
         } else {
@@ -172,18 +171,14 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       instantiation value (int)
      * @param cause       instantiation releaser
-     * @param informCause
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
-        if (informCause) {
-            cause = Cause.Null;
-        }
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -221,13 +216,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       new lower bound (included)
      * @param cause       updating releaser
-     * @param informCause
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        return value > 0 && instantiateTo(value, cause, informCause);
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        return value > 0 && instantiateTo(value, cause);
     }
 
     /**
@@ -244,23 +238,22 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *
      * @param value       new upper bound (included)
      * @param cause       update releaser
-     * @param informCause
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
      */
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
-        return value < 1 && instantiateTo(value, cause, informCause);
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        return value < 1 && instantiateTo(value, cause);
     }
 
     @Override
     public boolean setToTrue(ICause cause, boolean informCause) throws ContradictionException {
-        return instantiateTo(1, cause, informCause);
+        return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause, boolean informCause) throws ContradictionException {
-        return instantiateTo(0, cause, informCause);
+        return instantiateTo(0, cause);
     }
 
     public boolean instantiated() {

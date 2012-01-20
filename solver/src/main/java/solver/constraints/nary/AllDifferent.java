@@ -250,7 +250,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 					int val = var.getValue();
 					for(int j=0;j<n;j++){
 						if(j!=i){
-							vars[j].removeValue(val,this,false);
+							vars[j].removeValue(val,this);
 						}
 					}
 				}
@@ -275,7 +275,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				int val = vars[idxVarInProp].getValue();
 				for(int j=0;j<n;j++){
 					if(j!=idxVarInProp){
-						vars[j].removeValue(val,this,false);
+						vars[j].removeValue(val,this);
 					}
 				}
 			}
@@ -313,7 +313,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 					contradiction(vars[0],"");
 				}
 				if(var!=-2){
-					vars[var].instantiateTo(i,p,false);
+					vars[var].instantiateTo(i,p);
 				}
 			}
 		}

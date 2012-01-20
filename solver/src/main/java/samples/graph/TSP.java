@@ -122,7 +122,8 @@ public class TSP extends AbstractProblem{
 				}
 			}
 		}catch(Exception e){
-			e.printStackTrace();System.exit(0);
+			e.printStackTrace();
+			System.exit(0);
 		}
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		// BASIC MODEL

@@ -112,14 +112,14 @@ public class PropTimeInTour extends GraphPropagator {
 		int val = intVars[var].getUB();
 		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
 		if(p!=-1){
-			if(intVars[p].updateUpperBound(val-dist[p][var],this,false)){
+			if(intVars[p].updateUpperBound(val-dist[p][var],this)){
 				upUB(p);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
 			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
 				if(intVars[p].getLB()>val-dist[p][var]){
-					g.removeArc(p,var,this,false);
+					g.removeArc(p,var,this);
 				}
 			}
 		}
@@ -128,14 +128,14 @@ public class PropTimeInTour extends GraphPropagator {
 		int val = intVars[var].getLB();
 		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
 		if(s!=-1){
-			if(intVars[s].updateLowerBound(val+dist[var][s],this,false)){
+			if(intVars[s].updateLowerBound(val+dist[var][s],this)){
 				upLB(s);
 			}
 		}else{
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
 			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
 				if(intVars[s].getUB()<val+dist[var][s]){
-					g.removeArc(var,s,this,false);
+					g.removeArc(var,s,this);
 				}
 			}
 		}

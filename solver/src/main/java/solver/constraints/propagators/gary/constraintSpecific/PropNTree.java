@@ -161,7 +161,7 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
                 for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
                     //--- STANDART PRUNING
                     if (dominatorsFinder.isDomminatedBy(y, x)) {
-                        g.removeArc(x, y, this, false);
+                        g.removeArc(x, y, this);
                     }
                     // ENFORCE ARC-DOMINATORS (redondant)
                 }
@@ -172,14 +172,14 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
     }
 
     private void minTreePruning() throws ContradictionException {
-        nTree.updateLowerBound(minTree, this, false);
+        nTree.updateLowerBound(minTree, this);
         if (nTree.getUB() == minTree) {
             int node;
             for (TIntArrayList scc : nonSinks) {
                 for (int x = 0; x < scc.size(); x++) {
                     node = scc.get(x);
                     if (g.getEnvelopGraph().arcExists(node, node)) {
-                        g.removeArc(node, node, this, false);
+                        g.removeArc(node, node, this);
                     }
                 }
             }

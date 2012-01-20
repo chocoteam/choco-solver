@@ -153,7 +153,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		if(hkb-Math.floor(hkb)<0.01){
 			hkb = Math.floor(hkb);
 		}
-		obj.updateLowerBound((int)Math.ceil(hkb), this, false);
+		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
 		for(int iter=3;iter>0;iter--){
 			improved = false;
@@ -171,7 +171,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				if(hkb-Math.floor(hkb)<0.001){
 					hkb = Math.floor(hkb);
 				}
-				obj.updateLowerBound((int)Math.ceil(hkb), this, false);
+				obj.updateLowerBound((int)Math.ceil(hkb), this);
 				if(DEBUG){
 					if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
 						if(true){
@@ -203,7 +203,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 			if(hkb-Math.floor(hkb)<0.01){
 				hkb = Math.floor(hkb);
 			}
-			obj.updateLowerBound((int)Math.ceil(hkb), this, false);
+			obj.updateLowerBound((int)Math.ceil(hkb), this);
 			if(DEBUG){
 				if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
 					if(true){
@@ -345,7 +345,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				throw new UnsupportedOperationException("error tour not found");
 			}
 			next -= n;
-			g.enforceArc(i,next,this,false);
+			g.enforceArc(i,next,this);
 		}
 	}
 
@@ -359,11 +359,11 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 			contradiction(g,"mst failure");
 		}
 		if(from<n){
-			if(g.removeArc(from,to-n,this,false)){
+			if(g.removeArc(from,to-n,this)){
 				nbRem++;
 			}
 		}else{
-			if(g.removeArc(to,from-n,this,false)){
+			if(g.removeArc(to,from-n,this)){
 				nbRem++;
 			}
 		}

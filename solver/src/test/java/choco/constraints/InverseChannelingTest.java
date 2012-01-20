@@ -347,18 +347,18 @@ public class InverseChannelingTest {
         }
         solver.propagate();
 
-        Q.get(0).instantiateTo(1, Cause.Null, false);
-        Q.get(2).instantiateTo(5, Cause.Null, false);
-        Q.get(3).instantiateTo(2, Cause.Null, false);
-        Q.get(4).instantiateTo(4, Cause.Null, false);
-        Q.get(1).instantiateTo(3, Cause.Null, false);
-        Q.get(5).instantiateTo(9, Cause.Null, false);
-        Q.get(6).instantiateTo(11, Cause.Null, false);
-        Q.get(7).instantiateTo(14, Cause.Null, false);
-        Q.get(8).instantiateTo(17, Cause.Null, false);
-        Q.get(9).instantiateTo(19, Cause.Null, false);
+        Q.get(0).instantiateTo(1, Cause.Null);
+        Q.get(2).instantiateTo(5, Cause.Null);
+        Q.get(3).instantiateTo(2, Cause.Null);
+        Q.get(4).instantiateTo(4, Cause.Null);
+        Q.get(1).instantiateTo(3, Cause.Null);
+        Q.get(5).instantiateTo(9, Cause.Null);
+        Q.get(6).instantiateTo(11, Cause.Null);
+        Q.get(7).instantiateTo(14, Cause.Null);
+        Q.get(8).instantiateTo(17, Cause.Null);
+        Q.get(9).instantiateTo(19, Cause.Null);
         solver.propagate();
-        Q.get(10).instantiateTo(6, Cause.Null, false);
+        Q.get(10).instantiateTo(6, Cause.Null);
         solver.propagate();
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
@@ -383,22 +383,22 @@ public class InverseChannelingTest {
         }
         solver.propagate();
 
-        Q.get(0).instantiateTo(1, Cause.Null, false);
-        Q.get(1).instantiateTo(3, Cause.Null, false);
-        Q.get(2).instantiateTo(5, Cause.Null, false);
-        Q.get(3).instantiateTo(2, Cause.Null, false);
-        Q.get(4).instantiateTo(4, Cause.Null, false);
-        Q.get(5).instantiateTo(9, Cause.Null, false);
-        Q.get(6).instantiateTo(11, Cause.Null, false);
-        Q.get(7).instantiateTo(21, Cause.Null, false);
-        Q.get(8).instantiateTo(19, Cause.Null, false);
-        Q.get(9).instantiateTo(16, Cause.Null, false);
-        Q.get(10).instantiateTo(22, Cause.Null, false);
-        Q.get(11).instantiateTo(20, Cause.Null, false);
-        Q.get(12).instantiateTo(18, Cause.Null, false);
-        Q.get(13).instantiateTo(7, Cause.Null, false);
+        Q.get(0).instantiateTo(1, Cause.Null);
+        Q.get(1).instantiateTo(3, Cause.Null);
+        Q.get(2).instantiateTo(5, Cause.Null);
+        Q.get(3).instantiateTo(2, Cause.Null);
+        Q.get(4).instantiateTo(4, Cause.Null);
+        Q.get(5).instantiateTo(9, Cause.Null);
+        Q.get(6).instantiateTo(11, Cause.Null);
+        Q.get(7).instantiateTo(21, Cause.Null);
+        Q.get(8).instantiateTo(19, Cause.Null);
+        Q.get(9).instantiateTo(16, Cause.Null);
+        Q.get(10).instantiateTo(22, Cause.Null);
+        Q.get(11).instantiateTo(20, Cause.Null);
+        Q.get(12).instantiateTo(18, Cause.Null);
+        Q.get(13).instantiateTo(7, Cause.Null);
         solver.propagate();
-        Q.get(14).instantiateTo(10, Cause.Null, false);
+        Q.get(14).instantiateTo(10, Cause.Null);
         solver.propagate();
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {

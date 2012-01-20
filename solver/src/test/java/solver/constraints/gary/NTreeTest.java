@@ -52,7 +52,7 @@ public class NTreeTest {
 				g.getEnvelopGraph().addArc(i, j);
 			}
 			try {
-				g.enforceNode(i, Cause.Null,false);
+				g.enforceNode(i, Cause.Null);
 			} catch (ContradictionException e) {
 				e.printStackTrace();
 				System.exit(0);

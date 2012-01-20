@@ -162,7 +162,7 @@ public class HCP extends AbstractProblem{
 				}
 				for(int j=1; j<n ;j++){
 					if(!adjacencyMatrix[i][j]){
-						integers[i].removeValue(j, Cause.Null,false);
+						integers[i].removeValue(j, Cause.Null);
 					}
 				}
 			}
