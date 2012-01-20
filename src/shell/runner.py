@@ -183,7 +183,7 @@ class runit(Thread):
 
 
 
-con = mdb.connect('localhost', 'performance', 'perf123', 'performance')
+con = mdb.connect('localhost', 'perfuser', 'perf123', 'perfdb')
 #con = mdb.connect('localhost', 'testuser', 'test623', 'testdb')
 database.createTables(con)
 sid = database.openSession(con)
