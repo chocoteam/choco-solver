@@ -8,12 +8,15 @@ import database
 import MySQLdb as mdb
 
 ## ENVIRONMENT VARIABLES
-## HOME
-CHOCO_HOME = '../../'
+name = 'runner'
+dir = '.'
+pwd = ''
+home = '../../'
+
 
 ## java class-path for rocs
 #if CHOCO_SOLVER == '':
-CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
+CHOCO_SOLVER = join(home, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
 
 ## correct class-path
 CP = '-cp .:'+CHOCO_SOLVER
@@ -26,9 +29,6 @@ CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
 loop = 1 # can be override
 ## time limit for a process
 timelimit = 180 #in seconds => 10min
-name = 'runner'
-dir = '.'
-pwd = ''
 
 ## regexp for statisctics
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
@@ -44,7 +44,7 @@ def readParameters(paramlist):
     global timelimit
     global name
     global dir
-    global pwd
+    global pwd, home
     if len(paramlist)>0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
@@ -56,6 +56,8 @@ def readParameters(paramlist):
             dir = paramlist[1]
         elif paramlist[0] == "-pwd": # user pwd for db connexion
             pwd = paramlist[1]
+        elif paramlist[0] == "-h": # user pwd for db connexion
+            home = paramlist[1]
         readParameters(paramlist[2:])
 
 
