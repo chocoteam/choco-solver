@@ -149,6 +149,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
 			}
 		}
+		solver.associates(graph);
 		if (bcMode) {
 			setPropagators(
 					new PropAllDiffGraph(graph, vars.length, solver, this),
