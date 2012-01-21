@@ -27,6 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.recorders.fine.ArcEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 public class GraphDelta implements IGraphDelta {
@@ -35,17 +37,19 @@ public class GraphDelta implements IGraphDelta {
     // VARIABLES
     //***********************************************************************************
 
-    private IntDelta nodeEnf, nodeRem, arcEnf, arcRem;
+	private IntDelta[] deltaOfType;
+	private long timestamp;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public GraphDelta() {
-        nodeEnf = new Delta();
-        nodeRem = new Delta();
-        arcEnf = new Delta();
-        arcRem = new Delta();
+		deltaOfType = new IntDelta[4];
+		for(int i=0;i<4;i++){
+			deltaOfType[i] = new Delta();
+		}
+		timestamp = AbstractSearchLoop.timeStamp;
     }
 
     @Override
@@ -66,45 +70,35 @@ public class GraphDelta implements IGraphDelta {
     // ACCESSORS
     //***********************************************************************************
 
-    @Override
-    public IntDelta getNodeRemovalDelta() {
-        return nodeRem;
-    }
-
-    @Override
-    public IntDelta getNodeEnforcingDelta() {
-        return nodeEnf;
-    }
-
-    @Override
-    public IntDelta getArcRemovalDelta() {
-        return arcRem;
-    }
-
-    @Override
-    public IntDelta getArcEnforcingDelta() {
-        return arcEnf;
+	@Override
+    public void clear() {
+		for(int i=0;i<4;i++){
+			deltaOfType[i].clear();
+		}
+		timestamp = AbstractSearchLoop.timeStamp;
     }
 
 	@Override
-    public void clear() {
-        arcEnf.clear();
-		arcRem.clear();
-		nodeEnf.clear();
-		nodeRem.clear();
-    }
-
 	public int getSize(int i) {
-		switch (i) {
-			case GraphDeltaMonitor.NR:
-					return nodeRem.size();
-			case GraphDeltaMonitor.NE:
-					return nodeEnf.size();
-			case GraphDeltaMonitor.AR:
-					return arcRem.size();
-			case GraphDeltaMonitor.AE:
-					return arcEnf.size();
-			default: throw new UnsupportedOperationException();
+		return deltaOfType[i].size();
+	}
+
+	@Override
+	public void add(int element, int type) {
+		if(ArcEventRecorder.LAZY){
+			lazyClear();
 		}
+		deltaOfType[type].add(element);
+	}
+
+	private void lazyClear() {
+		if(timestamp!=AbstractSearchLoop.timeStamp){
+			clear();
+		}
+	}
+
+	@Override
+	public int get(int index, int type) {
+		return deltaOfType[type].get(index);
 	}
 }

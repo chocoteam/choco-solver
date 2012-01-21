@@ -32,6 +32,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IGraphDelta;
 
 /**
  * <br/>
@@ -40,13 +41,6 @@ import solver.variables.delta.IDeltaMonitor;
  * @since 07/12/11
  */
 public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
-
-
-	//NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
-	public final static int NR = 0;
-	public final static int NE = 1;
-	public final static int AR = 2;
-	public final static int AE = 3;
 
 	protected final GraphDelta delta;
 
@@ -62,7 +56,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 	}
 
 	@Override
-	public void update(EventType evt) {
+	public void update(EventType event) {
 		//TODO throw new UnsupportedOperationException();
 	}
 
@@ -84,66 +78,38 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 	@Override
 	public void clear() {
 		for (int i = 0; i < 4; i++) {
-			first[i] = last[i] = 0;
+			this.first[i] = last[i] = 0;
 		}
 	}
 
 	@Override
 	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
+		int type;
 		switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
 			case REMOVENODE:
-				for (int i = frozenFirst[NR]; i < frozenLast[NR]; i++) {
-					proc.execute(delta.getNodeRemovalDelta().get(i));
+				type = IGraphDelta.NR;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
 				}
 				break;
 			case ENFORCENODE:
-				for (int i = frozenFirst[NE]; i < frozenLast[NE]; i++) {
-					proc.execute(delta.getNodeEnforcingDelta().get(i));
+				type = IGraphDelta.NE;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
 				}
 				break;
 			case REMOVEARC:
-				for (int i = frozenFirst[AR]; i < frozenLast[AR]; i++) {
-					proc.execute(delta.getArcRemovalDelta().get(i));
+				type = IGraphDelta.AR;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
 				}
 				break;
 			case ENFORCEARC:
-				for (int i = frozenFirst[AE]; i < frozenLast[AE]; i++) {
-					proc.execute(delta.getArcEnforcingDelta().get(i));
+				type = IGraphDelta.AE;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
 				}
 				break;
 		}
-	}
-
-	/////////////////////////////
-	public int fromNodeRemoval() {
-		return frozenFirst[NR];
-	}
-
-	public int toNodeRemoval() {
-		return frozenLast[NR];
-	}
-
-	public int fromNodeEnforcing() {
-		return frozenFirst[NE];
-	}
-
-	public int toNodeEnforcing() {
-		return frozenLast[NE];
-	}
-
-	public int fromArcRemoval() {
-		return frozenFirst[AR];
-	}
-
-	public int toArcRemoval() {
-		return frozenLast[AR];
-	}
-
-	public int fromArcEnforcing() {
-		return frozenFirst[AE];
-	}
-
-	public int toArcEnforcing() {
-		return frozenLast[AE];
 	}
 }

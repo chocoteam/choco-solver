@@ -147,58 +147,60 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 				LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
 			}
 		}
-		solver.getSearchLoop().plugSearchMonitor(new ISearchMonitor() {
-			@Override
-			public void beforeInitialize() {}
-			@Override
-			public void afterInitialize() {}
-			@Override
-			public void beforeInitialPropagation() {}
-			@Override
-			public void afterInitialPropagation() {}
-			@Override
-			public void beforeOpenNode() {}
-			@Override
-			public void afterOpenNode() {}
-			@Override
-			public void onSolution() {}
-			@Override
-			public void beforeDownLeftBranch() {
-				for(IEventRecorder ier:all){
-					ier.flush();
+		if(!ArcEventRecorder.LAZY){
+			solver.getSearchLoop().plugSearchMonitor(new ISearchMonitor() {
+				@Override
+				public void beforeInitialize() {}
+				@Override
+				public void afterInitialize() {}
+				@Override
+				public void beforeInitialPropagation() {}
+				@Override
+				public void afterInitialPropagation() {}
+				@Override
+				public void beforeOpenNode() {}
+				@Override
+				public void afterOpenNode() {}
+				@Override
+				public void onSolution() {}
+				@Override
+				public void beforeDownLeftBranch() {
+					for(IEventRecorder ier:all){
+						ier.flush();
+					}
+					for(int i=solver.getNbVars()-1;i>=0;i--){
+						solver.getVar(i).getDelta().clear();
+					}
 				}
-				for(int i=solver.getNbVars()-1;i>=0;i--){
-					solver.getVar(i).getDelta().clear();
+				@Override
+				public void afterDownLeftBranch() {}
+				@Override
+				public void beforeDownRightBranch() {
+					for(IEventRecorder ier:all){
+						ier.flush();
+					}
+					for(int i=solver.getNbVars()-1;i>=0;i--){
+						solver.getVar(i).getDelta().clear();
+					}
 				}
-			}
-			@Override
-			public void afterDownLeftBranch() {}
-			@Override
-			public void beforeDownRightBranch() {
-				for(IEventRecorder ier:all){
-					ier.flush();
-				}
-				for(int i=solver.getNbVars()-1;i>=0;i--){
-					solver.getVar(i).getDelta().clear();
-				}
-			}
-			@Override
-			public void afterDownRightBranch() {}
-			@Override
-			public void beforeUpBranch() {}
-			@Override
-			public void afterUpBranch() {}
-			@Override
-			public void onContradiction(ContradictionException cex) {}
-			@Override
-			public void beforeRestart() {}
-			@Override
-			public void afterRestart() {}
-			@Override
-			public void beforeClose() {}
-			@Override
-			public void afterClose() {}
-		});
+				@Override
+				public void afterDownRightBranch() {}
+				@Override
+				public void beforeUpBranch() {}
+				@Override
+				public void afterUpBranch() {}
+				@Override
+				public void onContradiction(ContradictionException cex) {}
+				@Override
+				public void beforeRestart() {}
+				@Override
+				public void afterRestart() {}
+				@Override
+				public void beforeClose() {}
+				@Override
+				public void afterClose() {}
+			});
+		}
 		return all;
 	}
 

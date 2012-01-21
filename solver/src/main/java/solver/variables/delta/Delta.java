@@ -27,6 +27,7 @@
 
 package solver.variables.delta;
 
+import solver.recorders.fine.ArcEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 
@@ -62,10 +63,8 @@ public final class Delta implements IntDelta {
 
     protected void lazyClear() {
         if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-            last = 0;
-            timestamp = AbstractSearchLoop.timeStamp;
+            clear();
         }
-		throw new UnsupportedOperationException();
     }
 
     /**
@@ -74,7 +73,9 @@ public final class Delta implements IntDelta {
      * @param value value to add
      */
     public void add(int value) {
-//        lazyClear();
+		if(ArcEventRecorder.LAZY){
+       		lazyClear();
+		}
         rem = ensureCapacity(last, rem);
         rem[last++] = value;
     }

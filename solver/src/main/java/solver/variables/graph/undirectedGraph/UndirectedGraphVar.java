@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.delta.IGraphDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -69,7 +70,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	}
         if (envelop.removeEdge(x, y)){
         	if (reactOnModification){
-        		delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
+        		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y, IGraphDelta.AR);
         	}
         	EventType e = EventType.REMOVEARC;
         	notifyMonitors(e, cause);
@@ -82,7 +83,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){
-            		delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
+            		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y,IGraphDelta.AE);
             	}
             	EventType e = EventType.ENFORCEARC;
             	notifyMonitors(e, cause);

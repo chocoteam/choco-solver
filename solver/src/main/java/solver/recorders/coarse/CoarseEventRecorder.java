@@ -90,15 +90,6 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
             propagator.setActive();
         }
-        // if there is at least one fine event scheduled,
-        if (propagator.getNbPendingER() > 0) {
-            //promote event to top level event FULL_PROPAGATION
-            evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
-            // So, the propagator will be localy consistent,
-            // then remove every fine event attached to this propagator generated BEFORE calling this
-            // if views schedule event, they will be considered after
-            propagator.forEachFineEvent(virtExec);
-        }
         if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
 			propagator.coarseERcalls++;
@@ -106,6 +97,13 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 			evtmask = 0;
 			propagator.propagate(_evt);
 		}
+		// if there is at least one fine event scheduled,
+        if (propagator.getNbPendingER() > 0) {
+            // So, the propagator will be localy consistent,
+            // then remove every fine event attached to this propagator generated BEFORE calling this
+            // if views schedule event, they will be considered after
+            propagator.forEachFineEvent(virtExec);
+        }
 		return true;
 	}
 

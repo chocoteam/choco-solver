@@ -30,12 +30,16 @@ package solver.variables.delta;
 
 public interface IGraphDelta extends IDelta {
 
-    IntDelta getNodeRemovalDelta();
+	//NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
+	public final static int NR = 0;
+	public final static int NE = 1;
+	public final static int AR = 2;
+	public final static int AE = 3;
 
-    IntDelta getNodeEnforcingDelta();
+	public void add(int element, int type);
 
-    IntDelta getArcRemovalDelta();
+	public int get(int index, int type);
 
-    IntDelta getArcEnforcingDelta();
+	public int getSize(int i);
 
 }
