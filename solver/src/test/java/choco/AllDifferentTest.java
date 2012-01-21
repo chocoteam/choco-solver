@@ -235,7 +235,7 @@ public class AllDifferentTest {
 						graph.findAllSolutions();
 						Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(graph.getMeasures().getFailCount() == 0 || b==0, "gac failed"+ seed);
-						
+
 						LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
 								neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
 								bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount()});
@@ -263,25 +263,25 @@ public class AllDifferentTest {
 		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
 
 		switch (c) {
-		case 0:
-			for (int i = 0; i < vars.length - 1; i++) {
-				for (int j = i + 1; j < vars.length; j++) {
-					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
+			case 0:
+				for (int i = 0; i < vars.length - 1; i++) {
+					for (int j = i + 1; j < vars.length; j++) {
+						lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
+					}
 				}
-			}
-			break;
-		case 1:
-			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
-			break;
-		case 2:
-			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
-			break;
-		case 3:
-			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
-			break;
-		case 4:
-			lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
-			break;
+				break;
+			case 1:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
+				break;
+			case 2:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
+				break;
+			case 3:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
+				break;
+			case 4:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
+				break;
 		}
 
 		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
@@ -291,33 +291,33 @@ public class AllDifferentTest {
 		return s;
 	}
 
-    @Test
-    public void testXX(){
-        Solver solver = new Solver();
-        IntVar[] ts = new IntVar[4];
-        ts[0] = VariableFactory.enumerated("t0", new int[]{2,3,4}, solver);
-        ts[1] = VariableFactory.enumerated("t1", new int[]{-3,-2,-1,1,2}, solver);
-        ts[2] = VariableFactory.enumerated("t2", new int[]{-3,-2,-1,1,2,3}, solver);
-        ts[3] = VariableFactory.enumerated("t3", new int[]{-3,-2,-1,1,2,3}, solver);
+	@Test
+	public void testXX(){
+		Solver solver = new Solver();
+		IntVar[] ts = new IntVar[4];
+		ts[0] = VariableFactory.enumerated("t0", new int[]{2,3,4}, solver);
+		ts[1] = VariableFactory.enumerated("t1", new int[]{-3,-2,-1,1,2}, solver);
+		ts[2] = VariableFactory.enumerated("t2", new int[]{-3,-2,-1,1,2,3}, solver);
+		ts[3] = VariableFactory.enumerated("t3", new int[]{-3,-2,-1,1,2,3}, solver);
 
-        try{
-            solver.propagate();
-            ts[0].removeValue(2, Cause.Null);
-            ts[1].removeValue(2, Cause.Null);
-            ts[0].removeValue(3, Cause.Null);
-            ts[1].removeValue(1, Cause.Null);
-            ts[2].removeValue(-3, Cause.Null);
-            ts[2].removeValue(3, Cause.Null);
-            ts[3].removeValue(-3, Cause.Null);
-            ts[3].removeValue(3, Cause.Null);
-            solver.propagate();
-        }catch (ContradictionException ex){
+		try{
+			solver.propagate();
+			ts[0].removeValue(2, Cause.Null);
+			ts[1].removeValue(2, Cause.Null);
+			ts[0].removeValue(3, Cause.Null);
+			ts[1].removeValue(1, Cause.Null);
+			ts[2].removeValue(-3, Cause.Null);
+			ts[2].removeValue(3, Cause.Null);
+			ts[3].removeValue(-3, Cause.Null);
+			ts[3].removeValue(3, Cause.Null);
+			solver.propagate();
+		}catch (ContradictionException ex){
 
-        }
-        System.out.printf("%s\n", solver.toString());
+		}
+		System.out.printf("%s\n", solver.toString());
 
 
 
-    }
+	}
 
 }

@@ -42,6 +42,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator that ensures that a node has at most N neighbors
  *
  * @param <V>

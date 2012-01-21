@@ -28,24 +28,21 @@
 package solver.constraints.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
+import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
@@ -71,16 +68,15 @@ public class AllDifferent extends IntConstraint<IntVar> {
 		super(vars, solver);
 		switch (type) {
 			case CLIQUE: {
-                int s = vars.length;
-                int k = 0;
-                Propagator[] props = new Propagator[(s * s - s) / 2];
-                for (int i = 0; i < s - 1; i++) {
-                    for (int j = i + 1; j < s; j++) {
-                        props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver, this);
-                    }
-                }
-                setPropagators(props);
-//				setPropagators(new PropTest(vars,solver,this));
+				int s = vars.length;
+				int k = 0;
+				Propagator[] props = new Propagator[(s * s - s) / 2];
+				for (int i = 0; i < s - 1; i++) {
+					for (int j = i + 1; j < s; j++) {
+						props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver, this);
+					}
+				}
+				setPropagators(props);
 			}
 			break;
 			case PROBABILISTIC:
@@ -157,6 +153,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			setPropagators(
 					new PropAllDiffGraph(graph, vars.length, solver, this),
 					new PropAtMostNNeighbors(graph, solver, this, 1),
+					new PropAtLeastNNeighbors(graph, solver, this, 1),
 					new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash),
 					new PropGraphAllDiffBC(vars, graph, solver, this, valuesHash)
 			);
@@ -164,6 +161,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 			setPropagators(
 					new PropAllDiffGraph(graph, vars.length, solver, this),
 					new PropAtMostNNeighbors(graph, solver, this, 1),
+					new PropAtLeastNNeighbors(graph, solver, this, 1),
 					new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash)
 			);
 		}
@@ -220,102 +218,5 @@ public class AllDifferent extends IntConstraint<IntVar> {
 		}
 		sb.append("})");
 		return sb.toString();
-	}
-
-	private class PropTest extends Propagator<IntVar> {
-		int n;
-		private Proc proc;
-
-		public PropTest(IntVar[] vars, Solver solver, AllDifferent allDifferent) {
-			super(vars,solver,allDifferent, PropagatorPriority.LINEAR,false);
-			n = vars.length;
-			proc = new Proc(vars,this);
-		}
-
-		@Override
-		public int getPropagationConditions(int vIdx) {
-			return EventType.INT_ALL_MASK();
-		}
-
-		@Override
-		public void propagate(int evtmask) throws ContradictionException {
-			IntVar var;
-			int[] vals = new int[n];
-			for(int i=0;i<n;i++){
-				vals[i] = -1;
-			}
-			for(int i=0;i<n;i++){
-				var = vars[i];
-				if(var.instantiated()){
-					int val = var.getValue();
-					for(int j=0;j<n;j++){
-						if(j!=i){
-							vars[j].removeValue(val,this);
-						}
-					}
-				}
-				for(int j=var.getLB();j<=var.getUB();j=var.nextValue(j)){
-					if(vals[j]==-1){
-						vals[j] = i;
-					}else{
-						vals[j] = -2;
-					}
-				}
-			}
-			for(int i=0;i<n;i++){
-				if(vals[i]!=-2){
-//					vars[vals[i]].instantiateTo(i,this,false);
-				}
-			}
-		}
-
-		@Override
-		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-			if(vars[idxVarInProp].instantiated()){
-				int val = vars[idxVarInProp].getValue();
-				for(int j=0;j<n;j++){
-					if(j!=idxVarInProp){
-						vars[j].removeValue(val,this);
-					}
-				}
-			}
-			else{
-//				eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(proc,EventType.REMOVE);
-			}
-		}
-
-		@Override
-		public ESat isEntailed() {
-			return ESat.UNDEFINED;
-		}
-
-		private class Proc implements IntProcedure{
-			IntVar[] vars;
-			Propagator p;
-			public Proc(IntVar[] vars, Propagator prop) {
-				this.vars = vars;
-				p = prop;
-			}
-
-			@Override
-			public void execute(int i) throws ContradictionException {
-				int var = -1;
-				for(int v=0;v<n;v++){
-					if(vars[v].contains(i)){
-						if(var==-1){
-							var = v;
-						}else{
-							var = -2;
-						}
-					}
-				}
-				if(var==-1){
-					contradiction(vars[0],"");
-				}
-				if(var!=-2){
-					vars[var].instantiateTo(i,p);
-				}
-			}
-		}
 	}
 }

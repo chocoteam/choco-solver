@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Main propagator for AllDifferent constraint
  * Uses Regin algorithm
  * Runs in O(m.rac(n)) worst case time
