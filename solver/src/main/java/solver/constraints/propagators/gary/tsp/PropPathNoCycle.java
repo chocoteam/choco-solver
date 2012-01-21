@@ -137,7 +137,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	//	boolean firstTime = true;
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-	if(true){
+	if(ALWAYS_COARSE){
 		propagate(0);return;
 	}
 //		if(firstTime){

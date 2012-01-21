@@ -41,6 +41,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -154,15 +155,12 @@ public class PropTaskIntervals extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
-			propagate(0);
-			return;
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.DECUPP.mask + EventType.INCLOW.mask;
+		return EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override

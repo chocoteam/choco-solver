@@ -114,22 +114,11 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
+		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-
-//		try{
-//		if((mask & EventType.ENFORCEARC.mask) !=0){
-			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-//		}
-//		if((mask & EventType.REMOVEARC.mask)!=0){
-            eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
-//		}
-//			}
-//		catch(Exception e){
-//			e.printStackTrace();
-//			throw new UnsupportedOperationException();
-//		}
+		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+        eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override

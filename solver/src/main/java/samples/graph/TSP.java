@@ -222,7 +222,7 @@ public class TSP extends AbstractProblem{
 		AbstractStrategy strategy;
 		strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
 		solver.set(strategy);
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 	}
@@ -258,7 +258,7 @@ public class TSP extends AbstractProblem{
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;time;status;opt;obj;\n", outFile);
 		bench();
-//		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
+//		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv44.atsp";
 //		testInstance(instance);
 	}
 

@@ -116,7 +116,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
+		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
 //		System.out.println("propag");

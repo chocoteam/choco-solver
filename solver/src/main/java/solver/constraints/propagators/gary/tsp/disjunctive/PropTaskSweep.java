@@ -35,7 +35,6 @@
 package solver.constraints.propagators.gary.tsp.disjunctive;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -45,12 +44,6 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredArraySwapList_Array_RemoveOnly;
-
-import java.util.BitSet;
 
 public class PropTaskSweep extends GraphPropagator {
 
@@ -75,16 +68,6 @@ public class PropTaskSweep extends GraphPropagator {
 		ends = end;
 		this.n = st.length;
 		this.dist = dist;
-//		mates = new INeighbors[n];
-//		for(int i=0;i<n;i++){
-//			mates[i] = new StoredArraySwapList_Array_RemoveOnly(solver.getEnvironment(),n);
-//			for(int j=i+1;j<n;j++){
-//				if(st[i].getLB()<=end[j].getUB()&&st[j].getLB()<=end[i].getUB()){
-//					mates[i].add(j);
-//					mates[j].add(i);
-//				}
-//			}
-//		}
 	}
 
 	//***********************************************************************************
@@ -142,15 +125,13 @@ public class PropTaskSweep extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
+		if(ALWAYS_COARSE){
 			propagate(0);
 			return;
 		}
-		if(idxVarInProp<3*n){
-			check(idxVarInProp%n);
-		}else{
-			//TODO
-		}
+		idxVarInProp = idxVarInProp%n;
+		updateBounds(idxVarInProp);
+		check(idxVarInProp);
 	}
 
 	@Override

@@ -35,7 +35,6 @@
 package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
@@ -53,10 +52,7 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 
 public class PropTimeInTourGraphReactor extends GraphPropagator {
 
@@ -68,7 +64,6 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 	int n;
 	IntVar[] time;
 	int[][] dist;
-	private IntProcedure arcEnforced;
 	IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph rg;
 	private TIntArrayList tempNextSCC, tempCurSCC;
 
@@ -81,7 +76,6 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 		g = graph;
 		this.time = intVars;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc(this);
 		dist = matrix;
 		tempCurSCC = new TIntArrayList();
 		tempNextSCC = new TIntArrayList();
@@ -112,18 +106,12 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){
-			propagate(0);return;
-		}
-		if(idxVarInProp == n){
-			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-		}
-		graphTrasversal();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.INSTANTIATE.mask;
+		return EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override
@@ -276,24 +264,8 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 		}
 	}
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
 	private void enfArc(int from, int to) throws ContradictionException {
 		time[from].updateUpperBound(time[to].getUB() - dist[from][to], this);
 		time[to].updateLowerBound(time[from].getLB() + dist[from][to], this);
-	}
-
-	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
-
-		private EnfArc(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			enfArc(i/n-1,i%n);
-		}
 	}
 }

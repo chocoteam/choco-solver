@@ -66,7 +66,7 @@ public class TSPTW extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
+	private static final long TIMELIMIT = 10000;
 	private static String outFile = "atsptw";
 	static long seed = 0;
 	// instance
@@ -173,6 +173,7 @@ public class TSPTW extends AbstractProblem{
 			e.printStackTrace();
 			System.exit(0);
 		}
+		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTaskSweep(time, end, duration, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTaskIntervals(time, end, duration, distanceMatrix, gc, solver));
