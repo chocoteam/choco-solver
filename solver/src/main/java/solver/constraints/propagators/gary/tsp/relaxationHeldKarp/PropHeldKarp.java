@@ -47,6 +47,10 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.BitSet;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ * @param <V>
+ */
 public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp{
 
 	//***********************************************************************************

@@ -48,6 +48,9 @@ import solver.variables.IntVar;
 import sun.misc.Compare;
 import sun.misc.Sort;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ */
 public class PropTaskIntervals extends GraphPropagator {
 
 	//***********************************************************************************

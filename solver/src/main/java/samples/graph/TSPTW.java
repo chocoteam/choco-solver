@@ -35,6 +35,7 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskIntervals;

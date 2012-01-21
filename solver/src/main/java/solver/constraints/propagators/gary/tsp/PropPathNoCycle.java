@@ -50,7 +50,9 @@ import solver.variables.delta.IDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-/** Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+/**
+ * @PropAnn(tested = {BENCHMARK,CORRECTION})
+ * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  * */public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************

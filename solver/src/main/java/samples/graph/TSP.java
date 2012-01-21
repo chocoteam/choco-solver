@@ -202,7 +202,6 @@ public class TSP extends AbstractProblem{
 //			gc.addAdHocProp(new PropTaskDefinition(start, end, duration, graph, distanceMatrix, gc, solver));
 //			solver.post(ConstraintFactory.eq(end[n-1],totalCost,solver));
 //		}
-
 		solver.post(gc);
 	}
 
@@ -254,7 +253,7 @@ public class TSP extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		outFile = "resultsATSP_TIME.csv";
+		outFile = "atsp_allDiff.csv";
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;time;status;opt;obj;\n", outFile);
 		bench();

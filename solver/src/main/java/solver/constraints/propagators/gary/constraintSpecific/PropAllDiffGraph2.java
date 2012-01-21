@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 
 /**
+ * @PropAnn(tested = {BENCHMARK})
  * Main propagator for AllDifferent constraint
  * Uses Regin algorithm
  * Runs in O(m.rac(n)) worst case time
@@ -206,7 +207,7 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override

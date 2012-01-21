@@ -45,6 +45,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ */
 public class PropTaskSweep extends GraphPropagator {
 
 	//***********************************************************************************

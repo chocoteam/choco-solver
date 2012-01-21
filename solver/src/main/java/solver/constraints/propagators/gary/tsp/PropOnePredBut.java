@@ -48,6 +48,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {BENCHMARK,CORRECTION})
  * Each node but "but" has only one predecessor
  * */
 public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {

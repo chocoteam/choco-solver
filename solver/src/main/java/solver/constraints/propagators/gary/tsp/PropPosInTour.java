@@ -49,6 +49,9 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ */
 public class PropPosInTour extends GraphPropagator {
 
 	//***********************************************************************************

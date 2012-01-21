@@ -68,7 +68,10 @@ public class PropAntiArborescence<V extends GraphVar> extends GraphPropagator<V>
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**Ensures that graph is an antiarborescence rooted in node sink
+	/**
+ 	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
+	 *
+	 * Ensures that graph is an antiarborescence rooted in node sink
 	 * @param graph
 	 * @param sink root of the antiarborescence
 	 * @param constraint

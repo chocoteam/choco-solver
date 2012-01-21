@@ -46,6 +46,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {BENCHMARK})
  * Compute the cost of the graph by summing arcs costs
  * BEWARE - Assume that the last node has no successor
  * - For minimization problem

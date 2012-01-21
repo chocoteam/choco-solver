@@ -59,7 +59,9 @@ import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 import java.util.ArrayList;
 import java.util.BitSet;
 
-/** Maintain incrementally the reduced graph G_R and SCC
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ * Maintain incrementally the reduced graph G_R and SCC
  *  make G_R a hamiltonian path
  *  BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
  *  O(n+m)

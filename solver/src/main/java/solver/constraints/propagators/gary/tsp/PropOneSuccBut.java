@@ -50,6 +50,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {BENCHMARK,CORRECTION})
  * Each node but "but" has only one successor
  * */
 public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<V> {

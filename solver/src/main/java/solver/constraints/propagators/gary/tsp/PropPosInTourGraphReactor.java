@@ -53,6 +53,9 @@ import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.util.BitSet;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ */
 public class PropPosInTourGraphReactor extends GraphPropagator {
 
 	//***********************************************************************************

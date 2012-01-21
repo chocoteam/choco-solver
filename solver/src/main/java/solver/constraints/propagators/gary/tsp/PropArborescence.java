@@ -72,7 +72,9 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**Ensures that graph is an arborescence rooted in node source
+	/**
+	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
+	 * Ensures that graph is an arborescence rooted in node source
 	 * @param graph
 	 * @param source root of the arborescence
 	 * @param constraint
@@ -95,8 +97,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
 			g.enforceNode(i,this);
 			g.removeArc(i,i,this);
@@ -105,8 +107,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 		structuralPruning();
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		structuralPruning();
 	}
 

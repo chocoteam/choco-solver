@@ -51,6 +51,9 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import java.util.BitSet;
 
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ */
 public class PropSCCDoorsRules extends GraphPropagator {
 
 	//***********************************************************************************
