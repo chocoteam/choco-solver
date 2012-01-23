@@ -40,15 +40,17 @@ import solver.variables.IntVar;
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
  *
+ * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
+ *
  * @author Charles Prud'homme
  * @since 18/03/11
  */
 public final class PropSumLeq extends PropSumEq {
 
 
-    public PropSumLeq(IntVar[] vars, int k, int b, Solver solver,
+    public PropSumLeq(IntVar[] vars, int b, Solver solver,
                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, k, b, solver, intVarPropagatorConstraint);
+        super(vars, b, solver, intVarPropagatorConstraint);
     }
 
 
@@ -67,13 +69,9 @@ public final class PropSumLeq extends PropSumEq {
     @Override
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i =0;
-        for (; i < k; i++) {
+        for (; i < l; i++) {
             sumLB += x[i].getLB();
             sumUB += x[i].getUB();
-        }
-        for (; i < l; i++) {
-            sumLB -= x[i].getUB();
-            sumUB -= x[i].getLB();
         }
         if (sumUB <= b) {
             return ESat.TRUE;
@@ -88,11 +86,8 @@ public final class PropSumLeq extends PropSumEq {
         StringBuilder linComb = new StringBuilder(20);
         linComb.append(vars[0].getName());
         int i = 1;
-        for (; i < k; i++) {
-            linComb.append(" + ").append(vars[i].getName());
-        }
         for (; i < l; i++) {
-            linComb.append(" - ").append(vars[i].getName());
+            linComb.append(" + ").append(vars[i].getName());
         }
         linComb.append(" <= ");
         linComb.append(b);

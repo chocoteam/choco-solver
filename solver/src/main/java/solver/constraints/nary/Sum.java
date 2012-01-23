@@ -122,7 +122,7 @@ public class Sum extends IntConstraint<IntVar> {
         }
         for (int e = l; i < l; i++) {
             if (coeffs[i] != -1) {
-                x[--e] = Views.scale(vars[i], -coeffs[i]);
+                x[--e] = Views.minus(Views.scale(vars[i], -coeffs[i]));
             } else {
                 x[--e] = Views.minus(vars[i]);
             }
@@ -132,13 +132,13 @@ public class Sum extends IntConstraint<IntVar> {
 
         {
             case LEQ:
-                setPropagators(new PropSumLeq(x, s, b, solver, this));
+                setPropagators(new PropSumLeq(x, b, solver, this));
                 break;
             case GEQ:
-                setPropagators(new PropSumGeq(x, s, b, solver, this));
+                setPropagators(new PropSumGeq(x, b, solver, this));
                 break;
             case EQ:
-                setPropagators(new PropSumEq(x, s, b, solver, this));
+                setPropagators(new PropSumEq(x, b, solver, this));
                 break;
         }
 

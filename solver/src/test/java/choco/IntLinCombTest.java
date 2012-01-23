@@ -149,7 +149,7 @@ public class IntLinCombTest {
     @Test(groups = "1m")
     public void testSumvsIntLinCombTest() {
         Random rand = new Random();
-        for (int seed = 6; seed < 400; seed++) {
+        for (int seed = 0; seed < 400; seed++) {
             rand.setSeed(seed);
             int n = 1 + rand.nextInt(6);
             int min = -10 + rand.nextInt(20);
