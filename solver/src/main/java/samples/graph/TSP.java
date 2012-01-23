@@ -29,25 +29,14 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.list.array.TIntArrayList;
 import samples.AbstractProblem;
-import solver.Cause;
 import solver.Solver;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
-import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
-import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskIntervals;
-import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskSweep;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
@@ -58,7 +47,6 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import sun.jvm.hotspot.utilities.RobustOopDeterminator;
 
 import java.io.*;
 
@@ -110,7 +98,7 @@ public class TSP extends AbstractProblem{
 	@Override
 	public void buildModel() {
 		// create model
-		graph = new DirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, bestSol, solver);
 		try{
 			for(int i=0; i<n-1; i++){
@@ -173,7 +161,6 @@ public class TSP extends AbstractProblem{
 		// BST-based HK
 		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
 		gc.addAdHocProp(propHK_bst);
-
 //		if(time){
 //			start = new IntVar[n];
 //			end = new IntVar[n];
