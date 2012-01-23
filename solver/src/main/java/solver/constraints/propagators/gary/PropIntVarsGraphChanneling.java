@@ -45,6 +45,7 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator channeling an undirected graph and an array of integer variables
  * <p/>
  * BEWARE : for use reasons the channeling is only performed on arcs but not on nodes

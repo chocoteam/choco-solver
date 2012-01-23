@@ -47,7 +47,7 @@ public abstract class ArraySwapList implements INeighbors {
 	public ArraySwapList(int n) {
 		size=0;
 		sizeMax = n;
-		arrayLength = 10;
+		arrayLength = 16;
 		array = new int[arrayLength];
 	}
 

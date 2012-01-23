@@ -56,11 +56,11 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
 	//***********************************************************************************
 
 	@Override
-	protected void initParams(){
-		super.initParams();
+	protected void initParams(boolean inverseGraph){
+		super.initParams(inverseGraph);
 		for(int i=0;i<n;i++){
 			size[i]  = 0;
-			child[i] = 0;
+			child[i] = root;
 		}
 	}
 
@@ -87,7 +87,7 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
 			s = child[v];
 			child[v] = k;
 		}
-		while(s!=0){
+		while(s!=root){
 			ancestor[s] = v;
 			s = child[s];
 		}

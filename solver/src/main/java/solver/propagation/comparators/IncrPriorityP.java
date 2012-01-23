@@ -27,6 +27,7 @@
 
 package solver.propagation.comparators;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
@@ -50,7 +51,22 @@ public class IncrPriorityP implements Comparator<IEventRecorder>, Serializable {
     }
 
     public int compare(IEventRecorder v1, IEventRecorder v2) {
-        return 0;//v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
+		if(v1.getPropagators().length!=1 || v2.getPropagators().length!=1){
+			throw new UnsupportedOperationException();
+		}
+		if(true){
+			throw new UnsupportedOperationException();
+		}
+		if(v1.getPropagators()[0].getPriority().priority == v2.getPropagators()[0].getPriority().priority){
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+			System.out.println(v1.getClass().getSimpleName());
+			System.out.println(v2.getClass().getSimpleName());
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+		}
+		return v2.getPropagators()[0].getPriority().priority - v1.getPropagators()[0].getPriority().priority;
+//        return 0;//v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
     }
 
     public String toString() {

@@ -128,14 +128,14 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public void flush() {
-        if (lastPopped != null) {
-            lastPopped.flush();
-        }
+//        if (lastPopped != null) {
+//            lastPopped.flush();
+//        }
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.remove();//.pop();
-            if (IEventRecorder.LAZY) {
-                lastPopped.flush();
-            }
+//            if (IEventRecorder.LAZY) {
+//                lastPopped.flush();
+//            }
             lastPopped.deque();
         }
     }
