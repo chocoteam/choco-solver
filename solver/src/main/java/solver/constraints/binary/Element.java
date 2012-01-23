@@ -52,7 +52,9 @@ public class Element extends IntConstraint<IntVar> {
         super(ArrayUtils.toArray(value, index), solver);
         this.values = values;
         this.offset = offset;
-        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver, this));
+        //CPRU  double to simulate idempotency
+        setPropagators(new PropElement(vars[0], values, vars[1], offset, solver, this),
+                new PropElement(vars[0], values, vars[1], offset, solver, this));
     }
 
     public Element(IntVar value, int[] values, IntVar index, Solver solver) {
@@ -63,7 +65,9 @@ public class Element extends IntConstraint<IntVar> {
         super(ArrayUtils.append(new IntVar[]{value, index}, values), solver);
         this.values = new int[0];
         this.offset = offset;
-        setPropagators(new PropElementV(value, values, index, offset, solver, this));
+        //CPRU  double to simulate idempotency
+        setPropagators(new PropElementV(value, values, index, offset, solver, this),
+                new PropElementV(value, values, index, offset, solver, this));
     }
 
 

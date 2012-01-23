@@ -69,24 +69,24 @@ public class MaxViewTest {
             Assert.assertEquals(Z.previousValue(1), 0);
             Assert.assertEquals(Z.previousValue(-4), Integer.MIN_VALUE);
 
-            Z.updateLowerBound(2, Cause.Null, false);
+            Z.updateLowerBound(2, Cause.Null);
             Assert.assertEquals(X.getLB(), -4);
             Assert.assertEquals(X.getUB(), 12);
             Assert.assertEquals(Y.getLB(), -22);
             Assert.assertEquals(Y.getUB(), 10);
 
-            Z.updateUpperBound(9, Cause.Null, false);
+            Z.updateUpperBound(9, Cause.Null);
             Assert.assertEquals(X.getUB(), 9);
             Assert.assertEquals(Y.getUB(), 9);
 
-            Z.removeInterval(7, 9, Cause.Null, false);
+            Z.removeInterval(7, 9, Cause.Null);
             Assert.assertEquals(X.getUB(), 6);
             Assert.assertEquals(Y.getUB(), 6);
 
             Assert.assertEquals(X.getDomainSize(), 11);
             Assert.assertEquals(Y.getDomainSize(), 29);
 
-            Z.instantiateTo(5, Cause.Null, false);
+            Z.instantiateTo(5, Cause.Null);
             Assert.assertEquals(X.getUB(), 5);
             Assert.assertEquals(Y.getUB(), 5);
 

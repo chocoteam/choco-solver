@@ -41,7 +41,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -97,26 +96,26 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 		}
 		nbEnvLoop.set(env);
 		nbKerLoop.set(ker);
-		nLoops.updateLowerBound(ker, this, false);
-		nLoops.updateUpperBound(env, this, false);
+		nLoops.updateLowerBound(ker, this);
+		nLoops.updateUpperBound(env, this);
 		if(nLoops.getLB() == env && env!=ker){
 			for (int node=0;node<n;node++) {
 				if (g.getEnvelopGraph().arcExists(node, node)){
-					g.enforceArc(node, node, this, false);
+					g.enforceArc(node, node, this);
 				}
 			}
 			nbKerLoop.set(env);
-			nLoops.instantiateTo(env, this, false);
+			nLoops.instantiateTo(env, this);
 			active.set(false);
 		}
 		if(nLoops.getUB() == ker && env!=ker){
 			for (int node=0;node<n;node++) {
 				if (g.getEnvelopGraph().arcExists(node, node) && !g.getKernelGraph().arcExists(node, node)){
-					g.removeArc(node, node, this, false);
+					g.removeArc(node, node, this);
 				}
 			}
 			nbEnvLoop.set(ker);
-			nLoops.instantiateTo(ker, this, false);
+			nLoops.instantiateTo(ker, this);
 			active.set(false);
 		}
 	}
@@ -134,8 +133,8 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
                 eventRecorder.getDeltaMonitor(g).forEach(enforceProc, EventType.ENFORCEARC);
 			}
-			nLoops.updateUpperBound(nbEnvLoop.get(), this, false);
-			nLoops.updateLowerBound(nbKerLoop.get(), this, false);
+			nLoops.updateUpperBound(nbEnvLoop.get(), this);
+			nLoops.updateLowerBound(nbKerLoop.get(), this);
 		}
 		int env = nbEnvLoop.get();
 		int ker = nbKerLoop.get();
@@ -143,24 +142,24 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 			if(nLoops.getLB() == env){
 				for (int node =0; node<n ; node++) {
 					if (g.getEnvelopGraph().arcExists(node, node)){
-						g.enforceArc(node, node, this, false);
+						g.enforceArc(node, node, this);
 					}
 				}
 				nbKerLoop.set(env);
-				nLoops.instantiateTo(env, this, false);
+				nLoops.instantiateTo(env, this);
 				active.set(false);
 			}else if(nLoops.getUB() == ker){
 				for (int node = 0; node<n;node++) {
 					if (g.getEnvelopGraph().arcExists(node, node) && !g.getKernelGraph().arcExists(node, node)){
-						g.removeArc(node, node, this, false);
+						g.removeArc(node, node, this);
 					}
 				}
 				nbEnvLoop.set(ker);
-				nLoops.instantiateTo(ker, this, false);
+				nLoops.instantiateTo(ker, this);
 				active.set(false);
 			}
 		}else {
-			nLoops.instantiateTo(env,this,false);
+			nLoops.instantiateTo(env,this);
 			active.set(false);
 		}
 	}

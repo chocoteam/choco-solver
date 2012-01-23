@@ -66,19 +66,19 @@ public class ViewMinusTest {
             Assert.assertEquals(Y.previousValue(-4), -5);
             Assert.assertEquals(Y.previousValue(-10), Integer.MIN_VALUE);
 
-            Y.updateLowerBound(-9, Cause.Null, false);
+            Y.updateLowerBound(-9, Cause.Null);
             Assert.assertEquals(Y.getLB(), -9);
             Assert.assertEquals(X.getUB(), 9);
 
-            Y.updateUpperBound(-2, Cause.Null, false);
+            Y.updateUpperBound(-2, Cause.Null);
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
-            Y.removeValue(-4, Cause.Null, false);
+            Y.removeValue(-4, Cause.Null);
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
-            Y.removeInterval(-8, -6, Cause.Null, false);
+            Y.removeInterval(-8, -6, Cause.Null);
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -89,7 +89,7 @@ public class ViewMinusTest {
             Assert.assertEquals(X.getDomainSize(), 4);
             Assert.assertEquals(Y.getDomainSize(), 4);
 
-            Y.instantiateTo(-5, Cause.Null, false);
+            Y.instantiateTo(-5, Cause.Null);
             Assert.assertTrue(X.instantiated());
             Assert.assertTrue(Y.instantiated());
             Assert.assertEquals(X.getValue(), 5);

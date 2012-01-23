@@ -43,6 +43,31 @@ public class RandomArc extends ArcStrategy<GraphVar>{
 	
 	@Override
 	public int nextArc() {
+//		INeighbors envSuc, kerSuc;
+//		TIntArrayList possibleArcs = new TIntArrayList();
+//		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+//			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
+//			kerSuc = g.getKernelGraph().getSuccessorsOf(i);
+//			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
+//				possibleArcs.add(i);
+//			}
+//		}
+//		if(possibleArcs.isEmpty()){
+//			return -1;
+//		}
+//		int from = possibleArcs.get(rd.nextInt(possibleArcs.size()));
+//
+//		possibleArcs.clear();
+//		envSuc = g.getEnvelopGraph().getSuccessorsOf(from);
+//		for (int i=envSuc.getFirstElement();i>=0;i=envSuc.getNextElement()){
+//			possibleArcs.add(i);
+//		}
+//
+//		int to = possibleArcs.get(rd.nextInt(possibleArcs.size()));
+//
+//		return (from+1)*n+to;
+//
+//
 		INeighbors envSuc, kerSuc;
 		TIntArrayList possibleArcs = new TIntArrayList();
 		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
@@ -59,6 +84,18 @@ public class RandomArc extends ArcStrategy<GraphVar>{
 		if(possibleArcs.isEmpty()){
 			return -1;
 		}
-		return possibleArcs.get(rd.nextInt(possibleArcs.size()));
+		int arc = possibleArcs.get(rd.nextInt(possibleArcs.size()));
+
+//		System.out.println("DECISION "+(arc/n-1)+"->"+(arc%n));
+//			for(int i=0;i<n;i++){
+//			System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
+//		}System.out.println("endD");
+//		System.out.println("%%%%%%%% BRANCHING %%%%%%%%");
+//		for(int i=0;i<n;i++){
+//			System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
+//		}
+//		System.out.println("%%%%%%%% "+arc+" %%%%%%%%");
+//		System.out.println("%%%%%%%% BRANCHING %%%%%%%%");
+		return arc;//possibleArcs.get(rd.nextInt(possibleArcs.size()));
 	}
 }

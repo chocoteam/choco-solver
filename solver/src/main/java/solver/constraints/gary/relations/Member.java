@@ -84,29 +84,29 @@ public class Member extends GraphRelation<IntVar> {
 	}
 
 	@Override
-	public void applyTrue(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+	public void applyTrue(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
 		}
 		IntVar x = vars[var1];
 		if(x.getLB()<firstVal){
-			x.removeInterval(x.getLB(), firstVal-1, cause, informCause);
+			x.removeInterval(x.getLB(), firstVal-1, cause);
 		}
 		if(x.getUB()>lastVal){
-			x.removeInterval(lastVal+1, x.getUB(), cause, informCause);
+			x.removeInterval(lastVal+1, x.getUB(), cause);
 		}
 		if(x.hasEnumeratedDomain()){
 			int up = x.getUB();
 			for(int v=x.getLB(); v<=up; v = x.nextValue(v)){
 				if(!values.get(v-firstVal)){
-					x.removeValue(v, cause, informCause);
+					x.removeValue(v, cause);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void applyFalse(int var1, int var2, Solver solver, ICause cause, boolean informCause) throws ContradictionException {
+	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		if(var1 != var2){
 			throw new UnsupportedOperationException("unappropriate question only loops are concerned by such a relation");
 		}
@@ -116,11 +116,11 @@ public class Member extends GraphRelation<IntVar> {
 			int lb = Math.max(firstVal,x.getLB());
 			for(int v=lb; v<=up; v = x.nextValue(v)){
 				if(values.get(v-firstVal)){
-					x.removeValue(v, cause, informCause);
+					x.removeValue(v, cause);
 				}
 			}
 		}else{
-			x.removeInterval(firstVal, lastVal, cause, informCause);
+			x.removeInterval(firstVal, lastVal, cause);
 		}
 	}
 	

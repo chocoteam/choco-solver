@@ -64,4 +64,9 @@ public final class ViewDelta implements IntDelta {
     public int size() {
         return 0;
     }
+
+	@Override
+    public void clear() {
+        throw new UnsupportedOperationException();
+    }
 }

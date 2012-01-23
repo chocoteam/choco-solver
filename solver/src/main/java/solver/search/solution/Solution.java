@@ -104,7 +104,7 @@ public class Solution implements ICause {
             for (int i = 0; i < vars.length; i++) {
             	switch(vars[i].getType()){
                 case Variable.INTEGER : 
-                	((IntVar) vars[i]).instantiateTo(intvalues[i], this, false);break;
+                	((IntVar) vars[i]).instantiateTo(intvalues[i], this);break;
                 case Variable.GRAPH :
 					boolean[][] gv = graphValues.get(nbGV);
                 	((GraphVar) vars[i]).instantiateTo(gv, this);

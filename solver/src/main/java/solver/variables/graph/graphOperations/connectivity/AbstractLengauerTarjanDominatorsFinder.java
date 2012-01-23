@@ -44,9 +44,10 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	protected IDirectedGraph g;
 	// dominator tree
 	protected IDirectedGraph T;
-	protected int source, n, k;
+	protected int root, n, k;
 	protected int[] parent,vertex,bucket,ancestor,label,semi,dom;
 	protected INeighbors[] succs;
+	protected INeighbors[] preds;
 	protected TIntArrayList list;
 
 	//***********************************************************************************
@@ -55,7 +56,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	/**Object that finds dominators of the given flow graph g(s)*/
 	public AbstractLengauerTarjanDominatorsFinder(int s, IDirectedGraph g){
-		source = s;
+		root = s;
 		n = g.getNbNodes();
 		this.g = g;
 		parent = new int[n];
@@ -66,6 +67,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		vertex = new int[n];
 		bucket= new int[n];
 		succs = new INeighbors[n];
+		preds = new INeighbors[n];
 		T = new DirectedGraph(n, GraphType.LINKED_LIST);
 		list  = new TIntArrayList();
 	}
@@ -79,7 +81,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	 * @return false iff the source cannot reach all nodes (contradiction)
 	 * */
 	public boolean findDominators() {
-		initParams();
+		initParams(false);
 		DFS();
 		if(k!=n-1){
 			return false;
@@ -89,11 +91,33 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		return true;
 	}
 
-	protected void initParams(){
+	/**Find immediate postdominators of the given graph
+	 * and preprocess dominance requests
+	 * post dominators are dominators of the inverse graph
+	 * @return false iff the source cannot reach all nodes (contradiction)
+	 * */
+	public boolean findPostDominators() {
+		initParams(true);
+		DFS();
+		if(k!=n-1){
+			return false;
+		}
+		findAllIdom();
+		preprocessDominanceRequests();
+		return true;
+	}
+
+	protected void initParams(boolean inverseGraph){
 		for(int i=0;i<n;i++){
 			T.getSuccessorsOf(i).clear();
 			T.getPredecessorsOf(i).clear();
-			succs[i] = g.getSuccessorsOf(i);
+			if(inverseGraph){
+				succs[i] = g.getPredecessorsOf(i);
+				preds[i] = g.getSuccessorsOf(i);
+			}else{
+				succs[i] = g.getSuccessorsOf(i);
+				preds[i] = g.getPredecessorsOf(i);
+			}
 			semi[i]  = -1;
 			ancestor[i] = -1;
 			bucket[i] = -1;
@@ -101,7 +125,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 	}
 
 	protected void DFS(){
-		int node = source;
+		int node = root;
 		int next;
 		k=0;
 		semi[node] = k;
@@ -127,7 +151,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 					first = true;
 				}
 			}else{
-				if(node== source){
+				if(node== root){
 					notFinished = false;
 					break;
 				}
@@ -143,11 +167,11 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	protected void findAllIdom(){
 		int w,v,u;
-		INeighbors preds;
+		INeighbors prds;
 		for (int i=n-1; i>=1; i--){
 			w = vertex[i];
-			preds = g.getPredecessorsOf(w);
-			for(v= preds.getFirstElement();v>=0; v=preds.getNextElement()){
+			prds = preds[w];
+			for(v= prds.getFirstElement();v>=0; v=prds.getNextElement()){
 				u = EVAL(v);
 				if (semi[u]<semi[w]){
 					semi[w] = semi[u];
@@ -158,7 +182,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			}else{
 				dom[w] = parent[w];
 			}
-			LINK(parent[w],w);
+			LINK(parent[w], w);
 			int oldBI = parent[w];
 			v = bucket[oldBI];
 			while(v!=-1){
@@ -180,7 +204,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			}
 			T.addArc(dom[w],w);
 		}
-		dom[source]= source;
+		dom[root]= root;
 	}
 
 	protected void addToBucket(int buckIdx, int element) {
@@ -242,7 +266,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		}
 		//PREPROCESSING
 		int time = 0;
-		int currentNode = source;
+		int currentNode = root;
 		parent[currentNode] = currentNode;
 		ancestor[currentNode] = 0;
 		int nextNode;
@@ -258,7 +282,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			if(nextNode<0){
 				time++;
 				semi[currentNode] = time;
-				if(currentNode==source){
+				if(currentNode== root){
 					finished = true;
 					break;
 				}
@@ -282,9 +306,6 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	public boolean isArcDominator(int x, int y) {
 		//(x,y) existe && x domine y && y domines tous ses autres predecesseurs (sauf x donc)
-		Exception e = new Exception("method not implemented yet");
-		e.printStackTrace();
-		System.exit(0);
-		return false;
+		throw new UnsupportedOperationException("method not implemented yet");
 	}
 }

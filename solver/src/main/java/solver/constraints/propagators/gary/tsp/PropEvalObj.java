@@ -46,6 +46,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {BENCHMARK})
  * Compute the cost of the graph by summing arcs costs
  * BEWARE - Assume that the last node has no successor
  * - For minimization problem
@@ -103,9 +104,13 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         INeighbors succ;
+		minSum.set(0);
         for (int i = 0; i < n - 1; i++) {
             succ = g.getEnvelopGraph().getSuccessorsOf(i);
             int min = succ.getFirstElement();
+			if(min==-1){
+				contradiction(g,"");
+			}
             int minC = distMatrix[i][min];
             for (int s = min; s >= 0; s = succ.getNextElement()) {
                 if (distMatrix[i][s] < minC) {
@@ -116,7 +121,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             minSum.add(minC);
             minCostSucc[i].set(min);
         }
-        sum.updateLowerBound(minSum.get(), this, false);
+        sum.updateLowerBound(minSum.get(), this);
         // filter the graph
         INeighbors succs;
         int delta = minSum.get() - sum.getUB();
@@ -126,7 +131,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             curMin = distMatrix[i][minCostSucc[i].get()];
             for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                 if (delta > curMin - distMatrix[i][j]) {
-                    g.removeArc(i, j, this, false);
+                    g.removeArc(i, j, this);
                 }
             }
         }
@@ -134,7 +139,10 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        toCompute.clear();
+        if(ALWAYS_COARSE){
+			propagate(0);return;
+		}
+		toCompute.clear();
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];
         if (variable.getType() == Variable.GRAPH) {
@@ -147,7 +155,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
             for (int i = toCompute.size() - 1; i >= 0; i--) {
                 findMin(toCompute.get(i));
             }
-            sum.updateLowerBound(minSum.get(), this, false);
+            sum.updateLowerBound(minSum.get(), this);
         }
         if ((minSum.get() > oldMin) || ((mask & EventType.DECUPP.mask) != 0)) {
             // filter the graph
@@ -159,7 +167,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
                 curMin = distMatrix[i][minCostSucc[i].get()];
                 for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
                     if (delta > curMin - distMatrix[i][j]) {
-                        g.removeArc(i, j, this, false);
+                        g.removeArc(i, j, this);
                     }
                 }
             }
@@ -170,9 +178,8 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
         INeighbors succ = g.getEnvelopGraph().getSuccessorsOf(i);
         int min = succ.getFirstElement();
         if (min == -1) {
-            System.out.println(g.getEnvelopGraph());
-            System.out.println(i);
-            System.exit(0);
+//			throw new UnsupportedOperationException("n'a pas fait le point fixe");
+			contradiction(g,"");
         }
         int minC = distMatrix[i][min];
         for (int s = min; s >= 0; s = succ.getNextElement()) {

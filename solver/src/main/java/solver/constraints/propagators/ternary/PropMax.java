@@ -89,41 +89,41 @@ public class PropMax extends Propagator<IntVar> {
 
     public void filter(int idx) throws ContradictionException {
         if (idx == 0) {
-            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this, false);
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this, false);
+            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this);
+            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
 
             if (v0.hasEnumeratedDomain()) {
                 for (int valeur = v0.getLB(); valeur <= v0.getUB(); valeur = v0.nextValue(valeur)) {
                     if (!v1.contains(valeur) && !v2.contains(valeur)) {
-                        v0.removeValue(valeur, this, false);
+                        v0.removeValue(valeur, this);
                     }
                 }
             }
         } else if (idx == 1) {
-            v1.updateUpperBound(v0.getUB(), this, false);
+            v1.updateUpperBound(v0.getUB(), this);
             if (v1.getLB() > v2.getUB()) {
-                v0.updateLowerBound(v1.getLB(), this, false);
-                v1.updateLowerBound(v0.getLB(), this, false);
+                v0.updateLowerBound(v1.getLB(), this);
+                v1.updateLowerBound(v0.getLB(), this);
             }
 
             if (v1.hasEnumeratedDomain()) {
                 for (int valeur = v1.getLB(); valeur <= v1.getUB(); valeur = v1.nextValue(valeur)) {
                     if (!v0.contains(valeur) && valeur > v2.getUB()) {
-                        v1.removeValue(valeur, this, false);
+                        v1.removeValue(valeur, this);
                     }
                 }
             }
 
         } else if (idx == 2) {
-            v2.updateUpperBound(v0.getUB(), this, false);
+            v2.updateUpperBound(v0.getUB(), this);
             if (v2.getLB() > v1.getUB()) {
-                v0.updateLowerBound(v2.getLB(), this, false);
-                v2.updateLowerBound(v0.getLB(), this, false);
+                v0.updateLowerBound(v2.getLB(), this);
+                v2.updateLowerBound(v0.getLB(), this);
             }
             if (v2.hasEnumeratedDomain()) {
                 for (int valeur = v2.getLB(); valeur <= v2.getUB(); valeur = v2.nextValue(valeur)) {
                     if (!v0.contains(valeur) && valeur > v1.getUB()) {
-                        v2.removeValue(valeur, this, false);
+                        v2.removeValue(valeur, this);
                     }
                 }
             }
@@ -134,69 +134,69 @@ public class PropMax extends Propagator<IntVar> {
         int val;
         if (idx == 0) {
             val = v0.getValue();
-            v1.updateUpperBound(val, this, false);
-            v2.updateUpperBound(val, this, false);
+            v1.updateUpperBound(val, this);
+            v2.updateUpperBound(val, this);
             if (!v1.contains(val)) {
-                v2.instantiateTo(val, this, false);
+                v2.instantiateTo(val, this);
             }
             if (!v2.contains(val)) {
-                v1.instantiateTo(val, this, false);
+                v1.instantiateTo(val, this);
             }
         } else if (idx == 1) {
             val = v1.getValue();
             if (val >= v2.getUB()) {
-                v0.instantiateTo(val, this, false);
+                v0.instantiateTo(val, this);
                 setPassive();
             } else {
-                v0.updateUpperBound(Math.max(val, v2.getUB()), this, false);
-                v0.updateLowerBound(Math.max(val, v2.getLB()), this, false);
+                v0.updateUpperBound(Math.max(val, v2.getUB()), this);
+                v0.updateLowerBound(Math.max(val, v2.getLB()), this);
             }
         } else if (idx == 2) {
             val = v2.getValue();
             if (val >= v1.getUB()) {
-                v0.instantiateTo(val, this, false);
+                v0.instantiateTo(val, this);
                 setPassive();
             } else {
-                v0.updateUpperBound(Math.max(val, v1.getUB()), this, false);
-                v0.updateLowerBound(Math.max(val, v1.getLB()), this, false);
+                v0.updateUpperBound(Math.max(val, v1.getUB()), this);
+                v0.updateLowerBound(Math.max(val, v1.getLB()), this);
             }
         }
     }
 
     public void awakeOnUpp(int idx) throws ContradictionException {
         if (idx == 0) {
-            v1.updateUpperBound(v0.getUB(), this, false);
-            v2.updateUpperBound(v0.getUB(), this, false);
+            v1.updateUpperBound(v0.getUB(), this);
+            v2.updateUpperBound(v0.getUB(), this);
         } else {
-            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this, false);
+            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this);
         }
     }
 
     public void awakeOnLow(int idx) throws ContradictionException {
         if (idx == 0) {
             if (v1.getLB() > v2.getUB()) {
-                v1.updateLowerBound(v0.getLB(), this, false);
+                v1.updateLowerBound(v0.getLB(), this);
             }
             if (v2.getLB() > v1.getUB()) {
-                v2.updateLowerBound(v0.getLB(), this, false);
+                v2.updateLowerBound(v0.getLB(), this);
             }
         } else {
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this, false);
+            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
         }
     }
 
     public void awakeOnRem(int idx, int x) throws ContradictionException {
         if (idx == 0) {
             if (x > v2.getUB()) {
-                v1.removeValue(x, this, false);
+                v1.removeValue(x, this);
             }
 
             if (x > v1.getUB()) {
-                v2.removeValue(x, this, false);
+                v2.removeValue(x, this);
             }
         } else {
             if (!v1.contains(x) && !v2.contains(x)) {
-                v0.removeValue(x, this, false);
+                v0.removeValue(x, this);
             }
         }
     }

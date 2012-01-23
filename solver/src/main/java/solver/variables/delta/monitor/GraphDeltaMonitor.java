@@ -28,9 +28,11 @@ package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IGraphDelta;
 
 /**
  * <br/>
@@ -40,120 +42,74 @@ import solver.variables.delta.IDeltaMonitor;
  */
 public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
+	protected final GraphDelta delta;
 
-    //NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
-    protected final static int NR = 0;
-    protected final static int NE = 1;
-    protected final static int AR = 2;
-    protected final static int AE = 3;
+	private int[] first, last; // references, in variable delta value to propagate, to un propagated values
+	protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
 
-    protected final GraphDelta delta;
+	public GraphDeltaMonitor(GraphDelta delta) {
+		this.delta = delta;
+		this.first = new int[4];
+		this.last = new int[4];
+		this.frozenFirst = new int[4];
+		this.frozenLast = new int[4];
+	}
 
-    protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
-    protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+	@Override
+	public void update(EventType event) {
+		//TODO throw new UnsupportedOperationException();
+	}
 
-    public GraphDeltaMonitor(GraphDelta delta) {
-        this.delta = delta;
-        this.first = new int[4];
-        this.last = new int[4];
-        this.frozenFirst = new int[4];
-        this.frozenLast = new int[4];
-    }
+	@Override
+	public void freeze() {
+		for (int i = 0; i < 4; i++) {
+			this.frozenFirst[i] = first[i]; // freeze indices
+			this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
+		}
+	}
 
+	@Override
+	public void unfreeze() {
+		for (int i = 0; i < 4; i++) {
+			this.first[i] = last[i] = delta.getSize(i);
+		}
+	}
 
-    @Override
-    public void update(EventType evt) {
-        switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
-            case REMOVENODE:
-                last[NR] = delta.getNodeRemovalDelta().size();
-                break;
-            case ENFORCENODE:
-                last[NE] = delta.getNodeEnforcingDelta().size();
-                break;
-            case REMOVEARC:
-                last[AR] = delta.getArcRemovalDelta().size();
-                break;
-            case ENFORCEARC:
-                last[AE] = delta.getArcEnforcingDelta().size();
-                break;
-        }
-    }
+	@Override
+	public void clear() {
+		for (int i = 0; i < 4; i++) {
+			this.first[i] = last[i] = 0;
+		}
+	}
 
-    @Override
-    public void freeze() {
-        for (int i = 0; i < 4; i++) {
-            this.frozenFirst[i] = first[i]; // freeze indices
-            this.first[i] = this.frozenLast[i] = last[i];
-        }
-    }
-
-    @Override
-    public void unfreeze() {
-    }
-
-    @Override
-    public void clear() {
-        for (int i = 0; i < 4; i++) {
-            this.first[i] = this.last[i] = 0;
-        }
-    }
-
-    @Override
-    public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-        switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
-            case REMOVENODE:
-                for (int i = frozenFirst[NR]; i < frozenLast[NR]; i++) {
-                    proc.execute(delta.getNodeRemovalDelta().get(i));
-                }
-                break;
-            case ENFORCENODE:
-                for (int i = frozenFirst[NE]; i < frozenLast[NE]; i++) {
-                    proc.execute(delta.getNodeEnforcingDelta().get(i));
-                }
-                break;
-            case REMOVEARC:
-                for (int i = frozenFirst[AR]; i < frozenLast[AR]; i++) {
-                    proc.execute(delta.getArcRemovalDelta().get(i));
-                }
-                break;
-            case ENFORCEARC:
-                for (int i = frozenFirst[AE]; i < frozenLast[AE]; i++) {
-                    proc.execute(delta.getArcEnforcingDelta().get(i));
-                }
-                break;
-        }
-    }
-
-    /////////////////////////////
-    public int fromNodeRemoval() {
-        return frozenFirst[NR];
-    }
-
-    public int toNodeRemoval() {
-        return frozenLast[NR];
-    }
-
-    public int fromNodeEnforcing() {
-        return frozenFirst[NE];
-    }
-
-    public int toNodeEnforcing() {
-        return frozenLast[NE];
-    }
-
-    public int fromArcRemoval() {
-        return frozenFirst[AR];
-    }
-
-    public int toArcRemoval() {
-        return frozenLast[AR];
-    }
-
-    public int fromArcEnforcing() {
-        return frozenFirst[AE];
-    }
-
-    public int toArcEnforcing() {
-        return frozenLast[AE];
-    }
+	@Override
+	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
+		int type;
+		switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
+			case REMOVENODE:
+				type = IGraphDelta.NR;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
+				}
+				break;
+			case ENFORCENODE:
+				type = IGraphDelta.NE;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
+				}
+				break;
+			case REMOVEARC:
+				type = IGraphDelta.AR;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
+				}
+				break;
+			case ENFORCEARC:
+				type = IGraphDelta.AE;
+				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+					proc.execute(delta.get(i, type));
+				}
+				break;
+		}
+	}
 }

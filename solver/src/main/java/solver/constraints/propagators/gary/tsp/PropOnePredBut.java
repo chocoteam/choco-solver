@@ -48,6 +48,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {BENCHMARK,CORRECTION})
  * Each node but "but" has only one predecessor
  * */
 public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
@@ -87,14 +88,26 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		INeighbors preds;
+		int pre;
 		for(int i=0;i<n;i++){
 			if(i!=but){
+				pre = g.getKernelGraph().getPredecessorsOf(i).getFirstElement();
 				preds = g.getEnvelopGraph().getPredecessorsOf(i);
 				if (preds.neighborhoodSize()==0){
 					this.contradiction(g,i+" has no predecessor");
 				}
-				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),i,this,false);
+				else if (preds.neighborhoodSize()==1){
+					g.enforceArc(preds.getFirstElement(),i,this);
+				}
+				else if (pre!=-1){
+					if(g.getKernelGraph().getPredecessorsOf(i).getNextElement()!=-1){
+						contradiction(g,i+" has >1 predecessors");
+					}
+					for(int j=preds.getFirstElement();j>=0;j=preds.getNextElement()){
+						if(j!=pre){
+							g.removeArc(j,i,this);
+						}
+					}
 				}
 			}
 		}
@@ -102,13 +115,11 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-
-		if((mask & EventType.ENFORCEARC.mask) !=0){
-			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+		if(ALWAYS_COARSE){
+			propagate(0);return;
 		}
-		if((mask & EventType.REMOVEARC.mask)!=0){
-            eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
-		}
+		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+        eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -150,10 +161,11 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 			int to = i%n;
 			if(to!=but){
 				int from = i/n-1;
+//				System.out.println("ENFORCE "+from+" -> "+(i%n));
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
-						g.removeArc(i,to,p,false);
+						g.removeArc(i,to,p);
 					}
 				}
 			}
@@ -170,12 +182,13 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 		public void execute(int i) throws ContradictionException {
 			int to = i%n;
 			if(to!=but){
+//				System.out.println("REMOVE "+(i/n-1)+" -> "+(i%n));
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				if (preds.neighborhoodSize()==0){
 					p.contradiction(g,to+" has no predecessor");
 				}
 				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),to,p,false);
+					g.enforceArc(preds.getFirstElement(),to,p);
 				}
 			}
 		}

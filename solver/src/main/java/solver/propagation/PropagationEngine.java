@@ -33,13 +33,17 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.propagation.comparators.IncrPriorityP;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
 import solver.variables.EventType;
 import solver.variables.Variable;
+
+import java.util.Comparator;
 
 /**
  * An abstract class of IPropagatioEngine.
@@ -159,7 +163,11 @@ public class PropagationEngine implements IPropagationEngine {
         Constraint[] cstrs = solver.getCstrs();
         Primitive arcs = Primitive.arcs(cstrs);
         Primitive coarses = Primitive.unary(cstrs);
+//		if(true){
+//			throw new UnsupportedOperationException();
+//		}
         return Queue.build(arcs, coarses).pickOne();
+//        return Sort.build(IncrPriorityP.get(),arcs, coarses).pickOne();
     }
 
 

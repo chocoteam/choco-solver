@@ -177,7 +177,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
         } else if (nbpos == getMinOcc(val - offset)) {
             for (int j = 0; j < nbVars; j++) {
                 if (vars[j].contains(val)) {
-                    vars[j].instantiateTo(val, this, true);// not idempotent because data structure is maintained in awakeOnX methods
+                    vars[j].instantiateTo(val, this);// CPRU not idempotent because data structure is maintained in awakeOnX methods
                 }
             }
         }

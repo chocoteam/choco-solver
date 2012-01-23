@@ -42,6 +42,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator that ensures that a node has at least N neighbors
  * <p/>
  * BEWARE : the case where N=1 is useless because it is ensured by default
@@ -71,9 +72,6 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		int n = g.getEnvelopGraph().getNbNodes();
 		enf_nodes_proc = new NodeEnf(this);
 		rem_proc = new ArcRem(this, n);
-		if (n_neighbors==1){
-			throw new UnsupportedOperationException("useless propagator : AtLeast 1 neighbor is ensured by default ");
-		}
 	}
 
 	//***********************************************************************************
@@ -88,13 +86,13 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		INeighbors nei;
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			if(g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()<n_neighbors){
-				g.removeNode(node, this, false);
+				g.removeNode(node, this);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(node) 
 					&& g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors 
 					&& g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()<n_neighbors){
 				nei = g.getEnvelopGraph().getNeighborsOf(node);
 				for(next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(node, next, this, false);
+					g.enforceArc(node, next, this);
 				}
 			}
 		}
@@ -152,7 +150,7 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 			if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(i);
 				for(int next = nei.getFirstElement(); next >= 0; next = nei.getNextElement()){
-					g.enforceArc(i, next, p, false);
+					g.enforceArc(i, next, p);
 				}
 			}
 		}
@@ -173,22 +171,20 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		@Override
 		public void execute(int i) throws ContradictionException {
 			if (i>=n){
-				int from = i/n-1;
-				int to   = i%n;
-				prune(from);
-				prune(to);
+				prune(i/n-1);
+				prune(i%n);
 			}else{
 				throw new UnsupportedOperationException();
 			}
 		}
 		private void prune(int from) throws ContradictionException{
-			if(g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
-				g.removeNode(from, p, false);
+			if(g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()<n_neighbors){
+				g.removeNode(from, p);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(from) &&
 					g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
 				INeighbors nei = g.getEnvelopGraph().getNeighborsOf(from);
 				for(int next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
-					g.enforceArc(from, next, p, false);
+					g.enforceArc(from, next, p);
 				}
 			}
 		}

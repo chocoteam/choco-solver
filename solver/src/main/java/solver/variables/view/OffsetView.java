@@ -88,7 +88,7 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -99,15 +99,24 @@ public final class OffsetView extends View<IntVar> {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(value - cste, this, informCause);
+                boolean done = var.removeValue(value - cste, this);
                 if (done) {
                     if (value == inf) {
                         e = EventType.INCLOW;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     } else if (value == sup) {
                         e = EventType.DECUPP;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
+                        if (cause.reactOnPromotion()) {
+                            cause = Cause.Null;
+                        }
                     }
                     this.notifyMonitors(e, cause);
                     solver.getExplainer().removeValue(this, value, cause);
@@ -119,13 +128,13 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean removeInterval(int from, int to, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= getLB()) {
-            return updateLowerBound(to + 1, cause, informCause);
+            return updateLowerBound(to + 1, cause);
         } else if (getUB() <= to) {
-            return updateUpperBound(from - 1, cause, informCause);
+            return updateUpperBound(from - 1, cause);
         } else {
-            boolean done = var.removeInterval(from - cste, to - cste, cause, informCause);
+            boolean done = var.removeInterval(from - cste, to - cste, cause);
             if (done) {
                 notifyMonitors(EventType.REMOVE, cause);
             }
@@ -134,7 +143,7 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
@@ -145,7 +154,7 @@ public final class OffsetView extends View<IntVar> {
         } else if (contains(value)) {
             EventType e = EventType.INSTANTIATE;
 
-            boolean done = var.instantiateTo(value - cste, this, informCause);
+            boolean done = var.instantiateTo(value - cste, this);
             if (done) {
                 notifyMonitors(EventType.INSTANTIATE, cause);
                 return true;
@@ -158,7 +167,7 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -167,9 +176,12 @@ public final class OffsetView extends View<IntVar> {
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
-                boolean done = var.updateLowerBound(value - cste, this, informCause);
+                boolean done = var.updateLowerBound(value - cste, this);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
@@ -182,12 +194,9 @@ public final class OffsetView extends View<IntVar> {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause, boolean informCause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         ICause antipromo = cause;
-        if (informCause) {
-            cause = Cause.Null;
-        }
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
@@ -195,7 +204,7 @@ public final class OffsetView extends View<IntVar> {
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
-                boolean done = var.updateUpperBound(value - cste, cause, informCause);
+                boolean done = var.updateUpperBound(value - cste, cause);
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {

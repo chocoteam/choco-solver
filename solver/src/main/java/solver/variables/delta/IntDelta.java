@@ -41,6 +41,7 @@ public interface IntDelta extends IDelta{
      */
     void add(int value);
 
+
     /**
      * Return the idx^th value stored in the delta, if any
      * @param idx rank of the value

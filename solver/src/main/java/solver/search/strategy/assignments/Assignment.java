@@ -54,12 +54,12 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause, false);
+            var.instantiateTo(value, cause);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause, false);
+            var.removeValue(value, cause);
         }
 
         @Override
@@ -72,12 +72,12 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause, false);
+            var.removeValue(value, cause);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause, false);
+            var.instantiateTo(value, cause);
         }
 
         @Override
@@ -90,12 +90,12 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value, cause, false);
+            var.updateUpperBound(value, cause);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value + 1, cause, false);
+            var.updateLowerBound(value + 1, cause);
         }
 
         @Override
@@ -108,12 +108,12 @@ public abstract class Assignment<V extends Variable> implements Serializable{
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause, false);
+            var.updateLowerBound(value, cause);
         }
 
         @Override
         public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value - 1, cause, false);
+            var.updateUpperBound(value - 1, cause);
         }
 
         @Override
@@ -131,10 +131,10 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             	int from = value/n-1;
             	int to   = value%n;
 //            	System.out.println("enf "+value + " : "+from +" : "+to);
-            	var.enforceArc(from, to, cause, false);
+            	var.enforceArc(from, to, cause);
             }else{
 //            	System.out.println("enf "+value);
-            	var.enforceNode(value, cause, false);
+            	var.enforceNode(value, cause);
             }
         }
 
@@ -144,10 +144,10 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             if (value>=n){
             	int from = value/n-1;
             	int to   = value%n;
-            	var.removeArc(from, to, cause, false);
+            	var.removeArc(from, to, cause);
             }else{
 //            	System.out.println("rem "+value);
-            	var.removeNode(value, cause, false);
+            	var.removeNode(value, cause);
             }
         }
         

@@ -65,31 +65,69 @@ public abstract class AbstractSumView extends AbstractViewWithDomain {
         return String.format("(%s + %s)", A, B);
     }
 
+    protected abstract boolean _updateLowerBound(int value, ICause cause) throws ContradictionException;
+
+    protected abstract boolean _updateUpperBound(int value, ICause cause) throws ContradictionException;
+
     /////////////// SERVICES REQUIRED FROM SUM //////////////////////////
 
-    void filterOnLeq(ICause cause, int ub) throws ContradictionException {
+    @Override
+    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+        // one of the variable as changed externally, this involves a complete update of this
+        if (evt != EventType.REMOVE) {
+            filter(cause, true, 2);
+        }
+    }
+
+    void filter(ICause cause, boolean startWithLeq, int nbRules) throws ContradictionException {
+        boolean loop;
+        int nbR = 0;
+        do {
+            int lb = this.getLB();
+            int ub = this.getUB();
+            if (startWithLeq) {
+                loop = filterOnGeq(cause, lb, ub);
+            } else {
+                loop = filterOnLeq(cause, lb, ub);
+            }
+            startWithLeq ^= true;
+            nbR++;
+        } while (loop || nbR < nbRules);
+    }
+
+    private boolean filterOnLeq(ICause cause, int lb, int ub) throws ContradictionException {
         int lbA = A.getLB(), lbB = B.getLB();
         int sumLB = lbA + lbB - ub;
         if (-sumLB < 0) contradiction(cause, EventType.FULL_PROPAGATION, MSG_EMPTY);
         int ubA = A.getUB(), ubB = B.getUB();
+        boolean hasChanged = false;
         if (ubA - lbA + sumLB > 0) {
-            A.updateUpperBound(-sumLB + lbA, this, true);
+            hasChanged = A.updateUpperBound(-sumLB + lbA, this);//CPRU not idempotent
         }
         if (ubB - lbB + sumLB > 0) {
-            B.updateUpperBound(-sumLB + lbB, this, true);
+            hasChanged = B.updateUpperBound(-sumLB + lbB, this);//CPRU not idempotent
         }
+        if (lbA + lbB - lb> 0) {
+            hasChanged = _updateLowerBound(lbA + lbB, this);
+        }
+        return hasChanged;
     }
 
-    void filterOnGeq(ICause cause, int lb) throws ContradictionException {
+    private boolean filterOnGeq(ICause cause, int lb, int ub) throws ContradictionException {
         int ubA = A.getUB(), ubB = B.getUB();
         int sumUB = ubA + ubB - lb;
         if (-sumUB > 0) contradiction(cause, EventType.FULL_PROPAGATION, MSG_EMPTY);
         int lbA = A.getLB(), lbB = B.getLB();
+        boolean hasChanged = false;
         if (ubA - lbA - sumUB > 0) {
-            A.updateLowerBound(-sumUB + ubA, this, true);
+            hasChanged = A.updateLowerBound(-sumUB + ubA, this);//CPRU not idempotent
         }
         if (ubB - lbB - sumUB > 0) {
-            B.updateLowerBound(-sumUB + ubB, this, true);
+            hasChanged = B.updateLowerBound(-sumUB + ubB, this);//CPRU not idempotent
         }
+        if (ubA + ubB - ub < 0) {
+            hasChanged = _updateUpperBound(ubA + ubB, this);
+        }
+        return hasChanged;
     }
 }

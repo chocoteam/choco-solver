@@ -45,6 +45,7 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator channeling an undirected graph and an array of integer variables
  * <p/>
  * BEWARE : for use reasons the channeling is only performed on arcs but not on nodes
@@ -93,14 +94,14 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         // BEWARE the graph is created from the variables so it is initially correct (true for a standard use)
         for (int i = 0; i < intVars.length; i++) {
             if (intVars[i].instantiated()) {
-                g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this, false);
+                g.enforceArc(i, valuesHash.get(intVars[i].getValue()), this);
             }
         }
         IActiveNodes act = g.getKernelGraph().getActiveNodes();
         for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
             if (g.getKernelGraph().getNeighborsOf(i).neighborhoodSize() == 1) {
                 if (i < intVars.length) {
-                    intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this, false);
+                    intVars[i].instantiateTo(values[g.getKernelGraph().getNeighborsOf(i).getFirstElement()], this);
                 }
             }
         }
@@ -118,7 +119,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             }
         } else {
             if (EventType.anInstantiationEvent(mask)) {
-                g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this, false);
+                g.enforceArc(idxVarInProp, valuesHash.get(intVars[idxVarInProp].getValue()), this);
             }
             if ((mask & (EventType.REMOVE.mask | EventType.INCLOW.mask | EventType.DECUPP.mask)) != 0) {
                 valRemoved.set(idxVarInProp);
@@ -185,7 +186,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         public void execute(int i) throws ContradictionException {
             int from = idx;
             int to = valuesHash.get(i);
-            g.removeArc(from, to, p, false);
+            g.removeArc(from, to, p);
         }
     }
 
@@ -207,9 +208,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             int from = i / n - 1;
             int to = i % n;
             if (from < to) {
-                intVars[from].instantiateTo(values[to], p, false);
+                intVars[from].instantiateTo(values[to], p);
             } else {
-                intVars[to].instantiateTo(values[from], p, false);
+                intVars[to].instantiateTo(values[from], p);
             }
         }
 
@@ -233,9 +234,9 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
             int from = i / n - 1;
             int to = i % n;
             if (from < to) {
-                intVars[from].removeValue(values[to], p, false);
+                intVars[from].removeValue(values[to], p);
             } else {
-                intVars[to].removeValue(values[from], p, false);
+                intVars[to].removeValue(values[from], p);
             }
         }
 

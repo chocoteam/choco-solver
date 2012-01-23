@@ -54,10 +54,14 @@ import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
+import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
+
 import java.util.ArrayList;
 import java.util.BitSet;
 
-/** Maintain incrementally the reduced graph G_R and SCC
+/**
+ * @PropAnn(tested = {BENCHMARK})
+ * Maintain incrementally the reduced graph G_R and SCC
  *  make G_R a hamiltonian path
  *  BEWARE REQUIRES A UNIQUE SOURCE AND A UNIQUE SINK
  *  O(n+m)
@@ -73,13 +77,12 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 	private int n; 					// number of nodes in G
 	private V G;					// the graph variable
 	private IStateInt[] sccOf;		// SCC of each node
-	private INeighbors[] nodesOf;	// nodes of each SCC (CAN BE REMOVED)
+	private IStateInt[] sccFirst,sccNext; // nodes of each scc
 	private INeighbors[] mates;		// arcs of G that fit with outgoing arcs of a node in G_R
 	private IDirectedGraph G_R; 	// reduced graph
 	private IStateInt n_R; 			// number of nodes G_R
-	private RemArc arcRemoved;		// incremental procedure
+	private IntProcedure arcRemoved;// incremental procedure
 	private BitSet sccComputed;		// enable incrementation
-
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -99,11 +102,13 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		n_R = environment.makeInt(0);
 		G_R = new StoredDirectedGraph(environment, n, GraphType.DOUBLE_LINKED_LIST);
 		sccOf = new IStateInt[n];
-		nodesOf = new INeighbors[n];
+		sccFirst = new IStateInt[n];
+		sccNext  = new IStateInt[n];
 		mates = new INeighbors[n];
 		for (int i = 0; i < n; i++) {
 			sccOf[i] = environment.makeInt(0);
-			nodesOf[i] = new StoredIntLinkedList(environment);
+			sccFirst[i] = environment.makeInt(-1);
+			sccNext[i]  = environment.makeInt(-1);
 			G_R.getActiveNodes().desactivate(i);
 			mates[i] = new StoredDoubleIntLinkedList(environment);
 		}
@@ -117,11 +122,18 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
 	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	int count = 0;
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		for(int i=0;i<n;i++){
+			sccFirst[i].set(-1);
+			sccNext[i].set(-1);
+			mates[i].clear();
+			G_R.getActiveNodes().desactivate(i);
+		}
 		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph());
 		int s = allSCC.size();
 		n_R.set(s);
@@ -129,14 +141,11 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		TIntArrayList list;
 		for(int i=0;i<s;i++){
 			list = allSCC.get(i);
-			nodesOf[i].clear();
-			mates[i].clear();
-			G_R.getActiveNodes().desactivate(i);
 			G_R.getActiveNodes().activate(i);
 			for(int j=list.size()-1;j>=0;j--){
 				elem = list.get(j);
 				sccOf[elem].set(i);
-				nodesOf[i].add(elem);
+				addNode(i,elem);
 			}
 		}
 		INeighbors succs;
@@ -161,9 +170,32 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 				last = i;
 			}
 		}
+		if(first==-1 || last==-1 || first==last){
+			contradiction(G, "");
+		}
 		if(visit(first, last)!=n_R.get()){
 			contradiction(G, "");
 		}
+		int to,arc;
+		for(int i=0;i<n;i++){
+			to = G.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+			x  = sccOf[i].get();
+			if(to!=-1 && sccOf[to].get()!=x && mates[x].neighborhoodSize()>1){
+				arc = (i+1)*n+to;
+				for(int a=mates[x].getFirstElement();a>=0;a=mates[x].getNextElement()){
+					if(a!=arc){
+						G.removeArc(a/n-1,a%n,this);
+					}
+				}
+				mates[x].clear();
+				mates[x].add(arc);
+			}
+		}
+	}
+
+	private void addNode(int scc, int node) {
+		sccNext[node].set(sccFirst[scc].get());
+		sccFirst[scc].set(node);
 	}
 
 	private int visit(int node, int last) throws ContradictionException {
@@ -191,17 +223,38 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			to = e%n;
 			if(sccOf[to].get()!=next){
 				from = e/n-1;
-				G.removeArc(from,to,this,false);
+				G.removeArc(from,to,this);
 				mates[node].remove(e);
 			}
 		}
 		return visit(next,last)+1;
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(ALWAYS_COARSE){
+			propagate(0);
+			return;
+		}
 		sccComputed.clear();
-        eventRecorder.getDeltaMonitor(G).forEach(arcRemoved, EventType.REMOVEARC);
+		if((mask & EventType.REMOVEARC.mask)!=0){
+			eventRecorder.getDeltaMonitor(G).forEach(arcRemoved, EventType.REMOVEARC);
+		}
+		int to,x;
+		for(int i=0;i<n;i++){
+			to = G.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+			x  = sccOf[i].get();
+			if(to!=-1 && sccOf[to].get()!=x && mates[x].neighborhoodSize()>1){
+				int arc = (i+1)*n+to;
+				for(int a=mates[x].getFirstElement();a>=0;a=mates[x].getNextElement()){
+					if(a!=arc){
+						G.removeArc(a/n-1,a%n,this);
+					}
+				}
+				mates[x].clear();
+				mates[x].add(arc);
+			}
+		}
 	}
 
 	@Override
@@ -217,6 +270,34 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			return ESat.FALSE;
 		}
 		return ESat.UNDEFINED;
+	}
+
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
+
+	public IStateInt getNSCC(){
+		return n_R;
+	}
+
+	public INeighbors[] getOutArcs(){
+		return mates;
+	}
+
+	public IStateInt[] getSCCOF() {
+		return sccOf;
+	}
+
+	public IStateInt[] getSCCFirst() {
+		return sccFirst;
+	}
+
+	public IStateInt[] getSCCNext() {
+		return sccNext;
+	}
+
+	public IDirectedGraph getReducedGraph() {
+		return G_R;
 	}
 
 	//***********************************************************************************
@@ -239,8 +320,10 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			if (x==sccOf[to].get()){
 				if(!sccComputed.get(x)){
 					restriction.clear();
-					for(int k=nodesOf[x].getFirstElement(); k>=0; k=nodesOf[x].getNextElement()){
+					int k = sccFirst[x].get();
+					while(k!=-1){
 						restriction.set(k);
+						k = sccNext[k].get();
 					}
 					// piste1 algo faux
 					ArrayList<TIntArrayList> newSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph(), restriction);
@@ -250,24 +333,24 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						int first = G_R.getPredecessorsOf(x).getFirstElement();
 						int last  = G_R.getSuccessorsOf(x).getFirstElement();
 						// SCC broken
-						nodesOf[x].clear();
+						sccFirst[x].set(-1);
 						mates[x].clear();
 						G_R.removeArc(first,x);
 						G_R.removeArc(x,last);
 						// first scc
 						for(int e=0; e<newSCC.get(0).size();e++){
-							nodesOf[x].add(newSCC.get(0).get(e));
+							addNode(x,newSCC.get(0).get(e));
 						}
 						// others
 						int idx=n_R.get();
 						int elem;
 						for(int scc=1;scc<ns;scc++){
-							nodesOf[idx].clear();
+							sccFirst[idx].set(-1);
 							mates[idx].clear();
 							G_R.getActiveNodes().activate(idx);
 							for(int e=0; e<newSCC.get(scc).size();e++){
 								elem = newSCC.get(scc).get(e);
-								nodesOf[idx].add(elem);
+								addNode(idx,elem);
 								sccOf[elem].set(idx);
 							}
 							idx++;
@@ -277,9 +360,9 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						int e,sccE;
 						INeighbors nei;
 						for(int scc=0;scc<ns;scc++){
-							for(int k=newSCC.get(scc).size()-1;k>=0;k--){
+							sccE = sccOf[newSCC.get(scc).get(0)].get();
+							for(k=newSCC.get(scc).size()-1;k>=0;k--){
 								e = newSCC.get(scc).get(k);
-								sccE = sccOf[e].get();
 								nei = G.getEnvelopGraph().getSuccessorsOf(e);
 								for(int next=nei.getFirstElement(); next>=0; next=nei.getNextElement()){
 									if(sccE!=sccOf[next].get()){
@@ -299,7 +382,6 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 					}
 				}
 			}else{
-				int y = sccOf[to].get();
 				mates[x].remove(i);
 				if(mates[x].neighborhoodSize()==0){
 					p.contradiction(G,"G_R disconnected");

@@ -96,11 +96,11 @@ public class NotEqualX_YCTest {
 
         try {
             s.propagate();
-            vars[0].instantiateTo(1, Cause.Null, false);
+            vars[0].instantiateTo(1, Cause.Null);
             s.propagate();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 2);
-            vars[1].removeValue(2, Cause.Null, false);
+            vars[1].removeValue(2, Cause.Null);
             s.propagate();
             Assert.assertEquals(vars[1].getLB(), 0);
             Assert.assertEquals(vars[1].getUB(), 0);

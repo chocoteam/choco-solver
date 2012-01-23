@@ -93,9 +93,9 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 			for(int j = 0; j<n; j++){
 				if(relations[i][j].instantiated()){
 					if(relations[i][j].getBooleanValue() == ESat.TRUE){
-						graph.enforceArc(i, j, this, false);
+						graph.enforceArc(i, j, this);
 					}else{
-						graph.removeArc(i, j, this, false);
+						graph.removeArc(i, j, this);
 					}
 				}else{
 					if (graph instanceof DirectedGraphVar) {
@@ -224,9 +224,9 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 
 		protected void execute(int i, int j, boolean v) throws ContradictionException {
 			if(v){
-				g.enforceArc(i, j, p, false);
+				g.enforceArc(i, j, p);
 			}else{
-				g.removeArc(i, j, p, false);
+				g.removeArc(i, j, p);
 			}
 		}
 	}

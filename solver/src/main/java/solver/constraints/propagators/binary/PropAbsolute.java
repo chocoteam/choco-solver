@@ -136,11 +136,11 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(a0, -b0), this, false);
+        vars[0].updateLowerBound(Math.min(a0, -b0), this);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this, false);
+        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this);
 
     }
 
@@ -154,12 +154,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[0].removeInterval(left, right, this, false);
+                        vars[0].removeInterval(left, right, this);
                         left = right = value;
                     }
                 }
             }
-            vars[0].removeInterval(left, right, this, false);
+            vars[0].removeInterval(left, right, this);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -169,7 +169,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].nextValue(value);
             }
-            vars[0].updateLowerBound(nlb, this, false);
+            vars[0].updateLowerBound(nlb, this);
 
             value = vars[0].getUB();
             int nub = value + 1;
@@ -179,22 +179,22 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].previousValue(value);
             }
-            vars[0].updateUpperBound(nub, this, false);
+            vars[0].updateUpperBound(nub, this);
         }
     }
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(Math.abs(remVal), this, false);
+            vars[0].removeValue(Math.abs(remVal), this);
         }
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-vars[0].getUB(), this, false);
+        vars[1].updateLowerBound(-vars[0].getUB(), this);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(vars[0].getUB(), this, false);
+        vars[1].updateUpperBound(vars[0].getUB(), this);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -207,12 +207,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[1].removeInterval(left, right, this, false);
+                        vars[1].removeInterval(left, right, this);
                         left = right = value;
                     }
                 }
             }
-            vars[1].removeInterval(left, right, this, false);
+            vars[1].removeInterval(left, right, this);
         }else{
             int value = vars[1].getLB();
             int nlb = value - 1;
@@ -222,7 +222,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].nextValue(value);
             }
-            vars[1].updateLowerBound(nlb, this, false);
+            vars[1].updateLowerBound(nlb, this);
 
             value = vars[1].getUB();
             int nub = value + 1;
@@ -232,14 +232,14 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].previousValue(value);
             }
-            vars[1].updateUpperBound(nub, this, false);
+            vars[1].updateUpperBound(nub, this);
         }
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
         if (!vars[0].contains(-remVal)) {
-        vars[1].removeValue(remVal, this, false);
-        vars[1].removeValue(-remVal, this, false);
+        vars[1].removeValue(remVal, this);
+        vars[1].removeValue(-remVal, this);
     }
     }
 
