@@ -67,15 +67,14 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// dominators finder that contains the dominator tree
 	AbstractLengauerTarjanDominatorsFinder domFinder;
 	INeighbors[] successors;
-	// check reachability
-	LinkedList<Integer> list;
-	BitSet visited;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**Ensures that graph is an arborescence rooted in node source
+	/**
+	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
+	 * Ensures that graph is an arborescence rooted in node source
 	 * @param graph
 	 * @param source root of the arborescence
 	 * @param constraint
@@ -87,8 +86,6 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;
 		successors = new INeighbors[n];
-		list = new LinkedList<Integer>();
-		visited = new BitSet(n);
 		if(simple){
 			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
 		}else{
@@ -100,8 +97,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
 			g.enforceNode(i,this);
 			g.removeArc(i,i,this);
@@ -110,8 +107,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 		structuralPruning();
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		structuralPruning();
 	}
 

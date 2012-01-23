@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.delta.IGraphDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 
@@ -69,27 +70,10 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	}
         if (envelop.removeEdge(x, y)){
         	if (reactOnModification){
-        		delta.getArcRemovalDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
+        		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y, IGraphDelta.AR);
         	}
         	EventType e = EventType.REMOVEARC;
         	notifyMonitors(e, cause);
-        	// A node has at least one arc/edge otherwise it is meaningless
-			int nx = getEnvelopGraph().getNeighborsOf(x).neighborhoodSize();
-			int ny = getEnvelopGraph().getNeighborsOf(y).neighborhoodSize();
-			if(nx<2){
-				if(nx==0){
-					removeNode(x, cause); //CPRU not idempotent
-				}else if(getKernelGraph().getActiveNodes().isActive(x)){
-					enforceArc(x,getEnvelopGraph().getNeighborsOf(x).getFirstElement(),cause); //CPRU not idempotent
-				}
-			}
-			if(ny<2){
-				if(ny==0){
-					removeNode(y, cause); //CPRU not idempotent
-				}else if(getKernelGraph().getActiveNodes().isActive(y)){
-					enforceArc(y,getEnvelopGraph().getNeighborsOf(y).getFirstElement(),cause); //CPRU not idempotent
-				}
-			}
         	return true;
         }return false;
     }
@@ -99,7 +83,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){
-            		delta.getArcEnforcingDelta().add((x+1)*getEnvelopGraph().getNbNodes()+y);
+            		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y,IGraphDelta.AE);
             	}
             	EventType e = EventType.ENFORCEARC;
             	notifyMonitors(e, cause);

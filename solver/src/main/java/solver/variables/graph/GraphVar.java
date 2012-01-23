@@ -29,7 +29,6 @@ package solver.variables.graph;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
-import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -111,7 +110,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
-                delta.getNodeRemovalDelta().add(x);
+                delta.add(x,IGraphDelta.NR);
             }
             EventType e = EventType.REMOVENODE;
             notifyMonitors(e, cause);
@@ -125,20 +124,10 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
-                    delta.getNodeEnforcingDelta().add(x);
+                    delta.add(x,IGraphDelta.NE);
                 }
                 EventType e = EventType.ENFORCENODE;
                 notifyMonitors(e, cause);
-                INeighbors succ = getEnvelopGraph().getSuccessorsOf(x);
-				INeighbors pred = getEnvelopGraph().getPredecessorsOf(x);
-				if(succ.neighborhoodSize()==0 && pred.neighborhoodSize()==1){
-					enforceArc(pred.getFirstElement(),x,cause);
-				}else if(succ.neighborhoodSize()==1 && pred.neighborhoodSize()==0){
-					enforceArc(x,succ.getFirstElement(),cause);
-				}
-                if (succ.neighborhoodSize()==0 && pred.neighborhoodSize()==0) {
-                    this.contradiction(Cause.Null, EventType.ENFORCENODE, "cannot enforce nodes with no incident arcs");
-                }
                 return true;
             }
             return false;

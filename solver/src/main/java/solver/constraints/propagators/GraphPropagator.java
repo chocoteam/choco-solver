@@ -29,12 +29,16 @@ package solver.constraints.propagators;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.recorders.IEventRecorder;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.ArcEventRecorder;
 import solver.variables.Variable;
 
 public abstract class GraphPropagator<V extends Variable> extends Propagator<V> {
 
+	public final static boolean ALWAYS_COARSE = false;
+	
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -42,13 +46,4 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
     protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
         super(vars, solver, constraint, priority, true);
     }
-
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    public AbstractFineEventRecorder makeRequest(V var, int idx, Solver solver) {
-        return new ArcEventRecorder(var, this, idx, solver);
-    }
-
 }

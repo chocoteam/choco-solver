@@ -42,6 +42,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator that ensures that a node has at least N neighbors
  * <p/>
  * BEWARE : the case where N=1 is useless because it is ensured by default
@@ -71,9 +72,6 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		int n = g.getEnvelopGraph().getNbNodes();
 		enf_nodes_proc = new NodeEnf(this);
 		rem_proc = new ArcRem(this, n);
-		if (n_neighbors==1){
-			throw new UnsupportedOperationException("useless propagator : AtLeast 1 neighbor is ensured by default ");
-		}
 	}
 
 	//***********************************************************************************
@@ -173,16 +171,14 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 		@Override
 		public void execute(int i) throws ContradictionException {
 			if (i>=n){
-				int from = i/n-1;
-				int to   = i%n;
-				prune(from);
-				prune(to);
+				prune(i/n-1);
+				prune(i%n);
 			}else{
 				throw new UnsupportedOperationException();
 			}
 		}
 		private void prune(int from) throws ContradictionException{
-			if(g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){
+			if(g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()<n_neighbors){
 				g.removeNode(from, p);
 			}else if (g.getKernelGraph().getActiveNodes().isActive(from) &&
 					g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors){

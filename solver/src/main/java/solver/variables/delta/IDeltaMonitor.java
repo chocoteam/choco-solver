@@ -41,36 +41,36 @@ import solver.variables.EventType;
  */
 public interface IDeltaMonitor<D extends IDelta> {
 
-    void update(EventType evt);
+	void update(EventType evt);
 
-    void freeze();
+	void freeze();
 
-    void unfreeze();
+	void unfreeze();
 
-    void clear();
+	void clear();
 
-    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
+	void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
 
-    public static enum Default implements IDeltaMonitor<IDelta> {
-        NONE() {
-            @Override
-            public void update(EventType evt) {}
+	public static enum Default implements IDeltaMonitor<IDelta> {
+		NONE() {
+			@Override
+			public void update(EventType evt) {}
 
-            @Override
-            public void freeze() {}
+			@Override
+			public void freeze() {}
 
-            @Override
-            public void unfreeze() {
-            }
+			@Override
+			public void unfreeze() {
+			}
 
-            @Override
-            public void clear() {
-            }
+			@Override
+			public void clear() {
+			}
 
-            @Override
-            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-            }
-        }
-    }
+			@Override
+			public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+			}
+		}
+	}
 
 }

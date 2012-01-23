@@ -55,7 +55,7 @@ public class PathTest {
 		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
 		gc.addAdHocProp(new PropOneSuccBut(g,n-1,gc,s));
 		if(path){
-			gc.addAdHocProp(new PropPathNoCycle(g,gc,s));
+			gc.addAdHocProp(new PropPathNoCycle(g,0,n-1,gc,s));
 		}
 		if(arbo){
 			gc.addAdHocProp(new PropArborescence(g,0,gc,s,true));

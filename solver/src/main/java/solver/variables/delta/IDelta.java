@@ -48,4 +48,6 @@ public interface IDelta extends Serializable{
      * @return a monitor
      */
     <D extends IDelta>IDeltaMonitor<D> getMonitor();
+
+	void clear();
 }

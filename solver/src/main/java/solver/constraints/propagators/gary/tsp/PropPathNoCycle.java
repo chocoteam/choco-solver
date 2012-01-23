@@ -34,6 +34,7 @@
 
 package solver.constraints.propagators.gary.tsp;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IStateInt;
@@ -43,13 +44,18 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-/** Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
- * */public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
+/**
+ *
+ * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * */
+public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -58,7 +64,8 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	DirectedGraphVar g;
 	int n;
 	private IntProcedure arcEnforced;
-	private IStateInt[] origin,end;
+	private IStateInt[] origin,end,size;
+	private int source,sink;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -71,43 +78,93 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropPathNoCycle(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	public PropPathNoCycle(DirectedGraphVar graph, int source, int sink, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc(this);
 		origin = new IStateInt[n];
+		size = new IStateInt[n];
 		end = new IStateInt[n];
 		for(int i=0;i<n;i++){
 			origin[i] = environment.makeInt(i);
+			size[i] = environment.makeInt(1);
 			end[i] = environment.makeInt(i);
 		}
+		this.source = source;
+		this.sink   = sink;
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		int j,start,last;
+		for(int i=0;i<n;i++){
+			end[i].set(i);
+			origin[i].set(i);
+			size[i].set(1);
+		}
 		for(int i=0;i<n;i++){
 			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 			if(j!=-1){
+//				System.out.println(i+"->"+j+" *");
 				last = end[j].get();
 				start = origin[i].get();
 				g.removeArc(last,start,this);
 				origin[last].set(start);
 				end[start].set(last);
+				size[start].add(size[j].get());
+//				if(last == sink && g.getEnvelopGraph().getPredecessorsOf(start).neighborhoodSize()>1){
+//					if(size[source].get()+size[start].get()==n){
+//						g.enforceArc(end[source].get(), start, this, false);
+//					}else{
+//						g.removeArc(end[source].get(),start,this,false);
+//					}
+//				}
+//				if(start == source && g.getEnvelopGraph().getSuccessorsOf(last).neighborhoodSize()>1){
+//					if(size[source].get()+size[origin[sink].get()].get()==n){
+//						g.enforceArc(last,origin[sink].get(),this,false);
+//					}else{
+//						g.removeArc(last,origin[sink].get(),this,false);
+//					}
+//				}
+				if(origin[sink].get()==source && size[source].get()!=n){
+					contradiction(g,"non hamiltonian path");
+				}
 			}
 		}
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if((mask & EventType.ENFORCEARC.mask) !=0){
-            eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-		}
+	//	boolean firstTime = true;
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	if(ALWAYS_COARSE){
+		propagate(0);return;
+	}
+//		if(firstTime){
+//			System.out.println("First PROPAG");
+//			firstTime = false;
+//			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+//			System.out.println("/First PROPAG");
+//		}else{
+//			System.out.println("OTHER PROPAG");
+//		try{
+//			System.out.println("PATH");
+//			for(int i=0;i<n;i++){
+//				System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
+//			}
+//		System.out.println("%%%%%%%%%%%%%");
+//		System.out.println("%%%%%%%%%%%%%");
+		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//			throw new UnsupportedOperationException();
+//		}
+//		}
 	}
 
 	@Override
@@ -145,11 +202,64 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
 			int to = i%n;
+//			System.out.println("EXEnf "+from+"->"+to);
 			int last = end[to].get();
 			int start = origin[from].get();
+//			System.out.println("REM- "+last+"->"+start);
 			g.removeArc(last,start,p);
 			origin[last].set(start);
 			end[start].set(last);
+			size[start].add(size[to].get());
+//			if(last == sink && g.getKernelGraph().getPredecessorsOf(start).neighborhoodSize()==1){
+//				System.out.println("REM** "+end[source].get()+"->"+start);
+//				System.out.println("wtf");
+//				System.out.println(g.getEnvelopGraph());
+//				g.removeArc(end[source].get(),start,p,false);
+//			}
+//			if(start == source && g.getKernelGraph().getSuccessorsOf(last).neighborhoodSize()==1){
+//				System.out.println("REM*** "+last+"->"+origin[sink].get());
+//				g.removeArc(last,origin[sink].get(),p,false);
+//			}
+//			if(last == sink && g.getEnvelopGraph().getPredecessorsOf(start).neighborhoodSize()>1){
+//				if(size[source].get()+size[start].get()==n){
+//					System.out.println("ENF* "+end[source].get()+"->"+start);
+//					g.enforceArc(end[source].get(),start,p,false);
+//				}else{
+//					for(int k=0;k<n;k++){
+//						System.out.println(k+" : "+g.getEnvelopGraph().getSuccessorsOf(k));
+//					}
+//					System.out.println("REM* "+end[source].get()+"->"+start);
+//					g.removeArc(end[source].get(),start,p,false);
+//				}
+//			}
+//			if(start == source && g.getEnvelopGraph().getSuccessorsOf(last).neighborhoodSize()>1){
+//				if(size[source].get()+size[origin[sink].get()].get()==n){
+//					System.out.println("ENF** "+last+"->"+origin[sink].get());
+//					g.enforceArc(last,origin[sink].get(),p,false);
+//				}else{
+//					System.out.println("REM** "+last+"->"+origin[sink].get());
+//					g.removeArc(last,origin[sink].get(),p,false);
+//				}
+//			}
+			if(origin[sink].get()==source && size[source].get()!=n){
+//				System.out.println(origin[sink].get()+" & "+end[source].get() + " : "+n+"!="+size[source].get());
+//				for(int k=0;k<n;k++){
+//					System.out.println(k+" : "+g.getEnvelopGraph().getSuccessorsOf(k)+" / "+size[k].get());
+//				}
+//				if(true){
+//					throw new UnsupportedOperationException();
+//				}
+				contradiction(g,"non hamiltonian path");
+			}
 		}
 	}
+
+//	private class EnfTest implements IntProcedure {
+//		@Override
+//		public void execute(int i) throws ContradictionException {
+//			int from = i/n-1;
+//			int to = i%n;
+//			System.out.println(from + "->" + to);
+//		}
+//	}
 }

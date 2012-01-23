@@ -27,6 +27,7 @@
 
 package solver.variables.delta;
 
+import solver.recorders.fine.ArcEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.OneIntDeltaMonitor;
 
@@ -58,7 +59,9 @@ public final class OneValueDelta implements IntDelta {
 
     @Override
     public void add(int value) {
-        lazyClear();
+		if(ArcEventRecorder.LAZY){
+       		lazyClear();
+		}
         this.value = value;
         set = true;
     }
@@ -75,5 +78,10 @@ public final class OneValueDelta implements IntDelta {
     @Override
     public int size() {
         return set ? 1 : 0;
+    }
+
+	@Override
+    public void clear() {
+        throw new UnsupportedOperationException();
     }
 }

@@ -4,27 +4,23 @@
 import sys, subprocess, shlex, time, threading, os, signal,re, logging
 from threading import Thread
 from os.path import join
+import database
+import MySQLdb as mdb
 
 ## ENVIRONMENT VARIABLES
-## HOME
-CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/fi/'
-
-## java class-path for rocs
-#if CHOCO_SOLVER == '':
-CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
-
-## correct class-path
-CP = '-cp .:'+CHOCO_SOLVER
+name = 'runner'
+dir = '.'
+pwd = ''
+home = '../../'
 
 ## java command
 JAVA='java -Xmx1024m -Xms1024m '# -XX:+AggressiveOpts -XX:+UseConcMarkSweepG'
-CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
+
 
 ## Number of time a problem is run
 loop = 1 # can be override
 ## time limit for a process
 timelimit = 180 #in seconds => 10min
-name = 'runner'
 
 ## regexp for statisctics
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
@@ -39,6 +35,9 @@ def readParameters(paramlist):
     global loop
     global timelimit
     global name
+    global dir
+    global pwd
+    global home
     if len(paramlist)>0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
@@ -46,13 +45,26 @@ def readParameters(paramlist):
             timelimit = int(paramlist[1]) # time limit before killing a process
         elif paramlist[0] == "-n": # subname of output files
             name = paramlist[1]
+        elif paramlist[0] == "-d": # directory of output files
+            dir = paramlist[1]
+        elif paramlist[0] == "-pwd": # user pwd for db connexion
+            pwd = paramlist[1]
+        elif paramlist[0] == "-h": # user pwd for db connexion
+            home = paramlist[1]
         readParameters(paramlist[2:])
 
 
 readParameters(sys.argv[1:])
+print home
+
+# initialize env. variables
+CHOCO_SOLVER = join(home, 'solver','target',  'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
+CP = '-cp .:'+CHOCO_SOLVER
+CMD = JAVA+' '+CP+' '+' samples.FrontEndBenchmarking'
+print CHOCO_SOLVER
 
 def buildLog(name, ext, level):
-    hdlr = logging.FileHandler('./'+name+ext)
+    hdlr = logging.FileHandler(join(dir, name+ext))
     formatter = logging.Formatter('%(message)s')
     hdlr.setFormatter(formatter)
     logger = logging.getLogger(name)
@@ -61,7 +73,7 @@ def buildLog(name, ext, level):
     return logger
 
 
-out = open('./'+name+'.txt', 'w', 10)
+out = open(join(dir, name+'.txt'), 'w', 10)
 err = buildLog(name, '.log', logging.INFO)
 
 if len(sys.argv) > 1:
@@ -70,7 +82,7 @@ if len(sys.argv) > 1:
 print ">> Run "+ str(loop) +" time(s)"
 
 def kill( process ):
-    if process.poll() == None:
+    if process.poll() is None:
         os.kill( process.pid, signal.SIGKILL )
 
 def limit( process, cutoff ):
@@ -121,8 +133,12 @@ def computeXLS(line, result, size):
         info += ""+str(stdev)+";;"
         out.write(info)
 
+def storeInDB(con, line, sid, results):
+    parts = line.split(" ", 1) # separate name of problem and parameters
+    parts = parts + [" "]
+    database.insertValues(con, sid, parts[0], parts[1], results)
 
-f = open(join('.', name+'.list'),'r')
+f = open(join(dir, name+'.list'),'r')
 
 class runit(Thread):
     def __init__ (self,args, i, j):
@@ -173,6 +189,11 @@ class runit(Thread):
 
 
 
+con = mdb.connect('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
+#con = mdb.connect('localhost', 'testuser', 'test623', 'testdb')
+database.createTables(con)
+sid = database.openSession(con)
+
 for line in f:
     if line[0] != '#' and line != '\n':
         line = line.rstrip("\n")
@@ -185,7 +206,8 @@ for line in f:
         current.join()
 
         #compute(line, current.results, current.s)
-        computeXLS(line, current.results, current.s)
+#        computeXLS(line, current.results, current.s)
+        storeInDB(con, line, sid, current.results)
         out.write('\n')
         out.flush()
 out.close()
