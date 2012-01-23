@@ -47,13 +47,13 @@ import solver.variables.IntVar;
  */
 public class PropMax extends Propagator<IntVar> {
 
-    IntVar v0, v1, v2;
+    IntVar MAX, v1, v2;
     protected final RemProc rem_proc;
 
     public PropMax(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
         super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
-        this.v0 = X;
+        this.MAX = X;
         this.v1 = Y;
         this.v2 = Z;
         rem_proc = new RemProc(this);
@@ -68,120 +68,88 @@ public class PropMax extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        filter(0);
-        filter(1);
-        filter(2);
+    public int getPropagationConditions() {
+        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            this.awakeOnInst(varIdx);
-        } else if (EventType.isInclow(mask)) {
-            this.awakeOnLow(varIdx);
-        } else if (EventType.isDecupp(mask)) {
-            this.awakeOnUpp(varIdx);
-        } else if (EventType.isRemove(mask)) {
-            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+    public void propagate(int evtmask) throws ContradictionException {
+        filter(true, true);
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            filterHoles(true, true);
         }
     }
 
-    public void filter(int idx) throws ContradictionException {
-        if (idx == 0) {
-            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this);
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
-
-            if (v0.hasEnumeratedDomain()) {
-                for (int valeur = v0.getLB(); valeur <= v0.getUB(); valeur = v0.nextValue(valeur)) {
-                    if (!v1.contains(valeur) && !v2.contains(valeur)) {
-                        v0.removeValue(valeur, this);
-                    }
+    protected void filterHoles(boolean hv1, boolean hv2) throws ContradictionException {
+        if (MAX.hasEnumeratedDomain()) {
+            for (int valeur = MAX.getLB(); valeur <= MAX.getUB(); valeur = MAX.nextValue(valeur)) {
+                if (!v1.contains(valeur) && !v2.contains(valeur)) {
+                    MAX.removeValue(valeur, this);
                 }
             }
-        } else if (idx == 1) {
-            v1.updateUpperBound(v0.getUB(), this);
-            if (v1.getLB() > v2.getUB()) {
-                v0.updateLowerBound(v1.getLB(), this);
-                v1.updateLowerBound(v0.getLB(), this);
-            }
-
+        }
+        if (hv1) {
             if (v1.hasEnumeratedDomain()) {
+                int UB = v2.getUB();
                 for (int valeur = v1.getLB(); valeur <= v1.getUB(); valeur = v1.nextValue(valeur)) {
-                    if (!v0.contains(valeur) && valeur > v2.getUB()) {
+                    if (!MAX.contains(valeur) && valeur > UB) {
                         v1.removeValue(valeur, this);
                     }
                 }
             }
-
-        } else if (idx == 2) {
-            v2.updateUpperBound(v0.getUB(), this);
-            if (v2.getLB() > v1.getUB()) {
-                v0.updateLowerBound(v2.getLB(), this);
-                v2.updateLowerBound(v0.getLB(), this);
-            }
-            if (v2.hasEnumeratedDomain()) {
-                for (int valeur = v2.getLB(); valeur <= v2.getUB(); valeur = v2.nextValue(valeur)) {
-                    if (!v0.contains(valeur) && valeur > v1.getUB()) {
-                        v2.removeValue(valeur, this);
-                    }
+        }
+        if (v2.hasEnumeratedDomain()) {
+            int UB = v1.getUB();
+            for (int valeur = v2.getLB(); valeur <= v2.getUB(); valeur = v2.nextValue(valeur)) {
+                if (!MAX.contains(valeur) && valeur > UB) {
+                    v2.removeValue(valeur, this);
                 }
             }
         }
     }
 
-    public void awakeOnInst(int idx) throws ContradictionException {
-        int val;
-        if (idx == 0) {
-            val = v0.getValue();
-            v1.updateUpperBound(val, this);
-            v2.updateUpperBound(val, this);
-            if (!v1.contains(val)) {
-                v2.instantiateTo(val, this);
-            }
-            if (!v2.contains(val)) {
-                v1.instantiateTo(val, this);
-            }
-        } else if (idx == 1) {
-            val = v1.getValue();
-            if (val >= v2.getUB()) {
-                v0.instantiateTo(val, this);
-                setPassive();
-            } else {
-                v0.updateUpperBound(Math.max(val, v2.getUB()), this);
-                v0.updateLowerBound(Math.max(val, v2.getLB()), this);
-            }
-        } else if (idx == 2) {
-            val = v2.getValue();
-            if (val >= v1.getUB()) {
-                v0.instantiateTo(val, this);
-                setPassive();
-            } else {
-                v0.updateUpperBound(Math.max(val, v1.getUB()), this);
-                v0.updateLowerBound(Math.max(val, v1.getLB()), this);
-            }
+    protected void filter(boolean low, boolean upp) throws ContradictionException {
+        boolean hasChanged;
+        // check upper bound
+        if (upp) {
+            do {
+                hasChanged = MAX.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this);
+                hasChanged |= v1.updateUpperBound(MAX.getUB(), this);
+                hasChanged |= v2.updateUpperBound(MAX.getUB(), this);
+            } while (hasChanged);
+        }
+        //then check lower bound
+        if (low || upp) {
+            do {
+                hasChanged = MAX.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
+                if (v1.getUB() < MAX.getLB()) {
+                    hasChanged |= v2.updateLowerBound(MAX.getLB(), this);
+                    if (MAX.hasEnumeratedDomain() && v2.hasEnumeratedDomain()) {
+                        filterHoles(false, true);
+                    }
+                }
+                if (v2.getUB() < MAX.getLB()) {
+                    hasChanged |= v1.updateLowerBound(MAX.getLB(), this);
+                    if (MAX.hasEnumeratedDomain() && v1.hasEnumeratedDomain()) {
+                        filterHoles(true, false);
+                    }
+                }
+            } while (hasChanged);
         }
     }
 
-    public void awakeOnUpp(int idx) throws ContradictionException {
-        if (idx == 0) {
-            v1.updateUpperBound(v0.getUB(), this);
-            v2.updateUpperBound(v0.getUB(), this);
-        } else {
-            v0.updateUpperBound(Math.max(v1.getUB(), v2.getUB()), this);
-        }
-    }
 
-    public void awakeOnLow(int idx) throws ContradictionException {
-        if (idx == 0) {
-            if (v1.getLB() > v2.getUB()) {
-                v1.updateLowerBound(v0.getLB(), this);
-            }
-            if (v2.getLB() > v1.getUB()) {
-                v2.updateLowerBound(v0.getLB(), this);
-            }
-        } else {
-            v0.updateLowerBound(Math.max(v1.getLB(), v2.getLB()), this);
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        if (EventType.isInstantiate(mask)) {
+            filter(true, true);
+        } else if (EventType.isInclow(mask)) {
+            filter(true, false);
+        } else if (EventType.isDecupp(mask)) {
+            filter(false, true);
+        }
+        if (EventType.isRemove(mask)) {
+            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
     }
 
@@ -196,7 +164,7 @@ public class PropMax extends Propagator<IntVar> {
             }
         } else {
             if (!v1.contains(x) && !v2.contains(x)) {
-                v0.removeValue(x, this);
+                MAX.removeValue(x, this);
             }
         }
     }
@@ -204,7 +172,7 @@ public class PropMax extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            if (v0.getValue() != Math.max(v1.getValue(), v2.getValue())) {
+            if (MAX.getValue() != Math.max(v1.getValue(), v2.getValue())) {
                 return ESat.FALSE;
             } else {
                 return ESat.TRUE;
