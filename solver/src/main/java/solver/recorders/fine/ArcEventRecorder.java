@@ -97,99 +97,107 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 	public boolean execute() throws ContradictionException {
 		if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-            int evtmask_ = evtmask;
-            // for concurrent modification..
-            deltamon.freeze();
-            this.evtmask = 0; // and clean up mask
-            propagator.fineERcalls++;
-            assert (propagator.isActive()) : this + " is not active";
-            propagator.propagate(this, idxVinP, evtmask_);
-            deltamon.unfreeze();
-        }
-        return true;
-    }
+			int evtmask_ = evtmask;
+			// for concurrent modification..
+			deltamon.freeze();
+			this.evtmask = 0; // and clean up mask
+			propagator.fineERcalls++;
+			assert (propagator.isActive()) : this + " is not active";
+			propagator.propagate(this, idxVinP, evtmask_);
+			deltamon.unfreeze();
+		}
+		return true;
+	}
 
-    @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
+	@Override
+	public void beforeUpdate(V var, EventType evt, ICause cause) {
+		// nothing required here
+	}
 
-    @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
-        // Only notify constraints that filter on the specific event received
-        assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+	@Override
+	public void afterUpdate(V var, EventType evt, ICause cause) {
+		// Only notify constraints that filter on the specific event received
+		assert cause != null : "should be Cause.Null instead";
+		if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
+			if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
 //            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
-                // 1. clear the structure if necessary
-                if (LAZY) {
-                    if (timestamp - AbstractSearchLoop.timeStamp != 0) {
-                        this.evtmask = 0;
-                        deltamon.clear();
-                        timestamp = AbstractSearchLoop.timeStamp;
-                    }
-                }
-                // 2. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagator.decArity();
-                }
-                // 3. record the event and values removed
-                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmask |= evt.strengthened_mask;
-                }
-                deltamon.update(evt);
-                // 4. schedule this
-                if (!enqueued()) {
-                    scheduler.schedule(this);
-                }
-            }
-        }
-    }
+				// 1. clear the structure if necessary
+				if (LAZY) {
+					if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+						this.evtmask = 0;
+						deltamon.clear();
+						timestamp = AbstractSearchLoop.timeStamp;
+					}
+				}
+				// 2. if instantiation, then decrement arity of the propagator
+				if (EventType.anInstantiationEvent(evt.mask)) {
+					propagator.decArity();
+				}
+				// 3. record the event and values removed
+				if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+					evtmask |= evt.strengthened_mask;
+				}
+				deltamon.update(evt);
+				// 4. schedule this
+				if (!enqueued()) {
+					scheduler.schedule(this);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
+	@Override
+	public void contradict(V var, EventType evt, ICause cause) {
+		// nothing required here
+	}
 
-    public void virtuallyExecuted(){
-        this.evtmask = 0;
-        deltamon.unfreeze();
-        if(enqueued){
-            scheduler.remove(this);
-        }
-    }
+	public void virtuallyExecuted(){
+		this.evtmask = 0;
+		if(LAZY){
+			variable.getDelta().lazyClear();
+			if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+				this.evtmask = 0;
+				deltamon.clear();
+				timestamp = AbstractSearchLoop.timeStamp;
+			}
+		}
+		deltamon.unfreeze();
+		if(enqueued){
+			scheduler.remove(this);
+		}
+	}
 
-    @Override
-    public void flush() {
-        this.evtmask = 0;
-        deltamon.clear();
-    }
+	@Override
+	public void flush() {
+		this.evtmask = 0;
+		deltamon.clear();
+	}
 
-    @Override
-    public void enqueue() {
-        enqueued = true;
-        propagator.incNbRecorderEnqued();
-    }
+	@Override
+	public void enqueue() {
+		enqueued = true;
+		propagator.incNbRecorderEnqued();
+	}
 
-    @Override
-    public void deque() {
-        enqueued = false;
-        propagator.decNbRecrodersEnqued();
-    }
+	@Override
+	public void deque() {
+		enqueued = false;
+		propagator.decNbRecrodersEnqued();
+	}
 
-    @Override
-    public void activate() {
-        variable.activate(this);
-    }
+	@Override
+	public void activate() {
+		variable.activate(this);
+	}
 
-    @Override
-    public void desactivate() {
-        variable.desactivate(this);
-        flush();
-    }
+	@Override
+	public void desactivate() {
+		variable.desactivate(this);
+		flush();
+	}
 
-    @Override
-    public String toString() {
-        return variable + " -> " + propagator;
-    }
+	@Override
+	public String toString() {
+		return variable + " -> " + propagator;
+	}
 }
