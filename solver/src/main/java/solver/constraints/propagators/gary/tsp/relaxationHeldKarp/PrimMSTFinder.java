@@ -31,10 +31,12 @@ import solver.constraints.propagators.gary.tsp.heaps.Heap;
 import solver.constraints.propagators.gary.tsp.heaps.VerySimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
+
 import java.util.BitSet;
 
-public class PrimMSTFinder extends AbstractMSTFinder{
+public class PrimMSTFinder extends AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -63,11 +65,12 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	// METHODS
 	//***********************************************************************************
 
-	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
+	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
 		g = graph;
 		ma = propHK.getMandatoryArcsBitSet();
 		for(int i=0;i<n;i++){
-			Tree.getNeighborsOf(i).clear();
+			Tree.getSuccessorsOf(i).clear();
+			Tree.getPredecessorsOf(i).clear();
 		}
 		this.costs = costs;
 		heap.clear();
@@ -95,11 +98,28 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	}
 
 	private void addArc(int from, int to) {
-		Tree.addEdge(from,to);
-		treeCost += costs[from][to];
-		if(FILTER){
-			if(!(ma.get(from*n+to)||ma.get(from+to*n))){
-				maxTArc = Math.max(maxTArc, costs[from][to]);
+		if(from<n){
+			if(Tree.arcExists(to,from)){
+				return;
+			}
+			Tree.addArc(from,to);
+			treeCost += costs[from][to];
+			if(FILTER){
+				if(!ma.get(from*n+to)){
+					maxTArc = Math.max(maxTArc, costs[from][to]);
+				}
+			}
+		}else{
+			from -= n;
+			if(Tree.arcExists(from,to)){
+				return;
+			}
+			Tree.addArc(to,from);
+			treeCost += costs[to][from];
+			if(FILTER){
+				if(!ma.get(to*n+from)){
+					maxTArc = Math.max(maxTArc, costs[to][from]);
+				}
 			}
 		}
 		tSize++;
@@ -109,13 +129,23 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 	private void addNode(int i) {
 		if(!inTree.get(i)){
 			inTree.set(i);
-			INeighbors nei = g.getNeighborsOf(i);
+			INeighbors nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!inTree.get(j)){
-					if(ma.get(i*n+j)||ma.get(i+j*n)){
+					if(ma.get(i*n+j)){
 						heap.add(j,minVal,i);
 					}else{
 						heap.add(j,costs[i][j],i);
+					}
+				}
+			}
+			nei = g.getPredecessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!inTree.get(j)){
+					if(ma.get(j*n+i)){
+						heap.add(j,minVal,i+n);
+					}else{
+						heap.add(j,costs[j][i],i+n);
 					}
 				}
 			}
@@ -127,9 +157,9 @@ public class PrimMSTFinder extends AbstractMSTFinder{
 			double delta = UB-treeCost;
 			INeighbors nei;
 			for(int i=0;i<n;i++){
-				nei = g.getNeighborsOf(i);
+				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if((!Tree.edgeExists(i,j)) && costs[i][j]-maxTArc > delta){
+					if((!Tree.arcExists(i, j)) && costs[i][j]-maxTArc > delta){
 						propHK.remove(i,j);
 					}
 				}

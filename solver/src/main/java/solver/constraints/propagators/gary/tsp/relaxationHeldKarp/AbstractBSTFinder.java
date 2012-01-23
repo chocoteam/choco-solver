@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 import choco.kernel.memory.IStateInt;
 import solver.variables.graph.INeighbors;
 
-public abstract class AbstractBSTFinder extends AbstractMSTFinder{
+public abstract class AbstractBSTFinder extends AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -40,7 +40,6 @@ public abstract class AbstractBSTFinder extends AbstractMSTFinder{
 	protected IStateInt nR;
 	protected IStateInt[] sccOf;
 	protected INeighbors[] outArcs;
-	protected int[] minCostOutArcs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -51,6 +50,5 @@ public abstract class AbstractBSTFinder extends AbstractMSTFinder{
 		this.nR = nR;
 		this.sccOf = sccOf;
 		this.outArcs = outArcs;
-		minCostOutArcs = new int[n];
 	}
 }

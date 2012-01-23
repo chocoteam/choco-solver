@@ -32,11 +32,10 @@ import solver.constraints.propagators.gary.tsp.heaps.Heap;
 import solver.constraints.propagators.gary.tsp.heaps.VerySimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
+import solver.variables.graph.directedGraph.DirectedGraph;
 import java.util.BitSet;
 
-public class PrimBSTFinder extends AbstractMSTFinder{
+public class PrimBSTFinder extends AbstractBSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -49,38 +48,33 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	private int tSize;
 	private double minVal;
 	double maxTArc;
-	protected IStateInt nR;
-	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
-	protected double[] minCostOutArc;
 	protected int currentSCC;
 	private int start;
-	private final static boolean FILTER = false;
+	private final static boolean FILTER = true;
+	private double[] minCostOutArc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	public PrimBSTFinder(int nbNodes, HeldKarp propagator,int start, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator);
+		super(nbNodes,propagator,nR,sccOf,outArcs);
 		heap = new VerySimpleHeap(nbNodes);
 		inTree = new BitSet(n);
-		this.nR = nR;
-		this.sccOf = sccOf;
-		this.outArcs = outArcs;
 		this.start   = start;
-		minCostOutArc= new double[n];
+		minCostOutArc = new double[n];
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
+	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
 		g = graph;
 		ma = propHK.getMandatoryArcsBitSet();
 		for(int i=0;i<n;i++){
-			Tree.getNeighborsOf(i).clear();
+			Tree.getSuccessorsOf(i).clear();
+			Tree.getPredecessorsOf(i).clear();
 		}
 		this.costs = costs;
 		heap.clear();
@@ -93,10 +87,13 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 
 	private void prim() throws ContradictionException {
 		if(FILTER){
-			maxTArc = propHK.getMinArcVal();
+			maxTArc = minVal;
 		}
 		currentSCC = sccOf[start].get();
 		addNode(start);
+		while(tSize<n-1 && heap.isEmpty()){
+			nextSCC();
+		}
 		int from,to;
 		while (tSize<n-1 && !heap.isEmpty()){
 			while (tSize<n-1 && !heap.isEmpty()){
@@ -104,7 +101,7 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 				from = heap.getMate(to);
 				addArc(from,to);
 			}
-			if(tSize<n-1){
+			while(tSize<n-1 && heap.isEmpty()){
 				nextSCC();
 			}
 		}
@@ -117,16 +114,15 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 		if(outArcs[currentSCC].neighborhoodSize()==0){
 			propHK.contradiction();
 		}
-		int smallN = n/2;
 		int from,to;
 		int firstArc = outArcs[currentSCC].getFirstElement();
-		int minFrom = firstArc/smallN-1;
-		int minTo   = firstArc%smallN+smallN;
+		int minFrom = firstArc/n-1;
+		int minTo   = firstArc%n;
 		double minVal = costs[minFrom][minTo];
 		for(int out=outArcs[currentSCC].getFirstElement();out>=0;out=outArcs[currentSCC].getNextElement()){
-			from = out/smallN-1;
-			to   = out%smallN+smallN;
-			if(propHK.getMandatorySuccessorOf(from)==out%smallN){
+			from = out/n-1;
+			to   = out%n;
+			if(propHK.getMandatorySuccessorOf(from)==to){
 				minVal = costs[from][to];
 				minFrom = from;
 				minTo  = to;
@@ -139,19 +135,42 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 			}
 		}
 		minCostOutArc[currentSCC] = minVal;
-		Tree.addEdge(minFrom,minTo);
+		Tree.addArc(minFrom,minTo);
 		treeCost += minVal;
 		tSize++;
-		currentSCC = sccOf[minTo-smallN].get();
+		currentSCC = sccOf[minTo].get();
 		addNode(minTo);
 	}
 
 	private void addArc(int from, int to) {
-		Tree.addEdge(from,to);
-		treeCost += costs[from][to];
-		if(FILTER){
-			if(!(ma.get(from*n+to)||ma.get(from+to*n))){
-				maxTArc = Math.max(maxTArc, costs[from][to]);
+		if(from<n){
+			if(sccOf[from].get()!=sccOf[to].get()){
+				throw new UnsupportedOperationException();
+			}
+			if(Tree.arcExists(to,from)){
+				return;
+			}
+			Tree.addArc(from,to);
+			treeCost += costs[from][to];
+			if(FILTER){
+				if(!ma.get(from*n+to)){
+					maxTArc = Math.max(maxTArc, costs[from][to]);
+				}
+			}
+		}else{
+			from -= n;
+			if(sccOf[from].get()!=sccOf[to].get()){
+				throw new UnsupportedOperationException();
+			}
+			if(Tree.arcExists(from,to)){
+				return;
+			}
+			Tree.addArc(to, from);
+			treeCost += costs[to][from];
+			if(FILTER){
+				if(!ma.get(to*n+from)){
+					maxTArc = Math.max(maxTArc, costs[to][from]);
+				}
 			}
 		}
 		tSize++;
@@ -159,21 +178,25 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 	}
 
 	private void addNode(int i) {
-		int y;
-		int smallN = n/2;
 		if(!inTree.get(i)){
 			inTree.set(i);
-			INeighbors nei = g.getNeighborsOf(i);
+			INeighbors nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				y = j;
-				if(y>=smallN){
-					y-=smallN;
-				}
-				if((!inTree.get(j)) && sccOf[y].get()==currentSCC){
-					if(ma.get(i*n+j)||ma.get(i+j*n)){
+				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
+					if(ma.get(i*n+j)){
 						heap.add(j,minVal,i);
 					}else{
 						heap.add(j,costs[i][j],i);
+					}
+				}
+			}
+			nei = g.getPredecessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
+					if(ma.get(j*n+i)){
+						heap.add(j,minVal,i+n);
+					}else{
+						heap.add(j,costs[j][i],i+n);
 					}
 				}
 			}
@@ -184,24 +207,15 @@ public class PrimBSTFinder extends AbstractMSTFinder{
 		if(FILTER){
 			double delta = UB-treeCost;
 			INeighbors nei;
-			int x,y;
-			int smallN = n/2;
 			for(int i=0;i<n;i++){
-				nei = g.getNeighborsOf(i);
+				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if((!Tree.edgeExists(i,j))){
-						if(i>=smallN){
-							x=j;
-							y=i-smallN;
-						}else{
-							x=i;
-							y=j-smallN;
-						}
-						if(sccOf[x].get()==sccOf[y].get()){
+					if((!Tree.arcExists(i,j))){
+						if(sccOf[i].get()==sccOf[j].get()){
 							if(costs[i][j]-maxTArc > delta){
 								propHK.remove(i,j);
 							}
-						}else if(costs[i][j]-minCostOutArc[sccOf[x].get()] > delta){
+						}else if(costs[i][j]-minCostOutArc[sccOf[i].get()] > delta){
 							propHK.remove(i,j);
 						}
 					}

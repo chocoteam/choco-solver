@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 public abstract class AbstractMSTFinder {
@@ -38,10 +39,10 @@ public abstract class AbstractMSTFinder {
 	//***********************************************************************************
 
 	// INPUT
-	protected UndirectedGraph g;	// graph
+	protected DirectedGraph g;	// graph
 	protected int n;				// number of nodes
 	// OUTPUT
-	protected UndirectedGraph Tree;
+	protected DirectedGraph Tree;
 	protected double treeCost;
 	// PROPAGATOR
 	protected HeldKarp propHK;
@@ -52,7 +53,7 @@ public abstract class AbstractMSTFinder {
 
 	public AbstractMSTFinder(int nbNodes, HeldKarp propagator) {
 		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
+		Tree = new DirectedGraph(n,GraphType.LINKED_LIST);
 		propHK = propagator;
 	}
 
@@ -60,7 +61,7 @@ public abstract class AbstractMSTFinder {
 	// METHODS
 	//***********************************************************************************
 
-	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
+	public abstract void computeMST(double[][] costMatrix, DirectedGraph graph) throws ContradictionException;
 
 	public abstract void performPruning(double UB) throws ContradictionException;
 
@@ -68,7 +69,7 @@ public abstract class AbstractMSTFinder {
 	// ACCESSORS
 	//***********************************************************************************
 
-	public UndirectedGraph getMST() {
+	public DirectedGraph getMST() {
 		return Tree;
 	}
 	public double getBound() {

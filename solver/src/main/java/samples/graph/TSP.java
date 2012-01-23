@@ -168,11 +168,11 @@ public class TSP extends AbstractProblem{
 //		}
 		// MST-based HK
 		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
-		gc.addAdHocProp(propHK_mst);
+//		gc.addAdHocProp(propHK_mst);
 
 		// BST-based HK
-//		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
-//		gc.addAdHocProp(propHK_bst);
+		PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver, nR, sccOf, outArcs);
+		gc.addAdHocProp(propHK_bst);
 
 //		if(time){
 //			start = new IntVar[n];
@@ -317,7 +317,7 @@ public class TSP extends AbstractProblem{
 //				System.exit(0);
 //			}
 			TSP tspRun = new TSP(dist,name,noVal,best);
-			tspRun.configParameters(0,false);
+			tspRun.configParameters(4,false);
 			tspRun.execute();
 //			System.exit(0);
 //			tspRun = new TSP(dist,name,noVal,best);

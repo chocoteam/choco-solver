@@ -1,29 +1,29 @@
 /**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
- *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
- *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+*  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+*  All rights reserved.
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*
+*      * Redistributions of source code must retain the above copyright
+*        notice, this list of conditions and the following disclaimer.
+*      * Redistributions in binary form must reproduce the above copyright
+*        notice, this list of conditions and the following disclaimer in the
+*        documentation and/or other materials provided with the distribution.
+*      * Neither the name of the Ecole des Mines de Nantes nor the
+*        names of its contributors may be used to endorse or promote products
+*        derived from this software without specific prior written permission.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+*  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+*  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+*  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+*  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+*  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 
@@ -33,12 +33,11 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
-public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
+public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -102,16 +101,17 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 			p[i] = i;
 			rank[i] = 0;
 			ccTp[i] = i;
-			Tree.getNeighborsOf(i).clear();
+			Tree.getPredecessorsOf(i).clear();
+			Tree.getSuccessorsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size+=g.getNeighborsOf(i).neighborhoodSize();
+			size+=g.getSuccessorsOf(i).neighborhoodSize();
 		}
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
 		INeighbors nei;
 		for(int i=0;i<n;i++){
-			nei =g.getNeighborsOf(i);
+			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				integers[idx]=i*n+j;
 				costs[i*n+j] = costMatrix[i][j];
@@ -136,7 +136,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 	// METHODS
 	//***********************************************************************************
 
-	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
+	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
 		g = graph;
 		ma = propHK.getMandatoryArcsList();
 		sortArcs(costs);
@@ -252,7 +252,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 			rTo   = FIND(to);
 			if(rFrom != rTo){
 				LINK(rFrom, rTo);
-				Tree.addEdge(from, to);
+				Tree.addArc(from, to);
 				updateCCTree(rFrom, rTo,val);
 				treeCost += costs[arc];
 				tSize++;
@@ -279,7 +279,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 			rTo   = FIND(to);
 			if(rFrom != rTo){
 				LINK(rFrom, rTo);
-				Tree.addEdge(from, to);
+				Tree.addArc(from, to);
 				cost = costs[sortedArcs[idx]];
 				updateCCTree(rFrom, rTo, cost);
 				if(cost > maxTArc){
@@ -305,6 +305,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 		ccTp[rto] = newNode;
 		ccTEdgeCost[newNode] = cost;
 	}
+
 	private void LINK(int x, int y) {
 		if(rank[x]>rank[y]){
 			p[y] = p[x];
@@ -315,12 +316,14 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder{
 			rank[y]++;
 		}
 	}
+	
 	private int FIND(int i) {
 		if(p[i]!=i){
 			p[i] = FIND(p[i]);
 		}
 		return p[i];
 	}
+	
 //	private int getLCA(int i, int j) {
 //		BitSet marked = new BitSet(ccN);
 //		marked.set(i);

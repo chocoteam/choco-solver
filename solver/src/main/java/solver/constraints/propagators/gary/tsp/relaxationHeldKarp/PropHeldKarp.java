@@ -26,6 +26,7 @@
  */
 
 package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
@@ -40,8 +41,8 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
@@ -51,7 +52,7 @@ import java.util.BitSet;
  * @PropAnn(tested = {BENCHMARK})
  * @param <V>
  */
-public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp{
+public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -62,13 +63,9 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	int source, sink;
 	int n;
 	int[][] originalCosts;
-	// ASTP->TSP transfo
-	UndirectedGraph g2;
-	int source2,sink2;
-	int n2;
 	double[][] costs;
-	IStateDouble[] nodePenalities;
-	UndirectedGraph mst;
+	IStateDouble[] inPenalities,outPenalities;
+	DirectedGraph mst;
 	TIntArrayList mandatoryArcsList;
 	BitSet mandatoryArcsBitSet;
 	private double step;
@@ -87,38 +84,39 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		super((V[]) new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
-		n2 = 2*n;
 		obj = cost;
 		source = from;
 		sink   = to;
-		sink2 = sink;
-		source2 = source+n;
 		originalCosts = costMatrix;
-		costs = new double[n2][n2];
-		g2 = new UndirectedGraph(n2, GraphType.LINKED_LIST);
-		nodePenalities = new IStateDouble[n2];
-		for(int i=0;i<n2;i++){
-			nodePenalities[i] = environment.makeFloat(0);
+		costs = new double[n][n];
+		inPenalities = new IStateDouble[n];
+		outPenalities = new IStateDouble[n];
+		for(int i=0;i<n;i++){
+			inPenalities[i] = environment.makeFloat(0);
+			outPenalities[i] = environment.makeFloat(0);
 		}
 		totalPenalities= environment.makeFloat(0);
 		mandatoryArcsList  = new TIntArrayList();
-		mandatoryArcsBitSet= new BitSet(n2*n2);
+		mandatoryArcsBitSet= new BitSet(n*n);
 	}
 
 
 	/** MST based HK */
 	public static PropHeldKarp mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n2,phk);
-		phk.HK = new PrimMSTFinder(phk.n2,phk);
+		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
+//		phk.HKfilter = new PrimMSTFinder(phk.n,phk);
+		phk.HK = new PrimMSTFinder(phk.n,phk);
 		return phk;
 	}
 
 	/** BST based HK */
 	public static PropHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n2,phk,nR,sccOf,outArcs);
-		phk.HK = new PrimBSTFinder(phk.n2,phk,from,nR,sccOf,outArcs);
+		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
+//		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
+//		phk.HKfilter = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
+		phk.HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
 		return phk;
 	}
 
@@ -134,11 +132,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				costs[i][j+n] = originalCosts[i][j] + nodePenalities[i].get() + nodePenalities[j+n].get();
-				costs[j+n][i] = costs[i][j+n];
+				costs[i][j] = originalCosts[i][j] + outPenalities[i].get() + inPenalities[j].get();
 			}
-			costs[i][i+n] = nodePenalities[i].get() + nodePenalities[i+n].get();
-			costs[i+n][i] = costs[i][i+n];
 		}
 		HK_Pascals();
 	}
@@ -150,7 +145,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		double bestHKB;
 		boolean improved;
 		int count = 2;
-		HKfilter.computeMST(costs,g2);
+		HKfilter.computeMST(costs,g.getEnvelopGraph());
 		hkb = HKfilter.getBound()-totalPenalities.get();
 		bestHKB = hkb;
 		mst = HKfilter.getMST();
@@ -162,7 +157,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		for(int iter=3;iter>0;iter--){
 			improved = false;
 			for(int i=n;i>0;i--){
-				HK.computeMST(costs,g2);
+				HK.computeMST(costs,g.getEnvelopGraph());
 				hkb = HK.getBound()-totalPenalities.get();
 				if(hkb>bestHKB+0.01){
 					bestHKB = hkb;
@@ -188,13 +183,13 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 						return;
 					}
 				}
-				// DO NOT FILTER HERE TO FASTEN CONVERGENCE
+				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE
 				//	HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
 				updateStep(hkb,alpha);
 				HKPenalities();
 				updateCostMatrix();
 			}
-			HKfilter.computeMST(costs,g2);
+			HKfilter.computeMST(costs,g.getEnvelopGraph());
 			hkb = HKfilter.getBound()-totalPenalities.get();
 			if(hkb>bestHKB+0.1){
 				bestHKB = hkb;
@@ -240,52 +235,61 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	//***********************************************************************************
 
 	private void clearStructures() {
-//		totalPenalities = 0;
 		mandatoryArcsList.clear();
 		mandatoryArcsBitSet.clear();
-		for(int i=0;i<n2;i++){
+//		for(int i=0;i<n2;i++){
 //			nodePenalities[i] = 0;
-			g2.getNeighborsOf(i).clear();
-		}
+//			g2.getNeighborsOf(i).clear();
+//		}
 	}
 	private void rebuildGraph() {
 		INeighbors nei;
 		for(int i=0;i<n;i++){
-			g2.addEdge(i,i+n);
-			mandatoryArcsList.add(i*n2+(i+n));
-			mandatoryArcsBitSet.set(i*n2+(i+n));
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				g2.addEdge(i,j+n);
-			}
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				mandatoryArcsList.add(i*n2+(j+n));
-				mandatoryArcsBitSet.set(i*n2+(j+n));
+				mandatoryArcsList.add(i*n+(j));
+				mandatoryArcsBitSet.set(i*n+(j));
 			}
 		}
 	}
 	private void updateStep(double hkb,double alpha) {
 		double nb2viol = 0.0001;
 		double target = obj.getUB();
-		int deg;
-		for(int i=0;i<n2;i++){
-			if(i!=source2 && i!=sink2){
-				deg = mst.getNeighborsOf(i).neighborhoodSize();
-				nb2viol += (2-deg)*(2-deg);
+		int inDeg,outDeg;
+		for(int i=0;i<n;i++){
+			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
+			outDeg = mst.getSuccessorsOf(i).neighborhoodSize();
+			if(i==source){
+				nb2viol += (1-outDeg)*(1-outDeg);
+			}else if(i==sink){
+				nb2viol += (1-inDeg)*(1-inDeg);
+			}else{
+				nb2viol += (1-inDeg)*(1-inDeg)+(1-outDeg)*(1-outDeg);
 			}
 		}
 		step = alpha*(target-hkb)/nb2viol;
 	}
 	private void HKPenalities() {
 		double totalPenalities = 0;
-		for(int i=0;i<n2;i++){
-			if(i!=source2 && i!=sink2){
-				nodePenalities[i].add((mst.getNeighborsOf(i).neighborhoodSize()-2)*step);
-				totalPenalities += nodePenalities[i].get()*2;
+		int inDeg,outDeg;
+		for(int i=0;i<n;i++){
+			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
+			outDeg = mst.getSuccessorsOf(i).neighborhoodSize();
+			if(i==source){
+				outPenalities[i].add((outDeg-1)*step);
+				if(inPenalities[i].get()!=0){
+					throw new UnsupportedOperationException();
+				}
+			}else if(i==sink){
+				inPenalities[i].add((inDeg-1)*step);
+				if(outPenalities[i].get()!=0){
+					throw new UnsupportedOperationException();
+				}
 			}else{
-				nodePenalities[i].set(0);
+				inPenalities[i].add((inDeg-1)*step);
+				outPenalities[i].add((outDeg-1)*step);
 			}
+			totalPenalities += inPenalities[i].get()+outPenalities[i].get();
 		}
 		this.totalPenalities.set(totalPenalities);
 	}
@@ -294,26 +298,17 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				costs[i][j+n] = originalCosts[i][j] + nodePenalities[i].get() + nodePenalities[j+n].get();
-				costs[j+n][i] = costs[i][j+n];
+				costs[i][j] = originalCosts[i][j] + outPenalities[i].get() + inPenalities[j].get();
 			}
-			costs[i][i+n] = nodePenalities[i].get() + nodePenalities[i+n].get();
-			costs[i+n][i] = costs[i][i+n];
 		}
 	}
 	private void checkExtremities() {
 		String error = "";
-		if(mst.getNeighborsOf(source2).neighborhoodSize()!=1){
+		if(mst.getPredecessorsOf(source).neighborhoodSize()!=0){
 			error = "error source2 wrong degree";
 		}
-		if(mst.getNeighborsOf(sink2).neighborhoodSize()!=1){
+		if(mst.getSuccessorsOf(sink).neighborhoodSize()!=0){
 			error = "error sink2 wrong degree";
-		}
-		if(mst.getNeighborsOf(source2).getFirstElement()!=source){
-			error = "error bad link source - source+n";
-		}
-		if(mst.getNeighborsOf(sink2).getFirstElement()!=sink+n){
-			error = "error bad link sink - sink+n";
 		}
 		if(error!=""){
 			throw new UnsupportedOperationException(error);
@@ -323,34 +318,23 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		if(!forceTour){
 			return false;
 		}
-		for(int i=0;i<n2;i++){
-			if(i!=source2 && i!=sink2){
-				if(2!=mst.getNeighborsOf(i).neighborhoodSize()){
-					return false;
-				}
-			}else{
-				if(1!=mst.getNeighborsOf(i).neighborhoodSize()){
-					return false;
-				}
-			}
-		}
-		return true;
+		//TODO pas sur que ce soit utile
+		return false;
 	}
 	private void forceTourInstantiation() throws ContradictionException {
-		int next;
-		INeighbors nei;
-		for(int i=0;i<n-1;i++){
-			nei = mst.getNeighborsOf(i);
-			next = nei.getFirstElement();
-			if(next == i+n){
-				next = nei.getNextElement();
-			}
-			if(next<0){
-				throw new UnsupportedOperationException("error tour not found");
-			}
-			next -= n;
-			g.enforceArc(i,next,this);
-		}
+		throw new UnsupportedOperationException("error tour not found");
+//		int next;
+//		INeighbors nei;
+//		for(int i=0;i<n;i++){
+//			nei = mst.getSuccessorsOf(i);
+//			next = nei.getFirstElement();
+//			if(i!=sink){
+//				if(next<0){
+//					throw new UnsupportedOperationException("error tour not found");
+//				}
+//				g.enforceArc(i,next,this);
+//			}
+//		}
 	}
 
 	//***********************************************************************************
@@ -358,19 +342,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	//***********************************************************************************
 
 	public void remove(int from, int to) throws ContradictionException {
-		g2.removeEdge(from, to);
-		if(from==to+n || from+n==to){
-			contradiction(g,"mst failure");
-		}
-		if(from<n){
-			if(g.removeArc(from,to-n,this)){
-				nbRem++;
-			}
-		}else{
-			if(g.removeArc(to,from-n,this)){
-				nbRem++;
-			}
-		}
+		g.removeArc(from,to,this);
+		nbRem++;
 	}
 	public void contradiction() throws ContradictionException {
 		contradiction(g,"mst failure");
