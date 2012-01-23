@@ -1,0 +1,71 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+## ALL INTERVAL SERIES
+samples.AllIntervalSeries -o 500
+##
+samples.AllIntervalSeries -o 1000
+##
+## BALANCED INCOMPLETE BLOCK DESIGNS
+samples.BIBD -v 7 -k 3 -l 20
+##
+samples.BIBD -v 7 -k 3 -l 60
+##
+## CAR SEQUENCING
+#samples.CarSequencing -d myPb
+##
+samples.CarSequencing -d P4_72
+##
+## GOLOMB RULER
+samples.GolombRuler -m 9 -c BC
+##
+samples.GolombRuler -m 10 -c BC
+##
+## LATIN SQUARE
+samples.LatinSquare -n 30
+##
+## LATIN SQUARE
+samples.LatinSquare -n 40
+##
+## PARTITION PROBLEM
+samples.Partition -n 48
+##
+samples.Partition -n 64
+##
+## PHOTO
+samples.Photo -d large
+##
+## FAMOUS NQUEEN, my favourite
+samples.nqueen.NQueenBinary -q 12
+##
+samples.nqueen.NQueenGlobal -q 400
+##
+## MAGIC SERIES
+samples.MagicSeries -n 400
+##
+samples.MagicSeries -n 500
+##
+## MAGIC SQUARE
+samples.MagicSquare -n 5 -c BC
+##
+samples.MagicSquare -n 7 -c BC
+##
+## SOCIAL GOLFER
+samples.SocialGolfer -g 5 -w 7 -s 3
+##
+samples.SocialGolfer -g 5 -w 4 -s 3
+##
+## LANGFORD NUMBER
+samples.Langford -k 3 -n 17
+##
+## SCHUR LEMMA
+samples.SchurLemma -k 4 -n 44
+##
+## AIR PLANE LANDING
+samples.AirPlaneLanding -d airland1
