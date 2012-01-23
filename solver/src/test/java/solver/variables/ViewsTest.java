@@ -400,7 +400,7 @@ public class ViewsTest {
     public void test5() {
         // ~all-interval series
         int k = 5;
-        for (int seed = 5; seed < 99; seed ++) {
+        for (int seed = 0; seed < 99; seed ++) {
             Solver ref = new Solver();
             Solver solver = new Solver();
             {
