@@ -96,6 +96,18 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         this.makeList(this);
     }
 
+    public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
+        super(name, solver);
+        IEnvironment env = solver.getEnvironment();
+        OFFSET = offset;
+        int capacity = values.capacity();
+        this.VALUES = values.copy();
+        this.LB = env.makeInt(0);
+        this.UB = env.makeInt(capacity - 1);
+        this.SIZE = env.makeInt(values.size());
+        this.makeList(this);
+    }
+
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
         super(name, solver);
         IEnvironment env = solver.getEnvironment();

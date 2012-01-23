@@ -124,7 +124,7 @@ public class Sum extends IntConstraint<IntVar> {
             if (coeffs[i] != -1) {
                 x[--e] = Views.scale(vars[i], -coeffs[i]);
             } else {
-                x[--e] = vars[i];
+                x[--e] = Views.minus(vars[i]);
             }
         }
 
