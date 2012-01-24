@@ -44,10 +44,8 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
@@ -55,6 +53,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
  *
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
@@ -101,7 +100,7 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int j,start,last;
+		int j;
 		for(int i=0;i<n;i++){
 			end[i].set(i);
 			origin[i].set(i);
@@ -110,61 +109,17 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		for(int i=0;i<n;i++){
 			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 			if(j!=-1){
-//				System.out.println(i+"->"+j+" *");
-				last = end[j].get();
-				start = origin[i].get();
-				g.removeArc(last,start,this);
-				origin[last].set(start);
-				end[start].set(last);
-				size[start].add(size[j].get());
-//				if(last == sink && g.getEnvelopGraph().getPredecessorsOf(start).neighborhoodSize()>1){
-//					if(size[source].get()+size[start].get()==n){
-//						g.enforceArc(end[source].get(), start, this, false);
-//					}else{
-//						g.removeArc(end[source].get(),start,this,false);
-//					}
-//				}
-//				if(start == source && g.getEnvelopGraph().getSuccessorsOf(last).neighborhoodSize()>1){
-//					if(size[source].get()+size[origin[sink].get()].get()==n){
-//						g.enforceArc(last,origin[sink].get(),this,false);
-//					}else{
-//						g.removeArc(last,origin[sink].get(),this,false);
-//					}
-//				}
-				if(origin[sink].get()==source && size[source].get()!=n){
-					contradiction(g,"non hamiltonian path");
-				}
+				enforce(i,j);
 			}
 		}
 	}
 
-	//	boolean firstTime = true;
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-	if(ALWAYS_COARSE){
-		propagate(0);return;
-	}
-//		if(firstTime){
-//			System.out.println("First PROPAG");
-//			firstTime = false;
-//			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-//			System.out.println("/First PROPAG");
-//		}else{
-//			System.out.println("OTHER PROPAG");
-//		try{
-//			System.out.println("PATH");
-//			for(int i=0;i<n;i++){
-//				System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
-//			}
-//		System.out.println("%%%%%%%%%%%%%");
-//		System.out.println("%%%%%%%%%%%%%");
+		if(ALWAYS_COARSE){
+			propagate(0);return;
+		}
 		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-//		}
-//		catch(Exception e){
-//			e.printStackTrace();
-//			throw new UnsupportedOperationException();
-//		}
-//		}
 	}
 
 	@Override
@@ -188,6 +143,21 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		return ESat.UNDEFINED;
 	}
 
+	private void enforce(int i, int j) throws ContradictionException {
+		int last = end[j].get();
+		int start = origin[i].get();
+		if(origin[j].get()!=j){
+			contradiction(g,"");
+		}
+		g.removeArc(last,start,this);
+		origin[last].set(start);
+		end[start].set(last);
+		size[start].add(size[j].get());
+		if(origin[sink].get()==source && size[source].get()!=n){
+			contradiction(g,"non hamiltonian path");
+		}
+	}
+
 	//***********************************************************************************
 	// PROCEDURES
 	//***********************************************************************************
@@ -200,66 +170,7 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to = i%n;
-//			System.out.println("EXEnf "+from+"->"+to);
-			int last = end[to].get();
-			int start = origin[from].get();
-//			System.out.println("REM- "+last+"->"+start);
-			g.removeArc(last,start,p);
-			origin[last].set(start);
-			end[start].set(last);
-			size[start].add(size[to].get());
-//			if(last == sink && g.getKernelGraph().getPredecessorsOf(start).neighborhoodSize()==1){
-//				System.out.println("REM** "+end[source].get()+"->"+start);
-//				System.out.println("wtf");
-//				System.out.println(g.getEnvelopGraph());
-//				g.removeArc(end[source].get(),start,p,false);
-//			}
-//			if(start == source && g.getKernelGraph().getSuccessorsOf(last).neighborhoodSize()==1){
-//				System.out.println("REM*** "+last+"->"+origin[sink].get());
-//				g.removeArc(last,origin[sink].get(),p,false);
-//			}
-//			if(last == sink && g.getEnvelopGraph().getPredecessorsOf(start).neighborhoodSize()>1){
-//				if(size[source].get()+size[start].get()==n){
-//					System.out.println("ENF* "+end[source].get()+"->"+start);
-//					g.enforceArc(end[source].get(),start,p,false);
-//				}else{
-//					for(int k=0;k<n;k++){
-//						System.out.println(k+" : "+g.getEnvelopGraph().getSuccessorsOf(k));
-//					}
-//					System.out.println("REM* "+end[source].get()+"->"+start);
-//					g.removeArc(end[source].get(),start,p,false);
-//				}
-//			}
-//			if(start == source && g.getEnvelopGraph().getSuccessorsOf(last).neighborhoodSize()>1){
-//				if(size[source].get()+size[origin[sink].get()].get()==n){
-//					System.out.println("ENF** "+last+"->"+origin[sink].get());
-//					g.enforceArc(last,origin[sink].get(),p,false);
-//				}else{
-//					System.out.println("REM** "+last+"->"+origin[sink].get());
-//					g.removeArc(last,origin[sink].get(),p,false);
-//				}
-//			}
-			if(origin[sink].get()==source && size[source].get()!=n){
-//				System.out.println(origin[sink].get()+" & "+end[source].get() + " : "+n+"!="+size[source].get());
-//				for(int k=0;k<n;k++){
-//					System.out.println(k+" : "+g.getEnvelopGraph().getSuccessorsOf(k)+" / "+size[k].get());
-//				}
-//				if(true){
-//					throw new UnsupportedOperationException();
-//				}
-				contradiction(g,"non hamiltonian path");
-			}
+			enforce(i/n-1,i%n);
 		}
 	}
-
-//	private class EnfTest implements IntProcedure {
-//		@Override
-//		public void execute(int i) throws ContradictionException {
-//			int from = i/n-1;
-//			int to = i%n;
-//			System.out.println(from + "->" + to);
-//		}
-//	}
 }
