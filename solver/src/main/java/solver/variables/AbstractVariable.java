@@ -175,12 +175,12 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     public void notifyViews(EventType event, ICause cause) throws ContradictionException {
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].backPropagate(event, cause);
+                views[i].transformEvent(event, cause);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].backPropagate(event, cause);
+                    views[i].transformEvent(event, cause);
                 }
             }
         }

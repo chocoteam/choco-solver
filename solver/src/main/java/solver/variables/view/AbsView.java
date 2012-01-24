@@ -692,7 +692,7 @@ public final class AbsView extends View<IntVar> {
     }
 
     @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if (evt == EventType.INCLOW) {
             int lb = var.getLB();
             if (lb > 0) {

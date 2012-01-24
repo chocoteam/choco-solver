@@ -38,6 +38,12 @@ import solver.variables.EventType;
  */
 public interface IView extends ICause{
 
-    void backPropagate(EventType evt, ICause cause) throws ContradictionException;
+    /**
+     * Transform the original event wrt the view
+     * @param evt original event
+     * @param cause cause of the modification
+     * @throws ContradictionException can encounter a contradiction
+     */
+    void transformEvent(EventType evt, ICause cause) throws ContradictionException;
 
 }
