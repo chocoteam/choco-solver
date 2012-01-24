@@ -49,17 +49,15 @@ public class OneIntDeltaMonitor implements IDeltaMonitor<IntDelta> {
         used = false;
     }
 
-
     @Override
-    public void update(EventType evt) {
-        used = true;
+    public void freeze() {
+        used = delta.size() == 1;
     }
 
     @Override
-    public void freeze() {}
-
-    @Override
-    public void unfreeze() {}
+    public void unfreeze() {
+        used = false;
+    }
 
     @Override
     public void clear() {
@@ -69,7 +67,8 @@ public class OneIntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     @Override
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
         if (EventType.isRemove(eventType.mask)) {
-            proc.execute(delta.get(0));
+            if(used)
+                proc.execute(delta.get(0));
         }
     }
 }

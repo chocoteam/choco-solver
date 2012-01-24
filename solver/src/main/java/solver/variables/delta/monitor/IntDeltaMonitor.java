@@ -51,12 +51,6 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
         this.frozenLast = 0;
     }
 
-
-    @Override
-    public void update(EventType evt) {
-        last = delta.size();
-    }
-
     @Override
     public void freeze() {
         this.frozenFirst = first; // freeze indices

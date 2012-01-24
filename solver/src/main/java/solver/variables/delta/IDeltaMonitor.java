@@ -41,8 +41,6 @@ import solver.variables.EventType;
  */
 public interface IDeltaMonitor<D extends IDelta> {
 
-	void update(EventType evt);
-
 	void freeze();
 
 	void unfreeze();
@@ -53,8 +51,6 @@ public interface IDeltaMonitor<D extends IDelta> {
 
 	public static enum Default implements IDeltaMonitor<IDelta> {
 		NONE() {
-			@Override
-			public void update(EventType evt) {}
 
 			@Override
 			public void freeze() {}

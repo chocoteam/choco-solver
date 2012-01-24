@@ -91,7 +91,7 @@ public class GraphDelta implements IGraphDelta {
 		deltaOfType[type].add(element);
 	}
 
-	private void lazyClear() {
+	public void lazyClear() {
 		if(timestamp!=AbstractSearchLoop.timeStamp){
 			clear();
 		}

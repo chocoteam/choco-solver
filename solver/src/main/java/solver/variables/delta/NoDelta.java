@@ -47,10 +47,14 @@ public enum NoDelta implements IntDelta {
 
 	@Override
 	public void clear() {
-//		throw new UnsupportedOperationException();
 	}
 
-	@Override
+    @Override
+    public void lazyClear() {
+    }
+
+
+    @Override
     public int get(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
