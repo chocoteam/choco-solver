@@ -45,7 +45,7 @@ public final class OneValueDelta implements IntDelta {
     int timestamp = -1;
 
 
-    protected void lazyClear() {
+    public void lazyClear() {
         if (timestamp - AbstractSearchLoop.timeStamp != 0) {
             set = false;
             timestamp = AbstractSearchLoop.timeStamp;

@@ -50,4 +50,6 @@ public interface IDelta extends Serializable{
     <D extends IDelta>IDeltaMonitor<D> getMonitor();
 
 	void clear();
+
+    void lazyClear();
 }

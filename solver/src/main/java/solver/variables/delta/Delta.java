@@ -61,7 +61,7 @@ public final class Delta implements IntDelta {
         return values;
     }
 
-    protected void lazyClear() {
+    public void lazyClear() {
         if (timestamp - AbstractSearchLoop.timeStamp != 0) {
             clear();
         }
