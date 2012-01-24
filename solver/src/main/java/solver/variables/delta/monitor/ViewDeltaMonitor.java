@@ -26,7 +26,6 @@
  */
 package solver.variables.delta.monitor;
 
-import solver.variables.EventType;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
@@ -42,11 +41,6 @@ public abstract class ViewDeltaMonitor implements IDeltaMonitor<IntDelta> {
 
     public ViewDeltaMonitor(IDeltaMonitor<IntDelta> original) {
         this.original = original;
-    }
-
-    @Override
-    public final void update(EventType evt) {
-        original.update(evt);
     }
 
     @Override

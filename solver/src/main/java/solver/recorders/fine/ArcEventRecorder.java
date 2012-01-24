@@ -137,7 +137,6 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
                 if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                     evtmask |= evt.strengthened_mask;
                 }
-                deltamon.update(evt);
                 // 4. schedule this
                 if (!enqueued()) {
                     scheduler.schedule(this);
