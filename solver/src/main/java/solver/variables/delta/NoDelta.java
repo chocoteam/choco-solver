@@ -50,7 +50,9 @@ public enum NoDelta implements IntDelta {
 	}
 
     @Override
-    public void lazyClear() {}
+    public void lazyClear() {
+    }
+
 
     @Override
     public int get(int idx) {

@@ -51,5 +51,5 @@ public interface IDelta extends Serializable{
 
 	void clear();
 
-	void lazyClear();
+    void lazyClear();
 }
