@@ -28,7 +28,6 @@ package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IDeltaMonitor;
@@ -53,11 +52,6 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 		this.last = new int[4];
 		this.frozenFirst = new int[4];
 		this.frozenLast = new int[4];
-	}
-
-	@Override
-	public void update(EventType event) {
-		//TODO throw new UnsupportedOperationException();
 	}
 
 	@Override
