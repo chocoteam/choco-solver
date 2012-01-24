@@ -97,16 +97,16 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public boolean execute() throws ContradictionException {
         if (evtmask > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-			int evtmask_ = evtmask;
-			// for concurrent modification..
-			deltamon.freeze();
-			this.evtmask = 0; // and clean up mask
-			propagator.fineERcalls++;
-			assert (propagator.isActive()) : this + " is not active";
-			propagator.propagate(this, idxVinP, evtmask_);
-			deltamon.unfreeze();
-		}
-		return true;
+            int evtmask_ = evtmask;
+            // for concurrent modification..
+            deltamon.freeze();
+            this.evtmask = 0; // and clean up mask
+            propagator.fineERcalls++;
+            assert (propagator.isActive()) : this + " is not active";
+            propagator.propagate(this, idxVinP, evtmask_);
+            deltamon.unfreeze();
+        }
+        return true;
 	}
 
 	@Override
