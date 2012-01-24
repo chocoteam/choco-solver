@@ -29,12 +29,8 @@ package solver.recorders.coarse;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.recorders.IEventRecorder;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 /**
  * <br/>
@@ -100,13 +96,8 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 			evtmask = 0;
 			propagator.propagate(_evt);
 		}
-		// if there is at least one fine event scheduled,
-		if (propagator.getNbPendingER() > 0) {
-			// So, the propagator will be localy consistent,
-			// then remove every fine event attached to this propagator generated BEFORE calling this
-			// if views schedule event, they will be considered after
-			propagator.forEachFineEvent(virtExec);
-		}
+		// unfreeze (and eventually unschedule) every fine event attached to this propagator
+		propagator.forEachFineEvent(virtExec);
 		return true;
 	}
 
