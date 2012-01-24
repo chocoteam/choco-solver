@@ -70,8 +70,8 @@ public final class ViewDelta implements IntDelta {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-	public void lazyClear() {
-//		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void lazyClear() {
+        throw new UnsupportedOperationException();
+    }
 }

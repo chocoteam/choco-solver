@@ -26,14 +26,17 @@
  */
 package solver.variables;
 
+import choco.checker.DomainBuilder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import solver.Cause;
 import solver.Solver;
+import solver.constraints.ConstraintFactory;
+import solver.constraints.nary.cnf.ConjunctiveNormalForm;
+import solver.constraints.nary.cnf.Literal;
+import solver.constraints.nary.cnf.Node;
+import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.MaxXYZ;
-import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -45,92 +48,98 @@ import java.util.Random;
  */
 public class MaxViewTest {
 
-
-    @Test(groups = "1s")
-    public void test1() {
-        Solver solver = new Solver();
-
-        IntVar X = VariableFactory.bounded("X", -4, 12, solver);
-        IntVar Y = VariableFactory.bounded("Y", -22, 10, solver);
-        IntVar Z = Views.max(X, Y);
-
-        try {
-            solver.propagate();
-            Assert.assertFalse(Z.instantiated());
-            Assert.assertEquals(Z.getLB(), -4);
-            Assert.assertEquals(Z.getUB(), 12);
-            Assert.assertTrue(Z.contains(0));
-            Assert.assertEquals(Z.nextValue(-5), -4);
-            Assert.assertEquals(Z.nextValue(-4), -3);
-            Assert.assertEquals(Z.nextValue(0), 1);
-            Assert.assertEquals(Z.nextValue(12), Integer.MAX_VALUE);
-            Assert.assertEquals(Z.previousValue(13), 12);
-            Assert.assertEquals(Z.previousValue(12), 11);
-            Assert.assertEquals(Z.previousValue(1), 0);
-            Assert.assertEquals(Z.previousValue(-4), Integer.MIN_VALUE);
-
-            Z.updateLowerBound(2, Cause.Null);
-            Assert.assertEquals(X.getLB(), -4);
-            Assert.assertEquals(X.getUB(), 12);
-            Assert.assertEquals(Y.getLB(), -22);
-            Assert.assertEquals(Y.getUB(), 10);
-
-            Z.updateUpperBound(9, Cause.Null);
-            Assert.assertEquals(X.getUB(), 9);
-            Assert.assertEquals(Y.getUB(), 9);
-
-            Z.removeInterval(7, 9, Cause.Null);
-            Assert.assertEquals(X.getUB(), 6);
-            Assert.assertEquals(Y.getUB(), 6);
-
-            Assert.assertEquals(X.getDomainSize(), 11);
-            Assert.assertEquals(Y.getDomainSize(), 29);
-
-            Z.instantiateTo(5, Cause.Null);
-            Assert.assertEquals(X.getUB(), 5);
-            Assert.assertEquals(Y.getUB(), 5);
-
-        } catch (ContradictionException ex) {
-            Assert.fail();
-        }
+    public void maxref(Solver solver, IntVar x, IntVar y, IntVar z) {
+        BoolVar[] bs = VariableFactory.boolArray("b", 3, solver);
+        solver.post(new ReifiedConstraint(
+                bs[0],
+                ConstraintFactory.eq(z, x, solver),
+                ConstraintFactory.neq(z, x, solver),
+                solver));
+        solver.post(new ReifiedConstraint(
+                bs[1],
+                ConstraintFactory.eq(z, y, solver),
+                ConstraintFactory.neq(z, y, solver),
+                solver));
+        solver.post(new ReifiedConstraint(
+                bs[2],
+                ConstraintFactory.geq(x, y, solver),
+                ConstraintFactory.lt(x, y, solver),
+                solver));
+        solver.post(new ConjunctiveNormalForm(
+                Node.or(Node.and(Literal.pos(bs[0]), Literal.pos(bs[2])),
+                        Node.and(Literal.pos(bs[1]), Literal.neg(bs[2]))),
+                solver
+        ));
     }
 
-    @Test(groups = "10s")
-    public void test2() {
-        Random random = new Random();
-        for (int seed = 0; seed < 2000; seed++) {
-            random.setSeed(seed);
-            int lX = random.nextInt(5);
-            int uX = lX + random.nextInt(15);
-            int lY = random.nextInt(5);
-            int uY = lY + random.nextInt(15);
+    public void max(Solver solver, IntVar x, IntVar y, IntVar z) {
+        solver.post(new MaxXYZ(z, x, y, solver));
+    }
 
+    @Test
+    public void testMax1(){
+        Random random = new Random();
+        for (int seed = 1; seed < 9999; seed++) {
+            random.setSeed(seed);
+            int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15);
             Solver ref = new Solver();
             {
                 IntVar[] xs = new IntVar[3];
-                xs[0] = VariableFactory.bounded("x", lX, uX, ref);
-                xs[1] = VariableFactory.bounded("y", lY, uY, ref);
-                xs[2] = VariableFactory.bounded("z", Math.min(lX, lY), Math.max(uX,uY), ref);
-                ref.post(new MaxXYZ(xs[2], xs[0], xs[1], ref));
+                xs[0] = VariableFactory.bounded("x", domains[0][0], domains[0][1], ref);
+                xs[1] = VariableFactory.bounded("y", domains[1][0], domains[1][1], ref);
+                xs[2] = VariableFactory.bounded("z", domains[2][0], domains[2][1], ref);
+                maxref(ref, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(ref, true, true);
                 ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
             }
             Solver solver = new Solver();
             {
-                IntVar[] xs = new IntVar[2];
-                xs[0] = VariableFactory.bounded("x", lX, uX, solver);
-                xs[1] = VariableFactory.bounded("y", lY, uY, solver);
-                IntVar max = Views.max(xs[0], xs[1]);
+                IntVar[] xs = new IntVar[3];
+                xs[0] = VariableFactory.bounded("x", domains[0][0], domains[0][1], solver);
+                xs[1] = VariableFactory.bounded("y", domains[1][0], domains[1][1], solver);
+                xs[2] = VariableFactory.bounded("z", domains[1][0], domains[2][1], solver);
+                max(solver, xs[0], xs[1], xs[2]);
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
             ref.findAllSolutions();
             solver.findAllSolutions();
-            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount());
-//            Assert.assertEquals(solver.getMeasures().getNodeCount(), ref.getMeasures().getNodeCount());
-            System.out.printf("%d : %d vs. %d (%f)\n", seed, ref.getMeasures().getTimeCount(),
-                    solver.getMeasures().getTimeCount(),
-                    ref.getMeasures().getTimeCount() / (float) solver.getMeasures().getTimeCount());
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
+        }
+    }
+
+    @Test
+    public void testMax2(){
+        Random random = new Random();
+        for (int seed = 0; seed < 9999; seed++) {
+            random.setSeed(seed);
+            int[][] domains = DomainBuilder.buildFullDomains(3, 1, 15, random, random.nextDouble(), random.nextBoolean());
+
+            Solver ref = new Solver();
+            {
+                IntVar[] xs = new IntVar[3];
+                xs[0] = VariableFactory.enumerated("x", domains[0], ref);
+                xs[1] = VariableFactory.enumerated("y", domains[1], ref);
+                xs[2] = VariableFactory.enumerated("z", domains[2], ref);
+                maxref(ref, xs[0], xs[1], xs[2]);
+//                SearchMonitorFactory.log(ref, true, true);
+                ref.set(StrategyFactory.random(xs, ref.getEnvironment(), seed));
+            }
+            Solver solver = new Solver();
+            {
+                IntVar[] xs = new IntVar[3];
+                xs[0] = VariableFactory.enumerated("x", domains[0], solver);
+                xs[1] = VariableFactory.enumerated("y", domains[1], solver);
+                xs[2] = VariableFactory.enumerated("z", domains[2], solver);
+                max(solver, xs[0], xs[1], xs[2]);
+//                SearchMonitorFactory.log(solver, true, true);
+                solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
+            }
+            ref.findAllSolutions();
+            solver.findAllSolutions();
+            Assert.assertEquals(solver.getMeasures().getSolutionCount(), ref.getMeasures().getSolutionCount(), "SOLUTIONS ("+seed+")");
+            Assert.assertTrue(solver.getMeasures().getNodeCount() <= ref.getMeasures().getNodeCount(), "NODES ("+seed+")");
         }
     }
 }

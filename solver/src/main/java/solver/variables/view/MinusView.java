@@ -395,7 +395,7 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if (evt == EventType.INCLOW) {
             evt = EventType.DECUPP;
         } else if (evt == EventType.DECUPP) {

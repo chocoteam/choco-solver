@@ -96,9 +96,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 			evtmask = 0;
 			propagator.propagate(_evt);
 		}
-		// Set up deltamonitor indexes of fine event recorders
-		// and unschedule then (eventually)
-		// So, the propagator will be localy consistent,
+		// unfreeze (and eventually unschedule) every fine event attached to this propagator
 		propagator.forEachFineEvent(virtExec);
 		return true;
 	}

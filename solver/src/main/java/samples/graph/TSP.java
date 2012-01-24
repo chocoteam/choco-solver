@@ -52,92 +52,95 @@ import java.io.*;
 
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
- * */
-public class TSP extends AbstractProblem{
+ */
+public class TSP extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private static final long TIMELIMIT = 10000;
-	private static String outFile = "atsp";
-	static int seed = 0;
-	// instance
-	private String instanceName;
-	private int[][] distanceMatrix;
-	private int n, noVal, bestSol;
-	// model
-	private DirectedGraphVar graph;
-	private IntVar totalCost;
-	private Boolean status;
-	private GraphConstraint gc;
-	private boolean arbo,antiArbo,rg,hk;
-	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph G_R;
-	private IStateInt[] sccFirst, sccNext;
-	boolean time;
+    private static final long TIMELIMIT = 10000;
+    private static String outFile = "atsp";
+    static int seed = 0;
+    // instance
+    private String instanceName;
+    private int[][] distanceMatrix;
+    private int n, noVal, bestSol;
+    // model
+    private DirectedGraphVar graph;
+    private IntVar totalCost;
+    private Boolean status;
+    private GraphConstraint gc;
+    private boolean arbo, antiArbo, rg, hk;
+    private IStateInt nR;
+    IStateInt[] sccOf;
+    INeighbors[] outArcs;
+    IDirectedGraph G_R;
+    private IStateInt[] sccFirst, sccNext;
+    boolean time;
 
-	IntVar[] start,end,duration;
+    IntVar[] start, end, duration;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public TSP(int[][] matrix, String inst, int nv, int bestS) {
-		solver = new Solver();
-		distanceMatrix = matrix;
-		n = matrix.length;
-		noVal = nv;
-		instanceName = inst;
-		bestSol = bestS;
-	}
+    public TSP(int[][] matrix, String inst, int nv, int bestS) {
+        solver = new Solver();
+        distanceMatrix = matrix;
+        n = matrix.length;
+        noVal = nv;
+        instanceName = inst;
+        bestSol = bestS;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void buildModel() {
-		// create model
-		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
-		totalCost = VariableFactory.bounded("total cost ", 0, bestSol, solver);
-		try{
-			for(int i=0; i<n-1; i++){
-				graph.getKernelGraph().activateNode(i);
-				for(int j=0; j<n ;j++){
-					if(distanceMatrix[i][j]!=noVal){
-						graph.getEnvelopGraph().addArc(i,j);
-					}
-				}
-			}
-		}catch(Exception e){
-			e.printStackTrace();
-			System.exit(0);
-		}
-		gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		// BASIC MODEL
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
-		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+    @Override
+    public void buildModel() {
+        // create model
+        graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+        totalCost = VariableFactory.bounded("total cost ", 0, bestSol, solver);
+        try {
+            for (int i = 0; i < n - 1; i++) {
+                graph.getKernelGraph().activateNode(i);
+                for (int j = 0; j < n; j++) {
+                    if (distanceMatrix[i][j] != noVal) {
+                        graph.getEnvelopGraph().addArc(i, j);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+        gc = GraphConstraintFactory.makeConstraint(graph, solver);
+        // BASIC MODEL
+        gc.addAdHocProp(new PropOneSuccBut(graph, n - 1, gc, solver));
+        gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
+        gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
+        gc.addAdHocProp(new PropEvalObj(graph, totalCost, distanceMatrix, gc, solver));
 
-		if(arbo){
-			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
-		}
-		if(antiArbo){
-			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
-		}
-		if(rg){
-			// RG
-			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
-			nR = RP.getNSCC();
-			sccOf = RP.getSCCOF();
-			outArcs = RP.getOutArcs();
-			G_R = RP.getReducedGraph();
-			sccFirst = RP.getSCCFirst();
-			sccNext = RP.getSCCNext();
-			gc.addAdHocProp(RP);
-			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R,sccFirst,sccNext));
-		}
+        if (arbo) {
+            gc.addAdHocProp(new PropArborescence(graph, 0, gc, solver, true));
+        }
+        if (antiArbo) {
+            gc.addAdHocProp(new PropAntiArborescence(graph, n - 1, gc, solver, true));
+        }
+        if (rg) {
+            // RG
+            PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+            nR = RP.getNSCC();
+            sccOf = RP.getSCCOF();
+            outArcs = RP.getOutArcs();
+            G_R = RP.getReducedGraph();
+            sccFirst = RP.getSCCFirst();
+            sccNext = RP.getSCCNext();
+            gc.addAdHocProp(RP);
+            gc.addAdHocProp(new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext));
+        }
 //		if(hk){
 //			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
 //			try{
@@ -189,112 +192,115 @@ public class TSP extends AbstractProblem{
 //			gc.addAdHocProp(new PropTaskDefinition(start, end, duration, graph, distanceMatrix, gc, solver));
 //			solver.post(ConstraintFactory.eq(end[n-1],totalCost,solver));
 //		}
-		solver.post(gc);
-	}
+        solver.post(gc);
+    }
 
-	private void configParameters(boolean ab, boolean aab, boolean rg, boolean hk) {
-		arbo     = ab;
-		antiArbo = aab;
-		this.rg	 = rg;
-		this.hk  = hk;
-	}
-	private void configParameters(int p, boolean ti) {
-		configParameters(p%2==1,(p>>1)%2==1,(p>>2)%2==1,(p>>3)%2==1);
-		time = ti;
-	}
+    private void configParameters(boolean ab, boolean aab, boolean rg, boolean hk) {
+        arbo = ab;
+        antiArbo = aab;
+        this.rg = rg;
+        this.hk = hk;
+    }
 
-	@Override
-	public void configureSolver() {
-		AbstractStrategy strategy;
-		strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
-		solver.set(strategy);
+    private void configParameters(int p, boolean ti) {
+        configParameters(p % 2 == 1, (p >> 1) % 2 == 1, (p >> 2) % 2 == 1, (p >> 3) % 2 == 1);
+        time = ti;
+    }
+
+    @Override
+    public void configureSolver() {
+        AbstractStrategy strategy;
+        strategy = StrategyFactory.graphStrategy(graph, null, new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
+        solver.set(strategy);
 //		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		SearchMonitorFactory.log(solver, true, false);
-	}
+        solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+        SearchMonitorFactory.log(solver, true, false);
+    }
 
-	@Override
-	public void solve() {
-		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
+    @Override
+    public void solve() {
+        status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 //		status = solver.findSolution();
-		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIMELIMIT){
-			throw new UnsupportedOperationException();
-		}
-	}
+        if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
+            throw new UnsupportedOperationException();
+        }
+    }
 
-	@Override
-	public void prettyOut() {
-		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
-		String txt = instanceName+";"+solver.getMeasures().getSolutionCount()+";"+solver.getMeasures().getFailCount()+";"+solver.getMeasures().getTimeCount()+";"+status+";"+bestSol+";"+bestCost+";\n";
-		writeTextInto(txt, outFile);
+    @Override
+    public void prettyOut() {
+        int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+        String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";" + solver.getMeasures().getTimeCount() + ";" + status + ";" + bestSol + ";" + bestCost + ";\n";
+        writeTextInto(txt, outFile);
 //		int tot = 0;
 //		for(int i=0;i<n;i++){
 //			System.out.println(i+" : "+start[i]+" + "+duration[i]+" = "+end[i]);
 //			tot += duration[i].getValue();
 //		}
 //		System.out.println("TOTAL = "+tot);
-	}
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		outFile = "atsp_allDiff.csv";
-		clearFile(outFile);
-		writeTextInto("instance;sols;fails;time;status;opt;obj;\n", outFile);
-		bench();
+    public static void main(String[] args) {
+        outFile = "atsp_allDiff.csv";
+        clearFile(outFile);
+        writeTextInto("instance;sols;fails;time;status;opt;obj;\n", outFile);
+        bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv44.atsp";
 //		testInstance(instance);
-	}
+    }
 
-	private static void testInstance(String url){
-		File file = new File(url);
-		try {
-			BufferedReader buf = new BufferedReader(new FileReader(file));
-			String line = buf.readLine();
-			String name = line.split(":")[1].replaceAll(" ", "");
-			System.out.println("parsing instance "+name+"...");
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
-			int n = Integer.parseInt(line.split(":")[1].replaceAll(" ", ""))+1;
-			int[][] dist = new int[n][n];
-			line = buf.readLine();line = buf.readLine();line = buf.readLine();
-			String[] lineNumbers;
-			for(int i=0;i<n-1;i++){
-				int nbSuccs = 0;
-				while(nbSuccs<n-1){
-					line = buf.readLine();
-					line = line.replaceAll(" * ", " ");
-					lineNumbers = line.split(" ");
-					for(int j=1;j<lineNumbers.length;j++){
-						if(nbSuccs==n-1){
-							i++;
-							if(i==n-1)break;
-							nbSuccs = 0;
-						}
-						dist[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
-						nbSuccs ++;
-					}
-				}
-			}
-			int noVal = dist[0][0];
-			if(noVal == 0) noVal = Integer.MAX_VALUE/2;
-			int maxVal = 0;
-			for(int i=0;i<n;i++){
-				dist[i][n-1] = dist[i][0];
-				dist[n-1][i] = noVal;
-				dist[i][0]   = noVal;
-				for(int j=0;j<n;j++){
-					if(dist[i][j]!=noVal && dist[i][j]>maxVal){
-						maxVal = dist[i][j];
-					}
-				}
-			}
-			line = buf.readLine();
-			line = buf.readLine();
-			int best = Integer.parseInt(line.replaceAll(" ",""));
+    private static void testInstance(String url) {
+        File file = new File(url);
+        try {
+            BufferedReader buf = new BufferedReader(new FileReader(file));
+            String line = buf.readLine();
+            String name = line.split(":")[1].replaceAll(" ", "");
+            System.out.println("parsing instance " + name + "...");
+            line = buf.readLine();
+            line = buf.readLine();
+            line = buf.readLine();
+            int n = Integer.parseInt(line.split(":")[1].replaceAll(" ", "")) + 1;
+            int[][] dist = new int[n][n];
+            line = buf.readLine();
+            line = buf.readLine();
+            line = buf.readLine();
+            String[] lineNumbers;
+            for (int i = 0; i < n - 1; i++) {
+                int nbSuccs = 0;
+                while (nbSuccs < n - 1) {
+                    line = buf.readLine();
+                    line = line.replaceAll(" * ", " ");
+                    lineNumbers = line.split(" ");
+                    for (int j = 1; j < lineNumbers.length; j++) {
+                        if (nbSuccs == n - 1) {
+                            i++;
+                            if (i == n - 1) break;
+                            nbSuccs = 0;
+                        }
+                        dist[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
+                        nbSuccs++;
+                    }
+                }
+            }
+            int noVal = dist[0][0];
+            if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
+            int maxVal = 0;
+            for (int i = 0; i < n; i++) {
+                dist[i][n - 1] = dist[i][0];
+                dist[n - 1][i] = noVal;
+                dist[i][0] = noVal;
+                for (int j = 0; j < n; j++) {
+                    if (dist[i][j] != noVal && dist[i][j] > maxVal) {
+                        maxVal = dist[i][j];
+                    }
+                }
+            }
+            line = buf.readLine();
+            line = buf.readLine();
+            int best = Integer.parseInt(line.replaceAll(" ", ""));
 //			int[] params = new int[]{0,1,4,7};
 //			for(int p:params){
 //			for(int p=4;p<16;p++){
@@ -303,9 +309,9 @@ public class TSP extends AbstractProblem{
 //				tspRun.execute();
 //				System.exit(0);
 //			}
-			TSP tspRun = new TSP(dist,name,noVal,best);
-			tspRun.configParameters(4,false);
-			tspRun.execute();
+            TSP tspRun = new TSP(dist, name, noVal, best);
+            tspRun.configParameters(0, false);
+            tspRun.execute();
 //			System.exit(0);
 //			tspRun = new TSP(dist,name,noVal,best);
 //			tspRun.configParameters(0,true);
@@ -316,118 +322,116 @@ public class TSP extends AbstractProblem{
 //			tspRun = new TSP(dist,name,noVal,best);
 //			tspRun.configParameters(4,true);
 //			tspRun.execute();
-		}catch(Exception e){
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(0);
+        }
+    }
 
-	private static void bench(){
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
-		File folder = new File(dir);
-		String[] list = folder.list();
-		for(String s:list){
-			if(s.contains(".atsp"))
-				testInstance(dir+"/"+s);
-		}
-	}
+    private static void bench() {
+        String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
+        File folder = new File(dir);
+        String[] list = folder.list();
+        for (String s : list) {
+            if (s.contains(".atsp"))
+                testInstance(dir + "/" + s);
+        }
+    }
 
-	//***********************************************************************************
-	// RECORDING RESULTS
-	//***********************************************************************************
+    //***********************************************************************************
+    // RECORDING RESULTS
+    //***********************************************************************************
 
-	private static void writeTextInto(String text, String file) {
-		try{
-			FileWriter out  = new FileWriter(file,true);
-			out.write(text);
-			out.flush();
-			out.close();
-		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
-	}
+    private static void writeTextInto(String text, String file) {
+        try {
+            FileWriter out = new FileWriter(file, true);
+            out.write(text);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-	private static void clearFile(String file) {
-		try{
-			FileWriter out  = new FileWriter(file,false);
-			out.write("");
-			out.close();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+    private static void clearFile(String file) {
+        try {
+            FileWriter out = new FileWriter(file, false);
+            out.write("");
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	//***********************************************************************************
-	// HEURISTICS
-	//***********************************************************************************
+    //***********************************************************************************
+    // HEURISTICS
+    //***********************************************************************************
 
-	private class MinArc extends ArcStrategy{
+    private class MinArc extends ArcStrategy {
 
-		public MinArc(GraphVar graphVar) {
-			super(graphVar);
-		}
+        public MinArc(GraphVar graphVar) {
+            super(graphVar);
+        }
 
-		@Override
-		public int nextArc() {
-			int minArc = -1;
-			int minCost= -1;
-			INeighbors suc;
-			for(int i=0;i<n;i++){
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-					if(!g.getKernelGraph().arcExists(i,j)){
-						if(minCost == -1 || minCost>distanceMatrix[i][j]){
-							minCost = distanceMatrix[i][j];
-							minArc  = (i+1)*n+j;
-						}
-					}
-				}
-			}
-			return minArc;
-		}
-	}
+        @Override
+        public int nextArc() {
+            int minArc = -1;
+            int minCost = -1;
+            INeighbors suc;
+            for (int i = 0; i < n; i++) {
+                suc = g.getEnvelopGraph().getSuccessorsOf(i);
+                for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                    if (!g.getKernelGraph().arcExists(i, j)) {
+                        if (minCost == -1 || minCost > distanceMatrix[i][j]) {
+                            minCost = distanceMatrix[i][j];
+                            minArc = (i + 1) * n + j;
+                        }
+                    }
+                }
+            }
+            return minArc;
+        }
+    }
 
-	private class MinDomMinCost extends ArcStrategy{
+    private class MinDomMinCost extends ArcStrategy {
 
-		public MinDomMinCost(GraphVar graphVar) {
-			super(graphVar);
-		}
+        public MinDomMinCost(GraphVar graphVar) {
+            super(graphVar);
+        }
 
-		@Override
-		public int nextArc() {
-			int minArc = -1;
-			int minCost= -1;
-			INeighbors suc;
-			int from = -1;
-			int size = n+1;
-			for(int i=0;i<n-1;i++){
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(suc.neighborhoodSize()<size && suc.neighborhoodSize()>1){
-					from = i;
-					size = suc.neighborhoodSize();
-				}
-			}
-			if(from == -1){
-				return -1;
-			}
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for(int j=suc.getFirstElement();j>=0;j=suc.getNextElement()){
-				if(minCost == -1 || minCost>distanceMatrix[from][j]){
-					minCost = distanceMatrix[from][j];
-					minArc  = (from+1)*n+j;
-				}
-			}
-			if(minArc==-1){
-				throw new UnsupportedOperationException("error in branching");
-			}
-			if(g.getKernelGraph().arcExists(from,minArc%n)){
-				throw new UnsupportedOperationException("error in branching");
-			}
-			return minArc;
-		}
-	}
+        @Override
+        public int nextArc() {
+            int minArc = -1;
+            int minCost = -1;
+            INeighbors suc;
+            int from = -1;
+            int size = n + 1;
+            for (int i = 0; i < n - 1; i++) {
+                suc = g.getEnvelopGraph().getSuccessorsOf(i);
+                if (suc.neighborhoodSize() < size && suc.neighborhoodSize() > 1) {
+                    from = i;
+                    size = suc.neighborhoodSize();
+                }
+            }
+            if (from == -1) {
+                return -1;
+            }
+            suc = g.getEnvelopGraph().getSuccessorsOf(from);
+            for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+                if (minCost == -1 || minCost > distanceMatrix[from][j]) {
+                    minCost = distanceMatrix[from][j];
+                    minArc = (from + 1) * n + j;
+                }
+            }
+            if (minArc == -1) {
+                throw new UnsupportedOperationException("error in branching");
+            }
+            if (g.getKernelGraph().arcExists(from, minArc % n)) {
+                throw new UnsupportedOperationException("error in branching");
+            }
+            return minArc;
+        }
+    }
 }
 
 //	private void getGreedyFirstSolution() {

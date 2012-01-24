@@ -33,7 +33,9 @@ import samples.graph.GraphGenerator;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.propagators.gary.tsp.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.PropPathNoCycle;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -51,7 +53,7 @@ public class HamiltonianPathTest {
 
 	private final static long TIME_LIMIT = 5000;
 
-	@Test
+	@Test(groups = "10m")
 	public static void test() {
 		int[] sizes = new int[]{50,100,200,400};
 		long s;
