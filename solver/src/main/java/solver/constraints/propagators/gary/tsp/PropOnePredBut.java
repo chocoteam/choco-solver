@@ -34,6 +34,7 @@
 
 package solver.constraints.propagators.gary.tsp;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
@@ -48,9 +49,9 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @PropAnn(tested = {BENCHMARK,CORRECTION})
  * Each node but "but" has only one predecessor
  * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
@@ -161,7 +162,6 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 			int to = i%n;
 			if(to!=but){
 				int from = i/n-1;
-//				System.out.println("ENFORCE "+from+" -> "+(i%n));
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
@@ -182,7 +182,6 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 		public void execute(int i) throws ContradictionException {
 			int to = i%n;
 			if(to!=but){
-//				System.out.println("REMOVE "+(i/n-1)+" -> "+(i%n));
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				if (preds.neighborhoodSize()==0){
 					p.contradiction(g,to+" has no predecessor");

@@ -53,7 +53,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
  *
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  * */
-@PropAnn(tested=PropAnn.Status.CORRECTION)
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************

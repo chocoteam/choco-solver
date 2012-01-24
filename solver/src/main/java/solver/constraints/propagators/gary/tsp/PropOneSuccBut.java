@@ -35,6 +35,7 @@
 
 package solver.constraints.propagators.gary.tsp;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
@@ -51,9 +52,9 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @PropAnn(tested = {BENCHMARK,CORRECTION})
  * Each node but "but" has only one successor
  * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
@@ -121,21 +122,8 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-//		System.out.println("propag");
-//		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(g);
-//		System.out.println("delta : "+gdm.fromArcEnforcing()+" -> "+gdm.toArcEnforcing()+"  /// "+g.getDelta().getArcEnforcingDelta().size());
-//		try{
-//			System.out.println("SUCCESSIRS");
-//			for(int i=0;i<n;i++){
-//				System.out.println(i+" : "+g.getEnvelopGraph().getSuccessorsOf(i));
-//			}
 		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
 		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
-//			}
-//		catch(Exception e){
-//			e.printStackTrace();
-//			throw new UnsupportedOperationException();
-//		}
 	}
 
 	@Override
@@ -175,7 +163,6 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
-//			System.out.println("ENFORCE "+from+" -> "+(i%n));
 			if(from!=but){
 				int to   = i%n;
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
@@ -197,7 +184,6 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
-//			System.out.println("REMOVE "+from+" -> "+(i%n));
 			if(from!=but){
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
 				if (succs.neighborhoodSize()==0){
