@@ -91,7 +91,7 @@ public abstract class View<IV extends IntVar> extends AbstractView {
     }
 
     @Override
-    public void backPropagate(EventType evt, ICause cause) throws ContradictionException {
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         notifyMonitors(evt, cause);
     }
 

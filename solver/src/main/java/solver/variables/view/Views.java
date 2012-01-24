@@ -26,8 +26,15 @@
  */
 package solver.variables.view;
 
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.tools.StringUtils;
+import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
+import solver.constraints.nary.Sum;
+import solver.constraints.ternary.MaxXYZ;
 import solver.variables.IntVar;
+import solver.variables.fast.BitsetIntVarImpl;
+import solver.variables.fast.IntervalIntVarImpl;
 
 /**
  * Factory to build views.
@@ -69,7 +76,13 @@ public enum Views {
         if (cste < 0) {
             throw new UnsupportedOperationException("scale required positive coefficient!");
         } else {
-            var = new ScaleView(ivar, cste, ivar.getSolver());
+            if (cste == 1) {
+                var = ivar;
+            } else if (cste == -1) {
+                var = Views.minus(ivar);
+            } else {
+                var = new ScaleView(ivar, cste, ivar.getSolver());
+            }
         }
         return var;
     }
@@ -83,14 +96,41 @@ public enum Views {
     }
 
     public static IntVar sum(IntVar a, IntVar b) {
+        Solver solver = a.getSolver();
+        IntVar z;
+        //TODO: add a more complex analysis of the build domain
         if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
-            return new BitsetXYSumView(a, b, a.getSolver());
+            int lbA = a.getLB();
+            int ubA = a.getUB();
+            int lbB = b.getLB();
+            int ubB = b.getUB();
+            int OFFSET = lbA + lbB;
+            IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
+            DisposableRangeIterator itA = a.getRangeIterator(true);
+            DisposableRangeIterator itB = b.getRangeIterator(true);
+            while (itA.hasNext()) {
+                itB.bottomUpInit();
+                while (itB.hasNext()) {
+                    VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
+                    itB.next();
+                }
+                itB.dispose();
+                itA.next();
+            }
+            itA.dispose();
+            z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
         } else {
-            return new IntervalXYSumView(a, b, a.getSolver());
+            z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
         }
+        solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
+        return z;
     }
 
     public static IntVar max(IntVar a, IntVar b) {
-        return new MaxView(a, b, a.getSolver());
+        Solver solver = a.getSolver();
+        IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
+                Math.max(a.getLB(),  b.getLB()), Math.max(a.getUB(),b.getUB()), solver);
+        solver.post(new MaxXYZ(a,b, z, solver));
+        return z;
     }
 }

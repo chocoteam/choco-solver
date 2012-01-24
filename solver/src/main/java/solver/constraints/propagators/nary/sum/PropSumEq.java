@@ -43,13 +43,14 @@ import solver.variables.IntVar;
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
  *
+ * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
+ *
  * @author Charles Prud'homme
  * @since 18/03/11
  */
 public class PropSumEq extends Propagator<IntVar> {
 
     final IntVar[] x; // list of variable -- probably IntVarTimePosCste
-    final int k; // number of positive coefficients -- k first elements are positive ones
     final int l; // number of variables
     final int b; // bound to respect
     final int[] I; // variability of each variable -- domain amplitude
@@ -68,11 +69,10 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] vars, int k, int b,
+    public PropSumEq(IntVar[] vars, int b,
                      Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
         this.x = vars.clone();
-        this.k = k;
         l = x.length;
         this.b = b;
         I = new int[l];
@@ -81,18 +81,9 @@ public class PropSumEq extends Propagator<IntVar> {
     protected void prepare() {
         int f = 0, e = 0, i = 0;
         int lb, ub;
-        // positive coefficients first
-        for (; i < k; i++) {
+        for (; i < l; i++) {
             lb = x[i].getLB();
             ub = x[i].getUB();
-            f += lb;
-            e += ub;
-            I[i] = (ub - lb);
-        }
-        // negative coefficients
-        for (; i < l; i++) {
-            lb = -x[i].getUB();
-            ub = -x[i].getLB();
             f += lb;
             e += ub;
             I[i] = (ub - lb);
@@ -140,7 +131,7 @@ public class PropSumEq extends Propagator<IntVar> {
             doIt = false;
             int lb, ub, i = 0;
             // positive coefficients first
-            for (; i < k; i++) {
+            for (; i < l; i++) {
                 if (I[i] - (b - sumLB) > 0) {
                     lb = x[i].getLB();
                     ub = x[i].getUB();
@@ -152,20 +143,6 @@ public class PropSumEq extends Propagator<IntVar> {
                     }
                 }
             }
-            // then negative coefficients
-            for (; i < l; i++) {
-                if (I[i] - (b - sumLB) > 0) {
-                    lb = -x[i].getUB();
-                    ub = -x[i].getLB();
-                    if (x[i].updateLowerBound(-(b - sumLB + lb), this)) {
-                        int nub = -x[i].getLB();
-                        sumUB -= ub - nub;
-                        I[i] = nub - lb;
-                        anychange = doIt = true;
-                    }
-                }
-            }
-
         } while (doIt);
         return anychange;
     }
@@ -180,25 +157,12 @@ public class PropSumEq extends Propagator<IntVar> {
             doIt = false;
             int lb, ub, i = 0;
             // positive coefficients first
-            for (; i < k; i++) {
+            for (; i < l; i++) {
                 if (I[i] > -(b - sumUB)) {
                     lb = x[i].getLB();
                     ub = x[i].getUB();
                     if (x[i].updateLowerBound(b - sumUB + ub, this)) {
                         int nlb = x[i].getLB();
-                        sumLB += nlb - lb;
-                        I[i] = ub - nlb;
-                        doIt = anychange = true;
-                    }
-                }
-            }
-            // then negative coefficients
-            for (; i < l; i++) {
-                if (I[i] > -(b - sumUB)) {
-                    lb = -x[i].getUB();
-                    ub = -x[i].getLB();
-                    if (x[i].updateUpperBound(-(b - sumUB + ub), this)) {
-                        int nlb = -x[i].getUB();
                         sumLB += nlb - lb;
                         I[i] = ub - nlb;
                         doIt = anychange = true;
@@ -214,9 +178,9 @@ public class PropSumEq extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             filter(true, 2);
         }else if (EventType.isInclow(mask)) {
-            filter(i < k, 1);
+            filter(true, 1);
         } else if (EventType.isDecupp(mask)) {
-            filter(i >= k, 1);
+            filter(false, 1);
         }
     }
 
@@ -228,13 +192,9 @@ public class PropSumEq extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         int sumUB = 0, sumLB = 0, i = 0;
-        for (; i < k; i++) {
+        for (; i < l; i++) {
             sumLB += x[i].getLB();
             sumUB += x[i].getUB();
-        }
-        for (; i < l; i++) {
-            sumLB -= x[i].getUB();
-            sumUB -= x[i].getLB();
         }
         if (sumUB == b && sumLB == b) {
             return ESat.TRUE;
@@ -249,11 +209,8 @@ public class PropSumEq extends Propagator<IntVar> {
         StringBuilder linComb = new StringBuilder(20);
         linComb.append(vars[0].getName());
         int i = 1;
-        for (; i < k; i++) {
-            linComb.append(" + ").append(vars[i].getName());
-        }
         for (; i < l; i++) {
-            linComb.append(" - ").append(vars[i].getName());
+            linComb.append(" + ").append(vars[i].getName());
         }
         linComb.append(" = ");
         linComb.append(b);
