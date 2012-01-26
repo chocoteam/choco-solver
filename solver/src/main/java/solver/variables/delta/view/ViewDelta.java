@@ -67,11 +67,9 @@ public final class ViewDelta implements IntDelta {
 
 	@Override
     public void clear() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
     public void lazyClear() {
-        throw new UnsupportedOperationException();
     }
 }
