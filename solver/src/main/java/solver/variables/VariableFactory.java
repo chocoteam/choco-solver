@@ -65,7 +65,6 @@ public enum VariableFactory {
 	public static BoolVar bool(String name, Solver solver) {
 		BooleanBoolVarImpl var = new BooleanBoolVarImpl(name, solver);
 		var.setHeuristicVal(HeuristicValFactory.presetI(var));
-		solver.associates(var);
 		return var;
 	}
 
@@ -92,7 +91,6 @@ public enum VariableFactory {
 		} else {
 			IntVar var = new IntervalIntVarImpl(name, min, max, solver);
 			var.setHeuristicVal(HeuristicValFactory.presetI(var));
-			solver.associates(var);
 			return var;
 		}
 	}
@@ -120,7 +118,6 @@ public enum VariableFactory {
 		} else {
 			BitsetIntVarImpl var = new BitsetIntVarImpl(name, min, max, solver);
 			var.setHeuristicVal(HeuristicValFactory.presetI(var));
-			solver.associates(var);
 			return var;
 		}
 	}
@@ -150,7 +147,6 @@ public enum VariableFactory {
 		} else {
 			BitsetIntVarImpl var = new BitsetIntVarImpl(name, values, solver);
 			var.setHeuristicVal(HeuristicValFactory.presetI(var));
-			solver.associates(var);
 			return var;
 		}
 	}

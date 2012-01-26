@@ -93,6 +93,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
 
     public BooleanBoolVarImpl(String name, Solver solver) {
         super(name, solver);
+        solver.associates(this);
         notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = solver.getEnvironment().getNextOffset();
         mValue = 0;
