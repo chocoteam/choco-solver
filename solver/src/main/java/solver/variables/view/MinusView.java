@@ -32,7 +32,6 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -63,10 +62,10 @@ public class MinusView extends View<IntVar> {
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.attach(propagator, idxInProp); // to ensure var has a delta
+            var.analyseAndAdapt(mask);
             delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
 
                 @Override

@@ -291,6 +291,10 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public void analyseAndAdapt(int mask) {
+    }
+
+    @Override
     public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
         //void
     }

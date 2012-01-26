@@ -146,6 +146,10 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     public void attach(Propagator propagator, int idxInProp) {
         propagators.putIfAbsent(propagator, idxInProp);
         modificationEvents |= propagator.getPropagationConditions(idxInProp);
+        }
+
+    public void analyseAndAdapt(int mask) {
+        modificationEvents |= mask;
     }
 
     public Propagator[] getPropagators() {

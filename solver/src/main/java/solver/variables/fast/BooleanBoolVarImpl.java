@@ -36,7 +36,6 @@ import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
@@ -46,9 +45,9 @@ import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
-import solver.variables.delta.OneValueDelta;
 
 /**
  * <br/>
@@ -359,13 +358,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new OneValueDelta();
+            delta = new Delta();
             reactOnRemoval = true;
         }
-//        reactOnRemoval |= ((modificationEvents & EventType.REMOVE.mask) != 0);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

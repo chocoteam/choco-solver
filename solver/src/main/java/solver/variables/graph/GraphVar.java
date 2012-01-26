@@ -31,7 +31,6 @@ import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -193,8 +192,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnModification) {
             reactOnModification = true;
             delta = new GraphDelta();
