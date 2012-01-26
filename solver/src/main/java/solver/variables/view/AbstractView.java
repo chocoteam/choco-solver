@@ -54,6 +54,7 @@ public abstract class AbstractView extends AbstractVariable<IntVar> implements I
 
     protected AbstractView(String name, Solver solver) {
         super(name, solver);
+        solver.associates(this);
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
     }

@@ -65,6 +65,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     //***********************************************************************************
     public GraphVar(Solver solver) {
         super("G", solver);
+        solver.associates(this);
         this.environment = solver.getEnvironment();
         this.makeList(this);
     }
