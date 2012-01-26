@@ -133,7 +133,7 @@ public class PropReified extends Propagator<Variable> {
                 break;
                 case UNDEFINED:
                     prop.propagate(EventType.FULL_PROPAGATION.mask);
-                    if (!prop.isActive()) { //if the propagation has an impact on entailment
+                    if (prop.isPassive()) { //if the propagation has an impact on entailment
                         Propagator _prop = propagators[--_last];
                         propagators[_last] = prop;
                         propagators[p--] = _prop;
