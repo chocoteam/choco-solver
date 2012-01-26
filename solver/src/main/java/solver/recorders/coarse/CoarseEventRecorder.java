@@ -81,7 +81,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
 	@Override
 	public boolean execute() throws ContradictionException {
-		if (!propagator.isActive()) {
+		if (!propagator.isStateLess()) {
 			//promote event to top level event FULL_PROPAGATION
 			evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
 			propagator.setActive();
