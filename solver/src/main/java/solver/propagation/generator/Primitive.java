@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.PropagationEngine;
 import solver.propagation.comparators.predicate.All;
@@ -42,7 +41,7 @@ import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.conditions.ICondition;
 import solver.recorders.fine.ArcEventRecorder;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VariableClearing;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -148,58 +147,9 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 			}
 		}
 		if(!ArcEventRecorder.LAZY){
-			solver.getSearchLoop().plugSearchMonitor(new ISearchMonitor() {
-				@Override
-				public void beforeInitialize() {}
-				@Override
-				public void afterInitialize() {}
-				@Override
-				public void beforeInitialPropagation() {}
-				@Override
-				public void afterInitialPropagation() {}
-				@Override
-				public void beforeOpenNode() {}
-				@Override
-				public void afterOpenNode() {}
-				@Override
-				public void onSolution() {}
-				@Override
-				public void beforeDownLeftBranch() {
-					for(IEventRecorder ier:all){
-						ier.flush();
-					}
-					for(int i=solver.getNbVars()-1;i>=0;i--){
-						solver.getVar(i).getDelta().clear();
-					}
-				}
-				@Override
-				public void afterDownLeftBranch() {}
-				@Override
-				public void beforeDownRightBranch() {
-					for(IEventRecorder ier:all){
-						ier.flush();
-					}
-					for(int i=solver.getNbVars()-1;i>=0;i--){
-						solver.getVar(i).getDelta().clear();
-					}
-				}
-				@Override
-				public void afterDownRightBranch() {}
-				@Override
-				public void beforeUpBranch() {}
-				@Override
-				public void afterUpBranch() {}
-				@Override
-				public void onContradiction(ContradictionException cex) {}
-				@Override
-				public void beforeRestart() {}
-				@Override
-				public void afterRestart() {}
-				@Override
-				public void beforeClose() {}
-				@Override
-				public void afterClose() {}
-			});
+			solver.getSearchLoop().plugSearchMonitor(
+                    new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
+            );
 		}
 		return all;
 	}
