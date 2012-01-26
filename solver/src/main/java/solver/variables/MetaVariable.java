@@ -45,6 +45,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVaria
         components = vars;
         dim = vars.length;
         this.makeList(this);
+		solver.associates(this);
     }
 
     @Override

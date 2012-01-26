@@ -37,7 +37,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
@@ -149,7 +148,6 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
 			}
 		}
-		solver.associates(graph);
 		if (bcMode) {
 			setPropagators(
 					new PropAllDiffGraph(graph, vars.length, solver, this),
