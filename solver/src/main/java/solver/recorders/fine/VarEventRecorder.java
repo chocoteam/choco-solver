@@ -128,7 +128,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
                         propagator.fineERcalls++;
                         propagator.propagate(this, idxVinPs.get(pid), evtmask_);
                     }
-                    deltamon.get(pid).freeze();
+                    deltamon.get(pid).unfreeze();
                 }
             }
         } while (oneLeft);
