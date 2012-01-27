@@ -29,7 +29,6 @@ package solver.variables;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -56,10 +55,6 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVaria
             }
         }
         return true;
-    }
-
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
