@@ -27,6 +27,7 @@
 package solver.recorders.fine;
 
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.propagation.IScheduler;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
@@ -61,10 +62,11 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     /**
      * Return the delta monitor declared in <code>this</code> the variable given in parameter
      *
-     * @param variable a variable
+     * @param propagator
+     * @param variable   a variable
      * @return its deltamonitor in <code>this</code>
      */
-    public abstract IDeltaMonitor getDeltaMonitor(V variable);
+    public abstract IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable);
 
     @Override
     public boolean enqueued() {

@@ -49,6 +49,7 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+
 import java.util.BitSet;
 
 /**
@@ -115,7 +116,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 			return;
 		}
 		sccComputed.clear();
-		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override

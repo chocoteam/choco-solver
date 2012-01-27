@@ -128,10 +128,10 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
         if(variable.getType() == Variable.GRAPH){
 			if ((mask & EventType.REMOVEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(g).forEach(removeProc, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(removeProc, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(g).forEach(enforceProc, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(enforceProc, EventType.ENFORCEARC);
 			}
 			nLoops.updateUpperBound(nbEnvLoop.get(), this);
 			nLoops.updateLowerBound(nbKerLoop.get(), this);

@@ -42,14 +42,17 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 public class PropBST<V extends Variable> extends GraphPropagator<V>{
 
@@ -180,7 +183,7 @@ public class PropBST<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(arcRemoved, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(arcRemoved, EventType.REMOVEARC);
 
 		propagate(EventType.FULL_PROPAGATION.mask);
 	}

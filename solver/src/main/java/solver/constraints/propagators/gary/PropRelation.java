@@ -116,13 +116,13 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 		Variable var = vars[idxVarInProp];
         if (var.getType() == Variable.GRAPH) {
 			if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(var).forEach(arcEnforced, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, var).forEach(arcEnforced, EventType.ENFORCEARC);
             }
             if((mask & EventType.ENFORCENODE.mask) !=0){
-				eventRecorder.getDeltaMonitor(var).forEach(nodeEnforced, EventType.ENFORCENODE);
+				eventRecorder.getDeltaMonitor(this, var).forEach(nodeEnforced, EventType.ENFORCENODE);
 			}
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(var).forEach(arcRemoved, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, var).forEach(arcRemoved, EventType.REMOVEARC);
             }
 		}
 		else{
