@@ -219,7 +219,7 @@ public final class AbsView extends View<IntVar> {
 
     @Override
     public int getValue() {
-        return Math.abs(var.getLB());
+        return getLB();
     }
 
     @Override
