@@ -239,8 +239,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public int getValue() {
-        int v = var.getLB();
-        return v * v;
+        return getLB();
     }
 
     @Override
