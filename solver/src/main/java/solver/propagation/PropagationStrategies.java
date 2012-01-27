@@ -61,11 +61,55 @@ public enum PropagationStrategies {
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     },
+    ONE_QUEUE_WITH_VARS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Variable[] variables = solver.getVars();
+            Primitive arcs = Primitive.vars(variables);
+            Constraint[] constraints = solver.getCstrs();
+            Primitive coarses = Primitive.unary(constraints);
+            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
+        }
+    },
+    TWO_QUEUES_WITH_VARS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Variable[] variables = solver.getVars();
+            Constraint[] constraints = solver.getCstrs();
+            Queue arcs = Queue.build(Primitive.vars(variables));
+            Queue coarses = Queue.build(Primitive.unary(constraints));
+            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    ONE_QUEUE_WITH_PROPS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Primitive arcs = Primitive.props(constraints);
+            Primitive coarses = Primitive.unary(constraints);
+            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
+        }
+    },
+    TWO_QUEUES_WITH_PROPS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Queue arcs = Queue.build(Primitive.props(constraints));
+            Queue coarses = Queue.build(Primitive.unary(constraints));
+            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
     DEFAULT(){
         @Override
         public PropagationStrategy make(Solver solver) {
 //            return ONE_QUEUE_WITH_ARCS.make(solver);
+//            return ONE_QUEUE_WITH_VARS.make(solver);
+//            return ONE_QUEUE_WITH_PROPS.make(solver);
             return TWO_QUEUES_WITH_ARCS.make(solver);
+//            return TWO_QUEUES_WITH_VARS.make(solver);
+//            return TWO_QUEUES_WITH_PROPS.make(solver);
         }
     };
 
