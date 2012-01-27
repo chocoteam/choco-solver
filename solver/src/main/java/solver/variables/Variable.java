@@ -88,12 +88,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
      */
     Propagator[] getPropagators();
 
-    /**
-     * Return the index of <code>this</code> in <code>propagator</code>
-     * @param propagator a propagator
-     * @return index of this in propagator
-     */
-    int getIndexInPropagator(Propagator propagator);
+    int[] getPIndices();
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.

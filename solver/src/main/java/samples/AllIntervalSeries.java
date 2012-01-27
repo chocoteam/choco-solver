@@ -55,7 +55,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 5;
+    private int m = 500;
 
     IntVar[] vars;
     IntVar[] dist;

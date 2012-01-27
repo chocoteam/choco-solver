@@ -29,7 +29,6 @@ package solver.variables;
 
 import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -73,7 +72,9 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
 
     protected IList<V, IVariableMonitor<V>> records; // List of variable monitors
 
-    protected TObjectIntHashMap<Propagator> propagators;
+    protected Propagator[] propagators; // one propagator can appear more than one time
+    protected int[] pindices;    // but it indices must be different
+    protected int pIdx;
 
     protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
@@ -97,7 +98,8 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         this.name = name;
         this.solver = solver;
         views = new IView[2];
-        propagators = new TObjectIntHashMap<Propagator>();
+        propagators = new Propagator[8];
+        pindices = new int[8];
         ID = solver.nextId();
     }
 
@@ -144,20 +146,31 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     }
 
     public void attach(Propagator propagator, int idxInProp) {
-        propagators.putIfAbsent(propagator, idxInProp);
-        modificationEvents |= propagator.getPropagationConditions(idxInProp);
+        //ensure capacity
+        if (pIdx == propagators.length) {
+            Propagator[] tmp = propagators;
+            propagators = new Propagator[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, propagators, 0, pIdx);
+
+            int[] itmp = pindices;
+            pindices = new int[itmp.length * 3 / 2 + 1];
+            System.arraycopy(itmp, 0, pindices, 0, pIdx);
+
         }
+        propagators[pIdx] = propagator;
+        pindices[pIdx++] = idxInProp;
+    }
 
     public void analyseAndAdapt(int mask) {
         modificationEvents |= mask;
     }
 
     public Propagator[] getPropagators() {
-        return propagators.keys(new Propagator[propagators.size()]);
+        return Arrays.copyOf(propagators, pIdx);
     }
 
-    public int getIndexInPropagator(Propagator propagator) {
-        return propagators.get(propagator);
+    public int[] getPIndices() {
+        return Arrays.copyOf(pindices, pIdx);
     }
 
     public void activate(IVariableMonitor monitor) {
