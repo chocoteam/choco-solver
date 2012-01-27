@@ -111,7 +111,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
                     assert (propagator.isActive()) : this + " is not active ("+propagator.isStateLess()+" & "+ propagator.isPassive()+")";
                     propagator.fineERcalls++;
                     propagator.propagate(this, idxVinP.get(vid), evtmask_);
-                    deltamon.get(vid).freeze();
+                    deltamon.get(vid).unfreeze();
                 }
             }
         } while (oneLeft);
