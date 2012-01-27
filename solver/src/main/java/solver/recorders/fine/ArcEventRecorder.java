@@ -95,8 +95,8 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public boolean execute() throws ContradictionException {
+//        LoggerFactory.getLogger("solver").info("* {}", this.toString());
         if (evtmask > 0) {
-//            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
             int evtmask_ = evtmask;
             // for concurrent modification..
             deltamon.freeze();
@@ -120,7 +120,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
             if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
-//            LoggerFactory.getLogger("solver").info("\t << {}", this.toString());
+//            LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
                 // 1. clear the structure if necessary
                 if (LAZY) {
                     if (timestamp - AbstractSearchLoop.timeStamp != 0) {
@@ -152,7 +152,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     public void virtuallyExecuted() {
         this.evtmask = 0;
-        if(LAZY){
+        if (LAZY) {
             variable.getDelta().lazyClear();
             timestamp = AbstractSearchLoop.timeStamp;
         }
@@ -193,6 +193,6 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return variable + " -> " + propagator;
+        return "<< " + variable.toString() + "::"+propagator.toString() + " >>";
     }
 }
