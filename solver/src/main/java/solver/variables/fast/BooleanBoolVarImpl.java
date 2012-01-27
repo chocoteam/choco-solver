@@ -45,9 +45,9 @@ import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.delta.OneValueDelta;
 
 /**
  * <br/>
@@ -123,9 +123,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value       value to remove from the domain (int)
-     * @param cause       removal releaser
+     * @param value value to remove from the domain (int)
+     * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -169,8 +168,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value       instantiation value (int)
-     * @param cause       instantiation releaser
+     * @param value instantiation value (int)
+     * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -214,8 +213,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new lower bound (included)
-     * @param cause       updating releaser
+     * @param value new lower bound (included)
+     * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -236,8 +235,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new upper bound (included)
-     * @param cause       update releaser
+     * @param value new upper bound (included)
+     * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -361,7 +360,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new Delta();
+            delta = new OneValueDelta();
             reactOnRemoval = true;
         }
     }
