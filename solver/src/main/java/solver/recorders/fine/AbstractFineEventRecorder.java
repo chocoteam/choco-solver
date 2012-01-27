@@ -46,7 +46,8 @@ import solver.variables.delta.IDeltaMonitor;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>, IActivable {
+public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>,
+        IActivable<Propagator<V>> {
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;

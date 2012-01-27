@@ -223,7 +223,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         state.set(ACTIVE);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
-            fineER[i].activate();
+            fineER[i].activate(this);
         }
     }
 
@@ -233,7 +233,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         state.set(PASSIVE);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
-            fineER[i].desactivate();
+            fineER[i].desactivate(this);
         }
         coarseER.getScheduler().remove(coarseER);
     }

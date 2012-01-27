@@ -181,12 +181,12 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void activate() {
+    public void activate(Propagator<V> element) {
         variable.activate(this);
     }
 
     @Override
-    public void desactivate() {
+    public void desactivate(Propagator<V> element) {
         variable.desactivate(this);
         flush();
     }
