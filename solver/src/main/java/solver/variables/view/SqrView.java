@@ -239,8 +239,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public int getValue() {
-        int v = var.getValue();
-        return v * v;
+        return getLB();
     }
 
     @Override
@@ -752,29 +751,14 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        if (evt == EventType.INCLOW) {
-            int lb = var.getLB();
-            if (lb > 0) {
-                notifyMonitors(EventType.INCLOW, cause);
-                return;
+        if ((evt.mask & EventType.BOUND.mask) != 0) {
+            if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
+                notifyMonitors(EventType.INSTANTIATE, cause);
+            } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
+                notifyMonitors(EventType.BOUND, cause);
             }
-            int ub = var.getUB();
-            if (ub >= 0) {
-                notifyMonitors(EventType.DECUPP, cause);
-                return;
-            } // else, keep original event
-        } else if (evt == EventType.DECUPP) {
-            int ub = var.getUB();
-            if (ub < 0) {
-                notifyMonitors(EventType.INCLOW, cause);
-                return;
-            }
-            int lb = var.getLB();
-            if (lb <= 0) {
-                notifyMonitors(EventType.DECUPP, cause);
-                return;
-            } // else, keep original event
+        } else {
+            notifyMonitors(evt, cause);
         }
-        notifyMonitors(evt, cause);
     }
 }
