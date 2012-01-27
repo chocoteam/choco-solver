@@ -149,12 +149,18 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
     D getDelta();
 
     /**
-     * Regarding the propagator in parameter, update the propagation conditions of the variable
+     * Link the propagator to this
      *
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
      */
     void attach(Propagator propagator, int idxInProp);
+
+    /**
+     * Analysis propagator event reaction on this, and adapt this
+     * @param mask
+     */
+    void analyseAndAdapt(int mask);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

@@ -37,7 +37,6 @@ import com.sun.istack.internal.NotNull;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
@@ -417,10 +416,9 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            //TODO:  LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
             delta = new Delta();
             reactOnRemoval = true;
         }

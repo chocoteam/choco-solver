@@ -36,7 +36,6 @@ import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.OffsetIStateBitset;
@@ -124,9 +123,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value       value to remove from the domain (int)
-     * @param cause       removal releaser
+     * @param value value to remove from the domain (int)
+     * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -170,8 +168,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value       instantiation value (int)
-     * @param cause       instantiation releaser
+     * @param value instantiation value (int)
+     * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -215,8 +213,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new lower bound (included)
-     * @param cause       updating releaser
+     * @param value new lower bound (included)
+     * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -237,8 +235,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new upper bound (included)
-     * @param cause       update releaser
+     * @param value new upper bound (included)
+     * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -359,13 +357,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             delta = new OneValueDelta();
             reactOnRemoval = true;
         }
-//        reactOnRemoval |= ((modificationEvents & EventType.REMOVE.mask) != 0);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
