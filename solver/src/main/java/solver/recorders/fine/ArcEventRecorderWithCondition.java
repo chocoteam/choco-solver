@@ -74,11 +74,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagator.decArity();
                 }
-                // 2. record the event and values removed
-                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmask |= evt.strengthened_mask;
-                }
-                // 3. schedule this if condition is valid
+                // 2. schedule this if condition is valid
                 if (condition.validateScheduling(this, evt)) {
                     propagator.forcePropagate(EventType.FULL_PROPAGATION);
                 }
@@ -88,5 +84,10 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
 
     @Override
     public void flush() {
+    }
+
+    @Override
+    public String toString() {
+        return "<< " + variable.toString() + "::" + propagator.toString() + "::" + condition.toString() + " >>";
     }
 }
