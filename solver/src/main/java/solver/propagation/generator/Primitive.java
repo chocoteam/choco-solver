@@ -123,7 +123,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 					for (int v = 0; v < prop.getNbVars(); v++) {
 						Variable var = prop.getVar(v);
 						if (propagationEngine.isMarked(prop.getId(), var.getId())) {
-							all.add(arc(var, prop, var.getIndexInPropagator(prop), solver));
+							all.add(arc(var, prop, v, solver));
 							propagationEngine.clearWatermark(prop.getId(), var.getId());
 						}
 					}
@@ -134,10 +134,11 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 				for (int v = 0; v < variables.length; v++) {
 					Variable var = variables[v];
 					Propagator[] propagators = var.getPropagators();
+                    int[] idx = var.getPIndices();
 					for (int p = 0; p < propagators.length; p++) {
 						Propagator prop = propagators[p];
 						if (propagationEngine.isMarked(prop.getId(), var.getId())) {
-							all.add(arc(var, prop, var.getIndexInPropagator(prop), solver));
+							all.add(arc(var, prop, idx[p], solver));
 							propagationEngine.clearWatermark(prop.getId(), var.getId());
 						}
 					}

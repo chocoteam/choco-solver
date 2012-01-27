@@ -45,9 +45,9 @@ import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.delta.OneValueDelta;
 
 /**
  * <br/>
@@ -361,7 +361,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new Delta();
+            delta = new OneValueDelta();
             reactOnRemoval = true;
         }
     }
