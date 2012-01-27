@@ -164,14 +164,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
-        Constraint[] cstrs = solver.getCstrs();
-        Primitive arcs = Primitive.arcs(cstrs);
-        Primitive coarses = Primitive.unary(cstrs);
-//		if(true){
-//			throw new UnsupportedOperationException();
-//		}
-        return Queue.build(arcs, coarses).pickOne();
-//        return Sort.build(IncrPriorityP.get(),arcs, coarses).pickOne();
+        return PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(solver);
     }
 
 
