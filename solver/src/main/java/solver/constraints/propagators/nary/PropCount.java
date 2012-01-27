@@ -176,7 +176,7 @@ public class PropCount extends Propagator<IntVar> {
                 }
             }
             //assumption : we only get the inst events on all variables except the occurrence variable
-            eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
             filter(true, nbRule);
         }
 

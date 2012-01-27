@@ -621,7 +621,7 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         }
-        eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
     }
 
 

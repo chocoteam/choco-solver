@@ -267,7 +267,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             }
         }
         if (idx < nbVars) {
-            eventRecorder.getDeltaMonitor(vars[idx]).forEach(rem_proc, EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(rem_proc, EventType.REMOVE);
         }
     }
 

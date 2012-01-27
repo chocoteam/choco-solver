@@ -102,10 +102,10 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 
 		if((mask & EventType.REMOVEARC.mask) != 0){
-            eventRecorder.getDeltaMonitor(g).forEach(rem_proc, EventType.REMOVEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(rem_proc, EventType.REMOVEARC);
 		}
 		if((mask & EventType.ENFORCENODE.mask) != 0){
-            eventRecorder.getDeltaMonitor(g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
 		}
 	}
 

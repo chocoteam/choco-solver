@@ -293,7 +293,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
         if (var.getType() == Variable.GRAPH) {
 			// maintient du COUPLAGE et des SCC
             obsoleteMatching = false;
-            eventRecorder.getDeltaMonitor(g).forEach(maintain_matching, EventType.REMOVEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(maintain_matching, EventType.REMOVEARC);
             if (obsoleteMatching) {
                 repairMatching();
                 buildSCC();
@@ -303,7 +303,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
                 }
             } else {
                 repairedSCC.clear();
-                eventRecorder.getDeltaMonitor(g).forEach(maintain_scc, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(maintain_scc, EventType.REMOVEARC);
                 filter();
             }
         }

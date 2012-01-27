@@ -69,7 +69,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public IDeltaMonitor getDeltaMonitor(V variable) {
+    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
         return deltamon;
     }
 

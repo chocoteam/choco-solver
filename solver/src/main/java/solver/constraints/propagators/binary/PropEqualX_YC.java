@@ -132,7 +132,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                 this.awakeOnUpp(varIdx);
             }
             if (EventType.isRemove(mask)) {
-                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
             }
         }
     }
