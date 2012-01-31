@@ -28,8 +28,8 @@
 package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 
 import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.heaps.Heap;
-import solver.constraints.propagators.gary.tsp.heaps.VerySimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -50,7 +50,6 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 	double maxTArc;
 	protected int currentSCC;
 	private int start;
-	private final static boolean FILTER = true;
 	private double[] minCostOutArc;
 
 	//***********************************************************************************
@@ -59,7 +58,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 
 	public PrimBSTFinder(int nbNodes, HeldKarp propagator,int start, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		super(nbNodes,propagator,nR,sccOf,outArcs);
-		heap = new VerySimpleHeap(nbNodes);
+		heap = new FastArrayHeap(nbNodes);
 		inTree = new BitSet(n);
 		this.start   = start;
 		minCostOutArc = new double[n];

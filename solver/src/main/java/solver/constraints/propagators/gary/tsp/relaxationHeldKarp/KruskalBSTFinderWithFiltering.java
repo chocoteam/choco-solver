@@ -127,7 +127,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		Arrays.sort(integers,comp);
 		int v;
 		activeArcs.clear();
-		activeArcs.flip(0,size-1);
+		activeArcs.flip(0,size);
 		for(idx = 0; idx<size; idx++){
 			v = integers[idx];
 			sortedArcs[idx] = v;

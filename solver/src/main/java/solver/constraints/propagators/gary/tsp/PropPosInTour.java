@@ -49,6 +49,8 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
+import java.awt.*;
+
 /**
  * @PropAnn(tested = {BENCHMARK})
  */
@@ -61,7 +63,6 @@ public class PropPosInTour extends GraphPropagator {
 	DirectedGraphVar g;
 	int n;
 	IntVar[] intVars;
-	private int varIdx;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -91,7 +92,6 @@ public class PropPosInTour extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		varIdx = idxVarInProp;
 		if((mask & EventType.INCLOW.mask)!=0){
 			upLB(idxVarInProp,intVars[idxVarInProp].getLB());
 		}
@@ -102,7 +102,7 @@ public class PropPosInTour extends GraphPropagator {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
+		return EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
 	}
 
 	@Override
@@ -197,47 +197,6 @@ public class PropPosInTour extends GraphPropagator {
 					g.removeArc(var,s,this);
 				}
 			}
-		}
-	}
-
-	private void remVarPos(int var, int val) throws ContradictionException {
-		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
-		if(p!=-1){
-			if(intVars[p].removeValue(val-1,this)){
-				remVarPos(p,val-1);
-			}
-		}else{
-			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
-			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(intVars[p].instantiatedTo(val-1)){
-					g.removeArc(p,var,this);
-				}
-			}
-		}
-		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
-		if(s!=-1){
-			if(intVars[s].removeValue(val+1,this)){
-				remVarPos(s,val+1);
-			}
-		}else{
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
-			for(s=nei.getFirstElement();p>=0;p=nei.getNextElement()){
-				if(intVars[s].instantiatedTo(val+1)){
-					g.removeArc(var,s,this);
-				}
-			}
-		}
-	}
-
-	private class ValRem implements IntProcedure{
-		private GraphPropagator p;
-
-		private ValRem(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			remVarPos(varIdx,i);
 		}
 	}
 }

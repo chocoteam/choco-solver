@@ -124,7 +124,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder {
 		Arrays.sort(integers,comp);
 		int v;
 		activeArcs.clear();
-		activeArcs.flip(0,size-1);
+		activeArcs.set(0, size);
 		for(idx = 0; idx<size; idx++){
 			v = integers[idx];
 			sortedArcs[idx] = v;
@@ -143,7 +143,6 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder {
 		treeCost = 0;
 		cctRoot = n-1;
 		int tSize = addMandatoryArcs();
-		if(tSize>n-1){throw new UnsupportedOperationException("too many arcs in the MST");}
 		connectMST(tSize);
 	}
 

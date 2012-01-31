@@ -35,6 +35,7 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
@@ -57,6 +58,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
 import java.io.*;
+import java.util.BitSet;
 
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
@@ -68,7 +70,7 @@ public class TSPTW extends AbstractProblem{
 	//***********************************************************************************
 
 	private static final long TIMELIMIT = 10000;
-	private static String outFile = "atsptw";
+	private static String outFile;
 	static long seed = 0;
 	// instance
 	private String instanceName;
@@ -82,7 +84,9 @@ public class TSPTW extends AbstractProblem{
 	private IntVar totalCost;
 	private Boolean status;
 	private GraphConstraint gc;
-	private boolean arbo,antiArbo,rg,hk,bst;
+	private boolean arbo,antiArbo,rg,hk,disj, pos, allDiffAC;
+	static int nbParam = 7;
+	static int maxParam = 1<<nbParam;
 	private int p;
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph G_R;
 	private IntVar[] end,duration;
@@ -108,8 +112,68 @@ public class TSPTW extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
+//		buildFull();
+		buildpreviousModel();
+//		buildRGModel();
+	}
+	public void buildRGModel() {
 		// create model
-		graph = new DirectedGraphVar(solver,n, GraphType.MATRIX,GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
+		totalCost = VariableFactory.bounded("total cost ", 0, (int)Math.ceil(bestSol), solver);
+		time = new IntVar[n];
+		for(int i=0;i<n;i++){
+			time[i] = VariableFactory.bounded("time "+i,open[i],close[i],solver);
+		}
+		try{
+			for(int i=0; i<n-1; i++){
+				graph.getKernelGraph().activateNode(i);
+				for(int j=0; j<n ;j++){
+					if(distanceMatrix[i][j]!=noVal){
+						graph.getEnvelopGraph().addArc(i,j);
+					}
+				}
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+			System.exit(0);
+		}
+		gc = GraphConstraintFactory.makeConstraint(graph, solver);
+		// BASIC MODEL
+		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
+		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
+		if(rg){// reduced-graph based filtering
+			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+			nR = RP.getNSCC();
+			sccOf = RP.getSCCOF();
+			outArcs = RP.getOutArcs();
+			G_R = RP.getReducedGraph();
+			gc.addAdHocProp(RP);
+			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+			gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs));
+		}
+		else{
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
+			gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver));
+		}
+		try{
+			time[0].instantiateTo(0, Cause.Null);
+		}catch (Exception e){
+			e.printStackTrace();
+			System.exit(0);
+		}
+		solver.post(gc);
+	}
+	public void buildpreviousModel() {
+		// create model
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, (int)Math.ceil(bestSol), solver);
 		time = new IntVar[n];
 		for(int i=0;i<n;i++){
@@ -150,17 +214,73 @@ public class TSPTW extends AbstractProblem{
 			gc.addAdHocProp(RP);
 			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
 			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
 		}
 		else{
 			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
 		}
 		if(hk){// MST-based HK
-			gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver));
-		}
-		if(bst){// BST-based HK
-			gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs));
+			if(rg){// BST-based HK
+				gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs));
+			}else{
+				gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver));
+			}
 		}
 
+
+		if(disj){
+			end = new IntVar[n];
+			duration = new IntVar[n];
+			for(int i=0;i<n;i++){
+				end[i] = VariableFactory.bounded("end "+i,0,totalCost.getUB(),solver);
+				duration[i] = VariableFactory.bounded("duration "+i,0,totalCost.getUB(),solver);
+			}
+			try{
+				time[0].instantiateTo(0, Cause.Null);
+				duration[n-1].instantiateTo(0, Cause.Null);
+			}catch (Exception e){
+				e.printStackTrace();
+				System.exit(0);
+			}
+			gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
+			gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
+			gc.addAdHocProp(new PropTaskSweep(time, end, duration, distanceMatrix, gc, solver));
+			gc.addAdHocProp(new PropTaskIntervals(time, end, duration, distanceMatrix, gc, solver));
+		}
+		if(pos){
+			IntVar[] positions = new IntVar[n];
+			for(int i=0;i<n;i++){
+				positions[i] = VariableFactory.bounded("positions "+i,0,n-1,solver);
+			}
+			try{
+				positions[0].instantiateTo(0, Cause.Null);
+				positions[n-1].instantiateTo(n-1, Cause.Null);
+			}catch (Exception e){
+				e.printStackTrace();
+				System.exit(0);
+			}
+			gc.addAdHocProp(new PropPosInTour(positions, graph, gc, solver));
+			if(rg){
+				gc.addAdHocProp(new PropPosInTourGraphReactor(positions, graph, gc, solver,nR,sccOf,outArcs,G_R));
+			}else{
+				gc.addAdHocProp(new PropPosInTourGraphReactor(positions, graph, gc, solver));
+			}
+			solver.post(new AllDifferent(positions,solver,AllDifferent.Type.BC));
+		}
+		if(allDiffAC){
+			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+		}
+		solver.post(gc);
+	}
+	public void buildFull() {
+		// create model
+		graph = new DirectedGraphVar(solver,n, GraphType.ENVELOPE_SWAP_ARRAY,GraphType.LINKED_LIST);
+		totalCost = VariableFactory.bounded("total cost ", 0, (int)Math.ceil(bestSol), solver);
+		time = new IntVar[n];
+		for(int i=0;i<n;i++){
+			time[i] = VariableFactory.bounded("time "+i,open[i],close[i],solver);
+		}
 		end = new IntVar[n];
 		duration = new IntVar[n];
 		for(int i=0;i<n;i++){
@@ -168,35 +288,73 @@ public class TSPTW extends AbstractProblem{
 			duration[i] = VariableFactory.bounded("duration "+i,0,totalCost.getUB(),solver);
 		}
 		try{
+			for(int i=0; i<n-1; i++){
+				graph.getKernelGraph().activateNode(i);
+				for(int j=0; j<n ;j++){
+					if(distanceMatrix[i][j]!=noVal){
+						graph.getEnvelopGraph().addArc(i,j);
+					}
+				}
+			}
 			time[0].instantiateTo(0, Cause.Null);
 			duration[n-1].instantiateTo(0, Cause.Null);
-		}catch (Exception e){
+		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(0);
 		}
+		gc = GraphConstraintFactory.makeConstraint(graph, solver);
+		// BASIC MODEL
+		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
+		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
+
 		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTaskSweep(time, end, duration, distanceMatrix, gc, solver));
+
+		if(rg){
+			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+			nR = RP.getNSCC();
+			sccOf = RP.getSCCOF();
+			outArcs = RP.getOutArcs();
+			G_R = RP.getReducedGraph();
+			gc.addAdHocProp(RP);
+			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+			gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs));
+		}
+		else{
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
+			gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver));
+		}
 		gc.addAdHocProp(new PropTaskIntervals(time, end, duration, distanceMatrix, gc, solver));
-		solver.post(ConstraintFactory.eq(time[n-1],totalCost,solver));
 
 		solver.post(gc);
 	}
 
-	private void configParameters(boolean ab, boolean aab, boolean rg, boolean hk, boolean bst) {
+	private void configParameters(boolean ab, boolean aab, boolean rg, boolean hk, boolean disj, boolean pos, boolean adAC) {
 		arbo     = ab;
 		antiArbo = aab;
 		this.rg	 = rg;
 		this.hk  = hk;
-		this.bst = bst;
+		this.disj = disj;
+		this.pos = pos;
+		this.allDiffAC = adAC;
 	}
 
-	private void configParameters(int p,boolean bst) {
-		configParameters(p%2==1,(p>>1)%2==1,(p>>2)%2==1,(p>>3)%2==1,bst);
+	private void configParameters(int p) {
+		configParameters(p%2==1,(p>>1)%2==1,(p>>2)%2==1,(p>>3)%2==1,(p>>4)%2==1,(p>>5)%2==1,(p>>6)%2==1);
 		this.p = p;
-		if(bst){
-			this.p += 100;
-		}
+	}
+	private void configSingleParameters(int p) {
+		configParameters(p==1,p==2,p==3,p==4,p==5,p==6,p==7);
+		this.p = p;
 	}
 
 	@Override
@@ -206,32 +364,78 @@ public class TSPTW extends AbstractProblem{
 //		if(nR==null){
 //			strategy = StrategyFactory.graphLexico(graph);
 		strategy = StrategyFactory.graphStrategy(graph, null, new BuildPath(graph), GraphStrategy.NodeArcPriority.ARCS);
+
 //			strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinVal(graph), GraphStrategy.NodeArcPriority.ARCS);
 //		strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
 //		}else{
 //			strategy = StrategyFactory.graphStrategy(graph,null,new MinCostSCCBreak(graph), GraphStrategy.NodeArcPriority.ARCS);
 //		}
 		solver.set(strategy);
-//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-//		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
+		solver.getSearchLoop().restartAfterEachSolution(true);
 		SearchMonitorFactory.log(solver, true, false);
 	}
 
 	@Override
 	public void solve() {
-//		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
-		status = solver.findSolution();
+		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
+//		status = solver.findSolution();
 		if(solver.getMeasures().getTimeCount()<TIMELIMIT && solver.getMeasures().getSolutionCount()==0){
 			throw new UnsupportedOperationException("no solution?");
 		}
+//		if(solver.getMeasures().getSolutionCount()>0 && !checked()){
+//			System.out.println(p+" : param");
+//			System.out.println(graph.getEnvelopGraph());
+//			for(int i=0;i<n;i++){
+//				System.out.println(i+"->"+graph.getEnvelopGraph().getSuccessorsOf(i).getFirstElement()+" : "+time[i]);
+//			}
+//			throw new UnsupportedOperationException("not a solution");
+//		}
+	}
+
+	private boolean checked() {
+		if(!graph.instantiated()){
+			return false;
+		}
+		int node = 0;
+		int next = 0;
+		int time = open[0];
+		BitSet nodes = new BitSet(n);
+		do{
+			node = next;
+//			System.out.println("visit : "+node+" ["+open[node]/10000+","+close[node]/10000+"] at time "+time/10000);
+			if(nodes.get(node)){
+				return false;
+			}
+			nodes.set(node);
+			next = graph.getEnvelopGraph().getSuccessorsOf(node).getFirstElement();
+			if(next == -1 || graph.getEnvelopGraph().getSuccessorsOf(node).getNextElement()!=-1){
+				return false;
+			}
+//			System.out.println(time+"+"+distanceMatrix[node][next]+" = "+(time+distanceMatrix[node][next]));
+			time = Math.max(open[next],time+distanceMatrix[node][next]);
+			if(time>close[next]){
+				return false;
+			}
+		}while(next != n-1);
+		nodes.set(next);
+		if(graph.getEnvelopGraph().getSuccessorsOf(next).neighborhoodSize()>0){
+			return false;
+		}
+		if(nodes.nextClearBit(0)<n){
+			return false;
+		}
+		return true;
 	}
 
 	@Override
 	public void prettyOut() {
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+//		int bestCost = 0;
 		String txt = instanceName+";"+solver.getMeasures().getSolutionCount()+";"+solver.getMeasures().getFailCount()+
-				";"+solver.getMeasures().getTimeCount()+";"+status+";"+bestSol+";"+bestCost+";"+p+";\n";
+				";"+solver.getMeasures().getTimeCount()+";"+status+";"+bestSol+";"+bestCost+";"+p+";";
+		txt+=arbo+";"+antiArbo+";"+rg+";"+hk+";"+disj+";"+pos+";"+allDiffAC+";\n";
 		writeTextInto(txt, outFile);
 //		System.out.println(graph.getEnvelopGraph());
 //		for(int i=0;i<n;i++){
@@ -244,11 +448,11 @@ public class TSPTW extends AbstractProblem{
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		outFile = "tsptw.csv";
+		outFile = "tsptw_60sec_notasks.csv";
 		clearFile(outFile);
-		writeTextInto("instance;sols;fails;time;status;opt;obj;param;\n", outFile);
+		writeTextInto("instance;sols;fails;time;status;opt;obj;param;arbo;antiarbo;rg;hk;disj;pos;allDiff\n", outFile);
 		bench();
-//		String instance = "/Users/jfages07/github/In4Ga/tsptw/rc_204.3.txt";
+//		String instance = "/Users/jfages07/github/In4Ga/tsptw/rc_201.1.txt";
 //		testInstance(instance);
 	}
 
@@ -257,7 +461,7 @@ public class TSPTW extends AbstractProblem{
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();
-			System.out.println("parsing instance "+url+"...");
+			System.out.println("/n parsing instance "+url+".../n");
 			int n = Integer.parseInt(line)+1;
 			int[][] dist = new int[n][n];
 			String[] lineNumbers;
@@ -299,30 +503,30 @@ public class TSPTW extends AbstractProblem{
 			String name = lineNumbers[lineNumbers.length-1];
 
 			TSPTW tspRun;
-			int[] params = new int[]{0,4};
-//			for(int i=0;i<50;i++){
-//				seed = System.currentTimeMillis();
-				for(int p:params){
-					tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
-					tspRun.configParameters(p, false);
-					tspRun.execute();
-//					System.exit(0);
-				}
-//			}
-			if(true){
-				return;
-			}
-			for(int p=0;p<16;p++){
-				if((p>>2)%2==1){
-					tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
-					tspRun.configParameters(p,true);
-					tspRun.execute();
-				}
+//			int[] params = new int[]{0,4};
+//			for(int p:params){
+//			for(int p=0;p<maxParam;p++){
+			for(int p=0;p<=nbParam;p++){
 				tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
-				tspRun.configParameters(p,false);
+//				tspRun.configParameters(p);
+				tspRun.configSingleParameters(p);
 				tspRun.execute();
 			}
-			System.exit(0);
+//			}
+//			if(true){
+//				return;
+//			}
+//			for(int p=0;p<16;p++){
+//				if((p>>2)%2==1){
+//					tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
+//					tspRun.configParameters(p);
+//					tspRun.execute();
+//				}
+//				tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
+//				tspRun.configParameters(p);
+//				tspRun.execute();
+//			}
+//			System.exit(0);
 		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(0);
@@ -335,6 +539,7 @@ public class TSPTW extends AbstractProblem{
 		String[] list = folder.list();
 		for(String s:list){
 			if(s.contains(".txt"))
+//				if(s.contains("208"))
 				testInstance(dir+"/"+s);
 		}
 	}
@@ -517,7 +722,10 @@ public class TSPTW extends AbstractProblem{
 
 		private int selectNext(INeighbors succ, int from) {
 //			return minSuccs(succ);
-			return earliestTimeLB(succ,from);
+
+//			return succ.getFirstElement();
+			return earliestTimeLB(succ,from); // this one seems the best
+
 //			return earliestTimeUB(succ,from);
 		}
 

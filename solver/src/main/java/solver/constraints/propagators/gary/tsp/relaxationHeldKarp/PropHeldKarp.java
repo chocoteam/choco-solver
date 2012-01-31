@@ -31,6 +31,8 @@ import choco.kernel.ESat;
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
+import samples.graph.TSP;
+import samples.graph.Tree;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -71,7 +73,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	private double step;
 	private IStateDouble totalPenalities;
 	private AbstractMSTFinder HKfilter, HK;
-	private long nbRem;
+	public static long nbRem;
 	private final static boolean forceTour = false;
 	private final static boolean DEBUG = false;
 
@@ -98,6 +100,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		totalPenalities= environment.makeFloat(0);
 		mandatoryArcsList  = new TIntArrayList();
 		mandatoryArcsBitSet= new BitSet(n*n);
+		nbRem  = 0;
 	}
 
 
@@ -105,18 +108,23 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	public static PropHeldKarp mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
-//		phk.HKfilter = new PrimMSTFinder(phk.n,phk);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		return phk;
 	}
 
+	IStateInt[] sccOf;
+	IStateInt nr;
+	double total;
 	/** BST based HK */
 	public static PropHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
 //		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
+		phk.sccOf = sccOf;
+		phk.nr = nR;
 //		phk.HKfilter = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
 		phk.HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
+//		phk.HK = new PrimMSTFinder(phk.n,phk);
 		return phk;
 	}
 
@@ -124,16 +132,36 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	// HK Algorithm(s)
 	//***********************************************************************************
 
+	double sccPen;
 	public void HK_algorithm() throws ContradictionException {
+//		if(solver.getMeasures().getSolutionCount()==0){
+//			return;//the UB does not allow to prune
+//		}
+//		int size = 0;
+//		for(int i=0;i<n;i++){
+//			size+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//		}
+//		if(size>n*n/10){
+//			return;//the UB does not allow to prune
+//		}
+		sccPen = 0;//-10000;//-obj.getUB();
 		// initialisation
 		clearStructures();
 		rebuildGraph();
 		INeighbors nei;
+		total = 0;
+		boolean offSet = sccOf!=null;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				costs[i][j] = originalCosts[i][j] + outPenalities[i].get() + inPenalities[j].get();
+				if(offSet && sccOf[i].get()!=sccOf[j].get()){
+					costs[i][j] += sccPen;
+				}
 			}
+		}
+		if(offSet){
+			total = (nr.get()-1)*sccPen;
 		}
 		HK_Pascals();
 	}
@@ -145,20 +173,21 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		double bestHKB;
 		boolean improved;
 		int count = 2;
+		bestHKB = 0;
 		HKfilter.computeMST(costs,g.getEnvelopGraph());
-		hkb = HKfilter.getBound()-totalPenalities.get();
+		hkb = HKfilter.getBound()-totalPenalities.get()-total;
 		bestHKB = hkb;
 		mst = HKfilter.getMST();
 		if(hkb-Math.floor(hkb)<0.01){
 			hkb = Math.floor(hkb);
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
-		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
+		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() + total + 0.01);
 		for(int iter=3;iter>0;iter--){
 			improved = false;
 			for(int i=n;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
-				hkb = HK.getBound()-totalPenalities.get();
+				hkb = HK.getBound()-totalPenalities.get()-total;
 				if(hkb>bestHKB+0.01){
 					bestHKB = hkb;
 					improved = true;
@@ -167,7 +196,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				if(DEBUG){
 					checkExtremities();
 				}
-				if(hkb-Math.floor(hkb)<0.001){
+				if(hkb-Math.floor(hkb)<0.01){
 					hkb = Math.floor(hkb);
 				}
 				obj.updateLowerBound((int)Math.ceil(hkb), this);
@@ -183,14 +212,14 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 						return;
 					}
 				}
-				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE
-				//	HK.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
+				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE (not always true)
+				//	HK.performPruning((double) (obj.getUB()) + totalPenalities.get() +total + 0.01);
 				updateStep(hkb,alpha);
 				HKPenalities();
 				updateCostMatrix();
 			}
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
-			hkb = HKfilter.getBound()-totalPenalities.get();
+			hkb = HKfilter.getBound()-totalPenalities.get()-total;
 			if(hkb>bestHKB+0.1){
 				bestHKB = hkb;
 				improved = true;
@@ -215,7 +244,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 					return;
 				}
 			}
-			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() + 0.01);
+			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities.get() +total + 0.01);
 			updateStep(hkb,alpha);
 			HKPenalities();
 			updateCostMatrix();
@@ -255,6 +284,10 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	private void updateStep(double hkb,double alpha) {
 		double nb2viol = 0.0001;
 		double target = obj.getUB();
+//		target = (obj.getUB()+obj.getLB())/2; // TODO recently added
+		if(target-hkb<0){
+			target = hkb+0.1;
+		}
 		int inDeg,outDeg;
 		for(int i=0;i<n;i++){
 			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
@@ -295,10 +328,14 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	}
 	private void updateCostMatrix() {
 		INeighbors nei;
+		boolean offSet = sccOf!=null;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				costs[i][j] = originalCosts[i][j] + outPenalities[i].get() + inPenalities[j].get();
+				if(offSet && sccOf[i].get()!=sccOf[j].get()){
+					costs[i][j] += sccPen;
+				}
 			}
 		}
 	}
@@ -355,6 +392,18 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+//		String file = "HK.csv";
+//		int nbArcs;
+//		for(int i=0;i<n;i++){
+//			nbArcs = 0;
+//			for(int j=0;j<n;j++){
+//				nbArcs+=g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
+//			}
+//			TSP.writeTextInto(obj.getLB()+";"+nbArcs+";1;\n",file);
+//			System.out.println(obj.getLB()+";"+nbArcs);
+//			HK_algorithm();
+//		}
+//		System.exit(0);
 		HK_algorithm();
 		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * n)) + "%)");
 		System.out.println("current lower bound : "+obj.getLB());
@@ -374,7 +423,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	}
 
 	public double getMinArcVal() {
-		return -(((double)obj.getUB())+totalPenalities.get());
+		return Math.min(2*sccPen,-(((double)obj.getUB())+totalPenalities.get()));
 	}
 
 	@Override
@@ -388,5 +437,20 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 
 	public TIntArrayList getMandatoryArcsList() {
 		return mandatoryArcsList;
+	}
+
+	public void provideBranchingOpinion(int[][] branchingQuality){
+		if(mst!=null){
+			INeighbors succs;
+			int bonus = 10;
+			for (int i = 0; i < n; i++) {
+				succs = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
+					if(mst.arcExists(i,j)){
+						branchingQuality[i][j] += bonus;
+					}
+				}
+			}
+		}
 	}
 }

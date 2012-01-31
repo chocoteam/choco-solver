@@ -32,48 +32,37 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.disjunctive;
+package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import sun.misc.Compare;
-import sun.misc.Sort;
 
 /**
- * @PropAnn(tested = {BENCHMARK})
  */
-public class PropTaskIntervals extends GraphPropagator {
+public class PropPosIntervals extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	int n;
-	IntVar[] starts;
-	IntVar[] ends;
-	IntVar[] durations;
-	int[][] dist;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTaskIntervals(IntVar[] st, IntVar[] end, IntVar[] dur, int[][] dist, Constraint constraint, Solver solver) {
-		super(ArrayUtils.append(st,end,dur), solver, constraint, PropagatorPriority.BINARY);
-		starts = st;
-		durations = dur;
-		ends = end;
-		this.n = st.length;
-		this.dist = dist;
+	public PropPosIntervals(IntVar[] vars, Constraint constraint, Solver solver) {
+		super(vars, solver, constraint, PropagatorPriority.BINARY,true);
+		this.n = vars.length;
 	}
 
 	//***********************************************************************************
@@ -83,50 +72,36 @@ public class PropTaskIntervals extends GraphPropagator {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			updateBounds(i);
-		}
-		for(int i=0;i<n;i++){
 			for(int j=i+1;j<n;j++){
 				check(i,j);
 			}
 		}
 	}
 
-	private void updateBounds(int i) throws ContradictionException {
-		starts[i].updateUpperBound(ends[i].getUB() - durations[i].getLB(), this);
-		starts[i].updateLowerBound(ends[i].getLB() - durations[i].getUB(), this);
-		ends[i].updateLowerBound(starts[i].getLB()+durations[i].getLB(),this);
-		ends[i].updateUpperBound(starts[i].getUB()+durations[i].getUB(),this);
-		durations[i].updateUpperBound(ends[i].getUB()-starts[i].getLB(),this);
-		durations[i].updateLowerBound(ends[i].getLB()-starts[i].getUB(),this);
-	}
-
 	private void check(int i, int j) throws ContradictionException {
-		int first = Math.min(starts[i].getLB(),starts[j].getLB());
-		int last  = Math.max(ends[i].getUB(),ends[j].getUB());
+		int first = Math.min(vars[i].getLB(),vars[j].getLB());
+		int last  = Math.max(vars[i].getUB(),vars[j].getUB())+1;
 		if(first>last){
 			throw new UnsupportedOperationException();
 		}
 		int q = 0;
 		int tot = 0;
 		for(int k=0;k<n;k++){
-			tot += durations[k].getLB();
-			if(starts[k].getLB()>=first && ends[k].getUB()<=last){
-				q+=durations[k].getLB();
+			tot ++;
+			if(vars[k].getLB()>=first && vars[k].getUB()+1<=last){
+				q++;
 			}
 		}
 
-		if(tot>ends[n-1].getUB()){
-//			System.out.println(tot);
-//			throw new UnsupportedOperationException();
-			contradiction(ends[n-1],"");
+		if(tot>vars[n-1].getUB()+1){
+			contradiction(vars[n-1],"");
 		}
 		int mandFirst = last-q;
 		int mandLast  = first+q;
 //		System.out.println(first+" + "+q+" -> "+last);
 		if(mandFirst<mandLast){
 			for(int k=0;k<n;k++){
-				if(starts[k].getLB()<first || ends[k].getUB()>last){
+				if(vars[k].getLB()<first || vars[k].getUB()+1>last){
 //					checkEnergy(k,mandFirst,mandLast);
 					checkEnergy(k,first,last,q,mandFirst,mandLast);
 				}
@@ -136,21 +111,21 @@ public class PropTaskIntervals extends GraphPropagator {
 
 	private void checkEnergy(int i, int first, int last , int dur, int mandFirst , int mandLast) throws ContradictionException {
 		// can be done after the box
-		boolean right= ends[i].getUB()-durations[i].getLB()>=mandLast;
+		boolean right= vars[i].getUB()>=mandLast;
 		// cannot be done inside the box
-		if(durations[i].getLB()>last-first-dur){
+		if(1>last-first-dur){
 			// can be done before the box
-			if(starts[i].getLB()+durations[i].getLB()<=mandFirst){
+			if(vars[i].getLB()+1<=mandFirst){
 				if(!right){
-					ends[i].updateUpperBound(mandFirst,this);
+					vars[i].updateUpperBound(mandFirst-1,this);
 				}
 			}
 			// cannot be done before the box
 			else{
 				if(right){
-						starts[i].updateLowerBound(mandLast, this);
+						vars[i].updateLowerBound(mandLast, this);
 				}else{
-					contradiction(starts[i],"sweep");
+					contradiction(vars[i],"sweep");
 				}
 			}
 		}
@@ -163,7 +138,7 @@ public class PropTaskIntervals extends GraphPropagator {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.INCLOW.mask+EventType.DECUPP.mask+EventType.FULL_PROPAGATION.mask;
+		return EventType.FULL_PROPAGATION.mask+EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
 	}
 
 	@Override

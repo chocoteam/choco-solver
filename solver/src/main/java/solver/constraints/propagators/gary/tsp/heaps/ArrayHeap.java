@@ -24,54 +24,80 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.view;
-
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
 
 /**
- * A view delta is designed to store nothing (like NoDelta),
- * but a delta monitor based on the variable observed.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 26/08/11
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 30/01/12
+ * Time: 17:09
  */
-public final class ViewDelta implements IntDelta {
 
-    protected final IDeltaMonitor<IntDelta> deltaMonitor;
+package solver.constraints.propagators.gary.tsp.heaps;
 
-    public ViewDelta(IDeltaMonitor<IntDelta> deltaMonitor) {
-        this.deltaMonitor = deltaMonitor;
-    }
+import java.util.BitSet;
 
-    @Override
-    public IDeltaMonitor<IntDelta> getMonitor() {
-        return deltaMonitor;
-    }
+/**
+ * Trivial Heap to use for debugging
+ * worst case running time for O(m) add/decrease key and O(n) pop = O(n*n+m)
+ */
+public class ArrayHeap implements Heap{
 
-    @Override
-    public void add(int value) {
-        throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
-    }
+	BitSet in;
+	double[] value;
+	int[] mate;
 
-    @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
-    }
-
-    @Override
-    public int size() {
-        return 0;
-    }
+	public ArrayHeap(int n){
+		in = new BitSet(n);
+		value = new double[n];
+		mate = new int[n];
+	}
 
 	@Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
+	public void add(int element, double element_key, int i) {
+		if(element_key<value[element] || !in.get(element)){
+			in.set(element);
+			value[element] = element_key;
+			mate[element] = i;
+		}
+	}
 
-    @Override
-    public void lazyClear() {
-//        throw new UnsupportedOperationException();
-    }
+	@Override
+	public void decreaseKey(int element, double new_element_key, int newMate) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int pop() {
+		if(isEmpty()){
+			throw new UnsupportedOperationException();
+		}
+		int min = in.nextSetBit(0);
+		for(int i=in.nextSetBit(0);i>=0;i=in.nextSetBit(i+1)){
+			if(value[i]<value[min]){
+				min = i;
+			}
+		}
+		in.clear(min);
+		return min;
+	}
+
+	@Override
+	public void clear() {
+		in.clear();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return in.isEmpty();
+	}
+
+	@Override
+	public int getMate(int to) {
+		return mate[to];
+	}
+
+	@Override
+	public void remove(int element) {
+		throw new UnsupportedOperationException();
+	}
 }

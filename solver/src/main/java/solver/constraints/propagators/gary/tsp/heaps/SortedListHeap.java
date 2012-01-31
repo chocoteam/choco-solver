@@ -5,7 +5,7 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 
-public class VerySimpleHeap implements Heap{
+public class SortedListHeap implements Heap{
 
 	int n;
 	int root;
@@ -13,7 +13,7 @@ public class VerySimpleHeap implements Heap{
 	private int[] mate;
 	public IDirectedGraph path;
 
-	public VerySimpleHeap(int nbNodes){
+	public SortedListHeap(int nbNodes){
 		n = nbNodes;
 		root = -1;
 		mate = new int[n];

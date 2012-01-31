@@ -215,7 +215,8 @@ public class DirectedGraph implements IDirectedGraph {
 		if(x==y){
 			return addArc(x, y);
 		}
-		boolean b = addArc(x, y) || addArc(y, x);
+		boolean b = addArc(x, y);
+		b |= addArc(y, x);
 		return b;
 	}
 

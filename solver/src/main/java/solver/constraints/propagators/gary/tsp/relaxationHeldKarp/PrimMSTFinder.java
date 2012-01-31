@@ -27,13 +27,11 @@
 
 package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 
+import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.heaps.Heap;
-import solver.constraints.propagators.gary.tsp.heaps.VerySimpleHeap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
 import java.util.BitSet;
 
 public class PrimMSTFinder extends AbstractMSTFinder {
@@ -49,7 +47,6 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	private int tSize;
 	private double minVal;
 	double maxTArc;
-	private final static boolean FILTER = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -57,7 +54,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 
 	public PrimMSTFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
-		heap = new VerySimpleHeap(nbNodes);
+		heap = new FastArrayHeap(nbNodes);
 		inTree = new BitSet(n);
 	}
 
@@ -77,13 +74,13 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 		inTree.clear();
 		treeCost = 0;
 		tSize = 0;
-		minVal = propHK.getMinArcVal();
 		prim();
 	}
 
 	private void prim() throws ContradictionException {
+		minVal = propHK.getMinArcVal();
 		if(FILTER){
-			maxTArc = propHK.getMinArcVal();
+			maxTArc = minVal;
 		}
 		addNode(0);
 		int from,to;
@@ -168,4 +165,5 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
 	}
+
 }

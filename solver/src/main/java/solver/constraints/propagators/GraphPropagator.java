@@ -46,4 +46,6 @@ public abstract class GraphPropagator<V extends Variable> extends Propagator<V> 
     protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
         super(vars, solver, constraint, priority, true);
     }
+
+	public void provideBranchingOpinion(int[][] branchingQuality){}
 }

@@ -120,6 +120,17 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 	// METHODS
 	//***********************************************************************************
 
+	public void provideBranchingOpinion(int[][] branchingQuality){
+		INeighbors succs;
+		int penality = n*100;
+		for (int i = n_R.get()-1; i>=0; i--) {
+			succs = mates[i];
+			for(int arc=succs.getFirstElement(); arc>=0; arc=succs.getNextElement()){
+				branchingQuality[arc/n-1][arc%n] -= penality;
+			}
+		}
+	}
+
 	@Override
 	public int getPropagationConditions(int vIdx) {
 		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;

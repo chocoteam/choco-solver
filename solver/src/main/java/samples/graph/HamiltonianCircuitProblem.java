@@ -27,25 +27,22 @@
 
 package samples.graph;
 
-import choco.kernel.common.util.PoolManager;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import samples.AbstractProblem;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.InverseChanneling;
-import solver.constraints.nary.NoSubTours;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
-import solver.exception.ContradictionException;
+import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.Sort;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
@@ -56,8 +53,8 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-
 import java.io.*;
+import java.util.BitSet;
 import java.util.Random;
 
 /**
@@ -69,29 +66,48 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	// VARIABLES
 	//***********************************************************************************
 
+	private static final int ARBO = 0;
+	private static final int RG = 1;
+	private static final int NB_PARAM = 2;
+	private static final int ALL_MASK = 1<<NB_PARAM-1;
+	// too bad to be considered
+	private static final int ALLDIFF_AC = 2;
+	private static final int ANTI_ARBO = 3;
+	private static final int TIME = 4;
+	private static final int HK = 5;
+
 	private int n;
 	private DirectedGraphVar graph;
 	private boolean[][] adjacencyMatrix;
 	private GraphConstraint gc;
 	// model parameters
-	private int allDiff;
 	private long seed;
-	private boolean arbo,antiArbo,rg,hk;
-	private static String outFile = "HCP.csv";
-	private final static long TIME_LIMIT = 50000;
+	private BitSet config;
+	private static String outFile;
+	private final static long TIME_LIMIT = 10000;
+	// reduced graph data structures
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph G_R;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public HamiltonianCircuitProblem() {
+	public HamiltonianCircuitProblem(boolean[][] matrix, long s){
 		solver = new Solver();
-	}
-	private void set(boolean[][] matrix, long s){
 		seed   = s;
 		n = matrix.length;
 		adjacencyMatrix = matrix;
+		config = new BitSet(NB_PARAM);
+	}
+
+	private void configParameters(int mask) {
+		String bytes = Integer.toBinaryString(mask);
+		while(bytes.length()<NB_PARAM){
+			bytes = "0"+bytes;
+		}
+		for(int i=0;i<NB_PARAM;i++){
+			config.set(i,bytes.charAt(NB_PARAM-1-i)=='1');
+		}
 	}
 
 	//***********************************************************************************
@@ -100,45 +116,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		basicModel();
-		gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
-		if(arbo||antiArbo == false){
-			gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
-		}
-		if(arbo){
-			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
-		}
-		if(antiArbo){
-			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
-		}
-		if(rg){
-			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
-			nR = RP.getNSCC();
-			sccOf = RP.getSCCOF();
-			outArcs = RP.getOutArcs();
-			G_R = RP.getReducedGraph();
-			gc.addAdHocProp(RP);
-			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
-		}
-		if(hk){
-			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
-			try{
-				pos[0].instantiateTo(0, Cause.Null);
-				pos[n-1].instantiateTo(n - 1, Cause.Null);
-			}catch(Exception e){
-				e.printStackTrace();System.exit(0);
-			}
-			gc.addAdHocProp(new PropPosInTour(pos,graph,gc,solver));
-			if(rg){
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver,nR,sccOf,outArcs,G_R));
-			}else{
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver));
-			}
-			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
-		}
-		solver.post(gc);
-	}
-	private void basicModel(){
 		// create model
 		graph = new DirectedGraphVar(solver,n, GraphType.LINKED_LIST,GraphType.LINKED_LIST);
 		try{
@@ -156,24 +133,52 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-	}
-	private void configParameters(int ad, boolean ab, boolean aab, boolean rg, boolean hk) {
-		allDiff  = ad;
-		arbo     = ab;
-		antiArbo = aab;
-		this.rg	 = rg;
-		this.hk  = hk;
-	}
-	private void configParameters(int ad, int p) {
-		configParameters(ad,p%2==1,(p>>1)%2==1,(p>>2)%2==1,(p>>3)%2==1);
-	}
-	private static void showparam(int p){
-		System.out.println(p+"  ;  ");
-		System.out.println(p%2==1);
-		System.out.println(((p>>1)%2==1)+"  :  "+(p>>1));
-		System.out.println(((p>>2)%2==1)+"  :  "+(p>>2));
-		System.out.println(((p>>3)%2==1)+"  :  "+(p>>3));
+		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
+		if(config.get(ALLDIFF_AC)){
+			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+		}
+		if(config.get(ARBO)){
+			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+		}
+		if(config.get(ANTI_ARBO)){
+			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+		}
+		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
+		if(config.get(RG)){
+			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
+			nR = RP.getNSCC();
+			sccOf = RP.getSCCOF();
+			outArcs = RP.getOutArcs();
+			G_R = RP.getReducedGraph();
+			gc.addAdHocProp(RP);
+			gc.addAdHocProp(new PropSCCDoorsRules(graph,gc,solver,nR,sccOf,outArcs,G_R));
+		}
+		if(config.get(TIME)){
+			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
+			try{
+				pos[0].instantiateTo(0, Cause.Null);
+				pos[n-1].instantiateTo(n - 1, Cause.Null);
+			}catch(Exception e){
+				e.printStackTrace();System.exit(0);
+			}
+			gc.addAdHocProp(new PropPosInTour(pos,graph,gc,solver));
+			if(config.get(RG)){
+				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver,nR,sccOf,outArcs,G_R));
+			}else{
+				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver));
+			}
+			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
+		}
+		if(config.get(HK)){
+			IntVar obj = VariableFactory.bounded("obj",0,0,solver);
+			int[][] matrix = new int[n][n];
+			if(config.get(RG)){
+				gc.addAdHocProp(PropHeldKarp.bstBasedRelaxation(graph,0,n-1,obj,matrix,gc,solver,nR,sccOf,outArcs));
+			}else{
+				gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(graph,0,n-1,obj,matrix,gc,solver));
+			}
+		}
+		solver.post(gc);
 	}
 
 	//***********************************************************************************
@@ -184,20 +189,34 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	public void configureSolver() {
 		AbstractStrategy strategy;
 //		strategy = StrategyFactory.graphRandom(graph, seed);
-		strategy = StrategyFactory.graphStrategy(graph,null,new ConstructorHeur(graph,0), GraphStrategy.NodeArcPriority.ARCS);
+//		strategy = StrategyFactory.graphStrategy(graph,null,new ConstructorHeur(graph,0), GraphStrategy.NodeArcPriority.ARCS);
+		strategy = StrategyFactory.graphStrategy(graph,null,new MinDomMinVal(graph), GraphStrategy.NodeArcPriority.ARCS);
+//		strategy = StrategyFactory.graphStrategy(graph,null,new RandomHeur(graph,seed), GraphStrategy.NodeArcPriority.ARCS);
 		solver.set(strategy);
+		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 	}
 	@Override
 	public void solve() {
-//		solver.findAllSolutions();
 		solver.findSolution();
 		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIME_LIMIT){
 			throw new UnsupportedOperationException();
 		}
 	}
 	@Override
-	public void prettyOut() {}
+	public void prettyOut() {
+//		int nbArcs = 0;
+//		for(int i=0;i<n;i++){
+//			nbArcs += graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//		}
+//		System.out.println(nbArcs+" arcs");
+		System.out.println(config);
+//		System.out.println(graph.getEnvelopGraph());System.exit(0);
+//		if(config.get(RG)){
+//			System.out.println(G_R);
+//		}
+//		System.exit(0);
+	}
 
 	//***********************************************************************************
 	// TESTS
@@ -205,14 +224,16 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 
 	public static void main(String[] args) {
 //		benchmark_neighbors();
-//
-		String instance = "/Users/jfages07/Documents/code/ALL_hcp/alb1000.hcp";
-		testInstance(instance);
-
 //		benchmark_density();
-//		test_benchmark_neighbors();
+//		tsplib_bench();
+		hardInstances();
 	}
 
+	private static String getHead() {
+		return "n;d;seed;nbSols;nbNodes;nbFails;time;allDiff;arbo;antiArbo;rg;pos;hk\n";
+	}
+
+	// TSP LIB
 	private static boolean[][] parseInstance(String url){
 		File file = new File(url);
 		try {
@@ -258,28 +279,80 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}
 		throw new UnsupportedOperationException();
 	}
-
+	private static void tsplib_bench() {
+		outFile = "HCP_TSPLIB.csv";
+//		clearFile(outFile);
+		writeTextInto("instance;nbSols;nbNodes;nbFails;time;allDiff;arbo;antiArbo;rg;pos;\n",outFile);
+		String dir = "/Users/jfages07/Documents/code/ALL_hcp";
+		File folder = new File(dir);
+		String[] list = folder.list();
+		for (String s : list) {
+			if (s.contains(".hcp"))
+				testInstance(dir + "/" + s);
+		}
+	}
 	private static void testInstance(String instance) {
 		String[] st = instance.split("/");
 		String name = st[st.length-1];
 		boolean[][] matrix = parseInstance(instance);
-		HamiltonianCircuitProblem tspRun = new HamiltonianCircuitProblem();
-		tspRun.set(matrix,0);
-		tspRun.configParameters(0,true, true, true, false);
+		HamiltonianCircuitProblem tspRun;
+//		int max = 1<<NB_PARAM;
+//		for(int i=0;i<max;i++){
+		int i = 1<<3;
+		tspRun = new HamiltonianCircuitProblem(matrix,0);
+		tspRun.configParameters(i);
 		tspRun.execute();
+		IMeasures mes = tspRun.solver.getMeasures();
+		String res = name+";"+mes.getSolutionCount()+";"+mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";";
+//			for(int k=0;k<NB_PARAM;k++){
+//				res+=tspRun.config.get(k)+";";
+//			}
+		writeTextInto(res + "\n", outFile);
+//		}
+	}
+
+
+	// GENERATOR
+	// from file
+	private static void hardInstances(){
+		outFile = "hpp_hard.csv";
+		File file = new File("/Users/jfages07/Desktop/hard_instances_av_neigh.csv");
+		TLongArrayList seeds = new TLongArrayList();
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			line = buf.readLine();
+			long seed;
+			do{
+				seed = Long.parseLong(line.split(";")[2]);
+				seeds.add(seed);
+				line = buf.readLine();
+			}while(line!=null);
+			buf.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		GraphGenerator gg;
+		boolean[][] matrix;
+		for(int i=seeds.size()-1;i>=0;i--){
+			gg = new GraphGenerator(100,seeds.get(i), GraphGenerator.InitialProperty.HamiltonianCircuit);
+			matrix = gg.neighborBasedGenerator(3);
+			System.out.println("graph generated");
+			testModels(matrix,100,3,seeds.get(i));
+		}
 	}
 
 	public static void benchmark_density() {
-		outFile = "benchmark_density_constructive.csv";
+		outFile = "benchmark_density_MinDomMinVal.csv";
 		clearFile(outFile);
-		writeTextInto("n;d;seed;nbSols;nbNodes;nbFails;time;allDiff;p\n",outFile);
-		int[] sizes = new int[]{100,200,400};
+		writeTextInto(getHead(),outFile);
+		int[] sizes = new int[]{1000};
 		long s;
-		double[] densities = new double[]{0.1,0.3,0.5};
+		double[] densities = new double[]{0.1,0.2,0.3};
 		boolean[][] matrix;
 		for(int n:sizes){
 			for(double d:densities){
-				for(int ks = 0; ks<50; ks++){
+				for(int ks = 0; ks<10; ks++){
 					s = System.currentTimeMillis();
 					System.out.println("n:"+n+" d:"+d+" s:"+s);
 					GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
@@ -292,98 +365,41 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	}
 
 	public static void benchmark_neighbors() {
-//		outFile = "benchmark_neigh_random_1005001000.csv";
+		outFile = "benchmark_neigh_minDomMinVal.csv";
 		clearFile(outFile);
-		writeTextInto("n;nbVoisins;seed;nbSols;nbNodes;nbFails;time;allDiff;p\n",outFile);
-		int[] sizes = new int[]{50,100,200,400};
+		writeTextInto(getHead(),outFile);
+		int[] sizes = new int[]{1000};
 		long s;
-		int[] nbVoisins = new int[]{3,5,10};
+		int[] nbVoisins = new int[]{3,5,7,10,20};
 		boolean[][] matrix;
 		for(int n:sizes){
 			for(int nb:nbVoisins){
-				for(int ks = 0; ks<50; ks++){
+				for(int ks = 0; ks<30; ks++){
 					s = System.currentTimeMillis();
-					s = 1327352991833l;
 					System.out.println("n:"+n+" nbVoisins:"+nb+" s:"+s);
 					GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
 					matrix = gg.neighborBasedGenerator(nb);
 					System.out.println("graph generated");
 					testModels(matrix,n,nb,s);
-//					System.exit(0);
 				}
-			}
-		}
-	}
-
-	public static void benchmark_neighbors_script(int n, int nb) {
-		outFile = "benchmark_neigh_random_script.csv";
-		long s=System.currentTimeMillis();
-		boolean[][] matrix;
-		GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
-		matrix = transformMatrix(gg.neighborBasedGenerator(nb));
-		System.out.println("graph generated");
-		HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
-		hcp.set(matrix, s);
-		hcp.configParameters(0, 8);
-		hcp.execute();
-
-		for(int ks=0; ks<50;ks++){
-			s = System.currentTimeMillis();
-			System.out.println("n:"+n+" nbVoisins:"+nb+" s:"+s);
-			gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
-			matrix = transformMatrix(gg.neighborBasedGenerator(nb));
-			System.out.println("graph generated");
-			testModels(matrix,n,nb,s);
-		}
-	}
-
-	public static void test_benchmark_neighbors() {
-		outFile = "tests.csv";
-		clearFile(outFile);
-		writeTextInto("n;nbVoisins;seed;nbSols;nbNodes;nbFails;time;allDiff;p\n",outFile);
-		int[] sizes = new int[]{3,4,5,6,7,8,9,10,15,20,25,50};
-		long s;
-		int[] nbVoisins = new int[]{3,5,7};
-		boolean[][] matrix;
-		for(int n:sizes){
-			for(int nb:nbVoisins){
-				if(nb<n)
-					for(int ks = 0; ks<50; ks++){
-						s = System.currentTimeMillis();
-						System.out.println("n:"+n+" nbVoisins:"+nb+" s:"+s);
-						GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
-						matrix = gg.neighborBasedGenerator(nb);
-						System.out.println("graph generated");
-						testModels(matrix,n,nb,s);
-					}
 			}
 		}
 	}
 
 	private static void testModels(boolean[][] m, int n, double d, long seed) {
 		boolean[][] matrix = transformMatrix(m);
-//		int[] params = new int[]{0,1};//,1,4};//,7,15};
-//		for(int p:params){
-		for(int p=0;p<16;p++){
-//			p=4;
-			HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem();
-			hcp.set(matrix, seed);
-			hcp.configParameters(0, p);
-			System.out.println("p : "+p);
-			System.out.println("s : "+seed);
+		int max = 1<<NB_PARAM;
+		for(int mask=0;mask<max;mask++){
+			HamiltonianCircuitProblem hcp = new HamiltonianCircuitProblem(matrix, seed);
+			hcp.configParameters(mask);
 			hcp.execute();
 			IMeasures mes = hcp.solver.getMeasures();
-			if(mes.getTimeCount()<TIME_LIMIT && 1>mes.getSolutionCount()){
-				writeTextInto(n+";"+d+";"+seed+";"+mes.getSolutionCount()+";"+
-						mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";" + 0 + ";" + p + ";BUG\n", outFile);
-				throw new UnsupportedOperationException();
-			}else{
-				writeTextInto(n+";"+d+";"+seed+";"+mes.getSolutionCount()+";"+
-						mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";" + 0 + ";" + p + "\n", outFile);
+			String res = n+";"+d+";"+seed+";"+mes.getSolutionCount()+";"+mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";";
+			for(int i=0;i<NB_PARAM;i++){
+				res+=hcp.config.get(i)+";";
 			}
-//			System.exit(0);
+			writeTextInto(res + "\n", outFile);
 		}
-//		System.exit(0);
 	}
 
 	private static boolean[][] transformMatrix(boolean[][] m) {
@@ -398,38 +414,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		return matrix;
 	}
 
-	private static long referencemodel(boolean[][] matrix, int n, double d, long s) {
-		Solver solver = new Solver();
-		IntVar[] vars = VariableFactory.enumeratedArray("",n,0,n-1,solver);
-		IntVar[] prds = VariableFactory.enumeratedArray("",n,0,n-1,solver);
-		try {
-			for(int i=0;i<n;i++){
-				for(int j=0;j<n;j++){
-					if(!matrix[i][j]){
-						vars[i].removeValue(j,Cause.Null);
-					}
-				}
-			}
-		} catch (ContradictionException e) {
-			e.printStackTrace();
-		}
-//		solver.set(StrategyFactory.random(vars,solver.getEnvironment(),s));
-		solver.set(new IntRand(vars,s));
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
-//		solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
-//		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE));//,new NoSubTours(vars,solver));
-		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE),new AllDifferent(prds,solver, AllDifferent.Type.CLIQUE));
-		Boolean status = solver.findSolution();//AllSolutions();
-		IMeasures mes = solver.getMeasures();
-		for(int i=0;i<n;i++){
-//			System.out.println(i+" : "+vars[i]+"\t ///\t"+prds[i]);
-		}
-		writeTextInto(n+";"+d+";"+s+";"+mes.getSolutionCount()+";"+mes.getNodeCount()+";"+mes.getFailCount()+";"+mes.getTimeCount()+";-1;-1\n",outFile);
-		return solver.getMeasures().getSolutionCount();
-	}
-
 	//***********************************************************************************
-	// RESULTS
+	// OUTPUT
 	//***********************************************************************************
 
 	private static void writeTextInto(String text, String file) {
@@ -454,6 +440,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 			e.printStackTrace();
 		}
 	}
+
+	//***********************************************************************************
+	// BRANCHING
+	//***********************************************************************************
 
 	private class ConstructorHeur extends ArcStrategy {
 		int source;
@@ -487,108 +477,58 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}
 	}
 
-	private static class IntRand extends AbstractStrategy<IntVar>{
-
-		final PoolManager<FastDecision> decisionPool = new PoolManager<FastDecision>();
-		int n;
-		TIntArrayList list;
-		Random rd;
-
-		protected IntRand(IntVar[] variables, long seed) {
-			super(variables);
-			n = variables.length;
-			list = new TIntArrayList();
-			rd = new Random(seed);
-		}
-
-		@Override
-		public void init() {}
-
-		@Override
-		public Decision getDecision() {
-			list.clear();
-			boolean c0;
+	private class RandomHeur extends ArcStrategy {
+		TIntArrayList arcs;
+		public RandomHeur(GraphVar graphVar, long s) {
+			super(graphVar);
+			arcs = new TIntArrayList(n);
+			INeighbors nei;
 			for(int i=0;i<n;i++){
-				if(!vars[i].instantiated()){
-					c0 = vars[i].contains(0);
-					if(c0){
-						for(int j=vars[i].nextValue(vars[i].getLB());j<=vars[i].getUB();j=vars[i].nextValue(j)){
-							list.add((i+1)*n+j);
-						}
-						list.add((i+1)*n);
-					}else{
-						for(int j=vars[i].getLB();j<=vars[i].getUB();j=vars[i].nextValue(j)){
-							list.add((i+1)*n+j);
-						}
+				nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					arcs.add((i+1)*n+j);
+				}
+			}
+			arcs.shuffle(new Random(s));
+		}
+		@Override
+		public int nextArc() {
+			int size = arcs.size();
+			int from,to;
+			int index = -1;
+			do{
+				index ++;
+				from = arcs.get(index)/n-1;
+				to = arcs.get(index)%n;
+			}while(index+1<size && (g.getKernelGraph().arcExists(from,to)||!g.getEnvelopGraph().arcExists(from,to)));
+			if(g.getKernelGraph().arcExists(from,to)||!g.getEnvelopGraph().arcExists(from,to)){
+				return -1;
+			}
+			return arcs.get(index);
+		}
+	}
+
+	private class MinDomMinVal extends ArcStrategy {
+		public MinDomMinVal(GraphVar graphVar) {
+			super(graphVar);
+		}
+		@Override
+		public int nextArc() {
+			int nextI = -1;
+			int size;
+			for(int i=0;i<n;i++){
+				size = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(size>1){
+					if(nextI==-1 || size<g.getEnvelopGraph().getSuccessorsOf(nextI).neighborhoodSize()){
+						nextI = i;
 					}
 				}
 			}
-			if(list.size()==0){
-				return null;
+			if(nextI==-1){
+				return -1;
 			}
-			int x = list.get(rd.nextInt(list.size()));
-			int from = x/n-1;
-			int to   = x%n;
-			FastDecision d = decisionPool.getE();
-			if (d == null) {
-				d = new FastDecision(decisionPool);
-			}
-//			System.out.println("DECISION "+from+"->"+to);
-//			for(int i=0;i<n;i++){
-//				System.out.println(i+" : "+vars[i]);
-//			}System.out.println("endD");
-			d.set(vars[from], to, Assignment.int_eq);
-			return d;
+			int nextJ = g.getEnvelopGraph().getSuccessorsOf(nextI).getFirstElement();
+			return (nextI+1)*n+nextJ;
 		}
-	}
-
-	//***********************************************************************************
-	// TUTTE
-	//***********************************************************************************
-
-	private static boolean[][] makeTutteGraph(){
-		int n = 46;
-		boolean[][] m = new boolean[n][n];
-		makeThird(m,0);
-		makeThird(m,15);
-		makeThird(m,30);
-		// center
-		add(45,0,m,0);
-		add(45,15,m,0);
-		add(45,30,m,0);
-		// extremities
-		add(14,12+15,m,0);
-		add(14+15,12+30,m,0);
-		add(14+30,12,m,0);
-		return m;
-	}
-
-	private static void makeThird(boolean[][] m, int i) {
-		add(0,1,m,i);
-		add(0,3,m,i);
-		add(1,2,m,i);
-		add(2,3,m,i);
-		add(1,4,m,i);
-		add(2,6,m,i);
-		add(3,8,m,i);
-		add(4,5,m,i);
-		add(5,6,m,i);
-		add(6,7,m,i);
-		add(7,8,m,i);
-		add(5,9,m,i);
-		add(7,10,m,i);
-		add(8,11,m,i);
-		add(9,10,m,i);
-		add(10,11,m,i);
-		add(4,12,m,i);
-		add(9,13,m,i);
-		add(11,14,m,i);
-		add(12,13,m,i);
-		add(13,14,m,i);
-	}
-
-	private static void add(int from, int to, boolean[][] matrix, int offset) {
-		matrix[from+offset][to+offset] = true;
-		matrix[to+offset][from+offset] = true;
 	}
 }

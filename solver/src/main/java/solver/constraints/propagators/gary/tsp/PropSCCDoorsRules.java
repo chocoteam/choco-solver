@@ -49,6 +49,7 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+
 import java.util.BitSet;
 
 /**
@@ -66,6 +67,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 	private BitSet sccComputed;
 	private TIntArrayList inDoors;
 	private TIntArrayList outDoors;
+	// rg data structures
 	private IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph rg;
 	private IStateInt[] sccFirst, sccNext;
 
@@ -100,6 +102,33 @@ public class PropSCCDoorsRules extends GraphPropagator {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	public void provideBranchingOpinion(int[][] branchingQuality){
+//		INeighbors succs;
+//		int penalty = 10;
+//		int from,to;
+//		BitSet doors = new BitSet(n);
+//		for (int i = 0; i < nR.get(); i++) {
+//			succs = outArcs[i];
+//			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
+//				from = j/n-1;
+//				to   = j%n;
+//				doors.set(from);
+//				doors.set(to);
+//			}
+//		}
+//		for(int i=0;i<n;i++){
+//			succs = g.getEnvelopGraph().getSuccessorsOf(i);
+//			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
+//				if(doors.get(i)){
+//					branchingQuality[i][j] -= penalty;
+//				}
+//				if(doors.get(j)){
+//					branchingQuality[i][j] -= penalty;
+//				}
+//			}
+//		}
+	}
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
@@ -144,29 +173,30 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		}
 		if(outDoors.size()==1){
 			forceOutDoor(outDoors.get(0));
-		}
-		if(sccFirst!=null){
-			int sizeSCC = 0;
-			int idx = sccFirst[sccFrom].get();
-			while(idx!=-1){
-				sizeSCC++;
-				idx = sccNext[idx].get();
-			}
-			if(sizeSCC>2 && outDoors.size()==1){
-				int p = rg.getPredecessorsOf(sccFrom).getFirstElement();
-				if(p!=-1){
-					int in = -1;
-					for(int i=outArcs[p].getFirstElement();i>=0;i=outArcs[p].getNextElement()){
-						if(in == -1){
-							in = i%n;
-						}else if(in!=i%n){
-							return;
+			// if 1 in & 1 out and scc>2 forbid in->out
+			if(sccFirst!=null){
+				int sizeSCC = 0;
+				int idx = sccFirst[sccFrom].get();
+				while(idx!=-1 && sizeSCC<4){
+					sizeSCC++;
+					idx = sccNext[idx].get();
+				}
+				if(sizeSCC>2){
+					int p = rg.getPredecessorsOf(sccFrom).getFirstElement();
+					if(p!=-1){
+						int in = -1;
+						for(int i=outArcs[p].getFirstElement();i>=0;i=outArcs[p].getNextElement()){
+							if(in == -1){
+								in = i%n;
+							}else if(in!=i%n){
+								return;
+							}
 						}
+						if(in==-1){
+							throw new UnsupportedOperationException();
+						}
+						g.removeArc(in,outDoors.get(0),this);
 					}
-					if(in==-1){
-						throw new UnsupportedOperationException();
-					}
-					g.removeArc(in,outDoors.get(0),this);
 				}
 			}
 		}

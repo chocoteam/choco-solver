@@ -24,54 +24,51 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.view;
-
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
 
 /**
- * A view delta is designed to store nothing (like NoDelta),
- * but a delta monitor based on the variable observed.
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 26/08/11
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 30/01/12
+ * Time: 17:10
  */
-public final class ViewDelta implements IntDelta {
 
-    protected final IDeltaMonitor<IntDelta> deltaMonitor;
+package solver.constraints.propagators.gary.tsp.heaps;
 
-    public ViewDelta(IDeltaMonitor<IntDelta> deltaMonitor) {
-        this.deltaMonitor = deltaMonitor;
-    }
+import java.util.BitSet;
 
-    @Override
-    public IDeltaMonitor<IntDelta> getMonitor() {
-        return deltaMonitor;
-    }
+/**
+ * Same worst case complexity but much better in practice
+ * Especially when several nodes have same -infinity value 
+ */
+public class FastArrayHeap extends ArrayHeap{
 
-    @Override
-    public void add(int value) {
-        throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
-    }
+	BitSet best;
+	double bestVal;
 
-    @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
-    }
-
-    @Override
-    public int size() {
-        return 0;
-    }
+	public FastArrayHeap(int n){
+		super(n);
+		best = new BitSet(n);
+	}
 
 	@Override
-    public void clear() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void lazyClear() {
-//        throw new UnsupportedOperationException();
-    }
+	public void add(int element, double element_key, int i) {
+		if(isEmpty() || element_key<bestVal){
+			bestVal = element_key;
+			best.clear();
+			best.set(element);
+		}else if(element_key==bestVal){
+			best.set(element);
+		}
+		super.add(element,element_key,i);
+	}
+	@Override
+	public int pop() {
+		if(!best.isEmpty()){
+			int min = best.nextSetBit(0);
+			best.clear(min);
+			in.clear(min);
+			return min;
+		}
+		return super.pop();
+	}
 }

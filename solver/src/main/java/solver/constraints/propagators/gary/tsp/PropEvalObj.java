@@ -61,9 +61,10 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     int n;
     IntVar sum;
     int[][] distMatrix;
-    IStateInt[] minCostSucc;
+    IStateInt[] minCostSucc,maxCostSucc;
     IntProcedure arcEnforced, arcRemoved;
     IStateInt minSum;
+    IStateInt maxSum;
     TIntArrayList toCompute;
 
     //***********************************************************************************
@@ -90,10 +91,13 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
         arcEnforced = new EnfArc(this);
         arcRemoved = new RemArc(this);
         minSum = environment.makeInt(0);
+        maxSum = environment.makeInt(0);
         toCompute = new TIntArrayList();
         minCostSucc = new IStateInt[n];
+        maxCostSucc = new IStateInt[n];
         for (int i = 0; i < n; i++) {
             minCostSucc[i] = environment.makeInt(-1);
+            maxCostSucc[i] = environment.makeInt(-1);
         }
     }
 
@@ -105,23 +109,33 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     public void propagate(int evtmask) throws ContradictionException {
         INeighbors succ;
 		minSum.set(0);
+		maxSum.set(0);
         for (int i = 0; i < n - 1; i++) {
             succ = g.getEnvelopGraph().getSuccessorsOf(i);
             int min = succ.getFirstElement();
+			int max = min;
 			if(min==-1){
 				contradiction(g,"");
 			}
-            int minC = distMatrix[i][min];
-            for (int s = min; s >= 0; s = succ.getNextElement()) {
+			int minC = distMatrix[i][min];
+			int maxC = distMatrix[i][min];
+			for (int s = min; s >= 0; s = succ.getNextElement()) {
                 if (distMatrix[i][s] < minC) {
                     minC = distMatrix[i][s];
                     min = s;
+                }else if (distMatrix[i][s] > maxC) {
+                    maxC = distMatrix[i][s];
+                    max = s;
                 }
+
             }
             minSum.add(minC);
             minCostSucc[i].set(min);
+            maxSum.add(maxC);
+            maxCostSucc[i].set(max);
         }
         sum.updateLowerBound(minSum.get(), this);
+        sum.updateUpperBound(maxSum.get(), this);
         // filter the graph
         INeighbors succs;
         int delta = minSum.get() - sum.getUB();
@@ -139,7 +153,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if(ALWAYS_COARSE){
+        if(true || ALWAYS_COARSE){
 			propagate(0);return;
 		}
 		toCompute.clear();

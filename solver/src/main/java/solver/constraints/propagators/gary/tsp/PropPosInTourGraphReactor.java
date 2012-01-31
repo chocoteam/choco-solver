@@ -36,6 +36,7 @@ package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -74,7 +75,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	//***********************************************************************************
 
 	public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(new Variable[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		super(ArrayUtils.append(new Variable[]{graph},intVars), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.intVars = intVars;
 		this.n = g.getEnvelopGraph().getNbNodes();
@@ -115,14 +116,21 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+		if(idxVarInProp==0){
+			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+		}
 		graphTrasversal();
+		for(int i=0;i<nbRecorders();i++){
+			fineER[i].virtuallyExecuted();
+		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
+				+ EventType.DECUPP.mask + EventType.INCLOW.mask
+				+ EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override

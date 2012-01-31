@@ -30,7 +30,6 @@ package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 public abstract class AbstractMSTFinder {
 
@@ -38,9 +37,10 @@ public abstract class AbstractMSTFinder {
 	// VARIABLES
 	//***********************************************************************************
 
+	protected final static boolean FILTER = false;
 	// INPUT
 	protected DirectedGraph g;	// graph
-	protected int n;				// number of nodes
+	protected int n;			// number of nodes
 	// OUTPUT
 	protected DirectedGraph Tree;
 	protected double treeCost;

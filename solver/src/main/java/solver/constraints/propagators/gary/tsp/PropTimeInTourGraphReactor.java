@@ -43,7 +43,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.tsp.heaps.Heap;
-import solver.constraints.propagators.gary.tsp.heaps.VerySimpleHeap;
+import solver.constraints.propagators.gary.tsp.heaps.SortedListHeap;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -52,6 +52,7 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+
 import java.util.BitSet;
 
 /**
@@ -109,12 +110,14 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		throw new UnsupportedOperationException();
+		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.FULL_PROPAGATION.mask;
+		return EventType.FULL_PROPAGATION.mask
+				+EventType.INCLOW.mask+EventType.DECUPP.mask+EventType.INSTANTIATE.mask
+				+EventType.REMOVEARC.mask+ EventType.ENFORCEARC.mask;
 	}
 
 	@Override
@@ -132,7 +135,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void dijsktra_lb_rg() throws ContradictionException {
-		Heap heap = new VerySimpleHeap(n);
+		Heap heap = new SortedListHeap(n);
 		int[] bound = new int[n];
 		for(int i=0;i<n;i++){
 			bound[i] = Integer.MAX_VALUE;
@@ -200,7 +203,7 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void dijsktra_ub_rg() throws ContradictionException {
-		Heap heap = new VerySimpleHeap(n);
+		Heap heap = new SortedListHeap(n);
 		int[] bound = new int[n];
 		for(int i=0;i<n;i++){
 			bound[i] = Integer.MAX_VALUE;
@@ -268,6 +271,12 @@ public class PropTimeInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void enfArc(int from, int to) throws ContradictionException {
+		if(time[from].instantiated()){
+			time[to].instantiateTo(Math.max(time[to].getLB(),time[from].getValue()+dist[from][to]),this);
+		}
+		if(time[to].instantiated()){
+			time[from].instantiateTo(Math.min(time[from].getUB(),time[to].getValue()-dist[from][to]),this);
+		}
 		time[from].updateUpperBound(time[to].getUB() - dist[from][to], this);
 		time[to].updateLowerBound(time[from].getLB() + dist[from][to], this);
 	}

@@ -207,7 +207,7 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.FULL_PROPAGATION.mask;
+		return EventType.REMOVEARC.mask;
 	}
 
 	@Override
