@@ -268,6 +268,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars[i];
     }
 
+    public final V[] getVars() {
+        return vars;
+    }
+
     /**
      * Returns the number of variables involved in <code>this</code>.
      *
