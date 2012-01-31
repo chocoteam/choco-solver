@@ -101,11 +101,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         solver.associates(this);
         IEnvironment env = solver.getEnvironment();
         OFFSET = offset;
-        int capacity = values.capacity();
+        int cardinality = values.cardinality();
         this.VALUES = values.copy();
         this.LB = env.makeInt(0);
-        this.UB = env.makeInt(capacity - 1);
-        this.SIZE = env.makeInt(values.size());
+        this.UB = env.makeInt(values.prevSetBit(values.size()));
+        this.SIZE = env.makeInt(cardinality);
         this.makeList(this);
     }
 
