@@ -33,7 +33,6 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
@@ -65,10 +64,10 @@ public final class SqrView extends View<IntVar> {
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
-        super.attach(propagator, idxInProp);
+    public void analyseAndAdapt(int mask) {
+        super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.attach(propagator, idxInProp); // to ensure var has a delta
+            var.analyseAndAdapt(mask);
             delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
                 @Override
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
@@ -240,8 +239,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public int getValue() {
-        int v = var.getValue();
-        return v * v;
+        return getLB();
     }
 
     @Override
@@ -753,29 +751,14 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        if (evt == EventType.INCLOW) {
-            int lb = var.getLB();
-            if (lb > 0) {
-                notifyMonitors(EventType.INCLOW, cause);
-                return;
+        if ((evt.mask & EventType.BOUND.mask) != 0) {
+            if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
+                notifyMonitors(EventType.INSTANTIATE, cause);
+            } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
+                notifyMonitors(EventType.BOUND, cause);
             }
-            int ub = var.getUB();
-            if (ub >= 0) {
-                notifyMonitors(EventType.DECUPP, cause);
-                return;
-            } // else, keep original event
-        } else if (evt == EventType.DECUPP) {
-            int ub = var.getUB();
-            if (ub < 0) {
-                notifyMonitors(EventType.INCLOW, cause);
-                return;
-            }
-            int lb = var.getLB();
-            if (lb <= 0) {
-                notifyMonitors(EventType.DECUPP, cause);
-                return;
-            } // else, keep original event
+        } else {
+            notifyMonitors(evt, cause);
         }
-        notifyMonitors(evt, cause);
     }
 }

@@ -96,8 +96,8 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int getIndexInPropagator(Propagator propagator) {
-        return 0;
+    public int[] getPIndices() {
+        return new int[0];
     }
 
     @Override
@@ -288,6 +288,10 @@ public class ConstantView implements IntVar {
 
     @Override
     public void attach(Propagator propagator, int idxInProp) {
+    }
+
+    @Override
+    public void analyseAndAdapt(int mask) {
     }
 
     @Override

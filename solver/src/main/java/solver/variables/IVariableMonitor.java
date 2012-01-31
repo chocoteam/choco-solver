@@ -27,7 +27,6 @@
 package solver.variables;
 
 import solver.ICause;
-import solver.recorders.IActivable;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -37,7 +36,7 @@ import solver.recorders.IActivable;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends IActivable {
+public interface IVariableMonitor<V extends Variable> {
 
     /**
      * Operations to execute before updating the domain variable

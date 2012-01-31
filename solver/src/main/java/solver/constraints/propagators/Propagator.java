@@ -30,7 +30,6 @@ package solver.constraints.propagators;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.Nullable;
 import org.slf4j.Logger;
@@ -111,10 +110,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public IEnvironment environment;
 
+    protected static final int NEW = 0, ACTIVE = 1, PASSIVE = 2;
+
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected IStateBool isActive;
+    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
 
     protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
@@ -140,13 +141,14 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         this.vars = vars;
         this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.isActive = environment.makeBool(false);
+        this.state = environment.makeInt(NEW);
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
             vars[v].attach(this, v);
+            vars[v].analyseAndAdapt(getPropagationConditions(v));
             if (!vars[v].instantiated()) {
                 nbNi++;
             }
@@ -217,8 +219,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     }
 
     public void setActive() {
-        assert !isActive() : "the propagator is already active, it cannot set active";
-        isActive.set(true);
+        assert isStateLess() : "the propagator is already active, it cannot set active";
+        state.set(ACTIVE);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
             fineER[i].activate();
@@ -227,11 +229,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-//		if(true){
-//			return;
-//		}
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
-        isActive.set(false);
+        state.set(PASSIVE);
         //then notify the linked variables
         for (int i = 0; i < lastER; i++) {
             fineER[i].desactivate();
@@ -239,8 +238,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         coarseER.getScheduler().remove(coarseER);
     }
 
+    public boolean isStateLess() {
+        return state.get() == NEW;
+    }
+
     public boolean isActive() {
-        return isActive.get();
+        return state.get() == ACTIVE;
+    }
+
+    public boolean isPassive() {
+        return state.get() == PASSIVE;
     }
 
     /**

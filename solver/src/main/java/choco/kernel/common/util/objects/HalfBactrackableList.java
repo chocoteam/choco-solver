@@ -180,11 +180,8 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
             sElements[first].setIdxInV(parent, first);
             sElements[i] = tmp1;
             sElements[i].setIdxInV(parent, i);
+            sFirstActive.add(-1);
         }
-        if (first < i) {
-            throw new UnsupportedOperationException("Cannot reactivate " + element);
-        }
-        sFirstActive.add(-1);
     }
 
 
@@ -198,11 +195,8 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
             dElements[first].setIdxInV(parent, first + OFFSET);
             dElements[i] = tmp1;
             dElements[i].setIdxInV(parent, i + OFFSET);
+            dFirstActive.add(-1);
         }
-        if (first < i) {
-            throw new UnsupportedOperationException("Cannot reactivate " + element);
-        }
-        dFirstActive.add(-1);
     }
 
     private void sPassivate(E element) {
@@ -215,8 +209,8 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
             sElements[last].setIdxInV(parent, last);
             sElements[i] = tmp1;
             sElements[i].setIdxInV(parent, i);
+            sFirstPassive.add(-1);
         }
-        sFirstPassive.add(-1);
 
     }
 
@@ -230,8 +224,8 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
             dElements[last].setIdxInV(parent, last + OFFSET);
             dElements[i] = tmp1;
             dElements[i].setIdxInV(parent, i + OFFSET);
+            dFirstPassive.add(-1);
         }
-        dFirstPassive.add(-1);
     }
 
     private void sRemove(E e) {

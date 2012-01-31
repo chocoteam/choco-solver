@@ -574,7 +574,7 @@ public class TSP extends AbstractProblem {
 
 	static int lb;
 	static int ub;
-	private class MyMon extends VoidSearchMonitor {
+	private class MyMon extends VoidSearchMonitor implements ISearchMonitor{
 		public MyMon(){
 			ub = totalCost.getUB();
 			lb = totalCost.getLB();

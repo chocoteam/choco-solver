@@ -190,7 +190,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     public final void restartSearch() {
         restaureRootNode();
-		solver.getEnvironment().worldPush();
+        solver.getEnvironment().worldPush(); //issue#55
         try {
             objectivemanager.postDynamicCut();
             propEngine.propagate();

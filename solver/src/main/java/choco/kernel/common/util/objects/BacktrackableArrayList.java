@@ -67,11 +67,8 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
             elements[first].setIdxInV(parent, first);
             elements[i] = tmp1;
             elements[i].setIdxInV(parent, i);
+            firstActive.add(-1);
         }
-        if (first < i) {
-            throw new UnsupportedOperationException("Cannot reactivate an IActivate");
-        }
-        firstActive.add(-1);
     }
 
     @Override
@@ -85,8 +82,8 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
             elements[last].setIdxInV(parent, last);
             elements[i] = tmp1;
             elements[i].setIdxInV(parent, i);
+            firstPassive.add(-1);
         }
-        firstPassive.add(-1);
     }
 
 

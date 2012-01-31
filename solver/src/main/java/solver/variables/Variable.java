@@ -88,12 +88,7 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
      */
     Propagator[] getPropagators();
 
-    /**
-     * Return the index of <code>this</code> in <code>propagator</code>
-     * @param propagator a propagator
-     * @return index of this in propagator
-     */
-    int getIndexInPropagator(Propagator propagator);
+    int[] getPIndices();
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -149,12 +144,18 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
     D getDelta();
 
     /**
-     * Regarding the propagator in parameter, update the propagation conditions of the variable
+     * Link the propagator to this
      *
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
      */
     void attach(Propagator propagator, int idxInProp);
+
+    /**
+     * Analysis propagator event reaction on this, and adapt this
+     * @param mask
+     */
+    void analyseAndAdapt(int mask);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.PropRelation;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
@@ -77,7 +76,6 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		this.relation   = relation;
 		this.graph = relation.generateInitialGraph(vars, solver);
 		this.properties = new LinkedList<GraphProperty>();
-		solver.associates(graph);
 		Propagator pr = new PropRelation(vars, graph, solver, this, relation);
 		setPropagators(new Propagator[]{pr});
 		for(GraphProperty gp:relation.getGraphProperties()){
@@ -95,7 +93,6 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 		super(solver);
 		this.graph = g;
 		this.properties = new LinkedList<GraphProperty>();
-		solver.associates(graph);
 	}
 
 	//***********************************************************************************

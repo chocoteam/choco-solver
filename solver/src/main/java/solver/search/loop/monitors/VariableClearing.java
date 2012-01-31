@@ -24,52 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.view;
+package solver.search.loop.monitors;
 
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.Solver;
+import solver.recorders.IEventRecorder;
 
 /**
- * A view delta is designed to store nothing (like NoDelta),
- * but a delta monitor based on the variable observed.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 26/08/11
+ * @since 25/01/12
  */
-public final class ViewDelta implements IntDelta {
+public class VariableClearing extends VoidSearchMonitor implements ISearchMonitor {
 
-    protected final IDeltaMonitor<IntDelta> deltaMonitor;
+    final Solver solver;
+    final IEventRecorder[] recorders;
 
-    public ViewDelta(IDeltaMonitor<IntDelta> deltaMonitor) {
-        this.deltaMonitor = deltaMonitor;
+    public VariableClearing(Solver solver, IEventRecorder[] recorders) {
+        this.solver = solver;
+        this.recorders = recorders;
     }
 
     @Override
-    public IDeltaMonitor<IntDelta> getMonitor() {
-        return deltaMonitor;
+    public void beforeDownLeftBranch() {
+        for (int i = 0; i < recorders.length; i++) {
+            recorders[i].flush();
+        }
+        for (int i = solver.getNbVars() - 1; i >= 0; i--) {
+            solver.getVar(i).getDelta().clear();
+        }
     }
 
     @Override
-    public void add(int value) {
-        throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
-    }
-
-    @Override
-    public int get(int idx) throws IndexOutOfBoundsException {
-        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
-    }
-
-    @Override
-    public int size() {
-        return 0;
-    }
-
-	@Override
-    public void clear() {
-    }
-
-    @Override
-    public void lazyClear() {
+    public void beforeDownRightBranch() {
+        for (int i = 0; i < recorders.length; i++) {
+            recorders[i].flush();
+        }
+        for (int i = solver.getNbVars() - 1; i >= 0; i--) {
+            solver.getVar(i).getDelta().clear();
+        }
     }
 }
