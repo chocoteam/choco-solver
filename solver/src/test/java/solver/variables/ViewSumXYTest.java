@@ -68,20 +68,24 @@ public class ViewSumXYTest {
             Assert.assertEquals(Z.previousValue(4), Integer.MIN_VALUE);
 
             Z.updateLowerBound(12, Cause.Null);
+            solver.propagate();
             Assert.assertEquals(X.getLB(), 4);
             Assert.assertEquals(X.getUB(), 10);
             Assert.assertEquals(Y.getLB(), 3);
             Assert.assertEquals(Y.getUB(), 8);
 
             Y.updateUpperBound(-2, Cause.Null);
+            solver.propagate();
             Assert.assertEquals(Y.getUB(), -2);
             Assert.assertEquals(X.getLB(), 2);
 
             Y.removeValue(-4, Cause.Null);
+            solver.propagate();
             Assert.assertFalse(Y.contains(-4));
             Assert.assertFalse(X.contains(4));
 
             Y.removeInterval(-8, -6, Cause.Null);
+            solver.propagate();
             Assert.assertFalse(Y.contains(-8));
             Assert.assertFalse(Y.contains(-7));
             Assert.assertFalse(Y.contains(-6));
@@ -93,6 +97,7 @@ public class ViewSumXYTest {
             Assert.assertEquals(Y.getDomainSize(), 4);
 
             Y.instantiateTo(-5, Cause.Null);
+            solver.propagate();
             Assert.assertTrue(X.instantiated());
             Assert.assertTrue(Y.instantiated());
             Assert.assertEquals(X.getValue(), 5);
