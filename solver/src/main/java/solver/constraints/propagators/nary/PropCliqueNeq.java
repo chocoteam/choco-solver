@@ -46,7 +46,7 @@ import static choco.annotations.PropAnn.Status.*;
  * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
  * <br/>
  *
- * @author Hadrien Cambazard
+ * @author Xavier Lorca
  * @since 07/02/11
  */
 @PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})

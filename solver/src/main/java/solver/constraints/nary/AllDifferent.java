@@ -33,6 +33,8 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.binary.PropNotEqualX_YC;
 import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
 import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
@@ -55,7 +57,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, PROBABILISTIC, BC, RANGE, CLIQUE, GRAPH, NONE
+        AC, PROBABILISTIC, BC, RANGE, CLIQUE, CLIQUE_IN_ONE, GRAPH, NONE
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
@@ -65,7 +67,18 @@ public class AllDifferent extends IntConstraint<IntVar> {
     public AllDifferent(IntVar[] vars, Solver solver, Type type) {
         super(vars, solver);
         switch (type) {
-            case CLIQUE:
+            case CLIQUE: {
+				int s = vars.length;
+				int k = 0;
+				Propagator[] props = new Propagator[(s * s - s) / 2];
+				for (int i = 0; i < s - 1; i++) {
+					for (int j = i + 1; j < s; j++) {
+						props[k++] = new PropNotEqualX_YC(new IntVar[]{vars[i], vars[j]}, 0, solver, this);
+					}
+				}
+				setPropagators(props);
+			}
+            case CLIQUE_IN_ONE:
                 setPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
             case PROBABILISTIC:

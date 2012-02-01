@@ -83,7 +83,7 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         switch (type) {
             case NONE :
                 break;
-            case CLIQUE:
+            case CLIQUE_IN_ONE:
                 addPropagators(new PropCliqueNeq(this.X,solver,this));
                 addPropagators(new PropCliqueNeq(this.Y,solver,this));
             break;

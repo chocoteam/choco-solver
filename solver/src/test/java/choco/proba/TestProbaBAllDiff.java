@@ -40,7 +40,7 @@ public class TestProbaBAllDiff {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("OneAllDiff", ".csv")));
         OneAllDiffBenchProbas classical = new OneAllDiffBenchProbas(true, size, AllDifferent.Type.BC, -1, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas uniform = new OneAllDiffBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(true, size, AllDifferent.Type.CLIQUE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
+        OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(true, size, AllDifferent.Type.CLIQUE_IN_ONE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas dirac = new OneAllDiffBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{classical, uniform, dirac, clique};
         launchEval(10, size, problems, out);
@@ -51,7 +51,7 @@ public class TestProbaBAllDiff {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("nQueens", ".csv")));
         NqueensBenchProbas classical = new NqueensBenchProbas(true, size, AllDifferent.Type.RANGE, -1, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         NqueensBenchProbas uniform = new NqueensBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        NqueensBenchProbas clique = new NqueensBenchProbas(true, size, AllDifferent.Type.CLIQUE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
+        NqueensBenchProbas clique = new NqueensBenchProbas(true, size, AllDifferent.Type.CLIQUE_IN_ONE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         NqueensBenchProbas dirac = new NqueensBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{classical, uniform, dirac, clique};
         launchEval(10, size, problems, out);
@@ -62,7 +62,7 @@ public class TestProbaBAllDiff {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("allIntervalSeries", ".csv")));
         AllIntervalSeriesBenchProbas classical = new AllIntervalSeriesBenchProbas(true, size, AllDifferent.Type.RANGE, -1, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         AllIntervalSeriesBenchProbas uniform = new AllIntervalSeriesBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        AllIntervalSeriesBenchProbas clique = new AllIntervalSeriesBenchProbas(true, size, AllDifferent.Type.CLIQUE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
+        AllIntervalSeriesBenchProbas clique = new AllIntervalSeriesBenchProbas(true, size, AllDifferent.Type.CLIQUE_IN_ONE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         AllIntervalSeriesBenchProbas dirac = new AllIntervalSeriesBenchProbas(true, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{classical, uniform, dirac, clique};
         launchEval(10, size, problems, out);
@@ -73,7 +73,7 @@ public class TestProbaBAllDiff {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("magicSquare", ".csv")));
         MagicSquareBenchProbas classical = new MagicSquareBenchProbas(false, size, AllDifferent.Type.RANGE, -1, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         MagicSquareBenchProbas uniform = new MagicSquareBenchProbas(false, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        MagicSquareBenchProbas clique = new MagicSquareBenchProbas(false, size, AllDifferent.Type.CLIQUE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
+        MagicSquareBenchProbas clique = new MagicSquareBenchProbas(false, size, AllDifferent.Type.CLIQUE_IN_ONE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1);
         MagicSquareBenchProbas dirac = new MagicSquareBenchProbas(false, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{classical, uniform, dirac, clique};
         launchEval(10, size, problems, out);
@@ -86,7 +86,7 @@ public class TestProbaBAllDiff {
         HamiltonianCycleBenchProbas.GenerateStrat strat = HamiltonianCycleBenchProbas.GenerateStrat.ARC;
         HamiltonianCycleBenchProbas classical = new HamiltonianCycleBenchProbas(false, size, AllDifferent.Type.RANGE, -1, true, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
         HamiltonianCycleBenchProbas uniform = new HamiltonianCycleBenchProbas(false, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1, neighbors, strat);
-        HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(false, size, AllDifferent.Type.CLIQUE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
+        HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(false, size, AllDifferent.Type.CLIQUE_IN_ONE, 0, true, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
         HamiltonianCycleBenchProbas dirac = new HamiltonianCycleBenchProbas(false, size, AllDifferent.Type.PROBABILISTIC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1, neighbors, strat);
         // end test
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{classical, uniform, dirac, clique};
