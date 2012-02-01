@@ -27,23 +27,19 @@
 package solver.propagation;
 
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.propagation.comparators.IncrPriorityP;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
+import solver.propagation.wm.IWaterMarking;
+import solver.propagation.wm.WaterMarkers;
 import solver.variables.EventType;
 import solver.variables.Variable;
-
-import java.util.Comparator;
 
 /**
  * An abstract class of IPropagatioEngine.
@@ -59,11 +55,9 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected PropagationStrategy propagationStrategy;
 
-    protected TIntHashSet watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
+    protected IWaterMarking watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
 
     protected int pivot;
-
-    protected TIntObjectHashMap map;
 
     protected boolean initialized = false;
 
@@ -96,7 +90,7 @@ public class PropagationEngine implements IPropagationEngine {
             propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
             // 3. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);
-            if (watermarks.size() > 0) {
+            if (!watermarks.isEmpty()) {
                 throw new RuntimeException("default strategy has encountered a problem :: "+watermarks);
             }
             // 4. remove default if empty
@@ -114,49 +108,41 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     private void waterMark(Constraint[] constraints) {
-        long nbe2 = pivot * pivot;
-        if (nbe2 > Integer.MAX_VALUE) {
-            throw new RuntimeException("too much elements in the solver");
-        }
-        watermarks = new TIntHashSet();
-        map = new TIntObjectHashMap(pivot);
+        watermarks = WaterMarkers.make(pivot);
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].propagators;
             for (int p = 0; p < propagators.length; p++) {
                 Propagator propagator = propagators[p];
                 int idP = propagator.getId();
-                watermarks.add(idP);
-                map.putIfAbsent(idP, propagator);
+                watermarks.putMark(idP);
                 int nbV = propagator.getNbVars();
                 for (int v = 0; v < nbV; v++) {
                     Variable variable = propagator.getVar(v);
                     int idV = variable.getId();
-                    map.putIfAbsent(idV, variable);
-                    int id = _id(idV, idP);
-                    //System.out.printf("%d - %d => %s\n", idV, idP, id);
-                    if (watermarks.contains(id)) {
-                        throw new RuntimeException("error in computing id for couple (V,P)");
-                    }
-                    watermarks.add(id);
+                    watermarks.putMark(idV, idP, v);
                 }
             }
         }
     }
 
-    private int _id(int id1, int id2) {
-        if (id1 < id2) {
-            return id1 * pivot + id2;
+    public void clearWatermark(int id1, int id2, int id3) {
+        if (id1 == 0) {// coarse case
+            watermarks.clearMark(id2);
+        } else if (id2 == 0) {// coarse case
+            watermarks.clearMark(id1);
         } else {
-            return id2 * pivot + id1;
+            watermarks.clearMark(id1, id2, id3);
         }
     }
 
-    public void clearWatermark(int id1, int id2) {
-        watermarks.remove(_id(id1, id2));
+    public boolean isMarked(int id1, int id2, int id3) {
+        if (id1 == 0) {// coarse case
+            return watermarks.isMarked(id2);
+        } else if (id2 == 0) {// coarse case
+            return watermarks.isMarked(id1);
+        } else {
+            return watermarks.isMarked(id1, id2, id3);
     }
-
-    public boolean isMarked(int id1, int id2) {
-        return watermarks.contains(_id(id1, id2));
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
