@@ -39,9 +39,7 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.NoSubTours;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
-import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
 import solver.exception.ContradictionException;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
@@ -50,7 +48,6 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -437,8 +434,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		solver.set(new IntRand(vars,s));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 //		solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
-//		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE));//,new NoSubTours(vars,solver));
-		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE),new AllDifferent(prds,solver, AllDifferent.Type.CLIQUE));
+//		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE));//,new NoSubTours(vars,solver));
+		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE),new AllDifferent(prds,solver, AllDifferent.Type.CLIQUE_IN_ONE));
 		Boolean status = solver.findSolution();//AllSolutions();
 		IMeasures mes = solver.getMeasures();
 		for(int i=0;i<n;i++){

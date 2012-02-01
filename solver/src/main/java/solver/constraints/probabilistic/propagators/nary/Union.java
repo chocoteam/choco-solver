@@ -28,8 +28,8 @@
 package solver.constraints.probabilistic.propagators.nary;
 
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.variables.IntVar;
 
@@ -39,30 +39,27 @@ import java.util.Set;
 /**
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 15 nov. 2010
+ * @author Xavier Lorca
+ * @since 28 nov. 2011
  */
 public class Union {
-
-    /**
-     * link between a value and its position among all the values
-     */
-    TIntIntHashMap val2idx;
 
     /**
      * values in the union from 0 to idx included
      */
     Value[] values;
-    IStateInt idx;
 
     /**
-     * sum of the domain size
+     * available values in the table values[]
      */
-    IStateInt nbOcc;
+    IStateBitSet indices;
 
+    /**
+     * position in the table values[] of the last removed value
+     */
+    IStateInt posLastRemVal;
 
     public Union(IntVar[] variables, IEnvironment environment) {
-        nbOcc = environment.makeInt(0);
         Set<Value> vals = new HashSet<Value>();
         TIntObjectHashMap<Value> int2Value = new TIntObjectHashMap<Value>();
         for (IntVar var : variables) {
@@ -75,58 +72,72 @@ public class Union {
                     int2Value.put(value, v);
                 }
                 v.incrOcc();
-                nbOcc.add(1);
             }
         }
         values = vals.toArray(new Value[vals.size()]);
-        idx = environment.makeInt(values.length - 1);
-        val2idx = new TIntIntHashMap();
-        for (int i = 0; i < values.length; i++) {
-            val2idx.put(values[i].getValue(), i);
-        }
+        this.indices = environment.makeBitSet(values.length);//new BitSet(values.length);
+
+        this.indices.set(0, values.length);
+        this.posLastRemVal = environment.makeInt(-1);
+    }
+
+    public int getSize() {
+        return this.indices.cardinality();
+    }
+
+    public int getPositionLastRemVal() {
+        return this.posLastRemVal.get();
     }
 
     public void remove(int value) {
-        int lastPresent = idx.get();
-        int indice = val2idx.get(value);
-        Value v = values[indice];
-        v.decrOcc();
-        nbOcc.add(-1);
-        if (v.getOcc() == 0) {
-            Value lastElement = values[lastPresent];
-            values[lastPresent] = values[indice];
-            values[indice] = lastElement;
-            val2idx.put(lastElement.getValue(), indice);
-            val2idx.put(value, lastPresent);
-            idx.add(-1);
+        int rankV = this.getRank(value);
+        Value val = values[rankV];
+        val.decrOcc();
+        if (val.getOcc() == 0) {
+            this.indices.set(rankV, false);
+            this.posLastRemVal.set(rankV);
         }
     }
 
-
-    public int getUnionSize() {
-        return idx.get();
-    }
-
-    public int getNbOcc() {
-        return nbOcc.get();
+    private int getRank(int v) {
+        int rank = 0;
+        int next = this.indices.nextSetBit(rank);
+        while (next > -1 && this.values[next].getValue() != v) {
+            rank++;
+            next = this.indices.nextSetBit(rank);
+        }
+        return rank;
     }
 
     public int[] getValues() {
-        int[] tmp = new int[idx.get() + 1];
-        for (int i = 0; i < tmp.length; i++) {
-            tmp[i] = values[i].getValue();
+        int[] tmp = new int[this.getSize()];
+        int idx = 0;
+        for (int i = this.indices.nextSetBit(0); i >= 0; i = this.indices.nextSetBit(i + 1)) {
+            tmp[idx++] = values[i].getValue();
         }
         return tmp;
     }
 
     public String toString() {
-        String res = "union : [";
-        for (int i = 0; i <= idx.get(); i++) {
-            res += values[i].getValue() + ", ";
+        String res = "[";
+        int[] arrayValues = this.getValues();
+        for (int i = 0; i < arrayValues.length; i++) {
+            res += arrayValues[i] + ", ";
         }
         res = res.substring(0, res.length() - 2);
-        res += "]";
+        res += "]\n";
+        res += this.printDetails();
         return res;
+    }
+
+    private String printDetails() {
+        String details = "[";
+        for (int i = 0; i < values.length; i++) {
+            details += values[i] + ", ";
+        }
+        details = details.substring(0, details.length() - 2);
+        details += "]";
+        return details;
     }
 
 }
@@ -155,5 +166,19 @@ final class Value {
 
     public final void decrOcc() {
         this.occ.add(-1);
+    }
+
+    public boolean equals(Object o) {
+        Value v = (Value) o;
+        return this.value == v.getValue();
+    }
+
+    @Override
+    public int hashCode() {
+        return this.value;
+    }
+
+    public String toString() {
+        return "<" + value + "," + occ + ">";
     }
 }
