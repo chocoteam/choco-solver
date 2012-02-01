@@ -72,12 +72,6 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
         } else {
             update(recorder, event);
             if (isValid()) {
-                for (int i = 0; i < idxLastRecorder; i++) {
-                    ArcEventRecorderWithCondition crecorder = relatedRecorder[i];
-                    /*if (crequest.hasChanged()) {
-                        crequest.schedule(); // TODO: do not add request in parameter...
-                    }*/
-                }
                 wasValid.set(alwaysValid());
                 next.validateScheduling(recorder, event);
                 return true;

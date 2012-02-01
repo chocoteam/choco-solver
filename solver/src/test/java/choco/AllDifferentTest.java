@@ -271,7 +271,7 @@ public class AllDifferentTest {
 				}
 				break;
 			case 1:
-				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE_IN_ONE));
 				break;
 			case 2:
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));

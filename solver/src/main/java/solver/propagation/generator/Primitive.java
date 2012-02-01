@@ -205,12 +205,20 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 		return new Primitive<E>(arc, var0, propagators, All.singleton, null);
 	}
 
-	public static <E extends IEventRecorder> Primitive arcs(ICondition<E> condition, Constraint... constraints) {
+    public static <E extends IEventRecorder> Primitive arcs(Propagator... propagators) {
+		return new Primitive<E>(arc, var0, propagators, All.singleton, null);
+	}
+
+	public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition, Constraint... constraints) {
 		Propagator[] propagators = prop0;
 		for (int c = 0; c < constraints.length; c++) {
 			propagators = ArrayUtils.append(propagators, constraints[c].propagators);
 		}
-		return new Primitive<E>(arc, var0, propagators, All.singleton, condition);
+		return new Primitive<ArcEventRecorderWithCondition>(arc, var0, propagators, All.singleton, condition);
+	}
+
+	public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition, Propagator... propagators) {
+		return new Primitive<ArcEventRecorderWithCondition>(arc, var0, propagators, All.singleton, condition);
 	}
 
 	//---->
@@ -225,6 +233,10 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 		for (int c = 0; c < constraints.length; c++) {
 			propagators = ArrayUtils.append(propagators, constraints[c].propagators);
 		}
+		return new Primitive<E>(unary, var0, propagators, All.singleton, null);
+	}
+
+    public static <E extends IEventRecorder> Primitive unary(Propagator... propagators) {
 		return new Primitive<E>(unary, var0, propagators, All.singleton, null);
 	}
 
