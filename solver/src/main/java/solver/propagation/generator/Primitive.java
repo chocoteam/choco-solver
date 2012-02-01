@@ -122,9 +122,9 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 					Propagator prop = propagators[p];
 					for (int v = 0; v < prop.getNbVars(); v++) {
 						Variable var = prop.getVar(v);
-						if (propagationEngine.isMarked(prop.getId(), var.getId())) {
+                        if (propagationEngine.isMarked(prop.getId(), var.getId(), v)) {
 							all.add(arc(var, prop, v, solver));
-							propagationEngine.clearWatermark(prop.getId(), var.getId());
+                            propagationEngine.clearWatermark(prop.getId(), var.getId(), v);
 						}
 					}
 				}
@@ -134,12 +134,12 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 				for (int v = 0; v < variables.length; v++) {
 					Variable var = variables[v];
 					Propagator[] propagators = var.getPropagators();
-                    int[] idx = var.getPIndices();
+                    int[] pindices = var.getPIndices();
 					for (int p = 0; p < propagators.length; p++) {
 						Propagator prop = propagators[p];
-						if (propagationEngine.isMarked(prop.getId(), var.getId())) {
-							all.add(arc(var, prop, idx[p], solver));
-							propagationEngine.clearWatermark(prop.getId(), var.getId());
+                        if (propagationEngine.isMarked(prop.getId(), var.getId(), pindices[p])) {
+                            all.add(arc(var, prop, pindices[p], solver));
+                            propagationEngine.clearWatermark(prop.getId(), var.getId(), pindices[p]);
 						}
 					}
 				}
@@ -171,9 +171,9 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 		if (propagators.length > 0) {
 			for (int p = 0; p < propagators.length; p++) {
 				Propagator prop = propagators[p];
-				if (propagationEngine.isMarked(prop.getId(), 0)) {
+				if (propagationEngine.isMarked(prop.getId(),0,0)) {
 					all.add(_unary(prop, solver));
-					propagationEngine.clearWatermark(prop.getId(), 0);
+					propagationEngine.clearWatermark(prop.getId(), 0,0);
 				}
 			}
 		} else {
