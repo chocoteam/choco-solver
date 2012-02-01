@@ -83,4 +83,8 @@ public enum SearchMonitorFactory {
                 restartStrategy, restartStrategyLimit, solver.getSearchLoop(), restartLimit
         ));
     }
+
+    public static void prop_count(Solver solver) {
+        solver.getSearchLoop().plugSearchMonitor(new LogPropagationCount(solver));
+    }
 }
