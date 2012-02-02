@@ -134,6 +134,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
+		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		if(config.get(ALLDIFF_AC)){
 			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
 		}
@@ -143,7 +144,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		if(config.get(ANTI_ARBO)){
 			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
 		}
-		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		if(config.get(RG)){
 			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
 			nR = RP.getNSCC();
@@ -225,8 +225,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	public static void main(String[] args) {
 //		benchmark_neighbors();
 //		benchmark_density();
-//		tsplib_bench();
-		hardInstances();
+		tsplib_bench();
+//		hardInstances();
 	}
 
 	private static String getHead() {
@@ -298,9 +298,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		HamiltonianCircuitProblem tspRun;
 //		int max = 1<<NB_PARAM;
 //		for(int i=0;i<max;i++){
-		int i = 1<<3;
+//		int i = 1<<3;
 		tspRun = new HamiltonianCircuitProblem(matrix,0);
-		tspRun.configParameters(i);
+		tspRun.configParameters(0);
 		tspRun.execute();
 		IMeasures mes = tspRun.solver.getMeasures();
 		String res = name+";"+mes.getSolutionCount()+";"+mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";";
