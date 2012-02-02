@@ -30,6 +30,7 @@ import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -45,7 +46,7 @@ import java.util.List;
  * @since 15/12/11
  */
 public abstract class PropagationStrategy<E extends ISchedulable>
-        extends Generator<E> implements IScheduler<E>, ISchedulable {
+        extends Generator<E> implements IScheduler<E>, ISchedulable, Serializable {
 
     static enum P {
         pickOne, sweepUp, clearOut, loopOut

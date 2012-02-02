@@ -26,13 +26,15 @@
  */
 package solver.propagation.wm;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 26/01/12
  */
-public interface IWaterMarking {
+public interface IWaterMarking extends Serializable{
 
     int size();
 

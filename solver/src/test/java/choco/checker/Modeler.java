@@ -267,7 +267,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 map.put(domains[i], vars[i]);
             }
-            IntVar occVar = VariableFactory.enumerated("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
+            IntVar occVar = VariableFactory.bounded("ovar", domains[n - 1][0], domains[n - 1][domains[n - 1].length - 1], s);
             map.put(domains[n - 1], occVar);
             int[] params = (int[]) parameters;
             Count.Relop ro = null;

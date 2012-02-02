@@ -83,9 +83,9 @@ public class PropCount extends Propagator<IntVar> {
      * with  lvars = list of variables for which the occurence of occval in their domain is constrained
      *
      * @param value checking value
-     * @param vars   variables -- last one is LIMIT
-     * @param onInf  if true, constraint insures size{forall v in lvars | v = occval} <= occVar
-     * @param onSup  if true, constraint insure size{forall v in lvars | v = occval} >= occVar
+     * @param vars  variables -- last one is LIMIT
+     * @param onInf if true, constraint insures size{forall v in lvars | v = occval} <= occVar
+     * @param onSup if true, constraint insure size{forall v in lvars | v = occval} >= occVar
      */
     public PropCount(int value, IntVar[] vars, boolean onInf, boolean onSup, Solver solver,
                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
@@ -117,7 +117,7 @@ public class PropCount extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == vars.length-1) {
+        if (vIdx == vars.length - 1) {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         } else {
             return EventType.INT_ALL_MASK();
@@ -138,9 +138,21 @@ public class PropCount extends Propagator<IntVar> {
 
         this.nbSure.set(nbSure);
         this.nbPossible.set(nbPossible);
-        checkNbPossible();
-        checkNbSure();
+        filter(true, 2);
+    }
 
+    protected void filter(boolean startWithPoss, int nbRules) throws ContradictionException {
+        boolean run;
+        int nbR = 0;
+        do {
+            if (startWithPoss) {
+                run = checkNbPossible();
+            } else {
+                run = checkNbSure();
+            }
+            startWithPoss ^= true;
+            nbR++;
+        } while (run || nbR < nbRules);
     }
 
     @Override
@@ -148,23 +160,24 @@ public class PropCount extends Propagator<IntVar> {
         if (vIdx == ovIdx) {
             if (EventType.isInstantiate(mask) || EventType.isInclow(mask)) {
                 //assumption : we only get the bounds events on the occurrence variable
-                checkNbPossible();
+                filter(true, 1);
             }
             if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
                 //assumption : we only get the bounds events on the occurrence variable
-                checkNbSure();
+                filter(false, 1);
             }
         } else {
+            int nbRule = 1;
             if (EventType.isInstantiate(mask)) {
                 //assumption : we only get the inst events on all variables except the occurrence variable
                 if (vars[vIdx].getValue() == occval) {
                     nbSure.add(1);
-                    checkNbSure();
+                    nbRule++;
                 }
             }
             //assumption : we only get the inst events on all variables except the occurrence variable
             eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
-            checkNbPossible();
+            filter(true, nbRule);
         }
 
     }
@@ -173,7 +186,7 @@ public class PropCount extends Propagator<IntVar> {
     public ESat isEntailed() {
         int nbPos = 0;
         int nbSur = 0;
-        for (int i = 0; i < vars.length-1; i++) {
+        for (int i = 0; i < vars.length - 1; i++) {
             if (vars[i].contains(occval)) {
                 nbPos++;
                 if (vars[i].instantiated() && vars[i].getValue() == occval)
@@ -222,36 +235,43 @@ public class PropCount extends Propagator<IntVar> {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public void checkNbPossible() throws ContradictionException {
+    public boolean checkNbPossible() throws ContradictionException {
+        boolean hasChanged = false;
         if (constrainOnInfNumber) {
-            vars[nbListVars].updateUpperBound(nbPossible.get(), this);//CPRU not idempotent
+            hasChanged = vars[nbListVars].updateUpperBound(nbPossible.get(), this);
             if (vars[nbListVars].instantiatedTo(nbPossible.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
                     //for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
-                        //nbSure.add(1); // must be dealed by the event listener not here !!
-                        aRelevantVar.instantiateTo(occval,  this);//CPRU not idempotent
+                        hasChanged = true;
+                        nbSure.add(1); // must be dealed by the event listener not here !!
+                        aRelevantVar.instantiateTo(occval, this);
                     }
                 }
             }
         }
+        return hasChanged;
     }
 
-    public void checkNbSure() throws ContradictionException {
+    public boolean checkNbSure() throws ContradictionException {
+        boolean hasChanged = false;
         if (constrainOnSupNumber) {
-            vars[nbListVars].updateLowerBound(nbSure.get(), this); //CPRU not idempotent
+            hasChanged = vars[nbListVars].updateLowerBound(nbSure.get(), this);
             if (vars[nbListVars].instantiatedTo(nbSure.get())) {
                 for (int i = 0; i < relevantVar.length; i++) {
 //                for (IntDomainVar aRelevantVar : relevantVar) {
                     IntVar aRelevantVar = relevantVar[i];
                     if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
-                        //nbPossible.add(-1);
-                        aRelevantVar.removeValue(occval,  this); //CPRU not idempotent
+                        if (aRelevantVar.removeValue(occval, this)) {
+                            nbPossible.add(-1);
+                            hasChanged = true;
+                        }
                     }
                 }
             }
         }
+        return hasChanged;
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {
