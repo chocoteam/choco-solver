@@ -30,11 +30,12 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.unary.PropEqualXC;
+import solver.constraints.propagators.binary.PropEqualXY;
 import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
 import solver.constraints.propagators.unary.PropLessOrEqualXC;
 import solver.constraints.propagators.unary.PropNotEqualXC;
 import solver.variables.IntVar;
+import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -56,7 +57,7 @@ public class Relation extends IntConstraint<IntVar> {
         this.c = cste;
         switch (r){
             case EQ:
-                setPropagators(new PropEqualXC(var, c, solver, this));
+                setPropagators(new PropEqualXY(var, Views.fixed(cste, solver), solver, this));
                 break;
             case NQ:
                 setPropagators(new PropNotEqualXC(var, c, solver, this));
