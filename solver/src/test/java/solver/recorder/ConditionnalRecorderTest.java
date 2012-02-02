@@ -78,7 +78,7 @@ public class ConditionnalRecorderTest {
 
         //castRecords(cstrs, solver, solver.getEnvironment(), 2);
         AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), 2);
-        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
         solver.set(q);
 
         solver.post(cstrs);
@@ -102,7 +102,7 @@ public class ConditionnalRecorderTest {
 
             //castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
             AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), n/2);
-            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
             solver.set(q);
 
             solver.post(cstrs);

@@ -92,7 +92,7 @@ public class PropagationEngine implements IPropagationEngine {
             Constraint[] constraints = solver.getCstrs();
             // 1. water mark every couple variable-propagator of the solver
             waterMark(constraints);
-            // 2. add default strategy, default group => arc and unary in a queue
+            // 2. add default strategy, default group => arc and coarse in a queue
             propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
             // 3. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);

@@ -173,28 +173,28 @@ public abstract class AbstractBenchProbas {
                     PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
                     condition = new CondAllDiffBCProba(this.solver.getEnvironment(), prop.getVars(), this.active, this.dist);
                     primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.unary(prop);
+                    primitives[i + hall.size()] = Primitive.coarses(prop);
                 }
             } else {
                 for (int i = 0; i < hall.size(); i++) {
                     PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
                     condition = new CondAllDiffBCFreq(this.solver.getEnvironment(), prop.getVars(), this.frequency);
                     primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.unary(prop);
+                    primitives[i + hall.size()] = Primitive.coarses(prop);
                 }
             }
         }
 
         Propagator[] _cliques = clique.toArray(new Propagator[clique.size()]);
-        PropagationStrategy qneq = Queue.build(Sort.build(Primitive.arcs(_cliques)), Primitive.unary(_cliques));
+        PropagationStrategy qneq = Queue.build(Sort.build(Primitive.arcs(_cliques)), Primitive.coarses(_cliques));
 
         Propagator[] _others = others.toArray(new Propagator[others.size()]);
-        PropagationStrategy qothers = Queue.build(Primitive.arcs(_others), Primitive.unary(_others));
+        PropagationStrategy qothers = Queue.build(Primitive.arcs(_others), Primitive.coarses(_others));
 
         PropagationStrategy qadbc = null;
         if (primitives == null) {
             Propagator[] _hall = hall.toArray(new Propagator[hall.size()]);
-            qadbc = Queue.build(Primitive.arcs(_hall), Primitive.unary(_hall)).pickOne();
+            qadbc = Queue.build(Primitive.arcs(_hall), Primitive.coarses(_hall)).pickOne();
         } else {
             if (primitives.length > 0) {  // patch Xavier
                 qadbc = Queue.build(primitives).pickOne();

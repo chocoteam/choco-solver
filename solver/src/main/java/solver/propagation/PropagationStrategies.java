@@ -47,7 +47,7 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Primitive arcs = Primitive.arcs(constraints);
-            Primitive coarses = Primitive.unary(constraints);
+            Primitive coarses = Primitive.coarses(constraints);
             return Queue.build(Flatten.build(arcs, coarses)).clearOut();
         }
     },
@@ -56,7 +56,7 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.arcs(constraints));
-            Queue coarses = Queue.build(Primitive.unary(constraints));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
             //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
@@ -67,7 +67,7 @@ public enum PropagationStrategies {
             Variable[] variables = solver.getVars();
             Primitive arcs = Primitive.vars(variables);
             Constraint[] constraints = solver.getCstrs();
-            Primitive coarses = Primitive.unary(constraints);
+            Primitive coarses = Primitive.coarses(constraints);
             return Queue.build(Flatten.build(arcs, coarses)).clearOut();
         }
     },
@@ -77,7 +77,7 @@ public enum PropagationStrategies {
             Variable[] variables = solver.getVars();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.vars(variables));
-            Queue coarses = Queue.build(Primitive.unary(constraints));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
             //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
@@ -87,7 +87,7 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Primitive arcs = Primitive.props(constraints);
-            Primitive coarses = Primitive.unary(constraints);
+            Primitive coarses = Primitive.coarses(constraints);
             return Queue.build(Flatten.build(arcs, coarses)).clearOut();
         }
     },
@@ -96,7 +96,7 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.props(constraints));
-            Queue coarses = Queue.build(Primitive.unary(constraints));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
             //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
