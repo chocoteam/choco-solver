@@ -28,8 +28,9 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
-import solver.constraints.Constraint;
+import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,125 +43,110 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 
 /**
- * A specific <code>Propagator</code> extension defining filtering algorithm for:
+ * X >= Y
+ * <p/>
  * <br/>
- * <b>X =/= Y + C</b>
- * <br>where <i>X</i> and <i>Y</i> are <code>Variable</code> objects and <i>C</i> a constant.
- * <br>
- * This <code>Propagator</code> defines the <code>propagate</code> and <code>awakeOnInst</code> methods. The other ones
- * throw <code>UnsupportedOperationException</code>.
- * <br/>
- * <br/>
- * <i>Based on Choco-2.1.1</i>
  *
- * @author Xavier Lorca
  * @author Charles Prud'homme
- * @author Arnaud Malapert
- * @version 0.01, june 2010
- * @since 0.01
+ * @since 1 oct. 2010
  */
-public class PropNotEqualX_YC extends Propagator<IntVar> {
+public final class PropGreaterOrEqualXY extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
-    int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropNotEqualX_YC(IntVar[] vars, int c, Solver solver, Constraint constraint) {
-        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, false);
-        this.x = vars[0];
-        this.y = vars[1];
-        this.cste = c;
+    public PropGreaterOrEqualXY(IntVar x, IntVar y, Solver solver, IntConstraint constraint) {
+        super(ArrayUtils.toArray(x,y), solver, constraint, PropagatorPriority.BINARY, true);
+        this.x = x;
+        this.y = y;
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
-//        Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
-        if (vars[vIdx].hasEnumeratedDomain()) {
-            return EventType.INSTANTIATE.mask;
+        if(vIdx == 0){
+            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
+        }else{
+            return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
         }
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+    }
+
+    private void updateInfX() throws ContradictionException {
+        x.updateLowerBound(y.getLB(), this);
+    }
+
+    private void updateSupY() throws ContradictionException {
+        y.updateUpperBound(x.getUB(), this);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (x.instantiated()) {
-            removeValV1();
-        } else if (y.instantiated()) {
-            removeValV0();
-        } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
-            setPassive();
+        updateInfX();
+        updateSupY();
+        if (x.getLB() >= y.getUB()) {
+            this.setPassive();
         }
     }
+
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            if (varIdx == 0) {
-                removeValV1();
-            } else {
-                removeValV0();
+            this.awakeOnInst(varIdx);
+        } else {
+            if (EventType.isInclow(mask)) {
+                updateInfX();
             }
-        } else if (EventType.isBound(mask)) {
-            // typical case: A=[1,4], B=[1,4] (bounded domains)
-            // A instantiated to 3 => nothing can be done on B
-            // then B dec supp to 3 => 3 can also be removed du to A = 3.
-            propagate(EventType.FULL_PROPAGATION.mask);
+            if (EventType.isDecupp(mask)) {
+                updateSupY();
+            }
         }
-    }
-
-    private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue() + this.cste, this)) {
-            this.setPassive();
-        } else if (!x.contains(y.getValue() + cste)) {
+        if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
     }
 
-    private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue() - this.cste, this)) {
-            this.setPassive();
-        } else if (!y.contains(x.getValue() - cste)) {
-            this.setPassive();
+    void awakeOnInst(int idx) throws ContradictionException {
+        if (idx == 0) {
+            updateSupY();
+        } else {
+            updateInfX();
         }
+
     }
 
     @Override
     public ESat isEntailed() {
-        if ((x.getUB() < y.getLB() + this.cste) ||
-                (y.getUB() < x.getLB() - this.cste))
-            return ESat.TRUE;
-        else if (x.instantiated()
-                && y.instantiated()
-                && x.getValue() == y.getValue() + this.cste)
+        if (x.getUB() < y.getLB())
             return ESat.FALSE;
+        else if (x.getLB() >= y.getUB())
+            return ESat.TRUE;
         else
             return ESat.UNDEFINED;
     }
 
+
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".NEQ.").append(vars[1].getName());
-        bf.append("+").append(cste).append(")");
+        bf.append("prop(").append(vars[0].getName()).append(".GEQ.").append(vars[1].getName()).append(")");
         return bf.toString();
     }
 
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = new Explanation(this);
+        // the current deduction is due to the current domain of the involved variables
         Variable var = d.getVar();
-
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
-            expl.add(y.explain(VariableState.DOM));
+            expl.add(y.explain(VariableState.LB));
         }
-        else if (var != null) {
-            expl.add(x.explain(VariableState.DOM));
+        else if (var.equals(y)) {
+            expl.add(x.explain(VariableState.UB));
+        } else {
+            return super.explain(d);
         }
-        // and the application of the current propagator
-        expl.add(this);
         return expl;
     }
 }
