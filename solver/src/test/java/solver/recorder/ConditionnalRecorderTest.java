@@ -40,12 +40,10 @@ import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
 import solver.recorders.conditions.AbstractCondition;
 import solver.recorders.conditions.CompletlyInstantiated;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
