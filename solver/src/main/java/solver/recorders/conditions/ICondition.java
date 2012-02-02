@@ -28,7 +28,6 @@ package solver.recorders.conditions;
 
 import solver.constraints.propagators.Propagator;
 import solver.recorders.IEventRecorder;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
 import java.io.Serializable;
@@ -70,11 +69,11 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
      */
     public void linkRecorder(R recorder);
 
-    public static enum Default implements ICondition<ArcEventRecorderWithCondition> {
+    public static enum Default implements ICondition<IEventRecorder> {
         NO_CONDITION;
 
         @Override
-        public boolean validateScheduling(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
+        public boolean validateScheduling(IEventRecorder recorder, Propagator propagator, EventType event) {
             return false;
         }
 
@@ -84,7 +83,7 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
         }
 
         @Override
-        public void linkRecorder(ArcEventRecorderWithCondition recorder) {
+        public void linkRecorder(IEventRecorder recorder) {
         }
 
 

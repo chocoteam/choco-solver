@@ -2,7 +2,7 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import solver.constraints.propagators.Propagator;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.recorders.IEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -11,7 +11,7 @@ import solver.variables.IntVar;
  * User: chameau
  * Date: 3 nov. 2011
  */
-public class CondAllDiffBC extends AbstractCondition {
+public class CondAllDiffBC<R extends IEventRecorder> extends AbstractCondition<R> {
 
     protected IntVar[] vars;
 
@@ -33,5 +33,5 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {}
+    void update(R recorder, Propagator propagator, EventType event) {}
 }

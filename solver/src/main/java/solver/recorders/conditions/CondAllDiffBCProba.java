@@ -7,7 +7,7 @@ import solver.constraints.probabilistic.propagators.nary.Union;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -27,7 +27,7 @@ import static solver.recorders.conditions.CondAllDiffBCProba.Distribution.DIRAC;
  * User: chameau
  * Date: 22/11/11
  */
-public class CondAllDiffBCProba extends CondAllDiffBC {
+public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder> {
 
     public static String tabf = "/functions/f.txt";
     public static String tabg = "/functions/g.txt";
@@ -124,7 +124,7 @@ public class CondAllDiffBCProba extends CondAllDiffBC {
 
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
+    void update(AbstractFineEventRecorder recorder, Propagator propagator, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             this.nbFreeVars.add(-1);
         }
