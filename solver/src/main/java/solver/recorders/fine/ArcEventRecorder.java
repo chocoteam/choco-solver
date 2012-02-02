@@ -26,6 +26,7 @@
  */
 package solver.recorders.fine;
 
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -95,8 +96,8 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public boolean execute() throws ContradictionException {
-//        LoggerFactory.getLogger("solver").info("* {}", this.toString());
         if (evtmask > 0) {
+            if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("* {}", this.toString());
             int evtmask_ = evtmask;
             // for concurrent modification..
             deltamon.freeze();
@@ -120,7 +121,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
             if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
-//            LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+            if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
                 // 1. clear the structure if necessary
                 if (LAZY) {
                     if (timestamp - AbstractSearchLoop.timeStamp != 0) {
