@@ -26,15 +26,11 @@
  */
 package solver.recorders.fine;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntLongHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.IDeltaMonitor;
@@ -42,64 +38,28 @@ import solver.variables.delta.IDeltaMonitor;
 import java.util.Arrays;
 
 /**
- * A specialized fine event recorder associated with one variable and two or more propagators.
- * It observes a variable, records events occurring on the variable,
- * schedules it self when calling the filtering algortithm of the propagators
- * is required.
- * It also stores, if required, pointers to value removals.
- * <br/>
+ * An event recorder associated with one variable and its propagator.
+ * On a variable modification, its propagators are scheduled for FULL_PROPAGATION
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 06/12/11
+ * @since 24/01/12
  */
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
     protected final V variable; // one variable
-    protected Propagator<V>[] propagators; // its propagators
+    protected final Propagator<V>[] propagators; // its propagators
     protected int idxV; // index of this within the variable structure -- mutable
 
-    protected TIntIntHashMap idxVinPs; // index of the variable within the propagator -- immutable
-    protected final TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
-    protected final TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
-    protected final TIntIntHashMap evtmasks; // reference to events occuring -- inclusive OR over event mask
-
-
-    public VarEventRecorder(V variable, Propagator<V>[] propagators, int[] idxVinP, Solver solver) {
+    public VarEventRecorder(V variable, Propagator<V>[] propagators, Solver solver) {
         super(solver);
         this.variable = variable;
         variable.addMonitor(this);
-
         this.propagators = propagators.clone();
-        this.deltamon = new TIntObjectHashMap<IDeltaMonitor>(propagators.length);
-        this.timestamps = new TIntLongHashMap(propagators.length, (float) 0.5, -2, -2);
-        this.evtmasks = new TIntIntHashMap(propagators.length, (float) 0.5, -1, -1);
-        this.idxVinPs = new TIntIntHashMap(propagators.length, (float) 0.5, -2, -2);
+
         for (int i = 0; i < propagators.length; i++) {
-            Propagator propagator = propagators[i];
-            propagator.addRecorder(this);
-
-            int pid = propagator.getId();
-            idxVinPs.put(pid, idxVinP[i]);
-            deltamon.put(pid, variable.getDelta().getMonitor());
-            timestamps.put(pid, -1);
-            evtmasks.put(pid, 0);
+            propagators[i].addRecorder(this);
         }
-    }
-
-    @Override
-    public int getIdxInV(V variable) {
-        return idxV;
-    }
-
-    @Override
-    public void setIdxInV(V variable, int idx) {
-        this.idxV = idx;
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return propagators;
     }
 
     @Override
@@ -108,27 +68,13 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public boolean execute() throws ContradictionException {
-        if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        for (int i = 0; i < propagators.length; i++) {
-            Propagator propagator = propagators[i];
-            int pid = propagator.getId();
-            int evtmask_ = evtmasks.get(pid);
-            if (evtmask_ > 0) {
-//            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-                // for concurrent modification..
-                deltamon.get(pid).freeze();
-                evtmasks.put(pid, 0); // and clean up mask
+    public Propagator[] getPropagators() {
+        return propagators;
+    }
 
-                assert (propagator.isActive()) : this + " is not active";
-                if (propagator.isActive()) {
-                    propagator.fineERcalls++;
-                    propagator.propagate(this, idxVinPs.get(pid), evtmask_);
-                }
-                deltamon.get(pid).unfreeze();
-            }
-        }
-        return true;
+    @Override
+    public boolean execute() throws ContradictionException {
+        throw new SolverException("VarEventRecorder#execute() is empty and should not be called (nor scheduled)!");
     }
 
     @Override
@@ -140,42 +86,18 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        boolean oneoremore = false;
         for (int i = 0; i < propagators.length; i++) {
             Propagator propagator = propagators[i];
             if (cause != propagator // due to idempotency of propagator, it should not schedule itself
                     && propagator.isActive()) { // CPRU: could be maintained incrementally
-                if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
-                int pid = propagator.getId();
-                if ((evt.mask & propagator.getPropagationConditions(idxVinPs.get(pid))) != 0) {
-                    // 1. if instantiation, then decrement arity of the propagator
-                    if (EventType.anInstantiationEvent(evt.mask)) {
-                        propagator.decArity();
-                    }
-                    // 2. clear the structure if necessary
-                    if (LAZY) {
-                        if (timestamps.get(pid) - AbstractSearchLoop.timeStamp != 0) {
-                            deltamon.get(pid).clear();
-                            this.evtmasks.put(pid, 0);
-                            timestamps.put(pid, AbstractSearchLoop.timeStamp);
-                        }
-                    }
-                    // 3. record the event and values removed
-                    int em = evtmasks.get(pid);
-                    if ((evt.mask & em) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                        evtmasks.put(pid, em | evt.strengthened_mask);
-                    }
-                    oneoremore = true;
+                // 1. if instantiation, then decrement arity of the propagator
+                if (EventType.anInstantiationEvent(evt.mask)) {
+                    propagator.decArity();
                 }
+                // 2. schedule the coarse event recorder associated to thos
+                propagator.forcePropagate(EventType.FULL_PROPAGATION);
             }
         }
-        if (oneoremore) {
-            // 4. schedule this
-            if (!enqueued()) {
-                scheduler.schedule(this);
-            }
-        }
-
     }
 
     @Override
@@ -184,12 +106,18 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
+    public int getIdxInV(V variable) {
+        return idxV;
+    }
+
+    @Override
+    public void setIdxInV(V variable, int idx) {
+        idxV = idx;
+    }
+
+    @Override
     public void flush() {
-        for (int i = 0; i < propagators.length; i++) {
-            int pid = propagators[i].getId();
-            this.evtmasks.put(pid, 0);
-            this.deltamon.get(pid).clear();
-        }
+        // can be void
     }
 
     @Override
@@ -211,7 +139,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public void activate(Propagator<V> element) {
-        // if already activated, .activate has no side effect
         variable.activate(this);
     }
 
@@ -222,9 +149,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         for (int i = 0; i < propagators.length; i++) {
             if (propagators[i].isPassive()) {
                 count--;
-                int pid = propagators[i].getId();
-                this.evtmasks.put(pid, 0);
-                this.deltamon.get(pid).clear();
+                _desactivateP(i);
             }
         }
         if (count == 0) {
@@ -233,29 +158,22 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         }
     }
 
+    void _desactivateP(int i) {
+        // void
+    }
+
     @Override
     public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return deltamon.get(propagator.getId());
+        return IDeltaMonitor.Default.NONE;
     }
 
     @Override
     public void virtuallyExecuted() {
-        if (LAZY) {
-            variable.getDelta().lazyClear();
-        }
-        for (int i = 0; i < propagators.length; i++) {
-            int pid = propagators[i].getId();
-            this.evtmasks.put(pid, 0);
-            this.deltamon.get(pid).unfreeze();
-            this.timestamps.put(pid, AbstractSearchLoop.timeStamp);
-        }
-        if (enqueued) {
-            scheduler.remove(this);
-        }
+        // void
     }
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + Arrays.toString(propagators) + " >>";
+        return "<< " + variable + "::" + Arrays.toString(propagators) + ">>";
     }
 }
