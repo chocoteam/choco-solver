@@ -143,7 +143,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!ArcEventRecorder.LAZY) {
+        if (!FineArcEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );
@@ -179,7 +179,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!ArcEventRecorder.LAZY) {
+        if (!FineArcEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );
@@ -218,7 +218,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!ArcEventRecorder.LAZY) {
+        if (!FineArcEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );
@@ -235,7 +235,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         if (condition != null) {
             return new ArcEventRecorderWithCondition<V>(var, prop, idVinP, condition, solver);
         } else {
-            return new ArcEventRecorder<V>(var, prop, idVinP, solver);
+            return new FineArcEventRecorder<V>(var, prop, idVinP, solver);
         }
         //}
     }
@@ -313,16 +313,16 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 
     //<---- ARC-ORIENTED
 
-    public static Primitive<ArcEventRecorder> arcs(Constraint... constraints) {
+    public static Primitive<FineArcEventRecorder> arcs(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, null);
+        return new Primitive<FineArcEventRecorder>(arc, var0, propagators, All.singleton, null);
     }
 
-    public static Primitive<ArcEventRecorder> arcs(Propagator... propagators) {
-        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, null);
+    public static Primitive<FineArcEventRecorder> arcs(Propagator... propagators) {
+        return new Primitive<FineArcEventRecorder>(arc, var0, propagators, All.singleton, null);
     }
 
     public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition,

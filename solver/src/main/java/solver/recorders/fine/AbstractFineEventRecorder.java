@@ -39,7 +39,7 @@ import solver.variables.delta.IDeltaMonitor;
 /**
  * An abstract class for fine event recorder.
  * A fine event is categorized by one or more event occurring on one or more variables.
- * It includes at least one variable and one propagator (in that very case, it is a ArcEventRecorder).
+ * It includes at least one variable and one propagator
  * <p/>
  * <br/>
  *
