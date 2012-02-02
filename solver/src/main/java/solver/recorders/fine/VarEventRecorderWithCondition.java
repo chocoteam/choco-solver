@@ -26,6 +26,8 @@
  */
 package solver.recorders.fine;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -33,12 +35,12 @@ import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
+import java.util.Arrays;
+
 /**
- * A specialized fine event recorder associated with one variable and one propagator.
- * It observes a variable, records events occurring on the variable,
- * schedules it self when calling the filtering algortithm of the propagator
+ * A specialized fine event recorder associated with one variable and one or more propagators.
+ * It observes a variable, schedules coarse event when calling the filtering algortithm of the propagator
  * is required.
- * It also stores, if required, pointers to value removals.
  * <br/>
  * on a pris le parti de ne pas mémoriser les événements fins,
  * partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
@@ -47,33 +49,44 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
+public class VarEventRecorderWithCondition<V extends Variable> extends VarEventRecorder<V> {
 
-    protected int idxVinP; // index of the variable within the propagator -- immutable
+    protected TIntIntHashMap idxVinPs; // index of the variable within the propagator -- immutable
 
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
-    public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
+    public VarEventRecorderWithCondition(V variable, Propagator<V>[] propagators, int[] idxVinP,
                                          ICondition condition, Solver solver) {
-        super(variable, propagator, solver);
-        this.idxVinP = idxInProp;
+        super(variable, propagators, solver);
         this.condition = condition;
         condition.linkRecorder(this);
+        this.idxVinPs = new TIntIntHashMap(propagators.length, (float) 0.5, -2, -2);
+        for (int i = 0; i < propagators.length; i++) {
+            Propagator propagator = propagators[i];
+            int pid = propagator.getId();
+            idxVinPs.put(pid, idxVinP[i]);
+        }
     }
 
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
-                // 1. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagator.decArity();
-                }
-                // 2. schedule this if condition is valid
-                if (condition.validateScheduling(this, propagator, evt)) {
-                    propagator.forcePropagate(EventType.FULL_PROPAGATION);
+        for (int i = 0; i < propagators.length; i++) {
+            Propagator propagator = propagators[i];
+            if (cause != propagator // due to idempotency of propagator, it should not schedule itself
+                    && propagator.isActive()) { // CPRU: could be maintained incrementally
+                if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
+                int pid = propagator.getId();
+                if ((evt.mask & propagator.getPropagationConditions(idxVinPs.get(pid))) != 0) {
+                    // 1. if instantiation, then decrement arity of the propagator
+                    if (EventType.anInstantiationEvent(evt.mask)) {
+                        propagator.decArity();
+                    }
+                    // 2. schedule this if condition is valid
+                    if (condition.validateScheduling(this, propagator, evt)) {
+                        propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                    }
                 }
             }
         }
@@ -81,6 +94,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + propagator.toString() + "::" + condition.toString() + " >>";
+        return "<< " + variable.toString() + "::" + Arrays.toString(propagators) + "::" + condition.toString() + " >>";
     }
+
 }
