@@ -31,8 +31,9 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.binary.PropEqualXY_C;
+import solver.constraints.propagators.binary.PropEqualXY;
 import solver.variables.IntVar;
+import solver.variables.view.Views;
 
 /**
  * X + Y = C
@@ -52,7 +53,7 @@ public class EqualXY_C extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.cste = c;
-        setPropagators(new PropEqualXY_C(vars, c, solver, this));
+        setPropagators(new PropEqualXY(x, Views.offset(Views.minus(y), c), solver, this));
     }
 
     @Override
