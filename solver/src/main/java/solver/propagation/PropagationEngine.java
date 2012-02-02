@@ -32,18 +32,10 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-<<<<<<< HEAD
-import solver.propagation.generator.Primitive;
-=======
->>>>>>> issue#39 : extract water marker
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Sort;
 import solver.propagation.wm.IWaterMarking;
-<<<<<<< HEAD
 import solver.propagation.wm.WaterMarkers;
-=======
-import solver.propagation.wm.WaterMarkingImpl;
->>>>>>> issue#39 : extract water marker
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -97,11 +89,7 @@ public class PropagationEngine implements IPropagationEngine {
             // 3. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);
             if (!watermarks.isEmpty()) {
-<<<<<<< HEAD
-                throw new RuntimeException("default strategy has encountered a problem :: "+watermarks);
-=======
                 throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
->>>>>>> issue#39 : extract water marker
             }
             // 4. remove default if empty
             ///cpru a faire
@@ -118,11 +106,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     private void waterMark(Constraint[] constraints) {
-<<<<<<< HEAD
         watermarks = WaterMarkers.make(pivot);
-=======
-        watermarks = new WaterMarkingImpl(pivot);
->>>>>>> issue#39 : extract water marker
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].propagators;
             for (int p = 0; p < propagators.length; p++) {
@@ -156,11 +140,7 @@ public class PropagationEngine implements IPropagationEngine {
             return watermarks.isMarked(id1);
         } else {
             return watermarks.isMarked(id1, id2, id3);
-<<<<<<< HEAD
     }
-=======
-        }
->>>>>>> issue#39 : extract water marker
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
