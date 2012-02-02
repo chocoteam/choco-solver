@@ -101,15 +101,10 @@ public enum PropagationStrategies {
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     },
-    DEFAULT(){
+    DEFAULT() {
         @Override
         public PropagationStrategy make(Solver solver) {
-//            return ONE_QUEUE_WITH_ARCS.make(solver);
-//            return ONE_QUEUE_WITH_VARS.make(solver);
-//            return ONE_QUEUE_WITH_PROPS.make(solver);
             return TWO_QUEUES_WITH_ARCS.make(solver);
-//            return TWO_QUEUES_WITH_VARS.make(solver);
-//            return TWO_QUEUES_WITH_PROPS.make(solver);
         }
     };
 
