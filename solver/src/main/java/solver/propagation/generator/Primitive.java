@@ -319,49 +319,61 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 
     //<---- ARC-ORIENTED
 
-    public static <E extends IEventRecorder> Primitive arcs(Constraint... constraints) {
+    public static Primitive<ArcEventRecorder> arcs(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<E>(arc, var0, propagators, All.singleton, null);
+        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, null);
     }
 
-    public static <E extends IEventRecorder> Primitive arcs(ICondition<E> condition, Constraint... constraints) {
+    public static Primitive<ArcEventRecorder> arcs(Propagator... propagators) {
+        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, null);
+    }
+
+    public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition, Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<E>(arc, var0, propagators, All.singleton, condition);
+        return new Primitive<ArcEventRecorderWithCondition>(arc, var0, propagators, All.singleton, condition);
     }
 
     //---->
     //<---- VARIABLE-ORIENTED
 
-    public static <E extends IEventRecorder> Primitive vars(Variable... variables) {
-        return new Primitive<E>(var, variables, prop0, All.singleton, null);
+    public static Primitive<VarEventRecorder> vars(Variable... variables) {
+        return new Primitive<VarEventRecorder>(var, variables, prop0, All.singleton, null);
     }
 
     //---->
     //<---- PROPAGATOR-ORIENTED
 
-    public static <E extends IEventRecorder> Primitive props(Constraint... constraints) {
+    public static Primitive<PropEventRecorder> props(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<E>(prop, var0, propagators, All.singleton, null);
+        return new Primitive<PropEventRecorder>(prop, var0, propagators, All.singleton, null);
+    }
+
+    public static Primitive<PropEventRecorder> props(Propagator... propagators) {
+        return new Primitive<PropEventRecorder>(prop, var0, propagators, All.singleton, null);
     }
 
     //---->
     //<---- COARSE UNARY
 
-    public static <E extends IEventRecorder> Primitive unary(Constraint... constraints) {
+    public static Primitive<CoarseEventRecorder> unary(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<E>(unary, var0, propagators, All.singleton, null);
+        return new Primitive<CoarseEventRecorder>(unary, var0, propagators, All.singleton, null);
+    }
+
+    public static Primitive<CoarseEventRecorder> unary(Propagator... propagators) {
+        return new Primitive<CoarseEventRecorder>(unary, var0, propagators, All.singleton, null);
     }
 
     //---->
