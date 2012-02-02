@@ -29,6 +29,7 @@ package solver.recorders.fine;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -108,30 +109,25 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public boolean execute() throws ContradictionException {
-//        LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        boolean oneLeft;//TODO: to remove
-        do {
-            oneLeft = false;
-            for (int i = 0; i < propagators.length; i++) {
-                Propagator propagator = propagators[i];
-                int pid = propagator.getId();
-                int evtmask_ = evtmasks.get(pid);
-                if (evtmask_ > 0) {
-                    oneLeft = true;
+        if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        for (int i = 0; i < propagators.length; i++) {
+            Propagator propagator = propagators[i];
+            int pid = propagator.getId();
+            int evtmask_ = evtmasks.get(pid);
+            if (evtmask_ > 0) {
 //            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-                    // for concurrent modification..
-                    deltamon.get(pid).freeze();
-                    evtmasks.put(pid, 0); // and clean up mask
+                // for concurrent modification..
+                deltamon.get(pid).freeze();
+                evtmasks.put(pid, 0); // and clean up mask
 
-                    assert (propagator.isActive()) : this + " is not active";
-                    if (propagator.isActive()) {
-                        propagator.fineERcalls++;
-                        propagator.propagate(this, idxVinPs.get(pid), evtmask_);
-                    }
-                    deltamon.get(pid).unfreeze();
+                assert (propagator.isActive()) : this + " is not active";
+                if (propagator.isActive()) {
+                    propagator.fineERcalls++;
+                    propagator.propagate(this, idxVinPs.get(pid), evtmask_);
                 }
+                deltamon.get(pid).unfreeze();
             }
-        } while (oneLeft);
+        }
         return true;
     }
 
@@ -149,7 +145,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
             Propagator propagator = propagators[i];
             if (cause != propagator // due to idempotency of propagator, it should not schedule itself
                     && propagator.isActive()) { // CPRU: could be maintained incrementally
-//                LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
+                if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
                 int pid = propagator.getId();
                 if ((evt.mask & propagator.getPropagationConditions(idxVinPs.get(pid))) != 0) {
                     // 1. if instantiation, then decrement arity of the propagator

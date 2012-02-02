@@ -29,6 +29,7 @@ package solver.recorders.fine;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -93,28 +94,23 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     @Override
     public boolean execute() throws ContradictionException {
-//        LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        boolean oneLeft;//TODO: to remove
-        do {
-            oneLeft = false;
-            for (int i = 0; i < variables.length; i++) {
-                Variable variable = variables[i];
-                int vid = variable.getId();
-                int evtmask_ = evtmasks.get(vid);
-                if (evtmask_ > 0) {
-                    oneLeft = true;
-//            LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-                    // for concurrent modification..
-                    deltamon.get(vid).freeze();
-                    evtmasks.put(vid, 0); // and clean up mask
+        if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        for (int i = 0; i < variables.length; i++) {
+            Variable variable = variables[i];
+            int vid = variable.getId();
+            int evtmask_ = evtmasks.get(vid);
+            if (evtmask_ > 0) {
+//                LoggerFactory.getLogger("solver").info(">> {}", this.toString());
+                // for concurrent modification..
+                deltamon.get(vid).freeze();
+                evtmasks.put(vid, 0); // and clean up mask
 
-                    assert (propagator.isActive()) : this + " is not active ("+propagator.isStateLess()+" & "+ propagator.isPassive()+")";
-                    propagator.fineERcalls++;
-                    propagator.propagate(this, idxVinP.get(vid), evtmask_);
-                    deltamon.get(vid).unfreeze();
-                }
+                assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
+                propagator.fineERcalls++;
+                propagator.propagate(this, idxVinP.get(vid), evtmask_);
+                deltamon.get(vid).unfreeze();
             }
-        } while (oneLeft);
+        }
         return true;
     }
 
@@ -130,7 +126,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
         if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
             int vid = var.getId();
             if ((evt.mask & propagator.getPropagationConditions(idxVinP.get(vid))) != 0) {
-//                LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), var);
+                if(DEBUG_PROPAG)LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), var);
                 // 1. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagator.decArity();
