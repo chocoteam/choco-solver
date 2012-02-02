@@ -28,6 +28,7 @@
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
@@ -42,25 +43,23 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 
 /**
- * X >= Y + C
+ * X >= Y
  * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
+public final class PropGreaterOrEqualXY extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
-    int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropGreaterOrEqualX_YC(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
-        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, true);
-        this.x = vars[0];
-        this.y = vars[1];
-        this.cste = c;
+    public PropGreaterOrEqualXY(IntVar x, IntVar y, Solver solver, IntConstraint constraint) {
+        super(ArrayUtils.toArray(x,y), solver, constraint, PropagatorPriority.BINARY, true);
+        this.x = x;
+        this.y = y;
     }
 
     @Override
@@ -73,18 +72,18 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     }
 
     private void updateInfX() throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, this);
+        x.updateLowerBound(y.getLB(), this);
     }
 
     private void updateSupY() throws ContradictionException {
-        y.updateUpperBound(x.getUB() - this.cste, this);
+        y.updateUpperBound(x.getUB(), this);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         updateInfX();
         updateSupY();
-        if (x.getLB() >= y.getUB() + this.cste) {
+        if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
     }
@@ -102,7 +101,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
                 updateSupY();
             }
         }
-        if (x.getLB() >= y.getUB() + this.cste) {
+        if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
     }
@@ -118,9 +117,9 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (x.getUB() < y.getLB() + cste)
+        if (x.getUB() < y.getLB())
             return ESat.FALSE;
-        else if (x.getLB() >= y.getUB() + this.cste)
+        else if (x.getLB() >= y.getUB())
             return ESat.TRUE;
         else
             return ESat.UNDEFINED;
@@ -130,8 +129,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".GEQ.").append(vars[1].getName());
-        bf.append("+").append(cste).append(")");
+        bf.append("prop(").append(vars[0].getName()).append(".GEQ.").append(vars[1].getName()).append(")");
         return bf.toString();
     }
 

@@ -31,9 +31,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.binary.PropEqualXY;
+import solver.constraints.propagators.binary.PropGreaterOrEqualXY;
 import solver.constraints.propagators.binary.PropNotEqualXY;
-import solver.constraints.propagators.unary.PropGreaterOrEqualXC;
-import solver.constraints.propagators.unary.PropLessOrEqualXC;
 import solver.variables.IntVar;
 import solver.variables.view.Views;
 
@@ -63,16 +62,16 @@ public class Relation extends IntConstraint<IntVar> {
                 setPropagators(new PropNotEqualXY(var, Views.fixed(cste, solver), solver, this));
                 break;
             case GQ:
-                setPropagators(new PropGreaterOrEqualXC(var, c, solver, this));
+                setPropagators(new PropGreaterOrEqualXY(var, Views.fixed(cste, solver), solver, this));
                 break;
             case LQ:
-                setPropagators(new PropLessOrEqualXC(var, c, solver, this));
+                setPropagators(new PropGreaterOrEqualXY(Views.fixed(cste, solver), var, solver, this));
                 break;
             case GT:
-                setPropagators(new PropGreaterOrEqualXC(var, c+1, solver, this));
+                setPropagators(new PropGreaterOrEqualXY(var, Views.fixed(cste+1, solver), solver, this));
                 break;
             case LT:
-                setPropagators(new PropLessOrEqualXC(var, c-1, solver, this));
+                setPropagators(new PropGreaterOrEqualXY(Views.fixed(cste-1, solver),var, solver, this));
                 break;
         }
     }
