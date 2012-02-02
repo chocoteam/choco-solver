@@ -37,6 +37,7 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
 import solver.propagation.generator.Primitive;
@@ -135,9 +136,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
-		if(config.get(ALLDIFF_AC)){
-			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
-		}
+//		if(config.get(ALLDIFF_AC)){
+			gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+//		}
 		if(config.get(ARBO)){
 			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
 		}
@@ -302,6 +303,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		tspRun = new HamiltonianCircuitProblem(matrix,0);
 		tspRun.configParameters(0);
 		tspRun.execute();
+//		System.exit(0);
 		IMeasures mes = tspRun.solver.getMeasures();
 		String res = name+";"+mes.getSolutionCount()+";"+mes.getNodeCount()+";"+mes.getFailCount()+";" + mes.getTimeCount() + ";";
 //			for(int k=0;k<NB_PARAM;k++){

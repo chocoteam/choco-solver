@@ -72,7 +72,7 @@ public class BipartiteMaxCardMatching {
 		int[] dist = new int[n];
 		int[] reached = new int[n];
 		int phaseNumber = 1;
-		while(augmentingPathExists(g,freeInA, n, free, useful, dist, reached, phaseNumber,iterable)){ // at most O(rac(n)) iterations
+		while(phaseNumber<n && augmentingPathExists(g, freeInA, n, free, useful, dist, reached, phaseNumber, iterable)){ // at most O(rac(n)) iterations
 			findMaxSetAndAugment(g,freeInA, n, free, useful, dist, reached, phaseNumber,iterable);    // run in O(m)
 			phaseNumber++;
 			if(freeInA.cardinality()==0){

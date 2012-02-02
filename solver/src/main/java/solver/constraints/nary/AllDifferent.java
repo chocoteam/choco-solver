@@ -42,6 +42,7 @@ import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.nary.PropAllDiffAC;
 import solver.constraints.propagators.nary.PropAllDiffBC;
+import solver.constraints.propagators.nary.PropAllDiff_AC_JG;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
@@ -96,7 +97,10 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				buildGraphAllDifferent(this.vars, solver);
 				break;
 			case AC:
-				setPropagators(new PropAllDiffAC(this.vars, this, solver));
+//				setPropagators(new PropAllDiffAC(this.vars, this, solver));
+				// TODO check 
+				setPropagators(new PropAllDiff_AC_JG(this.vars, this, solver));
+
 				break;
 			case BC:
 			default:

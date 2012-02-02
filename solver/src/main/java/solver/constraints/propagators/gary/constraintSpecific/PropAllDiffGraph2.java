@@ -149,11 +149,18 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 		}
 		BipartiteMaxCardMatching.maxCardBipartiteMatching_HK(digraph, A, iterable, free, n);
 		int p;
+		int nbPasMatch = 0;
 		for (i=0;i<n;i++) {
 			p = digraph.getPredecessorsOf(i).getFirstElement();
 			matching[i] = p;
 			if(p!=-1){
 				matching[p] = i;
+			}else{
+//				contradiction(g,"");
+				nbPasMatch++;
+				if(nbPasMatch>1){
+					contradiction(g,"");
+				}
 			}
 		}
 	}
