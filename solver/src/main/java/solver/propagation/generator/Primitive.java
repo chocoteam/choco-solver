@@ -325,18 +325,18 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         return new Primitive<FineArcEventRecorder>(arc, var0, propagators, All.singleton, null);
     }
 
-    public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition,
+    public static Primitive<ArcEventRecorder> arcs(ICondition<ArcEventRecorder> condition,
                                                                 Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<ArcEventRecorderWithCondition>(arc, var0, propagators, All.singleton, condition);
+        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, condition);
     }
 
-    public static Primitive<ArcEventRecorderWithCondition> arcs(ICondition<ArcEventRecorderWithCondition> condition,
+    public static Primitive<ArcEventRecorder> arcs(ICondition<ArcEventRecorder> condition,
                                                                 Propagator... propagators) {
-        return new Primitive<ArcEventRecorderWithCondition>(arc, var0, propagators, All.singleton, condition);
+        return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, condition);
     }
 
     //---->
