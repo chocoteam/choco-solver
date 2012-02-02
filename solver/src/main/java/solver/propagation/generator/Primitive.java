@@ -143,7 +143,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!FineArcEventRecorder.LAZY) {
+        if (!IEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );
@@ -179,7 +179,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!FineArcEventRecorder.LAZY) {
+        if (!IEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );
@@ -218,7 +218,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 LoggerFactory.getLogger(Primitive.class).info("empty primitive creation");
             }
         }
-        if (!FineArcEventRecorder.LAZY) {
+        if (!IEventRecorder.LAZY) {
             solver.getSearchLoop().plugSearchMonitor(
                     new VariableClearing(solver, all.toArray(new IEventRecorder[all.size()]))
             );

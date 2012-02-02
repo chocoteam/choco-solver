@@ -27,7 +27,7 @@
 
 package solver.variables.delta;
 
-import solver.recorders.fine.FineArcEventRecorder;
+import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 
@@ -73,7 +73,7 @@ public final class Delta implements IntDelta {
      * @param value value to add
      */
     public void add(int value) {
-		if(FineArcEventRecorder.LAZY){
+		if(IEventRecorder.LAZY){
        		lazyClear();
 		}
         rem = ensureCapacity(last, rem);
