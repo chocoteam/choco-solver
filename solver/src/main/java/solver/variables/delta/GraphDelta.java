@@ -27,7 +27,7 @@
 
 package solver.variables.delta;
 
-import solver.recorders.fine.FineArcEventRecorder;
+import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 
@@ -85,7 +85,7 @@ public class GraphDelta implements IGraphDelta {
 
 	@Override
 	public void add(int element, int type) {
-		if(FineArcEventRecorder.LAZY){
+		if(IEventRecorder.LAZY){
 			lazyClear();
 		}
 		deltaOfType[type].add(element);
