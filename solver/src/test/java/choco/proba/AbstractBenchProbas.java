@@ -14,6 +14,7 @@ import solver.propagation.generator.Sort;
 import solver.recorders.conditions.CondAllDiffBCFreq;
 import solver.recorders.conditions.CondAllDiffBCProba;
 import solver.recorders.conditions.ICondition;
+import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -166,7 +167,7 @@ public abstract class AbstractBenchProbas {
 
         Primitive[] primitives = null;
         if (this.frequency >= 0) {
-            ICondition condition = null;
+            ICondition<ArcEventRecorderWithCondition> condition = null;
             primitives = new Primitive[hall.size() * 2];
             if (this.frequency == 0) {
                 for (int i = 0; i < hall.size(); i++) {

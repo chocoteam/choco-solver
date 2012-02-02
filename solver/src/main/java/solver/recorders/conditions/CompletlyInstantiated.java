@@ -29,6 +29,7 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.Propagator;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
@@ -62,7 +63,7 @@ public class CompletlyInstantiated extends AbstractCondition{
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, EventType event) {
+    void update(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             nbVarInstantiated.add(1);
         }

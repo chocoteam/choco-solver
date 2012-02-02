@@ -75,7 +75,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
                     propagator.decArity();
                 }
                 // 2. schedule this if condition is valid
-                if (condition.validateScheduling(this, evt)) {
+                if (condition.validateScheduling(this, propagator, evt)) {
                     propagator.forcePropagate(EventType.FULL_PROPAGATION);
                 }
             }

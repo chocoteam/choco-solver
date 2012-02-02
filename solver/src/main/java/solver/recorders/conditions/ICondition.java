@@ -26,6 +26,7 @@
  */
 package solver.recorders.conditions;
 
+import solver.constraints.propagators.Propagator;
 import solver.recorders.IEventRecorder;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
@@ -49,9 +50,10 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
      * If the condition is newly validate, schedule all related recorders, if any.
      *
      * @param recorder recently modified recorder
+     * @param propagator the concerned propagator
      * @param event   event requiring a validation
      */
-    boolean validateScheduling(R recorder, EventType event);
+    boolean validateScheduling(R recorder, Propagator propagator, EventType event);
 
     /**
      * Return the next condition to check, if <code>this</code> is not valid </br>
@@ -72,7 +74,7 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
         NO_CONDITION;
 
         @Override
-        public boolean validateScheduling(ArcEventRecorderWithCondition recorder, EventType event) {
+        public boolean validateScheduling(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
             return false;
         }
 
