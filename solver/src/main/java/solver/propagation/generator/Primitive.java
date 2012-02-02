@@ -59,9 +59,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     protected static final int var = 1 << 2;
     protected static final int prop = 1 << 3;
     protected static final int fine = arc + var + prop;
-    protected static final int unary = 1 << 4;
-    protected static final int nary = 1 << 5;
-    protected static final int coarse = unary + nary;
+    protected static final int coarse = 1 << 4;
 
     protected static final Variable[] var0 = new Variable[0];
     protected static final Propagator[] prop0 = new Propagator[0];
@@ -101,12 +99,8 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
                 elements.addAll(_props(propagationEngine, solver));
             }
         }
-        if ((mymask & coarse) != 0) {
-            if ((mymask & unary) != 0) { // build unary coarse event recorders
-                elements.addAll(_unaries(propagationEngine, solver));
-            } else if ((mymask & nary) != 0) { // build nary coarse event recorders
-                throw new SolverException("propagators coarse event recorder not yet implemented!");
-            }
+        if ((mymask & coarse) != 0) {// build unary coarse event recorders
+            elements.addAll(_unaries(propagationEngine, solver));
         }
         return elements;
     }
@@ -364,16 +358,16 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     //---->
     //<---- COARSE UNARY
 
-    public static Primitive<CoarseEventRecorder> unary(Constraint... constraints) {
+    public static Primitive<CoarseEventRecorder> coarses(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<CoarseEventRecorder>(unary, var0, propagators, All.singleton, null);
+        return new Primitive<CoarseEventRecorder>(coarse, var0, propagators, All.singleton, null);
     }
 
-    public static Primitive<CoarseEventRecorder> unary(Propagator... propagators) {
-        return new Primitive<CoarseEventRecorder>(unary, var0, propagators, All.singleton, null);
+    public static Primitive<CoarseEventRecorder> coarses(Propagator... propagators) {
+        return new Primitive<CoarseEventRecorder>(coarse, var0, propagators, All.singleton, null);
     }
 
     //---->
