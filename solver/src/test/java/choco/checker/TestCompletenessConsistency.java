@@ -305,6 +305,34 @@ public class TestCompletenessConsistency {
     }
 
     @Test
+    public void testAMONGBC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongBC, 2, 2, 50, new int[]{0,1}, seed + i, "bc");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGAC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongAC, 2, 2, 50, new int[]{0,1}, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGBC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongBC, 5, -10, 10, new int[]{0,1}, seed + i, "bc");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGAC2() {
+        long seed = 0;
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0,1}, seed + i, "ac");
+    }
+
+    /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Galak/SOLVER_ERROR.ser");
         s.getEnvironment().worldPopUntil(0);
@@ -317,6 +345,6 @@ public class TestCompletenessConsistency {
             }
         }
         s.propagate();
-    }
+    }*/
 }
 
