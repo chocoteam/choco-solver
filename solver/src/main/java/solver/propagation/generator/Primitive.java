@@ -265,7 +265,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         if (condition != null) {
             throw new SolverException("var cannot handle condition");
         } else {
-            return new PropEventRecorder<V>(vars, prop, pindices, solver);
+            return new FinePropEventRecorder<V>(vars, prop, pindices, solver);
         }
         //}
     }
@@ -275,7 +275,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         if (condition != null) {
             throw new SolverException("f2c_prop cannot handle condition");
         } else {
-            return new Fine2CoarsePropEventRecorder<V>(vars, propagator, solver);
+            return new PropEventRecorder<V>(vars, propagator, solver);
         }
         //}
     }
@@ -349,16 +349,16 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     //---->
     //<---- PROPAGATOR-ORIENTED
 
-    public static Primitive<PropEventRecorder> props(Constraint... constraints) {
+    public static Primitive<FinePropEventRecorder> props(Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
         }
-        return new Primitive<PropEventRecorder>(prop, var0, propagators, All.singleton, null);
+        return new Primitive<FinePropEventRecorder>(prop, var0, propagators, All.singleton, null);
     }
 
-    public static Primitive<PropEventRecorder> props(Propagator... propagators) {
-        return new Primitive<PropEventRecorder>(prop, var0, propagators, All.singleton, null);
+    public static Primitive<FinePropEventRecorder> props(Propagator... propagators) {
+        return new Primitive<FinePropEventRecorder>(prop, var0, propagators, All.singleton, null);
     }
 
     //---->
