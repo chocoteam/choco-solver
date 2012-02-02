@@ -29,7 +29,6 @@ package solver.recorders.fine;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -41,27 +40,25 @@ import solver.variables.Variable;
  * is required.
  * It also stores, if required, pointers to value removals.
  * <br/>
+ * on a pris le parti de ne pas mémoriser les événements fins,
+ * partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
+ * que de lancer directement la propag' lourde
  *
  * @author Charles Prud'homme
  * @since 01/12/11
  */
 public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
 
+    protected int idxVinP; // index of the variable within the propagator -- immutable
+
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
                                          ICondition condition, Solver solver) {
-        super(variable, propagator, idxInProp, solver);
+        super(variable, propagator, solver);
+        this.idxVinP = idxInProp;
         this.condition = condition;
         condition.linkRecorder(this);
-    }
-
-    @Override
-    public boolean execute() throws ContradictionException {
-        // on a pris le parti de ne pas mémoriser les événements fins,
-        // partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
-        // que de lancer directement la propag' lourde
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -80,10 +77,6 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
                 }
             }
         }
-    }
-
-    @Override
-    public void flush() {
     }
 
     @Override
