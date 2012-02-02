@@ -29,7 +29,14 @@ package choco.checker;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.search.loop.SearchLoops;
+import solver.variables.EventType;
+
+import java.io.IOException;
 
 import static choco.checker.ConsistencyChecker.checkConsistency;
 
@@ -289,7 +296,15 @@ public class TestCompletenessConsistency {
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, false, seed + i, "ac");
     }
 
-    /*@Test
+    @Test(groups = "1m")
+    public void testELEMENTBC1() {
+        long seed = 0;//System.currentTimeMillis();
+        for (int i = 0; i < 999; i++)  {
+            checkConsistency(Modeler.modelNthBC, 2, -10, 10, null, seed + i, "bc");
+        }
+    }
+
+    @Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
         Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Galak/SOLVER_ERROR.ser");
         s.getEnvironment().worldPopUntil(0);
@@ -302,6 +317,6 @@ public class TestCompletenessConsistency {
             }
         }
         s.propagate();
-    }*/
+    }
 }
 
