@@ -43,11 +43,16 @@ import java.util.*;
  */
 public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    Comparator<ISchedulable> comparator;
+    Comparator<S> comparator = new Comparator<S>() {
+        @Override
+        public int compare(S o1, S o2) {
+            return 0;
+        }
+    };
 
-    protected ISchedulable lastPopped;
+    protected S lastPopped;
 
-    protected ISchedulable[] elements;
+    protected S[] elements;
     protected BitSet toPropagate;
     protected boolean init = false;
 
@@ -55,17 +60,17 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         super(generators);
     }
 
-    private Sort(List<Generator> generator, Comparator comparator) {
+    private Sort(List<Generator> generator, Comparator<S> comparator) {
         super(generator);
         this.comparator = comparator;
     }
 
     //<-- DSL
-    public static Sort build(Comparator comparator, Generator... generators) {
+    public static <S extends ISchedulable> Sort<S> build(Comparator<S> comparator, Generator... generators) {
         if (generators.length == 0) {
             throw new RuntimeException("Sort::Empty generators array");
         }
-        return new Sort(Arrays.asList(generators), comparator);
+        return new Sort<S>(Arrays.asList(generators), comparator);
     }
 
     public static Sort build(Generator... generators) {
@@ -77,14 +82,13 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public List<Sort<S>> populate(PropagationEngine propagationEngine, Solver solver) {
-        //CPRU
-        // Collections.sort(elements, comparator);
         List<S> elts = new ArrayList<S>();
         for (int i = 0; i < generators.size(); i++) {
             Generator gen = generators.get(i);
             elts.addAll(gen.populate(propagationEngine, solver));
         }
-        this.elements = elts.toArray(new ISchedulable[elts.size()]);
+        this.elements = (S[])elts.toArray(new ISchedulable[elts.size()]);
+        Arrays.sort(elements, comparator);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
