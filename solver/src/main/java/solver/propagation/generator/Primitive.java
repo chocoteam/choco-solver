@@ -245,7 +245,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         if (condition != null) {
             throw new SolverException("var cannot handle condition");
         } else {
-            return new VarEventRecorder<V>(var, prop, pindices, solver);
+            return new FineVarEventRecorder<V>(var, prop, pindices, solver);
         }
         //}
     }
@@ -255,7 +255,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         if (condition != null) {
             throw new SolverException("f2c_var cannot handle condition");
         } else {
-            return new Fine2CoarseVarEventRecorder<V>(var, props, solver);
+            return new VarEventRecorder<V>(var, props, solver);
         }
         //}
     }
@@ -342,8 +342,8 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     //---->
     //<---- VARIABLE-ORIENTED
 
-    public static Primitive<VarEventRecorder> vars(Variable... variables) {
-        return new Primitive<VarEventRecorder>(var, variables, prop0, All.singleton, null);
+    public static Primitive<FineVarEventRecorder> vars(Variable... variables) {
+        return new Primitive<FineVarEventRecorder>(var, variables, prop0, All.singleton, null);
     }
 
     //---->
