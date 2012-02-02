@@ -29,6 +29,7 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
+import solver.constraints.propagators.Propagator;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
@@ -64,20 +65,21 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
      * todo: preciser les raisons
      *
      * @param recorder recently modified recorder
+     * @param propagator
      * @param event
      */
-    public final boolean validateScheduling(ArcEventRecorderWithCondition recorder, EventType event) {
+    public final boolean validateScheduling(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
         if (wasValid.get()) {
             return true;
         } else {
-            update(recorder, event);
+            update(recorder, propagator, event);
             if (isValid()) {
                 wasValid.set(alwaysValid());
-                next.validateScheduling(recorder, event);
+                next.validateScheduling(recorder, propagator, event);
                 return true;
             }
             //return false;
-            return next.validateScheduling(recorder, event);
+            return next.validateScheduling(recorder, propagator, event);
         }
     }
 
@@ -106,9 +108,10 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
      * Updates the current condition on the modification of one its related records.
      *
      * @param recorder recently modified recorder
+     * @param propagator
      * @param event
      */
-    abstract void update(ArcEventRecorderWithCondition recorder, EventType event);
+    abstract void update(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event);
 
     /**
      * Link the <code>recorder</code> to the condition

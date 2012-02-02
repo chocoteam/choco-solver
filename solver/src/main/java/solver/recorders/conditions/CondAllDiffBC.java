@@ -1,6 +1,7 @@
 package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
+import solver.constraints.propagators.Propagator;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -32,5 +33,5 @@ public class CondAllDiffBC extends AbstractCondition {
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, EventType event) {}
+    void update(ArcEventRecorderWithCondition recorder, Propagator propagator, EventType event) {}
 }
