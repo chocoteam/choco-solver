@@ -76,11 +76,12 @@ public class PropAmongGAC extends Propagator<IntVar> {
     public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
-        this.values = values;
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
         UB = environment.makeInt(0);
         this.setValues = new TIntHashSet(values);
+        this.values = setValues.toArray();
+        Arrays.sort(this.values);
         this.occs = new IStateInt[nb_vars];
         for (int i = 0; i < nb_vars; i++) {
             occs[i] = environment.makeInt(0);
@@ -93,7 +94,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
         if (idx == nb_vars) {
             return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
         }
-        return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
+        return EventType.INSTANTIATE.mask + +EventType.BOUND.mask + EventType.REMOVE.mask;
     }
 
     @Override
@@ -104,8 +105,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
             for (int i = 0; i < nb_vars; i++) {
                 IntVar var = vars[i];
                 int nb = 0;
-                for (int value : values) {
-                    nb += (var.contains(value) ? 1 : 0);
+                for (int j = 0; j < values.length; j++) {
+                    nb += (var.contains(values[j]) ? 1 : 0);
                 }
                 occs[i].set(nb);
                 if (nb == var.getDomainSize()) {
@@ -135,13 +136,10 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
         if (lb == min && lb == max) {
             removeOnlyValues();
-            setPassive();
-            return;
         }
 
         if (ub == min && ub == max) {
             removeButValues();
-            setPassive();
         }
     }
 
@@ -166,7 +164,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     }
                 }
             } else {
-                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
             }
             if (needFilter) {
                 filter();
@@ -183,19 +181,37 @@ public class PropAmongGAC extends Propagator<IntVar> {
         int left, right;
         for (int i = both.nextSetBit(0); i >= 0; i = both.nextSetBit(i + 1)) {
             IntVar v = vars[i];
-            left = right = Integer.MIN_VALUE;
-            for (int value : values) {
-                if (v.contains(value)) {
-                    occs[i].add(-1);
+            if (v.hasEnumeratedDomain()) {
+                for (int value : values) {
+                    if (v.removeValue(value, this)) {
+                        occs[i].add(-1);
+                    }
                 }
-                if (value == right + 1) {
-                    right = value;
-                } else {
-                    v.removeInterval(left, right, this);
-                    left = right = value;
+            } else {
+                int lb = v.getLB();
+                int ub = v.getUB();
+                int k1 = 0;
+                int k2 = values.length-1;
+                // values is sorted
+                // so first, find the first value inside dom(v)
+                while(k1 < k2 && values[k1]<lb){
+                    k1++;
+                }
+                // and bottom-up shaving
+                while(k1 <= k2 && v.removeValue(values[k1], this)){
+                    occs[i].add(-1);
+                    k1++;
+                }
+                // then find the last value inside dom(v)
+                while(k2 > k1 && values[k2]>ub){
+                    k2--;
+                }
+                // and top bottom shaving
+                while(k2 >= k1 && v.removeValue(values[k2], this)){
+                    occs[i].add(-1);
+                    k2--;
                 }
             }
-            v.removeInterval(left, right, this);
         }
     }
 

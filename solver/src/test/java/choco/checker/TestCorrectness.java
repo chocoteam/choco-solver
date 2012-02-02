@@ -180,4 +180,20 @@ public class TestCorrectness {
             CorrectnessChecker.checkCorrectness(Modeler.modelLexAC, n, -n, 2*n, seed, false);
         }
     }
+
+    @Test(groups = "1m")
+    public void testAMONGAC() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
+        }
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGBC() {
+        long seed = System.currentTimeMillis();
+        for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{2, 1});
+        }
+    }
 }

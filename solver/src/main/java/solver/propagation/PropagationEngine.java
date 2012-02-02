@@ -33,17 +33,13 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.propagation.comparators.IncrPriorityP;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
 import solver.variables.EventType;
 import solver.variables.Variable;
-
-import java.util.Comparator;
 
 /**
  * An abstract class of IPropagatioEngine.
@@ -93,7 +89,11 @@ public class PropagationEngine implements IPropagationEngine {
             // 1. water mark every couple variable-propagator of the solver
             waterMark(constraints);
             // 2. add default strategy, default group => arc and unary in a queue
-            propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
+            if(propagationStrategy == null){
+                propagationStrategy = buildDefault(solver);
+            }else{
+                propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
+            }
             // 3. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);
             if (watermarks.size() > 0) {
