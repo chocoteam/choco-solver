@@ -164,7 +164,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     }
                 }
             } else {
-                eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
             }
             if (needFilter) {
                 filter();

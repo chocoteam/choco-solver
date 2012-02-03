@@ -4,9 +4,10 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.constraints.probabilistic.propagators.nary.Union;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -26,7 +27,7 @@ import static solver.recorders.conditions.CondAllDiffBCProba.Distribution.DIRAC;
  * User: chameau
  * Date: 22/11/11
  */
-public class CondAllDiffBCProba extends CondAllDiffBC {
+public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder> {
 
     public static String tabf = "/functions/f.txt";
     public static String tabg = "/functions/g.txt";
@@ -123,14 +124,14 @@ public class CondAllDiffBCProba extends CondAllDiffBC {
 
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, EventType event) {
+    void update(AbstractFineEventRecorder recorder, Propagator propagator, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             this.nbFreeVars.add(-1);
         }
         // WARNING: Initially, the paper proposes to only react to variable assignment... But in practice, a value in
         // the union can be removed only by a propagation which is not induced by an assignment.
         try {
-            recorder.getDeltaMonitor(recorder.getVariables()[0]).forEach(rem_proc, EventType.REMOVE);
+            recorder.getDeltaMonitor(propagator, recorder.getVariables()[0]).forEach(rem_proc, EventType.REMOVE);
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBCProba#update encounters an exception");
         }

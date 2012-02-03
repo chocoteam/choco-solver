@@ -159,7 +159,7 @@ public class PropWST<V extends Variable> extends GraphPropagator<V>{
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(vars[idxVarInProp].getType() == Variable.GRAPH){
-			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 		}
 		propagate(EventType.FULL_PROPAGATION.mask);
 	}

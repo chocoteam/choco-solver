@@ -26,65 +26,40 @@
  */
 package solver.recorders.fine;
 
-import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.IDeltaMonitor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
- * A specialized fine event recorder associated with one variable and two or more propagators.
- * It observes a variable, records events occurring on the variable,
- * schedules it self when calling the filtering algortithm of the propagators
- * is required.
- * It also stores, if required, pointers to value removals.
- * <br/>
+ * An event recorder associated with one variable and its propagator.
+ * On a variable modification, its propagators are scheduled for FULL_PROPAGATION
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 06/12/11
+ * @since 24/01/12
  */
-public abstract class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
+public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final V variable; // variable to observe
-    protected List<Propagator<V>> propagators; // propagators to inform
-    protected TIntArrayList idxVinPs; // index of the variable within the propagator -- immutable
+    protected final V variable; // one variable
+    protected final Propagator<V>[] propagators; // its propagators
     protected int idxV; // index of this within the variable structure -- mutable
 
-    protected long timestamp = 0; // a timestamp lazy clear the event structures
-    protected int evtmask; // reference to events occuring -- inclusive OR over event mask
-
-
-    public VarEventRecorder(V variable, Solver solver) {
+    public VarEventRecorder(V variable, Propagator<V>[] propagators, Solver solver) {
         super(solver);
         this.variable = variable;
-        this.propagators = new ArrayList<Propagator<V>>();
-        this.idxVinPs = new TIntArrayList();
-    }
+        variable.addMonitor(this);
+        this.propagators = propagators.clone();
 
-    public void addPropagator(Propagator<V> propagator, int idxVinP) {
-        propagators.add(propagator);
-        idxVinPs.add(idxVinP);
-    }
-
-
-    @Override
-    public int getIdxInV(V variable) {
-        return idxV;
-    }
-
-    @Override
-    public void setIdxInV(V variable, int idx) {
-        this.idxV = idx;
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return propagators.toArray(new Propagator[propagators.size()]);
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].addRecorder(this);
+        }
     }
 
     @Override
@@ -93,8 +68,36 @@ public abstract class VarEventRecorder<V extends Variable> extends AbstractFineE
     }
 
     @Override
+    public Propagator[] getPropagators() {
+        return propagators;
+    }
+
+    @Override
+    public boolean execute() throws ContradictionException {
+        throw new SolverException("VarEventRecorder#execute() is empty and should not be called (nor scheduled)!");
+    }
+
+    @Override
     public void beforeUpdate(V var, EventType evt, ICause cause) {
         // nothing required here
+    }
+
+    @Override
+    public void afterUpdate(V var, EventType evt, ICause cause) {
+        // Only notify constraints that filter on the specific event received
+        assert cause != null : "should be Cause.Null instead";
+        for (int i = 0; i < propagators.length; i++) {
+            Propagator propagator = propagators[i];
+            if (cause != propagator // due to idempotency of propagator, it should not schedule itself
+                    && propagator.isActive()) { // CPRU: could be maintained incrementally
+                // 1. if instantiation, then decrement arity of the propagator
+                if (EventType.anInstantiationEvent(evt.mask)) {
+                    propagator.decArity();
+                }
+                // 2. schedule the coarse event recorder associated to thos
+                propagator.forcePropagate(EventType.FULL_PROPAGATION);
+            }
+        }
     }
 
     @Override
@@ -103,39 +106,74 @@ public abstract class VarEventRecorder<V extends Variable> extends AbstractFineE
     }
 
     @Override
+    public int getIdxInV(V variable) {
+        return idxV;
+    }
+
+    @Override
+    public void setIdxInV(V variable, int idx) {
+        idxV = idx;
+    }
+
+    @Override
     public void flush() {
-        this.evtmask = 0;
+        // can be void
     }
 
     @Override
     public void enqueue() {
         enqueued = true;
-        for (int i = 0; i < propagators.size(); i++) {
-            propagators.get(i).incNbRecorderEnqued();
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].incNbRecorderEnqued();
         }
     }
+
 
     @Override
     public void deque() {
         enqueued = false;
-        for (int i = 0; i < propagators.size(); i++) {
-            propagators.get(i).decNbRecrodersEnqued();
+        for (int i = 0; i < propagators.length; i++) {
+            propagators[i].decNbRecrodersEnqued();
         }
     }
 
     @Override
-    public void activate() {
+    public void activate(Propagator<V> element) {
         variable.activate(this);
     }
 
     @Override
-    public void desactivate() {
-        variable.desactivate(this);
-        flush();
+    public void desactivate(Propagator<V> element) {
+        // must be desactivate when no propagator are active
+        int count = propagators.length;
+        for (int i = 0; i < propagators.length; i++) {
+            if (propagators[i].isPassive()) {
+                count--;
+                _desactivateP(i);
+            }
+        }
+        if (count == 0) {
+            variable.desactivate(this);
+            flush();
+        }
+    }
+
+    void _desactivateP(int i) {
+        // void
+    }
+
+    @Override
+    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
+        return IDeltaMonitor.Default.NONE;
+    }
+
+    @Override
+    public void virtuallyExecuted() {
+        // void
     }
 
     @Override
     public String toString() {
-        return variable + " -> <" + propagators + ">";
+        return "<< " + variable + "::" + Arrays.toString(propagators) + ">>";
     }
 }

@@ -88,7 +88,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	@Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
 			}
 		}
 

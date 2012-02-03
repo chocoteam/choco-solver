@@ -91,10 +91,10 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
         Variable var = vars[idxVarInProp];
         if (var.getType() == Variable.GRAPH) {
 			if ((mask & EventType.ENFORCENODE.mask) != 0){
-				eventRecorder.getDeltaMonitor(var).forEach(enforceProc, EventType.ENFORCENODE);
+				eventRecorder.getDeltaMonitor(this, var).forEach(enforceProc, EventType.ENFORCENODE);
 			}
 			if ((mask & EventType.REMOVENODE.mask) != 0){
-                eventRecorder.getDeltaMonitor(var).forEach(removeProc, EventType.REMOVENODE);
+                eventRecorder.getDeltaMonitor(this, var).forEach(removeProc, EventType.REMOVENODE);
 			}
 		}else{
 			if ((mask & EventType.DECUPP.mask) != 0){

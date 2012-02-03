@@ -149,7 +149,7 @@ public class PropTaskDefinition extends GraphPropagator {
 			checkGraph(i);
 		}else{
 			nodeChanged.clear();
-			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved,EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved,EventType.REMOVEARC);
 			for(int i=nodeChanged.nextSetBit(0);i>=0;i=nodeChanged.nextSetBit(i+1)){
 				setDuration(i);
 				updateBounds(i);

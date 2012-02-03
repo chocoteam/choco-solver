@@ -85,7 +85,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
-                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
 //                updateHolesinY();
             }
         } else { // filter from Y to X
@@ -98,7 +98,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
-                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
 //                updateHolesinX();
             }
         }

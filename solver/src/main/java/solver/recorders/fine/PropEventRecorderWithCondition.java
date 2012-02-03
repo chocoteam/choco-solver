@@ -26,6 +26,7 @@
  */
 package solver.recorders.fine;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -33,12 +34,12 @@ import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
+import java.util.Arrays;
+
 /**
- * A specialized fine event recorder associated with one variable and one propagator.
- * It observes a variable, records events occurring on the variable,
- * schedules it self when calling the filtering algortithm of the propagator
+ * A specialized fine event recorder associated with one or more variable and one propagator.
+ * It observes variables, schedules coarse event when calling the filtering algortithm of the propagator
  * is required.
- * It also stores, if required, pointers to value removals.
  * <br/>
  * on a pris le parti de ne pas mémoriser les événements fins,
  * partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
@@ -47,26 +48,32 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
+public class PropEventRecorderWithCondition<V extends Variable> extends PropEventRecorder<V> {
 
-    protected int idxVinP; // index of the variable within the propagator -- immutable
+    protected TIntIntHashMap idxVinP; // index of each variable within P -- immutable
 
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
-    public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
-                                         ICondition condition, Solver solver) {
-        super(variable, propagator, solver);
-        this.idxVinP = idxInProp;
+    public PropEventRecorderWithCondition(V[] variables, Propagator<V> propagator, int[] idxVinPs,
+                                          ICondition condition, Solver solver) {
+        super(variables, propagator, solver);
         this.condition = condition;
         condition.linkRecorder(this);
+
+        this.idxVinP = new TIntIntHashMap(variables.length, (float) 0.5, -1, -1);
+        for (int i = 0; i < variables.length; i++) {
+            V variable = variables[i];
+            int vid = variable.getId();
+            idxVinP.put(vid, idxVinPs[i]);
+        }
     }
 
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
-        assert cause != null : "should be Cause.Null instead";
         if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+            int vid = var.getId();
+            if ((evt.mask & propagator.getPropagationConditions(idxVinP.get(vid))) != 0) {
                 // 1. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagator.decArity();
@@ -81,6 +88,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + propagator.toString() + "::" + condition.toString() + " >>";
+        return "<< {F} " + Arrays.toString(variables) + "::" + propagator.toString() + "::" + condition.toString() + " >>";
     }
+
 }

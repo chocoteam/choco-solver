@@ -36,7 +36,6 @@ package solver.constraints.propagators.gary.tsp.trash;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -48,8 +47,8 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.util.BitSet;
-import java.util.LinkedList;
 
 /**
  * Find some infeasible patterns based on nodes degree
@@ -93,7 +92,7 @@ public class PropDegreePatterns<V extends DirectedGraphVar> extends GraphPropaga
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor)eventRecorder.getDeltaMonitor(g);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor)eventRecorder.getDeltaMonitor(this, g);
 
 //		if(gdm.toArcRemoval() - gdm.fromArcRemoval()>(n-2)/2){
 			checkPattern(-1,-1);

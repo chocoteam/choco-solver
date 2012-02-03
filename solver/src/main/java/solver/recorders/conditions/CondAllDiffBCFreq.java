@@ -1,6 +1,7 @@
 package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
+import solver.recorders.IEventRecorder;
 import solver.variables.IntVar;
 
 /**
@@ -8,7 +9,7 @@ import solver.variables.IntVar;
  * User: chameau
  * Date: 22/11/11
  */
-public class CondAllDiffBCFreq extends CondAllDiffBC {
+public class CondAllDiffBCFreq<R extends IEventRecorder> extends CondAllDiffBC<R> {
 
     final int frequency;
     int count;

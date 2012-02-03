@@ -118,7 +118,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         if (idxVarInProp == zIdx) { // z only deals with bound events
             boundChange.set(true);
         } else { // other variables only deals with removal events
-            eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }

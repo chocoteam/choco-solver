@@ -32,7 +32,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.unary.Relation;
+import solver.constraints.unary.Member;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -82,8 +82,7 @@ public class AllIntervalSeries extends AbstractProblem {
         {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
-                solver.post(new Relation(dist[i], Relation.R.GT, 0, solver));
-                solver.post(new Relation(dist[i], Relation.R.LT, m, solver));
+                solver.post(new Member(dist[i], 1, m-1, solver));
             }
         }
 
@@ -135,7 +134,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        //SearchMonitorFactory.log(solver, true, true);
+//        SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
     }
 

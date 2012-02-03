@@ -111,10 +111,10 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 		Variable var = vars[idxVarInProp];
         if (var.getType() == Variable.GRAPH) {
 			if ((mask & EventType.REMOVEARC.mask)!=0){
-                eventRecorder.getDeltaMonitor(g).forEach(rem, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(rem, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
 			}
 		}else{
 			//TODO

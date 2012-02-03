@@ -128,10 +128,10 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
         Variable var = vars[idxVarInProp];
         if (var.getType() == Variable.GRAPH) {
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-                eventRecorder.getDeltaMonitor(var).forEach(enf, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, var).forEach(enf, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-                eventRecorder.getDeltaMonitor(var).forEach(rem, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, var).forEach(rem, EventType.REMOVEARC);
 			}
 		}
 		else{
