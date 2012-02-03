@@ -85,13 +85,13 @@ public class PropNSuccs<V extends DirectedGraphVar> extends GraphPropagator<V> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if ((mask & EventType.REMOVEARC.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(rem, EventType.REMOVEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(rem, EventType.REMOVEARC);
         }
         if ((mask & EventType.ENFORCEARC.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(enf, EventType.ENFORCEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
         }
         if ((mask & EventType.ENFORCENODE.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(enforceNodeProc, EventType.ENFORCENODE);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enforceNodeProc, EventType.ENFORCENODE);
         }
     }
 

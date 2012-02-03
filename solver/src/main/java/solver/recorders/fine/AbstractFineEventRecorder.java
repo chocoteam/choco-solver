@@ -27,6 +27,7 @@
 package solver.recorders.fine;
 
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.propagation.IScheduler;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
@@ -38,14 +39,15 @@ import solver.variables.delta.IDeltaMonitor;
 /**
  * An abstract class for fine event recorder.
  * A fine event is categorized by one or more event occurring on one or more variables.
- * It includes at least one variable and one propagator (in that very case, it is a ArcEventRecorder).
+ * It includes at least one variable and one propagator
  * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>, IActivable {
+public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>,
+        IActivable<Propagator<V>> {
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
@@ -61,10 +63,11 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     /**
      * Return the delta monitor declared in <code>this</code> the variable given in parameter
      *
-     * @param variable a variable
+     * @param propagator
+     * @param variable   a variable
      * @return its deltamonitor in <code>this</code>
      */
-    public abstract IDeltaMonitor getDeltaMonitor(V variable);
+    public abstract IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable);
 
     @Override
     public boolean enqueued() {

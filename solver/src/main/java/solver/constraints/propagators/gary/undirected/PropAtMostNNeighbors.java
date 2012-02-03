@@ -144,7 +144,7 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(g).forEach(enf_proc, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
 	}
 
 	//***********************************************************************************

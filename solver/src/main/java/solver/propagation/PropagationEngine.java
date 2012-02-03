@@ -32,9 +32,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
@@ -86,12 +84,12 @@ public class PropagationEngine implements IPropagationEngine {
             Constraint[] constraints = solver.getCstrs();
             // 1. water mark every couple variable-propagator of the solver
             waterMark(constraints);
-            // 2. add default strategy, default group => arc and unary in a queue
+            // 2. add default strategy, default group => arc and coarse in a queue
             propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
             // 3. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);
             if (!watermarks.isEmpty()) {
-                throw new RuntimeException("default strategy has encountered a problem :: "+watermarks);
+                throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
             }
             // 4. remove default if empty
             ///cpru a faire
@@ -146,14 +144,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
-        Constraint[] cstrs = solver.getCstrs();
-        Primitive arcs = Primitive.arcs(cstrs);
-        Primitive coarses = Primitive.unary(cstrs);
-//		if(true){
-//			throw new UnsupportedOperationException();
-//		}
-        return Queue.build(arcs, coarses).pickOne();
-//        return Sort.build(IncrPriorityP.get(),arcs, coarses).pickOne();
+        return PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(solver);
     }
 
 

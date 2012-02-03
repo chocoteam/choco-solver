@@ -28,7 +28,11 @@ package solver.propagation;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.propagation.generator.*;
+import solver.propagation.generator.Flatten;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.PropagationStrategy;
+import solver.propagation.generator.Queue;
+import solver.variables.Variable;
 
 /**
  * <br/>
@@ -43,7 +47,7 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Primitive arcs = Primitive.arcs(constraints);
-            Primitive coarses = Primitive.unary(constraints);
+            Primitive coarses = Primitive.coarses(constraints);
             return Queue.build(Flatten.build(arcs, coarses)).clearOut();
         }
     },
@@ -52,9 +56,55 @@ public enum PropagationStrategies {
         public PropagationStrategy make(Solver solver) {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.arcs(constraints));
-            Queue coarses = Queue.build(Primitive.unary(constraints));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
             //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
             return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    ONE_QUEUE_WITH_VARS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Variable[] variables = solver.getVars();
+            Primitive arcs = Primitive.vars(variables);
+            Constraint[] constraints = solver.getCstrs();
+            Primitive coarses = Primitive.coarses(constraints);
+            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
+        }
+    },
+    TWO_QUEUES_WITH_VARS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Variable[] variables = solver.getVars();
+            Constraint[] constraints = solver.getCstrs();
+            Queue arcs = Queue.build(Primitive.vars(variables));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
+            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    ONE_QUEUE_WITH_PROPS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Primitive arcs = Primitive.props(constraints);
+            Primitive coarses = Primitive.coarses(constraints);
+            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
+        }
+    },
+    TWO_QUEUES_WITH_PROPS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            Queue arcs = Queue.build(Primitive.props(constraints));
+            Queue coarses = Queue.build(Primitive.coarses(constraints));
+            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    DEFAULT() {
+        @Override
+        public PropagationStrategy make(Solver solver) {
+            return TWO_QUEUES_WITH_ARCS.make(solver);
         }
     };
 

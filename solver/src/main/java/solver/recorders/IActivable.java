@@ -33,15 +33,15 @@ package solver.recorders;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface IActivable {
+public interface IActivable<E> {
 
     /**
      * Activate <code>this</code>
      */
-    void activate();
+    void activate(E element);
 
     /**
      * Desactivate <code>this</code>
      */
-    void desactivate();
+    void desactivate(E element);
 }

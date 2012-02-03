@@ -100,7 +100,7 @@ public class PropElementV extends Propagator<IntVar> {
             awakeOnSup(vIdx);
         }
         if (EventType.isRemove(mask)) {
-            eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
         }
     }
 

@@ -179,12 +179,12 @@ public class PropBST_incr<V extends Variable> extends GraphPropagator<V>{
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(vars[idxVarInProp].getType() == Variable.GRAPH){
 			treeBroken = false;
-			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 			if(treeBroken){
 				propagate(EventType.FULL_PROPAGATION.mask); // RECOMPUTE from oldT
 			}else{
 				newEnf = false;
-				eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+				eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
 				if(newEnf){
 					propagate(EventType.FULL_PROPAGATION.mask);
 				}else{

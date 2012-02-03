@@ -101,13 +101,13 @@ public class PropNPreds extends GraphPropagator<DirectedGraphVar> {
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 
         if ((mask & EventType.REMOVEARC.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(remArc, EventType.REMOVEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(remArc, EventType.REMOVEARC);
         }
         if ((mask & EventType.ENFORCEARC.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(enfArc, EventType.ENFORCEARC);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enfArc, EventType.ENFORCEARC);
         }
         if ((mask & EventType.ENFORCENODE.mask) != 0) {
-            eventRecorder.getDeltaMonitor(g).forEach(enfNode, EventType.ENFORCENODE);
+            eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
         }
     }
 

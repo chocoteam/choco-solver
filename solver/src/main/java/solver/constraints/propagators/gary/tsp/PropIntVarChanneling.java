@@ -125,10 +125,10 @@ public class PropIntVarChanneling extends GraphPropagator {
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(vars[idxVarInProp].getType() == Variable.GRAPH){
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-				eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+				eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-				eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+				eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 			}
 		}else{
 			varIdx = idxVarInProp;
@@ -136,7 +136,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
 				g.enforceArc(varIdx,val,this);
 			}
-			eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
+			eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
 		}
 	}
 

@@ -29,7 +29,8 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBool;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.constraints.propagators.Propagator;
+import solver.recorders.IEventRecorder;
 import solver.variables.EventType;
 
 /**
@@ -45,17 +46,17 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public abstract class AbstractCondition implements ICondition<ArcEventRecorderWithCondition> {
+public abstract class AbstractCondition<R extends IEventRecorder> implements ICondition<R> {
 
-    ArcEventRecorderWithCondition[] relatedRecorder; // array of conditionnal records declaring this -- size >= number of elements!
+    R[] relatedRecorder; // array of conditionnal records declaring this -- size >= number of elements!
     int idxLastRecorder; // index of the last not null recorder in relatedRecorder
     final IStateBool wasValid;
-    ICondition<ArcEventRecorderWithCondition> next = Default.NO_CONDITION;
+    ICondition next = Default.NO_CONDITION;
 
 
     protected AbstractCondition(IEnvironment environment) {
         wasValid = environment.makeBool(false);
-        relatedRecorder = new ArcEventRecorderWithCondition[8];
+        relatedRecorder = (R[]) new IEventRecorder[8];
     }
 
     /**
@@ -63,21 +64,22 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
      * If the condition is newly validate, push all related records in the propagation engine.
      * todo: preciser les raisons
      *
-     * @param recorder recently modified recorder
+     * @param recorder   recently modified recorder
+     * @param propagator
      * @param event
      */
-    public final boolean validateScheduling(ArcEventRecorderWithCondition recorder, EventType event) {
+    public final boolean validateScheduling(R recorder, Propagator propagator, EventType event) {
         if (wasValid.get()) {
             return true;
         } else {
-            update(recorder, event);
+            update(recorder, propagator, event);
             if (isValid()) {
                 wasValid.set(alwaysValid());
-                next.validateScheduling(recorder, event);
+                next.validateScheduling(recorder, propagator, event);
                 return true;
             }
             //return false;
-            return next.validateScheduling(recorder, event);
+            return next.validateScheduling(recorder, propagator, event);
         }
     }
 
@@ -105,20 +107,21 @@ public abstract class AbstractCondition implements ICondition<ArcEventRecorderWi
     /**
      * Updates the current condition on the modification of one its related records.
      *
-     * @param recorder recently modified recorder
+     * @param recorder   recently modified recorder
+     * @param propagator
      * @param event
      */
-    abstract void update(ArcEventRecorderWithCondition recorder, EventType event);
+    abstract void update(R recorder, Propagator propagator, EventType event);
 
     /**
      * Link the <code>recorder</code> to the condition
      *
      * @param recorder condition recorder
      */
-    public void linkRecorder(ArcEventRecorderWithCondition recorder) {
+    public void linkRecorder(R recorder) {
         if (idxLastRecorder >= relatedRecorder.length) {
-            ArcEventRecorderWithCondition[] tmp = relatedRecorder;
-            relatedRecorder = new ArcEventRecorderWithCondition[tmp.length * 2];
+            R[] tmp = relatedRecorder;
+            relatedRecorder = (R[]) new IEventRecorder[tmp.length * 2];
             System.arraycopy(tmp, 0, relatedRecorder, 0, tmp.length);
         }
         relatedRecorder[idxLastRecorder++] = recorder;

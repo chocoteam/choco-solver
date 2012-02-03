@@ -43,6 +43,8 @@ import java.io.Serializable;
  */
 public interface IEventRecorder extends solver.propagation.ISchedulable, Serializable {
 
+    public static final boolean DEBUG_PROPAG = false;
+
     public static final boolean LAZY = true;
 
     /**

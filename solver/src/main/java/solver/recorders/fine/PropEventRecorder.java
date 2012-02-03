@@ -26,6 +26,7 @@
  */
 package solver.recorders.fine;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -35,35 +36,41 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.IDeltaMonitor;
 
+import java.util.Arrays;
+
 /**
+ * An event recorder associated with one propagator and its variables.
+ * On a variable modification, the propagators is scheduled for FULL_PROPAGATION
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 02/02/12
+ * @since 24/01/12
  */
-public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
+public class PropEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final V variable; // variable to observe
-    protected final Propagator<V> propagator; // propagator to inform
+    protected final Propagator<V> propagator; // one propagator
+    protected final V[] variables; // its variables
+    protected TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
 
-    protected int idxV; // index of this within the variable structure -- mutable
-
-    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver) {
+    public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver) {
         super(solver);
-        this.variable = variable;
         this.propagator = propagator;
-        variable.addMonitor(this);
         propagator.addRecorder(this);
+        this.variables = variables.clone();
+        this.idxVs = new TIntIntHashMap(variables.length, (float) 0.5, -2, -2);
+        for (int i = 0; i < variables.length; i++) {
+            variables[i].addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
+        }
+    }
+
+    @Override
+    public Variable[] getVariables() {
+        return variables;
     }
 
     @Override
     public Propagator[] getPropagators() {
         return new Propagator[]{propagator};
-    }
-
-    @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
     }
 
     @Override
@@ -95,12 +102,12 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public int getIdxInV(V variable) {
-        return idxV;
+        return idxVs.get(variable.getId());
     }
 
     @Override
     public void setIdxInV(V variable, int idx) {
-        this.idxV = idx;
+        idxVs.put(variable.getId(), idx);
     }
 
     @Override
@@ -119,17 +126,21 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::"+propagator.toString() + " >>";
+        return "<< " + Arrays.toString(variables) + "::" + propagator.toString() + " >>";
     }
 
     @Override
     public void activate(Propagator<V> element) {
-        variable.activate(this);
+        for (int i = 0; i < variables.length; i++) {
+            variables[i].activate(this);
+        }
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
-        variable.desactivate(this);
+        for (int i = 0; i < variables.length; i++) {
+            variables[i].desactivate(this);
+        }
     }
 
     @Override
@@ -143,5 +154,4 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
         enqueued = false;
         propagator.decNbRecrodersEnqued();
     }
-
 }

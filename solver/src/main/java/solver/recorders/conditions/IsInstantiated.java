@@ -29,7 +29,8 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.constraints.propagators.Propagator;
+import solver.recorders.IEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -41,7 +42,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class IsInstantiated extends AbstractCondition {
+public class IsInstantiated<R extends IEventRecorder> extends AbstractCondition<R> {
 
     final IStateInt nbVarInstantiated;
     final IntVar variable;
@@ -63,6 +64,6 @@ public class IsInstantiated extends AbstractCondition {
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, EventType event) {
+    void update(R recorder, Propagator propagator, EventType event) {
     }
 }

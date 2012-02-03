@@ -348,7 +348,7 @@ public class Solver implements Serializable {
     public Boolean solve() {
         if (!engine.hasStrategy()) {
             LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
+            set(PropagationStrategies.DEFAULT.make(this));
         }
         if (search.getStrategy() == null) {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
@@ -362,7 +362,7 @@ public class Solver implements Serializable {
     public void propagate() throws ContradictionException {
         if (!engine.hasStrategy()) {
             LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.ONE_QUEUE_WITH_ARCS.make(this));
+            set(PropagationStrategies.DEFAULT.make(this));
         }
         if (!engine.initialized()) {
             engine.init(this);
