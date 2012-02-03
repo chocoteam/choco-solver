@@ -238,7 +238,7 @@ public class AllDifferentTest {
 
 						LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
 								neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
-								bc.getMeasures().getTimeCount(), ac.getMeasures().getTimeCount()});
+						bc.getMeasures().getTimeCount(), graph.getMeasures().getTimeCount()});
 					}
 				}
 			}

@@ -222,12 +222,14 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean removeEdge(int x, int y) {
-		return removeArc(x, y) || removeArc(y, x);
+		boolean b = removeArc(x, y) || removeArc(y, x);
+		return b;
 	}
 
 	@Override
 	public boolean edgeExists(int x, int y) {
-		return arcExists(x, y) || arcExists(y, x);
+		boolean b = arcExists(x, y) || arcExists(y, x);
+		return b;
 	}
 
 	@Override

@@ -24,106 +24,98 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.gary.constraintSpecific;
+package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.Variable;
+import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.BitSet;
 
 /**
- * Propagator for AllDifferent AC constraint for graphs
- * directed or undirected
+ * Propagator for AllDifferent AC constraint for integer variables
  *
  * Uses Regin algorithm
  * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
  * per arc removed from the support
- * HAS A LAZY FILTERING : the filtering is applied only once per search node in order to speed up the search
+ * Has a good average behavior in practice
  * <p/>
  * Runs incrementally for maintaining a matching
  * <p/>
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
+public class PropAllDiffAC_new extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private int n,n2;
-	private GraphVar g;
 	private DirectedGraph digraph;
 	private int[] matching;
 	private int[] nodeSCC;
 	private BitSet free;
 	private IntProcedure remProc;
-	int matchingCardinality;
-	long timestamp;
-	// for augmenting matching
-	int[] father;
-	BitSet in;
-	LinkedList<Integer> list;
-	public final static boolean LAZY = true;
+	// for augmenting matching (BFS)
+	private int[] father;
+	private BitSet in;
+	private int idxVarInProp;
+	private TIntIntHashMap map;
+	int[] fifo;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * AllDifferent constraint for a graph
+	 * AllDifferent constraint for integer variables
 	 * enables to control the cardinality of the matching
-	 * @param graph
-	 * @param matchingCardinality
-	 * @param sol
+	 * @param vars
 	 * @param constraint
+	 * @param sol
 	 */
-	public PropAllDiffGraphIncremental(GraphVar graph, int matchingCardinality, Solver sol, Constraint constraint) {
-		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.QUADRATIC);
-		n = graph.getEnvelopGraph().getNbNodes();
-		n2=2*n;
-		g = graph;
-		this.matchingCardinality = matchingCardinality;
-		matching = new int[n2];
-		nodeSCC = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(),n2, GraphType.LINKED_LIST);
-		free = new BitSet(n2);
-		matchingCardinality = n;
-		if(g.isDirected()){
-			remProc = new DirectedRemProc();
-		}else{
-			remProc = new UndirectedRemProc();
+	public PropAllDiffAC_new(IntVar[] vars, Constraint constraint, Solver sol) {
+		super(vars, sol, constraint, PropagatorPriority.QUADRATIC,true);
+		n = vars.length;
+		map = new TIntIntHashMap();
+		IntVar v;
+		int ub;
+		int idx=n;
+		for(int i=0;i<n;i++){
+			v = vars[i];
+			ub = v.getUB();
+			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
+				if(!map.containsKey(j)){
+					map.put(j,idx);
+					idx++;
+				}
+			}
 		}
+		n2=idx;
+		fifo = new int[n2];
+		matching = new int[n2];
+		nodeSCC = new int[n2+1];
+		digraph = new StoredDirectedGraph(solver.getEnvironment(),n2+1, GraphType.MATRIX);
+		free = new BitSet(n2);
+		remProc = new DirectedRemProc();
 		father = new int[n2];
 		in = new BitSet(n2);
-		list = new LinkedList<Integer>();
-	}
-
-	/**
-	 * AllDifferent constraint for a graph
-	 * suppose that a perfect matching is exepcted
-	 * @param graph
-	 * @param sol
-	 * @param constraint
-	 */
-	public PropAllDiffGraphIncremental(GraphVar graph, Solver sol, Constraint constraint) {
-		this(graph,graph.getEnvelopGraph().getNbNodes(),sol,constraint);
 	}
 
 	//***********************************************************************************
@@ -131,13 +123,18 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	//***********************************************************************************
 
 	private void buildDigraph() {
-		free.flip(0,n2);
-		int j;
-		INeighbors nei;
+		for(int i=0;i<n2;i++){
+			digraph.getSuccessorsOf(i).clear();
+			digraph.getPredecessorsOf(i).clear();
+		}
+		free.set(0,n2);
+		int j,k,ub;
+		IntVar v;
 		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				j+=n;
+			v = vars[i];
+			ub = v.getUB();
+			for(k=v.getLB();k<=ub;k=v.nextValue(k)){
+				j = map.get(k);
 				if(free.get(i) && free.get(j)){
 					digraph.addArc(j, i);
 					free.clear(i);
@@ -158,17 +155,10 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 			tryToMatch(i);
 		}
 		int p;
-		int cardinality = 0;
 		for (int i=0;i<n;i++) {
 			p = digraph.getPredecessorsOf(i).getFirstElement();
-			if(p!=-1){
-				cardinality++;
-				matching[p]=i;
-			}
+			matching[p]=i;
 			matching[i]=p;
-		}
-		if(cardinality<matchingCardinality){
-			contradiction(g,"");
 		}
 	}
 
@@ -183,22 +173,24 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 				digraph.addArc(tmp,father[tmp]);
 				tmp = father[tmp];
 			}
+		}else{
+			contradiction(vars[i],"no match");
 		}
 	}
 
 	private int augmentPath_BFS(int root){
 		in.clear();
-		list.clear();
-		list.add(root);
+		int indexFirst = 0, indexLast = 0;
+		fifo[indexLast++]=root;
 		int x,y;
 		INeighbors succs;
-		while(!list.isEmpty()){
-			x = list.removeFirst();
+		while(indexFirst!=indexLast){
+			x = fifo[indexFirst++];
 			succs = digraph.getSuccessorsOf(x);
 			for(y=succs.getFirstElement();y>=0;y=succs.getNextElement()){
 				if(!in.get(y)){
 					father[y] = x;
-					list.addLast(y);
+					fifo[indexLast++]=y;
 					in.set(y);
 					if(free.get(y)){
 						return y;
@@ -214,6 +206,17 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	//***********************************************************************************
 
 	private void buildSCC() {
+		if(n2>n*2){
+			digraph.desactivateNode(n2);
+			digraph.activateNode(n2);
+			for(int i=n;i<n2;i++){
+				if(free.get(i)){
+					digraph.addArc(i,n2);
+				}else{
+					digraph.addArc(n2,i);
+				}
+			}
+		}
 		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
 		int scc = 0;
 		for (TIntArrayList in : allSCC) {
@@ -222,21 +225,22 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 			}
 			scc++;
 		}
+		digraph.desactivateNode(n2);
 	}
 
 	private void filter() throws ContradictionException {
 		buildSCC();
-		INeighbors succ;
-		int j;
-		for (int node = 0;node<n;node++) {
-			succ = g.getEnvelopGraph().getSuccessorsOf(node);
-			for (j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
-				if (nodeSCC[node] != nodeSCC[j+n]) {
-					if (matching[node] == j+n && matching[j+n] == node) {
-						g.enforceArc(node, j, this);
-					} else {
-						g.removeArc(node, j, this);
-						digraph.removeArc(node,j+n);
+		int j,ub;
+		IntVar v;
+		for (int i=0; i<n; i++) {
+			v  = vars[i];
+			ub = v.getUB();
+			for(int k = v.getLB(); k<=ub; k=v.nextValue(k)){
+				j = map.get(k);
+				if (nodeSCC[i] != nodeSCC[j]) {
+					if (matching[i] != j || matching[j] != i) {
+						v.removeValue(k, this);
+						digraph.removeArc(i,j);
 					}
 				}
 			}
@@ -249,6 +253,19 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		if(n2<n*2){
+			contradiction(null,"");
+		}
+		for(int v=0;v<n;v++){
+			if(vars[v].instantiated()){
+				int val = vars[v].getValue();
+				for(int i=0;i<n;i++){
+					if(i!=v){
+						vars[i].removeValue(val,this);
+					}
+				}
+			}
+		}
 		buildDigraph();
 		repairMatching();
 		filter();
@@ -256,14 +273,37 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		free.clear();
-		eventRecorder.getDeltaMonitor(g).forEach(remProc, EventType.REMOVEARC);
-		repairMatching();
-		if(!LAZY){
-			timestamp = AbstractSearchLoop.timeStamp-1;
+		this.idxVarInProp = idxVarInProp;
+		eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(remProc, EventType.REMOVE);
+		if((mask & EventType.INSTANTIATE.mask) !=0){
+			int val = vars[idxVarInProp].getValue();
+			int j = map.get(val);
+			INeighbors nei = digraph.getPredecessorsOf(j);
+			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+				if(i!=idxVarInProp){
+					digraph.removeEdge(i,j);
+					vars[i].removeValue(val,this);
+				}
+			}
+			int i = digraph.getSuccessorsOf(j).getFirstElement();
+			if(i!=-1 && i!=idxVarInProp){
+				digraph.removeEdge(i,j);
+				vars[i].removeValue(val,this);
+			}
 		}
-		if(timestamp!= AbstractSearchLoop.timeStamp){
-			timestamp = AbstractSearchLoop.timeStamp;
+		if(nbPendingER==0){
+			free.clear();
+			for(int i=0;i<n;i++){
+				if(digraph.getPredecessorsOf(i).neighborhoodSize()==0){
+					free.set(i);
+				}
+			}
+			for(int i=n;i<n2;i++){
+				if(digraph.getSuccessorsOf(i).neighborhoodSize()==0){
+					free.set(i);
+				}
+			}
+			repairMatching();
 			filter();
 		}
 	}
@@ -274,58 +314,31 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.INT_ALL_MASK();
+	}
+	@Override
+	public int getPropagationConditions() {
+		return EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(!g.instantiated()){
-			return  ESat.UNDEFINED;
-		}
-		BitSet b = new BitSet(n);
-		int next;
-		for(int i=0;i<n;i++){
-			next = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
-			if(next!=-1){
-				if(b.get(next)){
-					return ESat.FALSE;
-				}else{
-					b.set(next);
+		if (isCompletelyInstantiated()) {
+			for (int i=0;i<n;i++) {
+				for (int j=i+1;j<n;j++) {
+					if (vars[i].getValue() == vars[j].getValue()) {
+						return ESat.FALSE;
+					}
 				}
 			}
+			return ESat.TRUE;
 		}
-		return ESat.TRUE;
+		return ESat.UNDEFINED;
 	}
 
 	private class DirectedRemProc implements IntProcedure{
 		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n+n;
-			if(digraph.arcExists(to,from)){
-				free.set(to);
-				free.set(from);
-				digraph.removeArc(to, from);
-			}
-			if(digraph.arcExists(from,to)){
-				digraph.removeArc(from,to);
-			}
-		}
-	}
-	private class UndirectedRemProc implements IntProcedure{
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
-			check(from,to+n);
-			check(from+n,to);
-		}
-		private void check(int from, int to){
-			if(digraph.arcExists(to,from)){
-				free.set(to);
-				free.set(from);
-				digraph.removeArc(to, from);
-			}else if(digraph.arcExists(from,to)){
-				digraph.removeArc(from,to);
-			}
+			digraph.removeEdge(idxVarInProp, map.get(i));
 		}
 	}
 }

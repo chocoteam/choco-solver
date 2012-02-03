@@ -40,9 +40,7 @@ import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
 import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
-import solver.constraints.propagators.nary.PropAllDiffAC;
-import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.constraints.propagators.nary.PropAllDiff_AC_JG;
+import solver.constraints.propagators.nary.*;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
@@ -94,13 +92,12 @@ public class AllDifferent extends IntConstraint<IntVar> {
 							}//*/
 				break;
 			case GRAPH:
-				buildGraphAllDifferent(this.vars, solver);
+//				buildGraphAllDifferent(this.vars, solver);
+				setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
 				break;
 			case AC:
-//				setPropagators(new PropAllDiffAC(this.vars, this, solver));
-				// TODO check 
-				setPropagators(new PropAllDiff_AC_JG(this.vars, this, solver));
-
+				// TODO remplacer par AllDiffAC_new et supprimer AllDiffGRAPH
+				setPropagators(new PropAllDiffAC(this.vars, this, solver));
 				break;
 			case BC:
 			default:
