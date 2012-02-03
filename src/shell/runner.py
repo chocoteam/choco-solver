@@ -4,8 +4,25 @@
 import sys, subprocess, shlex, time, threading, os, signal,re, logging
 from threading import Thread
 from os.path import join
-import database
-import MySQLdb as mdb
+try:
+    import MySQLdb
+    import database
+except ImportError :
+    database = None
+try :
+    import matplotlib
+    import pylab
+    import plotmysql
+except ImportError:
+    plotmysql = None
+
+#################################
+if database is None:
+    print "WARNING : You should install 'MySQLdb' for python to use the database part. This will be skipped."
+if plotmysql is None:
+    print "WARNING : You should install 'matplotlib' for python to use the plot part. This will be skipped."
+
+#################################
 
 ## ENVIRONMENT VARIABLES
 name = 'runner'
@@ -133,10 +150,10 @@ def computeXLS(line, result, size):
         info += ""+str(stdev)+";;"
         out.write(info)
 
-def storeInDB(con, line, sid, results):
+def storeInDB(mydatab, line, results):
     parts = line.split(" ", 1) # separate name of problem and parameters
     parts = parts + [" "]
-    database.insertValues(con, sid, parts[0], parts[1], results)
+    mydatab.insertValues(parts[0], parts[1], results)
 
 f = open(join(dir, name+'.list'),'r')
 
@@ -188,11 +205,11 @@ class runit(Thread):
         process.stderr.close()
 
 
-
-con = mdb.connect('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
-#con = mdb.connect('localhost', 'testuser', 'test623', 'testdb')
-database.createTables(con)
-sid = database.openSession(con)
+mydatab = None
+if mdb is not None:
+    mydatab = database.Database()
+    mydatab.createTables()
+    mydatab.openSession(con)
 
 for line in f:
     if line[0] != '#' and line != '\n':
@@ -205,12 +222,16 @@ for line in f:
         current.start()
         current.join()
 
-        #compute(line, current.results, current.s)
-#        computeXLS(line, current.results, current.s)
-        storeInDB(con, line, sid, current.results)
+#        compute(line, current.results, current.s)
+        computeXLS(line, current.results, current.s)
+        if mdb is not None:
+            storeInDB(mydatab, line, current.results)
         out.write('\n')
         out.flush()
 out.close()
+if mdb is not None & plotmysql is not None:
+    mydatab.plot()
+
 print ">> End of script"
 
 
