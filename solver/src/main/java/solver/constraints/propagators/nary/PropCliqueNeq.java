@@ -60,7 +60,12 @@ public class PropCliqueNeq extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
+        //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
+//        Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
+        if (vars[vIdx].hasEnumeratedDomain()) {
+            return EventType.INSTANTIATE.mask;
+        }
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
     @Override
@@ -101,6 +106,52 @@ public class PropCliqueNeq extends Propagator<IntVar> {
             for (int j = 0; j < vars.length; j++) {
                 if (j != idxVarInProp) {
                     vars[j].removeValue(val, this);
+                }
+            }
+        } else if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
+            checkBounds(idxVarInProp);
+        } else if (EventType.isInclow(mask)) {
+            checkLB(idxVarInProp);
+        } else if (EventType.isDecupp(mask)) {
+            checkUB(idxVarInProp);
+        }
+    }
+
+    protected void checkBounds(int i) throws ContradictionException {
+        int lb = vars[i].getLB();
+        int ub = vars[i].getUB();
+        for (int j = 0; j < vars.length; j++) {
+            if (j != i && vars[j].instantiated()) {
+                int val = vars[j].getValue();
+                if (val == lb) {
+                    vars[i].updateLowerBound(val + 1, this);
+                }
+                if (val == ub) {
+                    vars[i].updateUpperBound(val - 1, this);
+                }
+            }
+        }
+    }
+
+    protected void checkLB(int i) throws ContradictionException {
+        int lb = vars[i].getLB();
+        for (int j = 0; j < vars.length; j++) {
+            if (j != i && vars[j].instantiated()) {
+                int val = vars[j].getValue();
+                if (val == lb) {
+                    vars[i].updateLowerBound(val + 1, this);
+                }
+            }
+        }
+    }
+
+    protected void checkUB(int i) throws ContradictionException {
+        int ub = vars[i].getUB();
+        for (int j = 0; j < vars.length; j++) {
+            if (j != i && vars[j].instantiated()) {
+                int val = vars[j].getValue();
+                if (val == ub) {
+                    vars[i].updateUpperBound(val - 1, this);
                 }
             }
         }

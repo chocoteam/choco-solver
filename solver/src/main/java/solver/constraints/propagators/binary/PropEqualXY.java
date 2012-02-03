@@ -123,9 +123,7 @@ public final class PropEqualXY extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate
-            (AbstractFineEventRecorder eventRecorder, int varIdx,
-             int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx,int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
             setPassive();
@@ -199,6 +197,13 @@ public final class PropEqualXY extends Propagator<IntVar> {
         public void execute(int i) throws ContradictionException {
             p.awakeOnRem(idxVar, i);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".EQ.").append(vars[1].getName()).append(")");
+        return bf.toString();
     }
 
     @Override
