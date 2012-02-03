@@ -55,26 +55,23 @@ public class CostasArrays extends AbstractProblem {
 	private static int n = 14;  // should be <15 to be solve quickly
 
 	IntVar[] vars;
-	IntVar[] dist;
 	IntVar[] vectors;
 
 	@Override
 	public void buildModel() {
 		solver = new Solver();
 		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
-		dist = new IntVar[n*n-n];
 		vectors = new IntVar[n*n-n];
 		int idx = 0;
 		for (int i = 0; i < n; i++) {
 			for(int j=0;j<n;j++){
 				if(i!=j){
-					dist[idx] = Views.sum(vars[j], Views.minus(vars[i]));
-					vectors[idx] = Views.offset(dist[idx],2*n*(j-i));
+					vectors[idx] = Views.offset(Views.sum(vars[j], Views.minus(vars[i])),2*n*(j-i));
 					idx++;
 				}
 			}
 		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE));
+		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GRAPH));
 		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.CLIQUE));
 	}
 
