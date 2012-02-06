@@ -207,7 +207,7 @@ class runit(Thread):
 
 mydatab = None
 if database is not None:
-    mydatab = database.Database()
+    mydatab = database.Database('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
     mydatab.createTables()
     mydatab.openSession(con)
 
