@@ -29,7 +29,10 @@ if plotmysql is None:
 ## ENVIRONMENT VARIABLES
 name = 'runner'
 dir = '.'
+host= ''
+user = ''
 pwd = ''
+dbname = ''
 home = '../../'
 
 ## java command
@@ -43,9 +46,11 @@ timelimit = 180 #in seconds => 10min
 ## number threads used
 thread = 1
 ## insert in db
-db = (database is not None)
+db = False
 ## plot results
-plot = (database is not None) & (plotmysql is not None)
+plot = False
+## front end running
+frontend = True
 
 ## regexp for statisctics
 ## [STATISTICS S Solutions, Objective: O, Resolution Ts (tms), N Nodes, B Backtracks, F Fails, R Restarts, P + P propagations]
@@ -62,10 +67,14 @@ def readParameters(paramlist):
     global thread
     global name
     global dir
+    global host
+    global user
     global pwd
+    global dbname
     global home
     global db
     global plot
+    global frontend
     offset = 2
     if len(paramlist) > 0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
@@ -78,27 +87,45 @@ def readParameters(paramlist):
             name = paramlist[1]
         elif paramlist[0] == "-d": # directory of output files
             dir = paramlist[1]
+        elif paramlist[0] == "-host": # user pwd for db connexion
+            host = paramlist[1]
+        elif paramlist[0] == "-user": # user for db connexion
+            user = paramlist[1]
         elif paramlist[0] == "-pwd": # user pwd for db connexion
             pwd = paramlist[1]
+        elif paramlist[0] == "-dbname": # dbname pwd for db connexion
+            dbname = paramlist[1]
         elif paramlist[0] == "-h": # user pwd for db connexion
             home = paramlist[1]
-        elif paramlist[0] == "-nodb": # no database
-            db = False
+        elif paramlist[0] == "-db": # no database
+            db = True & (database is not None)
             offset = 1
-        elif paramlist[0] == "-noplot": # no plot
-            plot = False
+        elif paramlist[0] == "-plot": # no plot
+            plot = True & (database is not None) & (plotmysql is not None)
+            offset = 1
+        elif paramlist[0] == "-nofe": # no front end
+            frontend = False
             offset = 1
         readParameters(paramlist[offset:])
 
+def checkParam():
+    if not frontend & loop > 1:
+        print 'Loop parameter is not considered as no front end option is on'
+    if db | plot:
+        print host
+        if host == '': raise Exception('database cnx : host must be defined')
+        if user == '': raise Exception('database cnx : user must be defined')
+        if dbname == '': raise Exception('database cnx : dbname must be defined')
 
-readParameters(sys.argv[1:])
-print home
+def buildCmd():
+    CMD = JAVA + ' ' + CP + ' '
+    if frontend:
+         CMD += ' samples.FrontEndBenchmarking -loop ' + str(loop) + ' -args "' + line + ' -log QUIET"'
+    else :
+        CMD += line + ' -log QUIET'
+    print CMD
+    return CMD
 
-# initialize env. variables
-CHOCO_SOLVER = join(home, 'solver', 'target', 'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
-CP = '-cp .:' + CHOCO_SOLVER
-CMD = JAVA + ' ' + CP + ' ' + ' samples.FrontEndBenchmarking'
-print CHOCO_SOLVER
 
 def buildLog(name, ext, level):
     hdlr = logging.FileHandler(join(dir, name + ext))
@@ -108,15 +135,6 @@ def buildLog(name, ext, level):
     logger.addHandler(hdlr)
     logger.setLevel(level)
     return logger
-
-
-out = open(join(dir, name + '.txt'), 'w', 10)
-err = buildLog(name, '.log', logging.INFO)
-
-if len(sys.argv) > 1:
-    if sys.argv[1] == "-l":
-        loop = int(sys.argv[2])
-print ">> Run " + str(loop) + " time(s)"
 
 def kill( process ):
     if process.poll() is None:
@@ -156,8 +174,6 @@ def storeInDB(mydatab, line, results):
     parts = line.split(" ", 1) # separate name of problem and parameters
     parts = parts + [" "]
     mydatab.insertValues(parts[0], parts[1], results)
-
-f = open(join(dir, name + '.list'), 'r')
 
 class runit(Thread):
     def __init__ (self, args, i, j):
@@ -208,9 +224,28 @@ class runit(Thread):
         process.stderr.close()
 
 
+readParameters(sys.argv[1:])
+print host
+checkParam()
+
+# initialize env. variables
+CHOCO_SOLVER = join(home, 'solver', 'target', 'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
+CP = '-cp .:' + CHOCO_SOLVER
+print CHOCO_SOLVER
+
+out = open(join(dir, name + '.txt'), 'w', 10)
+err = buildLog(name, '.log', logging.INFO)
+
+if len(sys.argv) > 1:
+    if sys.argv[1] == "-l":
+        loop = int(sys.argv[2])
+print ">> Run " + str(loop) + " time(s)"
+
+f = open(join(dir, name + '.list'), 'r')
+
 mydatab = None
 if (database is not None) & (db | plot):
-    mydatab = database.Database('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
+    mydatab = database.Database(host, user, pwd, dbname)
 
 if (database is not None) & db:
     mydatab.createTables()
@@ -218,7 +253,7 @@ if (database is not None) & db:
 
 ## get commands per thread
 runlist = [[]]
-i = 0;
+i = 0
 j = 0
 runlist.append([])
 for line in f:
@@ -237,7 +272,7 @@ for i in range(len(runlist)):
     runner = []
     for t in range(len(runlist[i])):
         line = runlist[i][t]
-        command = CMD + ' -loop ' + str(loop) + ' -args "' + line + ' -log QUIET"'
+        command = buildCmd()
         args = shlex.split(command)
         current = runit(command, i, t)
         runner.append(current)
