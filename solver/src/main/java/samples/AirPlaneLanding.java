@@ -168,7 +168,7 @@ public class AirPlaneLanding extends AbstractProblem {
         IntVar obj_e = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
         solver.post(Sum.eq(earliness, Arrays.copyOfRange(costLAT, 0, n), obj_e, 1, solver));
 
-        IntVar obj_t = VariableFactory.bounded("obj_e", 0, obj_ub, solver);
+        IntVar obj_t = VariableFactory.bounded("obj_t", 0, obj_ub, solver);
         solver.post(Sum.eq(tardiness, Arrays.copyOfRange(costLAT, n, 2 * n), obj_t, 1, solver));
         solver.post(Sum.eq(new IntVar[]{obj_e, obj_t, objective}, new int[]{1, 1, -1}, 0, solver));
 
@@ -221,14 +221,18 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void prettyOut() {
+        LoggerFactory.getLogger("bench").info("Air plane landing({})", mData);
         StringBuilder st = new StringBuilder();
-        for (int i = 0; i < n; i++) {
-            st.append("plane ").append(i).append(" [").
-                    append(planes[i].getValue()).append(",+").
-                    append("]\n");
+        if (solver.isFeasible() != Boolean.TRUE) {
+            st.append("\tINFEASIBLE");
+        } else {
+            for (int i = 0; i < n; i++) {
+                st.append("plane ").append(i).append(" [").
+                        append(planes[i].getValue()).append(",+").
+                        append("]\n");
+            }
         }
         LoggerFactory.getLogger("bench").info(st.toString());
-
     }
 
     public static void main(String[] args) {
