@@ -181,6 +181,11 @@ public class PropMax extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
+    @Override
+    public String toString() {
+        return MAX.toString()+".MAX("+v1.toString()+","+v2.toString()+")";
+    }
+
     private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropMax p;
