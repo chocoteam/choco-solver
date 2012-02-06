@@ -63,4 +63,9 @@ class LogStatEveryXXms extends VoidSearchMonitor implements ISearchMonitor{
         };
         printer.setDaemon(true);
     }
+
+    @Override
+    public void afterInitialPropagation() {
+        printer.start();
+    }
 }
