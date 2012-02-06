@@ -28,7 +28,7 @@ package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -53,19 +53,15 @@ public class PropCount extends Propagator<IntVar> {
     /**
      * Store the number of variables which can still take the occurence value
      */
-    public final IStateInt nbPossible;
+    public final IStateBitSet nbPossible;
 
     /**
      * Store the number of variables which are instantiated to the occurence value
      */
-    public final IStateInt nbSure;
+    public final IStateBitSet nbSure;
 
     public final boolean constrainOnInfNumber;    // >=
     public final boolean constrainOnSupNumber;    // <=
-
-    //a table of variables that contain the occurrence value in their
-    //initial domain.
-    public final IntVar[] relevantVar;
 
     public int nbListVars;
 
@@ -95,20 +91,12 @@ public class PropCount extends Propagator<IntVar> {
         this.constrainOnInfNumber = onInf;
         this.constrainOnSupNumber = onSup;
         this.nbListVars = ovIdx;
-        nbPossible = environment.makeInt(0);
-        nbSure = environment.makeInt(0);
+        nbPossible = environment.makeBitSet(vars.length);
+        nbSure = environment.makeBitSet(vars.length);
         int cpt = 0;
         for (int i = 0; i < ovIdx; i++) {
             if (vars[i].contains(this.occval)) {
-                nbPossible.add(1);
-                cpt++;
-            }
-        }
-        relevantVar = new IntVar[cpt];
-        cpt = 0;
-        for (int i = 0; i < ovIdx; i++) {
-            if (vars[i].contains(this.occval)) {
-                relevantVar[cpt] = vars[i];
+                nbPossible.set(i);
                 cpt++;
             }
         }
@@ -126,18 +114,15 @@ public class PropCount extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int nbSure = 0, nbPossible = 0;
         for (int i = 0; i < (nbListVars); i++) {
             if (vars[i].contains(occval)) {
-                nbPossible++;
+                nbPossible.set(i);
                 if (vars[i].instantiatedTo(occval)) {
-                    nbSure++;
+                    nbSure.set(i);
                 }
             }
         }
 
-        this.nbSure.set(nbSure);
-        this.nbPossible.set(nbPossible);
         filter(true, 2);
     }
 
@@ -171,7 +156,7 @@ public class PropCount extends Propagator<IntVar> {
             if (EventType.isInstantiate(mask)) {
                 //assumption : we only get the inst events on all variables except the occurrence variable
                 if (vars[vIdx].getValue() == occval) {
-                    nbSure.add(1);
+                    nbSure.set(vIdx);
                     nbRule++;
                 }
             }
@@ -238,15 +223,14 @@ public class PropCount extends Propagator<IntVar> {
     public boolean checkNbPossible() throws ContradictionException {
         boolean hasChanged = false;
         if (constrainOnInfNumber) {
-            hasChanged = vars[nbListVars].updateUpperBound(nbPossible.get(), this);
-            if (vars[nbListVars].instantiatedTo(nbPossible.get())) {
-                for (int i = 0; i < relevantVar.length; i++) {
-                    //for (IntDomainVar aRelevantVar : relevantVar) {
-                    IntVar aRelevantVar = relevantVar[i];
-                    if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
+            int card = nbPossible.cardinality();
+            hasChanged = vars[nbListVars].updateUpperBound(card, this);
+            if (vars[nbListVars].instantiatedTo(card)) {
+                for (int i = nbPossible.nextSetBit(0); i >= 0; i = nbPossible.nextSetBit(i + 1)) {
+                    if (/*vars[i].contains(occval) && */!vars[i].instantiated()) {
                         hasChanged = true;
-                        nbSure.add(1); // must be dealed by the event listener not here !!
-                        aRelevantVar.instantiateTo(occval, this);
+                        nbSure.set(i);
+                        vars[i].instantiateTo(occval, this);
                     }
                 }
             }
@@ -257,14 +241,13 @@ public class PropCount extends Propagator<IntVar> {
     public boolean checkNbSure() throws ContradictionException {
         boolean hasChanged = false;
         if (constrainOnSupNumber) {
-            hasChanged = vars[nbListVars].updateLowerBound(nbSure.get(), this);
-            if (vars[nbListVars].instantiatedTo(nbSure.get())) {
-                for (int i = 0; i < relevantVar.length; i++) {
-//                for (IntDomainVar aRelevantVar : relevantVar) {
-                    IntVar aRelevantVar = relevantVar[i];
-                    if (aRelevantVar.contains(occval) && !aRelevantVar.instantiated()) {
-                        if (aRelevantVar.removeValue(occval, this)) {
-                            nbPossible.add(-1);
+            int sure = nbSure.cardinality();
+            hasChanged = vars[nbListVars].updateLowerBound(sure, this);
+            if (vars[nbListVars].instantiatedTo(sure)) {
+                for (int i = nbPossible.nextSetBit(0); i >= 0; i = nbPossible.nextSetBit(i + 1)) {
+                    if (/*aRelevantVar.contains(occval) && */!vars[i].instantiated()) {
+                        if (vars[i].removeValue(occval, this)) {
+                            nbPossible.clear(i);
                             hasChanged = true;
                         }
                     }
@@ -292,7 +275,7 @@ public class PropCount extends Propagator<IntVar> {
         @Override
         public void execute(int i) throws ContradictionException {
             if (i == p.occval) {
-                p.nbPossible.add(-1);
+                p.nbPossible.clear(idxVar);
             }
         }
     }
