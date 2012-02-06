@@ -225,7 +225,6 @@ class runit(Thread):
 
 
 readParameters(sys.argv[1:])
-print host
 checkParam()
 
 # initialize env. variables

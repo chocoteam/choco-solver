@@ -1,6 +1,6 @@
 import sys
 try:
-  import MySQLdb as mdb
+  import MySQLdb
 except ImportError:
   print "ERROR : You should install MySQLdb for python"
 try :
@@ -12,6 +12,11 @@ try :
     import pylab as plab
 except ImportError:
     print "ERROR : You should install matplotlib for python"
+
+host= ''
+user = ''
+pwd = ''
+dbname = ''
 
 def make_patch_spines_invisible(ax):
     ax.set_frame_on(True)
@@ -114,3 +119,24 @@ def plot(con):
     filout.write("</body>\n</html>")
     filout.close()
     filout.close()
+
+def readParameters(paramlist):
+    global host
+    global user
+    global pwd
+    global dbname
+    offset = 2
+    if len(paramlist) > 0:
+        if paramlist[0] == "-host": # user pwd for db connexion
+            host = paramlist[1]
+        elif paramlist[0] == "-user": # user for db connexion
+            user = paramlist[1]
+        elif paramlist[0] == "-pwd": # user pwd for db connexion
+            pwd = paramlist[1]
+        elif paramlist[0] == "-dbname": # dbname pwd for db connexion
+            dbname = paramlist[1]
+        readParameters(paramlist[offset:])
+
+readParameters(sys.argv[1:])
+con = MySQLdb.connect(host, user, pwd, dbname)
+plot(con)
