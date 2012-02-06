@@ -209,7 +209,7 @@ mydatab = None
 if database is not None:
     mydatab = database.Database('morini.emn.fr', 'choco-perf', pwd, 'choco-perf')
     mydatab.createTables()
-    mydatab.openSession(con)
+    mydatab.openSession()
 
 for line in f:
     if line[0] != '#' and line != '\n':

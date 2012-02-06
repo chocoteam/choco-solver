@@ -94,7 +94,7 @@ class Database:
         cur.execute("INSERT INTO SESSION (name, exec_date, id) VALUES (%s, NOW(), UUID())", name)
         cur.execute("SELECT id FROM SESSION ORDER BY exec_date DESC LIMIT 1")
         row = cur.fetchone()
-        seld.sid = row[0]
+        self.sid = row[0]
 
     ############################################
     # name: command line
