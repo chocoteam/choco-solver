@@ -206,7 +206,7 @@ class runit(Thread):
 
 
 mydatab = None
-if mdb is not None:
+if database is not None:
     mydatab = database.Database()
     mydatab.createTables()
     mydatab.openSession(con)
@@ -224,12 +224,12 @@ for line in f:
 
 #        compute(line, current.results, current.s)
         computeXLS(line, current.results, current.s)
-        if mdb is not None:
+        if database is not None:
             storeInDB(mydatab, line, current.results)
         out.write('\n')
         out.flush()
 out.close()
-if mdb is not None & plotmysql is not None:
+if database is not None & plotmysql is not None:
     mydatab.plot()
 
 print ">> End of script"
