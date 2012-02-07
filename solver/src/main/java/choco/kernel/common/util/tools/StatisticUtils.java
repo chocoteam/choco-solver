@@ -57,6 +57,14 @@ public class StatisticUtils {
         return sum;
     }
 
+    public static float sum(float... values){
+        float sum = 0.0f;
+        for(int i = 0; i < values.length; i++){
+            sum+= values[i];
+        }
+        return sum;
+    }
+
     public static double sum(double... values){
         double sum = 0.0;
         for(int i = 0; i < values.length; i++){
@@ -70,6 +78,10 @@ public class StatisticUtils {
     }
 
     public static float mean(long... values){
+        return sum(values)/values.length;
+    }
+
+    public static double mean(float... values){
         return sum(values)/values.length;
     }
 
@@ -96,6 +108,15 @@ public class StatisticUtils {
         return Math.sqrt(mean(psd));
     }
 
+    public static float standarddeviation(float... values){
+        double mean = mean(values);
+        double[] psd = new double[values.length];
+        for(int i = 0 ; i < values.length; i++){
+            psd[i] = Math.pow(values[i] - mean, 2.0);
+        }
+        return (float)Math.sqrt(mean(psd));
+    }
+
     public static int[] prepare(int... values){
         Arrays.sort(values);
         int[] back = new int[values.length - 2];
@@ -106,6 +127,13 @@ public class StatisticUtils {
     public static long[] prepare(long... values){
         Arrays.sort(values);
         long[] back = new long[values.length - 2];
+        System.arraycopy(values, 1, back, 0, back.length);
+        return back;
+    }
+
+    public static float[] prepare(float... values){
+        Arrays.sort(values);
+        float[] back = new float[values.length - 2];
         System.arraycopy(values, 1, back, 0, back.length);
         return back;
     }
