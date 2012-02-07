@@ -54,7 +54,7 @@ public abstract class AbstractBenchProbas {
     private long nbBcks;
     private long nbHeavyPropag;
     private long nbLigthPropag;
-    private long time;
+    private float time;
 
     // output averages
     private long avgSolutions;

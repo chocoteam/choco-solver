@@ -59,7 +59,7 @@ public class ThreadSolverTest {
 
         Solver sref = modeler(n);
         sref.findAllSolutions();
-        long tref = sref.getMeasures().getTimeCount();
+        float tref = sref.getMeasures().getTimeCount();
 
         int n1 = n / 2;
 
@@ -75,7 +75,7 @@ public class ThreadSolverTest {
 
         ts1.findAllSolutions();
         ts2.findAllSolutions();
-        long tsms = ts1.getSolver().getMeasures().getTimeCount() + ts2.getSolver().getMeasures().getTimeCount();
+        float tsms = ts1.getSolver().getMeasures().getTimeCount() + ts2.getSolver().getMeasures().getTimeCount();
 
         ts1.join();
         ts2.join();

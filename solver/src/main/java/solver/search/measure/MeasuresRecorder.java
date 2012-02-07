@@ -149,13 +149,13 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
-    public long getTimeCount() {
-        return timeCount / 1000 / 1000;
+    public float getTimeCount() {
+        return timeCount / IN_MS;
     }
 
     @Override
-    public long getReadingTimeCount() {
-        return readingTimeCount / 1000 / 1000;
+    public float getReadingTimeCount() {
+        return readingTimeCount / IN_MS;
     }
 
     @Override
@@ -164,13 +164,13 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
-    public long getInitialisationTimeCount() {
-        return initialisationTimeCount / 1000 / 1000;
+    public float getInitialisationTimeCount() {
+        return initialisationTimeCount / IN_MS;
     }
 
     @Override
-    public long getInitialPropagationTimeCount() {
-        return initialPropagationTimeCount / 1000 / 1000;
+    public float getInitialPropagationTimeCount() {
+        return initialPropagationTimeCount / IN_MS;
     }
 
     @Override
