@@ -55,7 +55,7 @@ public class LimitsTest {
         long tl = 500;
         s.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         s.findAllSolutions();
-        long tc = s.getMeasures().getTimeCount();
+        float tc = s.getMeasures().getTimeCount();
         Assert.assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl+" vs. "+ tc);
     }
 
@@ -65,7 +65,7 @@ public class LimitsTest {
         long tl = 500;
         s.getSearchLoop().getLimitsBox().setThreadTimeLimit(tl);
         s.findAllSolutions();
-        long tc = s.getMeasures().getTimeCount();
+        float tc = s.getMeasures().getTimeCount();
         Assert.assertTrue(tl - (tl * 10 / 100) <= tc && tc <= tl + (tl * 10 / 100), tl+" vs. "+ tc);
     }
 

@@ -86,7 +86,7 @@ public class CycleLtTest {
         st.append(StringUtils.pad("PUSHED ", -15, " "));
         st.append(StringUtils.pad("POPPED ", -15, " "));
         st.append(StringUtils.pad("(DIFF)", -15, " "));
-        long[] times = new long[nbIt];
+        float[] times = new float[nbIt];
         for (int j = 0; j < EngineStrategies.values().length; j++) {
             log.info(st.toString());
             st.setLength(0);
