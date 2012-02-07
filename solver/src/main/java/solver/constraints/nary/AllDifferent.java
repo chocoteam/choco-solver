@@ -28,25 +28,16 @@
 package solver.constraints.nary;
 
 import choco.kernel.ESat;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualXY;
-import solver.constraints.propagators.gary.PropIntVarsGraphChanneling;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph;
-import solver.constraints.propagators.gary.constraintSpecific.PropGraphAllDiffBC;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
-import solver.constraints.propagators.nary.PropAllDiffAC;
+import solver.constraints.propagators.nary.PropAllDiffAC_new;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.constraints.propagators.nary.PropCliqueNeq;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
  * Standard alldiff constraint with generalized AC
@@ -87,10 +78,9 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 addPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
             case GRAPH:
-                buildGraphAllDifferent(this.vars, solver);
-                break;
             case AC:
-                setPropagators(new PropAllDiffAC(this.vars, this, solver));
+                setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
+//                setPropagators(new PropAllDiffAC(this.vars, this, solver)); //CPRU: to remove
                 break;
             case BC:
                 setPropagators(new PropAllDiffBC(this.vars, solver, this));
@@ -100,67 +90,6 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 setPropagators(new PropAllDiffBC(this.vars, solver, this));
                 addPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
-        }
-    }
-
-    /**
-     * AllDifferent constraint using an explicit graph variables-values
-     * Uses Regin algorithm GAC in O(m.rac(n)) worst case time
-     * <p/>
-     * BEWARE pretty heavy : to avo•d when the amount of bks is high and when
-     * there are much more values than variables
-     *
-     * @param vars   should be enumerated variables otherwise a BC choice would be much more relevant
-     * @param solver
-     */
-    private void buildGraphAllDifferent(IntVar[] vars, Solver solver) {
-        TIntArrayList valuesList = new TIntArrayList();
-        boolean bcMode = false;
-        int val, ub;
-        for (int v = 0; v < vars.length; v++) {
-            if (!vars[v].hasEnumeratedDomain()) {
-                bcMode = true;
-            }
-            ub = vars[v].getUB();
-            for (val = vars[v].getLB(); val <= ub; val = vars[v].nextValue(val)) {
-                if (!valuesList.contains(val)) {
-                    valuesList.add(val);
-                }
-            }
-        }
-        int n = vars.length + valuesList.size();
-        int[] values = new int[n];
-        TIntIntHashMap valuesHash = new TIntIntHashMap();
-        for (int i = 0; i < vars.length; i++) {
-            values[i] = i;
-            valuesHash.put(i, i);
-        }
-        for (int i = vars.length; i < n; i++) {
-            values[i] = valuesList.get(i - vars.length);
-            valuesHash.put(values[i], i);
-        }
-        UndirectedGraphVar graph = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
-        for (int v = 0; v < vars.length; v++) {
-            ub = vars[v].getUB();
-            for (val = vars[v].getLB(); val <= ub; val = vars[v].nextValue(val)) {
-                graph.getEnvelopGraph().addEdge(v, valuesHash.get(val));
-            }
-        }
-        if (bcMode) {
-            setPropagators(
-                    new PropAllDiffGraph(graph, vars.length, solver, this),
-                    new PropAtMostNNeighbors(graph, solver, this, 1),
-                    new PropAtLeastNNeighbors(graph, solver, this, 1),
-                    new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash),
-                    new PropGraphAllDiffBC(vars, graph, solver, this, valuesHash)
-            );
-        } else {
-            setPropagators(
-                    new PropAllDiffGraph(graph, vars.length, solver, this),
-                    new PropAtMostNNeighbors(graph, solver, this, 1),
-                    new PropAtLeastNNeighbors(graph, solver, this, 1),
-                    new PropIntVarsGraphChanneling(vars, graph, solver, this, values, valuesHash)
-            );
         }
     }
 
