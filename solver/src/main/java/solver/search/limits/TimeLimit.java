@@ -56,8 +56,8 @@ public class TimeLimit extends VoidSearchMonitor implements ILimit, ISearchMonit
 
     @Override
     public boolean isReached() {
-        final long diff = timeLimit - measures.getTimeCount();
-        return diff <= 0;
+        final float diff = timeLimit - measures.getTimeCount();
+        return diff <= 0.0;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class TimeLimit extends VoidSearchMonitor implements ILimit, ISearchMonit
 
     @Override
     public String toString() {
-        return String.format("Time: %d >= %d", measures.getTimeCount(), timeLimit);
+        return String.format("Time: %.3f >= %d", measures.getTimeCount(), timeLimit);
     }
 
     @Override

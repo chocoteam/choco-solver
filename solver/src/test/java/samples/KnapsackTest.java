@@ -28,7 +28,7 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
-import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.list.array.TFloatArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
@@ -43,7 +43,7 @@ import java.io.IOException;
  * @since 19 juil. 2010
  */
 public class KnapsackTest {
-    static TLongArrayList times = new TLongArrayList();
+    static TFloatArrayList times = new TFloatArrayList();
 
     public IntVar power;
 
