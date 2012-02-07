@@ -106,6 +106,9 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 					}
 				}
 				private void prune(int from) throws ContradictionException{
+					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
+						contradiction(g,"");
+					}
 					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors &&
 					   g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
 						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
