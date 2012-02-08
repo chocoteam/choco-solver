@@ -28,7 +28,6 @@
 package choco;
 
 import choco.checker.DomainBuilder;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -62,59 +61,37 @@ public class AllDifferentTest {
 		IEnvironment env = s.getEnvironment();
 
 		IntVar[] vars = new IntVar[n];
-		int i = 0;
-		vars[0] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[1] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[2] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[3] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[4] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[5] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[6] = VariableFactory.enumerated("v_" + (i++), 1, n, s);
-		vars[7] = VariableFactory.enumerated("v_" + (i), 1, n, s);
+		for(int i = 0; i < n; i++){
+		    vars[i] = VariableFactory.enumerated("v_" + i, 1, n, s);
+        }
+        s.post(new AllDifferent(vars, s));
+        if (simple) {
 
-		List<Constraint> lcstrs = new ArrayList<Constraint>(10);
-		IntVar[] allvars;
-		if (simple) {
-			allvars = vars;
-
-			lcstrs.add(new AllDifferent(vars, s));
-			for (i = 0; i < n - 1; i++) {
+			for (int i = 0; i < n - 1; i++) {
 				for (int j = i + 1; j < n; j++) {
 					int k = j - i;
-					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], s));
-					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], k, s));
-					lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], -k, s));
+					s.post(ConstraintFactory.neq(vars[i], vars[j], s));
+					s.post(ConstraintFactory.neq(vars[i], vars[j], k, s));
+					s.post(ConstraintFactory.neq(vars[i], vars[j], -k, s));
 				}
 			}
 		} else {
 			IntVar[] diag1 = new IntVar[n];
 			IntVar[] diag2 = new IntVar[n];
 
-			for (i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++) {
 				diag1[i] = VariableFactory.enumerated("v_" + (i + 2 * n), -n, n, s);
 				diag2[i] = VariableFactory.enumerated("v_" + (i + n), 1, 2 * n, s);
 			}
-			allvars = ArrayUtils.append(vars, diag1, diag2);
-
-			lcstrs.add(new AllDifferent(vars, s));
-
-			for (i = 0; i < n; i++) {
-				lcstrs.add(ConstraintFactory.eq(diag1[i], vars[i], -i, s));
-				lcstrs.add(ConstraintFactory.eq(diag2[i], vars[i], i, s));
+			for (int i = 0; i < n; i++) {
+				s.post(ConstraintFactory.eq(diag1[i], vars[i], -i, s));
+				s.post(ConstraintFactory.eq(diag2[i], vars[i], i, s));
 			}
-			lcstrs.add(new AllDifferent(diag1, s));
-			lcstrs.add(new AllDifferent(diag2, s));
-
+			s.post(new AllDifferent(diag1, s));
+			s.post(new AllDifferent(diag2, s));
 		}
-
-
-		Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
-
 		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
-
-		s.post(cstrs);
 		s.set(strategy);
-
 		s.findAllSolutions();
 		long sol = s.getMeasures().getSolutionCount();
 		Assert.assertEquals(sol, nbSol, "nb sol incorrect");
@@ -204,12 +181,12 @@ public class AllDifferentTest {
 	@Test(groups = "1h")
 	public void test6() {
 		Random rand;
-		for (int seed = 0; seed < 10; seed++) {
+		for (int seed = 0; seed < 4; seed++) {
 			rand = new Random(seed);
 			for (double d = 0.25; d <= 1.0; d += 0.25) {
 				for (int h = 0; h <= 1; h++) {
 					for (int b = 0; b <= 1; b++) {
-						int n = 1 + rand.nextInt(7);
+						int n = 1 + rand.nextInt(3);
 						int[][] domains = DomainBuilder.buildFullDomains(n, 1, 2*n, rand, d, h == 0);
 
 						Solver neqs = alldiffs(domains, 0, b == 0);
@@ -220,18 +197,23 @@ public class AllDifferentTest {
 						Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 
-						Solver bc = alldiffs(domains, 2, b == 0);
+                        Solver clique1 = alldiffs(domains, 2, b == 0);
+						clique1.findAllSolutions();
+						Assert.assertEquals(clique1.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
+						Assert.assertEquals(clique1.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
+
+						Solver bc = alldiffs(domains, 3, b == 0);
 						bc.findAllSolutions();
 						Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 
-						Solver ac = alldiffs(domains, 3, b == 0);
+						Solver ac = alldiffs(domains, 4, b == 0);
 						ac.findAllSolutions();
 						Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 						Assert.assertTrue(ac.getMeasures().getFailCount()==0 || b==0, "nb nod incorrect"+ seed);
 
-						Solver graph = alldiffs(domains, 4, b==0);
+						Solver graph = alldiffs(domains, 5, b==0);
 						graph.findAllSolutions();
 						Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(graph.getMeasures().getFailCount() == 0 || b==0, "gac failed"+ seed);
@@ -273,13 +255,16 @@ public class AllDifferentTest {
 			case 1:
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE));
 				break;
-			case 2:
-				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
+            case 2:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.CLIQUE_IN_ONE));
 				break;
 			case 3:
-				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
 				break;
 			case 4:
+				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
+				break;
+			case 5:
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
 				break;
 		}

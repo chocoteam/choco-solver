@@ -33,10 +33,12 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.lex.LexChain;
 import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * CSPLib prob006:<br/>
@@ -71,17 +73,19 @@ public class GolombRuler extends AbstractProblem {
         }
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
-        for (int i = 0; i < ticks.length - 1; i++) {
-            solver.post(ConstraintFactory.lt(ticks[i], ticks[i + 1], solver));
-        }
+//        for (int i = 0; i < ticks.length - 1; i++) {
+//            solver.post(ConstraintFactory.lt(ticks[i], ticks[i + 1], solver));
+//        }
+        solver.post(new LexChain(true, solver, ticks));
 
         diffs = new IntVar[(m * m - m) / 2];
 
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-                diffs[k] = VariableFactory.enumerated("d_" + k, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
+//                diffs[k] = VariableFactory.enumerated("d_" + k, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+//                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
+                diffs[k] = Views.sum(ticks[j], Views.minus(ticks[i]));
                 solver.post(new Relation(diffs[k], Relation.R.GQ, (j - i) * (j - i + 1) / 2, solver));
                 solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
             }

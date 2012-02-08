@@ -69,7 +69,6 @@ public class ConsistencyChecker {
                     int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
                     Solver ref = referencePropagation(modeler, nbVar, domains, map, parameters);
                     if (ref == null) break; // no solution found for this generated problem
-
                     // otherwise, link original domains with refernce one.
                     IntVar[] rvars = new IntVar[nbVar];
                     for (int k = 0; k < nbVar; k++) {
@@ -94,6 +93,7 @@ public class ConsistencyChecker {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                             new Object[]{ds, ide, h, rvars[d], val, loop, seed});
                                     LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
+                                    writeDown(ref);
                                     Assert.fail("no solution found");
                                 }
                             } catch (Exception e) {
@@ -101,13 +101,7 @@ public class ConsistencyChecker {
                                 LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                         new Object[]{ds, ide, h, rvars[d], val, loop, seed});
                                 LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
-                                File f = new File("SOLVER_ERROR.ser");
-                                try {
-                                    Solver.writeInFile(ref, f);
-                                } catch (IOException ee) {
-                                    ee.printStackTrace();
-                                }
-                                LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
+                                writeDown(ref);
                                 Assert.fail();
                             }
                         }
@@ -125,15 +119,9 @@ public class ConsistencyChecker {
             LoggerFactory.getLogger("test").info("Pas de solution pour ce probleme => rien a tester !");
             return null;
         } catch (Exception e) {
-            File f = new File("SOLVER_ERROR.ser");
-            try {
-                Solver.writeInFile(ref, f);
-            } catch (IOException ee) {
-                ee.printStackTrace();
-            }
+            writeDown(ref);
             LoggerFactory.getLogger("test").error(e.getMessage());
             LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
-            LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
             Assert.fail();
         }
         return ref;
@@ -152,5 +140,15 @@ public class ConsistencyChecker {
             default:
                 throw new UnsupportedOperationException();
         }
+    }
+
+    protected static void writeDown(Solver ref) {
+        File f = new File("SOLVER_ERROR.ser");
+        try {
+            Solver.writeInFile(ref, f);
+        } catch (IOException ee) {
+            ee.printStackTrace();
+        }
+        LoggerFactory.getLogger("test").error("{}", f.getAbsolutePath());
     }
 }

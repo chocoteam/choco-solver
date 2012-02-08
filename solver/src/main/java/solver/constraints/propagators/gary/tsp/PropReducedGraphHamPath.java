@@ -53,8 +53,6 @@ import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
-import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredIntLinkedList;
-import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -249,7 +247,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		}
 		sccComputed.clear();
 		if((mask & EventType.REMOVEARC.mask)!=0){
-			eventRecorder.getDeltaMonitor(G).forEach(arcRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this, G).forEach(arcRemoved, EventType.REMOVEARC);
 		}
 		int to,x;
 		for(int i=0;i<n;i++){

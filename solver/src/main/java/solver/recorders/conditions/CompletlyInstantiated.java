@@ -29,6 +29,9 @@ package solver.recorders.conditions;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.Propagator;
+import solver.recorders.IEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.recorders.fine.ArcEventRecorderWithCondition;
 import solver.variables.EventType;
 
@@ -40,7 +43,7 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 22/03/11
  */
-public class CompletlyInstantiated extends AbstractCondition{
+public class CompletlyInstantiated<R extends IEventRecorder> extends AbstractCondition<R>{
 
     final IStateInt nbVarInstantiated;
     final int threshold;
@@ -62,14 +65,14 @@ public class CompletlyInstantiated extends AbstractCondition{
     }
 
     @Override
-    void update(ArcEventRecorderWithCondition recorder, EventType event) {
+    void update(R recorder, Propagator propagator, EventType event) {
         if (EventType.isInstantiate(event.mask)) {
             nbVarInstantiated.add(1);
         }
     }
 
     @Override
-    public void linkRecorder(ArcEventRecorderWithCondition recorder) {
+    public void linkRecorder(R recorder) {
         super.linkRecorder(recorder);
         /*if (request.getVariable().instantiated()) {
             nbVarInstantiated.add(1);

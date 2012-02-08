@@ -26,13 +26,15 @@
  */
 package choco.kernel.common.util.iterators;
 
+import java.io.Serializable;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 05/10/11
  */
-public abstract class Disposable {
+public abstract class Disposable implements Serializable {
 
     private boolean reusable = true;
 

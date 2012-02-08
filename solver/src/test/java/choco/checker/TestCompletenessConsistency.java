@@ -29,7 +29,14 @@ package choco.checker;
 
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.search.loop.SearchLoops;
+import solver.variables.EventType;
+
+import java.io.IOException;
 
 import static choco.checker.ConsistencyChecker.checkConsistency;
 
@@ -250,51 +257,94 @@ public class TestCompletenessConsistency {
     @Test(groups = "1m")
     public void testCOUNTBC1() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelCountBC, 2, 2, 50, new int[]{0,1}, seed + i, "bc");
+        for (int i = 0; i < 999; i++)
+            checkConsistency(Modeler.modelCountBC, 2, 2, 50, new int[]{0, 1}, seed + i, "bc");
     }
 
     @Test(groups = "1m")
     public void testCOUNTAC1() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelCountAC, 2, 2, 50, new int[]{0,1}, seed + i, "ac");
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelCountAC, 2, 2, 50, new int[]{0, 1}, seed + i, "ac");
     }
 
-    @Test(groups = "1m")
+    @Test(groups = "10s")
     public void testCOUNTBC2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelCountBC, 5, -10, 10, new int[]{0,1}, seed + i, "bc");
+        for (int i = 0; i < 999; i++)
+            checkConsistency(Modeler.modelCountBC, 5, -10, 10, new int[]{0, 1}, seed + i, "bc");
     }
 
     @Test(groups = "1m")
     public void testCOUNTAC2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
-            checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0,1}, seed + i, "ac");
+        for (int i = 0; i < 99; i++)
+            checkConsistency(Modeler.modelCountAC, 5, -10, 10, new int[]{0, 1}, seed + i, "ac");
     }
 
     @Test(groups = "10s")
     public void testLEX1() {
-        long seed = 0;//System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, true, seed + i, "ac");
     }
 
     @Test(groups = "10s")
     public void testLEX2() {
         long seed = System.currentTimeMillis();
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 99; i++)
             checkConsistency(Modeler.modelLexAC, 6, -10, 10, false, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
+    public void testELEMENTBC1() {
+        long seed = 0;//System.currentTimeMillis();
+        for (int i = 0; i < 999; i++)  {
+            checkConsistency(Modeler.modelNthBC, 2, -10, 10, null, seed + i, "bc");
+        }
+    }
+
+    @Test
+    public void testAMONGBC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongBC, 2, 2, 50, new int[]{0,1}, seed + i, "bc");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGAC1() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongAC, 2, 2, 50, new int[]{0,1}, seed + i, "ac");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGBC2() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongBC, 5, -10, 10, new int[]{0,1}, seed + i, "bc");
+    }
+
+    @Test(groups = "1m")
+    public void testAMONGAC2() {
+        long seed = 0;
+        for (int i = 0; i < 20; i++)
+            checkConsistency(Modeler.modelAmongAC, 5, -10, 10, new int[]{0,1}, seed + i, "ac");
     }
 
     /*@Test
     public void runner() throws ClassNotFoundException, IOException, ContradictionException {
-        Solver s = Solver.readFromFile("/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/SOLVER_ERROR.ser");
+        Solver s = Solver.readFromFile("/Users/cprudhom/Sources/Galak/SOLVER_ERROR.ser");
         s.getEnvironment().worldPopUntil(0);
         s.getEnvironment().worldPush();
-        s.findSolution();
+        Constraint[] constraints = s.getCstrs();
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].propagators;
+            for (int p = 0; p < propagators.length; p++) {
+                propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
+            }
+        }
+        s.propagate();
     }*/
 }
 

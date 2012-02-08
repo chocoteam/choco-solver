@@ -37,6 +37,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.recorders.IActivable;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -46,7 +47,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends Identity, Serializable {
+public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>, Identity, Serializable {
 
 
     public final static int INTEGER = 0;
@@ -97,20 +98,6 @@ public interface Variable<D extends IDelta> extends Identity, Serializable {
      * @param monitor a variable monitor
      */
     void addMonitor(IVariableMonitor monitor);
-
-    /**
-     * Activate a IVariableMonitor
-     *
-     * @param monitor a variable monitor
-     */
-    void activate(IVariableMonitor monitor);
-
-    /**
-     * Desactivate a monitor, the monitor is reactivate upon backtracking.
-     *
-     * @param monitor a variable monitor
-     */
-    void desactivate(IVariableMonitor monitor);
 
     //todo : to complete
     void removeMonitor(IVariableMonitor monitor);

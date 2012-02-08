@@ -37,7 +37,6 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -161,10 +160,10 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
         Variable variable = vars[idxVarInProp];
         if (variable.getType() == Variable.GRAPH) {
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
             }
             for (int i = toCompute.size() - 1; i >= 0; i--) {
                 findMin(toCompute.get(i));

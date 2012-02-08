@@ -149,7 +149,7 @@ public class PropMax extends Propagator<IntVar> {
             filter(false, true);
         }
         if (EventType.isRemove(mask)) {
-            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
     }
 
@@ -179,6 +179,11 @@ public class PropMax extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public String toString() {
+        return MAX.toString()+".MAX("+v1.toString()+","+v2.toString()+")";
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

@@ -128,7 +128,7 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             struct.setMatch(varIdx, var.getValue());
         } else {
-            eventRecorder.getDeltaMonitor(vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
         }
 //        if (getNbPendingER() == 0) {
 //            struct.removeUselessEdges(this);

@@ -24,69 +24,89 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.unary;
+package solver.propagation.wm;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
-import solver.exception.ContradictionException;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.EventType;
-import solver.variables.IntVar;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 16/06/11
+ * @since 26/01/12
  */
-public class PropEqualXC extends Propagator<IntVar> {
+public class WaterMarkingLongImpl implements IWaterMarking {
 
-    private final int constant;
+    protected TLongObjectHashMap<TIntHashSet> elements;
 
-    public PropEqualXC(IntVar var, int cste, Solver solver,
-                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
-        this.constant = cste;
+    protected long pivot;
+
+
+    public WaterMarkingLongImpl(long pivot) {
+        elements = new TLongObjectHashMap<TIntHashSet>();
+        this.pivot = pivot;
     }
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask;
-    }
-
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        vars[0].instantiateTo(constant, this);
-    }
-
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        propagate(EventType.FULL_PROPAGATION.mask);
-    }
-
-    @Override
-    public ESat isEntailed() {
-        if (vars[0].instantiatedTo(constant)) {
-            return ESat.TRUE;
-        } else if (vars[0].contains(constant)) {
-            return ESat.UNDEFINED;
+    private long _id(long id1, long id2) {
+        if (id1 < id2) {
+            return id1 * pivot + id2;
+        } else {
+            return id2 * pivot + id1;
         }
-        return ESat.FALSE;
     }
 
     @Override
-    public String toString() {
-        return vars[0].getName() + " = " + constant;
+    public int size() {
+        return elements.size();
     }
 
+    @Override
+    public boolean isEmpty() {
+        return elements.isEmpty();
+    }
 
     @Override
-    public Explanation explain(Deduction d) {
-        return new Explanation(this);
+    public void putMark(int id) {
+        elements.put(id, null);
+    }
+
+    @Override
+    public void putMark(int id1, int id2, int id3) {
+        long id = _id(id1, id2);
+        if (elements.contains(id)) {
+            elements.get(id).add(id3);
+        } else {
+            TIntHashSet tmp = new TIntHashSet();
+            tmp.add(id3);
+            elements.put(id, tmp);
+        }
+    }
+
+    @Override
+    public void clearMark(int id) {
+        elements.remove(id);
+    }
+
+    @Override
+    public void clearMark(int id1, int id2, int id3) {
+        long id = _id(id1, id2);
+        TIntHashSet tmp = elements.get(id);
+        if (tmp != null) {
+            tmp.remove(id3);
+            if (tmp.isEmpty()) {
+                elements.remove(id);
+            }
+        }
+    }
+
+    @Override
+    public boolean isMarked(int id) {
+        return elements.containsKey(id);
+    }
+
+    @Override
+    public boolean isMarked(int id1, int id2, int id3) {
+        TIntHashSet tmp = elements.get(_id(id1, id2));
+        return tmp != null && tmp.contains(id3);
     }
 }

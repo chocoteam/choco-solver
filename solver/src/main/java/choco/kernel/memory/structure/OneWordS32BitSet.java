@@ -408,7 +408,7 @@ public class OneWordS32BitSet implements IStateBitSet {
             return -1;
         }
 
-        if (fromIndex >= 64)
+        if (fromIndex >= 32)
             return length() - 1;
 
         int word = this.word.get() & (WORD_MASK >>> -(fromIndex + 1));

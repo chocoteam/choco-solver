@@ -113,7 +113,7 @@ public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropa
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override

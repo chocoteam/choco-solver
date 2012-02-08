@@ -83,10 +83,10 @@ public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends 
         Variable var = vars[idxVarInProp];
         if (var.getType() == Variable.GRAPH) {
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+                eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
             }
             k.updateLowerBound(nbInKer.get(), this);
             k.updateUpperBound(nbInEnv.get(), this);

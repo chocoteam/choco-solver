@@ -92,7 +92,7 @@ public class PropRegular extends Propagator<IntVar> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp,
                           int mask) throws ContradictionException {
-        eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+        eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
     }
 
     @Override

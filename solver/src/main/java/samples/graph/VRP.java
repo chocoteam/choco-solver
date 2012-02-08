@@ -38,7 +38,6 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.basic.PropEachNodeHasLoop;
 import solver.constraints.propagators.gary.constraintSpecific.PropTruckDepArr;
 import solver.constraints.propagators.gary.directed.PropNPreds;
@@ -86,7 +85,7 @@ public class VRP extends AbstractProblem {
 	
 	//params
 	private int nbMaxTrucks;
-	private long solvingTime;
+	private float solvingTime;
 	private int[][] distancesMatrix;
 	private VRPInstance instance;
 	//variables and graph
@@ -317,7 +316,8 @@ public class VRP extends AbstractProblem {
 		File folder = new File(folderURL);
 		File[] instances = folder.listFiles();
 		String[] params = new String[]{"-f",""};
-		long timePath, nbTrucksPath, timeTrans, nbTrucksTrans;
+		float timePath, timeTrans;
+        long nbTrucksPath, nbTrucksTrans;
 		String results = "timePAth;nbTPath;timeTrans;nbTTrans\n";
 		writeTextInto(results, outputFile);
 		for(int i=0; i<instances.length; i++){
@@ -353,7 +353,8 @@ public class VRP extends AbstractProblem {
 		File folder = new File(folderURL);
 		File[] instances = folder.listFiles();
 		String[] params = new String[]{"-f",""};
-		long timeTrans, nbTrucksTrans;
+		float timeTrans;
+        long nbTrucksTrans;
 		String results = "timePAth;nbTPath;timeTrans;nbTTrans\n";
 		writeTextInto(results, outputFile);
 		for(int i=0; i<instances.length; i++){

@@ -125,7 +125,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override

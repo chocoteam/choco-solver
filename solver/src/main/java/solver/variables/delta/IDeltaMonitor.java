@@ -30,6 +30,8 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 
+import java.io.Serializable;
+
 /**
  * A delta monitor.
  * It is based on a specific delta and stores some specific informations about it.
@@ -39,7 +41,7 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public interface IDeltaMonitor<D extends IDelta> {
+public interface IDeltaMonitor<D extends IDelta> extends Serializable {
 
 	void freeze();
 

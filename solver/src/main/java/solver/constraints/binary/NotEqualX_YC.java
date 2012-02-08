@@ -30,8 +30,9 @@ package solver.constraints.binary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.binary.PropNotEqualX_YC;
+import solver.constraints.propagators.binary.PropNotEqualXY;
 import solver.variables.IntVar;
+import solver.variables.view.Views;
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,7 +52,7 @@ public final class NotEqualX_YC extends IntConstraint<IntVar> {
         this.x = x;
         this.y = y;
         this.c = c;
-        setPropagators(new PropNotEqualX_YC(new IntVar[]{x, y}, c, solver, this));
+        setPropagators(new PropNotEqualXY(x, Views.offset(y, c), solver, this));
     }
 
     @Override

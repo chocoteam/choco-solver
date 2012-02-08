@@ -257,7 +257,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		free.clear();
-		eventRecorder.getDeltaMonitor(g).forEach(remProc, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this,g).forEach(remProc, EventType.REMOVEARC);
 		repairMatching();
 		if(!LAZY){
 			timestamp = AbstractSearchLoop.timeStamp-1;

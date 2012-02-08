@@ -98,12 +98,16 @@ public class MagicSeries extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Magic series({})", n);
         StringBuilder st = new StringBuilder();
-        st.append("\t");
-        for (int i = 0; i < n; i++) {
-            st.append(vars[i].getValue()).append(" ");
-            if (i % 10 == 9) {
-                st.append("\n\t");
+        if (solver.isFeasible() == Boolean.TRUE) {
+            st.append("\t");
+            for (int i = 0; i < n; i++) {
+                st.append(vars[i].getValue()).append(" ");
+                if (i % 10 == 9) {
+                    st.append("\n\t");
+                }
             }
+        } else {
+             st.append("\tINFEASIBLE");
         }
         LoggerFactory.getLogger("bench").info(st.toString());
 

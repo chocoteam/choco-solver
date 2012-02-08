@@ -32,9 +32,10 @@ import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.set.hash.TIntHashSet;import gnu.trove.iterator.TIntIterator;
-import gnu.trove.stack.TIntStack;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
 import org.jgrapht.graph.DirectedMultigraph;
 import org.slf4j.LoggerFactory;
@@ -300,7 +301,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
         if (vIdx < offset) {
             checkWorld();
-            eventRecorder.getDeltaMonitor(vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
         } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(vIdx - offset);
             computed = false;

@@ -100,11 +100,11 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 			propagate(0);return;
 		}
 		if(idxVarInProp==0){
-			eventRecorder.getDeltaMonitor(dir).forEach(arcEnforced, EventType.ENFORCEARC);
-			eventRecorder.getDeltaMonitor(dir).forEach(arcRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this,dir).forEach(arcEnforced, EventType.ENFORCEARC);
+			eventRecorder.getDeltaMonitor(this,dir).forEach(arcRemoved, EventType.REMOVEARC);
 		}else{
-			eventRecorder.getDeltaMonitor(undir).forEach(edgeEnforced, EventType.ENFORCEARC);
-			eventRecorder.getDeltaMonitor(undir).forEach(edgeRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this,undir).forEach(edgeEnforced, EventType.ENFORCEARC);
+			eventRecorder.getDeltaMonitor(this,undir).forEach(edgeRemoved, EventType.REMOVEARC);
 		}
 	}
 

@@ -130,7 +130,7 @@ public enum Views {
         Solver solver = a.getSolver();
         IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
                 Math.max(a.getLB(),  b.getLB()), Math.max(a.getUB(),b.getUB()), solver);
-        solver.post(new MaxXYZ(a,b, z, solver));
+        solver.post(new MaxXYZ(z, a,b, solver));
         return z;
     }
 }

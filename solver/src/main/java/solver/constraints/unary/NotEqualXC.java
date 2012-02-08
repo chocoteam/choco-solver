@@ -29,8 +29,9 @@ package solver.constraints.unary;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.unary.PropNotEqualXC;
+import solver.constraints.propagators.binary.PropNotEqualXY;
 import solver.variables.IntVar;
+import solver.variables.view.Views;
 
 /**
  * Unary constraint ensuring:
@@ -49,7 +50,7 @@ public class NotEqualXC extends IntConstraint<IntVar> {
     public NotEqualXC(IntVar var, int cste, Solver solver) {
         super(new IntVar[]{var}, solver);
         this.constant = cste;
-        setPropagators(new PropNotEqualXC(var, constant, solver, this));
+        setPropagators(new PropNotEqualXY(var, Views.fixed(cste, solver), solver, this));
     }
 
     @Override

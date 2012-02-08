@@ -29,39 +29,36 @@ package solver.recorders.fine;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
- * A specialized fine event recorder associated with one integer variable and one propagator.
+ * A specialized fine event recorder associated with one variable and one propagator.
  * It observes a variable, records events occurring on the variable,
  * schedules it self when calling the filtering algortithm of the propagator
  * is required.
  * It also stores, if required, pointers to value removals.
  * <br/>
+ * on a pris le parti de ne pas mémoriser les événements fins,
+ * partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
+ * que de lancer directement la propag' lourde
  *
  * @author Charles Prud'homme
  * @since 01/12/11
  */
 public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
 
+    protected int idxVinP; // index of the variable within the propagator -- immutable
+
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
                                          ICondition condition, Solver solver) {
-        super(variable, propagator, idxInProp, solver);
+        super(variable, propagator, solver);
+        this.idxVinP = idxInProp;
         this.condition = condition;
         condition.linkRecorder(this);
-    }
-
-    @Override
-    public boolean execute() throws ContradictionException {
-        // on a pris le parti de ne pas mémoriser les événements fins,
-        // partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
-        // que de lancer directement la propag' lourde
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -74,12 +71,8 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagator.decArity();
                 }
-                // 2. record the event and values removed
-                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmask |= evt.strengthened_mask;
-                }
-                // 3. schedule this if condition is valid
-                if (condition.validateScheduling(this, evt)) {
+                // 2. schedule this if condition is valid
+                if (condition.validateScheduling(this, propagator, evt)) {
                     propagator.forcePropagate(EventType.FULL_PROPAGATION);
                 }
             }
@@ -87,6 +80,7 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     }
 
     @Override
-    public void flush() {
+    public String toString() {
+        return "<< " + variable.toString() + "::" + propagator.toString() + "::" + condition.toString() + " >>";
     }
 }

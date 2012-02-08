@@ -120,8 +120,8 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-		eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override

@@ -38,14 +38,12 @@ import solver.propagation.generator.Flatten;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Queue;
-import solver.recorders.conditions.AbstractCondition;
 import solver.recorders.conditions.CompletlyInstantiated;
-import solver.recorders.fine.ArcEventRecorderWithCondition;
+import solver.recorders.conditions.ICondition;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -79,8 +77,8 @@ public class ConditionnalRecorderTest {
         IntVar[] vars = new IntVar[]{x, y, z};
 
         //castRecords(cstrs, solver, solver.getEnvironment(), 2);
-        AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), 2);
-        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+        ICondition cond = new CompletlyInstantiated(solver.getEnvironment(), 2);
+        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
         solver.set(q);
 
         solver.post(cstrs);
@@ -103,8 +101,8 @@ public class ConditionnalRecorderTest {
             Constraint[] cstrs = {new AllDifferent(x, solver, AllDifferent.Type.BC)};
 
             //castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
-            AbstractCondition cond = new CompletlyInstantiated(solver.getEnvironment(), n/2);
-            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.unary(cstrs))).clearOut();
+            ICondition cond = new CompletlyInstantiated(solver.getEnvironment(), n / 2);
+            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
             solver.set(q);
 
             solver.post(cstrs);

@@ -77,7 +77,7 @@ public final class OffsetView extends View<IntVar> {
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                     if (EventType.isRemove(eventType.mask)) {
                         for (int i = frozenFirst; i < frozenLast; i++) {
-                            proc.execute(delta.get(i) - cste);
+                            proc.execute(delta.get(i) + cste);
                         }
                     }
                 }

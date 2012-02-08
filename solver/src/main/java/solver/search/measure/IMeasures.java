@@ -47,11 +47,32 @@ public interface IMeasures extends ISearchMonitor, Serializable {
     long timestamp();
 
     /**
-     * Get the time count in milliseconds of the measure
+     * Get the time count in milliseconds of the measure (including initial propagation time count).
      *
      * @return time count
      */
-    long getTimeCount();
+    float getTimeCount();
+
+    /**
+     * Get the reading time count in milliseconds of the measure
+     *
+     * @return readingtime count
+     */
+    float getReadingTimeCount();
+
+    /**
+     * Get the initialisation time count in milliseconds of the measure
+     *
+     * @return initialisationtime count
+     */
+    float getInitialisationTimeCount();
+
+    /**
+     * Get the initial propagation time count in milliseconds of the measure
+     *
+     * @return initial propagation time count
+     */
+    float getInitialPropagationTimeCount();
 
     /**
      * Get the node count of the measure
@@ -119,13 +140,7 @@ public interface IMeasures extends ISearchMonitor, Serializable {
 
     void declareObjective();
 
-    long getReadingTimeCount();
-
     void setReadingTimeCount(long time);
-
-    long getInitialPropagationTimeCount();
-
-    long getInitialisationTimeCount();
 
     void updatePropagationCount();
 

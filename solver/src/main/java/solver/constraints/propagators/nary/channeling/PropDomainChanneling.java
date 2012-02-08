@@ -162,7 +162,7 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 oldsup.set(vars[idxVarInProp].getUB());
             }
             if (EventType.isRemove(mask)) {
-                eventRecorder.getDeltaMonitor(vars[idxVarInProp]).forEach(rem_proc, EventType.REMOVE);
+                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc, EventType.REMOVE);
             }
         }
 

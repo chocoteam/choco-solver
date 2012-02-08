@@ -144,7 +144,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 			return;
 		}
 		sccComputed.clear();
-		eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override

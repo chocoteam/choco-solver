@@ -117,8 +117,8 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(idxVarInProp==0){
-			eventRecorder.getDeltaMonitor(g).forEach(arcEnforced, EventType.ENFORCEARC);
-			eventRecorder.getDeltaMonitor(g).forEach(arcRemoved, EventType.REMOVEARC);
+			eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
+			eventRecorder.getDeltaMonitor(this,g).forEach(arcRemoved, EventType.REMOVEARC);
 		}
 		graphTrasversal();
 		for(int i=0;i<nbRecorders();i++){

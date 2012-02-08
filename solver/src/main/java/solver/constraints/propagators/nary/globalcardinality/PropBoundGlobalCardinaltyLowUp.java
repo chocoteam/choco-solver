@@ -123,7 +123,7 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             }
             if (EventType.isRemove(mask)) {
                 if (idx < nbVars) {
-                    eventRecorder.getDeltaMonitor(vars[idx]).forEach(rem_proc, EventType.REMOVE);
+                    eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(rem_proc, EventType.REMOVE);
                 }
             }
         }
