@@ -27,6 +27,7 @@
 
 package solver.variables.domain;
 
+import solver.ICause;
 import solver.variables.delta.IntDelta;
 
 import java.io.Serializable;
@@ -122,9 +123,10 @@ public interface IIntDomain extends Serializable{
     /**
      * Restricts <code>this</code> to a singleton: <code>aValue</code>, and store the removed values in the delta
      * @param aValue instantiation value
+     * @param cause of the instantiation
      * @return true at least one value has been removed (ie <code>this</code> was not yet instantiated to <code>aValue</code>), false otherwise
      */
-    boolean restrictAndUpdateDelta(int aValue);
+    boolean restrictAndUpdateDelta(int aValue, ICause cause);
 
     /**
      * Updates the lower bound of <code>this</code>, by removing values before <code>aValue</code>
@@ -137,9 +139,10 @@ public interface IIntDomain extends Serializable{
      * Updates the lower bound of <code>this</code>, by removing values before <code>aValue</code>,
      * and store the removed values in the delta
      * @param aValue the new lower bound
+     * @param cause of the update
      * @return true at least one value has been removed (ie the previous lower bound was smaller), false otherwise
      */
-    boolean updateLowerBoundAndDelta(int aValue);
+    boolean updateLowerBoundAndDelta(int aValue, ICause cause);
 
     /**
      * Updates the upper bound of <code>this</code>, by removing values after <code>aValue</code>
@@ -152,9 +155,10 @@ public interface IIntDomain extends Serializable{
      * Updates the upper bound of <code>this</code>, by removing values after <code>aValue</code>,
      * and store the removed values in the delta.
      * @param aValue the new upper bound
+     * @param cause of the update
      * @return true at least one value has been removed (ie the previous upper bound was greater), false otherwise
      */
-    boolean updateUpperBoundAndDelta(int aValue);
+    boolean updateUpperBoundAndDelta(int aValue, ICause cause);
 
     /**
      * removes <code>aValue</code> from <code>this</code>
@@ -167,10 +171,11 @@ public interface IIntDomain extends Serializable{
     /**
      * removes <code>aValue</code> from <code>this</code>, and store it in the delta
      * @param aValue value to remove
+     * @param cause of the removal
      * @return true if <code>aValue</code> has been removed (ie, <code>aValue</code> was contained in <code>this</code>),
      * false otherwise
      */
-    boolean removeAndUpdateDelta(int aValue);
+    boolean removeAndUpdateDelta(int aValue, ICause cause);
 
     /**
      * Checks wether <code>this</code> is an enumerated domain, ie each value is physically stored

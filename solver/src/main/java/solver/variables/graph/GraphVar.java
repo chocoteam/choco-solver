@@ -110,7 +110,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         }
         if (envelop.desactivateNode(x)) {
             if (reactOnModification) {
-                delta.add(x,IGraphDelta.NR);
+                delta.add(x,IGraphDelta.NR,cause);
             }
             EventType e = EventType.REMOVENODE;
             notifyMonitors(e, cause);
@@ -124,7 +124,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         if (envelop.getActiveNodes().isActive(x)) {
             if (kernel.activateNode(x)) {
                 if (reactOnModification) {
-                    delta.add(x,IGraphDelta.NE);
+                    delta.add(x,IGraphDelta.NE,cause);
                 }
                 EventType e = EventType.ENFORCENODE;
                 notifyMonitors(e, cause);

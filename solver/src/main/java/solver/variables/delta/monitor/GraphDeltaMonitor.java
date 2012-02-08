@@ -27,6 +27,7 @@
 package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.delta.GraphDelta;
@@ -43,15 +44,17 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
 	protected final GraphDelta delta;
 
-	private int[] first, last; // references, in variable delta value to propagate, to un propagated values
+	protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
 	protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+	protected ICause propagator;
 
-	public GraphDeltaMonitor(GraphDelta delta) {
+	public GraphDeltaMonitor(GraphDelta delta, ICause propagator) {
 		this.delta = delta;
 		this.first = new int[4];
 		this.last = new int[4];
 		this.frozenFirst = new int[4];
 		this.frozenLast = new int[4];
+		this.propagator = propagator;
 	}
 
 	@Override
@@ -83,25 +86,33 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 			case REMOVENODE:
 				type = IGraphDelta.NR;
 				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					proc.execute(delta.get(i, type));
+					if(delta.getCause(i,type)!=propagator){
+						proc.execute(delta.get(i, type));
+					}
 				}
 				break;
 			case ENFORCENODE:
 				type = IGraphDelta.NE;
 				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					proc.execute(delta.get(i, type));
+					if(delta.getCause(i,type)!=propagator){
+						proc.execute(delta.get(i, type));
+					}
 				}
 				break;
 			case REMOVEARC:
 				type = IGraphDelta.AR;
 				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					proc.execute(delta.get(i, type));
+					if(delta.getCause(i,type)!=propagator){
+						proc.execute(delta.get(i, type));
+					}
 				}
 				break;
 			case ENFORCEARC:
 				type = IGraphDelta.AE;
 				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					proc.execute(delta.get(i, type));
+					if(delta.getCause(i,type)!=propagator){
+						proc.execute(delta.get(i, type));
+					}
 				}
 				break;
 		}

@@ -189,7 +189,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
                 notInstanciated.contains(value);
                 notInstanciated.remove(offset);
                 if (reactOnRemoval) {
-                    delta.add(1 - value);
+                    delta.add(1 - value, cause);
                 }
                 mValue = value;
                 this.notifyMonitors(e, cause);
