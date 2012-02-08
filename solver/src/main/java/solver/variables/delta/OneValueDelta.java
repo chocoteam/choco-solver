@@ -27,6 +27,7 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.OneIntDeltaMonitor;
@@ -41,6 +42,7 @@ public final class OneValueDelta implements IntDelta {
 
 
     int value;
+	ICause cause;
     boolean set;
     int timestamp = -1;
 
@@ -53,16 +55,17 @@ public final class OneValueDelta implements IntDelta {
     }
 
     @Override
-    public IDeltaMonitor<IntDelta> getMonitor() {
-        return new OneIntDeltaMonitor(this);
+    public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
+        return new OneIntDeltaMonitor(this,propagator);
     }
 
     @Override
-    public void add(int value) {
+    public void add(int value, ICause cause) {
 		if(IEventRecorder.LAZY){
        		lazyClear();
 		}
         this.value = value;
+		this.cause = cause;
         set = true;
     }
 
@@ -70,6 +73,15 @@ public final class OneValueDelta implements IntDelta {
     public int get(int idx) {
         if (idx < 1) {
             return value;
+        } else {
+            throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
+        }
+    }
+
+	@Override
+    public ICause getCause(int idx) {
+        if (idx < 1) {
+            return cause;
         } else {
             throw new IndexOutOfBoundsException("OneValueDelta#get(): size must be checked before!");
         }

@@ -29,6 +29,7 @@ package solver.variables.domain;
 
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -76,7 +77,7 @@ public final class IntervalIntDomain implements IIntDomain {
      * {@inheritDoc}
      */
     @Override
-    public boolean removeAndUpdateDelta(int aValue) {
+    public boolean removeAndUpdateDelta(int aValue, ICause cause) {
         return false;
     }
 
@@ -84,15 +85,15 @@ public final class IntervalIntDomain implements IIntDomain {
      * {@inheritDoc}
      */
     @Override
-    public boolean restrictAndUpdateDelta(int aValue) {
+    public boolean restrictAndUpdateDelta(int aValue, ICause cause) {
         int ub = this.upperbound.get();
         int i = this.lowerbound.get();
         for (; i < aValue; i++) {
-            delta.add(i);
+            delta.add(i,cause);
         }
         i = aValue+1;
         for (; i <= ub; i++) {
-            delta.add(i);
+            delta.add(i,cause);
         }
         this.lowerbound.set(aValue);
         this.upperbound.set(aValue);
@@ -142,12 +143,12 @@ public final class IntervalIntDomain implements IIntDomain {
      * {@inheritDoc}
      */
     @Override
-    public boolean updateUpperBoundAndDelta(int aValue) {
+    public boolean updateUpperBoundAndDelta(int aValue, ICause cause) {
         boolean change = false;
         for (int i = upperbound.get(); i > aValue; i--) {
             change = true;
             //BEWARE: this line significantly decreases performances
-            delta.add(i);
+            delta.add(i,cause);
         }
         size.add(aValue - upperbound.get());
         upperbound.set(aValue);
@@ -168,12 +169,12 @@ public final class IntervalIntDomain implements IIntDomain {
      * {@inheritDoc}
      */
     @Override
-    public boolean updateLowerBoundAndDelta(int aValue) {
+    public boolean updateLowerBoundAndDelta(int aValue, ICause cause) {
         boolean change = false;
         for (int i = lowerbound.get(); i < aValue; i++) {
             change = true;
             //BEWARE: this line significantly decreases performances
-            delta.add(i);
+            delta.add(i,cause);
         }
         size.add(lowerbound.get() - aValue);
         lowerbound.set(aValue);
