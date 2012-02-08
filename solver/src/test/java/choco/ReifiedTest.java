@@ -28,7 +28,8 @@
 package choco;
 
 import choco.checker.DomainBuilder;
-import gnu.trove.set.hash.TIntHashSet;import org.testng.Assert;
+import gnu.trove.set.hash.TIntHashSet;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;

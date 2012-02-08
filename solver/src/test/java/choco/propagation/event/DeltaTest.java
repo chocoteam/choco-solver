@@ -29,6 +29,7 @@ package choco.propagation.event;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.variables.delta.Delta;
 
 /**
@@ -43,7 +44,7 @@ public class DeltaTest {
     public void testAdd(){
         Delta d = new Delta();
         for(int i = 1; i < 40; i++){
-            d.add(i);
+            d.add(i, Cause.Null);
             Assert.assertEquals(d.size(), i);
         }
     }

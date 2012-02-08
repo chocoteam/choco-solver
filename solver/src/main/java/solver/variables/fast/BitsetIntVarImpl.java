@@ -177,7 +177,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (change) {
                     this.SIZE.add(-1);
                     if (reactOnRemoval) {
-                        delta.add(aValue + OFFSET);
+                        delta.add(aValue + OFFSET, cause);
                     }
                 }
 
@@ -266,11 +266,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
                 for (; i < aValue; i = VALUES.nextSetBit(i + 1)) {
-                    delta.add(i + OFFSET);
+                    delta.add(i + OFFSET,cause);
                 }
                 i = VALUES.nextSetBit(aValue + 1);
                 for (; i >= 0; i = VALUES.nextSetBit(i + 1)) {
-                    delta.add(i + OFFSET);
+                    delta.add(i + OFFSET,cause);
                 }
             }
             this.VALUES.clear();
@@ -323,7 +323,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
                     for (int i = old - OFFSET; i < aValue; i = VALUES.nextSetBit(i + 1)) {
-                        delta.add(i + OFFSET);
+                        delta.add(i + OFFSET, cause);
                     }
                 }
                 VALUES.clear(old - OFFSET, aValue);
@@ -381,7 +381,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (reactOnRemoval) {
                     //BEWARE: this loop significantly decreases performances
                     for (int i = old - OFFSET; i > aValue; i = VALUES.prevSetBit(i - 1)) {
-                        delta.add(i + OFFSET);
+                        delta.add(i + OFFSET,cause);
                     }
                 }
                 VALUES.clear(aValue + 1, old - OFFSET + 1);
