@@ -75,9 +75,20 @@ public final class AbsView extends View<IntVar> {
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                     if (EventType.isRemove(eventType.mask)) {
                         for (int i = frozenFirst; i < frozenLast; i++) {
-							if(propagator!=delta.getCause(i)){
-                            	proc.execute(Math.abs(delta.get(i)));
-							}
+                            if(propagator!=delta.getCause(i)){
+                                int v = delta.get(i);
+                                if (!var.contains(-v)) {
+                                    boolean found = false;
+                                    for (int j = i + 1; !found && j < frozenLast; j++) {
+                                        if (delta.get(j) == -v) {
+                                            found = true;
+                                        }
+                                    }
+                                    if (!found) {
+                                        proc.execute(Math.abs(v));
+                                    }
+                                }
+                            }
                         }
                     }
                 }
