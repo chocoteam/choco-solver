@@ -64,7 +64,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
         for (int i = 0; i < variables.length; i++) {
             V variable = variables[i];
             int vid = variable.getId();
-            deltamon.put(vid, variable.getDelta().getMonitor());
+            deltamon.put(vid, variable.getDelta().getMonitor(propagator));
             timestamps.put(vid, -1);
             evtmasks.put(vid, 0);
             idxVinP.put(vid, idxVinPs[i]);

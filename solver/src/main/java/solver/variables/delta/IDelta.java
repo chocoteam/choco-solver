@@ -27,6 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
+
 import java.io.Serializable;
 
 /**
@@ -45,9 +47,10 @@ public interface IDelta extends Serializable{
 
     /**
      * Create and return a dedicated monitor for this.
+	 * @param propagator of the monitor
      * @return a monitor
      */
-    <D extends IDelta>IDeltaMonitor<D> getMonitor();
+    <D extends IDelta>IDeltaMonitor<D> getMonitor(ICause propagator);
 
 	void clear();
 

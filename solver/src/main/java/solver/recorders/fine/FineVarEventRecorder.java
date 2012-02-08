@@ -72,7 +72,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
             Propagator propagator = propagators[i];
             int pid = propagator.getId();
             idxVinPs.put(pid, idxVinP[i]);
-            deltamon.put(pid, variable.getDelta().getMonitor());
+            deltamon.put(pid, variable.getDelta().getMonitor(propagator));
             timestamps.put(pid, -1);
             evtmasks.put(pid, 0);
         }

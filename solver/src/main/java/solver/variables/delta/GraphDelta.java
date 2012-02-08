@@ -27,6 +27,7 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
@@ -53,8 +54,8 @@ public class GraphDelta implements IGraphDelta {
     }
 
     @Override
-    public GraphDeltaMonitor getMonitor() {
-        return new GraphDeltaMonitor(this);
+    public GraphDeltaMonitor getMonitor(ICause propagator) {
+        return new GraphDeltaMonitor(this,propagator);
     }
 
     //***********************************************************************************
@@ -84,11 +85,11 @@ public class GraphDelta implements IGraphDelta {
 	}
 
 	@Override
-	public void add(int element, int type) {
+	public void add(int element, int type, ICause cause) {
 		if(IEventRecorder.LAZY){
 			lazyClear();
 		}
-		deltaOfType[type].add(element);
+		deltaOfType[type].add(element,cause);
 	}
 
 	public void lazyClear() {
@@ -100,5 +101,10 @@ public class GraphDelta implements IGraphDelta {
 	@Override
 	public int get(int index, int type) {
 		return deltaOfType[type].get(index);
+	}
+
+	@Override
+	public ICause getCause(int index, int type) {
+		return deltaOfType[type].getCause(index);
 	}
 }

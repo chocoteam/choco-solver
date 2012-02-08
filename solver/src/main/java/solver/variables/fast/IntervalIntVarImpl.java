@@ -127,7 +127,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
             EventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
-                    delta.add(value);
+                    delta.add(value,cause);
                 }
                 SIZE.add(-1);
                 LB.set(value + 1);
@@ -137,7 +137,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                 }
             } else {
                 if (reactOnRemoval) {
-                    delta.add(value);
+                    delta.add(value,cause);
                 }
                 SIZE.add(-1);
                 UB.set(value - 1);
@@ -206,11 +206,11 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                 int ub = this.UB.get();
                 int i = this.LB.get();
                 for (; i < value; i++) {
-                    delta.add(i);
+                    delta.add(i,cause);
                 }
                 i = value + 1;
                 for (; i <= ub; i++) {
-                    delta.add(i);
+                    delta.add(i,cause);
                 }
             }
             this.LB.set(value);
@@ -255,7 +255,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                 if (reactOnRemoval) {
                     for (int i = old; i < value; i++) {
                         //BEWARE: this line significantly decreases performances
-                        delta.add(i);
+                        delta.add(i,antipromo);
                     }
                 }
                 SIZE.add(old - value);
@@ -306,7 +306,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                 if (reactOnRemoval) {
                     for (int i = old; i > value; i--) {
                         //BEWARE: this line significantly decreases performances
-                        delta.add(i);
+                        delta.add(i,antipromo);
                     }
                 }
                 SIZE.add(value - old);
