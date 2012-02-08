@@ -28,6 +28,8 @@
 package solver.variables.delta;
 
 
+import solver.ICause;
+
 public interface IGraphDelta extends IDelta {
 
 	//NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
@@ -36,9 +38,11 @@ public interface IGraphDelta extends IDelta {
 	public final static int AR = 2;
 	public final static int AE = 3;
 
-	public void add(int element, int type);
+	public void add(int element, int type, ICause cause);
 
 	public int get(int index, int type);
+
+	public ICause getCause(int index, int type);
 
 	public int getSize(int i);
 

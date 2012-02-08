@@ -26,6 +26,7 @@
  */
 package solver.variables.delta.view;
 
+import solver.ICause;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
@@ -46,17 +47,22 @@ public final class ViewDelta implements IntDelta {
     }
 
     @Override
-    public IDeltaMonitor<IntDelta> getMonitor() {
+    public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
         return deltaMonitor;
     }
 
     @Override
-    public void add(int value) {
+    public void add(int value, ICause cause) {
         throw new UnsupportedOperationException("Delta#add(int) unavailable for view");
     }
 
     @Override
     public int get(int idx) throws IndexOutOfBoundsException {
+        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
+    }
+
+	@Override
+    public ICause getCause(int idx) throws IndexOutOfBoundsException {
         throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
     }
 

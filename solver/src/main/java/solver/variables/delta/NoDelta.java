@@ -27,6 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
+
 /**
  * <br/>
  *
@@ -37,12 +39,12 @@ public enum NoDelta implements IntDelta {
     singleton;
 
     @Override
-    public IDeltaMonitor getMonitor() {
+    public IDeltaMonitor getMonitor(ICause propagator) {
         return IDeltaMonitor.Default.NONE;
     }
 
     @Override
-    public void add(int value) {
+    public void add(int value, ICause cause) {
     }
 
 	@Override
@@ -56,6 +58,11 @@ public enum NoDelta implements IntDelta {
 
     @Override
     public int get(int idx) {
+        throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
+    }
+
+	@Override
+    public ICause getCause(int idx) {
         throw new IndexOutOfBoundsException("NoDelta#get(): fordidden call, size must be checked before!");
     }
 

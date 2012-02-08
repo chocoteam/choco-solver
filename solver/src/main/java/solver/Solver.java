@@ -33,6 +33,7 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.buffer.EnvironmentBuffering;
 import choco.kernel.memory.copy.EnvironmentCopying;
 import choco.kernel.memory.trailing.EnvironmentTrailing;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -53,6 +54,7 @@ import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
+import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
 
 import java.io.*;
@@ -102,6 +104,8 @@ public class Solver implements Serializable {
      */
     Constraint[] cstrs;
     int cIdx;
+
+    public TIntObjectHashMap<ConstantView> cachedConstants;
 
     /**
      * Environment, based of the search tree (trailing or copying)
@@ -168,6 +172,7 @@ public class Solver implements Serializable {
         this.engine = new PropagationEngine();
         this.search.setPropEngine(engine);
         this.setExplainer(new ExplanationEngine(this));
+        this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
     }
 
     private void loadProperties() {
