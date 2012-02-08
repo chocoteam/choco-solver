@@ -184,7 +184,7 @@ public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder>
                 if (rho == 1) {
                     res = 1 - (tauNuMu(nu, mu) / (m * psiNuMu(nu, mu)));  // case 3: theo. 2 p.10
                 } else {
-                    throw new UnsupportedOperationException(); // cas rho > 1 ? couvert par mu >= rho ?
+                    res = 0; // cas rho > 1 ? couvert par mu >= rho ?
                 }
             }
         }
