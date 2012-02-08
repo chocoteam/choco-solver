@@ -509,6 +509,7 @@ public class TSP extends AbstractProblem {
 			ub = totalCost.getValue();
 		}
 	}
+
 	private class DichotomicSearch extends AbstractStrategy<IntVar> {
 		IntVar obj;
 		private boolean done;
@@ -655,6 +656,7 @@ public class TSP extends AbstractProblem {
 		}
 	}
 
+	static boolean branchOnArcs = false;
 	private class MinDomMinCost extends ArcStrategy {
 
 		public MinDomMinCost(GraphVar graphVar) {
@@ -663,6 +665,17 @@ public class TSP extends AbstractProblem {
 
 		@Override
 		public int nextArc() {
+			if(branchOnArcs){
+				if(!g.instantiated()){
+//					System.out.println(g.getEnvelopGraph());
+//					System.out.println(g.getKernelGraph());
+//					throw new UnsupportedOperationException();
+//					System.out.println("pas ouf");
+				}else{
+					return -1;
+				}
+			}
+			branchOnArcs = true;
 			int minArc = -1;
 			int minCost = -1;
 			INeighbors suc;
@@ -850,6 +863,7 @@ public class TSP extends AbstractProblem {
 
 		@Override
 		public int nextArc() {
+			branchOnArcs = false;
 			INeighbors suc;
 			int from = -1;
 			int size = n + 1;
@@ -902,6 +916,7 @@ public class TSP extends AbstractProblem {
 						}
 					}
 					if(!done){
+//						return -1;
 						throw new UnsupportedOperationException();
 					}
 					if(val<minCost){
@@ -919,6 +934,7 @@ public class TSP extends AbstractProblem {
 			return minArc;
 		}
 	}
+
 	private class MinNeigh extends ArcStrategy {
 
 		public MinNeigh(GraphVar graphVar) {
@@ -960,6 +976,7 @@ public class TSP extends AbstractProblem {
 			return minArc;
 		}
 	}
+
 	private class MinSucc extends ArcStrategy {
 
 		public MinSucc(GraphVar graphVar) {

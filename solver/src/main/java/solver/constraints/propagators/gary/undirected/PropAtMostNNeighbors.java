@@ -142,6 +142,9 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 					}
 				}
 			}
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
+				contradiction(g,"");
+			}
 		}
 	}
 

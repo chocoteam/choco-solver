@@ -46,6 +46,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -103,26 +104,26 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 			origin[i].set(i);
 			size[i].set(1);
 		}
+		INeighbors nei;
 		for(int i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+			nei = g.getKernelGraph().getSuccessorsOf(i);
+			j = nei.getFirstElement();
 			if(j!=-1 && i<j){
 				enforce(i,j);
 			}
-			j = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
+			j = nei.getNextElement();
 			if(j!=-1 && i<j){
 				enforce(i,j);
 			}
-			j = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
-			if(j!=-1){
-				throw new UnsupportedOperationException("should not have >2 edges");
-//				contradiction(g,"");
+			if(nei.getNextElement()!=-1){
+				contradiction(g,"");
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
+		if(ALWAYS_COARSE || true){
 			propagate(0);return;
 		}
 		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
@@ -190,7 +191,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 			enforceNormal(i,j);
 			return;
 		}
-		contradiction(g,"");//this cas should not happen (expect if deg=2 is not propagated yet
+		contradiction(g,"");//this cas should not happen (except if deg=2 is not propagated yet)
 	}
 
 	private void enforceNormal(int i, int j) throws ContradictionException {
@@ -221,9 +222,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	private class EnfArc implements IntProcedure {
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to = i%n;
-			enforce(from,to);
+			enforce(i/n-1,i%n);
 		}
 	}
 }
