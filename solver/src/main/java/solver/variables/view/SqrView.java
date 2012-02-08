@@ -68,22 +68,25 @@ public final class SqrView extends View<IntVar> {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta()) {
+            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(), this) {
                 @Override
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                     if (EventType.isRemove(eventType.mask)) {
                         for (int i = frozenFirst; i < frozenLast; i++) {
-                            int v = delta.get(i);
-                            if (!var.contains(-v)) {
-                                boolean found = false;
-                                for (int j = i + 1; !found && j < frozenLast; j++) {
-                                    if (delta.get(j) == -v) {
-                                        found = true;
+                            if (propagator != delta.getCause(i)) {
+                                int v = delta.get(i);
+                                if (!var.contains(-v)) {
+                                    boolean found = false;
+                                    for (int j = i + 1; !found && j < frozenLast; j++) {
+                                        if (delta.get(j) == -v) {
+                                            found = true;
+                                        }
+                                    }
+                                    if (!found) {
+                                        proc.execute(v * v);
                                     }
                                 }
-                                if (!found) {
-                                    proc.execute(v*v);
-                                }
+
                             }
                         }
                     }
@@ -204,7 +207,7 @@ public final class SqrView extends View<IntVar> {
         boolean done = var.removeInterval(-floorV + 1, floorV - 1, this);
         if (done) {
             EventType evt = EventType.INCLOW;
-            if(instantiated()){
+            if (instantiated()) {
                 evt = EventType.INSTANTIATE;
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;
@@ -227,7 +230,7 @@ public final class SqrView extends View<IntVar> {
         done |= var.updateUpperBound(floorV, this);
         if (done) {
             EventType evt = EventType.DECUPP;
-            if(instantiated()){
+            if (instantiated()) {
                 evt = EventType.INSTANTIATE;
                 if (cause.reactOnPromotion()) {
                     cause = Cause.Null;

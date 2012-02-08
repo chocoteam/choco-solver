@@ -59,7 +59,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver) {
         super(variable, propagator, solver);
         this.idxVinP = idxVinP;
-        this.deltamon = variable.getDelta().getMonitor();
+        this.deltamon = variable.getDelta().getMonitor(propagator);
     }
 
     @Override
