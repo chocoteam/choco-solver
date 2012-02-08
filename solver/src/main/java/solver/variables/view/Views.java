@@ -54,16 +54,23 @@ public enum Views {
     }
 
     public static IntVar fixed(String name, int value, Solver solver) {
-        if (value == 0 || value == 1) {
-            //            solver.associates(var);
-            return new BoolConstantView(name, value, solver);
-        } else {
-            //            solver.associates(var);
-            return new ConstantView("cste -- " + value, value, solver);
+        if (solver.cachedConstants.containsKey(value)) {
+            return solver.cachedConstants.get(value);
         }
+        ConstantView cste;
+        if (value == 0 || value == 1) {
+            cste = new BoolConstantView(name, value, solver);
+        } else {
+            cste = new ConstantView("cste -- " + value, value, solver);
+        }
+        solver.cachedConstants.put(value, cste);
+        return cste;
     }
 
     public static IntVar offset(IntVar ivar, int cste) {
+        if (cste == 0) {
+            return ivar;
+        }
         return new OffsetView(ivar, cste, ivar.getSolver());
     }
 
@@ -88,49 +95,77 @@ public enum Views {
     }
 
     public static IntVar abs(IntVar ivar) {
-        return new AbsView(ivar, ivar.getSolver());
+        if (ivar.instantiated()) {
+            return fixed(Math.abs(ivar.getValue()), ivar.getSolver());
+        } else if (ivar.getLB() >= 0) {
+            return ivar;
+        } else if (ivar.getUB() <= 0) {
+            return minus(ivar);
+        } else {
+            return new AbsView(ivar, ivar.getSolver());
+        }
     }
 
     public static IntVar sqr(IntVar ivar) {
+        if (ivar.instantiated()) {
+            int value = ivar.getValue();
+            return fixed(value * value, ivar.getSolver());
+        }
         return new SqrView(ivar, ivar.getSolver());
     }
 
     public static IntVar sum(IntVar a, IntVar b) {
-        Solver solver = a.getSolver();
-        IntVar z;
-        //TODO: add a more complex analysis of the build domain
-        if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
-            int lbA = a.getLB();
-            int ubA = a.getUB();
-            int lbB = b.getLB();
-            int ubB = b.getUB();
-            int OFFSET = lbA + lbB;
-            IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
-            DisposableRangeIterator itA = a.getRangeIterator(true);
-            DisposableRangeIterator itB = b.getRangeIterator(true);
-            while (itA.hasNext()) {
-                itB.bottomUpInit();
-                while (itB.hasNext()) {
-                    VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
-                    itB.next();
-                }
-                itB.dispose();
-                itA.next();
+        if (a.instantiated()) {
+            if (b.instantiated()) {
+                return fixed(a.getValue() + b.getValue(), a.getSolver());
+            } else {
+                return offset(b, a.getValue());
             }
-            itA.dispose();
-            z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
+        } else if (b.instantiated()) {
+            return offset(a, b.getValue());
         } else {
-            z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
+            Solver solver = a.getSolver();
+            IntVar z;
+            //TODO: add a more complex analysis of the build domain
+            if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
+                int lbA = a.getLB();
+                int ubA = a.getUB();
+                int lbB = b.getLB();
+                int ubB = b.getUB();
+                int OFFSET = lbA + lbB;
+                IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
+                DisposableRangeIterator itA = a.getRangeIterator(true);
+                DisposableRangeIterator itB = b.getRangeIterator(true);
+                while (itA.hasNext()) {
+                    itB.bottomUpInit();
+                    while (itB.hasNext()) {
+                        VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
+                        itB.next();
+                    }
+                    itB.dispose();
+                    itA.next();
+                }
+                itA.dispose();
+                z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
+            } else {
+                z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
+            }
+            solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
+            return z;
         }
-        solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
-        return z;
     }
 
     public static IntVar max(IntVar a, IntVar b) {
-        Solver solver = a.getSolver();
-        IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
-                Math.max(a.getLB(),  b.getLB()), Math.max(a.getUB(),b.getUB()), solver);
-        solver.post(new MaxXYZ(z, a,b, solver));
-        return z;
+        if (a.getLB() >= b.getUB()) {
+            return a;
+        } else if (b.getLB() >= a.getUB()) {
+            return b;
+        } else {
+            Solver solver = a.getSolver();
+            IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
+                    Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
+            solver.post(new MaxXYZ(z, a, b, solver));
+            return z;
+        }
     }
 }
