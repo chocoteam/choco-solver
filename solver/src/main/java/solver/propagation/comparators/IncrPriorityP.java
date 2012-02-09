@@ -27,7 +27,6 @@
 
 package solver.propagation.comparators;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
 import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
@@ -65,7 +64,7 @@ public class IncrPriorityP implements Comparator<IEventRecorder>, Serializable {
 			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 		}
-		return v2.getPropagators()[0].getPriority().priority - v1.getPropagators()[0].getPriority().priority;
+		return v1.getPropagators()[0].getPriority().priority - v2.getPropagators()[0].getPriority().priority;
 //        return 0;//v2.getPropagator().getPriority().priority - v1.getPropagator().getPriority().priority;
     }
 

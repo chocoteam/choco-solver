@@ -35,7 +35,7 @@ package solver.constraints.propagators;
  */
 public enum PropagatorPriority {
 
-    UNARY(7), BINARY(6), TERNARY(5), LINEAR(4), QUADRATIC(3), CUBIC(2), VERY_SLOW(1);// 0 = PROPAGATE;
+    UNARY(1), BINARY(2), TERNARY(3), LINEAR(4), QUADRATIC(5), CUBIC(6), VERY_SLOW(7);// 8 = PROPAGATE;
 
 
     public final int priority;
