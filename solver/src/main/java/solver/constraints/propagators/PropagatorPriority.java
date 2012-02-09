@@ -46,19 +46,19 @@ public enum PropagatorPriority {
 
     public static PropagatorPriority get(int prio) {
         switch (prio) {
-            case 7:
+            case 1:
                 return UNARY;
-            case 6:
+            case 2:
                 return BINARY;
-            case 5:
+            case 3:
                 return TERNARY;
             case 4:
                 return LINEAR;
-            case 3:
+            case 5:
                 return QUADRATIC;
-            case 2:
+            case 6:
                 return CUBIC;
-            case 1:
+            case 7:
                 return VERY_SLOW;
             default:
                 return VERY_SLOW;
