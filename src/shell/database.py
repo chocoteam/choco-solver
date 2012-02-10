@@ -38,7 +38,7 @@ class Database:
         with self.con:
             cur = self.con.cursor()
             cur.execute(
-                "DROP TABLES IF EXISTS SESSION, PROBLEM_PER_SESSION, PROBLEM, RESULTS, TIME, DATA"
+                "DROP TABLES IF EXISTS SESSION, PROBLEM, RESULTS, TIME, DATA"
             )
 
 
@@ -52,21 +52,9 @@ class Database:
             )")
 
         cur.execute(
-            "CREATE TABLE IF NOT EXISTS PROBLEM_PER_SESSION (\
-                ses_id BINARY(36), pb_id BINARY(36),\
-                PRIMARY KEY (ses_id, pb_id)\
-            )")
-
-        cur.execute(
             "CREATE TABLE IF NOT EXISTS PROBLEM(\
                 name VARCHAR(100) NOT NULL, parameters VARCHAR(255), id BINARY(36),\
                 PRIMARY KEY (name(75), parameters(100))\
-            )")
-
-        cur.execute(
-            "CREATE TABLE IF NOT EXISTS RESULTS( \
-                pb_id BINARY(36), exec_date DATETIME, time_id INT, data_id INT,\
-                PRIMARY KEY (pb_id, exec_date)\
             )")
 
         cur.execute(
@@ -82,15 +70,20 @@ class Database:
                 PRIMARY KEY (id)\
             )")
 
-        cur.execute("ALTER TABLE PROBLEM_PER_SESSION ADD FOREIGN KEY (pb_id) REFERENCES PROBLEM(pb_id)")
-        cur.execute("ALTER TABLE RESULTS ADD FOREIGN KEY (pb_id) REFERENCES PROBLEM(pb_id)")
+        cur.execute(
+            "CREATE TABLE IF NOT EXISTS RESULTS( \
+                ses_id BINARY(36), pb_id BINARY(36), time_id INT, data_id INT,\
+                PRIMARY KEY (ses_id, pb_id, time_id, data_id)\
+            )")
+
+        cur.execute("ALTER TABLE RESULTS ADD FOREIGN KEY (ses_id) REFERENCES SESSION(id)")
+        cur.execute("ALTER TABLE RESULTS ADD FOREIGN KEY (pb_id) REFERENCES PROBLEM(id)")
         cur.execute("ALTER TABLE RESULTS ADD FOREIGN KEY (time_id) REFERENCES TIME(id)")
         cur.execute("ALTER TABLE RESULTS ADD FOREIGN KEY (data_id) REFERENCES DATA(id)")
 
 
-    def openSession(self):
+    def openSession(self, name):
         cur = self.con.cursor()
-        name = "test"
         cur.execute("INSERT INTO SESSION (name, exec_date, id) VALUES (%s, NOW(), UUID())", name)
         cur.execute("SELECT id FROM SESSION ORDER BY exec_date DESC LIMIT 1")
         row = cur.fetchone()
@@ -119,9 +112,6 @@ class Database:
         # get the problem id
         pb_id = row[0]
 
-        # insert into set
-        cur.execute("INSERT INTO PROBLEM_PER_SESSION (ses_id, pb_id) VALUES (%s, %s)",(self.sid, pb_id))
-
         # insert into TIME
         cur.execute("INSERT INTO TIME (building, init, init_prop, resolution) VALUES (%s, %s,%s,%s)",
                     (str(results[1][0]), str(results[2][0]), str(results[3][0]), str(results[5][0]))
@@ -140,8 +130,8 @@ class Database:
         d_id = cur.fetchone()[0]
 
         # insert into RESULTS
-        cur.execute("INSERT INTO RESULTS (pb_id, exec_date, time_id, data_id) VALUES (%s, NOW(), %s, %s)",
-                    (pb_id, t_id, d_id)
+        cur.execute("INSERT INTO RESULTS (ses_id, pb_id, time_id, data_id) VALUES (%s, %s, %s, %s)",
+                    (self.sid, pb_id, t_id, d_id)
         )
 
     def plot(self):
