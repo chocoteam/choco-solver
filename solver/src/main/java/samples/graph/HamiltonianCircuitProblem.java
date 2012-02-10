@@ -280,18 +280,21 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}
 		throw new UnsupportedOperationException();
 	}
+
 	private static void tsplib_bench() {
 		outFile = "HCP_TSPLIB.csv";
-//		clearFile(outFile);
+		clearFile(outFile);
 		writeTextInto("instance;nbSols;nbNodes;nbFails;time;allDiff;arbo;antiArbo;rg;pos;\n",outFile);
 		String dir = "/Users/jfages07/Documents/code/ALL_hcp";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		for (String s : list) {
-			if (s.contains(".hcp"))
+			if (s.contains(".hcp")){
 				testInstance(dir + "/" + s);
+			}
 		}
 	}
+	
 	private static void testInstance(String instance) {
 		String[] st = instance.split("/");
 		String name = st[st.length-1];
@@ -312,7 +315,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		writeTextInto(res + "\n", outFile);
 //		}
 	}
-
 
 	// GENERATOR
 	// from file

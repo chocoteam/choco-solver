@@ -37,12 +37,10 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.*;
@@ -316,14 +314,15 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 			int from = i/n-1;
 			int to   = i%n;
 			check(from,to+n);
-			check(from+n,to);
+			check(to,from+n);
 		}
 		private void check(int from, int to){
 			if(digraph.arcExists(to,from)){
 				free.set(to);
 				free.set(from);
 				digraph.removeArc(to, from);
-			}else if(digraph.arcExists(from,to)){
+			}
+			if(digraph.arcExists(from,to)){
 				digraph.removeArc(from,to);
 			}
 		}

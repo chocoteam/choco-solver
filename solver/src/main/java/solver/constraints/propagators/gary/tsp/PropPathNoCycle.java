@@ -153,8 +153,20 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		origin[last].set(start);
 		end[start].set(last);
 		size[start].add(size[j].get());
+//		if(start==source && size[start].get()<n-1){
+//			g.removeArc(last,sink,this);
+//		}
+		if(start==source || last == sink){
+			if(size[source].get()+size[origin[sink].get()].get()<n){
+				g.removeArc(end[source].get(),origin[sink].get(),this);
+			}
+			if(size[source].get()+size[origin[sink].get()].get()==n){
+				g.enforceArc(end[source].get(),origin[sink].get(),this);
+			}
+		}
 		if(origin[sink].get()==source && size[source].get()!=n){
-			contradiction(g,"non hamiltonian path");
+			throw new UnsupportedOperationException("should be already treated");
+//			contradiction(g,"non hamiltonian path");
 		}
 	}
 

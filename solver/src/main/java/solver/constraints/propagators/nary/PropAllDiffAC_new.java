@@ -50,7 +50,11 @@ import java.util.BitSet;
 /**
  * Propagator for AllDifferent AC constraint for integer variables
 <<<<<<< HEAD
+<<<<<<< HEAD
  *
+=======
+ * <p/>
+>>>>>>> develop
 =======
  * <p/>
 >>>>>>> develop

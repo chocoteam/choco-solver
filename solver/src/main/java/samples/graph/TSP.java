@@ -35,14 +35,12 @@ import samples.AbstractProblem;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.exception.ContradictionException;
@@ -60,7 +58,6 @@ import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
@@ -299,9 +296,9 @@ public class TSP extends AbstractProblem {
 //					StrategyFactory.graphStrategy(graph, null, new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS)
 //			);
 			strategy = new StrategiesSequencer(solver.getEnvironment(),
-					StrategyFactory.graphStrategy(undi, null, new MinNeighMinSumCost(undi), GraphStrategy.NodeArcPriority.ARCS),
-					StrategyFactory.graphStrategy(graph, null, new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS),
-					StrategyFactory.graphLexico(graph),StrategyFactory.graphLexico(undi)
+//					StrategyFactory.graphStrategy(undi, null, new MinNeighMinSumCost(undi), GraphStrategy.NodeArcPriority.ARCS),
+					StrategyFactory.graphStrategy(graph, null, new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS)
+//					,StrategyFactory.graphLexico(graph),StrategyFactory.graphLexico(undi)
 			);
 		}
 
@@ -315,7 +312,7 @@ public class TSP extends AbstractProblem {
 //		solver.getSearchLoop().getLimitsBox().setSolutionLimit(2);
 		SearchMonitorFactory.log(solver, true, false);
 //		if(policy>0)
-		solver.getSearchLoop().restartAfterEachSolution(true);
+//		solver.getSearchLoop().restartAfterEachSolution(true);
 	}
 
 	@Override
@@ -330,8 +327,44 @@ public class TSP extends AbstractProblem {
 	@Override
 	public void prettyOut() {
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+		double coef = 0;
+		double sum = 0;
+		int x,y;
+//		String s ="";
+//		for(int i=0;i<n-1;i++){
+//			s+="\n";
+//			for(int j=0;j<n;j++){
+//				s+=distanceMatrix[i][j]+",";
+//			}
+//		}
+//		System.out.println(s);
+//		System.exit(0);
+		for(int i=0;i<n-1;i++){
+			for(int j=i+1;j<n;j++){
+				if(i!=0 || j!=n-1){
+					x = distanceMatrix[i][j];
+					if(i==0){
+						y=distanceMatrix[j][n-1];
+					}else{
+						if(j==n-1){
+							y=distanceMatrix[0][i];
+						}else{
+							y=distanceMatrix[j][i];
+						}
+					}
+					if(x>100000 || y>100000){
+						System.out.println(i+"-"+j+" : "+x+" : "+y);
+						throw new UnsupportedOperationException();
+					}
+					coef += Math.abs(x-y);
+					sum += x+y;
+				}
+			}
+		}
+		coef /=sum;
+
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ solver.getMeasures().getTimeCount() + ";" + policy + ";" + bestCost + ";"+rg+";\n";
+				+ (int)(solver.getMeasures().getTimeCount()) + ";" + policy + ";" + bestCost + ";"+undirectedMate+";"+coef+"\n";
 		writeTextInto(txt, outFile);
 	}
 
@@ -343,9 +376,9 @@ public class TSP extends AbstractProblem {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;time;policy;obj;rg;\n", outFile);
-//		bench();
-		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ftv38.atsp";
-		testInstance(instance);
+		bench();
+//		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
+//		testInstance(instance);
 	}
 
 	private static void testInstance(String url) {
@@ -409,10 +442,10 @@ public class TSP extends AbstractProblem {
 				TSP tspRun = new TSP(dist,name,noVal,best);
 				tspRun.configParameters(p,false);
 				tspRun.execute();
-//				undirectedMate = false;
-//				tspRun = new TSP(dist,name,noVal,best);
-//				tspRun.configParameters(p,false);
-//				tspRun.execute();
+				undirectedMate = false;
+				tspRun = new TSP(dist,name,noVal,best);
+				tspRun.configParameters(p,false);
+				tspRun.execute();
 //				System.exit(0);
 //				}
 //				System.exit(0);

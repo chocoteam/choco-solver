@@ -100,7 +100,6 @@ public class PropAtLeastNNeighbors<V extends UndirectedGraphVar> extends GraphPr
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-
 		if((mask & EventType.REMOVEARC.mask) != 0){
             eventRecorder.getDeltaMonitor(this, g).forEach(rem_proc, EventType.REMOVEARC);
 		}

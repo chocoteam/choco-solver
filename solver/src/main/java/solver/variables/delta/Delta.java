@@ -27,6 +27,7 @@
 
 package solver.variables.delta;
 
+import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.monitor.IntDeltaMonitor;
@@ -39,26 +40,30 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  */
 public final class Delta implements IntDelta {
 
-    int[] rem;
-    int last;
+	int[] rem;
+	ICause[] causes;
+	int last;
     int timestamp = -1;
 
     public Delta() {
         rem = new int[16];
+        causes = new ICause[16];
     }
 
     @Override
-    public IntDeltaMonitor getMonitor() {
-        return new IntDeltaMonitor(this);
+    public IntDeltaMonitor getMonitor(ICause propagator) {
+        return new IntDeltaMonitor(this,propagator);
     }
 
-    private static int[] ensureCapacity(int idx, int[] values) {
-        if (idx >= values.length) {
-            int[] tmp = new int[idx * 3 / 2 + 1];
-            System.arraycopy(values, 0, tmp, 0, idx);
-            return tmp;
+	private void ensureCapacity() {
+        if (last >= rem.length) {
+            int[] tmp = new int[last * 3 / 2 + 1];
+			ICause[] tmpc = new ICause[last * 3 / 2 + 1];
+			System.arraycopy(rem, 0, tmp, 0, last);
+			System.arraycopy(causes, 0, tmpc, 0, last);
+			rem = tmp;
+			causes = tmpc;
         }
-        return values;
     }
 
     public void lazyClear() {
@@ -71,18 +76,25 @@ public final class Delta implements IntDelta {
      * Adds a new value to the delta
      *
      * @param value value to add
+     * @param cause of the removal
      */
-    public void add(int value) {
+    public void add(int value, ICause cause) {
 		if(IEventRecorder.LAZY){
        		lazyClear();
 		}
-        rem = ensureCapacity(last, rem);
+        ensureCapacity();
+        causes[last] = cause;
         rem[last++] = value;
     }
 
     @Override
     public int get(int idx) {
         return rem[idx];
+    }
+
+	@Override
+    public ICause getCause(int idx) {
+        return causes[idx];
     }
 
     /**

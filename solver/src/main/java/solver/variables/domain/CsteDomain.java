@@ -27,6 +27,7 @@
 
 package solver.variables.domain;
 
+import solver.ICause;
 import solver.exception.SolverException;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -110,7 +111,7 @@ public class CsteDomain implements IIntDomain {
     }
 
     @Override
-    public boolean restrictAndUpdateDelta(int aValue) {
+    public boolean restrictAndUpdateDelta(int aValue, ICause cause) {
         throw new SolverException("Unexpected call of restrictAndUpdateDelta");
     }
 
@@ -120,7 +121,7 @@ public class CsteDomain implements IIntDomain {
     }
 
     @Override
-    public boolean updateLowerBoundAndDelta(int aValue) {
+    public boolean updateLowerBoundAndDelta(int aValue, ICause cause) {
         throw new SolverException("Unexpected call of updateInf");
     }
 
@@ -130,7 +131,7 @@ public class CsteDomain implements IIntDomain {
     }
 
     @Override
-    public boolean updateUpperBoundAndDelta(int aValue) {
+    public boolean updateUpperBoundAndDelta(int aValue, ICause cause) {
         throw new SolverException("Unexpected call of updateInf");
     }
 
@@ -140,7 +141,7 @@ public class CsteDomain implements IIntDomain {
     }
 
     @Override
-    public boolean removeAndUpdateDelta(int aValue) {
+    public boolean removeAndUpdateDelta(int aValue, ICause cause) {
         throw new SolverException("Unexpected call of remove");
     }
 

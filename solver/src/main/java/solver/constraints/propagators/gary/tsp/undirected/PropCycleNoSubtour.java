@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.undirected;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
@@ -123,8 +123,9 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE || true){
-			propagate(0);return;
+		if(ALWAYS_COARSE){
+			propagate(0);
+			return;
 		}
 		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
