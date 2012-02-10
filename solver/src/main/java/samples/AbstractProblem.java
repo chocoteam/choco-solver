@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.IPropagationEngine;
-import solver.propagation.comparators.EngineStrategies;
+import solver.propagation.PropagationStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 /**
@@ -65,7 +65,7 @@ public abstract class AbstractProblem {
     Level level = Level.VERBOSE;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
-    EngineStrategies policy = EngineStrategies.DEFAULT;
+    PropagationStrategies policy = PropagationStrategies.DEFAULT;
 
     @Option(name = "-seed", usage = "Seed for Shuffle propagation engine.", required = false)
     protected long seed = 29091981;
@@ -90,7 +90,7 @@ public abstract class AbstractProblem {
 
     public abstract void prettyOut();
 
-    public final void readArgs(String... args) {
+    public final boolean readArgs(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
         parser.setUsageWidth(160);
         try {
@@ -100,8 +100,9 @@ public abstract class AbstractProblem {
             System.err.println("java " + this.getClass() + " [options...]");
             parser.printUsage(System.err);
             System.err.println();
-            System.exit(-1);
+            return false;
         }
+        return true;
     }
 
     protected void overridePolicy() {
@@ -109,13 +110,9 @@ public abstract class AbstractProblem {
         switch (policy) {
             case DEFAULT:
                 break;
-            case SHUFFLE:
-                engine.clear();
-//                solver.getEngine().addGroup(Group.buildGroup(Predicates.all(), new Shuffle(seed), Policy.FIXPOINT));
-                break;
             default:
                 engine.clear();
-                policy.defineIn(solver);
+                solver.set(policy.make(solver));
                 break;
         }
     }
@@ -125,27 +122,28 @@ public abstract class AbstractProblem {
     }
 
     public final void execute(String... args) {
-        this.readArgs(args);
-        Logger log = LoggerFactory.getLogger("bench");
-        this.printDescription();
-        this.buildModel();
-        this.configureSolver();
+        if (this.readArgs(args)) {
+            Logger log = LoggerFactory.getLogger("bench");
+            this.printDescription();
+            this.buildModel();
+            this.configureSolver();
 
-        overrideExplanation();
-        overridePolicy();
+            overrideExplanation();
+            overridePolicy();
 
-        if (level.getLevel() > Level.QUIET.getLevel()) {
-            SearchMonitorFactory.log(solver,
-                    level.getLevel() > Level.VERBOSE.getLevel(),
-                    level.getLevel() > Level.SOLUTIONS.getLevel());
-        }
+            if (level.getLevel() > Level.QUIET.getLevel()) {
+                SearchMonitorFactory.log(solver,
+                        level.getLevel() > Level.VERBOSE.getLevel(),
+                        level.getLevel() > Level.SOLUTIONS.getLevel());
+            }
 
-        this.solve();
-        if (level.getLevel() > Level.QUIET.getLevel()) {
-            this.prettyOut();
-        }
-        if (level.getLevel() > Level.SILENT.getLevel()) {
-            log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+            this.solve();
+            if (level.getLevel() > Level.QUIET.getLevel()) {
+                this.prettyOut();
+            }
+            if (level.getLevel() > Level.SILENT.getLevel()) {
+                log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+            }
         }
     }
 

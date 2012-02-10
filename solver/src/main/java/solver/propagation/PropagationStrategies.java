@@ -28,11 +28,15 @@ package solver.propagation;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.propagation.generator.Flatten;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.propagation.generator.*;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * <br/>
@@ -48,7 +52,7 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Primitive arcs = Primitive.arcs(constraints);
             Primitive coarses = Primitive.coarses(constraints);
-            return Queue.build(Flatten.build(arcs, coarses)).clearOut();
+            return Queue.build(arcs, coarses).clearOut();
         }
     },
     TWO_QUEUES_WITH_ARCS() {
@@ -57,8 +61,36 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.arcs(constraints));
             Queue coarses = Queue.build(Primitive.coarses(constraints));
-            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
-            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    PRIORITY_QUEUES_WITH_ARCS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
+            for (int i = 0; i < constraints.length; i++) {
+                Propagator[] propagators = constraints[i].propagators;
+                for (int j = 0; j < propagators.length; j++) {
+                    if (queues[propagators[j].getPriority().priority] == null) {
+                        queues[propagators[j].getPriority().priority] = new ArrayList<Propagator>();
+                    }
+                    queues[propagators[j].getPriority().priority].add(propagators[j]);
+                }
+            }
+            ArrayList<PropagationStrategy> real_q = new ArrayList<PropagationStrategy>();
+            for (int i = 0; i < queues.length; i++) {
+                if (queues[i] != null) {
+                    real_q.add(
+                            Queue.build(Primitive.arcs(
+                                    queues[i].toArray(new Propagator[queues[i].size()])
+                            )
+                            ).clearOut()
+                    );
+                }
+            }
+            real_q.add(Queue.build(Primitive.coarses(constraints)).pickOne());
+            return Sort.build(real_q.toArray(new PropagationStrategy[real_q.size()])).clearOut();
         }
     },
     ONE_QUEUE_WITH_VARS() {
@@ -78,8 +110,22 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.vars(variables));
             Queue coarses = Queue.build(Primitive.coarses(constraints));
-            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
-            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    INCREASING_DEGREE_VARS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Variable[] variables = solver.getVars();
+            Arrays.sort(variables, new Comparator<Variable>() {
+                @Override
+                public int compare(Variable o1, Variable o2) {
+                    return ((IntVar) o1).getDomainSize() - ((IntVar) o2).getDomainSize();
+                }
+            });
+            PropagationStrategy svar = Sort.build(Primitive.vars(variables)).clearOut();
+            Constraint[] constraints = solver.getCstrs();
+            return Sort.build(svar, Queue.build(Primitive.coarses(constraints)).pickOne()).clearOut();
         }
     },
     ONE_QUEUE_WITH_PROPS() {
@@ -97,8 +143,36 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = Queue.build(Primitive.props(constraints));
             Queue coarses = Queue.build(Primitive.coarses(constraints));
-            //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
-            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+        }
+    },
+    PRIORITY_QUEUES_WITH_PROPS() {
+        @SuppressWarnings({"unchecked"})
+        public PropagationStrategy make(Solver solver) {
+            Constraint[] constraints = solver.getCstrs();
+            ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
+            for (int i = 0; i < constraints.length; i++) {
+                Propagator[] propagators = constraints[i].propagators;
+                for (int j = 0; j < propagators.length; j++) {
+                    if (queues[propagators[j].getPriority().priority] == null) {
+                        queues[propagators[j].getPriority().priority] = new ArrayList<Propagator>();
+                    }
+                    queues[propagators[j].getPriority().priority].add(propagators[j]);
+                }
+            }
+            ArrayList<PropagationStrategy> real_q = new ArrayList<PropagationStrategy>();
+            for (int i = 0; i < queues.length; i++) {
+                if (queues[i] != null) {
+                    real_q.add(
+                            Queue.build(Primitive.props(
+                                    queues[i].toArray(new Propagator[queues[i].size()])
+                            )
+                            ).clearOut()
+                    );
+                }
+            }
+            real_q.add(Queue.build(Primitive.coarses(constraints)).pickOne());
+            return Sort.build(real_q.toArray(new PropagationStrategy[real_q.size()])).clearOut();
         }
     },
     DEFAULT() {
