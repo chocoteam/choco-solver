@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.comparators.EngineStrategies;
+import solver.propagation.PropagationStrategies;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -62,9 +62,9 @@ public class MagicSquareTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < EngineStrategies.values().length; t++) {
+            for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(j);
-                EngineStrategies.values()[t].defineIn(sol);
+                PropagationStrategies.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
