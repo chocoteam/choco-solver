@@ -49,9 +49,6 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
 
     private static final String MSG_INCONSISTENT = "inconsistent";
 
-    private final int[] maxOccurrences;
-    private final int[] minOccurrences;
-
     public PropBoundGlobalCardinaltyLowUp(IntVar[] vars, int[] minOccurrences, int[] maxOccurrences,
                                           int firstCardValue, int lastCardValue,
                                           Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
