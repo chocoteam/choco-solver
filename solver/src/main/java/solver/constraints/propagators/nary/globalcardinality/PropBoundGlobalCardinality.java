@@ -66,7 +66,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     private final int[] potentialStableSets;
     private final int[] newMin;
 
-    private final int[] minOccurrences, maxOccurrences;
+    int[] minOccurrences, maxOccurrences;
 
     int offset = 0;
 
@@ -680,6 +680,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     final void initBackDataStruct() throws ContradictionException {
+        for (int i = 0; i < range; i++) {
+            val_maxOcc[i].set(0);
+            val_minOcc[i].set(0);
+        }
         for (int i = 0; i < range; i++) {
             for (int j = 0; j < nbVars; j++) {
                 if (vars[j].contains(i + offset)) {
