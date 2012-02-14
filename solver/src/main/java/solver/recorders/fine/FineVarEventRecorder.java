@@ -165,17 +165,23 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     }
 
     @Override
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
         if (LAZY) {
             variable.getDelta().lazyClear();
         }
-        for (int i = 0; i < propagators.length; i++) {
-            int pid = propagators[i].getId();
-            this.evtmasks.put(pid, 0);
-            this.deltamon.get(pid).unfreeze();
-            this.timestamps.put(pid, AbstractSearchLoop.timeStamp);
+        int pid = propagator.getId();
+        this.evtmasks.put(pid, 0);
+        this.deltamon.get(pid).unfreeze();
+        this.timestamps.put(pid, AbstractSearchLoop.timeStamp);
+
+        //TODO: to remove when active propagators will be managed smartly
+        boolean canDeque = true;
+        for (int i = 0; i < propagators.length && canDeque; i++) {
+            if (this.evtmasks.get(propagators[i].getId()) != 0) {
+                canDeque = false;
+            }
         }
-        if (enqueued) {
+        if (enqueued && canDeque) {
             scheduler.remove(this);
         }
     }

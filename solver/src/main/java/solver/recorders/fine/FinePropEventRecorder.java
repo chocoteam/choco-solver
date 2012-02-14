@@ -142,7 +142,8 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
 
     @Override
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
+        assert this.propagator == propagator : "wrong propagator";
         if (LAZY) {
             for (int i = 0; i < variables.length; i++) {
                 variables[i].getDelta().lazyClear();
