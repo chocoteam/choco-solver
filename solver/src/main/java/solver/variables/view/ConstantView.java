@@ -287,11 +287,15 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
+    public void link(Propagator propagator, int idxInProp) {
     }
 
     @Override
     public void analyseAndAdapt(int mask) {
+    }
+
+    @Override
+    public void unlink(Propagator propagator) {
     }
 
     @Override
