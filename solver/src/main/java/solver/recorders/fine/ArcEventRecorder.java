@@ -114,7 +114,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
     }
 
     @Override

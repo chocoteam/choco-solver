@@ -26,7 +26,8 @@
  */
 package solver.recorders.coarse;
 
-import choco.kernel.common.util.procedure.Procedure;
+import choco.kernel.common.util.procedure.UnaryProcedure;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IScheduler;
 import solver.recorders.IEventRecorder;
@@ -46,10 +47,19 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder {
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued; // to check wether this is enqueud or not.
 
-    protected static final Procedure<AbstractFineEventRecorder> virtExec = new Procedure<AbstractFineEventRecorder>() {
+    protected static final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
+
+        Propagator coarseProp;
+
+        @Override
+        public UnaryProcedure set(Propagator propagator) {
+            coarseProp = propagator;
+            return this;
+        }
+
         @Override
         public void execute(AbstractFineEventRecorder abstractFineEventRecorder) throws ContradictionException {
-            abstractFineEventRecorder.virtuallyExecuted();
+            abstractFineEventRecorder.virtuallyExecuted(coarseProp);
         }
     };
 

@@ -98,7 +98,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 			propagator.propagate(_evt);
 		}
 		// unfreeze (and eventually unschedule) every fine event attached to this propagator
-		propagator.forEachFineEvent(virtExec);
+		propagator.forEachFineEvent(virtExec.set(propagator));
 		return true;
 	}
 

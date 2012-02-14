@@ -134,7 +134,8 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
         // nothing required here
     }
 
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
+        assert this.propagator == propagator : "wrong propagator";
         this.evtmask = 0;
         if (LAZY) {
             variable.getDelta().lazyClear();
