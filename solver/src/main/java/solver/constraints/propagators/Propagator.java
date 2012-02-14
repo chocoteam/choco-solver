@@ -138,7 +138,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
-        this.vars = vars;
+        this.vars = vars.clone();
         this.solver = solver;
         this.environment = solver.getEnvironment();
         this.state = environment.makeInt(NEW);

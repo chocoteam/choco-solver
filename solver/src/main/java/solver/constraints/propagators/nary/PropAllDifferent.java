@@ -47,7 +47,7 @@ public class PropAllDifferent extends AbstractBipartiteMatching {
 
 
     public PropAllDifferent(IntVar[] vars, Solver solver, IntConstraint constraint) {
-        super(vars.clone(), vars.length, PropAllDifferent.getValueGap(vars), solver, constraint,
+        super(vars, vars.length, PropAllDifferent.getValueGap(vars), solver, constraint,
                 PropagatorPriority.CUBIC, true);
         minValue = Integer.MAX_VALUE;
         maxValue = Integer.MIN_VALUE;
