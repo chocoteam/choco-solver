@@ -168,7 +168,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
         // void
     }
 
