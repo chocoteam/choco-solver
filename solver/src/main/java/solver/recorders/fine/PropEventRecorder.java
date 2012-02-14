@@ -121,7 +121,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     }
 
     @Override
-    public void virtuallyExecuted() {
+    public void virtuallyExecuted(Propagator propagator) {
     }
 
     @Override

@@ -98,6 +98,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     /**
      * Set the event recorder in the same state as the one after its execution.
      * It is dequed, mask is void and delta monitor is unfreeze.
+     * @param propagator the propagator executed in the coarse recorder
      */
-    public abstract void virtuallyExecuted();
+    public abstract void virtuallyExecuted(Propagator propagator);
 }
