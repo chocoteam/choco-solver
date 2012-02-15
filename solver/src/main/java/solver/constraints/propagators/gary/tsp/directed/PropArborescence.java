@@ -25,19 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 03/10/11
- * Time: 19:56
- */
+package solver.constraints.propagators.gary.tsp.directed;
 
-package solver.constraints.propagators.gary.tsp;
-
-import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -46,48 +36,60 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
+
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**
- *
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * Arborescence constraint (simplification from tree constraint)
+ * based on dominators
+ * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
+ * but very efficient in practice
  * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	// flow graph
 	DirectedGraphVar g;
+	// source that reaches other nodes
+	int source;
+	// number of nodes
 	int n;
-	private IntProcedure arcEnforced;
-	private IStateInt[] origin,end,size;
+	// dominators finder that contains the dominator tree
+	AbstractLengauerTarjanDominatorsFinder domFinder;
+	INeighbors[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
+	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
+	 * Ensures that graph is an arborescence rooted in node source
 	 * @param graph
+	 * @param source root of the arborescence
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
+		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
-		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc();
-		origin = new IStateInt[n];
-		size = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
+		n = g.getEnvelopGraph().getNbNodes();
+		this.source = source;
+		successors = new INeighbors[n];
+		if(simple){
+			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
+		}else{
+			domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
 		}
 	}
 
@@ -97,68 +99,53 @@ public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropa
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int i,j;
-		for(i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
-			size[i].set(1);
+		System.out.println("propagate");
+		for(int i=0;i<n;i++){
+			g.enforceNode(i,this);
+			g.removeArc(i,i,this);
+			g.removeArc(i,source,this);
 		}
-		for(i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-			if(j!=-1){
-				enforce(i,j);
-			}
-		}
+		structuralPruning();
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
+		structuralPruning();
+	}
+
+	private void structuralPruning() throws ContradictionException {
+		if(domFinder.findDominators()){
+			INeighbors nei;
+			for (int x=0; x<n; x++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(x);
+				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
+					//--- STANDART PRUNING
+					if(domFinder.isDomminatedBy(x,y)){
+						g.removeArc(x,y,this);
+					}
+					// ENFORCE ARC-DOMINATORS (redondant)
+				}
+			}
+		}else{
+			contradiction(g,"the source cannot reach all nodes");
+		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask ;
+		return EventType.REMOVEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
-
-	private void enforce(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		if(origin[j].get()!=j){
-			contradiction(g,"");
-		}
-		if(end[i].get()!=i){
-			contradiction(g,"");
-		}
-		if(i==last && j==start){
-			if(size[start].get()!=n){
-				contradiction(g,"");
+		if(isCompletelyInstantiated()){
+			try{
+				structuralPruning();
+			}catch (Exception e){
+				return ESat.FALSE;
 			}
-			return;
+			return ESat.TRUE;
 		}
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
-		if(size[start].get()!=n){
-			g.removeArc(last,start,this);
-		}else{
-			g.enforceArc(last,start,this);
-		}
-	}
-
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
-	private class EnfArc implements IntProcedure {
-		@Override
-		public void execute(int i) throws ContradictionException {
-			enforce(i/n-1,i%n);
-		}
+		return ESat.UNDEFINED;
 	}
 }

@@ -25,9 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
 import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.heaps.Heap;
 import solver.exception.ContradictionException;
@@ -41,7 +42,6 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected BitSet ma; 	//mandatory arcs (i,j) <-> i*n+j
 	double[][] costs;
 	Heap heap;
 	BitSet inTree;
@@ -70,7 +70,6 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 
 	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
 		g = graph;
-		ma = propHK.getMandatoryArcsBitSet();
 		for(int i=0;i<n;i++){
 			Tree.getSuccessorsOf(i).clear();
 			Tree.getPredecessorsOf(i).clear();
@@ -121,7 +120,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 		for(int out=outArcs[currentSCC].getFirstElement();out>=0;out=outArcs[currentSCC].getNextElement()){
 			from = out/n-1;
 			to   = out%n;
-			if(propHK.getMandatorySuccessorOf(from)==to){
+			if(propHK.isMandatory(from,to)){
 				minVal = costs[from][to];
 				minFrom = from;
 				minTo  = to;
@@ -152,7 +151,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			Tree.addArc(from,to);
 			treeCost += costs[from][to];
 			if(FILTER){
-				if(!ma.get(from*n+to)){
+				if(!propHK.isMandatory(from,to)){
 					maxTArc = Math.max(maxTArc, costs[from][to]);
 				}
 			}
@@ -167,7 +166,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			Tree.addArc(to, from);
 			treeCost += costs[to][from];
 			if(FILTER){
-				if(!ma.get(to*n+from)){
+				if(!propHK.isMandatory(to,from)){
 					maxTArc = Math.max(maxTArc, costs[to][from]);
 				}
 			}
@@ -182,7 +181,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			INeighbors nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
-					if(ma.get(i*n+j)){
+					if(propHK.isMandatory(i,j)){
 						heap.add(j,minVal,i);
 					}else{
 						heap.add(j,costs[i][j],i);
@@ -192,7 +191,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			nei = g.getPredecessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
-					if(ma.get(j*n+i)){
+					if(propHK.isMandatory(j,i)){
 						heap.add(j,minVal,i+n);
 					}else{
 						heap.add(j,costs[j][i],i+n);

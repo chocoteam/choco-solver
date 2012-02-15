@@ -32,29 +32,24 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
-import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-/**
- *
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropIntVarChanneling extends GraphPropagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -62,36 +57,36 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 
 	DirectedGraphVar g;
 	int n;
+	IntVar[] intVars;
+	private int varIdx;
 	private IntProcedure arcEnforced;
-	private IStateInt[] origin,end,size;
-	private int source,sink;
+	private IntProcedure arcRemoved;
+	private IntProcedure valRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
+	/** Links intVars and the graph
+	 * arc (x,y)=var[x]=y
+	 * values outside range [0,n-1] are not considered
+	 * @param intVars
 	 * @param graph
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropPathNoCycle(DirectedGraphVar graph, int source, int sink, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(intVars,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+		this.intVars = intVars;
 		this.n = g.getEnvelopGraph().getNbNodes();
+		valRemoved  = new ValRem(this);
 		arcEnforced = new EnfArc(this);
-		origin = new IStateInt[n];
-		size = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
+		if(intVars[0].hasEnumeratedDomain()){
+			arcRemoved  = new RemArcAC(this);
+		}else{
+			arcRemoved  = new RemArcBC(this);
 		}
-		this.source = source;
-		this.sink   = sink;
 	}
 
 	//***********************************************************************************
@@ -100,79 +95,91 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int j;
+		INeighbors nei;
+		IntVar v;
 		for(int i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
-			size[i].set(1);
-		}
-		for(int i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-			if(j!=-1){
-				enforce(i,j);
+			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!intVars[i].contains(j)){
+					g.removeArc(i,j,this);
+				}
+			}
+			v = intVars[i];
+			int ub = v.getUB();
+			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
+				if(j<n && !g.getEnvelopGraph().arcExists(i,j)){
+					v.removeValue(j,this);
+				}
+			}
+			if(!v.hasEnumeratedDomain()){
+				ub = v.getUB();
+				while(ub>=0 && ub<n && !g.getEnvelopGraph().arcExists(i,ub)){
+					v.removeValue(ub,this);
+					ub--;
+				}
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);return;
+		if(vars[idxVarInProp].getType() == Variable.GRAPH){
+			if((mask & EventType.ENFORCEARC.mask) !=0){
+				eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+			}
+			if((mask & EventType.REMOVEARC.mask)!=0){
+				eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+			}
+		}else{
+			varIdx = idxVarInProp;
+			int val = intVars[varIdx].getLB();
+			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
+				g.enforceArc(varIdx,val,this);
+			}
+			eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
 		}
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask ;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(g.instantiated()){
-			int narcs = 0;
-			for(int i=0;i<n;i++){
-				narcs+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-			}
-			boolean connected = ConnectivityFinder.findCCOf(g.getEnvelopGraph()).size()==1;
-			if(connected && narcs==n-1){
-				return ESat.TRUE;
-			}
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
-	}
-
-	private void enforce(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		if(origin[j].get()!=j){
-			contradiction(g,"");
-		}
-		g.removeArc(last,start,this);
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
-//		if(start==source && size[start].get()<n-1){
-//			g.removeArc(last,sink,this);
-//		}
-		if(start==source || last == sink){
-			if(size[source].get()+size[origin[sink].get()].get()<n){
-				g.removeArc(end[source].get(),origin[sink].get(),this);
-			}
-			if(size[source].get()+size[origin[sink].get()].get()==n){
-				g.enforceArc(end[source].get(),origin[sink].get(),this);
+		for(int i=0;i<vars.length;i++){
+			if(!vars[i].instantiated()){
+				return ESat.UNDEFINED;
 			}
 		}
-		if(origin[sink].get()==source && size[source].get()!=n){
-			throw new UnsupportedOperationException("should be already treated");
-//			contradiction(g,"non hamiltonian path");
+		int val;
+		for(int i=0;i<n;i++){
+			val = intVars[i].getValue();
+			if(val<n && !g.getEnvelopGraph().arcExists(i,val)){
+				return ESat.FALSE;
+			}
+			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+				return ESat.FALSE;
+			}
 		}
+		return ESat.TRUE;
 	}
 
 	//***********************************************************************************
 	// PROCEDURES
 	//***********************************************************************************
+
+	private class ValRem implements IntProcedure{
+		private GraphPropagator p;
+
+		private ValRem(GraphPropagator p){
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			g.removeArc(varIdx,i,p);
+		}
+	}
 
 	private class EnfArc implements IntProcedure {
 		private GraphPropagator p;
@@ -182,7 +189,43 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			enforce(i/n-1,i%n);
+			intVars[i/n-1].instantiateTo(i%n,p);
+		}
+	}
+
+	private class RemArcAC implements IntProcedure{
+		private GraphPropagator p;
+
+		private RemArcAC(GraphPropagator p){
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			intVars[i/n-1].removeValue(i%n,p);
+		}
+	}
+
+	private class RemArcBC implements IntProcedure{
+		private GraphPropagator p;
+
+		private RemArcBC(GraphPropagator p){
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = i/n-1;
+			int to = i%n;
+			if(to==intVars[from].getLB()){
+				while(to<n && !g.getEnvelopGraph().arcExists(from,to)){
+					to++;
+				}
+				intVars[from].updateLowerBound(to,p);
+			}else if(to==intVars[from].getUB()){
+				while(to>=0 && !g.getEnvelopGraph().arcExists(from,to)){
+					to--;
+				}
+				intVars[from].updateUpperBound(to, p);
+			}
 		}
 	}
 }

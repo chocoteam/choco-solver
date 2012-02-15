@@ -1,44 +1,46 @@
 /**
-*  Copyright (c) 1999-2011, Ecole des Mines de Nantes
-*  All rights reserved.
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions are met:
-*
-*      * Redistributions of source code must retain the above copyright
-*        notice, this list of conditions and the following disclaimer.
-*      * Redistributions in binary form must reproduce the above copyright
-*        notice, this list of conditions and the following disclaimer in the
-*        documentation and/or other materials provided with the distribution.
-*      * Neither the name of the Ecole des Mines de Nantes nor the
-*        names of its contributors may be used to endorse or promote products
-*        derived from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
-*  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-*  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-*  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
-*  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-*  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  All rights reserved.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the Ecole des Mines de Nantes nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
-package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
-import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
+import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
-public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
+public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -61,32 +63,31 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 	private int fromInterest, cctRoot;
 	private BitSet useful;
 	private double minTArc,maxTArc;
-	TIntArrayList links;
-	private int[] minCostOutArcs;
+	private double[][] distMatrix;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalBSTFinderWithFiltering(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator,nR,sccOf,outArcs);
+	public KruskalOneTreeFinderWithFiltering(int nbNodes, HeldKarp propagator) {
+		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];
 		costs = new double[n*n];
 		sortedArcs = new int[n*n];
 		indexOfArc = new int[n][n];
 		p = new int[n];
+		// CCtree
 		ccN = 2*n+1;
+		// backtrable
 		ccTree = new DirectedGraph(ccN,GraphType.LINKED_LIST);
 		ccTEdgeCost = new double[ccN];
 		ccTp = new int[n];
 		useful = new BitSet(n);
 		lca = new LCAGraphManager(ccN);
-		links = new TIntArrayList();
-		minCostOutArcs = new int[n];
 	}
 
-	private void sortArcs(double[][] costMatrix) throws ContradictionException {
+	private void sortArcs(){
 		Comparator<Integer> comp = new Comparator<Integer>(){
 			@Override
 			public int compare(Integer i1, Integer i2) {
@@ -100,25 +101,32 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 			}
 		};
 		int size = 0;
-		for(int i=0;i<n;i++){
+		Tree.getNeighborsOf(0).clear();
+		for(int i=1;i<n;i++){
 			p[i] = i;
 			rank[i] = 0;
 			ccTp[i] = i;
-			Tree.getSuccessorsOf(i).clear();
-			Tree.getPredecessorsOf(i).clear();
+			Tree.getNeighborsOf(i).clear();
 			ccTree.desactivateNode(i);
 			ccTree.activateNode(i);
-			size+=g.getSuccessorsOf(i).neighborhoodSize();
+			size += g.getSuccessorsOf(i).neighborhoodSize();
 		}
+		size -= g.getSuccessorsOf(0).neighborhoodSize();
+		if(size%2!=0){
+			throw new UnsupportedOperationException();
+		}
+		size /= 2;
+		INeighbors nei;
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
-		INeighbors nei;
-		for(int i=0;i<n;i++){
+		for(int i=1;i<n;i++){
 			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				integers[idx]=i*n+j;
-				costs[i*n+j] = costMatrix[i][j];
-				idx++;
+				if(i<j){
+					integers[idx]=i*n+j;
+					costs[i*n+j] = distMatrix[i][j];
+					idx++;
+				}
 			}
 		}
 		for(int i=n; i<ccN; i++){
@@ -127,33 +135,11 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		Arrays.sort(integers,comp);
 		int v;
 		activeArcs.clear();
-		activeArcs.flip(0,size);
+		activeArcs.set(0, size);
 		for(idx = 0; idx<size; idx++){
 			v = integers[idx];
 			sortedArcs[idx] = v;
 			indexOfArc[v/n][v%n] = idx;
-		}
-		int f,t;
-		for(int x=nR.get()-1;x>=0;x--){
-			minCostOutArcs[x] = -1;
-			int mand = -1;
-			for(int a=outArcs[x].getFirstElement();a>=0;a=outArcs[x].getNextElement()){
-				f = a/n-1;
-				t = a%n;
-				if(g.arcExists(f,t)){
-					activeArcs.clear(indexOfArc[f][t]);
-					links.add(a-n);
-					if(minCostOutArcs[x]==-1 || costs[minCostOutArcs[x]]>costs[a-n]){
-						minCostOutArcs[x] = a-n;
-					}
-				}
-				if(propHK.getMandatorySuccessorOf(f)==t){
-					mand = a-n;
-				}
-			}
-			if(mand!=-1){
-				minCostOutArcs[x] = mand;
-			}
 		}
 	}
 
@@ -161,17 +147,67 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 	// METHODS
 	//***********************************************************************************
 
-	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
+	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
 		g = graph;
-		links.clear();
+		distMatrix = costs;
 		ma = propHK.getMandatoryArcsList();
-		sortArcs(costs);
+		sortArcs();
 		treeCost = 0;
 		cctRoot = n-1;
 		int tSize = addMandatoryArcs();
-		tSize += addOutArcs();
-		if(tSize>n-1){throw new UnsupportedOperationException("too many arcs in the MST");}
 		connectMST(tSize);
+		// add 0-node
+		add0Node();
+	}
+
+	int min1,min2;
+	private void add0Node() throws ContradictionException {
+		INeighbors nei = g.getSuccessorsOf(0);
+		min1 = -1;
+		min2 = -1;
+		boolean b1=false,b2=false;
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			if(!b1){
+				if(min1==-1){
+					min1 = j;
+				}
+				if(distMatrix[0][j]<distMatrix[0][min1]){
+					min2 = min1;
+					min1 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					if(min1!=j){
+						min2 = min1;
+					}
+					min1 = j;
+					b1 = true;
+				}
+			}
+			if(min1!=j && !b2){
+				if(min2==-1 || distMatrix[0][j]<distMatrix[0][min2]){
+					min2 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					min2 = j;
+					b2 = true;
+				}
+			}
+		}
+		if(min1 == min2){
+			throw new UnsupportedOperationException();
+		}
+		if(min1 == -1 || min2 == -1){
+			propHK.contradiction();
+		}
+		if(!propHK.isMandatory(0,min1)){
+			maxTArc = Math.max(maxTArc, distMatrix[0][min1]);
+		}
+		if(!propHK.isMandatory(0,min2)){
+			maxTArc = Math.max(maxTArc, distMatrix[0][min2]);
+		}
+		Tree.addEdge(0,min1);
+		Tree.addEdge(0,min2);
+		treeCost += distMatrix[0][min1]+distMatrix[0][min2];
 	}
 
 	public void performPruning(double UB) throws ContradictionException{
@@ -180,13 +216,39 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 			throw new UnsupportedOperationException("mst>ub");
 		}
 		fromInterest = 0;
-		if(selectRelevantArcs(delta)){
+		if(selectAndCompress(delta)){
 			lca.preprocess(cctRoot, ccTree);
 			pruning(fromInterest,delta);
 		}
 	}
 
 	private boolean selectRelevantArcs(double delta) throws ContradictionException {
+		// Trivially no inference
+		int idx = activeArcs.nextSetBit(0);
+		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
+			idx = activeArcs.nextSetBit(idx+1);
+		}
+		if(idx==-1){
+			return false;
+		}
+		fromInterest = idx;
+		// Maybe interesting
+		while(idx>=0 && costs[sortedArcs[idx]]-maxTArc <= delta){
+			idx = activeArcs.nextSetBit(idx+1);
+		}
+		// Trivially infeasible arcs
+		while(idx>=0){
+			if(!Tree.arcExists(sortedArcs[idx]/n, sortedArcs[idx]%n)){
+				propHK.remove(sortedArcs[idx]/n, sortedArcs[idx]%n);
+				activeArcs.clear(idx);
+			}
+			idx = activeArcs.nextSetBit(idx+1);
+		}
+		ccTree.addArc(cctRoot,0);
+		return true;
+	}
+
+	private boolean selectAndCompress(double delta) throws ContradictionException {
 		// Trivially no inference
 		int idx = activeArcs.nextSetBit(0);
 		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
@@ -214,7 +276,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		if(useful.cardinality()==0){
 			return false;
 		}
-		// contract ccTree
+		//contract ccTree
 		int p,s;
 		for(int i=useful.nextClearBit(0);i<n;i=useful.nextClearBit(i+1)){
 			ccTree.desactivateNode(i);
@@ -250,25 +312,23 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 	private void pruning(int fi, double delta) throws ContradictionException {
 		int i,j;
 		double repCost;
-		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
-			i = sortedArcs[arc]/n;
-			j = sortedArcs[arc]%n;
-			if(!Tree.arcExists(i, j)){
-				repCost = ccTEdgeCost[lca.getLCA(i,j)];
-				if(costs[i*n+j]-repCost > delta){
-					propHK.remove(i,j);
+		INeighbors nei = g.getNeighborsOf(0);
+		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+			if(i!=min1 && i!=min2){
+				if(distMatrix[0][i]-distMatrix[0][min2] > delta){
+					propHK.remove(0,i);
 				}
 			}
 		}
-		int arc,x;
-		for(int k=links.size()-1;k>=0;k--){
-			arc = links.get(k);
-			i = arc/n;
-			j = arc%n;
-			if(!Tree.arcExists(i, j)){
-				x = sccOf[i].get();
-				repCost = costs[minCostOutArcs[x]];
+		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
+			i = sortedArcs[arc]/n;
+			j = sortedArcs[arc]%n;
+			if(!Tree.arcExists(i,j)){
+//				repCost = ccTEdgeCost[getLCA(i,j)];
+				repCost = ccTEdgeCost[lca.getLCA(i,j)];
+				PropSymmetricHeldKarp.reducedCosts[i][j] = repCost;
 				if(costs[i*n+j]-repCost > delta){
+					activeArcs.clear(arc);
 					propHK.remove(i,j);
 				}
 			}
@@ -287,44 +347,18 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 			arc = ma.get(i);
 			from = arc/n;
 			to = arc%n;
-			rFrom = FIND(from);
-			rTo   = FIND(to);
-			if(rFrom != rTo){
-				LINK(rFrom, rTo);
-				Tree.addArc(from, to);
-				treeCost += costs[arc];
-				// ne peut pas etre utilise pour remplacer un autre arc
-				updateCCTree(rFrom, rTo, val);
-				tSize++;
-			}else{
-				propHK.contradiction();
-			}
-		}
-		return tSize;
-	}
-
-	private int addOutArcs() throws ContradictionException {
-		int rFrom,rTo, from,to;
-		int tSize = 0;
-		int minArc;
-		double val = propHK.getMinArcVal();
-		double cost;
-		for(int i=nR.get()-1;i>=0;i--){
-			minArc = minCostOutArcs[i];
-			if(minArc!=-1){
-				minArc = minCostOutArcs[i];
-				from = minArc/n;
-				to   = minArc%n;
+			if(from!=0 && to!=0){
 				rFrom = FIND(from);
 				rTo   = FIND(to);
 				if(rFrom != rTo){
 					LINK(rFrom, rTo);
-					Tree.addArc(from, to);
-					cost = costs[minArc];
-					updateCCTree(rFrom, rTo, val);// TODO devrait pouvoir dégager
-					treeCost += cost;
+					Tree.addEdge(from, to);
+					updateCCTree(rFrom, rTo,val);
+					treeCost += costs[arc];
 					tSize++;
-				}// else edge is mandatory and thus already treated
+				}else{
+					propHK.contradiction();
+				}
 			}
 		}
 		return tSize;
@@ -335,8 +369,8 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		int idx = activeArcs.nextSetBit(0);
 		minTArc = -propHK.getMinArcVal();
 		maxTArc = propHK.getMinArcVal();
-		double cost;
-		while(tSize < n-1){
+		double cost = 0;
+		while(tSize < n-2){
 			if(idx<0){
 				propHK.contradiction();
 			}
@@ -346,7 +380,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 			rTo   = FIND(to);
 			if(rFrom != rTo){
 				LINK(rFrom, rTo);
-				Tree.addArc(from, to);
+				Tree.addEdge(from, to);
 				cost = costs[sortedArcs[idx]];
 				updateCCTree(rFrom, rTo, cost);
 				if(cost > maxTArc){
@@ -362,7 +396,7 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		}
 	}
 
-	private void updateCCTree(int rfrom, int rto, double arcCost) {
+	private void updateCCTree(int rfrom, int rto, double cost) {
 		cctRoot++;
 		int newNode = cctRoot;
 		ccTree.activateNode(newNode);
@@ -370,9 +404,9 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		ccTree.addArc(newNode,ccTp[rto]);
 		ccTp[rfrom] = newNode;
 		ccTp[rto] = newNode;
-		ccTEdgeCost[newNode] = arcCost;
+		ccTEdgeCost[newNode] = cost;
 	}
-	
+
 	private void LINK(int x, int y) {
 		if(rank[x]>rank[y]){
 			p[y] = p[x];
@@ -391,8 +425,9 @@ public class KruskalBSTFinderWithFiltering extends AbstractBSTFinder {
 		return p[i];
 	}
 
+//	BitSet marked = new BitSet(n*2);
 //	private int getLCA(int i, int j) {
-//		BitSet marked = new BitSet(ccN);
+//		marked.clear();
 //		marked.set(i);
 //		marked.set(j);
 //		int p = ccTree.getPredecessorsOf(i).getFirstElement();

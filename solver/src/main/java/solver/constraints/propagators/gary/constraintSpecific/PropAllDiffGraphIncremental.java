@@ -78,7 +78,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	int[] father;
 	BitSet in;
 	LinkedList<Integer> list;
-	public final static boolean LAZY = true;
+	public final static boolean LAZY = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

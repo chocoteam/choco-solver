@@ -1,3 +1,4 @@
+
 /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
@@ -32,61 +33,54 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-public class PropIntVarChanneling extends GraphPropagator {
+/**
+ * Each node but "but" has only one successor
+ * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
+public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	DirectedGraphVar g;
-	int n;
-	IntVar[] intVars;
-	private int varIdx;
+	int but,n;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
-	private IntProcedure valRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/** Links intVars and the graph
-	 * arc (x,y)=var[x]=y
-	 * values outside range [0,n-1] are not considered
-	 * @param intVars
+	/** All nodes of the graph but "but" have only one successor
 	 * @param graph
+	 * @param but the node which is not concerned by the constraint
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(ArrayUtils.append(intVars,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
+	public PropOneSuccBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		this.intVars = intVars;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		valRemoved  = new ValRem(this);
+		this.but = but;
 		arcEnforced = new EnfArc(this);
-		if(intVars[0].hasEnumeratedDomain()){
-			arcRemoved  = new RemArcAC(this);
-		}else{
-			arcRemoved  = new RemArcBC(this);
-		}
+		arcRemoved  = new RemArc(this);
 	}
 
 	//***********************************************************************************
@@ -95,27 +89,27 @@ public class PropIntVarChanneling extends GraphPropagator {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors nei;
-		IntVar v;
+		INeighbors succs;
+		int next;
 		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!intVars[i].contains(j)){
-					g.removeArc(i,j,this);
+			if(i!=but){
+				succs = g.getEnvelopGraph().getSuccessorsOf(i);
+				next = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+				if (succs.neighborhoodSize()==0){
+					this.contradiction(g,i+" has no successor");
 				}
-			}
-			v = intVars[i];
-			int ub = v.getUB();
-			for(int j=v.getLB();j<=ub;j=v.nextValue(j)){
-				if(j<n && !g.getEnvelopGraph().arcExists(i,j)){
-					v.removeValue(j,this);
+				else if (succs.neighborhoodSize()==1){
+					g.enforceArc(i,succs.getFirstElement(),this);
 				}
-			}
-			if(!v.hasEnumeratedDomain()){
-				ub = v.getUB();
-				while(ub>=0 && ub<n && !g.getEnvelopGraph().arcExists(i,ub)){
-					v.removeValue(ub,this);
-					ub--;
+				else if(next!=-1){
+					if(g.getKernelGraph().getSuccessorsOf(i).getNextElement()!=-1){
+						contradiction(g,"too many successors");
+					}
+					for(int j=succs.getFirstElement();j>=0;j=succs.getNextElement()){
+						if(j!=next){
+							g.removeArc(i,j,this);
+						}
+					}
 				}
 			}
 		}
@@ -123,63 +117,40 @@ public class PropIntVarChanneling extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(vars[idxVarInProp].getType() == Variable.GRAPH){
-			if((mask & EventType.ENFORCEARC.mask) !=0){
-				eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-			}
-			if((mask & EventType.REMOVEARC.mask)!=0){
-				eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
-			}
-		}else{
-			varIdx = idxVarInProp;
-			int val = intVars[varIdx].getLB();
-			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
-				g.enforceArc(varIdx,val,this);
-			}
-			eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
+		if(ALWAYS_COARSE){
+			propagate(0);return;
 		}
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		for(int i=0;i<vars.length;i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		int val;
+		boolean done = true;
 		for(int i=0;i<n;i++){
-			val = intVars[i].getValue();
-			if(val<n && !g.getEnvelopGraph().arcExists(i,val)){
-				return ESat.FALSE;
-			}
-			if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
-				return ESat.FALSE;
+			if(i!=but){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+					return ESat.FALSE;
+				}
+				if(g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()){
+					done = false;
+				}
 			}
 		}
-		return ESat.TRUE;
+		if(done){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
 
 	//***********************************************************************************
 	// PROCEDURES
 	//***********************************************************************************
-
-	private class ValRem implements IntProcedure{
-		private GraphPropagator p;
-
-		private ValRem(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			g.removeArc(varIdx,i,p);
-		}
-	}
 
 	private class EnfArc implements IntProcedure {
 		private GraphPropagator p;
@@ -189,42 +160,36 @@ public class PropIntVarChanneling extends GraphPropagator {
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].instantiateTo(i%n,p);
+			int from = i/n-1;
+			if(from!=but){
+				int to   = i%n;
+				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
+				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
+					if(i!=to){
+						g.removeArc(from,i,p);
+					}
+				}
+			}
 		}
 	}
 
-	private class RemArcAC implements IntProcedure{
+	private class RemArc implements IntProcedure{
 		private GraphPropagator p;
 
-		private RemArcAC(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].removeValue(i%n,p);
-		}
-	}
-
-	private class RemArcBC implements IntProcedure{
-		private GraphPropagator p;
-
-		private RemArcBC(GraphPropagator p){
+		private RemArc(GraphPropagator p){
 			this.p = p;
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i/n-1;
-			int to = i%n;
-			if(to==intVars[from].getLB()){
-				while(to<n && !g.getEnvelopGraph().arcExists(from,to)){
-					to++;
+			if(from!=but){
+				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
+				if (succs.neighborhoodSize()==0){
+					p.contradiction(g,from+" has no successor");
 				}
-				intVars[from].updateLowerBound(to,p);
-			}else if(to==intVars[from].getUB()){
-				while(to>=0 && !g.getEnvelopGraph().arcExists(from,to)){
-					to--;
+				if (succs.neighborhoodSize()==1){
+					g.enforceArc(from,succs.getFirstElement(),p);
 				}
-				intVars[from].updateUpperBound(to, p);
 			}
 		}
 	}

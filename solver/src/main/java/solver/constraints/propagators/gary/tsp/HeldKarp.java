@@ -32,23 +32,18 @@
  * Time: 01:03
  */
 
-package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.exception.ContradictionException;
 
-import java.util.BitSet;
-
 public interface HeldKarp {
-	BitSet getMandatoryArcsBitSet();
 
+	boolean isMandatory(int i, int j);
 	TIntArrayList getMandatoryArcsList();
-
 	void contradiction() throws ContradictionException;
-
 	void remove(int i, int i1) throws ContradictionException;
-
 	double getMinArcVal();
-
-	int getMandatorySuccessorOf(int i);
+	boolean isInMST(int i, int j);
+	void waitFirstSolution(boolean b);
 }

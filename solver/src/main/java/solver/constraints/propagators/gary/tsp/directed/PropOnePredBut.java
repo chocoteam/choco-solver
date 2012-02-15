@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
@@ -33,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
@@ -50,10 +49,10 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * Each node but "but" has only one successor
+ * Each node but "but" has only one predecessor
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -68,13 +67,13 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/** All nodes of the graph but "but" have only one successor
+	/** All nodes of the graph but "but" have only one predecessor
 	 * @param graph
 	 * @param but the node which is not concerned by the constraint
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropOneSuccBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
@@ -87,27 +86,27 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors succs;
-		int next;
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+		INeighbors preds;
+		int pre;
 		for(int i=0;i<n;i++){
 			if(i!=but){
-				succs = g.getEnvelopGraph().getSuccessorsOf(i);
-				next = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-				if (succs.neighborhoodSize()==0){
-					this.contradiction(g,i+" has no successor");
+				pre = g.getKernelGraph().getPredecessorsOf(i).getFirstElement();
+				preds = g.getEnvelopGraph().getPredecessorsOf(i);
+				if (preds.neighborhoodSize()==0){
+					this.contradiction(g,i+" has no predecessor");
 				}
-				else if (succs.neighborhoodSize()==1){
-					g.enforceArc(i,succs.getFirstElement(),this);
+				else if (preds.neighborhoodSize()==1){
+					g.enforceArc(preds.getFirstElement(),i,this);
 				}
-				else if(next!=-1){
-					if(g.getKernelGraph().getSuccessorsOf(i).getNextElement()!=-1){
-						contradiction(g,"too many successors");
+				else if (pre!=-1){
+					if(g.getKernelGraph().getPredecessorsOf(i).getNextElement()!=-1){
+						contradiction(g,i+" has >1 predecessors");
 					}
-					for(int j=succs.getFirstElement();j>=0;j=succs.getNextElement()){
-						if(j!=next){
-							g.removeArc(i,j,this);
+					for(int j=preds.getFirstElement();j>=0;j=preds.getNextElement()){
+						if(j!=pre){
+							g.removeArc(j,i,this);
 						}
 					}
 				}
@@ -115,13 +114,13 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
 		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+        eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -134,10 +133,10 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		boolean done = true;
 		for(int i=0;i<n;i++){
 			if(i!=but){
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()>1){
+				if(g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()>1){
 					return ESat.FALSE;
 				}
-				if(g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()){
+				if(g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getPredecessorsOf(i).neighborhoodSize()){
 					done = false;
 				}
 			}
@@ -160,13 +159,13 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			if(from!=but){
-				int to   = i%n;
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
-					if(i!=to){
-						g.removeArc(from,i,p);
+			int to = i%n;
+			if(to!=but){
+				int from = i/n-1;
+				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
+				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
+					if(i!=from){
+						g.removeArc(i,to,p);
 					}
 				}
 			}
@@ -181,14 +180,14 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			if(from!=but){
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				if (succs.neighborhoodSize()==0){
-					p.contradiction(g,from+" has no successor");
+			int to = i%n;
+			if(to!=but){
+				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
+				if (preds.neighborhoodSize()==0){
+					p.contradiction(g,to+" has no predecessor");
 				}
-				if (succs.neighborhoodSize()==1){
-					g.enforceArc(from,succs.getFirstElement(),p);
+				if (preds.neighborhoodSize()==1){
+					g.enforceArc(preds.getFirstElement(),to,p);
 				}
 			}
 		}

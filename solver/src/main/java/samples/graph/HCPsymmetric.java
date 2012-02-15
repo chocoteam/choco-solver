@@ -31,9 +31,9 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
-import solver.constraints.propagators.gary.tsp.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
@@ -75,7 +75,79 @@ public class HCPsymmetric {
 
 	public static void main(String[] args) {
 		tsplib_bench();
+//		kingTour();
 	}
+
+	// King Tour
+	private static void kingTour() {
+		outFile = "KING_TOUR.csv";
+		clearFile(outFile);
+		writeTextInto("instance;nbSols;nbFails;time;orientation;allDiffAC;\n",outFile);
+//		int size = 50;
+		int[] sizes = {10,20,50,100,200,500};
+		for(int size:sizes){
+			String s = "king_"+size;
+			boolean[][] matrix = generateKingTourInstance(size);
+			alldifferentAC = false;
+			solveUndirected(matrix,s);
+			solveDirected(matrix,s);
+			alldifferentAC = true;
+			solveUndirected(matrix,s);
+			solveDirected(matrix,s);
+		}
+	}
+
+	private static boolean[][] generateKingTourInstance(int size){
+		int n = size*size;
+		int node,next,a,b;
+		boolean[][] matrix = new boolean[n][n];
+		for(int i=0;i<size;i++){
+			for(int j=0;j<size;j++){
+				node = i*size+j;
+				// move
+				a = i+1;
+				b = j+2;
+				next = a*size+(b);
+				if(next>=0 && next<n){
+					matrix[node][next] = inChessboard(a,b,size);
+					matrix[next][node] = matrix[node][next];
+				}
+				// move
+				a = i+1;
+				b = j-2;
+				next = a*size+(b);
+				if(next>=0 && next<n){
+					matrix[node][next] = inChessboard(a,b,size);
+					matrix[next][node] = matrix[node][next];
+				}
+				// move
+				a = i+2;
+				b = j+1;
+				next = a*size+(b);
+				if(next>=0 && next<n){
+					matrix[node][next] = inChessboard(a,b,size);
+					matrix[next][node] = matrix[node][next];
+				}
+				// move
+				a = i+2;
+				b = j-1;
+				next = a*size+(b);
+				if(next>=0 && next<n){
+					matrix[node][next] = inChessboard(a,b,size);
+					matrix[next][node] = matrix[node][next];
+				}
+			}
+		}
+		return matrix;
+	}
+
+	private static boolean inChessboard(int a, int b, int n) {
+		if(a<0 || a>=n || b<0 || b>=n){
+			return false;
+		}
+		return true;
+	}
+
 	// TSP LIB
 	private static boolean[][] parseInstance(String url){
 		File file = new File(url);
@@ -122,10 +194,13 @@ public class HCPsymmetric {
 				boolean[][] matrix = parseInstance(dir + "/" + s);
 				alldifferentAC = false;
 				solveUndirected(matrix,s);
+//				solveUndirected(matrix,s);
 				solveDirected(matrix,s);
 				alldifferentAC = true;
-				solveUndirected(matrix,s);
 				solveDirected(matrix,s);
+//				solveDirected(matrix,s);
+//				solveDirected(matrix,s);
+//				solveDirected(matrix,s);
 			}
 		}
 	}
@@ -162,6 +237,7 @@ public class HCPsymmetric {
 		solver.getSearchLoop().plugSearchMonitor(new MyMon());
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
+//		solver.findAllSolutions();
 		solver.findSolution();
 		checkUndirected(solver, undi);
 		//output
@@ -174,7 +250,7 @@ public class HCPsymmetric {
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
 			throw new UnsupportedOperationException();
 		}
-		if(solver.getMeasures().getSolutionCount() > 0){
+		if(solver.getMeasures().getSolutionCount() ==1){
 			if(!undi.instantiated()){
 				throw new UnsupportedOperationException();
 			}
@@ -216,7 +292,8 @@ public class HCPsymmetric {
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 		solver.findSolution();
-		checkDirected(solver,dir);
+//		solver.findAllSolutions();
+		checkDirected(solver, dir);
 		//output
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) + ";directed;"+alldifferentAC+";\n";
@@ -227,7 +304,7 @@ public class HCPsymmetric {
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
 			throw new UnsupportedOperationException();
 		}
-		if (solver.getMeasures().getSolutionCount() > 0){
+		if (solver.getMeasures().getSolutionCount() == 1){
 			if(!dir.instantiated()){
 				throw new UnsupportedOperationException();
 			}

@@ -25,8 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
+import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;

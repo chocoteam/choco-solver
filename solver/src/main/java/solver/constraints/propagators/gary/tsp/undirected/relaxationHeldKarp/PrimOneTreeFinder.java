@@ -25,22 +25,23 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
+import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.heaps.Heap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
+
 import java.util.BitSet;
 
-public class PrimMSTFinder extends AbstractMSTFinder {
+public class PrimOneTreeFinder extends AbstractOneTreeFinder {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected BitSet ma; 	//mandatory arcs (i,j) <-> i*n+j
 	double[][] costs;
 	Heap heap;
 	BitSet inTree;
@@ -52,7 +53,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimMSTFinder(int nbNodes, HeldKarp propagator) {
+	public PrimOneTreeFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 		heap = new FastArrayHeap(nbNodes);
 		inTree = new BitSet(n);
@@ -62,12 +63,10 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	// METHODS
 	//***********************************************************************************
 
-	public void computeMST(double[][] costs, DirectedGraph graph) throws ContradictionException {
+	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
 		g = graph;
-		ma = propHK.getMandatoryArcsBitSet();
 		for(int i=0;i<n;i++){
-			Tree.getSuccessorsOf(i).clear();
-			Tree.getPredecessorsOf(i).clear();
+			Tree.getNeighborsOf(i).clear();
 		}
 		this.costs = costs;
 		heap.clear();
@@ -82,41 +81,67 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 		if(FILTER){
 			maxTArc = minVal;
 		}
-		addNode(0);
+		inTree.set(0);
+		INeighbors nei = g.getSuccessorsOf(0);
+		int min1 = -1;
+		int min2 = -1;
+		boolean b1=false,b2=false;
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			if(!b1){
+				if(min1==-1){
+					min1 = j;
+				}
+				if(costs[0][j]<costs[0][min1]){
+					min2 = min1;
+					min1 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					if(min1!=j){
+						min2 = min1;
+					}
+					min1 = j;
+					b1 = true;
+				}
+			}
+			if(min1!=j && !b2){
+				if(min2==-1 || costs[0][j]<costs[0][min2]){
+					min2 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					min2 = j;
+					b2 = true;
+				}
+			}
+		}
+		if(min1 == -1 || min2 == -1){
+			propHK.contradiction();
+		}
+		addNode(min1);
 		int from,to;
-		while (tSize<n-1 && !heap.isEmpty()){
+		while (tSize<n-2 && !heap.isEmpty()){
 			to = heap.pop();
 			from = heap.getMate(to);
 			addArc(from,to);
 		}
-		if(tSize!=n-1){
+		if(tSize!=n-2){
 			propHK.contradiction();
+		}
+		addArc(0,min1);
+		addArc(0,min2);
+		if(Tree.getNeighborsOf(0).neighborhoodSize()!=2){
+			throw new UnsupportedOperationException();
 		}
 	}
 
 	private void addArc(int from, int to) {
-		if(from<n){
-			if(Tree.arcExists(to,from)){
-				return;
-			}
-			Tree.addArc(from,to);
-			treeCost += costs[from][to];
-			if(FILTER){
-				if(!ma.get(from*n+to)){
-					maxTArc = Math.max(maxTArc, costs[from][to]);
-				}
-			}
-		}else{
-			from -= n;
-			if(Tree.arcExists(from,to)){
-				return;
-			}
-			Tree.addArc(to,from);
-			treeCost += costs[to][from];
-			if(FILTER){
-				if(!ma.get(to*n+from)){
-					maxTArc = Math.max(maxTArc, costs[to][from]);
-				}
+		if(Tree.edgeExists(from,to)){
+			throw new UnsupportedOperationException();
+		}
+		Tree.addEdge(from,to);
+		treeCost += costs[from][to];
+		if(FILTER){
+			if(!propHK.isMandatory(from,to)){
+				maxTArc = Math.max(maxTArc, costs[from][to]);
 			}
 		}
 		tSize++;
@@ -129,20 +154,10 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 			INeighbors nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!inTree.get(j)){
-					if(ma.get(i*n+j)){
+					if(propHK.isMandatory(i,j)){
 						heap.add(j,minVal,i);
 					}else{
 						heap.add(j,costs[i][j],i);
-					}
-				}
-			}
-			nei = g.getPredecessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!inTree.get(j)){
-					if(ma.get(j*n+i)){
-						heap.add(j,minVal,i+n);
-					}else{
-						heap.add(j,costs[j][i],i+n);
 					}
 				}
 			}
@@ -156,7 +171,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 			for(int i=0;i<n;i++){
 				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if((!Tree.arcExists(i, j)) && costs[i][j]-maxTArc > delta){
+					if(i<j && (!Tree.arcExists(i, j)) && costs[i][j]-maxTArc > delta){
 						propHK.remove(i,j);
 					}
 				}
@@ -165,5 +180,4 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 //			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
 	}
-
 }

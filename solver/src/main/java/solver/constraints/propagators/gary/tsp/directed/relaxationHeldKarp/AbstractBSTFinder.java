@@ -25,55 +25,31 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
-import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
+import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.variables.graph.INeighbors;
 
-public abstract class AbstractMSTFinder {
+public abstract class AbstractBSTFinder extends AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected final static boolean FILTER = true;
-	// INPUT
-	protected UndirectedGraph g;	// graph
-	protected int n;			// number of nodes
-	// OUTPUT
-	protected UndirectedGraph Tree;
-	protected double treeCost;
-	// PROPAGATOR
-	protected HeldKarp propHK;
+	// REDUCED GRAPH STRUCTURE
+	protected IStateInt nR;
+	protected IStateInt[] sccOf;
+	protected INeighbors[] outArcs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractMSTFinder(int nbNodes, HeldKarp propagator) {
-		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
-		propHK = propagator;
-	}
-
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
-
-	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
-
-	public abstract void performPruning(double UB) throws ContradictionException;
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	public UndirectedGraph getMST() {
-		return Tree;
-	}
-	public double getBound() {
-		return treeCost;
+	public AbstractBSTFinder(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+		super(nbNodes,propagator);
+		this.nR = nR;
+		this.sccOf = sccOf;
+		this.outArcs = outArcs;
 	}
 }

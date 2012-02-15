@@ -33,7 +33,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;

@@ -32,7 +32,7 @@
  * Time: 10:42
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;

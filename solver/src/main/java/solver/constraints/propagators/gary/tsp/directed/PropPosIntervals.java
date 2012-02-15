@@ -25,9 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 03/10/11
+ * Time: 19:56
+ */
+
+package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -36,61 +44,25 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
-
-import java.util.BitSet;
-import java.util.LinkedList;
+import solver.variables.IntVar;
 
 /**
- * Arborescence constraint (simplification from tree constraint)
- * based on dominators
- * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
- * but very efficient in practice
- * */
-public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
+ */
+public class PropPosIntervals extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	// flow graph
-	DirectedGraphVar g;
-	// source that reaches other nodes
-	int source;
-	// number of nodes
 	int n;
-	// dominators finder that contains the dominator tree
-	AbstractLengauerTarjanDominatorsFinder domFinder;
-	INeighbors[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
-	 * Ensures that graph is an arborescence rooted in node source
-	 * @param graph
-	 * @param source root of the arborescence
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
-		g = graph;
-		n = g.getEnvelopGraph().getNbNodes();
-		this.source = source;
-		successors = new INeighbors[n];
-		if(simple){
-			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
-		}else{
-			domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
-		}
+	public PropPosIntervals(IntVar[] vars, Constraint constraint, Solver solver) {
+		super(vars, solver, constraint, PropagatorPriority.BINARY,true);
+		this.n = vars.length;
 	}
 
 	//***********************************************************************************
@@ -99,53 +71,78 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		System.out.println("propagate");
 		for(int i=0;i<n;i++){
-			g.enforceNode(i,this);
-			g.removeArc(i,i,this);
-			g.removeArc(i,source,this);
+			for(int j=i+1;j<n;j++){
+				check(i,j);
+			}
 		}
-		structuralPruning();
+	}
+
+	private void check(int i, int j) throws ContradictionException {
+		int first = Math.min(vars[i].getLB(),vars[j].getLB());
+		int last  = Math.max(vars[i].getUB(),vars[j].getUB())+1;
+		if(first>last){
+			throw new UnsupportedOperationException();
+		}
+		int q = 0;
+		int tot = 0;
+		for(int k=0;k<n;k++){
+			tot ++;
+			if(vars[k].getLB()>=first && vars[k].getUB()+1<=last){
+				q++;
+			}
+		}
+
+		if(tot>vars[n-1].getUB()+1){
+			contradiction(vars[n-1],"");
+		}
+		int mandFirst = last-q;
+		int mandLast  = first+q;
+//		System.out.println(first+" + "+q+" -> "+last);
+		if(mandFirst<mandLast){
+			for(int k=0;k<n;k++){
+				if(vars[k].getLB()<first || vars[k].getUB()+1>last){
+//					checkEnergy(k,mandFirst,mandLast);
+					checkEnergy(k,first,last,q,mandFirst,mandLast);
+				}
+			}
+		}
+	}
+
+	private void checkEnergy(int i, int first, int last , int dur, int mandFirst , int mandLast) throws ContradictionException {
+		// can be done after the box
+		boolean right= vars[i].getUB()>=mandLast;
+		// cannot be done inside the box
+		if(1>last-first-dur){
+			// can be done before the box
+			if(vars[i].getLB()+1<=mandFirst){
+				if(!right){
+					vars[i].updateUpperBound(mandFirst-1,this);
+				}
+			}
+			// cannot be done before the box
+			else{
+				if(right){
+						vars[i].updateLowerBound(mandLast, this);
+				}else{
+					contradiction(vars[i],"sweep");
+				}
+			}
+		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		structuralPruning();
-	}
-
-	private void structuralPruning() throws ContradictionException {
-		if(domFinder.findDominators()){
-			INeighbors nei;
-			for (int x=0; x<n; x++){
-				nei = g.getEnvelopGraph().getSuccessorsOf(x);
-				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
-					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(x,y)){
-						g.removeArc(x,y,this);
-					}
-					// ENFORCE ARC-DOMINATORS (redondant)
-				}
-			}
-		}else{
-			contradiction(g,"the source cannot reach all nodes");
-		}
+		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask;
+		return EventType.FULL_PROPAGATION.mask+EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(isCompletelyInstantiated()){
-			try{
-				structuralPruning();
-			}catch (Exception e){
-				return ESat.FALSE;
-			}
-			return ESat.TRUE;
-		}
 		return ESat.UNDEFINED;
 	}
 }

@@ -28,13 +28,11 @@ package solver.constraints.gary;
 
 import solver.Solver;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.*;
 import solver.constraints.propagators.gary.basic.*;
 import solver.constraints.propagators.gary.constraintSpecific.*;
 import solver.constraints.propagators.gary.directed.*;
-import solver.constraints.propagators.gary.tsp.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.variables.IntVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;

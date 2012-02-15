@@ -27,8 +27,6 @@
 
 package samples.graph;
 
-import choco.kernel.ResolutionPolicy;
-import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import samples.AbstractProblem;
 import solver.Cause;
@@ -38,25 +36,20 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
-import solver.constraints.propagators.gary.tsp.*;
-import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
-import solver.search.loop.AbstractSearchLoop;
+import solver.constraints.propagators.gary.tsp.directed.*;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 import java.io.*;
-import java.util.BitSet;
 
 /**
  * Parse and solve a Hamiltonian Cycle Problem instance of the TSPLIB

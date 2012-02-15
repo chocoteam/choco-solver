@@ -29,19 +29,20 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
-import solver.Cause;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.PropEvalObj;
-import solver.constraints.propagators.gary.tsp.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
-import solver.constraints.propagators.gary.tsp.PropPathNoCycle;
-import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.PropEvalObj;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
+import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropFastSymmetricHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
 import solver.constraints.propagators.gary.undirected.*;
 import solver.exception.ContradictionException;
@@ -54,8 +55,8 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
@@ -78,8 +79,8 @@ public class TSPsymmetric {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 50000;
-	private static final int MAX_SIZE = 100;
+	private static final long TIMELIMIT = 5000;
+	private static final int MAX_SIZE = 120;
 	private static long seed = 0;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
@@ -87,6 +88,12 @@ public class TSPsymmetric {
 	private static Solver solver;
 	private static GraphVar graph;
 	private static int[][] dist;
+	private static boolean allDiffAC    = false;
+	private static boolean optProofOnly = true;
+	private static boolean fast;
+	private static PropSymmetricHeldKarp mst;
+	private static int search;
+	private static boolean restart;
 
 	//***********************************************************************************
 	// METHODS
@@ -94,7 +101,7 @@ public class TSPsymmetric {
 
 	public static void main(String[] args) {
 		clearFile(outFile = "tsp.csv");
-		writeTextInto("instance;sols;fails;time;obj;undirected;seed;\n", outFile);
+		writeTextInto("instance;sols;fails;time;obj;allDiffAC;search;\n", outFile);
 		bench();
 	}
 
@@ -109,34 +116,44 @@ public class TSPsymmetric {
 				line = buf.readLine();
 			}
 			int n = Integer.parseInt(line.split(":")[1].replaceAll(" ", ""));
-			System.out.println(n);
+			if(n>MAX_SIZE){
+				return null;
+			}
+			System.out.println("n : "+n);
 			int[][] dist = new int[n][n];
-			double[] x = new double[n];
-			double[] y = new double[n];
-			while(line.contains("EDGE")||!line.contains("SECTION")){
+			//
+			while(!line.contains("EDGE_WEIGHT_TYPE")){
 				line = buf.readLine();
 			}
-			line = buf.readLine();
-			String[] lineNumbers;
-			for(int i=0;i<n;i++){
-				line = line.replaceAll(" * ", " ");
-				lineNumbers = line.split(" ");
-				if(lineNumbers.length!=4 && lineNumbers.length!=3){
-					throw new UnsupportedOperationException("wrong format");
+			String type = line.split(": ")[1];
+			if(type.contains("EXPLICIT")){
+				while(!line.contains("EDGE_WEIGHT_FORMAT")){
+					line = buf.readLine();
 				}
-				x[i] = Double.parseDouble(lineNumbers[1]);
-				y[i] = Double.parseDouble(lineNumbers[2]);
-				line = buf.readLine();
-			}
-			if(!line.contains("EOF")){
+				String format = line.split(": ")[1];
+				while(!line.contains("EDGE_WEIGHT_SECTION")){
+					line = buf.readLine();
+				}
+				if(format.contains("UPPER_ROW")){
+					halfMatrix(dist,buf);
+				}else if(format.contains("FULL_MATRIX")){
+					fullMatrix(dist,buf);
+				}else if(format.contains("LOWER_DIAG_ROW")){
+					lowerDiagMatrix(dist,buf);
+				}else if(format.contains("UPPER_DIAG_ROW")){
+					upperDiagMatrix(dist,buf);
+				}else{
+					return null;
+				}
+			}else if(type.contains("CEIL_2D")||type.contains("EUC_2D")||type.contains("ATT")||type.contains("GEO")){
+				while(!line.contains("NODE_COORD_SECTION")){
+					line = buf.readLine();
+				}
+				coordinates(dist,buf,type);
+			}else{
 				throw new UnsupportedOperationException();
 			}
-			for(int i=0;i<n;i++){
-				for(int j=i+1;j<n;j++){
-					dist[i][j] = (int)Math.sqrt(x[i]*x[j]+y[i]*y[j]);
-					dist[j][i] = dist[i][j];
-				}
-			}
+
 			return dist;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -145,44 +162,257 @@ public class TSPsymmetric {
 		return null;
 	}
 
+	private static void coordinates(int[][] dist, BufferedReader buf, String type) throws IOException {
+		int n = dist.length;
+		String line;
+		double[] x = new double[n];
+		double[] y = new double[n];
+		line = buf.readLine();
+		String[] lineNumbers;
+		for(int i=0;i<n;i++){
+			line = line.replaceAll(" * ", " ");
+			lineNumbers = line.split(" ");
+			if(lineNumbers.length!=4 && lineNumbers.length!=3){
+				System.out.println("wrong line "+line);
+				throw new UnsupportedOperationException("wrong format");
+			}
+			x[i] = Double.parseDouble(lineNumbers[lineNumbers.length-2]);
+			y[i] = Double.parseDouble(lineNumbers[lineNumbers.length-1]);
+			line = buf.readLine();
+		}
+		if(!line.contains("EOF")){
+			throw new UnsupportedOperationException();
+		}
+		for(int i=0;i<n;i++){
+			for(int j=i+1;j<n;j++){
+				dist[i][j] = getDist(x[i],x[j],y[i],y[j],type);
+				dist[j][i] = dist[i][j];
+			}
+		}
+	}
+
+	private static int getDist(double x1, double x2, double y1, double y2, String type) {
+		double xd = x2-x1;
+		double yd = y2-y1;
+		if(type.contains("CEIL_2D")){
+			double rt = Math.sqrt((xd*xd+yd*yd));
+			return (int)Math.ceil(rt);
+		}
+		if(type.contains("EUC_2D")){
+			double rt = Math.sqrt((xd*xd+yd*yd));
+			return (int)Math.round(rt);
+		}
+		if(type.contains("ATT")){
+			double rt = Math.sqrt((xd*xd+yd*yd)/10);
+			int it = (int)Math.round(rt);
+			if(it<rt){
+				it++;
+			}
+			return it;
+		}
+		if(type.contains("GEO")){
+			double PI = 3.141592;
+			double min;
+			int deg;
+			// i
+			deg = (int) x1;
+			min = x1 - deg;
+			double lati = PI*(deg+(5.0*min)/3.0)/180.0;
+			deg = (int) y1;
+			min = y1 - deg;
+			double longi = PI*(deg+(5.0*min)/3.0)/180.0;
+			// j
+			deg = (int) x2;
+			min = x2 - deg;
+			double latj = PI*(deg+(5.0*min)/3.0)/180.0;
+			deg = (int) y2;
+			min = y2 - deg;
+			double longj = PI*(deg+(5.0*min)/3.0)/180.0;
+
+			double RRR = 6378.388;
+			double q1 = Math.cos(longi-longj);
+			double q2 = Math.cos(lati-latj);
+			double q3 = Math.cos(lati+latj);
+
+			double dij = RRR*Math.acos(((1+q1)*q2-(1-q1)*q3)/2)+1;
+			return (int) dij;
+		}
+		throw new UnsupportedOperationException("wrong format");
+	}
+
+	private static void halfMatrix(int[][] dist, BufferedReader buf) throws IOException {
+		int n = dist.length;
+		String line;
+		line = buf.readLine();
+		String[] lineNumbers;
+		for(int i=0;i<n-1;i++){
+			line = line.replaceAll(" * ", " ");
+			lineNumbers = line.split(" ");
+			int off = 0;
+			if(lineNumbers[0].equals("")){
+				off++;
+			}
+			for(int k=0;k<lineNumbers.length-off;k++){
+				dist[i][i+k+1] = Integer.parseInt(lineNumbers[k+off]);
+				dist[i+k+1][i] = dist[i][i+k+1];
+			}
+			line = buf.readLine();
+		}
+	}
+	private static void fullMatrix(int[][] dist, BufferedReader buf) throws IOException {
+		int n = dist.length;
+		String line;
+		line = buf.readLine();
+		String[] lineNumbers;
+		for(int i=0;i<n;i++){
+			line = line.replaceAll(" * ", " ");
+			lineNumbers = line.split(" ");
+			int off = 0;
+			if(lineNumbers[0].equals("")){
+				off++;
+			}
+			for(int k=0;k<n;k++){
+				dist[i][k] = Integer.parseInt(lineNumbers[k+off]);
+			}
+			line = buf.readLine();
+		}
+	}
+	private static void lowerDiagMatrix(int[][] dist, BufferedReader buf) throws IOException {
+		int n = dist.length;
+		String line;
+		line = buf.readLine();
+		String[] lineNumbers;
+		int l=0,c=0;
+		while(true){
+			line = line.replaceAll(" * ", " ");
+			lineNumbers = line.split(" ");
+			int off = 0;
+			if(lineNumbers[0].equals("")){
+				off++;
+			}
+			for(int i=off;i<lineNumbers.length;i++){
+				dist[l][c] = Integer.parseInt(lineNumbers[i]);
+				dist[c][l] = dist[l][c];
+				c++;
+				if(c>l){
+					c=0;
+					l++;
+				}
+				if(l==dist.length){
+					return;
+				}
+			}
+			line = buf.readLine();
+		}
+	}
+	private static void upperDiagMatrix(int[][] dist, BufferedReader buf) throws IOException {
+		int n = dist.length;
+		String line;
+		line = buf.readLine();
+		String[] lineNumbers;
+		int l=0,c=0;
+		while(true){
+			line = line.replaceAll(" * ", " ");
+			lineNumbers = line.split(" ");
+			int off = 0;
+			if(lineNumbers[0].equals("")){
+				off++;
+			}
+			for(int i=off;i<lineNumbers.length;i++){
+				dist[l][c] = Integer.parseInt(lineNumbers[i]);
+				dist[c][l] = dist[l][c];
+				c++;
+				if(c>=n){
+					l++;
+					c=l;
+				}
+				if(l==dist.length){
+					return;
+				}
+			}
+			line = buf.readLine();
+		}
+	}
+
 	private static void bench() {
 		String dir = "/Users/jfages07/github/In4Ga/ALL_tsp";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
+		optProofOnly = true;
 		for (String s : list) {
-			if (s.contains(".tsp") && !s.contains("gz")){
+			if (s.contains(".tsp") && (!s.contains("gz"))){
 				matrix = parseInstance(dir + "/" + s);
-				int n = matrix.length;
-				int maxArcCost = 0;
-				for(int i=0;i<n;i++){
-					for(int j=0;j<n;j++){
-						if(matrix[i][j]>maxArcCost){
-							maxArcCost = matrix[i][j];
+				if(matrix!=null){
+					int n = matrix.length;
+					int maxArcCost = 0;
+//					String st = "";
+					for(int i=0;i<n;i++){
+//						st+="\n";
+						for(int j=0;j<n;j++){
+//							st+=matrix[i][j]+", ";
+							if(matrix[i][j]>maxArcCost){
+								maxArcCost = matrix[i][j];
+							}
 						}
 					}
+//					System.out.println(st);
+					upperBound = maxArcCost*n;
+					if(optProofOnly){
+						setUB(s.split("\\.")[0]);
+						System.out.println("optimum : "+upperBound);
+					}
+//					allDiffAC = true;
+//					solveDirected(matrix, s);
+//					allDiffAC = false;
+//					fast = false;
+//					solveUndirected(matrix, s);
+					fast = true;
+					restart = true;
+					search = 0;
+//					solveUndirected(matrix, s);
+//					restart = true;
+//					search = 2;
+					allDiffAC = false;
+					solveUndirected(matrix, s);
+
+				}else{
+					System.out.println("CANNOT LOAD");
 				}
-				upperBound = maxArcCost*n;
-//				upperBound = 22610;
-//				for(int k=0;k<100;k++){
-				seed = System.currentTimeMillis();
-				solveDirected(matrix,s);
-				solveUndirected(matrix,s);
-//				System.exit(0);
-//				}
 			}
+		}
+	}
+
+	private static void setUB(String s) {
+		File file = new File("/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv");
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			while(!line.contains(s)){
+				line = buf.readLine();
+			}
+			upperBound = Integer.parseInt(line.split(";")[1]);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
 		}
 	}
 
 	private static void solveUndirected(int[][] matrix, String instanceName) {
 		int n = matrix.length;
-		if(n>MAX_SIZE){
-			return;
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(matrix[i][j] != matrix[j][i]){
+					System.out.println(i+" : "+j);
+					System.out.println(matrix[i][j]+" != "+matrix[j][i]);
+					throw new UnsupportedOperationException();
+				}
+			}
 		}
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
-		UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		graph = undi;
 		dist = matrix;
 		for(int i=0;i<n;i++){
@@ -197,19 +427,39 @@ public class TSPsymmetric {
 		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,2));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
 		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
-		gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
-		gc.addAdHocProp(PropSymmetricHeldKarp.mstBasedRelaxation(undi, totalCost, matrix, gc, solver));
+		if(allDiffAC){
+			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
+		}
+		if(fast){
+			mst = PropFastSymmetricHeldKarp.mstBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		}else{
+			mst = PropSymmetricHeldKarp.mstBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		}
+		gc.addAdHocProp(mst);
+		switch (search){
+			case 0: solver.set(new RCSearch(undi));break;
+			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),new RCSearch(undi)));break;
+			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),new RCSearch(undi)));break;
+			default: throw new UnsupportedOperationException();
+		}
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphRandom(undi,seed));
-		solver.set(StrategyFactory.graphStrategy(undi,null,new MaxRegretMinCost(undi,matrix), GraphStrategy.NodeArcPriority.ARCS));
+//		solver.set(new RCSearch(undi));
+//		solver.set(new StrategiesSequencer(solver.getEnvironment(),new BottomUp(totalCost),new RCSearch(undi)));
+//		solver.set(StrategyFactory.graphStrategy(undi,null,new MaxRC(undi), GraphStrategy.NodeArcPriority.ARCS));
+//		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeighMinCost2(undi,matrix), GraphStrategy.NodeArcPriority.ARCS));
+//		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeighMinCost(undi,matrix), GraphStrategy.NodeArcPriority.ARCS));
 //		solver.set(StrategyFactory.graphStrategy(undi,null,new MinCost(undi,matrix), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 //		solver.getSearchLoop().getLimitsBox().setSolutionLimit(1);
 //		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
-		solver.getSearchLoop().plugSearchMonitor(new MyMon());
-		solver.getSearchLoop().restartAfterEachSolution(true);
+//		solver.getSearchLoop().plugSearchMonitor(new MyMon());
+//		solver.getSearchLoop().plugSearchMonitor(new ResMon());
+		if(restart){
+			solver.getSearchLoop().restartAfterEachSolution(true);
+		}
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
@@ -218,14 +468,15 @@ public class TSPsymmetric {
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";1;"+seed+";\n";
+				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";"+allDiffAC+";"+search+";\n";
 		writeTextInto(txt, outFile);
 	}
 
 	private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
 		int n = matrix.length;
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-			throw new UnsupportedOperationException();
+			writeTextInto("BUG\n",outFile);
+//			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount() > 0){
 			int sum = 0;
@@ -236,8 +487,9 @@ public class TSPsymmetric {
 					}
 				}
 			}
-			if(sum!=totalCost.getValue()){
-				throw new UnsupportedOperationException();
+			if(sum!=solver.getSearchLoop().getObjectivemanager().getBestValue()){
+				writeTextInto("BUG\n",outFile);
+//				throw new UnsupportedOperationException();
 			}
 		}
 	}
@@ -245,9 +497,6 @@ public class TSPsymmetric {
 	private static void solveDirected(int[][] m, String instanceName) {
 		int[][] matrix = transformMatrix(m);
 		int n = matrix.length;
-		if(n>MAX_SIZE+1){
-			return;
-		}
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",0,upperBound,solver);
@@ -269,18 +518,19 @@ public class TSPsymmetric {
 		gc.addAdHocProp(new PropOnePredBut(dir, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
 		gc.addAdHocProp(new PropEvalObj(dir, totalCost, matrix, gc, solver));
-		gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
+		if(allDiffAC){
+			gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
+		}
 		gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(dir,0,n-1,totalCost,matrix,gc,solver));
 		solver.post(gc);
 		// config
-//		solver.set(StrategyFactory.graphRandom(dir,seed));
-		solver.set(StrategyFactory.graphStrategy(dir, null, new MaxRegretMinCost(dir,matrix), GraphStrategy.NodeArcPriority.ARCS));
-//		solver.set(StrategyFactory.graphStrategy(dir,null,new MinCost(dir,matrix), GraphStrategy.NodeArcPriority.ARCS));
+		solver.set(StrategyFactory.graphStrategy(dir, null, new MinDomMaxRegretMinCost(dir,matrix), GraphStrategy.NodeArcPriority.ARCS));
+//		solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeighMinCost(dir,matrix), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 //		solver.getSearchLoop().getLimitsBox().setSolutionLimit(1);
 //		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
-		solver.getSearchLoop().plugSearchMonitor(new MyMon());
+//		solver.getSearchLoop().plugSearchMonitor(new MyMon());
 		solver.getSearchLoop().restartAfterEachSolution(true);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
@@ -290,14 +540,15 @@ public class TSPsymmetric {
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";0;"+seed+";\n";
+				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";directed;"+allDiffAC+";\n";
 		writeTextInto(txt, outFile);
 	}
 
 	private static void checkDirected(Solver solver, DirectedGraphVar dir, IntVar totalCost, int[][] matrix) {
 		int n = matrix.length;
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-			throw new UnsupportedOperationException();
+			writeTextInto("BUG\n",outFile);
+//				throw new UnsupportedOperationException();
 		}
 		if (solver.getMeasures().getSolutionCount() > 0){
 			int sum = 0;
@@ -306,7 +557,8 @@ public class TSPsymmetric {
 				sum+=matrix[i][j];
 			}
 			if(sum!=totalCost.getValue()){
-				throw new UnsupportedOperationException();
+				writeTextInto("BUG\n",outFile);
+//				throw new UnsupportedOperationException();
 			}
 		}
 	}
@@ -352,55 +604,72 @@ public class TSPsymmetric {
 	// HEURISTICS
 	//***********************************************************************************
 
+	private static class ResMon extends VoidSearchMonitor implements ISearchMonitor {
+		int nbFails;
+		public void onContradiction(ContradictionException cex){
+			nbFails++;
+			if(nbFails == 200){
+				nbFails = 0;
+				solver.getSearchLoop().restart();
+			}
+		}
+	}
+
 	static int lb;
 	static int ub;
-	private static class MyMon extends VoidSearchMonitor implements ISearchMonitor {
-		public MyMon(){
-			ub = totalCost.getUB();
-			lb = totalCost.getLB();
-
-		}
-		public void afterRestart() {
-			try {
-				totalCost.updateUpperBound(ub, Cause.Null);
-				totalCost.updateLowerBound(lb, Cause.Null);
-				solver.getEngine().propagate();
-			} catch (ContradictionException e) {
-				solver.getSearchLoop().interrupt();
-			}
-			resetStrategy();
-		}
-		public void onSolution() {
-			ub = totalCost.getValue()-1;
-		}
-		public void afterInitialPropagation() {
-			lb = totalCost.getLB();
-			ub = totalCost.getValue();
-		}
-	}
-
-	public static void resetStrategy() {
-		solver.set(new StrategiesSequencer(solver.getEnvironment(),new DichotomicSearch(totalCost),
-				StrategyFactory.graphStrategy(graph, null, new MaxRegretMinCost(graph, dist), GraphStrategy.NodeArcPriority.ARCS)));
-	}
 
 	private static class DichotomicSearch extends AbstractStrategy<IntVar> {
 		IntVar obj;
-		private boolean done;
+		long nbSols;
 		protected DichotomicSearch(IntVar obj) {
 			super(new IntVar[]{obj});
 			this.obj = obj;
-			done = false;
+			lb = -1;
 		}
 		@Override
 		public void init() {}
 		@Override
 		public Decision getDecision() {
-			if(done || solver.getMeasures().getSolutionCount()==0 || obj.getLB()==obj.getUB()){
+			if(lb==-1){
+				lb = obj.getLB();
+			}
+			if(obj.getLB()==obj.getUB()){
 				return null;
 			}
-			done = true;
-			int target = (obj.getLB()+obj.getUB())/2;
+			if(nbSols == solver.getMeasures().getSolutionCount()){
+				return null;
+			}else{
+				nbSols = solver.getMeasures().getSolutionCount();
+				ub = obj.getUB();
+				int target = (lb+ub)/2;
+				System.out.println(lb+" : "+ub+" -> "+target);
+				FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
+				dec.set(obj,target, objCut);
+				return dec;
+			}
+		}
+	}
+
+	private static class BottomUp extends AbstractStrategy<IntVar> {
+		IntVar obj;
+		int val;
+		protected BottomUp(IntVar obj) {
+			super(new IntVar[]{obj});
+			this.obj = obj;
+			val = -1;
+		}
+		@Override
+		public void init() {}
+		@Override
+		public Decision getDecision() {
+			if(obj.getLB()==obj.getUB()){
+				return null;
+			}
+			if(val==-1){
+				val = obj.getLB();
+			}
+			int target = val;
+			val++;
 			System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+target);
 			FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
 			dec.set(obj,target, objCut);
@@ -409,28 +678,25 @@ public class TSPsymmetric {
 	}
 
 	public static Assignment<IntVar> objCut = new Assignment<IntVar>() {
-
 		@Override
 		public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
 			var.updateUpperBound(value, cause);
 		}
-
 		@Override
 		public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
 			lb = value+1;
 			var.updateLowerBound(value + 1, cause);
 		}
-
 		@Override
 		public String toString() {
 			return " <= ";
 		}
 	};
+
 	//***********************************************************************************
 	// HEURISTICS
 	//***********************************************************************************
 
-		
 	private static class MinCostMinNeigh extends ArcStrategy {
 		int[][] dist;
 
@@ -617,6 +883,232 @@ public class TSPsymmetric {
 		}
 	}
 
+	private static class MSTMaxRegretMinCost extends ArcStrategy {
+		int[][] dist;
+		int offSet;
+
+		public MSTMaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
+			super(graphVar);
+			dist = costMatrix;
+			if(graphVar.isDirected()){
+				offSet = 1;
+			}else{
+				offSet = 0;
+			}
+		}
+
+		@Override
+		public int nextArc() {
+			INeighbors suc;
+			int from=-1,to=-1;
+			int size = n+1;
+			int val;
+			int minCost = -1;
+			for(int i=0;i<n;i++){
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()>2 && suc.neighborhoodSize()<size){
+					size = suc.neighborhoodSize();
+				}
+				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+					if(mst.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+						val = dist[i][j];
+						if(minCost == -1 || val<minCost){
+							minCost = val;
+							from = i;
+							to = j;
+						}
+					}
+				}
+			}
+			if (to == -1 || g.getKernelGraph().arcExists(from, to)) {
+				throw new UnsupportedOperationException("error in branching");
+			}
+//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
+			return (from+1)*n+to;
+		}
+
+		public int nextFromUndir(int size) {
+			INeighbors suc;
+			int from = -1;
+			int difMax = -1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if (suc.neighborhoodSize()==size) {
+					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+					int best = mand;
+					if(mand==-1){
+						best = getBest(i,-2,-2,suc);
+						int secondBest = getBest(i,best,-2,suc);
+						int thirdBest = getBest(i,best,secondBest,suc);
+						int val = dist[i][thirdBest]+dist[i][thirdBest]-dist[i][secondBest]-dist[i][best];
+						if(dist[i][secondBest]<dist[i][best]){
+							throw new UnsupportedOperationException();
+						}
+						if(dist[i][thirdBest]<dist[i][secondBest]){
+							throw new UnsupportedOperationException();
+						}
+						if(val<0){
+							throw new UnsupportedOperationException();
+						}
+						if(val>difMax){
+							difMax = val;
+							from = i;
+						}
+					}else{
+						int secondBest = getBest(i,best,-2,suc);
+						int thirdBest = getBest(i,best,secondBest,suc);
+						if(dist[i][thirdBest]-dist[i][secondBest]<0){
+							throw new UnsupportedOperationException();
+						}
+						if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
+							difMax = dist[i][thirdBest]-dist[i][secondBest];
+							from = i;
+						}
+					}
+//					int secondBest = getBest(i,best,-2,suc);
+//					int thirdBest = getBest(i,best,secondBest,suc);
+//					if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
+//						difMax = dist[i][thirdBest]-dist[i][secondBest];
+//						from = i;
+//					}
+				}
+			}
+			return from;
+		}
+
+		private int getBest(int from, int not1, int not2, INeighbors nei) {
+			int best = -1;
+			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+				if(j!=not1 && j!=not2){
+					if(best==-1 || dist[from][j]<dist[from][best]){
+						best = j;
+					}
+				}
+			}
+			if(best == -1){
+				throw new UnsupportedOperationException();
+			}
+			return best;
+		}
+	}
+
+	private static class MinDomMaxRegretMinCost extends ArcStrategy {
+		int[][] dist;
+		int offSet;
+
+		public MinDomMaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
+			super(graphVar);
+			dist = costMatrix;
+			if(graphVar.isDirected()){
+				offSet = 1;
+			}else{
+				offSet = 0;
+			}
+		}
+
+		@Override
+		public int nextArc() {
+			INeighbors suc;
+			int from;
+			int size = n+1;
+			for(int i=0;i<n;i++){
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()>2 && suc.neighborhoodSize()<size){
+					size = suc.neighborhoodSize();
+				}
+			}
+			from = nextFromUndir(size);
+			if(from==-1){
+				if(!g.instantiated()){
+					throw new UnsupportedOperationException();
+				}
+				return -1;
+			}
+			int val;
+			int to = -1;
+			int minCost = -1;
+			suc = g.getEnvelopGraph().getSuccessorsOf(from);
+			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+				if(!g.getKernelGraph().arcExists(from,j)){
+					val = dist[from][j];
+					if(minCost == -1 || val<minCost){
+						minCost = val;
+						to = j;
+					}
+				}
+			}
+			if (to == -1 || g.getKernelGraph().arcExists(from, to)) {
+				throw new UnsupportedOperationException("error in branching");
+			}
+//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
+			return (from+1)*n+to;
+		}
+
+		public int nextFromUndir(int size) {
+			INeighbors suc;
+			int from = -1;
+			int difMax = -1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if (suc.neighborhoodSize()==size) {
+					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+					int best = mand;
+					if(mand==-1){
+						best = getBest(i,-2,-2,suc);
+						int secondBest = getBest(i,best,-2,suc);
+						int thirdBest = getBest(i,best,secondBest,suc);
+						int val = dist[i][thirdBest]+dist[i][thirdBest]-dist[i][secondBest]-dist[i][best];
+						if(dist[i][secondBest]<dist[i][best]){
+							throw new UnsupportedOperationException();
+						}
+						if(dist[i][thirdBest]<dist[i][secondBest]){
+							throw new UnsupportedOperationException();
+						}
+						if(val<0){
+							throw new UnsupportedOperationException();
+						}
+						if(val>difMax){
+							difMax = val;
+							from = i;
+						}
+					}else{
+						int secondBest = getBest(i,best,-2,suc);
+						int thirdBest = getBest(i,best,secondBest,suc);
+						if(dist[i][thirdBest]-dist[i][secondBest]<0){
+							throw new UnsupportedOperationException();
+						}
+						if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
+							difMax = dist[i][thirdBest]-dist[i][secondBest];
+							from = i;
+						}
+					}
+//					int secondBest = getBest(i,best,-2,suc);
+//					int thirdBest = getBest(i,best,secondBest,suc);
+//					if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
+//						difMax = dist[i][thirdBest]-dist[i][secondBest];
+//						from = i;
+//					}
+				}
+			}
+			return from;
+		}
+
+		private int getBest(int from, int not1, int not2, INeighbors nei) {
+			int best = -1;
+			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+				if(j!=not1 && j!=not2){
+					if(best==-1 || dist[from][j]<dist[from][best]){
+						best = j;
+					}
+				}
+			}
+			if(best == -1){
+				throw new UnsupportedOperationException();
+			}
+			return best;
+		}
+	}
+
 	private static class MinNeighMinCost extends ArcStrategy {
 		int[][] dist;
 		int offSet;
@@ -645,7 +1137,7 @@ public class TSPsymmetric {
 				}
 			}
 			if (from == -1) {
-				System.out.println("over");
+//				System.out.println("over");
 				return -1;
 			}
 			int val;
@@ -667,7 +1159,7 @@ public class TSPsymmetric {
 			if (g.getKernelGraph().arcExists(from, to)) {
 				throw new UnsupportedOperationException("error in branching");
 			}
-			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
+//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
 			return (from+1)*n+to;
 		}
 	}
@@ -838,6 +1330,23 @@ public class TSPsymmetric {
 		}
 	}
 
+	private static class MaxRC extends ArcStrategy {
+		public MaxRC(GraphVar graphVar) {
+			super(graphVar);
+		}
+		@Override
+		public int nextArc() {
+			int minArc = mst.getHighestRC();
+			if (minArc == -1) {
+				if(!g.instantiated()){
+					throw new UnsupportedOperationException();
+				}
+				return -1;
+			}
+			return minArc;
+		}
+	}
+
 	private static class ConstructorHeur extends ArcStrategy {
 		BitSet seen;
 		int[][] matrix;
@@ -903,6 +1412,127 @@ public class TSPsymmetric {
 //				}
 //			}
 //			return (x+1)*n+y;
+		}
+	}
+
+	// ReducedCostBasedSearch
+
+	private static class RCSearch extends AbstractStrategy<GraphVar> {
+		GraphVar g;
+		private boolean enf;
+		protected RCSearch(GraphVar g) {
+			super(new GraphVar[]{g});
+			this.g = g;
+		}
+		@Override
+		public void init() {}
+		@Override
+		public Decision getDecision() {
+			if(g.instantiated()){
+				return null;
+			}
+			GraphDecision dec;
+			if(enf){
+				dec = new GraphDecision(g,minDomMinCost(), Assignment.graph_enforcer);
+			}else{
+				dec = new GraphDecision(g,maxDomMaxCost(), Assignment.graph_remover);
+			}
+			enf = !enf;
+			return dec;
+		}
+		public int maxDomMaxCost() {
+			int n = g.getEnvelopOrder();
+			INeighbors suc;
+			int size = 0;
+			int sizi;
+			int val;
+			int to = -1;
+			int minCost = -1;
+			int from=-1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()>2){
+					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+						if((mst.isInMST(i,j)) && (!g.getKernelGraph().arcExists(i,j))){
+							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
+							if (sizi == size) {
+								val = dist[i][j];
+								if(minCost == -1 || val>minCost){
+									minCost = val;
+									to = j;
+									from = i;
+								}
+							}
+							if (sizi > size) {
+								size = sizi;
+								val = dist[i][j];
+								minCost = val;
+								to = j;
+								from = i;
+							}
+						}
+					}
+				}
+			}
+			return (from+1)*n+to;
+		}
+		public int minDomMinCost() {
+			int n = g.getEnvelopOrder();
+			INeighbors suc;
+			int size = 2*n + 1;
+			int sizi;
+			int val;
+			int to = -1;
+			int minCost = -1;
+			int from=-1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()>2){
+					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+						if(mst.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
+							if (sizi == size) {
+								val = dist[i][j];
+								if(minCost == -1 || val<minCost){
+									minCost = val;
+									to = j;
+									from = i;
+								}
+							}
+							if (sizi < size) {
+								size = sizi;
+								val = dist[i][j];
+								minCost = val;
+								to = j;
+								from = i;
+							}
+						}
+					}
+				}
+			}
+			return (from+1)*n+to;
+		}
+	}
+
+	private static class CompositeSearch extends AbstractStrategy {
+
+		AbstractStrategy s1,s2;
+		protected CompositeSearch(AbstractStrategy s1, AbstractStrategy s2) {
+			super(ArrayUtils.append(s1.vars,s2.vars));
+			this.s1 = s1;
+			this.s2 = s2;
+		}
+
+		@Override
+		public void init() {}
+
+		@Override
+		public Decision getDecision() {
+			Decision d = s1.getDecision();
+			if(d==null){
+				d = s2.getDecision();
+			}
+			return d;
 		}
 	}
 }

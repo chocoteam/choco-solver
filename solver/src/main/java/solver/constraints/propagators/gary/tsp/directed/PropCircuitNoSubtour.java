@@ -32,10 +32,12 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp;
+package solver.constraints.propagators.gary.tsp.directed;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -44,25 +46,49 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.IntVar;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 /**
- */
-public class PropPosIntervals extends Propagator<IntVar> {
+ *
+ * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
+public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	DirectedGraphVar g;
 	int n;
+	private IntProcedure arcEnforced;
+	private IStateInt[] origin,end,size;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropPosIntervals(IntVar[] vars, Constraint constraint, Solver solver) {
-		super(vars, solver, constraint, PropagatorPriority.BINARY,true);
-		this.n = vars.length;
+	/**
+	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
+	 * runs in O(1) per instantiation event
+	 * @param graph
+	 * @param constraint
+	 * @param solver
+	 * */
+	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
+		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		g = graph;
+		this.n = g.getEnvelopGraph().getNbNodes();
+		arcEnforced = new EnfArc();
+		origin = new IStateInt[n];
+		size = new IStateInt[n];
+		end = new IStateInt[n];
+		for(int i=0;i<n;i++){
+			origin[i] = environment.makeInt(i);
+			size[i] = environment.makeInt(1);
+			end[i] = environment.makeInt(i);
+		}
 	}
 
 	//***********************************************************************************
@@ -71,78 +97,68 @@ public class PropPosIntervals extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				check(i,j);
-			}
+		int i,j;
+		for(i=0;i<n;i++){
+			end[i].set(i);
+			origin[i].set(i);
+			size[i].set(1);
 		}
-	}
-
-	private void check(int i, int j) throws ContradictionException {
-		int first = Math.min(vars[i].getLB(),vars[j].getLB());
-		int last  = Math.max(vars[i].getUB(),vars[j].getUB())+1;
-		if(first>last){
-			throw new UnsupportedOperationException();
-		}
-		int q = 0;
-		int tot = 0;
-		for(int k=0;k<n;k++){
-			tot ++;
-			if(vars[k].getLB()>=first && vars[k].getUB()+1<=last){
-				q++;
-			}
-		}
-
-		if(tot>vars[n-1].getUB()+1){
-			contradiction(vars[n-1],"");
-		}
-		int mandFirst = last-q;
-		int mandLast  = first+q;
-//		System.out.println(first+" + "+q+" -> "+last);
-		if(mandFirst<mandLast){
-			for(int k=0;k<n;k++){
-				if(vars[k].getLB()<first || vars[k].getUB()+1>last){
-//					checkEnergy(k,mandFirst,mandLast);
-					checkEnergy(k,first,last,q,mandFirst,mandLast);
-				}
-			}
-		}
-	}
-
-	private void checkEnergy(int i, int first, int last , int dur, int mandFirst , int mandLast) throws ContradictionException {
-		// can be done after the box
-		boolean right= vars[i].getUB()>=mandLast;
-		// cannot be done inside the box
-		if(1>last-first-dur){
-			// can be done before the box
-			if(vars[i].getLB()+1<=mandFirst){
-				if(!right){
-					vars[i].updateUpperBound(mandFirst-1,this);
-				}
-			}
-			// cannot be done before the box
-			else{
-				if(right){
-						vars[i].updateLowerBound(mandLast, this);
-				}else{
-					contradiction(vars[i],"sweep");
-				}
+		for(i=0;i<n;i++){
+			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+			if(j!=-1){
+				enforce(i,j);
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		forcePropagate(EventType.FULL_PROPAGATION);
+		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.FULL_PROPAGATION.mask+EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
+		return EventType.ENFORCEARC.mask ;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
+	}
+
+	private void enforce(int i, int j) throws ContradictionException {
+		int last = end[j].get();
+		int start = origin[i].get();
+		if(origin[j].get()!=j){
+			contradiction(g,"");
+		}
+		if(end[i].get()!=i){
+			contradiction(g,"");
+		}
+		if(i==last && j==start){
+			if(size[start].get()!=n){
+				contradiction(g,"");
+			}
+			return;
+		}
+		origin[last].set(start);
+		end[start].set(last);
+		size[start].add(size[j].get());
+		if(size[start].get()!=n){
+			g.removeArc(last,start,this);
+		}else{
+			g.enforceArc(last,start,this);
+		}
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private class EnfArc implements IntProcedure {
+		@Override
+		public void execute(int i) throws ContradictionException {
+			enforce(i/n-1,i%n);
+		}
 	}
 }

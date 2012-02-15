@@ -103,6 +103,9 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		}
 		minSum /= 2;
 		maxSum /= 2;
+		if(maxSum<0){
+			maxSum = Integer.MAX_VALUE;
+		}
 		sum.updateLowerBound(minSum, this);
 		sum.updateUpperBound(maxSum, this);
 		// filter the graph

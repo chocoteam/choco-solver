@@ -25,24 +25,55 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/12
- * Time: 01:03
- */
-
 package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
-import gnu.trove.list.array.TIntArrayList;
+import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.exception.ContradictionException;
+import solver.variables.graph.GraphType;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
-import java.util.BitSet;
+public abstract class AbstractOneTreeFinder {
 
-public interface HeldKarp {
-	TIntArrayList getMandatoryArcsList();
-	void contradiction() throws ContradictionException;
-	void remove(int i, int i1) throws ContradictionException;
-	double getMinArcVal();
-	boolean isMandatory(int i, int j);
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
+
+	protected final static boolean FILTER = true;
+	// INPUT
+	protected UndirectedGraph g;	// graph
+	protected int n;			// number of nodes
+	// OUTPUT
+	protected UndirectedGraph Tree;
+	protected double treeCost;
+	// PROPAGATOR
+	protected HeldKarp propHK;
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	public AbstractOneTreeFinder(int nbNodes, HeldKarp propagator) {
+		n = nbNodes;
+		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
+		propHK = propagator;
+	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
+
+	public abstract void performPruning(double UB) throws ContradictionException;
+
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
+
+	public UndirectedGraph getMST() {
+		return Tree;
+	}
+	public double getBound() {
+		return treeCost;
+	}
 }
