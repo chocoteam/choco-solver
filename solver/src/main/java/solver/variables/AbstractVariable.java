@@ -145,7 +145,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         this.uniqueID = uniqueID;
     }
 
-    public void attach(Propagator propagator, int idxInProp) {
+    public void link(Propagator propagator, int idxInProp) {
         //ensure capacity
         if (pIdx == propagators.length) {
             Propagator[] tmp = propagators;
@@ -163,6 +163,20 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
 
     public void analyseAndAdapt(int mask) {
         modificationEvents |= mask;
+    }
+
+    public void unlink(Propagator propagator) {
+        // 1. find the propagator
+        int i = 0;
+        while (i < pIdx && propagators[i] != propagator) {
+            i++;
+        }
+        assert i < pIdx : "remove unknown propagator";
+
+        // 2. swap it with the last one
+        pIdx--;
+        propagators[i] = propagators[pIdx];
+        pindices[i] = pindices[pIdx];
     }
 
     public Propagator[] getPropagators() {

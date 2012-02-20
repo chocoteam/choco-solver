@@ -73,10 +73,20 @@ public class PropReified extends Propagator<Variable> {
         lastActiveR = environment.makeInt(right.length);
 
         for (int i = 0; i < left.length; i++) {
+            // disconnect propagator from variable
+            for (int j = 0; j < left[i].getNbVars(); j++) {
+                left[i].getVar(j).unlink(left[i]);
+            }
+            // force creation of coarse recorder
             left[i].addRecorder(new CoarseEventRecorder(left[i], solver));
             left[i].setActive();
         }
         for (int i = 0; i < right.length; i++) {
+            // disconnect propagator from variable
+            for (int j = 0; j < right[i].getNbVars(); j++) {
+                right[i].getVar(j).unlink(right[i]);
+            }
+            // force creation of coarse recorder
             right[i].addRecorder(new CoarseEventRecorder(right[i], solver));
             right[i].setActive();
         }

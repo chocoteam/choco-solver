@@ -136,13 +136,20 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
      */
-    void attach(Propagator propagator, int idxInProp);
+    void link(Propagator propagator, int idxInProp);
 
     /**
      * Analysis propagator event reaction on this, and adapt this
      * @param mask
      */
     void analyseAndAdapt(int mask);
+
+    /**
+     * Remove a propagator from the list of propagator of <code>this</code>.
+     * SHOULD BE CONTAINED IN THIS.
+     * @param propagator the propagator to remove
+     */
+    void unlink(Propagator propagator);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

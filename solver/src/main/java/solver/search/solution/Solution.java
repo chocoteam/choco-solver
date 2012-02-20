@@ -80,7 +80,7 @@ public class Solution implements ICause {
         intvalues = new int[vars.length];
         graphValues = new LinkedList<boolean[][]>();
         for (int i = 0; i < vars.length; i++) {
-            assert (vars[i].instantiated()); // BEWARE only decision variables should be instantiated
+            assert (vars[i].instantiated()):vars[i]+" is not instantiated"; // BEWARE only decision variables should be instantiated
             switch(vars[i].getType()){
             case Variable.INTEGER : 
             	intvalues[i] = ((IntVar) vars[i]).getValue();break;
