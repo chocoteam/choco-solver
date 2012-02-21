@@ -58,12 +58,32 @@ public class PropFastSymmetricHeldKarp<V extends Variable> extends PropSymmetric
 		penalities = new double[n];
 	}
 
-
 	/** MST based HK */
 	public static PropFastSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalOneTreeFinderWithFiltering(phk.n,phk);
+//		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);
+		phk.HK = new PrimMSTFinder(phk.n,phk);
+		phk.HKfilter = phk.HK;
+		phk.treeMode = MST;
+		throw new UnsupportedOperationException("Are you sure?");
+//		return phk;
+	}
+	/** ONE TREE based HK */
+	public static PropFastSymmetricHeldKarp oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+//		phk.HKfilter = new KruskalOneTreeFinder(phk.n,phk);
 		phk.HK = new PrimOneTreeFinder(phk.n,phk);
+		phk.HKfilter = phk.HK;
+		phk.treeMode = ONE_TREE;
+		return phk;
+	}
+	/** TWO TREE based HK */
+	public static PropFastSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+//		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
+		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
+		phk.HKfilter = phk.HK;
+		phk.treeMode = TWO_TREE;
 		return phk;
 	}
 
@@ -94,22 +114,35 @@ public class PropFastSymmetricHeldKarp<V extends Variable> extends PropSymmetric
 		}
 		double sumPenalities = 0;
 		int deg;
-		for(int i=0;i<n;i++){
+		for(int i=1;i<n-1;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
 			penalities[i] += (deg-2)*step;
-			if(penalities[i]>Double.MAX_VALUE/(n-1)){
-				throw new UnsupportedOperationException();
-			}
-			if(penalities[i]<-Double.MAX_VALUE/(n-1)){
+			if(penalities[i]>Double.MAX_VALUE/(n-1) || penalities[i]<-Double.MAX_VALUE/(n-1)){
 				throw new UnsupportedOperationException();
 			}
 			sumPenalities += penalities[i];
 		}
-		if(penalities[0]!=0){
-			throw new UnsupportedOperationException();
+		int degFirst = mst.getNeighborsOf(0).neighborhoodSize();
+		int degLast = mst.getNeighborsOf(n-1).neighborhoodSize();
+		switch(treeMode){
+			case MST:
+				penalities[0] += (degFirst-1)*step;
+				penalities[n-1]+=(degLast-1)*step;
+				sumPenalities += (penalities[0]+penalities[n-1])/2;break;
+			case ONE_TREE:
+				penalities[n-1] += (degLast-2)*step;
+				sumPenalities += penalities[n-1];
+				if(degFirst!=2){
+					throw new UnsupportedOperationException();
+				};break;
+			case TWO_TREE:
+				if(degFirst!=1||degFirst!=1){
+					throw new UnsupportedOperationException();
+				}break;
 		}
 		this.totalPenalities = 2*sumPenalities;
 	}
+
 	protected void updateCostMatrix() {
 		INeighbors nei;
 		for(int i=0;i<n;i++){
@@ -122,6 +155,7 @@ public class PropFastSymmetricHeldKarp<V extends Variable> extends PropSymmetric
 			}
 		}
 	}
+
 	protected double getTotalPen(){
 		return totalPenalities;
 	}

@@ -32,7 +32,7 @@ import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
-public abstract class AbstractOneTreeFinder {
+public abstract class AbstractTreeFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -41,7 +41,7 @@ public abstract class AbstractOneTreeFinder {
 	protected final static boolean FILTER = true;
 	// INPUT
 	protected UndirectedGraph g;	// graph
-	protected int n;			// number of nodes
+	protected int n;				// number of nodes
 	// OUTPUT
 	protected UndirectedGraph Tree;
 	protected double treeCost;
@@ -52,7 +52,7 @@ public abstract class AbstractOneTreeFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractOneTreeFinder(int nbNodes, HeldKarp propagator) {
+	public AbstractTreeFinder(int nbNodes, HeldKarp propagator) {
 		n = nbNodes;
 		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
 		propHK = propagator;

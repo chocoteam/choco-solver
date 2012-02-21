@@ -45,6 +45,7 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 /**
  * @PropAnn(tested = {BENCHMARK})
@@ -449,5 +450,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				}
 			}
 		}
+	}
+	public DirectedGraph getMST(){
+		return mst;
 	}
 }

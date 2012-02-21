@@ -25,20 +25,44 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 03/10/11
+ * Time: 19:56
+ */
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+package solver.constraints.propagators.gary.tsp.undirected;
+
+import choco.annotations.PropAnn;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-public class PrimOneTreeFinder extends PrimMSTFinder {
+/**
+ *
+ * Simple NoSubtour of Pesant when undirected graph
+ * */
+@PropAnn(tested=PropAnn.Status.BENCHMARK)
+public class PropChainNoSubtour2 extends PropCycleNoSubtour {
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimOneTreeFinder(int nbNodes, HeldKarp propagator) {
-		super(nbNodes,propagator);
+	/**
+	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
+	 * runs in O(1) per instantiation event
+	 * @param graph
+	 * @param constraint
+	 * @param solver
+	 * */
+	public PropChainNoSubtour2(UndirectedGraphVar graph, Constraint<UndirectedGraphVar,
+			Propagator<UndirectedGraphVar>> constraint, Solver solver) {
+		super(graph,constraint,solver);
 	}
 
 	//***********************************************************************************
@@ -46,78 +70,28 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 	//***********************************************************************************
 
 	@Override
-	protected void prim() throws ContradictionException {
-		minVal = propHK.getMinArcVal();
-		if(FILTER){
-			maxTArc = minVal;
+	public void propagate(int evtmask) throws ContradictionException {
+		int j;
+		for(int i=0;i<n;i++){
+			end[i].set(i);
+			origin[i].set(i);
+			size[i].set(1);
 		}
-		inTree.set(0);
-		INeighbors nei = g.getSuccessorsOf(0);
-		int min1 = -1;
-		int min2 = -1;
-		boolean b1=false,b2=false;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(!b1){
-				if(min1==-1){
-					min1 = j;
-				}
-				if(costs[0][j]<costs[0][min1]){
-					min2 = min1;
-					min1 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					if(min1!=j){
-						min2 = min1;
-					}
-					min1 = j;
-					b1 = true;
-				}
+		enforce(0,n-1);
+		INeighbors nei;
+		for(int i=0;i<n;i++){
+			nei = g.getKernelGraph().getSuccessorsOf(i);
+			j = nei.getFirstElement();
+			if(j!=-1 && i<j){
+				enforce(i,j);
 			}
-			if(min1!=j && !b2){
-				if(min2==-1 || costs[0][j]<costs[0][min2]){
-					min2 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					min2 = j;
-					b2 = true;
-				}
+			j = nei.getNextElement();
+			if(j!=-1 && i<j){
+				enforce(i,j);
 			}
-		}
-		if(FILTER){
-			if(!propHK.isMandatory(0,min1)){
-				maxTArc = Math.max(maxTArc, costs[0][min1]);
+			if(nei.getNextElement()!=-1){
+				contradiction(g,"");
 			}
-			if(!propHK.isMandatory(0,min2)){
-				maxTArc = Math.max(maxTArc, costs[0][min2]);
-			}
-		}
-		if(min1 == -1 || min2 == -1){
-			propHK.contradiction();
-		}
-		int first=-1,sizeFirst=n+1;
-		for(int i=1;i<n;i++){
-			if(g.getSuccessorsOf(i).neighborhoodSize()<sizeFirst){
-				first = i;
-				sizeFirst = g.getSuccessorsOf(i).neighborhoodSize();
-			}
-		}
-		if(first==-1){
-			propHK.contradiction();
-		}
-		addNode(first);
-		int from,to;
-		while (tSize<n-2 && !heap.isEmpty()){
-			to = heap.pop();
-			from = heap.getMate(to);
-			addArc(from,to);
-		}
-		if(tSize!=n-2){
-			propHK.contradiction();
-		}
-		addArc(0,min1);
-		addArc(0,min2);
-		if(Tree.getNeighborsOf(0).neighborhoodSize()!=2){
-			throw new UnsupportedOperationException();
 		}
 	}
 }

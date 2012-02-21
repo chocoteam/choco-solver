@@ -49,6 +49,7 @@ import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -74,7 +75,7 @@ public class TSP {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 600000;
+	private static final long TIMELIMIT = 300000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
@@ -102,7 +103,7 @@ public class TSP {
 	//***********************************************************************************
 
 	private static int arbo=0,rg=1,undirectedMate=2,pos=3;//,time=5;
-	private static int NB_PARAM = 6;
+	private static int NB_PARAM = 4;
 	private static BitSet config;
 	private static boolean bst;
 
@@ -112,7 +113,7 @@ public class TSP {
 			bytes = "0"+bytes;
 		}
 		for(int i=0;i<bytes.length();i++){
-			config.set(i,bytes.charAt(i)=='1');
+			config.set(i,bytes.charAt(NB_PARAM-1-i)=='1');
 		}
 	}
 
@@ -175,7 +176,7 @@ public class TSP {
 			gc.addAdHocProp(SCCP);
 		}
 		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.MATRIX,GraphType.LINKED_LIST);
+			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
 			INeighbors nei;
 			for(int i=0;i<n-1;i++){
 				undi.getKernelGraph().activateNode(i);
@@ -250,7 +251,7 @@ public class TSP {
 			hk = propHK_mst;
 			gc.addAdHocProp(propHK_mst);
 		}
-		hk.waitFirstSolution(search!=1 && initialUB!=optimum);
+//		hk.waitFirstSolution(search!=1 && initialUB!=optimum);
 		solver.post(gc);
 		//SOLVER CONFIG
 		switch (search){
@@ -283,7 +284,6 @@ public class TSP {
 		}else{
 			configst += "0;";
 		}
-		configst += bst+";";
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost + ";"+searchMode[search]+";"+configst+"\n";
@@ -297,7 +297,7 @@ public class TSP {
 	public static void main(String[] args) {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
-		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;antiarbo;rg;undi;pos;time;bst;\n", outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;bst;\n", outFile);
 		config = new BitSet(NB_PARAM);
 		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
@@ -308,29 +308,43 @@ public class TSP {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		File folder = new File(dir);
 		String[] list = folder.list();
+		bst = false;
+		search = 0;
 		for (String s : list) {
-			if (s.contains(".atsp")){
+			if (s.contains("43.atsp")){
 				loadInstance(dir + "/" + s);
-				if(n<150){
+				if(n<160){
 //					for(int se=0;se<3;se++){
-					search = 0;
-//					bst = false;
-//					configParameters(0);
+					configParameters(0);
+					buildModel();
+//					configParameters(1<<rg);
 //					buildModel();
+//					configParameters(1<<rg);
+//					buildModel();
+//					config.clear(rg);
+//					buildModel();
+
 //					configParameters(1<<3);
 //					buildModel();
-					bst = false;
-					configParameters(1<<3);
-					buildModel();
-					for(int p=0;p<NB_PARAM;p++){
-						configParameters(1<<p);
-//						if(config.get(rg)){
-//							bst = true;
+//					bst = true;
+//					buildModel();
+//					for(int p=0;p<NB_PARAM;p++){
+//						configParameters(1<<p);
+//						buildModel();
+//					}
+//					for(int p=0;p<NB_PARAM;p++){
+//						if(p!=rg){
+//							configParameters((1<<p)+(1<<rg));
 //							buildModel();
-//							bst = false;
 //						}
-						buildModel();
-					}
+//					}
+//					bst = true;
+//					for(int p=0;p<NB_PARAM;p++){
+//						if(p!=rg){
+//							configParameters((1<<p)+(1<<rg));
+//							buildModel();
+//						}
+//					}
 //					}
 				}
 			}
@@ -532,7 +546,8 @@ public class TSP {
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 						if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
 							if((!config.get(rg)) || sccOf[i].get()==sccOf[j].get()){
-								sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
+								sizi = suc.neighborhoodSize();
+								sizi += g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
 								if (sizi == size) {
 									val = distanceMatrix[i][j];
 									if(minCost == -1 || val<minCost){
@@ -559,7 +574,8 @@ public class TSP {
 					if(suc.neighborhoodSize()>1){
 						for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 							if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
-								sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
+								sizi = suc.neighborhoodSize();
+								sizi += g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
 								if (sizi == size) {
 									val = distanceMatrix[i][j];
 									if(minCost == -1 || val<minCost){

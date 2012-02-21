@@ -31,13 +31,14 @@ import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 
-public class PrimOneTreeFinder extends PrimMSTFinder {
+public class PrimTwoTreeFinder extends PrimMSTFinder {
+
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimOneTreeFinder(int nbNodes, HeldKarp propagator) {
+	public PrimTwoTreeFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 	}
 
@@ -45,57 +46,15 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 	// METHODS
 	//***********************************************************************************
 
-	@Override
 	protected void prim() throws ContradictionException {
 		minVal = propHK.getMinArcVal();
 		if(FILTER){
 			maxTArc = minVal;
 		}
 		inTree.set(0);
-		INeighbors nei = g.getSuccessorsOf(0);
-		int min1 = -1;
-		int min2 = -1;
-		boolean b1=false,b2=false;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(!b1){
-				if(min1==-1){
-					min1 = j;
-				}
-				if(costs[0][j]<costs[0][min1]){
-					min2 = min1;
-					min1 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					if(min1!=j){
-						min2 = min1;
-					}
-					min1 = j;
-					b1 = true;
-				}
-			}
-			if(min1!=j && !b2){
-				if(min2==-1 || costs[0][j]<costs[0][min2]){
-					min2 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					min2 = j;
-					b2 = true;
-				}
-			}
-		}
-		if(FILTER){
-			if(!propHK.isMandatory(0,min1)){
-				maxTArc = Math.max(maxTArc, costs[0][min1]);
-			}
-			if(!propHK.isMandatory(0,min2)){
-				maxTArc = Math.max(maxTArc, costs[0][min2]);
-			}
-		}
-		if(min1 == -1 || min2 == -1){
-			propHK.contradiction();
-		}
+		inTree.set(n-1);
 		int first=-1,sizeFirst=n+1;
-		for(int i=1;i<n;i++){
+		for(int i=1;i<n-1;i++){
 			if(g.getSuccessorsOf(i).neighborhoodSize()<sizeFirst){
 				first = i;
 				sizeFirst = g.getSuccessorsOf(i).neighborhoodSize();
@@ -106,18 +65,95 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 		}
 		addNode(first);
 		int from,to;
-		while (tSize<n-2 && !heap.isEmpty()){
+		while (tSize<n-3 && !heap.isEmpty()){
 			to = heap.pop();
 			from = heap.getMate(to);
 			addArc(from,to);
 		}
-		if(tSize!=n-2){
+		if(tSize!=n-3){
 			propHK.contradiction();
 		}
-		addArc(0,min1);
-		addArc(0,min2);
-		if(Tree.getNeighborsOf(0).neighborhoodSize()!=2){
-			throw new UnsupportedOperationException();
+		addExtremities();
+		if(tSize!=n-1){
+			propHK.contradiction();
+		}
+	}
+
+	// STUFF
+	protected void addExtremities(){
+		int mc1 = -1,mc2 = -1;
+		if(g.getSuccessorsOf(0).neighborhoodSize()==1){
+			mc1 = g.getSuccessorsOf(0).getFirstElement();
+		}
+		if(g.getSuccessorsOf(n-1).neighborhoodSize()==1){
+			mc2 = g.getSuccessorsOf(n-1).getFirstElement();
+		}
+		if(mc1!=-1){
+			if(mc2!=-1){
+			}else{
+				mc2 = getBestNot(n-1,mc1);
+			}
+		}else{
+			if(mc2!=-1){
+				mc1 = getBestNot(0,mc2);
+			}else{
+				mc2 = getBestNot(n-1,-2);
+				mc1 = getBestNot(0,mc2);
+				double k = costs[0][mc1]+costs[n-1][mc2];
+				int mc1bis = getBestNot(0,-2);
+				int mc2bis = getBestNot(n-1,mc1bis);
+				double kbis = costs[0][mc1bis]+costs[n-1][mc2bis];
+				if(kbis<k){
+					mc2 = mc2bis;
+					mc1 = mc1bis;
+				}
+			}
+		}
+		if(FILTER){
+			if(!propHK.isMandatory(0,mc1)){
+				maxTArc = Math.max(maxTArc, costs[0][mc1]);
+			}
+			if(!propHK.isMandatory(n-1,mc2)){
+				maxTArc = Math.max(maxTArc, costs[n-1][mc2]);
+			}
+		}
+		Tree.addEdge(0,mc1);
+		Tree.addEdge(n-1,mc2);
+		tSize += 2;
+		treeCost += costs[0][mc1]+costs[n-1][mc2];
+	}
+
+	protected int getBestNot(int i, int not) {
+		if(not==0 || not==n-1){
+			INeighbors nei = g.getSuccessorsOf(i);
+			double cost = -1;
+			int idx = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(j!=0 && j!=n-1 && (idx==-1 || cost>costs[i][j])){
+					idx = j;
+					cost = costs[i][j];
+				}
+			}
+			if(idx==-1){
+				throw new UnsupportedOperationException();
+			}
+			return idx;
+		}else{
+			INeighbors nei = g.getSuccessorsOf(i);
+			double cost = -1;
+			int idx = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(j!=not && (idx==-1 || cost>costs[i][j])){
+					idx = j;
+					cost = costs[i][j];
+				}
+			}
+			if(idx==-1){
+				System.out.println(nei);
+				System.out.println(propHK.isMandatory(i,nei.getFirstElement()));
+				throw new UnsupportedOperationException();
+			}
+			return idx;
 		}
 	}
 }

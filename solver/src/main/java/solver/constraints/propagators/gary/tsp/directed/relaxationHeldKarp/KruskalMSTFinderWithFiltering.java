@@ -268,7 +268,7 @@ public class KruskalMSTFinderWithFiltering extends AbstractMSTFinder {
 		int idx = activeArcs.nextSetBit(0);
 		minTArc = -propHK.getMinArcVal();
 		maxTArc = propHK.getMinArcVal();
-		double cost = 0;
+		double cost;
 		while(tSize < n-1){
 			if(idx<0){
 				propHK.contradiction();

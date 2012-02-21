@@ -35,12 +35,11 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
-public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
+public class KruskalMSTFinder extends AbstractTreeFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -48,28 +47,28 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 
 	protected TIntArrayList ma; 	//mandatory arcs (i,j) <-> i*n+j
 	// indexes are sorted
-	int[] sortedArcs;   // from sorted to lex
-	int[][] indexOfArc; // from lex (i,j) to sorted (i+1)*n+j
-	private BitSet activeArcs; // if sorted is active
+	protected int[] sortedArcs;   // from sorted to lex
+	protected int[][] indexOfArc; // from lex (i,j) to sorted (i+1)*n+j
+	protected BitSet activeArcs; // if sorted is active
 	// UNSORTED
-	double[] costs;			 // cost of the lex arc
-	int[] p, rank;
+	protected double[] costs;			 // cost of the lex arc
+	protected int[] p, rank;
 	// CCtree
-	private int ccN;
-	private DirectedGraph ccTree;
-	private int[] ccTp;
-	private double[] ccTEdgeCost;
-	private LCAGraphManager lca;
-	private int fromInterest, cctRoot;
-	private BitSet useful;
-	private double minTArc,maxTArc;
-	private double[][] distMatrix;
+	protected int ccN;
+	protected DirectedGraph ccTree;
+	protected int[] ccTp;
+	protected double[] ccTEdgeCost;
+	protected LCAGraphManager lca;
+	protected int fromInterest, cctRoot;
+	protected BitSet useful;
+	protected double minTArc,maxTArc;
+	protected double[][] distMatrix;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public KruskalOneTreeFinderWithFiltering(int nbNodes, HeldKarp propagator) {
+	public KruskalMSTFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];
@@ -87,64 +86,8 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		lca = new LCAGraphManager(ccN);
 	}
 
-	private void sortArcs(){
-		Comparator<Integer> comp = new Comparator<Integer>(){
-			@Override
-			public int compare(Integer i1, Integer i2) {
-				if(costs[i1]<costs[i2]){
-					return -1;
-				}
-				if(costs[i1]>costs[i2]){
-					return 1;
-				}
-				return 0;
-			}
-		};
-		int size = 0;
-		Tree.getNeighborsOf(0).clear();
-		for(int i=1;i<n;i++){
-			p[i] = i;
-			rank[i] = 0;
-			ccTp[i] = i;
-			Tree.getNeighborsOf(i).clear();
-			ccTree.desactivateNode(i);
-			ccTree.activateNode(i);
-			size += g.getSuccessorsOf(i).neighborhoodSize();
-		}
-		size -= g.getSuccessorsOf(0).neighborhoodSize();
-		if(size%2!=0){
-			throw new UnsupportedOperationException();
-		}
-		size /= 2;
-		INeighbors nei;
-		Integer[] integers = new Integer[size];
-		int idx  = 0;
-		for(int i=1;i<n;i++){
-			nei =g.getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				if(i<j){
-					integers[idx]=i*n+j;
-					costs[i*n+j] = distMatrix[i][j];
-					idx++;
-				}
-			}
-		}
-		for(int i=n; i<ccN; i++){
-			ccTree.desactivateNode(i);
-		}
-		Arrays.sort(integers,comp);
-		int v;
-		activeArcs.clear();
-		activeArcs.set(0, size);
-		for(idx = 0; idx<size; idx++){
-			v = integers[idx];
-			sortedArcs[idx] = v;
-			indexOfArc[v/n][v%n] = idx;
-		}
-	}
-
 	//***********************************************************************************
-	// METHODS
+	// FIND MST
 	//***********************************************************************************
 
 	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
@@ -156,59 +99,65 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		cctRoot = n-1;
 		int tSize = addMandatoryArcs();
 		connectMST(tSize);
-		// add 0-node
-		add0Node();
 	}
 
-	int min1,min2;
-	private void add0Node() throws ContradictionException {
-		INeighbors nei = g.getSuccessorsOf(0);
-		min1 = -1;
-		min2 = -1;
-		boolean b1=false,b2=false;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(!b1){
-				if(min1==-1){
-					min1 = j;
-				}
-				if(distMatrix[0][j]<distMatrix[0][min1]){
-					min2 = min1;
-					min1 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					if(min1!=j){
-						min2 = min1;
+	protected void sortArcs(){
+			Comparator<Integer> comp = new Comparator<Integer>(){
+				@Override
+				public int compare(Integer i1, Integer i2) {
+					if(costs[i1]<costs[i2]){
+						return -1;
 					}
-					min1 = j;
-					b1 = true;
+					if(costs[i1]>costs[i2]){
+						return 1;
+					}
+					return 0;
+				}
+			};
+			int size = 0;
+			for(int i=0;i<n;i++){
+				p[i] = i;
+				rank[i] = 0;
+				ccTp[i] = i;
+				Tree.getNeighborsOf(i).clear();
+				ccTree.desactivateNode(i);
+				ccTree.activateNode(i);
+				size += g.getSuccessorsOf(i).neighborhoodSize();
+			}
+			if(size%2!=0){
+				throw new UnsupportedOperationException();
+			}
+			size /= 2;
+			INeighbors nei;
+			Integer[] integers = new Integer[size];
+			int idx  = 0;
+			for(int i=0;i<n;i++){
+				nei =g.getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
+					if(i<j){
+						integers[idx]=i*n+j;
+						costs[i*n+j] = distMatrix[i][j];
+						idx++;
+					}
 				}
 			}
-			if(min1!=j && !b2){
-				if(min2==-1 || distMatrix[0][j]<distMatrix[0][min2]){
-					min2 = j;
-				}
-				if(propHK.isMandatory(0,j)){
-					min2 = j;
-					b2 = true;
-				}
+			for(int i=n; i<ccN; i++){
+				ccTree.desactivateNode(i);
+			}
+			Arrays.sort(integers,comp);
+			int v;
+			activeArcs.clear();
+			activeArcs.set(0, size);
+			for(idx = 0; idx<size; idx++){
+				v = integers[idx];
+				sortedArcs[idx] = v;
+				indexOfArc[v/n][v%n] = idx;
 			}
 		}
-		if(min1 == min2){
-			throw new UnsupportedOperationException();
-		}
-		if(min1 == -1 || min2 == -1){
-			propHK.contradiction();
-		}
-		if(!propHK.isMandatory(0,min1)){
-			maxTArc = Math.max(maxTArc, distMatrix[0][min1]);
-		}
-		if(!propHK.isMandatory(0,min2)){
-			maxTArc = Math.max(maxTArc, distMatrix[0][min2]);
-		}
-		Tree.addEdge(0,min1);
-		Tree.addEdge(0,min2);
-		treeCost += distMatrix[0][min1]+distMatrix[0][min2];
-	}
+
+	//***********************************************************************************
+	// PRUNING
+	//***********************************************************************************
 
 	public void performPruning(double UB) throws ContradictionException{
 		double delta = UB-treeCost;
@@ -222,7 +171,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		}
 	}
 
-	private boolean selectRelevantArcs(double delta) throws ContradictionException {
+	protected boolean selectRelevantArcs(double delta) throws ContradictionException {
 		// Trivially no inference
 		int idx = activeArcs.nextSetBit(0);
 		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
@@ -248,7 +197,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		return true;
 	}
 
-	private boolean selectAndCompress(double delta) throws ContradictionException {
+	protected boolean selectAndCompress(double delta) throws ContradictionException {
 		// Trivially no inference
 		int idx = activeArcs.nextSetBit(0);
 		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
@@ -309,24 +258,19 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		return true;
 	}
 
-	private void pruning(int fi, double delta) throws ContradictionException {
+	protected void pruning(int fi, double delta) throws ContradictionException {
 		int i,j;
 		double repCost;
-		INeighbors nei = g.getNeighborsOf(0);
-		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-			if(i!=min1 && i!=min2){
-				if(distMatrix[0][i]-distMatrix[0][min2] > delta){
-					propHK.remove(0,i);
-				}
-			}
-		}
 		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i,j)){
+				if(propHK.isMandatory(i,j)){
+					throw new UnsupportedOperationException();
+				}
 //				repCost = ccTEdgeCost[getLCA(i,j)];
 				repCost = ccTEdgeCost[lca.getLCA(i,j)];
-				PropSymmetricHeldKarp.reducedCosts[i][j] = repCost;
+//				PropSymmetricHeldKarp.reducedCosts[i][j] = repCost;
 				if(costs[i*n+j]-repCost > delta){
 					activeArcs.clear(arc);
 					propHK.remove(i,j);
@@ -339,7 +283,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 	// Kruskal's
 	//***********************************************************************************
 
-	private int addMandatoryArcs() throws ContradictionException {
+	protected int addMandatoryArcs() throws ContradictionException {
 		int from,to,rFrom,rTo,arc;
 		int tSize = 0;
 		double val = propHK.getMinArcVal();
@@ -347,30 +291,28 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 			arc = ma.get(i);
 			from = arc/n;
 			to = arc%n;
-			if(from!=0 && to!=0){
-				rFrom = FIND(from);
-				rTo   = FIND(to);
-				if(rFrom != rTo){
-					LINK(rFrom, rTo);
-					Tree.addEdge(from, to);
-					updateCCTree(rFrom, rTo,val);
-					treeCost += costs[arc];
-					tSize++;
-				}else{
-					propHK.contradiction();
-				}
+			rFrom = FIND(from);
+			rTo   = FIND(to);
+			if(rFrom != rTo){
+				LINK(rFrom, rTo);
+				Tree.addEdge(from, to);
+				updateCCTree(rFrom, rTo, val);
+				treeCost += costs[arc];
+				tSize++;
+			}else{
+				propHK.contradiction();
 			}
 		}
 		return tSize;
 	}
 
-	private void connectMST(int tSize) throws ContradictionException {
+	protected void connectMST(int tSize) throws ContradictionException {
 		int from,to,rFrom,rTo;
 		int idx = activeArcs.nextSetBit(0);
 		minTArc = -propHK.getMinArcVal();
 		maxTArc = propHK.getMinArcVal();
-		double cost = 0;
-		while(tSize < n-2){
+		double cost;
+		while(tSize < n-1){
 			if(idx<0){
 				propHK.contradiction();
 			}
@@ -396,7 +338,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		}
 	}
 
-	private void updateCCTree(int rfrom, int rto, double cost) {
+	protected void updateCCTree(int rfrom, int rto, double cost) {
 		cctRoot++;
 		int newNode = cctRoot;
 		ccTree.activateNode(newNode);
@@ -407,7 +349,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		ccTEdgeCost[newNode] = cost;
 	}
 
-	private void LINK(int x, int y) {
+	protected void LINK(int x, int y) {
 		if(rank[x]>rank[y]){
 			p[y] = p[x];
 		}else{
@@ -418,7 +360,7 @@ public class KruskalOneTreeFinderWithFiltering extends AbstractOneTreeFinder {
 		}
 	}
 
-	private int FIND(int i) {
+	protected int FIND(int i) {
 		if(p[i]!=i){
 			p[i] = FIND(p[i]);
 		}

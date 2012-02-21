@@ -55,16 +55,16 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  * Simple NoSubtour of Pesant when undirected graph
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
+public class PropChainNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected UndirectedGraphVar g;
-	protected int n;
-	protected IntProcedure arcEnforced;
-	protected IStateInt[] origin,end,size;
+	UndirectedGraphVar g;
+	int n;
+	private IntProcedure arcEnforced;
+	private IStateInt[] origin,end,size;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -77,7 +77,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropCycleNoSubtour(UndirectedGraphVar graph, Constraint<UndirectedGraphVar, Propagator<UndirectedGraphVar>> constraint, Solver solver) {
+	public PropChainNoSubtour(UndirectedGraphVar graph, Constraint<UndirectedGraphVar, Propagator<UndirectedGraphVar>> constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
@@ -139,6 +139,9 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	public ESat isEntailed() {
 		if(g.instantiated()){
 			for(int i=0;i<n;i++){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<2){
+					return ESat.FALSE;
+				}
 				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>2){
 					return ESat.UNDEFINED;
 				}
@@ -152,13 +155,13 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 		return ESat.UNDEFINED;
 	}
 
-	protected void enforce(int i, int j) throws ContradictionException {
-		if(end[j].get()==end[i].get() && origin[i].get()==origin[j].get()){
-			if(size[origin[i].get()].get()==n){
-				return;
-			}
-			contradiction(g,"");
-		}
+	private void enforce(int i, int j) throws ContradictionException {
+//		if(end[j].get()==end[i].get() && origin[i].get()==origin[j].get()){
+//			if(size[origin[i].get()].get()==n){
+//				return;
+//			}
+//			contradiction(g,"");
+//		}
 		if(end[i].get() == i && origin[j].get()==j){
 			enforceNormal(i,j);
 			return;
@@ -192,7 +195,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 		contradiction(g,"");//this cas should not happen (except if deg=2 is not propagated yet)
 	}
 
-	protected  void enforceNormal(int i, int j) throws ContradictionException {
+	private void enforceNormal(int i, int j) throws ContradictionException {
 		int last = end[j].get();
 		int start = origin[i].get();
 		origin[last].set(start);
@@ -201,15 +204,13 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 		if(size[start].get()>n){
 			contradiction(g,"");
 		}
-		if(size[start].get()<n){
-			if(last==j && start == i){
-				// rien faire car le chemin ne contient qu'une arrete
-			}else{
-				g.removeArc(last,start,this);
-			}
+		if(last!=j || start != i){
+			g.removeArc(last,start,this);
 		}
-		if(size[start].get()==n){
-			g.enforceArc(last, start, this);
+		if(start==0 || last == n-1){
+			if(size[0].get()+size[origin[n-1].get()].get()<n){
+				g.removeArc(end[0].get(),origin[n-1].get(),this);
+			}
 		}
 	}
 
@@ -217,7 +218,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	// PROCEDURES
 	//***********************************************************************************
 
-	protected  class EnfArc implements IntProcedure {
+	private class EnfArc implements IntProcedure {
 		@Override
 		public void execute(int i) throws ContradictionException {
 			enforce(i/n-1,i%n);

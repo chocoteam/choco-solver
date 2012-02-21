@@ -1330,22 +1330,22 @@ public class TSPsymmetric {
 		}
 	}
 
-	private static class MaxRC extends ArcStrategy {
-		public MaxRC(GraphVar graphVar) {
-			super(graphVar);
-		}
-		@Override
-		public int nextArc() {
-			int minArc = mst.getHighestRC();
-			if (minArc == -1) {
-				if(!g.instantiated()){
-					throw new UnsupportedOperationException();
-				}
-				return -1;
-			}
-			return minArc;
-		}
-	}
+//	private static class MaxRC extends ArcStrategy {
+//		public MaxRC(GraphVar graphVar) {
+//			super(graphVar);
+//		}
+//		@Override
+//		public int nextArc() {
+//			int minArc = mst.getHighestRC();
+//			if (minArc == -1) {
+//				if(!g.instantiated()){
+//					throw new UnsupportedOperationException();
+//				}
+//				return -1;
+//			}
+//			return minArc;
+//		}
+//	}
 
 	private static class ConstructorHeur extends ArcStrategy {
 		BitSet seen;

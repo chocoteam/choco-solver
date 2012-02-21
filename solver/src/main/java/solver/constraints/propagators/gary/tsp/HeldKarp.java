@@ -36,9 +36,12 @@ package solver.constraints.propagators.gary.tsp;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.exception.ContradictionException;
+import solver.variables.graph.IGraph;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 public interface HeldKarp {
 
+	IGraph getMST();
 	boolean isMandatory(int i, int j);
 	TIntArrayList getMandatoryArcsList();
 	void contradiction() throws ContradictionException;

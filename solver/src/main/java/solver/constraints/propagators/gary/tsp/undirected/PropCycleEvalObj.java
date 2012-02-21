@@ -51,27 +51,16 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 	// VARIABLES
 	//***********************************************************************************
 
-	UndirectedGraphVar g;
-	int n;
-	IntVar sum;
-	int[][] distMatrix;
-	private int[] replacementCost;
+	protected UndirectedGraphVar g;
+	protected int n;
+	protected IntVar sum;
+	protected int[][] distMatrix;
+	protected int[] replacementCost;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * Ensures that obj=SUM{costMatrix[i][j], (i,j) in arcs of graph}
-	 * BEWARE - Assume that the last node has no successor
-	 * - For minimization problem
-	 *
-	 * @param graph
-	 * @param obj
-	 * @param costMatrix
-	 * @param constraint
-	 * @param solver
-	 */
 	public PropCycleEvalObj(UndirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
@@ -86,20 +75,33 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 	//***********************************************************************************
 
 	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
+	}
+
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
+	}
+
+	@Override
+	public ESat isEntailed() {
+		return ESat.UNDEFINED;
+	}
+	
+	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors succ;
 		int minSum =0;
 		int maxSum =0;
 		for (int i = 0; i < n; i++) {
-			succ = g.getEnvelopGraph().getSuccessorsOf(i);
-			if(succ.neighborhoodSize()<2){
-				contradiction(g,"");
-			}
 			minSum += findTwoBest(i);
 			maxSum += findTwoWorst(i);
 		}
 		if(maxSum%2!=0){
 			maxSum++;
+		}
+		if(minSum%2!=0){
+			minSum--;
 		}
 		minSum /= 2;
 		maxSum /= 2;
@@ -107,8 +109,11 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 			maxSum = Integer.MAX_VALUE;
 		}
 		sum.updateLowerBound(minSum, this);
-		sum.updateUpperBound(maxSum, this);
-		// filter the graph
+//		sum.updateUpperBound(maxSum, this);
+		filter(minSum);
+	}
+
+	protected void filter(int minSum) throws ContradictionException {
 		INeighbors succs;
 		int delta = sum.getUB()-minSum;
 		for (int i = 0; i < n; i++) {
@@ -126,7 +131,7 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		}
 	}
 
-	private int findTwoBest(int i){
+	protected int findTwoBest(int i){
 		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 		if(mc1!=-1){
 			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
@@ -144,12 +149,12 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		return distMatrix[i][mc1]+cost;
 	}
 
-	private int getBestNot(int i, int not) {
+	protected int getBestNot(int i, int not) {
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int cost = -1;
 		int idx = -1;
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (cost==-1 || cost>distMatrix[i][j])){
+			if(j!=not && (idx==-1 || cost>distMatrix[i][j])){
 				idx = j;
 				cost = distMatrix[i][j];
 			}
@@ -160,7 +165,7 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		return idx;
 	}
 
-	private int findTwoWorst(int i){
+	protected int findTwoWorst(int i){
 		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 		if(mc1!=-1){
 			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
@@ -173,12 +178,12 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		return distMatrix[i][mc1]+distMatrix[i][getWorstNot(i, mc1)];
 	}
 
-	private int getWorstNot(int i, int not) {
+	protected int getWorstNot(int i, int not) {
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int cost = -1;
 		int idx = -1;
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (cost==-1 || cost<distMatrix[i][j])){
+			if(j!=not && (idx==-1 || cost<distMatrix[i][j])){
 				idx = j;
 				cost = distMatrix[i][j];
 			}
@@ -189,18 +194,4 @@ public class PropCycleEvalObj<V extends Variable> extends GraphPropagator<V> {
 		return idx;
 	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
-	}
-
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
 }
