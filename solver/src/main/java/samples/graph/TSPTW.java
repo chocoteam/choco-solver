@@ -506,12 +506,12 @@ public class TSPTW extends AbstractProblem{
 //			int[] params = new int[]{0,4};
 //			for(int p:params){
 //			for(int p=0;p<maxParam;p++){
-			for(int p=0;p<=nbParam;p++){
+//			for(int p=0;p<=nbParam;p++){
 				tspRun = new TSPTW(dist,open,close,name,noVal,maxVal);
 //				tspRun.configParameters(p);
-				tspRun.configSingleParameters(p);
+				tspRun.configSingleParameters(0);
 				tspRun.execute();
-			}
+//			}
 //			}
 //			if(true){
 //				return;

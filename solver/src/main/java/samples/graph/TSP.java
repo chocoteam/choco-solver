@@ -158,7 +158,7 @@ public class TSP {
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addAdHocProp(new PropEvalObj(graph, totalCost, distanceMatrix, gc, solver));
-		gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+//		gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
 		// STRUCTURAL FILTERING
 		if (config.get(arbo)) {
 			gc.addAdHocProp(new PropArborescence(graph, 0, gc, solver, true));
@@ -313,7 +313,7 @@ public class TSP {
 		bst = false;
 		search = 0;
 		for (String s : list) {
-			if (s.contains("70.atsp") && !s.contains("170.atsp")){
+			if (s.contains(".atsp") && !s.contains("170.atsp")){
 				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
 				if(n<150){
@@ -331,9 +331,9 @@ public class TSP {
 //					config.clear(rg);
 //					buildModel();
 					bst = false;
-					configParameters(0);
+					configParameters((1<<undirectedMate));
 					buildModel();
-					configParameters(1<<rg);
+					configParameters((1<<undirectedMate)+(1<<rg));
 					buildModel();
 					bst = true;
 					buildModel();

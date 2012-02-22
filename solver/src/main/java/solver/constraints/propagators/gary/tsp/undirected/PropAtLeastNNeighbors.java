@@ -45,7 +45,6 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator that ensures that a node has at least N neighbors
  * <p/>
- * BEWARE : the case where N=1 is useless because it is ensured by default
  *
  * @param <V>
  * @author Jean-Guillaume Fages

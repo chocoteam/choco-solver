@@ -40,6 +40,8 @@ import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
+import solver.constraints.propagators.gary.tsp.PropTimeInTour;
+import solver.constraints.propagators.gary.tsp.PropTimeInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropFastHeldKarp;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
@@ -76,7 +78,7 @@ public class TSPTW2 {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 300000;
+	private static final long TIMELIMIT = 30000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
@@ -86,6 +88,7 @@ public class TSPTW2 {
 	private static Solver solver;
 	// model
 	private static DirectedGraphVar graph;
+	private static IntVar[] time;
 	private static IntVar totalCost;
 	private static GraphConstraint gc;
 	// RG data structure
@@ -103,10 +106,11 @@ public class TSPTW2 {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	private static int arbo=0,rg=1,undirectedMate=2,pos=3;//,time=5;
-	private static int NB_PARAM = 4;
+	private static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;
+	private static int NB_PARAM = 5;
 	private static BitSet config;
 	private static boolean bst;
+	private static int[] open,close;
 
 	private static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -132,9 +136,13 @@ public class TSPTW2 {
 	public static void buildModel() {
 		// create model
 		solver = new Solver();
-		initialUB = optimum;
+//		initialUB = optimum;
 		graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
+		time = new IntVar[n];
+		for(int i=0;i<n;i++){
+			time[i] = VariableFactory.bounded("time "+i,open[i],close[i],solver);
+		}
 		try {
 			for (int i = 0; i < n - 1; i++) {
 				graph.getKernelGraph().activateNode(i);
@@ -158,13 +166,15 @@ public class TSPTW2 {
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addAdHocProp(new PropEvalObj(graph, totalCost, distanceMatrix, gc, solver));
-		gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
 		// STRUCTURAL FILTERING
+		if(config.get(allDiff)){
+			gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+		}
 		if (config.get(arbo)) {
 			gc.addAdHocProp(new PropArborescence(graph, 0, gc, solver, true));
 			gc.addAdHocProp(new PropAntiArborescence(graph, n - 1, gc, solver, true));
 		}
-		//	gc.addAdHocProp(new PropSeparator(graph,gc,solver)); // USELESS IN PRACTICE
 		if (config.get(rg)) {
 			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
 			nR = RP.getNSCC();
@@ -176,9 +186,12 @@ public class TSPTW2 {
 			gc.addAdHocProp(RP);
 			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
 			gc.addAdHocProp(SCCP);
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver,nR,sccOf,outArcs,G_R));
+		}else{
+			gc.addAdHocProp(new PropTimeInTourGraphReactor(time,graph,distanceMatrix,gc,solver));
 		}
 		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.MATRIX,GraphType.LINKED_LIST);
 			INeighbors nei;
 			for(int i=0;i<n-1;i++){
 				undi.getKernelGraph().activateNode(i);
@@ -253,7 +266,7 @@ public class TSPTW2 {
 			hk = propHK_mst;
 			gc.addAdHocProp(propHK_mst);
 		}
-//		hk.waitFirstSolution(search!=1 && initialUB!=optimum);
+		hk.waitFirstSolution(true);//initialUB!=optimum);
 		solver.post(gc);
 		//SOLVER CONFIG
 		switch (search){
@@ -307,14 +320,13 @@ public class TSPTW2 {
 	}
 
 	private static void bench() {
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
+		String dir = "/Users/jfages07/github/In4Ga/tsptw";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		bst = false;
-		search = 0;
+		search = 2;
 		for (String s : list) {
-			if (s.contains("70.atsp") && !s.contains("170.atsp")){
-				if(s.contains("p43.atsp"))System.exit(0);
+			if (s.contains(".txt") && !s.contains("filter")){
 				loadInstance(dir + "/" + s);
 				if(n<150){
 //					bst = false;
@@ -333,87 +345,81 @@ public class TSPTW2 {
 					bst = false;
 					configParameters(0);
 					buildModel();
-					configParameters(1<<rg);
-					buildModel();
-					bst = true;
-					buildModel();
-//					for(int p=0;p<NB_PARAM;p++){
-//						configParameters(1<<p);
-//						buildModel();
-//					}
-//					for(int p=0;p<NB_PARAM;p++){
-//						if(p!=rg){
-//							configParameters((1<<p)+(1<<rg));
-//							buildModel();
-//						}
-//					}
+//					configParameters(1<<rg);
+//					buildModel();
 //					bst = true;
-//					for(int p=0;p<NB_PARAM;p++){
-//						if(p!=rg){
-//							configParameters((1<<p)+(1<<rg));
-//							buildModel();
-//						}else{
-//							configParameters((1<<rg));
-//							buildModel();
-//						}
-//					}
+//					buildModel();
+					for(int p=0;p<NB_PARAM;p++){
+						configParameters(1<<p);
+						buildModel();
+					}
+					for(int p=0;p<NB_PARAM;p++){
+						if(p!=rg){
+							configParameters((1<<p)+(1<<rg));
+							buildModel();
+						}
+					}
+					bst = true;
+					for(int p=0;p<NB_PARAM;p++){
+						if(p!=rg){
+							configParameters((1<<p)+(1<<rg));
+							buildModel();
+						}else{
+							configParameters((1<<rg));
+							buildModel();
+						}
+					}
 //					}
 				}
 			}
 		}
 	}
 
-	private static void loadInstance(String url) {
+	private static void loadInstance(String url){
 		File file = new File(url);
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();
-			instanceName = line.split(":")[1].replaceAll(" ", "");
-			System.out.println("parsing instance " + instanceName + "...");
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
-			n = Integer.parseInt(line.split(":")[1].replaceAll(" ", "")) + 1;
+			System.out.println("/n parsing instance "+url+".../n");
+			n = Integer.parseInt(line)+1;
 			distanceMatrix = new int[n][n];
-			line = buf.readLine();
-			line = buf.readLine();
-			line = buf.readLine();
 			String[] lineNumbers;
-			for (int i = 0; i < n - 1; i++) {
-				int nbSuccs = 0;
-				while (nbSuccs < n - 1) {
-					line = buf.readLine();
-					line = line.replaceAll(" * ", " ");
-					lineNumbers = line.split(" ");
-					for (int j = 1; j < lineNumbers.length; j++) {
-						if (nbSuccs == n - 1) {
-							i++;
-							if (i == n - 1) break;
-							nbSuccs = 0;
-						}
-						distanceMatrix[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
-						nbSuccs++;
-					}
+			for(int i=0;i<n-1;i++){
+				line = buf.readLine();
+				lineNumbers = line.split(" ");
+				for(int j=0;j<n-1;j++){
+					distanceMatrix[i][j] = (int) (Double.parseDouble(lineNumbers[j])*10000);
 				}
+				distanceMatrix[i][n-1] = distanceMatrix[i][0];
 			}
 			noVal = distanceMatrix[0][0];
-			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
+			if(noVal == 0) noVal = Integer.MAX_VALUE;
 			int maxVal = 0;
-			for (int i = 0; i < n; i++) {
-				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-				distanceMatrix[n - 1][i] = noVal;
-				distanceMatrix[i][0] = noVal;
-				for (int j = 0; j < n; j++) {
-					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
+			for(int i=0;i<n;i++){
+				distanceMatrix[i][n-1] = distanceMatrix[i][0];
+				distanceMatrix[n-1][i] = noVal;
+				distanceMatrix[i][0]   = noVal;
+				distanceMatrix[i][i]   = noVal;
+				for(int j=0;j<n;j++){
+					if(distanceMatrix[i][j]!=noVal && distanceMatrix[i][j]>maxVal){
 						maxVal = distanceMatrix[i][j];
 					}
 				}
 			}
-			line = buf.readLine();
-			line = buf.readLine();
-			initialUB = maxVal*n;
-			optimum = Integer.parseInt(line.replaceAll(" ", ""));
-		} catch (Exception e) {
+			open = new int[n];
+			close = new int[n];
+			for(int i=0;i<n-1;i++){
+				line = buf.readLine();
+				line = line.replaceAll(" * ", " ");
+				lineNumbers = line.split(" ");
+				open[i] = Integer.parseInt(lineNumbers[0])*10000;
+				close[i] = Integer.parseInt(lineNumbers[1])*10000;
+			}
+			open[n-1] = open[0];
+			close[n-1]= close[0];
+			initialUB = n*maxVal;
+			lineNumbers = url.split("/");
+		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(0);
 		}
@@ -536,8 +542,8 @@ public class TSPTW2 {
 		public void init() {}
 		@Override
 		public Decision getDecision() {
-//			int dec = minDomMinCost();
-			int dec = maxRepCost();
+			int dec = minDomMinCost();
+//			int dec = maxRepCost();
 			if(dec==-1){
 				if(!g.instantiated()){
 					throw new UnsupportedOperationException();
@@ -761,7 +767,11 @@ public class TSPTW2 {
 			int to = -1;
 			int from=-1;
 			for (int i = 0; i < n; i++) {
-				suc = hk.getMST().getSuccessorsOf(i);
+				if(hk.getMST()!=null){
+					suc = hk.getMST().getSuccessorsOf(i);
+				}else{
+					suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				}
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if(!g.getKernelGraph().arcExists(i,j)){
 						repCost = hk.getRepCost(i,j);

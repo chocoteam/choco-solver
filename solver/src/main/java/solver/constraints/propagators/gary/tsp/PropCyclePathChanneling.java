@@ -110,7 +110,9 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 							undir.removeArc(i,j,this);
 						}
 					}else{
-						undir.removeArc(i,j,this);
+						if(!dir.getEnvelopGraph().arcExists(j,i)){
+							undir.removeArc(i,j,this);
+						}
 					}
 				}
 				if(dir.getKernelGraph().arcExists(i,j)){
@@ -164,6 +166,11 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 				to = from;
 				from = 0;
 			}
+			if(from>to){
+				int k = from;
+				from = to;
+				to = k;
+			}
 			if(from==0){
 				if(dir.getEnvelopGraph().arcExists(0,to)){
 					if(!dir.getEnvelopGraph().arcExists(to,nUndir)){
@@ -193,6 +200,14 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 		public void execute(int i) throws ContradictionException {
 			int from = i/nDir-1;
 			int to = i%nDir;
+			if(from==nUndir || to==0){
+				throw new UnsupportedOperationException();
+			}
+			if(from>to){
+				int k = from;
+				from = to;
+				to = k;
+			}
 			if(to==nUndir){
 				undir.enforceArc(from,0,p);
 			}else{
@@ -233,6 +248,9 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 		public void execute(int i) throws ContradictionException {
 			int from = i/nDir-1;
 			int to = i%nDir;
+			if(from==nUndir || to==0){
+				throw new UnsupportedOperationException();
+			}
 			if(from==0){
 				if(!dir.getEnvelopGraph().arcExists(to,nUndir)){
 					undir.removeArc(from,to,p);
@@ -240,7 +258,7 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 				if(undir.getKernelGraph().arcExists(from,to)){
 					dir.enforceArc(to,nUndir,p);
 				}
-			}else if(to==nDir-1){
+			}else if(to==nUndir){
 				if(!dir.getEnvelopGraph().arcExists(0,from)){
 					undir.removeArc(from,0,p);
 				}
