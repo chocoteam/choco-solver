@@ -76,4 +76,7 @@ public abstract class AbstractMSTFinder {
 	public double getBound() {
 		return treeCost;
 	}
+	public double getRepCost(int from, int to){
+		throw new UnsupportedOperationException("use GAC propagators");
+	}
 }

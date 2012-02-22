@@ -65,7 +65,8 @@ public class PropFastHeldKarp<V extends Variable> extends PropHeldKarp {
 	/** MST based HK */
 	public static PropFastHeldKarp mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropFastHeldKarp phk = new PropFastHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
+		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
+//		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
 //		phk.HKfilter = new PrimMSTFinder(phk.n,phk);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		return phk;
@@ -74,7 +75,8 @@ public class PropFastHeldKarp<V extends Variable> extends PropHeldKarp {
 	/** BST based HK */
 	public static PropFastHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		PropFastHeldKarp phk = new PropFastHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
+		phk.HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
+//		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
 //		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
 		phk.sccOf = sccOf;
 		phk.nr = nR;

@@ -371,6 +371,9 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		g.removeArc(from,to,this);
 		nbRem++;
 	}
+	public void enforce(int from, int to) throws ContradictionException {
+		g.enforceArc(from,to,this);
+	}
 	public void contradiction() throws ContradictionException {
 		contradiction(g,"mst failure");
 	}
@@ -453,5 +456,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	}
 	public DirectedGraph getMST(){
 		return mst;
+	}
+	public double getRepCost(int from, int to){
+		return HKfilter.getRepCost(from,to);
 	}
 }

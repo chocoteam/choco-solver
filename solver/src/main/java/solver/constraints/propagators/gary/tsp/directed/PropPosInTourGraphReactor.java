@@ -69,6 +69,12 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
 	IStateInt nR; IStateInt[] sccOf; INeighbors[] outArcs; IDirectedGraph rg;
+	// data for algorithms
+	BitSet done;
+	TIntArrayList nextSCCnodes = new TIntArrayList();
+	TIntArrayList currentSet = new TIntArrayList();
+	TIntArrayList nextSet = new TIntArrayList();
+	TIntArrayList tmp = null;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -81,6 +87,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc(this);
 		arcRemoved  = new RemArc(this);
+		done = new BitSet(n);
 	}
 
 	public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver,
@@ -153,10 +160,10 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void BFS() throws ContradictionException {
-		BitSet done = new BitSet(n);
-		TIntArrayList currentSet = new TIntArrayList();
-		TIntArrayList nextSet = new TIntArrayList();
-		TIntArrayList tmp = null;
+		done.clear();
+		currentSet.clear();
+		nextSet.clear();
+		tmp = null;
 		int x = 0;
 		nextSet.add(x);
 		int level = 0;
@@ -181,12 +188,14 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void BFS_RG() throws ContradictionException {
-		BitSet done = new BitSet(n);
-		TIntArrayList currentSet = new TIntArrayList();
-		TIntArrayList nextSet = new TIntArrayList();
-		TIntArrayList nextSCCnodes = new TIntArrayList();
-		TIntArrayList tmp = null;
+		done.clear();
+		currentSet.clear();
+		nextSet.clear();
+		nextSCCnodes.clear();
+		tmp = null;
+		/// --------
 		int x = 0;
+		int nbNode = 0;
 		nextSet.add(x);
 		int level = 0;
 		int scc = sccOf[x].get();
@@ -197,6 +206,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 				nextSet = tmp;
 				nextSet.clear();
 				for(int i=currentSet.size()-1; i>=0; i--){
+					nbNode++;
 					x = currentSet.get(i);
 					intVars[x].updateLowerBound(level,this);
 					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
@@ -218,14 +228,59 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 			nextSet = nextSCCnodes;
 			nextSCCnodes = tmp;
 			nextSCCnodes.clear();
+			if(level>nbNode){
+				throw new UnsupportedOperationException();
+			}
+			level = nbNode;
 		}
 	}
+//	private void BFS_RG() throws ContradictionException {
+//		BitSet done = new BitSet(n);
+//		TIntArrayList currentSet = new TIntArrayList();
+//		TIntArrayList nextSet = new TIntArrayList();
+//		TIntArrayList nextSCCnodes = new TIntArrayList();
+//		TIntArrayList tmp = null;
+//		int x = 0;
+//		nextSet.add(x);
+//		int level = 0;
+//		int scc = sccOf[x].get();
+//		while(scc!=-1){
+//			while(nextSet.size()>0){
+//				tmp = currentSet;
+//				currentSet = nextSet;
+//				nextSet = tmp;
+//				nextSet.clear();
+//				for(int i=currentSet.size()-1; i>=0; i--){
+//					x = currentSet.get(i);
+//					intVars[x].updateLowerBound(level,this);
+//					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+//					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//						if(!done.get(j)){
+//							done.set(j);
+//							if(sccOf[j].get()==scc){
+//								nextSet.add(j);
+//							}else{
+//								nextSCCnodes.add(j);
+//							}
+//						}
+//					}
+//				}
+//				level++;
+//			}
+//			scc = rg.getSuccessorsOf(scc).getFirstElement();
+//			tmp = nextSet;
+//			nextSet = nextSCCnodes;
+//			nextSCCnodes = tmp;
+//			nextSCCnodes.clear();
+//		}
+//	}
 
 	private void BFSfromEnd() throws ContradictionException {
-		BitSet done = new BitSet(n);
-		TIntArrayList currentSet = new TIntArrayList();
-		TIntArrayList nextSet = new TIntArrayList();
-		TIntArrayList tmp = null;
+		done.clear();
+		currentSet.clear();
+		nextSet.clear();
+		tmp = null;
+		/// --------
 		int x = n-1;
 		nextSet.add(x);
 		int level = n-1;
@@ -250,14 +305,16 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	}
 
 	private void BFSfromEnd_RG() throws ContradictionException {
-		BitSet done = new BitSet(n);
-		TIntArrayList currentSet = new TIntArrayList();
-		TIntArrayList nextSet = new TIntArrayList();
-		TIntArrayList nextSCCnodes = new TIntArrayList();
-		TIntArrayList tmp = null;
+		done.clear();
+		currentSet.clear();
+		nextSet.clear();
+		nextSCCnodes.clear();
+		tmp = null;
+		/// --------
 		int x = n-1;
 		nextSet.add(x);
 		int level = n-1;
+		int nbNodes = n-1;
 		int scc = sccOf[x].get();
 		while(scc!=-1){
 			while(nextSet.size()>0){
@@ -266,6 +323,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 				nextSet = tmp;
 				nextSet.clear();
 				for(int i=currentSet.size()-1; i>=0; i--){
+					nbNodes--;
 					x = currentSet.get(i);
 					intVars[x].updateUpperBound(level, this);
 					INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(x);
@@ -287,6 +345,10 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 			nextSet = nextSCCnodes;
 			nextSCCnodes = tmp;
 			nextSCCnodes.clear();
+			if(level<nbNodes){
+				throw new UnsupportedOperationException();
+			}
+			level = nbNodes;
 		}
 	}
 

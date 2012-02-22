@@ -313,6 +313,9 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		g.removeArc(from,to,this);
 		nbRem++;
 	}
+	public void enforce(int from, int to) throws ContradictionException {
+		g.enforceArc(from,to,this);
+	}
 	public void contradiction() throws ContradictionException {
 		contradiction(g,"mst failure");
 	}
@@ -412,5 +415,8 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	}
 	public UndirectedGraph getMST(){
 		return mst;
+	}
+	public double getRepCost(int from, int to){
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 }

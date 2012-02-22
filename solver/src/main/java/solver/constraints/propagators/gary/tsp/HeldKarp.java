@@ -49,4 +49,6 @@ public interface HeldKarp {
 	double getMinArcVal();
 	boolean isInMST(int i, int j);
 	void waitFirstSolution(boolean b);
+	void enforce(int i, int j)throws ContradictionException;
+	double getRepCost(int i, int j);
 }
