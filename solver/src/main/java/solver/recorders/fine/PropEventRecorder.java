@@ -50,17 +50,38 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     protected final Propagator<V> propagator; // one propagator
     protected final V[] variables; // its variables
-    protected TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
+    protected final TIntIntHashMap v2i; // a hash map to retrieve idx of variable in this data structures
+    protected final int[] varIdx; // an array of indices helping retrieving data of a variable, thanks to v2i and var.id
+    protected int nbUVar;// number of unique variable, a bound for arrays
+    protected final int[] idxVs; // index of this within variable structures -- mutable
 
-    public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver) {
+
+    PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, int n) {
         super(solver);
         this.propagator = propagator;
         propagator.addRecorder(this);
         this.variables = variables.clone();
-        this.idxVs = new TIntIntHashMap(variables.length, (float) 0.5, -2, -2);
+        // create max size arrays
+        v2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
+        varIdx = new int[n];
+        this.idxVs = new int[n];
+    }
+
+    public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver) {
+        this(variables, propagator, solver, variables.length);
+        int k = 0; // count the number of unique variable
         for (int i = 0; i < variables.length; i++) {
-            variables[i].addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
+            V variable = variables[i];
+            int vid = variable.getId();
+            int idx = v2i.get(vid);
+            if (idx == -1) { // first occurrence of the variable
+                v2i.put(vid, k);
+                varIdx[k] = k;
+                variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
+                k++;
+            }
         }
+        nbUVar = k;
     }
 
     @Override
@@ -102,17 +123,17 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     @Override
     public int getIdxInV(V variable) {
-        return idxVs.get(variable.getId());
+        return idxVs[v2i.get(variable.getId())];
     }
 
     @Override
     public void setIdxInV(V variable, int idx) {
-        idxVs.put(variable.getId(), idx);
+        idxVs[v2i.get(variable.getId())] = idx;
     }
 
     @Override
     public void flush() {
-        // can be void
+        // void
     }
 
     @Override
@@ -122,6 +143,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     @Override
     public void virtuallyExecuted(Propagator propagator) {
+        // void
     }
 
     @Override
@@ -131,15 +153,15 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     @Override
     public void activate(Propagator<V> element) {
-        for (int i = 0; i < variables.length; i++) {
-            variables[i].activate(this);
+        for (int i = 0; i < nbUVar; i++) {
+            variables[varIdx[i]].activate(this);
         }
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
-        for (int i = 0; i < variables.length; i++) {
-            variables[i].desactivate(this);
+        for (int i = 0; i < nbUVar; i++) {
+            variables[varIdx[i]].desactivate(this);
         }
     }
 

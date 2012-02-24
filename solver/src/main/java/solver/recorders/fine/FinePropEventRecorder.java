@@ -26,9 +26,6 @@
  */
 package solver.recorders.fine;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntLongHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -50,44 +47,60 @@ import java.util.Arrays;
  */
 public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder<V> {
 
-    protected TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
-    protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
-    protected TIntIntHashMap evtmasks; // reference to events occuring -- inclusive OR over event mask
-    protected TIntIntHashMap idxVinP; //; // index of each variable within P -- immutable
+    protected final IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
+    protected final long[] timestamps; // a timestamp lazy clear the event structures
+    protected final int[] evtmasks; // reference to events occuring -- inclusive OR over event mask
+    // BEWARE a variable can occur more than one time in a propagator !!
+    protected final int[][] idxVinP; //; // index of each variable within P -- immutable
 
     public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver) {
-        super(variables, propagator, solver);
-        this.deltamon = new TIntObjectHashMap<IDeltaMonitor>(variables.length);
-        this.timestamps = new TIntLongHashMap(variables.length, (float) 0.5, -2, -2);
-        this.evtmasks = new TIntIntHashMap(variables.length, (float) 0.5, -1, -1);
-        this.idxVinP = new TIntIntHashMap(variables.length, (float) 0.5, -1, -1);
-        for (int i = 0; i < variables.length; i++) {
+        super(variables, propagator, solver, variables.length);
+
+        int n = variables.length;
+        this.deltamon = new IDeltaMonitor[n];
+        this.timestamps = new long[n];
+        Arrays.fill(timestamps, -1);
+        this.evtmasks = new int[n];
+        this.idxVinP = new int[n][];
+        int k = 0; // count the number of unique variable
+        for (int i = 0; i < n; i++) {
             V variable = variables[i];
             int vid = variable.getId();
-            deltamon.put(vid, variable.getDelta().createDeltaMonitor(propagator));
-            timestamps.put(vid, -1);
-            evtmasks.put(vid, 0);
-            idxVinP.put(vid, idxVinPs[i]);
+            int idx = v2i.get(vid);
+            if (idx == -1) { // first occurrence of the variable
+                v2i.put(vid, k);
+                varIdx[k] = k;
+                variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
+                deltamon[k] = variable.getDelta().createDeltaMonitor(propagator);
+                idxVinP[k] = new int[]{idxVinPs[i]};
+                k++;
+            } else { // snd or more occurrence of the variable
+                int[] tmp = idxVinP[idx];
+                idxVinP[idx] = new int[tmp.length + 1];
+                System.arraycopy(tmp, 0, idxVinP[idx], 0, tmp.length);
+                idxVinP[idx][tmp.length] = idxVinPs[i];
+            }
         }
+        nbUVar = k;
     }
 
     @Override
     public boolean execute() throws ContradictionException {
         if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        for (int i = 0; i < variables.length; i++) {
-            Variable variable = variables[i];
-            int vid = variable.getId();
-            int evtmask_ = evtmasks.get(vid);
+        for (int i = 0; i < nbUVar; i++) {
+            int evtmask_ = evtmasks[i];
             if (evtmask_ > 0) {
 //                LoggerFactory.getLogger("solver").info(">> {}", this.toString());
                 // for concurrent modification..
-                deltamon.get(vid).freeze();
-                evtmasks.put(vid, 0); // and clean up mask
+                deltamon[i].freeze();
+                evtmasks[i] = 0; // and clean up mask
 
                 assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
                 propagator.fineERcalls++;
-                propagator.propagate(this, idxVinP.get(vid), evtmask_);
-                deltamon.get(vid).unfreeze();
+                for (int j = 0; j < idxVinP[i].length; j++) { // a loop for variable appearing more than once in a propagator
+                    propagator.propagate(this, idxVinP[i][j], evtmask_);
+                }
+                deltamon[i].unfreeze();
             }
         }
         return true;
@@ -95,32 +108,34 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
-// Only notify constraints that filter on the specific event received
+        // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+            if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             int vid = var.getId();
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP.get(vid))) != 0) {
-                if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), var);
-                // 1. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagator.decArity();
-                }
-                // 2. clear the structure if necessary
-                if (LAZY) {
-                    if (timestamps.get(vid) - AbstractSearchLoop.timeStamp != 0) {
-                        deltamon.get(vid).clear();
-                        this.evtmasks.put(vid, 0);
-                        timestamps.put(vid, AbstractSearchLoop.timeStamp);
+            int idx = v2i.get(vid);
+            for (int j = 0; j < idxVinP[idx].length; j++) { // a loop for variable appearing more than once in a propagator
+                if ((evt.mask & propagator.getPropagationConditions(idxVinP[idx][j])) != 0) {
+                    // 1. if instantiation, then decrement arity of the propagator
+                    if (EventType.anInstantiationEvent(evt.mask)) {
+                        propagator.decArity();
                     }
-                }
-                // 3. record the event and values removed
-                int em = evtmasks.get(vid);
-                if ((evt.mask & em) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmasks.put(vid, em | evt.strengthened_mask);
-                }
-                // 4. schedule this
-                if (!enqueued()) {
-                    scheduler.schedule(this);
+                    // 2. clear the structure if necessary
+                    if (LAZY) {
+                        if (timestamps[idx] - AbstractSearchLoop.timeStamp != 0) {
+                            deltamon[idx].clear();
+                            this.evtmasks[idx] = 0;
+                            timestamps[idx] = AbstractSearchLoop.timeStamp;
+                        }
+                    }
+                    // 3. record the event and values removed
+                    if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                        evtmasks[idx] |= evt.strengthened_mask;
+                    }
+                    // 4. schedule this
+                    if (!enqueued()) {
+                        scheduler.schedule(this);
+                    }
                 }
             }
         }
@@ -128,16 +143,15 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public void flush() {
-        for (int i = 0; i < variables.length; i++) {
-            int vid = variables[i].getId();
-            this.evtmasks.put(vid, 0);
-            this.deltamon.get(vid).clear();
+        for (int i = 0; i < nbUVar; i++) {
+            this.evtmasks[i] = 0;
+            this.deltamon[i].clear();
         }
     }
 
     @Override
     public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return deltamon.get(variable.getId());
+        return deltamon[v2i.get(variable.getId())];
     }
 
 
@@ -145,12 +159,11 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     public void virtuallyExecuted(Propagator propagator) {
         assert this.propagator == propagator : "wrong propagator";
         if (LAZY) {
-            for (int i = 0; i < variables.length; i++) {
-                variables[i].getDelta().lazyClear();
-                int vid = variables[i].getId();
-                this.evtmasks.put(vid, 0);
-                this.deltamon.get(vid).unfreeze();
-                this.timestamps.put(vid, AbstractSearchLoop.timeStamp);
+            for (int i = 0; i < nbUVar; i++) {
+                variables[varIdx[i]].getDelta().lazyClear(); // to prevent from unfreezing delta no yet lazy cleared
+                this.evtmasks[i] = 0;
+                this.deltamon[i].unfreeze();
+                this.timestamps[i] = AbstractSearchLoop.timeStamp;
             }
         }
         if (enqueued) {
@@ -159,17 +172,16 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     }
 
     @Override
-    public String toString() {
-        return "<< {F} " + Arrays.toString(variables) + "::" + propagator.toString() + " >>";
+    public void desactivate(Propagator<V> element) {
+        for (int i = 0; i < nbUVar; i++) {
+            variables[varIdx[i]].desactivate(this);
+            this.evtmasks[i] = 0;
+            this.deltamon[i].clear();
+        }
     }
 
     @Override
-    public void desactivate(Propagator<V> element) {
-        for (int i = 0; i < variables.length; i++) {
-            int vid = variables[i].getId();
-            variables[i].desactivate(this);
-            this.evtmasks.put(vid, 0);
-            this.deltamon.get(vid).clear();
-        }
+    public String toString() {
+        return "<< {F} " + Arrays.toString(variables) + "::" + propagator.toString() + " >>";
     }
 }
