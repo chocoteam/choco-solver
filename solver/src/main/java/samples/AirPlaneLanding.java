@@ -123,8 +123,8 @@ public class AirPlaneLanding extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
 
-            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
-            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
+//            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
+//            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
 
             obj_ub += Math.max(
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],

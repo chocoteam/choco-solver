@@ -31,6 +31,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.propagation.generator.*;
+import solver.recorders.coarse.CoarseEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -125,7 +126,15 @@ public enum PropagationStrategies {
             });
             PropagationStrategy svar = Sort.build(Primitive.vars(variables)).clearOut();
             Constraint[] constraints = solver.getCstrs();
-            return Sort.build(svar, Queue.build(Primitive.coarses(constraints)).pickOne()).clearOut();
+            return Sort.build(svar, Sort.build(
+                    new Comparator<CoarseEventRecorder> (){
+                        @Override
+                        public int compare(CoarseEventRecorder o1, CoarseEventRecorder o2) {
+                            return o1.getPropagators()[0].getPriority().priority -
+                                    o2.getPropagators()[0].getPriority().priority;
+                        }
+                    },Primitive.coarses(
+            constraints)).pickOne()).clearOut();
         }
     },
     ONE_QUEUE_WITH_PROPS() {

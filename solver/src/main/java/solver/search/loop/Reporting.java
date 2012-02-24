@@ -72,12 +72,12 @@ public enum Reporting {
     }
 
     public static String fullReport(Solver solver) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(StringUtils.pad("", 50, "#"));
-        sb.append(onUnsatisfiedConstraints(solver));
-        sb.append(StringUtils.pad("", 50, "="));
-        sb.append(onDecisions(solver));
-        sb.append(StringUtils.pad("", 50, "#"));
+        StringBuilder sb = new StringBuilder("\n");
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
+        sb.append(onUnsatisfiedConstraints(solver)).append("\n");
+        sb.append(StringUtils.pad("", 50, "=")).append("\n");
+        sb.append(onDecisions(solver)).append("\n");
+        sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }
 }
