@@ -51,7 +51,7 @@ public final class Delta implements IntDelta {
     }
 
     @Override
-    public IntDeltaMonitor getMonitor(ICause propagator) {
+    public IntDeltaMonitor createDeltaMonitor(ICause propagator) {
         return new IntDeltaMonitor(this,propagator);
     }
 

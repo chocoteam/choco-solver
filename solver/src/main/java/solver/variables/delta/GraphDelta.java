@@ -54,7 +54,7 @@ public class GraphDelta implements IGraphDelta {
     }
 
     @Override
-    public GraphDeltaMonitor getMonitor(ICause propagator) {
+    public GraphDeltaMonitor createDeltaMonitor(ICause propagator) {
         return new GraphDeltaMonitor(this,propagator);
     }
 

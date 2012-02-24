@@ -55,7 +55,7 @@ public final class OneValueDelta implements IntDelta {
     }
 
     @Override
-    public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
+    public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
         return new OneIntDeltaMonitor(this,propagator);
     }
 

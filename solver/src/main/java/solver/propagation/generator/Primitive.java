@@ -246,6 +246,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
             throw new SolverException("var cannot handle condition");
         } else {
             return new FineVarEventRecorder<V>(var, prop, pindices, solver);
+//            return new FineVarEventRecorderAlternative<V>(var, prop, pindices, solver);
         }
         //}
     }
