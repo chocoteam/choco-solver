@@ -31,6 +31,7 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
+import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffGAC;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualXY;
 import solver.constraints.propagators.nary.PropAllDiffAC_new;
@@ -73,9 +74,12 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 setPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
             case PROBABILISTIC:
-                PropProbaAllDiffBC prop = new PropProbaAllDiffBC(this.vars, solver, this);
+                //PropProbaAllDiffBC prop = new PropProbaAllDiffBC(this.vars, solver, this);
+                ///
+                PropProbaAllDiffGAC prop =  new PropProbaAllDiffGAC(this.vars, this, solver);
+                ////
                 setPropagators(prop);
-                addPropagators(new PropCliqueNeq(vars, solver, this));
+                addPropagators(new PropCliqueNeq(vars, solver, this));// toremoveXL
                 break;
             case GRAPH:
             case AC:

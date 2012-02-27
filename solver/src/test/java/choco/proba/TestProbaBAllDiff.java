@@ -18,10 +18,10 @@ public class TestProbaBAllDiff {
 
     public static void main(String[] args) throws IOException {
         TestProbaBAllDiff.oneAllDiffTest(10);
-        TestProbaBAllDiff.hamiltonianCycleTest(400);
+        TestProbaBAllDiff.hamiltonianCycleTest(300);
         TestProbaBAllDiff.magicSquareTest(4);
         TestProbaBAllDiff.nQueensTest(11);
-        TestProbaBAllDiff.allIntervalSeriesTest(10);
+        TestProbaBAllDiff.allIntervalSeriesTest(8);
     }
 
     public static String fileIt(String name, String ext) {
