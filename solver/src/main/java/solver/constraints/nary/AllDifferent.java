@@ -36,6 +36,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualXY;
 import solver.constraints.propagators.nary.PropAllDiffAC_new;
 import solver.constraints.propagators.nary.PropAllDiffBC;
+import solver.constraints.propagators.nary.PropAllDiffRC;
 import solver.constraints.propagators.nary.PropCliqueNeq;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -49,17 +50,17 @@ import solver.variables.Variable;
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, PROBABILISTIC, BC, RANGE, CLIQUE, CLIQUE_IN_ONE, GRAPH, NONE
+        AC, PGAC, PBC, BC, RC, NEQS, GLOBALNEQS, GRAPH, NONE
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.RANGE);
+        this(vars, solver, Type.RC);
     }
 
     public AllDifferent(IntVar[] vars, Solver solver, Type type) {
         super(vars, solver);
         switch (type) {
-            case CLIQUE: {
+            case NEQS: {
 				int s = vars.length;
 				int k = 0;
 				Propagator[] props = new Propagator[(s * s - s) / 2];
@@ -70,29 +71,29 @@ public class AllDifferent extends IntConstraint<IntVar> {
 				}
 				setPropagators(props);
 			}
-            case CLIQUE_IN_ONE:
+            case GLOBALNEQS:
                 setPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
-            case PROBABILISTIC:
-                //PropProbaAllDiffBC prop = new PropProbaAllDiffBC(this.vars, solver, this);
-                ///
-                PropProbaAllDiffGAC prop =  new PropProbaAllDiffGAC(this.vars, this, solver);
-                ////
-                setPropagators(prop);
-                addPropagators(new PropCliqueNeq(vars, solver, this));// toremoveXL
+            case PGAC:
+                PropProbaAllDiffGAC propGAC =  new PropProbaAllDiffGAC(this.vars, this, solver);
+                setPropagators(propGAC);
+                addPropagators(new PropCliqueNeq(vars, solver, this));
+                break;
+            case PBC:
+                PropProbaAllDiffBC propBC = new PropProbaAllDiffBC(this.vars, solver, this);
+                setPropagators(propBC);
+                addPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
             case GRAPH:
             case AC:
                 setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
-//                setPropagators(new PropAllDiffAC(this.vars, this, solver)); //CPRU: to remove
                 break;
             case BC:
                 setPropagators(new PropAllDiffBC(this.vars, solver, this));
                 break;
-            case RANGE:
+            case RC:
             default:
-                setPropagators(new PropAllDiffBC(this.vars, solver, this));
-                addPropagators(new PropCliqueNeq(vars, solver, this));
+                setPropagators(new PropAllDiffRC(this.vars, solver, this));
                 break;
         }
     }

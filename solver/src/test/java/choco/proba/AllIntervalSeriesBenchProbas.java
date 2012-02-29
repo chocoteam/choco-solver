@@ -20,9 +20,14 @@ import java.io.IOException;
  */
 public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
 
-    public AllIntervalSeriesBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
+    public AllIntervalSeriesBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
                                         CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+        super(new Solver(), n, type, frequency, active, dist, out, seed);
+    }
+
+    @Override
+    void solveProcess() {
+        this.solver.findAllSolutions();
     }
 
     @Override

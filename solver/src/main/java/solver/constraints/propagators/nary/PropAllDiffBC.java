@@ -42,6 +42,7 @@ import solver.variables.IntVar;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Deque;
 
 import static choco.annotations.PropAnn.Status.*;
 
@@ -73,8 +74,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     int[] instantiatedValues;
     IStateInt ivIdx;
 
-    boolean infBoundModified = true;
-    boolean supBoundModified = true;
+    protected boolean infBoundModified = true;
+    protected boolean supBoundModified = true;
 
     public PropAllDiffBC(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
@@ -228,15 +229,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getLB()) {
-                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
-            }
-            if (instantiatedValues[j] == vars[i].getUB()) {
-                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
-            }
-        }*/
     }
 
     protected void awakeOnInf(int i) throws ContradictionException {
@@ -249,12 +241,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getLB()) {
-                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
-            }
-        }*/
     }
 
     protected void awakeOnSup(int i) throws ContradictionException {
@@ -267,26 +253,11 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getUB()) {
-                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
-            }
-        }*/
     }
 
-    protected void awakeOnInst(int i) throws ContradictionException {   // Propagation classique
+    protected void awakeOnInst(int i) throws ContradictionException {
         infBoundModified = true;
         supBoundModified = true;
-        int val = vars[i].getValue();
-        for (int j = 0; j < vars.length; j++) {
-            if (j != i) {
-                vars[j].removeValue(val, this);
-            }
-        }
-        /*int idx = ivIdx.get();
-        instantiatedValues[idx++] = val;
-        ivIdx.set(idx);*/
     }
 
     private void filter() throws ContradictionException {

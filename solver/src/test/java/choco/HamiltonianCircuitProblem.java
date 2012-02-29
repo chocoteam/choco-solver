@@ -160,7 +160,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		if(bc){
 			return new AllDifferent(integers,solver,AllDifferent.Type.BC);
 		}else{
-			return new AllDifferent(integers,solver,AllDifferent.Type.CLIQUE_IN_ONE);
+			return new AllDifferent(integers,solver,AllDifferent.Type.GLOBALNEQS);
 		}
 	}
 	private void addHK(){
@@ -326,7 +326,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE),new NoSubTours(vars,solver));
+		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS),new NoSubTours(vars,solver));
 		Boolean status = solver.findAllSolutions();
 		if(status==null){
 			return -1;

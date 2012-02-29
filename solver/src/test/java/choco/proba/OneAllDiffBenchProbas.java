@@ -21,15 +21,29 @@ import java.util.Set;
  */
 public class OneAllDiffBenchProbas extends AbstractBenchProbas {
 
-    public OneAllDiffBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
+    Instance inst;
+
+    public OneAllDiffBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
                                  CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+        super(new Solver(), n, type, frequency, active, dist, out, seed);
+    }
+
+    @Override
+    void solveProcess() {
+        this.solver.findAllSolutions();
     }
 
     @Override
     void buildProblem(int size) {
-        Instance inst = new Instance(size, 0, size - 1, seed, 0, solver);
-        this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
+        this.inst = new Instance(size, 0, size - 1, seed, 0, solver);
+        switch(dist) {
+            case DIRAC :
+                this.vars = inst.generate(Distribution.ALL_EQUAL_INTERVALS_SIZEFREE);
+                break;
+            case UNIFORM :
+            default :
+                this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
+        }
         this.allVars = vars;
         AllDifferent alldiff = new AllDifferent(this.vars, solver, type);
         this.cstrs = new Constraint[]{alldiff};

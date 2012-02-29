@@ -4,7 +4,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
+import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffGAC;
 import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.nary.PropAllDiffAC_new;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.constraints.propagators.nary.PropCliqueNeq;
 import solver.propagation.generator.Primitive;
@@ -35,7 +37,7 @@ public abstract class AbstractBenchProbas {
     int seed;
     boolean active; // true iff the probability is effectively applied
 
-    boolean mode; // true iff we search for all the solutions
+    //boolean mode; // true iff we search for all the solutions
     int size;
     Solver solver;
     IntVar[] allVars; // all the vairables of the problem
@@ -64,11 +66,11 @@ public abstract class AbstractBenchProbas {
     private long avgLigthPropag;
     private long avgTime;
 
-    AbstractBenchProbas(Solver solver, boolean mode, int size, AllDifferent.Type type, int frequency,
+    AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
                         boolean active, CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) {
         this.solver = solver;
         this.type = type;
-        this.mode = mode;
+        //this.mode = mode;
         this.out = out;
         this.seed = seed;
         this.frequency = frequency;
@@ -101,7 +103,7 @@ public abstract class AbstractBenchProbas {
         this.writeResults();
     }
 
-    void recordAverage() throws IOException {
+    void recordAverage(BufferedWriter results) throws IOException {
         String s = "";
         s += ((double) this.avgSolutions / this.nbTests) + "\t";
         s += ((double) this.avgNodes / this.nbTests) + "\t";
@@ -110,8 +112,8 @@ public abstract class AbstractBenchProbas {
         s += ((double) this.avgLigthPropag / this.nbTests) + "\t";
         s += ((double) this.avgTime / this.nbTests) + "\t";
         s += "-" + "\t";
-        this.out.write(s);
-        this.out.flush();
+        results.write(s);
+        results.flush();
     }
 
     private void incrAverage() {
@@ -141,21 +143,31 @@ public abstract class AbstractBenchProbas {
         this.out.flush();
     }
 
+    void configSearchStrategy() {
+        this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
+    }
+
+    void solveProcess() {
+        this.solver.findSolution();
+    }
+
     void execute() throws IOException {
         this.buildProblem(size);
         this.solver.post(this.cstrs);
 
         // 1. placer les propagateurs dans différentes listes
-        ArrayList<PropAllDiffBC> hall = new ArrayList<PropAllDiffBC>();
+        ArrayList<Propagator<IntVar>> hall = new ArrayList<Propagator<IntVar>>();
         ArrayList<PropCliqueNeq> clique = new ArrayList<PropCliqueNeq>();
-        ArrayList<Propagator> others = new ArrayList<Propagator>();
+        ArrayList<Propagator<IntVar>> others = new ArrayList<Propagator<IntVar>>();
 
         Constraint[] constraints = solver.getCstrs();
         for (int i = 0; i < constraints.length; i++) {
             Propagator<IntVar>[] props = constraints[i].propagators;
             for (Propagator<IntVar> p : props) {
                 if (p instanceof PropAllDiffBC) {
-                    hall.add((PropAllDiffBC) p);
+                    hall.add(p);
+                } else if (p instanceof PropAllDiffAC_new) {
+                    hall.add(p);
                 } else if (p instanceof PropCliqueNeq) {
                     clique.add((PropCliqueNeq) p);
                 } else {
@@ -170,14 +182,14 @@ public abstract class AbstractBenchProbas {
             primitives = new Primitive[hall.size() * 2];
             if (this.frequency == 0) {
                 for (int i = 0; i < hall.size(); i++) {
-                    PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
+                    Propagator<IntVar> prop = hall.get(i);
                     condition = new CondAllDiffBCProba(this.solver.getEnvironment(), prop.getVars(), this.active, this.dist);
                     primitives[i] = Primitive.arcs(condition, prop);
                     primitives[i + hall.size()] = Primitive.coarses(prop);
                 }
             } else {
                 for (int i = 0; i < hall.size(); i++) {
-                    PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
+                    Propagator<IntVar> prop = hall.get(i);
                     condition = new CondAllDiffBCFreq(this.solver.getEnvironment(), prop.getVars(), this.frequency);
                     primitives[i] = Primitive.arcs(condition, prop);
                     primitives[i + hall.size()] = Primitive.coarses(prop);
@@ -218,17 +230,12 @@ public abstract class AbstractBenchProbas {
         }
 
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
-        //System.out.println(this.solver);
-        //solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
-        // SearchMonitorFactory.log(solver, true, true);
-        if (this.mode) {
-            //System.out.println("\t find all solutions");
-            this.solver.findAllSolutions();
-        } else {
-            //System.out.println("\t find first solution");
-            this.solver.findSolution();
-        }
+        this.configSearchStrategy();
+        this.solveProcess();
+    }
+
+    public String toString() {
+        return ""+type+"-"+this.dist;
     }
 
 

@@ -38,6 +38,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 import static choco.annotations.PropAnn.Status.*;
 
 /**
@@ -102,18 +105,30 @@ public class PropCliqueNeq extends Propagator<IntVar> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            int val = vars[idxVarInProp].getValue();
-            for (int j = 0; j < vars.length; j++) {
-                if (j != idxVarInProp) {
-                    vars[j].removeValue(val, this);
-                }
-            }
+            checkInst(idxVarInProp);
         } else if (EventType.isInclow(mask) && EventType.isDecupp(mask)) {
             checkBounds(idxVarInProp);
         } else if (EventType.isInclow(mask)) {
             checkLB(idxVarInProp);
         } else if (EventType.isDecupp(mask)) {
             checkUB(idxVarInProp);
+        }
+    }
+
+    protected void checkInst(int i) throws ContradictionException {
+        Deque<IntVar> modified = new ArrayDeque<IntVar>();
+        modified.push(vars[i]);
+        while (!modified.isEmpty()) {
+            IntVar cur = modified.pop();
+            int valCur = cur.getValue();
+            for (IntVar toCheck : vars) {
+                if (toCheck != cur && toCheck.contains(valCur)) {
+                    toCheck.removeValue(valCur, this);
+                    if (toCheck.instantiated()) {
+                        modified.push(toCheck);
+                    }
+                }
+            }
         }
     }
 

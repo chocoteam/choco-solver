@@ -20,9 +20,9 @@ import java.util.Arrays;
  */
 public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
-    public MagicSquareBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
+    public MagicSquareBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
                                         CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+        super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
     @Override

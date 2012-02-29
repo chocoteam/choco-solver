@@ -64,7 +64,7 @@ public class Langford extends AbstractProblem {
     private int k = 3;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 17;
+    private int n = 9;
 
     IntVar[] position;
 

@@ -28,10 +28,10 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
     int neighbor;
     GenerateStrat strat;
 
-    public HamiltonianCycleBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
+    public HamiltonianCycleBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
                                        CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed, int neighbor,
                                        GenerateStrat strat) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+        super(new Solver(), n, type, frequency, active, dist, out, seed);
         this.neighbor = neighbor;
         this.strat = strat;
     }

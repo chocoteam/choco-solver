@@ -83,11 +83,11 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         switch (type) {
             case NONE :
                 break;
-            case CLIQUE_IN_ONE:
+            case GLOBALNEQS:
                 addPropagators(new PropCliqueNeq(this.X,solver,this));
                 addPropagators(new PropCliqueNeq(this.Y,solver,this));
             break;
-            case PROBABILISTIC:
+            case PBC:
                 PropProbaAllDiffBC propX = new PropProbaAllDiffBC(this.X, solver, this);
                 PropProbaAllDiffBC propY = new PropProbaAllDiffBC(this.Y, solver, this);
                 addPropagators(propX,propY);
@@ -103,7 +103,7 @@ public class InverseChanneling extends IntConstraint<IntVar> {
                 addPropagators(new PropAllDiffBC(this.X, solver, this));
                 addPropagators(new PropAllDiffBC(this.Y, solver, this));
                 break;
-            case RANGE:
+            case RC:
             default:
                 addPropagators(new PropAllDiffBC(this.X, solver, this));
                 addPropagators(new PropAllDiffBC(this.Y, solver, this));

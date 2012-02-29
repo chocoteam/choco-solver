@@ -66,7 +66,7 @@ public class NQueenModeler {
         List<Constraint> lcstrs1 = new ArrayList<Constraint>(1);
         List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
 
-        lcstrs1.add(new AllDifferent(vars, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs1.add(new AllDifferent(vars, s, AllDifferent.Type.PGAC));
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
@@ -110,13 +110,13 @@ public class NQueenModeler {
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(10);
 
-        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.PGAC));
         for (int i = 0; i < n; i++) {
             lcstrs.add(ConstraintFactory.eq(diag1[i], vars[i], i, s));
             lcstrs.add(ConstraintFactory.eq(diag2[i], vars[i], -i, s));
         }
-        lcstrs.add(new AllDifferent(diag1, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs.add(new AllDifferent(diag2, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs.add(new AllDifferent(diag1, s, AllDifferent.Type.PGAC));
+        lcstrs.add(new AllDifferent(diag2, s, AllDifferent.Type.PGAC));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
@@ -149,13 +149,13 @@ public class NQueenModeler {
         List<Constraint> lcstrs2 = new ArrayList<Constraint>(10);
 //        List<Constraint> lcstrs3 = new ArrayList<Constraint>(10);
 
-        lcstrs1.add(new AllDifferent(vars, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs1.add(new AllDifferent(vars, s, AllDifferent.Type.PGAC));
         for (int i = 0; i < n; i++) {
             lcstrs2.add(ConstraintFactory.eq(diag1[i], vars[i], i, s));
             lcstrs2.add(ConstraintFactory.eq(diag2[i], vars[i], -i, s));
         }
-        lcstrs1.add(new AllDifferent(diag1, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs1.add(new AllDifferent(diag2, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs1.add(new AllDifferent(diag1, s, AllDifferent.Type.PGAC));
+        lcstrs1.add(new AllDifferent(diag2, s, AllDifferent.Type.PGAC));
 
         lcstrs.addAll(lcstrs1);
         lcstrs.addAll(lcstrs2);
@@ -202,8 +202,8 @@ public class NQueenModeler {
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(10);
 
-        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs.add(new AllDifferent(dualvars, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.PGAC));
+        lcstrs.add(new AllDifferent(dualvars, s, AllDifferent.Type.PGAC));
 
         for (int i = 0; i < n; i++) {
             lcstrs.add(ConstraintFactory.eq(diag1[i], vars[i], i, s));
@@ -212,10 +212,10 @@ public class NQueenModeler {
             lcstrs.add(ConstraintFactory.eq(dualdiag1[i], dualvars[i], i, s));
             lcstrs.add(ConstraintFactory.eq(dualdiag2[i], dualvars[i], -i, s));
         }
-        lcstrs.add(new AllDifferent(diag1, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs.add(new AllDifferent(diag2, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs.add(new AllDifferent(dualdiag1, s, AllDifferent.Type.PROBABILISTIC));
-        lcstrs.add(new AllDifferent(dualdiag2, s, AllDifferent.Type.PROBABILISTIC));
+        lcstrs.add(new AllDifferent(diag1, s, AllDifferent.Type.PGAC));
+        lcstrs.add(new AllDifferent(diag2, s, AllDifferent.Type.PGAC));
+        lcstrs.add(new AllDifferent(dualdiag1, s, AllDifferent.Type.PGAC));
+        lcstrs.add(new AllDifferent(dualdiag2, s, AllDifferent.Type.PGAC));
 
         lcstrs.add(new InverseChanneling(vars, dualvars, s));
 

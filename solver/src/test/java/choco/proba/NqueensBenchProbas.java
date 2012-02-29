@@ -18,9 +18,14 @@ import java.io.IOException;
  */
 public class NqueensBenchProbas extends AbstractBenchProbas {
 
-    public NqueensBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
+    public NqueensBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
                               CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+        super(new Solver(), n, type, frequency, active, dist, out, seed);
+    }
+
+    @Override
+    void solveProcess() {
+        this.solver.findAllSolutions();
     }
 
     @Override

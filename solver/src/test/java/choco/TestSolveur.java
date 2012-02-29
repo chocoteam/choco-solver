@@ -120,7 +120,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferent(vars, s, AllDifferent.Type.PROBABILISTIC);
+                cstrs[i] = new AllDifferent(vars, s, AllDifferent.Type.PGAC);
             }
 
             s.post(cstrs);

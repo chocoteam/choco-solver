@@ -434,8 +434,8 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		solver.set(new IntRand(vars,s));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 //		solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
-//		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE));//,new NoSubTours(vars,solver));
-		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE),new AllDifferent(prds,solver, AllDifferent.Type.CLIQUE_IN_ONE));
+//		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS));//,new NoSubTours(vars,solver));
+		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS),new AllDifferent(prds,solver, AllDifferent.Type.GLOBALNEQS));
 		Boolean status = solver.findSolution();//AllSolutions();
 		IMeasures mes = solver.getMeasures();
 		for(int i=0;i<n;i++){
