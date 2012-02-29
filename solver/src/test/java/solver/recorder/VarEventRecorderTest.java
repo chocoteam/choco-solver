@@ -71,8 +71,7 @@ public class VarEventRecorderTest {
         iv1.addMonitor(anyObject(IVariableMonitor.class));
         cer = createMock(CoarseEventRecorder.class);
         p1 = createMock(Propagator.class);
-        p1.getId();
-        expectLastCall().andReturn(1);
+        expect(p1.getId()).andReturn(1).times(2);
         p1.addRecorder(anyObject(IEventRecorder.class));
         p2 = createMock(Propagator.class);
         p2.getId();
@@ -85,7 +84,7 @@ public class VarEventRecorderTest {
 
         replay(iv1, cer, p1, p2, p3);
 
-        ver = new VarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p2, p3}, solver);
+        ver = new VarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p1, p2, p3}, solver);
         resetToDefault(iv1, cer, p1, p2, p3);
     }
 
@@ -133,12 +132,12 @@ public class VarEventRecorderTest {
         IStateInt firstAP = get("firstAP", VarEventRecorder.class, ver);
         IStateInt firstPP = get("firstPP", VarEventRecorder.class, ver);
         Propagator[] props = get("propagators", VarEventRecorder.class, ver);
-        int[] propIdx= get("propIdx", VarEventRecorder.class, ver);
+        int[] propIdx = get("propIdx", VarEventRecorder.class, ver);
 
         Assert.assertEquals(firstAP.get(), 3);
         Assert.assertEquals(firstPP.get(), 3);
         Assert.assertEquals(props, new Propagator[]{p1, p2, p3});
-        Assert.assertEquals(propIdx, new int[]{0,1,2});
+        Assert.assertEquals(propIdx, new int[]{0, 1, 2});
         // prepare iv1 to receive a call to activate(ver)
         reset(iv1, cer, p1, p2, p3);
         iv1.activate(ver);
@@ -151,7 +150,7 @@ public class VarEventRecorderTest {
         Assert.assertEquals(firstAP.get(), 2);
         Assert.assertEquals(firstPP.get(), 3);
         Assert.assertEquals(props, new Propagator[]{p1, p2, p3});
-        Assert.assertEquals(propIdx, new int[]{2,1,0});
+        Assert.assertEquals(propIdx, new int[]{2, 1, 0});
         verify(iv1, cer, p1, p2, p3);
         reset(iv1, cer, p1, p2, p3);
         p2.getId();
@@ -163,7 +162,7 @@ public class VarEventRecorderTest {
         Assert.assertEquals(firstAP.get(), 1);
         Assert.assertEquals(firstPP.get(), 3);
         Assert.assertEquals(props, new Propagator[]{p1, p2, p3});
-        Assert.assertEquals(propIdx, new int[]{2,1,0});
+        Assert.assertEquals(propIdx, new int[]{2, 1, 0});
         verify(iv1, cer, p1, p2, p3);
         reset(iv1, cer, p1, p2, p3);
         p2.getId();
@@ -175,7 +174,7 @@ public class VarEventRecorderTest {
         Assert.assertEquals(firstAP.get(), 1);
         Assert.assertEquals(firstPP.get(), 2);
         Assert.assertEquals(props, new Propagator[]{p1, p2, p3});
-        Assert.assertEquals(propIdx, new int[]{2,0,1});
+        Assert.assertEquals(propIdx, new int[]{2, 0, 1});
         verify(iv1, cer, p1, p2, p3);
         reset(iv1, cer, p1, p2, p3);
         p1.getId();
@@ -187,7 +186,7 @@ public class VarEventRecorderTest {
         Assert.assertEquals(firstAP.get(), 1);
         Assert.assertEquals(firstPP.get(), 1);
         Assert.assertEquals(props, new Propagator[]{p1, p2, p3});
-        Assert.assertEquals(propIdx, new int[]{2,0,1});
+        Assert.assertEquals(propIdx, new int[]{2, 0, 1});
         verify(iv1, cer, p1, p2, p3);
         reset(iv1, cer, p1, p2, p3);
         replay(iv1, cer, p1, p2, p3);

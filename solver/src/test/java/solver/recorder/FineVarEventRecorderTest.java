@@ -81,8 +81,7 @@ public class FineVarEventRecorderTest {
 
         // first proapagator
         p1 = createMock(Propagator.class);
-        p1.getId();
-        expectLastCall().andReturn(1);
+        expect(p1.getId()).andReturn(1).times(2);
         p1.addRecorder(anyObject(FineVarEventRecorder.class));
         id1 = createMock(IDeltaMonitor.class);
         d1.createDeltaMonitor(p1);
@@ -122,7 +121,7 @@ public class FineVarEventRecorderTest {
 
         replay(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
 
-        ver = new FineVarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p2, p3, p4, p5}, new int[]{0, 1, 0, 2, 1}, solver);
+        ver = new FineVarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p1, p2, p3, p4, p5}, new int[]{0, 5, 1, 0, 2, 1}, solver);
 
         verify(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
         reset(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
@@ -191,15 +190,18 @@ public class FineVarEventRecorderTest {
         // p1, p2, p3 are active
         // p4 is passive
         // p5 is not yet active
-        // p1 has triggered an event on iv1
-        // ver is executed : p2 and p3 should be propagate.
-        // Bonus : p2 is passive after propagate
+        // p2 has triggered an event on iv1
+        // ver is executed : p1 and p3 should be propagate.
+        // Bonus : p1 is passive after propagate
         // <--START PREPARING-->
         p1.getId();
         expectLastCall().andReturn(1);
         p1.getPropagationConditions(0);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
+        p1.getPropagationConditions(5);
+        expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p1.decArity();
+        expectLastCall().times(2);
         id1.clear();
         p3.getId();
         expectLastCall().andReturn(3);
@@ -232,6 +234,7 @@ public class FineVarEventRecorderTest {
         // DELTA MONITOR 1
         id1.freeze();
         id1.clear();
+        id1.unfreeze();
         // PROPAGATOR 2
         p2.getId();
         expectLastCall().andReturn(2);

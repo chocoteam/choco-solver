@@ -53,24 +53,54 @@ import java.util.Arrays;
  */
 public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V> {
 
-    protected final int[] idxVinPs; // index of the variable within the propagator -- immutable
-    protected final IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
-    protected final long[] timestamps; // a timestamp lazy clear the event structures
-    protected final int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
+    protected int[][] idxVinPs; // index of the variable within the propagator -- immutable
+    protected IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
+    protected long[] timestamps; // a timestamp lazy clear the event structures
+    //BEWARE a variable can occur more than one time into a propagator
+    protected int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
     private boolean flag_swap_during_execution = false; // a flag to capture propagator swapping during its execution
 
-    public FineVarEventRecorder(V variable, Propagator<V>[] propagators, int[] idxVinP, Solver solver) {
-        super(variable, propagators, solver);
-        int n = propagators.length;
+    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver) {
+        super(variable, solver, props.length);
+        int n = props.length;
+        // CREATE EMPTY STRUCTURE
         this.deltamon = new IDeltaMonitor[n];
+        this.evtmasks = new int[n];
+        this.idxVinPs = new int[n][];
+
         this.timestamps = new long[n];
         Arrays.fill(timestamps, -1);
-        this.evtmasks = new int[n];
-        this.idxVinPs = idxVinP.clone();
+
         IDelta delta = variable.getDelta();
+        int k = 0; // count the number of distinct propagator
         for (int i = 0; i < n; i++) {
-            deltamon[i] = delta.createDeltaMonitor(propagators[i]);
+            Propagator propagator = props[i];
+            int pid = propagator.getId();
+            int idx = p2i.get(pid);
+            if (idx == -1) { // first occurrence of the variable
+                this.propagators[k] = propagator;
+                propagator.addRecorder(this);
+                p2i.put(pid, k);
+                propIdx[k] = k;
+                deltamon[k] = delta.createDeltaMonitor(propagator);
+                idxVinPs[k] = new int[]{idxVinP[i]};
+                k++;
+            } else {
+                int[] itmp = idxVinPs[idx];
+                idxVinPs[idx] = new int[itmp.length + 1];
+                System.arraycopy(itmp, 0, idxVinPs[idx], 0, itmp.length);
+                idxVinPs[idx][itmp.length] = idxVinP[i];
+            }
         }
+        if (k < n) {
+            propagators = Arrays.copyOfRange(propagators, 0, k);
+            propIdx = Arrays.copyOfRange(propIdx, 0, k);
+            deltamon = Arrays.copyOfRange(deltamon, 0, k);
+            evtmasks = Arrays.copyOfRange(evtmasks, 0, k);
+            idxVinPs = Arrays.copyOfRange(idxVinPs, 0, k);
+        }
+        firstAP = solver.getEnvironment().makeInt(k);
+        firstPP = solver.getEnvironment().makeInt(k);
     }
 
     @Override
@@ -90,21 +120,22 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
                 deltamon[idx].freeze();
                 evtmasks[idx] = 0; // and clean up mask
                 assert (propagator.isActive()) : this + " is not active";
-                propagator.fineERcalls++;
-                propagator.propagate(this, idxVinPs[idx], evtmask_);
-                if (flag_swap_during_execution) {
-                    flag_swap_during_execution = false;
-                    assert (propagator.isPassive()) : this + " is not passive";
-                    last--;
-                    k--;
+                for (int j = 0; j < idxVinPs[idx].length; j++) {
+                    propagator.fineERcalls++;
+                    propagator.propagate(this, idxVinPs[idx][j], evtmask_);
+                    if (flag_swap_during_execution) {
+                        flag_swap_during_execution = false;
+                        assert (propagator.isPassive()) : this + " is not passive";
+                        last--;
+                        k--;
+                        break;
+                    }
+                    //<cp> if the propagator has been passivate, this has been updated
+                    // and the deltamonitor is already clear() --> no need to unfreeze.
                 }
-                //<cp> if the propagator has been passivate, this has been updated
-                // and the deltamonitor is already clear() --> no need to unfreeze.
-                // Otherwise...
-                else {
-                    deltamon[idx].unfreeze();
-                }
+                deltamon[idx].unfreeze();
             }
+
         }
         return true;
     }
@@ -122,24 +153,26 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
             Propagator propagator = propagators[i];
             if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
                 int idx = p2i.get(propagator.getId());
-                if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx])) != 0) {
-                    // 1. if instantiation, then decrement arity of the propagator
-                    if (EventType.anInstantiationEvent(evt.mask)) {
-                        propagator.decArity();
-                    }
-                    // 2. clear the structure if necessary
-                    if (LAZY) {
-                        if (timestamps[idx] - AbstractSearchLoop.timeStamp != 0) {
-                            deltamon[idx].clear();
-                            this.evtmasks[idx] = 0;
-                            timestamps[idx] = AbstractSearchLoop.timeStamp;
+                for (int j = 0; j < idxVinPs[idx].length; j++) {
+                    if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx][j])) != 0) {
+                        // 1. if instantiation, then decrement arity of the propagator
+                        if (EventType.anInstantiationEvent(evt.mask)) {
+                            propagator.decArity();
                         }
+                        // 2. clear the structure if necessary
+                        if (LAZY) {
+                            if (timestamps[idx] - AbstractSearchLoop.timeStamp != 0) {
+                                deltamon[idx].clear();
+                                this.evtmasks[idx] = 0;
+                                timestamps[idx] = AbstractSearchLoop.timeStamp;
+                            }
+                        }
+                        // 3. record the event and values removed
+                        if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                            evtmasks[idx] |= evt.strengthened_mask;
+                        }
+                        oneoremore = true;
                     }
-                    // 3. record the event and values removed
-                    if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                        evtmasks[idx] |= evt.strengthened_mask;
-                    }
-                    oneoremore = true;
                 }
             }
         }

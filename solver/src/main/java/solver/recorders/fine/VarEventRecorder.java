@@ -51,31 +51,44 @@ import java.util.Arrays;
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
     protected final V variable; // one variable
-    protected final Propagator<V>[] propagators; // its propagators
+    protected Propagator<V>[] propagators; // its propagators -- distinct
     protected int idxV; // index of this within the variable structure -- mutable
     protected final TIntIntHashMap p2i; // hashmap to retrieve the position of a propagator in propagators thanks to its pid
-    protected final int[] propIdx; // an array of indices helping to get active propagators
+    protected int[] propIdx; // an array of indices helping to get active propagators
     protected IStateInt firstAP; // index of the first active propagator in propIdx
     protected IStateInt firstPP; // index of the first passive propagator in propIdx
 
-    public VarEventRecorder(V variable, Propagator<V>[] propagators, Solver solver) {
+    VarEventRecorder(V variable, Solver solver, int n) {
         super(solver);
         this.variable = variable;
         variable.addMonitor(this);
-        this.propagators = propagators.clone();
-
-        int n = propagators.length;
-        p2i = new TIntIntHashMap(n);
+        p2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
+        this.propagators = new Propagator[n];
         this.propIdx = new int[n];
-        firstAP = solver.getEnvironment().makeInt(n);
-        firstPP = solver.getEnvironment().makeInt(n);
+    }
 
+    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver) {
+        this(variable, solver, props.length);
+        int n = props.length;
+        int k = 0; // count the number of distinct propagator
         for (int i = 0; i < n; i++) {
-            Propagator propagator = propagators[i];
-            propagator.addRecorder(this);
-            p2i.put(propagator.getId(), i);
-            propIdx[i] = i;
+            Propagator propagator = props[i];
+            int pid = propagator.getId();
+            int idx = p2i.get(pid);
+            if (idx == -1) { // first occurrence of the variable
+                this.propagators[k] = propagator;
+                propagator.addRecorder(this);
+                p2i.put(pid, k);
+                propIdx[k] = k;
+                k++;
+            }
         }
+        if (k < n) {
+            propagators = Arrays.copyOfRange(propagators, 0, k);
+            propIdx = Arrays.copyOfRange(propIdx, 0, k);
+        }
+        firstAP = solver.getEnvironment().makeInt(k);
+        firstPP = solver.getEnvironment().makeInt(k);
     }
 
     @Override
@@ -143,9 +156,10 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void enqueue() {
         enqueued = true;
-        int first = firstAP.get();
+        // <cp> include not yet activate propagator in the loop, to avoid maintain this outside
+//        int first = firstAP.get();
         int last = firstPP.get();
-        for (int k = first; k < last; k++) {
+        for (int k = 0; k < last; k++) {
             int i = propIdx[k];
             propagators[i].incNbRecorderEnqued();
         }
@@ -155,10 +169,10 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void deque() {
         enqueued = false;
-        enqueued = false;
-        int first = firstAP.get();
+        // <cp> include not yet activate propagator in the loop, to avoid maintain this outside
+//        int first = firstAP.get();
         int last = firstPP.get();
-        for (int k = first; k < last; k++) {
+        for (int k = 0; k < last; k++) {
             int i = propIdx[k];
             propagators[i].decNbRecrodersEnqued();
         }
