@@ -214,9 +214,9 @@ public class ConstraintFactory {
         IntVar[] tmpV = new IntVar[e];
         int[] tmpC = new int[e];
         // iteration over the paramater array to avoid non-deterministic behavior introduced by the map
-        for (int i = 0; i < vars.length; i++) {
-            IntVar var = vars[i];
-            if (map.contains(vars[i])) {
+        for (int i = 0; i < nvars.length; i++) {
+            IntVar var = nvars[i];
+            if (map.contains(var)) {
                 int coeff = map.get(var);
                 if (coeff > 0) {
                     tmpV[b] = var;
