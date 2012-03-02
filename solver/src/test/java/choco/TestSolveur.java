@@ -32,7 +32,9 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -120,7 +122,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferent(vars, s, AllDifferent.Type.PGAC);
+                cstrs[i] = new AllDifferentProba(vars, s, AllDifferent.Type.AC, CondAllDiffBCProba.Distribution.UNIFORM);
             }
 
             s.post(cstrs);

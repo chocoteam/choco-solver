@@ -29,7 +29,7 @@ package samples.nqueen;
 
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 

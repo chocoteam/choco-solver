@@ -2,10 +2,11 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.constraints.unary.Relation;
-import solver.recorders.conditions.CondAllDiffBCProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -27,7 +28,7 @@ import static solver.constraints.ConstraintFactory.lt;
 public class PartitionBenchProbas extends AbstractBenchProbas {
 
     public PartitionBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                 CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
@@ -37,16 +38,16 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
         y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
         Collection<IntVar> allVars = new ArrayList<IntVar>();
-        for (int i = 0; i < x.length+y.length; i++) {
+        for (int i = 0; i < x.length + y.length; i++) {
             if (i < x.length) {
                 allVars.add(x[i]);
             } else {
-                allVars.add(y[i-x.length]);
+                allVars.add(y[i - x.length]);
             }
         }
 
@@ -96,13 +97,13 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         allCstrs.add(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
         allCstrs.add(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
 
-        AllDifferent alldiff = new AllDifferent(xy, solver, type);
-        allCstrs.add(alldiff);
-        this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);
-        this.allDiffs = new AllDifferent[]{alldiff};
-        this.nbAllDiff = 1;
-        this.allDiffVars = new IntVar[][]{xy};
+        if (proba) {
+            allCstrs.add(new AllDifferentProba(xy, solver, type, this.dist));
+        } else {
+            allCstrs.add(new AllDifferent(xy, solver, type));
+        }
 
+        this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);
         this.allVars = allVars.toArray(new IntVar[allVars.size()]);
         this.vars = xy;
     }

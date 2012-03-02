@@ -25,19 +25,19 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.nary;
+package solver.constraints.nary.alldifferent;
 
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffGAC;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualXY;
-import solver.constraints.propagators.nary.PropAllDiffAC_new;
-import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.constraints.propagators.nary.PropAllDiffRC;
-import solver.constraints.propagators.nary.PropCliqueNeq;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_new;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffRC;
+import solver.constraints.propagators.nary.alldifferent.PropCliqueNeq;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
+import solver.constraints.propagators.nary.alldifferent.proba.PropAllDiffProba;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -47,53 +47,45 @@ import solver.variables.Variable;
  * no explicit variables are used for the right vertex set
  * the right vertex set is the interval (minValue .. maxValue)
  */
-public class AllDifferent extends IntConstraint<IntVar> {
+public class AllDifferentProba extends IntConstraint<IntVar> {
 
-    public static enum Type {
-        AC, PGAC, PBC, BC, RC, NEQS, GLOBALNEQS, GRAPH, NONE
+    public AllDifferentProba(IntVar[] vars, Solver solver, CondAllDiffBCProba.Distribution dist) {
+        this(vars, solver, AllDifferent.Type.AC, dist);
     }
 
-    public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.RC);
-    }
-
-    public AllDifferent(IntVar[] vars, Solver solver, Type type) {
+    public AllDifferentProba(IntVar[] vars, Solver solver, AllDifferent.Type type, CondAllDiffBCProba.Distribution dist) {
         super(vars, solver);
+        CondAllDiffBCProba condition = new CondAllDiffBCProba(solver.getEnvironment(), vars, dist);
         switch (type) {
             case NEQS: {
-				int s = vars.length;
-				int k = 0;
-				Propagator[] props = new Propagator[(s * s - s) / 2];
-				for (int i = 0; i < s - 1; i++) {
-					for (int j = i + 1; j < s; j++) {
-						props[k++] = new PropNotEqualXY(vars[i], vars[j], solver, this);
-					}
-				}
-				setPropagators(props);
-			}
-            case GLOBALNEQS:
-                setPropagators(new PropCliqueNeq(vars, solver, this));
-                break;
-            case PGAC:
-                PropProbaAllDiffGAC propGAC =  new PropProbaAllDiffGAC(this.vars, this, solver);
-                setPropagators(propGAC);
-                addPropagators(new PropCliqueNeq(vars, solver, this));
-                break;
-            case PBC:
-                PropProbaAllDiffBC propBC = new PropProbaAllDiffBC(this.vars, solver, this);
-                setPropagators(propBC);
-                addPropagators(new PropCliqueNeq(vars, solver, this));
-                break;
-            case GRAPH:
-            case AC:
-                setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
+                int s = vars.length;
+                int k = 0;
+                Propagator[] props = new Propagator[(s * s - s) / 2];
+                for (int i = 0; i < s - 1; i++) {
+                    for (int j = i + 1; j < s; j++) {
+                        props[k++] = new PropNotEqualXY(vars[i], vars[j], solver, this);
+                    }
+                }
+                setPropagators(props);
+            }
+            case RC:
+                setPropagators(new PropAllDiffProba(vars, solver, this,
+                        condition,
+                        new PropCliqueNeq(this.vars, solver, this),
+                        new PropAllDiffRC(this.vars, solver, this)));
                 break;
             case BC:
-                setPropagators(new PropAllDiffBC(this.vars, solver, this));
+                setPropagators(new PropAllDiffProba(vars, solver, this,
+                        condition,
+                        new PropCliqueNeq(this.vars, solver, this),
+                        new PropAllDiffBC(this.vars, solver, this)));
                 break;
-            case RC:
+            case AC:
             default:
-                setPropagators(new PropAllDiffRC(this.vars, solver, this));
+                setPropagators(new PropAllDiffProba(vars, solver, this,
+                        condition,
+                        new PropCliqueNeq(this.vars, solver, this),
+                        new PropAllDiffAC_new(this.vars, this, solver)));
                 break;
         }
     }
@@ -141,7 +133,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
-        sb.append("AllDifferent({");
+        sb.append("AllDifferentProba({");
         for (int i = 0; i < vars.length; i++) {
             if (i > 0) sb.append(", ");
             Variable var = vars[i];

@@ -36,9 +36,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.NoSubTours;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.exception.ContradictionException;
 import solver.search.measure.IMeasures;
@@ -435,7 +435,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 //		solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
 //		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS));//,new NoSubTours(vars,solver));
-		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS),new AllDifferent(prds,solver, AllDifferent.Type.GLOBALNEQS));
+		solver.post(new InverseChanneling(vars,prds,solver),new NoSubTours(vars,solver),new AllDifferent(vars,solver, AllDifferent.Type.NEQS),new AllDifferent(prds,solver, AllDifferent.Type.NEQS));
 		Boolean status = solver.findSolution();//AllSolutions();
 		IMeasures mes = solver.getMeasures();
 		for(int i=0;i<n;i++){

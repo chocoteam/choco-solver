@@ -2,27 +2,14 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffGAC;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.nary.PropAllDiffAC_new;
-import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.constraints.propagators.nary.PropCliqueNeq;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
-import solver.recorders.conditions.CondAllDiffBCFreq;
-import solver.recorders.conditions.CondAllDiffBCProba;
-import solver.recorders.conditions.ICondition;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
@@ -43,10 +30,7 @@ public abstract class AbstractBenchProbas {
     IntVar[] allVars; // all the vairables of the problem
     IntVar[] vars; // decision variables for the problem
     Constraint[] cstrs; // all the cstrs involved in the problem (including alldiff)
-    int nbAllDiff; // number of alldiff cstrs
     AllDifferent.Type type;
-    AllDifferent[] allDiffs; // all the alldiff cstrs involved in the problem
-    IntVar[][] allDiffVars; // variables related to each alldiff cstrs : allDiffVars[i] are the variables of the cstr allDiffs[i]
     CondAllDiffBCProba.Distribution dist; // kind of distribution considered for the probability
 
     // output data
@@ -79,7 +63,7 @@ public abstract class AbstractBenchProbas {
         this.size = size;
     }
 
-    abstract void buildProblem(int size);
+    abstract void buildProblem(int size, boolean proba);
 
     void restartProblem(int size, int seed) {
         this.solver = new Solver();
@@ -152,90 +136,16 @@ public abstract class AbstractBenchProbas {
     }
 
     void execute() throws IOException {
-        this.buildProblem(size);
+        this.buildProblem(size, false);
         this.solver.post(this.cstrs);
-
-        // 1. placer les propagateurs dans différentes listes
-        ArrayList<Propagator<IntVar>> hall = new ArrayList<Propagator<IntVar>>();
-        ArrayList<PropCliqueNeq> clique = new ArrayList<PropCliqueNeq>();
-        ArrayList<Propagator<IntVar>> others = new ArrayList<Propagator<IntVar>>();
-
-        Constraint[] constraints = solver.getCstrs();
-        for (int i = 0; i < constraints.length; i++) {
-            Propagator<IntVar>[] props = constraints[i].propagators;
-            for (Propagator<IntVar> p : props) {
-                if (p instanceof PropAllDiffBC) {
-                    hall.add(p);
-                } else if (p instanceof PropAllDiffAC_new) {
-                    hall.add(p);
-                } else if (p instanceof PropCliqueNeq) {
-                    clique.add((PropCliqueNeq) p);
-                } else {
-                    others.add(p);
-                }
-            }
-        }
-
-        Primitive[] primitives = null;
-        if (this.frequency >= 0) {
-            ICondition condition = null;
-            primitives = new Primitive[hall.size() * 2];
-            if (this.frequency == 0) {
-                for (int i = 0; i < hall.size(); i++) {
-                    Propagator<IntVar> prop = hall.get(i);
-                    condition = new CondAllDiffBCProba(this.solver.getEnvironment(), prop.getVars(), this.active, this.dist);
-                    primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.coarses(prop);
-                }
-            } else {
-                for (int i = 0; i < hall.size(); i++) {
-                    Propagator<IntVar> prop = hall.get(i);
-                    condition = new CondAllDiffBCFreq(this.solver.getEnvironment(), prop.getVars(), this.frequency);
-                    primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.coarses(prop);
-                }
-            }
-        }
-
-        Propagator[] _cliques = clique.toArray(new Propagator[clique.size()]);
-        PropagationStrategy qneq = Queue.build(Sort.build(Primitive.arcs(_cliques)), Primitive.coarses(_cliques));
-
-        Propagator[] _others = others.toArray(new Propagator[others.size()]);
-        PropagationStrategy qothers = Queue.build(Primitive.arcs(_others), Primitive.coarses(_others));
-
-        PropagationStrategy qadbc = null;
-        if (primitives == null) {
-            Propagator[] _hall = hall.toArray(new Propagator[hall.size()]);
-            qadbc = Queue.build(Primitive.arcs(_hall), Primitive.coarses(_hall)).pickOne();
-        } else {
-            if (primitives.length > 0) {  // patch Xavier
-                qadbc = Queue.build(primitives).pickOne();
-            }
-        }
-        if (qadbc != null) {   // patch Xavier
-            solver.set(
-                    Sort.build(
-                            qneq.clearOut(),
-                            qothers.clearOut(),
-                            qadbc.pickOne()
-                    ).clearOut()
-            );
-        } else {   // patch Xavier
-            solver.set(
-                    Sort.build(
-                            qneq.clearOut(),
-                            qothers.clearOut()
-                    ).clearOut()
-            );
-        }
-
+//        solver.set(PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver));
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         this.configSearchStrategy();
         this.solveProcess();
     }
 
     public String toString() {
-        return ""+type+"-"+this.dist;
+        return "" + type + "-" + this.dist;
     }
 
 

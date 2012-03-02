@@ -36,8 +36,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.NoSubTours;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
@@ -160,7 +160,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		if(bc){
 			return new AllDifferent(integers,solver,AllDifferent.Type.BC);
 		}else{
-			return new AllDifferent(integers,solver,AllDifferent.Type.GLOBALNEQS);
+			return new AllDifferent(integers,solver,AllDifferent.Type.NEQS);
 		}
 	}
 	private void addHK(){
@@ -326,7 +326,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		} catch (ContradictionException e) {
 			e.printStackTrace();
 		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GLOBALNEQS),new NoSubTours(vars,solver));
+		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.NEQS),new NoSubTours(vars,solver));
 		Boolean status = solver.findAllSolutions();
 		if(status==null){
 			return -1;

@@ -2,10 +2,11 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.NoSubTours;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -37,7 +38,7 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         GraphGenerator.InitialProperty prop = GraphGenerator.InitialProperty.HamiltonianCircuit;
         GraphGenerator gen = new GraphGenerator(size, seed, prop);
         //System.out.println(gen);
@@ -49,31 +50,13 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
                 gen.neighborBasedGenerator(neighbor);
                 break;
         }
-        //System.out.println(gen);
         int[][] graph = gen.toInteger();
-        /*for (int i = 0; i < size; i++) {
-            System.out.print("graph[" + i + "]:=");
-            for (int j = 0; j < graph[i].length; j++) {
-                System.out.print(graph[i][j] + " ");
-            }
-            System.out.println();
-        }*/
         int[][] invGraph = gen.invToInteger();
-        /*for (int i = 0; i < size; i++) {
-            System.out.print("anti-graph[" + i + "]:=");
-            for (int j = 0; j < invGraph[i].length; j++) {
-                System.out.print(invGraph[i][j] + " ");
-            }
-            System.out.println();
-        }*/
 
         this.vars = new IntVar[size];
         IntVar[] preds = new IntVar[size];
         this.allVars = new IntVar[2 * size];
-        this.allDiffVars = new IntVar[][]{vars, preds};
-        this.nbAllDiff = 2;
         this.cstrs = new Constraint[4];
-        this.allDiffs = new AllDifferent[this.nbAllDiff];
         // variables
         for (int i = 0; i < size; i++) {
             vars[i] = VariableFactory.enumerated("node" + i, graph[i], solver);
@@ -87,11 +70,14 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
             allVars[k++] = preds[i];
         }
         // contraintes
-        this.allDiffs[0] = new AllDifferent(vars, solver, type);
-        this.cstrs[0] = this.allDiffs[0];
+        if (proba) {
+            this.cstrs[0] = new AllDifferentProba(vars, solver, type, this.dist);
+            this.cstrs[2] = new AllDifferentProba(preds, solver, type, this.dist);
+        } else {
+            this.cstrs[0] = new AllDifferent(vars, solver, type);
+            this.cstrs[2] = new AllDifferent(preds, solver, type);
+        }
         this.cstrs[1] = new NoSubTours(vars, solver);
-        this.allDiffs[1] = new AllDifferent(preds, solver, type);
-        this.cstrs[2] = this.allDiffs[1];
         this.cstrs[3] = new InverseChanneling(this.vars, preds, solver, AllDifferent.Type.NONE);
     }
 }

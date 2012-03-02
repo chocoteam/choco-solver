@@ -1,12 +1,12 @@
 package choco.proba;
 
-import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.constraints.unary.Relation;
-import solver.recorders.conditions.CondAllDiffBCProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -41,7 +41,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         Collection<Constraint> allCstrs = new ArrayList<Constraint>();
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
         this.vars = this.allVars = position;
@@ -53,12 +53,12 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
             }
         }
         allCstrs.add(ConstraintFactory.lt(position[0], position[n*k-1], solver));
-        AllDifferent alldiff = new AllDifferent(position, solver, type);
-        allCstrs.add(alldiff);
+        if (proba) {
+            allCstrs.add(new AllDifferentProba(position, solver, type, this.dist));
+        } else {
+            allCstrs.add(new AllDifferent(position, solver, type));
+        }
 
         this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);
-        this.allDiffs = new AllDifferent[]{alldiff};
-        this.nbAllDiff = 1;
-        this.allDiffVars = new IntVar[][]{position};
     }
 }

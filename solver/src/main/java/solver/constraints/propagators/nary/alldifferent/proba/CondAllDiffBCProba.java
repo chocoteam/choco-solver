@@ -1,4 +1,4 @@
-package solver.recorders.conditions;
+package solver.constraints.propagators.nary.alldifferent.proba;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
@@ -20,14 +20,16 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import static solver.recorders.conditions.CondAllDiffBCProba.Distribution.DIRAC;
+import static solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba.Distribution.DIRAC;
 
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  * Date: 22/11/11
  */
-public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder> {
+public class CondAllDiffBCProba {
+
+    protected IntVar[] vars;
 
     public static String tabf = "/functions/f.txt";
     public static String tabg = "/functions/g.txt";
@@ -53,19 +55,14 @@ public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder>
      */
     protected IStateInt sumDomSize;
 
-    /**
-     * only for evaluations
-     */
-    boolean active;
-
     final Distribution dist;
 
     private double[] f;
     private double[] g;
     static final int nbValues = 950;
 
-    public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars, boolean active, Distribution dist) throws IOException {
-        super(environment, vars);
+    public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars, Distribution dist) {
+        this.vars = vars;
         this.unionset = new Union(vars, environment);
         this.rand = new Random();
         this.sumDomSize = environment.makeInt(0);
@@ -79,53 +76,55 @@ public class CondAllDiffBCProba extends CondAllDiffBC<AbstractFineEventRecorder>
             }
         }
         this.nbFreeVars = environment.makeInt(k);
-        this.active = active;
         this.dist = dist;
         if (dist.equals(DIRAC)) {
-            // initialiser f et g a partir des fichiers fournis
-            InputStream isF = CondAllDiffBCProba.class.getResourceAsStream(tabf);
-            BufferedReader readf = new BufferedReader(new InputStreamReader(isF));
-            InputStream isG = CondAllDiffBCProba.class.getResourceAsStream(tabg);
-            BufferedReader readg = new BufferedReader(new InputStreamReader(isG));
-            this.f = new double[nbValues];
-            this.g = new double[nbValues];
-            for (int i = 0; i < nbValues; i++) {
-                String fi = readf.readLine();
-                String gi = readg.readLine();
-                String[] tfi = fi.split("\\*\\^");
-                /*for (String s : tfi) {
-                    System.out.print(s + "  --  ");
-                }
-                System.out.println();*/
-                String[] tgi = gi.split("\\*\\^");
-                if (tfi.length > 2 || tgi.length > 2) {
-                    System.out.println(tfi.length + ", " + tgi.length);
-                    throw new UnsupportedOperationException();
-                }
-                if (tfi.length == 1) {
-                    this.f[i] = Double.parseDouble(tfi[0]);
-                } else {
-                    this.f[i] = Double.parseDouble(tfi[0]) * Math.pow(10, Double.parseDouble(tfi[1]));
-                }
-                if (tgi.length == 1) {
-                    this.g[i] = Double.parseDouble(tgi[0]);
-                } else {
-                    this.g[i] = Double.parseDouble(tgi[0]) * Math.pow(10, Double.parseDouble(tgi[1]));
-                }
+            try {
+                // initialiser f et g a partir des fichiers fournis
+                InputStream isF = CondAllDiffBCProba.class.getResourceAsStream(tabf);
+                BufferedReader readf = new BufferedReader(new InputStreamReader(isF));
+                InputStream isG = CondAllDiffBCProba.class.getResourceAsStream(tabg);
+                BufferedReader readg = new BufferedReader(new InputStreamReader(isG));
+                this.f = new double[nbValues];
+                this.g = new double[nbValues];
+                for (int i = 0; i < nbValues; i++) {
+                    String fi = null;
 
+                    fi = readf.readLine();
+                    String gi = readg.readLine();
+                    String[] tfi = fi.split("\\*\\^");
+                    /*for (String s : tfi) {
+                        System.out.print(s + "  --  ");
+                    }
+                    System.out.println();*/
+                    String[] tgi = gi.split("\\*\\^");
+                    if (tfi.length > 2 || tgi.length > 2) {
+                        System.out.println(tfi.length + ", " + tgi.length);
+                        throw new UnsupportedOperationException();
+                    }
+                    if (tfi.length == 1) {
+                        this.f[i] = Double.parseDouble(tfi[0]);
+                    } else {
+                        this.f[i] = Double.parseDouble(tfi[0]) * Math.pow(10, Double.parseDouble(tfi[1]));
+                    }
+                    if (tgi.length == 1) {
+                        this.g[i] = Double.parseDouble(tgi[0]);
+                    } else {
+                        this.g[i] = Double.parseDouble(tgi[0]) * Math.pow(10, Double.parseDouble(tgi[1]));
+                    }
+                }
+            } catch (IOException e) {
+                throw new SolverException("Encounter a problem while reading functions");
             }
         }
     }
 
-    @Override
     boolean isValid() {
-        return !active || rand.nextDouble() >= proba();
+        return rand.nextDouble() >= proba();
     }
 
 
-    @Override
-    void update(AbstractFineEventRecorder recorder, Propagator propagator, EventType event) {
-        if (EventType.isInstantiate(event.mask)) {
+    void update(AbstractFineEventRecorder recorder, Propagator propagator, int evtmask) {
+        if (EventType.isInstantiate(evtmask)) {
             this.nbFreeVars.add(-1);
         }
         // WARNING: Initially, the paper proposes to only react to variable assignment... But in practice, a value in

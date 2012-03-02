@@ -29,7 +29,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;

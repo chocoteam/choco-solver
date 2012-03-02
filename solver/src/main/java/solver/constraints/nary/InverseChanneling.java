@@ -31,11 +31,11 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
-import solver.constraints.propagators.nary.PropAllDiffAC;
-import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.constraints.propagators.nary.PropCliqueNeq;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.nary.PropInverseChanneling;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffRC;
 import solver.variables.IntVar;
 
 /**
@@ -83,18 +83,6 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         switch (type) {
             case NONE :
                 break;
-            case GLOBALNEQS:
-                addPropagators(new PropCliqueNeq(this.X,solver,this));
-                addPropagators(new PropCliqueNeq(this.Y,solver,this));
-            break;
-            case PBC:
-                PropProbaAllDiffBC propX = new PropProbaAllDiffBC(this.X, solver, this);
-                PropProbaAllDiffBC propY = new PropProbaAllDiffBC(this.Y, solver, this);
-                addPropagators(propX,propY);
-                addPropagators(new PropCliqueNeq(this.X,solver,this), new PropCliqueNeq(this.Y,solver,this));
-            break;
-            case GRAPH:
-                throw new UnsupportedOperationException();
             case AC:
                 addPropagators(new PropAllDiffAC(this.X, this, solver));
                 addPropagators(new PropAllDiffAC(this.Y, this, solver));
@@ -105,9 +93,8 @@ public class InverseChanneling extends IntConstraint<IntVar> {
                 break;
             case RC:
             default:
-                addPropagators(new PropAllDiffBC(this.X, solver, this));
-                addPropagators(new PropAllDiffBC(this.Y, solver, this));
-                addPropagators(new PropCliqueNeq(this.X,solver,this), new PropCliqueNeq(this.Y,solver,this));
+                addPropagators(new PropAllDiffRC(this.X, solver, this));
+                addPropagators(new PropAllDiffRC(this.Y, solver, this));
                 break;
     }
     }

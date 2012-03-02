@@ -2,8 +2,9 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -34,22 +35,22 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         this.inst = new Instance(size, 0, size - 1, seed, 0, solver);
-        switch(dist) {
-            case DIRAC :
+        switch (dist) {
+            case DIRAC:
                 this.vars = inst.generate(Distribution.ALL_EQUAL_INTERVALS_SIZEFREE);
                 break;
-            case UNIFORM :
-            default :
+            case UNIFORM:
+            default:
                 this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
         }
         this.allVars = vars;
-        AllDifferent alldiff = new AllDifferent(this.vars, solver, type);
-        this.cstrs = new Constraint[]{alldiff};
-        this.allDiffs = new AllDifferent[]{alldiff};
-        this.nbAllDiff = 1;
-        this.allDiffVars = new IntVar[][]{this.vars};
+        if (proba) {
+            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.dist)};
+        } else {
+            this.cstrs = new Constraint[]{new AllDifferent(this.vars, solver, type)};
+        }
     }
 
 

@@ -29,7 +29,7 @@ package solver.constraints.probabilistic.propagators.nary;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.PropAllDiffAC_new;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_new;
 import solver.recorders.conditions.CondAllDiffBC;
 import solver.variables.EventType;
 import solver.variables.IntVar;

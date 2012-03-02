@@ -4,11 +4,12 @@ import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.constraints.nary.lex.LexChain;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.constraints.unary.Relation;
-import solver.recorders.conditions.CondAllDiffBCProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -42,7 +43,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         Collection<Constraint> allCstrs = new ArrayList<Constraint>();
         Collection<IntVar> allVars = new ArrayList<IntVar>();
         IntVar[] ticks;
@@ -65,8 +66,11 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
                 allCstrs.add(Sum.leq(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, -((size - 1 - j + i) * (size - j + i)) / 2, solver));
             }
         }
-        AllDifferent alldiff = new AllDifferent(diffs, solver, type);
-        allCstrs.add(alldiff);
+        if (proba) {
+            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.dist));
+        } else {
+            allCstrs.add(new AllDifferent(diffs, solver, type));
+        }
 
         // break symetries
         if (size > 2) {
@@ -74,9 +78,6 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
         }
 
         this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);
-        this.allDiffs = new AllDifferent[]{alldiff};
-        this.nbAllDiff = 1;
-        this.allDiffVars = new IntVar[][]{diffs};
         this.allVars = allVars.toArray(new IntVar[allVars.size()]);
         this.vars = ticks;
     }

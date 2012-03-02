@@ -1,4 +1,4 @@
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.alldifferent;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;

@@ -33,7 +33,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.generator.Flatten;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.PropagationStrategy;

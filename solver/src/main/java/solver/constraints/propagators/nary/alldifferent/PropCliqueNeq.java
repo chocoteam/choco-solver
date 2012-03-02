@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.alldifferent;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;

@@ -3,9 +3,10 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -21,21 +22,21 @@ import java.util.Arrays;
 public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
     public MagicSquareBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                        CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                  CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         int ms = size * (size * size + 1) / 2;
 
         IntVar[][] matrix = new IntVar[size][size];
         IntVar[][] invMatrix = new IntVar[size][size];
         this.vars = new IntVar[size * size];
         this.allVars = new IntVar[(size * size) + 2 * size];
-        this.allDiffVars = new IntVar[][]{vars};
-        this.nbAllDiff = 1;
-        this.allDiffs = new AllDifferent[this.nbAllDiff];
+//        this.allDiffVars = new IntVar[][]{vars};
+//        this.nbAllDiff = 1;
+//        this.allDiffs = new AllDifferent[this.nbAllDiff];
         this.cstrs = new Constraint[1 + (2 * size) + 5];
 
         int k = 0;
@@ -57,9 +58,12 @@ public class MagicSquareBenchProbas extends AbstractBenchProbas {
             this.allVars[k++] = diag2[i];
         }
 
-        this.allDiffs[0] = new AllDifferent(vars, solver, type);
         int c = 0;
-        this.cstrs[c++] = this.allDiffs[0];
+        if (proba) {
+            this.cstrs[c++] = new AllDifferentProba(vars, solver, type, this.dist);
+        } else {
+            this.cstrs[c++] = new AllDifferent(vars, solver, type);
+        }
 
         int[] coeffs = new int[size];
         Arrays.fill(coeffs, 1);

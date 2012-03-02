@@ -36,7 +36,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -197,26 +197,16 @@ public class AllDifferentTest {
 						Assert.assertEquals(clique.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertEquals(clique.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 
-                        Solver clique1 = alldiffs(domains, 2, b == 0);
-						clique1.findAllSolutions();
-						Assert.assertEquals(clique1.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-						Assert.assertEquals(clique1.getMeasures().getNodeCount(), neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
-
-						Solver bc = alldiffs(domains, 3, b == 0);
+                        Solver bc = alldiffs(domains, 2, b == 0);
 						bc.findAllSolutions();
 						Assert.assertEquals(bc.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(bc.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 
-						Solver ac = alldiffs(domains, 4, b == 0);
+						Solver ac = alldiffs(domains, 3, b == 0);
 						ac.findAllSolutions();
 						Assert.assertEquals(ac.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
 						Assert.assertTrue(ac.getMeasures().getNodeCount() <= neqs.getMeasures().getNodeCount(), "nb nod incorrect"+ seed);
 						Assert.assertTrue(ac.getMeasures().getFailCount()==0 || b==0, "nb nod incorrect"+ seed);
-
-						Solver graph = alldiffs(domains, 5, b==0);
-						graph.findAllSolutions();
-						Assert.assertEquals(graph.getMeasures().getSolutionCount(), neqs.getMeasures().getSolutionCount(), "nb sol incorrect "+seed);
-						Assert.assertTrue(graph.getMeasures().getFailCount() == 0 || b==0, "gac failed"+ seed);
 
 						LoggerFactory.getLogger("test").info("{}ms - {}ms - {}ms - {}ms", new Object[]{
 								neqs.getMeasures().getTimeCount(), clique.getMeasures().getTimeCount(),
@@ -256,16 +246,10 @@ public class AllDifferentTest {
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.NEQS));
 				break;
             case 2:
-				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GLOBALNEQS));
-				break;
-			case 3:
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.BC));
 				break;
-			case 4:
+			case 3:
 				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.AC));
-				break;
-			case 5:
-				lcstrs.add(new AllDifferent(vars, s, AllDifferent.Type.GRAPH));
 				break;
 		}
 

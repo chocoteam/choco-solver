@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.alldifferent;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
@@ -42,7 +42,6 @@ import solver.variables.IntVar;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Deque;
 
 import static choco.annotations.PropAnn.Status.*;
 
