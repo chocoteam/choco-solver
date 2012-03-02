@@ -19,14 +19,14 @@ public class TestProbaBAllDiff {
 
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
-        TestProbaBAllDiff.oneAllDiffTest(12, results);
-        TestProbaBAllDiff.hamiltonianCycleTest(300, results);
+        TestProbaBAllDiff.oneAllDiffTest(11, results);
+        /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(4, results);
-        TestProbaBAllDiff.nQueensTest(11, results);
+        TestProbaBAllDiff.nQueensTest(10, results);
         TestProbaBAllDiff.allIntervalSeriesTest(8, results);
         TestProbaBAllDiff.partitionTest(24, results);
         TestProbaBAllDiff.golombRulerTest(8, results);
-        TestProbaBAllDiff.langfordTest(3,17, results);
+        TestProbaBAllDiff.langfordTest(3,17, results);*/
         results.close();
     }
 
@@ -150,6 +150,8 @@ public class TestProbaBAllDiff {
         launchEval(name, 5, k*n, problems, out, results);
         out.close();
     }
+
+
 
     private static void launchEval(String name, int step, int size, AbstractBenchProbas[] problems,
                                    BufferedWriter out, BufferedWriter results) throws IOException {

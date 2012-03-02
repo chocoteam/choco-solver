@@ -176,8 +176,8 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
                     System.arraycopy(values, 0, domains[v], 0, sizeMax);
                 }
             } else {
+                int size = r.nextInt(sizeMax) + 1;
                 for (int v = 0; v < n; v++) {
-                    int size = r.nextInt(sizeMax) + 1;
                     int inf = r.nextInt(sizeMax - size + 1);
                     domains[v] = new int[size];
                     System.arraycopy(values, inf, domains[v], 0, size);
