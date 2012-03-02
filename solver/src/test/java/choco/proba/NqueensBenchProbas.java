@@ -45,9 +45,9 @@ public class NqueensBenchProbas extends AbstractBenchProbas {
             allVars[k++] = diag2[i];
         }
         if (proba) {
-            AllDifferentProba alldiff = new AllDifferentProba(vars, solver, type, this.dist);
-            AllDifferentProba alldiffdiag1 = new AllDifferentProba(diag1, solver, type, this.dist);
-            AllDifferentProba alldiffdiag2 = new AllDifferentProba(diag2, solver, type, this.dist);
+            AllDifferentProba alldiff = new AllDifferentProba(vars, solver, type, this.dist, this.count);
+            AllDifferentProba alldiffdiag1 = new AllDifferentProba(diag1, solver, type, this.dist, this.count);
+            AllDifferentProba alldiffdiag2 = new AllDifferentProba(diag2, solver, type, this.dist, this.count);
             this.cstrs = new Constraint[]{alldiff, alldiffdiag1, alldiffdiag2};
         } else {
             AllDifferent alldiff = new AllDifferent(vars, solver, type);

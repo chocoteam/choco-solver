@@ -54,7 +54,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
         }
         allCstrs.add(ConstraintFactory.lt(position[0], position[n*k-1], solver));
         if (proba) {
-            allCstrs.add(new AllDifferentProba(position, solver, type, this.dist));
+            allCstrs.add(new AllDifferentProba(position, solver, type, this.dist, this.count));
         } else {
             allCstrs.add(new AllDifferent(position, solver, type));
         }

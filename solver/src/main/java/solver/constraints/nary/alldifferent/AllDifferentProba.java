@@ -49,11 +49,11 @@ import solver.variables.Variable;
  */
 public class AllDifferentProba extends IntConstraint<IntVar> {
 
-    public AllDifferentProba(IntVar[] vars, Solver solver, CondAllDiffBCProba.Distribution dist) {
-        this(vars, solver, AllDifferent.Type.AC, dist);
+    public AllDifferentProba(IntVar[] vars, Solver solver, CondAllDiffBCProba.Distribution dist, CounterProba count) {
+        this(vars, solver, AllDifferent.Type.AC, dist, count);
     }
 
-    public AllDifferentProba(IntVar[] vars, Solver solver, AllDifferent.Type type, CondAllDiffBCProba.Distribution dist) {
+    public AllDifferentProba(IntVar[] vars, Solver solver, AllDifferent.Type type, CondAllDiffBCProba.Distribution dist, CounterProba count) {
         super(vars, solver);
         CondAllDiffBCProba condition = new CondAllDiffBCProba(solver.getEnvironment(), vars, dist);
         switch (type) {
@@ -69,23 +69,20 @@ public class AllDifferentProba extends IntConstraint<IntVar> {
                 setPropagators(props);
             }
             case RC:
-                setPropagators(new PropAllDiffProba(vars, solver, this,
-                        condition,
-                        new PropCliqueNeq(this.vars, solver, this),
-                        new PropAllDiffRC(this.vars, solver, this)));
+                setPropagators(new PropAllDiffProba(vars, solver, this, condition, count,
+                                                    new PropCliqueNeq(this.vars, solver, this),
+                                                    new PropAllDiffRC(this.vars, solver, this)));
                 break;
             case BC:
-                setPropagators(new PropAllDiffProba(vars, solver, this,
-                        condition,
-                        new PropCliqueNeq(this.vars, solver, this),
-                        new PropAllDiffBC(this.vars, solver, this)));
+                setPropagators(new PropAllDiffProba(vars, solver, this, condition, count,
+                                                    new PropCliqueNeq(this.vars, solver, this),
+                                                    new PropAllDiffBC(this.vars, solver, this)));
                 break;
             case AC:
             default:
-                setPropagators(new PropAllDiffProba(vars, solver, this,
-                        condition,
-                        new PropCliqueNeq(this.vars, solver, this),
-                        new PropAllDiffAC_new(this.vars, this, solver)));
+                setPropagators(new PropAllDiffProba(vars, solver, this, condition, count,
+                                                    new PropCliqueNeq(this.vars, solver, this),
+                                                    new PropAllDiffAC_new(this.vars, this, solver)));
                 break;
         }
     }

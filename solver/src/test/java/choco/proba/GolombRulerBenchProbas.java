@@ -67,7 +67,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
             }
         }
         if (proba) {
-            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.dist));
+            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.dist, this.count));
         } else {
             allCstrs.add(new AllDifferent(diffs, solver, type));
         }

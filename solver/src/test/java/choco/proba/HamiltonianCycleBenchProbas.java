@@ -71,8 +71,8 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
         }
         // contraintes
         if (proba) {
-            this.cstrs[0] = new AllDifferentProba(vars, solver, type, this.dist);
-            this.cstrs[2] = new AllDifferentProba(preds, solver, type, this.dist);
+            this.cstrs[0] = new AllDifferentProba(vars, solver, type, this.dist, this.count);
+            this.cstrs[2] = new AllDifferentProba(preds, solver, type, this.dist, this.count);
         } else {
             this.cstrs[0] = new AllDifferent(vars, solver, type);
             this.cstrs[2] = new AllDifferent(preds, solver, type);

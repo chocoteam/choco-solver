@@ -60,7 +60,7 @@ public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
         int c = 0;
         if (proba) {
-            this.cstrs[c++] = new AllDifferentProba(vars, solver, type, this.dist);
+            this.cstrs[c++] = new AllDifferentProba(vars, solver, type, this.dist, this.count);
         } else {
             this.cstrs[c++] = new AllDifferent(vars, solver, type);
         }

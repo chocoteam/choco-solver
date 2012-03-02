@@ -3,6 +3,7 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.CounterProba;
 import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
@@ -32,22 +33,23 @@ public abstract class AbstractBenchProbas {
     Constraint[] cstrs; // all the cstrs involved in the problem (including alldiff)
     AllDifferent.Type type;
     CondAllDiffBCProba.Distribution dist; // kind of distribution considered for the probability
+    CounterProba count;
 
     // output data
     private int nbTests; // number of tests executed
     private long nbSolutions;
     private long nbNodes;
     private long nbBcks;
-    private long nbHeavyPropag;
-    private long nbLigthPropag;
+    private long nbPropag;
+    private long nbTrig;
     private float time;
 
     // output averages
     private long avgSolutions;
     private long avgNodes;
     private long avgBcks;
-    private long avgHeavyPropag;
-    private long avgLigthPropag;
+    private long avgPropag;
+    private long avgNbTrig;
     private long avgTime;
 
     AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
@@ -61,6 +63,7 @@ public abstract class AbstractBenchProbas {
         this.active = active;
         this.dist = dist;
         this.size = size;
+        this.count = new CounterProba();
     }
 
     abstract void buildProblem(int size, boolean proba);
@@ -76,8 +79,8 @@ public abstract class AbstractBenchProbas {
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
         this.nbBcks = mes.getBackTrackCount();
-        this.nbHeavyPropag = mes.getPropagationsCount();
-        this.nbLigthPropag = mes.getEventsCount();
+        this.nbPropag = mes.getPropagationsCount()+mes.getEventsCount();
+        this.nbTrig = count.getValue();
         if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
             this.time = mes.getTimeCount();
         } else {
@@ -92,8 +95,8 @@ public abstract class AbstractBenchProbas {
         s += ((double) this.avgSolutions / this.nbTests) + "\t";
         s += ((double) this.avgNodes / this.nbTests) + "\t";
         s += ((double) this.avgBcks / this.nbTests) + "\t";
-        s += ((double) this.avgHeavyPropag / this.nbTests) + "\t";
-        s += ((double) this.avgLigthPropag / this.nbTests) + "\t";
+        s += ((double) this.avgPropag / this.nbTests) + "\t";
+        s += ((double) this.avgNbTrig / this.nbTests) + "\t";
         s += ((double) this.avgTime / this.nbTests) + "\t";
         s += "-" + "\t";
         results.write(s);
@@ -104,8 +107,8 @@ public abstract class AbstractBenchProbas {
         this.avgSolutions += this.nbSolutions;
         this.avgNodes += this.nbNodes;
         this.avgBcks += this.nbBcks;
-        this.avgHeavyPropag += this.nbHeavyPropag;
-        this.avgLigthPropag += this.nbLigthPropag;
+        this.avgPropag += this.nbPropag;
+        this.avgNbTrig += this.nbTrig;
         this.avgTime += this.time;
         this.nbTests++;
     }
@@ -115,8 +118,8 @@ public abstract class AbstractBenchProbas {
         s += this.nbSolutions + "\t";
         s += this.nbNodes + "\t";
         s += this.nbBcks + "\t";
-        s += this.nbHeavyPropag + "\t";
-        s += this.nbLigthPropag + "\t";
+        s += this.nbPropag + "\t";
+        s += this.nbTrig + "\t";
         if (this.time == 0) {
             s += "NaN" + "\t";
         } else {

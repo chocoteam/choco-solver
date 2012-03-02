@@ -34,6 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
+import solver.constraints.nary.alldifferent.CounterProba;
 import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -122,7 +123,7 @@ public class TestSolveur {
             }
             Constraint[] cstrs = new Constraint[m];
             for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferentProba(vars, s, AllDifferent.Type.AC, CondAllDiffBCProba.Distribution.UNIFORM);
+                cstrs[i] = new AllDifferentProba(vars, s, AllDifferent.Type.AC, CondAllDiffBCProba.Distribution.UNIFORM, new CounterProba());
             }
 
             s.post(cstrs);

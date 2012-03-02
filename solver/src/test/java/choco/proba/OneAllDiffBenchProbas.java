@@ -47,7 +47,7 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
         }
         this.allVars = vars;
         if (proba) {
-            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.dist)};
+            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.dist, this.count)};
         } else {
             this.cstrs = new Constraint[]{new AllDifferent(this.vars, solver, type)};
         }

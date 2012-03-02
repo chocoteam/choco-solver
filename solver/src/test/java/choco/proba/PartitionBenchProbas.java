@@ -98,7 +98,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         allCstrs.add(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
 
         if (proba) {
-            allCstrs.add(new AllDifferentProba(xy, solver, type, this.dist));
+            allCstrs.add(new AllDifferentProba(xy, solver, type, this.dist, this.count));
         } else {
             allCstrs.add(new AllDifferent(xy, solver, type));
         }

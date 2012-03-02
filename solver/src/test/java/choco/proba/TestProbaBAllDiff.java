@@ -18,14 +18,14 @@ public class TestProbaBAllDiff {
 
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
-        TestProbaBAllDiff.oneAllDiffTest(5, results);
-        /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
+        TestProbaBAllDiff.oneAllDiffTest(11, results);
+        TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(4, results);
         TestProbaBAllDiff.nQueensTest(10, results);
         TestProbaBAllDiff.allIntervalSeriesTest(8, results);
         TestProbaBAllDiff.partitionTest(24, results);
         TestProbaBAllDiff.golombRulerTest(8, results);
-        TestProbaBAllDiff.langfordTest(3,17, results);*/
+        TestProbaBAllDiff.langfordTest(3,17, results);
         results.close();
     }
 
@@ -48,10 +48,8 @@ public class TestProbaBAllDiff {
         OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, CondAllDiffBCProba.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, CondAllDiffBCProba.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        OneAllDiffBenchProbas diracGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
-        OneAllDiffBenchProbas uniformBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
-        OneAllDiffBenchProbas diracBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC, uniformBC, diracBC};
+        OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 50, size, problems, out, results);
         out.close();
     }
@@ -160,10 +158,10 @@ public class TestProbaBAllDiff {
             String solutions = type + "-sols";
             String nodes = type + "-nodes";
             String bcks = type + "-bcks";
-            String heavyPropag = type + "-Hprop";
             String propag = type + "-prop";
+            String trig = type + "-trig";
             String time = type + "-time";
-            String all = solutions + "\t" + nodes + "\t" + bcks + "\t" + heavyPropag + "\t" + propag + "\t" + time + "\t";
+            String all = solutions + "\t" + nodes + "\t" + bcks + "\t" + propag + "\t" + trig + "\t" + time + "\t";
             out.write(all + "-" + "\t");
         }
         out.newLine();
@@ -184,10 +182,10 @@ public class TestProbaBAllDiff {
             String solutions = type + "-sols";
             String nodes = type + "-nodes";
             String bcks = type + "-bcks";
-            String heavyPropag = type + "-Hprop";
             String propag = type + "-prop";
+            String trig = type + "-trig";
             String time = type + "-time";
-            String all = solutions + "\t" + nodes + "\t" + bcks + "\t" + heavyPropag + "\t" + propag + "\t" + time + "\t";
+            String all = solutions + "\t" + nodes + "\t" + bcks + "\t" + propag + "\t" + trig + "\t" + time + "\t";
             results.write(all + "-" + "\t");
         }
         results.newLine();

@@ -29,6 +29,7 @@ package solver.constraints.propagators.nary.alldifferent.proba;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.nary.alldifferent.CounterProba;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.nary.alldifferent.PropCliqueNeq;
@@ -48,15 +49,18 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
     PropCliqueNeq propCliqueNeq;
     Propagator propAllDiff;
     CondAllDiffBCProba condition;
+    CounterProba count;
 
     public PropAllDiffProba(V[] vars, Solver solver, Constraint<V, Propagator<V>> vPropagatorConstraint,
                             CondAllDiffBCProba condition,
+                            CounterProba count,
                             PropCliqueNeq propCliqueNeq,
                             Propagator propAllDiff) {
         super(vars, solver, vPropagatorConstraint, PropagatorPriority.VERY_SLOW, false);
         this.propCliqueNeq = propCliqueNeq;
         this.propAllDiff = propAllDiff;
         this.condition = condition;
+        this.count = count;
     }
 
     @Override
@@ -70,6 +74,7 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
             if (condition.isValid()) {
                 propAllDiff.propagate(evtmask);
             } else {
+                count.incr();
                 propCliqueNeq.propagate(evtmask);
             }
         } else {
@@ -86,6 +91,7 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
         if (condition.isValid()) {
             forcePropagate(EventType.CUSTOM_PROPAGATION);
         } else {
+            count.incr();
             propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);
         }
     }

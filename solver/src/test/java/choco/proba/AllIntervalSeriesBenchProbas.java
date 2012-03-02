@@ -49,8 +49,8 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
             this.allVars[k] = dist[i - 1];
         }
         if (proba) {
-            this.cstrs[2 * (size - 1)] = new AllDifferentProba(vars, solver, type, this.dist);
-            this.cstrs[2 * (size - 1) + 1] = new AllDifferentProba(dist, solver, type, this.dist);
+            this.cstrs[2 * (size - 1)] = new AllDifferentProba(vars, solver, type, this.dist, this.count);
+            this.cstrs[2 * (size - 1) + 1] = new AllDifferentProba(dist, solver, type, this.dist, this.count);
         } else {
             this.cstrs[2 * (size - 1)] = new AllDifferent(vars, solver, type);
             this.cstrs[2 * (size - 1) + 1] = new AllDifferent(dist, solver, type);
