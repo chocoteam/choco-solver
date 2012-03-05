@@ -59,33 +59,34 @@ public class PropFastSymmetricHeldKarp<V extends Variable> extends PropSymmetric
 	}
 
 	/** MST based HK */
-	public static PropFastSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+//	public static PropFastSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+//		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
 //		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);
-		phk.HK = new PrimMSTFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
-		phk.treeMode = MST;
-		throw new UnsupportedOperationException("Are you sure?");
-//		return phk;
-	}
+//		phk.HK = new PrimMSTFinder(phk.n,phk);
+//		phk.treeMode = MST;
+//		throw new UnsupportedOperationException("Are you sure?");
+////		return phk;
+//	}
 	/** ONE TREE based HK */
 	public static PropFastSymmetricHeldKarp oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+		phk.HKfilter = new KruskalOneTree_GAC(phk.n,phk);
 //		phk.HKfilter = new KruskalOneTreeFinder(phk.n,phk);
 		phk.HK = new PrimOneTreeFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
+//		phk.HKfilter = phk.HK;
+//		System.exit(0);
 		phk.treeMode = ONE_TREE;
 		return phk;
 	}
 	/** TWO TREE based HK */
-	public static PropFastSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-//		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
-		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
-		phk.treeMode = TWO_TREE;
-		return phk;
-	}
+//	public static PropFastSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+//		PropFastSymmetricHeldKarp phk = new PropFastSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+////		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
+//		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
+//		phk.HKfilter = phk.HK;
+//		phk.treeMode = TWO_TREE;
+//		return phk;
+//	}
 
 	//***********************************************************************************
 	// HK Algorithm(s)

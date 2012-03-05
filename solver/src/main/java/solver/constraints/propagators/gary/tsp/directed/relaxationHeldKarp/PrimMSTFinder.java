@@ -44,8 +44,8 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	double[][] costs;
 	Heap heap;
 	BitSet inTree;
-	private int tSize;
-	private double minVal;
+	int tSize;
+	double minVal;
 	double maxTArc;
 
 	//***********************************************************************************

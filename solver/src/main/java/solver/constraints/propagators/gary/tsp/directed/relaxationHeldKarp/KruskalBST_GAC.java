@@ -152,10 +152,10 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 		connectMST(tSize);
 	}
 
-	protected void pruning(int fi, double delta) throws ContradictionException {
+	protected void pruning(double delta) throws ContradictionException {
 		int i,j;
 		double repCost;
-		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
+		for(int arc=activeArcs.nextSetBit(0); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i, j)){
@@ -163,7 +163,7 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 				if(costs[i*n+j]-repCost > delta){
 					propHK.remove(i,j);
 				}else{
-					markTreeEdges(ccTp, i, j, costs[i * n + j]);
+					markTreeEdges(ccTp, i, j);
 				}
 			}
 		}
@@ -172,11 +172,17 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 			arc = links.get(k);
 			i = arc/n;
 			j = arc%n;
-			if(!Tree.arcExists(i, j)){
+			if(g.arcExists(i,j)&&!Tree.arcExists(i, j)){
 				x = sccOf[i].get();
 				repCost = costs[minCostOutArcs[x]];
 				if(costs[i*n+j]-repCost > delta){
 					propHK.remove(i,j);
+				}else{
+					int f = minCostOutArcs[x]/n;
+					int t = minCostOutArcs[x]%n;
+					if(map[f][t]==-1 || costs[map[f][t]]>costs[i*n+j]){
+						map[t][f] = map[f][t] = i*n+j;
+					}
 				}
 			}
 		}
@@ -184,8 +190,7 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				repCost = map[i][j];
-				if(repCost-costs[i*n+j]>delta){
+				if(map[i][j]==-1 || costs[map[i][j]]-costs[i*n+j]>delta){
 					propHK.enforce(i,j);
 				}
 			}
@@ -222,4 +227,13 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 		}
 		return tSize;
 	}
+
+//	public double getRepCost(int from, int to){
+//		if(map[from][to]==-1){
+//			System.out.println(from+" : "+to+" / "+ma.contains(from*n+to));
+//			System.out.println(Tree);
+//			throw new UnsupportedOperationException();
+//		}
+//		return costs[map[from][to]]-costs[from*n+to];
+//	}
 }

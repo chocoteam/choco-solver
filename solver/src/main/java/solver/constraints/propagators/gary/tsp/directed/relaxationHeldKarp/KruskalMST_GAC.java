@@ -1,29 +1,29 @@
 /**
-*  Copyright (c) 1999-2011, Ecole des Mines de Nantes
-*  All rights reserved.
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions are met:
-*
-*      * Redistributions of source code must retain the above copyright
-*        notice, this list of conditions and the following disclaimer.
-*      * Redistributions in binary form must reproduce the above copyright
-*        notice, this list of conditions and the following disclaimer in the
-*        documentation and/or other materials provided with the distribution.
-*      * Neither the name of the Ecole des Mines de Nantes nor the
-*        names of its contributors may be used to endorse or promote products
-*        derived from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
-*  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-*  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-*  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
-*  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-*  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-*  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
+ *  All rights reserved.
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions are met:
+ *
+ *      * Redistributions of source code must retain the above copyright
+ *        notice, this list of conditions and the following disclaimer.
+ *      * Redistributions in binary form must reproduce the above copyright
+ *        notice, this list of conditions and the following disclaimer in the
+ *        documentation and/or other materials provided with the distribution.
+ *      * Neither the name of the Ecole des Mines de Nantes nor the
+ *        names of its contributors may be used to endorse or promote products
+ *        derived from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
@@ -58,10 +58,10 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	protected int[] ccTp;
 	protected double[] ccTEdgeCost;
 	protected LCAGraphManager lca;
-	protected int fromInterest, cctRoot;
+	protected int cctRoot;
 	protected BitSet useful;
 	protected double minTArc,maxTArc;
-	protected double[][] map;
+	protected int[][] map;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -82,7 +82,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		ccTp = new int[n];
 		useful = new BitSet(n);
 		lca = new LCAGraphManager(ccN);
-		map = new double[n][n];
+		map = new int[n][n];
 	}
 
 	protected void sortArcs(double[][] costMatrix){
@@ -152,11 +152,10 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		if(delta<0){
 			throw new UnsupportedOperationException("mst>ub");
 		}
-		fromInterest = 0;
 		prepareMandArcDetection();
 		if(selectRelevantArcs(delta)){
 			lca.preprocess(cctRoot, ccTree);
-			pruning(fromInterest,delta);
+			pruning(delta);
 		}
 	}
 
@@ -201,22 +200,20 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		}
 	}
 
-	protected void markTreeEdges(int[] next, int i, int j, double cost) {
+	protected void markTreeEdges(int[] next, int i, int j) {
+		int rep = i*n+j;
 		if(Tree.arcExists(j,i)){
 			if(map[j][i]==-1){
-				map[j][i] = cost;
-				map[i][j] = cost;
+				map[j][i] = map[i][j] = rep;
 			}
 			return;
 		}
 		if(next[i]==next[j]){
 			if(map[i][next[i]]==-1){
-				map[i][next[i]] = cost;
-				map[next[i]][i] = cost;
+				map[i][next[i]] = map[next[i]][i] = rep;
 			}
 			if(map[j][next[j]]==-1){
-				map[j][next[j]] = cost;
-				map[next[j]][j] = cost;
+				map[j][next[j]] = map[next[j]][j] = rep;
 			}
 			return;
 		}
@@ -233,8 +230,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 			tmp = next[b];
 			next[b] = meeting;
 			if(map[b][tmp]==-1){
-				map[b][tmp] = cost;
-				map[tmp][b] = cost;
+				map[b][tmp] = map[tmp][b] = rep;
 			}
 			b = tmp;
 		}
@@ -242,73 +238,11 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 			tmp = next[a];
 			next[a] = meeting;
 			if(map[a][tmp]==-1){
-				map[a][tmp] = cost;
-				map[tmp][a] = cost;
+				map[a][tmp] = map[tmp][a] = rep;
 			}
 			a = tmp;
 		}
 	}
-
-//	private boolean selectRelevantArcs(double delta) throws ContradictionException {
-//		// Trivially no inference
-//		int idx = activeArcs.nextSetBit(0);
-////		while(idx>=0 && costs[sortedArcs[idx]]-minTArc <= delta){
-////			idx = activeArcs.nextSetBit(idx+1);
-////		}
-////		if(idx==-1){
-////			return false;
-////		}
-//		fromInterest = idx;
-//		// Maybe interesting
-//		useful.clear();
-//		while(idx>=0 && costs[sortedArcs[idx]]-maxTArc <= delta){
-//			useful.set(sortedArcs[idx]/n);
-//			useful.set(sortedArcs[idx]%n);
-//			idx = activeArcs.nextSetBit(idx+1);
-//		}
-//		// Trivially infeasible arcs
-//		while(idx>=0){
-//			if(!Tree.arcExists(sortedArcs[idx]/n, sortedArcs[idx]%n)){
-//				propHK.remove(sortedArcs[idx]/n, sortedArcs[idx]%n);
-//				activeArcs.clear(idx);
-//			}
-//			idx = activeArcs.nextSetBit(idx+1);
-//		}
-//		if(useful.cardinality()==0){
-//			return false;
-//		}
-//		//contract ccTree
-//		int p,s;
-//		for(int i=useful.nextClearBit(0);i<n;i=useful.nextClearBit(i+1)){
-//			ccTree.desactivateNode(i);
-//		}
-//		for(int i=ccTree.getActiveNodes().getFirstElement();i>=0;i=ccTree.getActiveNodes().getNextElement()){
-//			s = ccTree.getSuccessorsOf(i).getFirstElement();
-//			if(s==-1){
-//				if(i>=n){
-//					ccTree.desactivateNode(i);
-//				}
-//			}else if (ccTree.getSuccessorsOf(i).getNextElement()==-1){
-//				p = ccTree.getPredecessorsOf(i).getFirstElement();
-//				ccTree.desactivateNode(i);
-//				if(p!=-1){
-//					ccTree.addArc(p,s);
-//				}
-//			}
-//		}
-//		cctRoot++;
-//		int newNode = cctRoot;
-//		ccTree.activateNode(newNode);
-//		ccTEdgeCost[newNode] = propHK.getMinArcVal();
-//		for(int i=ccTree.getActiveNodes().getFirstElement();i>=0;i=ccTree.getActiveNodes().getNextElement()){
-//			if(ccTree.getPredecessorsOf(i).getFirstElement()==-1){
-//				if(i!=cctRoot){
-//					ccTree.addArc(cctRoot,i);
-//				}
-//			}
-//		}
-//		return true;
-//	}
 
 	protected boolean selectRelevantArcs(double delta) throws ContradictionException {
 		// Trivially no inference
@@ -340,10 +274,10 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		return true;
 	}
 
-	protected void pruning(int fi, double delta) throws ContradictionException {
+	protected void pruning(double delta) throws ContradictionException {
 		int i,j;
 		double repCost;
-		for(int arc=activeArcs.nextSetBit(fi); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
+		for(int arc=activeArcs.nextSetBit(0); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i,j)){
@@ -352,7 +286,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 					activeArcs.clear(arc);
 					propHK.remove(i,j);
 				}else{
-					markTreeEdges(ccTp,i,j, costs[i*n+j]);
+					markTreeEdges(ccTp,i,j);
 				}
 			}
 		}
@@ -360,11 +294,13 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//				if(!activeArcs.get(indexOfArc[j][i])){
-					repCost = map[i][j];
-					if(repCost-costs[i*n+j]>delta){
-						propHK.enforce(i,j);
-					}
+				if(map[i][j]==-1 || costs[map[i][j]]-costs[i*n+j]>delta){
+					propHK.enforce(i,j);
+				}
+//					repCost = costs[map[i][j]];
+//					if(repCost-costs[i*n+j]>delta){
+//						propHK.enforce(i,j);
+//					}
 //				}
 			}
 		}
@@ -450,7 +386,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 			rank[y]++;
 		}
 	}
-	
+
 	protected int FIND(int i) {
 		if(p[i]!=i){
 			p[i] = FIND(p[i]);
@@ -459,9 +395,9 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	}
 
 	public double getRepCost(int from, int to){
-		return map[from][to]-costs[from*n+to];
+		return costs[map[from][to]]-costs[from*n+to];
 	}
-	
+
 //	private int getLCA(int i, int j) {
 //		BitSet marked = new BitSet(ccN);
 //		marked.set(i);

@@ -32,37 +32,44 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.tsp.disjunctive;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- */
-public class PropPosIntervals extends Propagator<IntVar> {
+ * @PropAnn(tested = {BENCHMARK})
+ * */
+public class PropTimeInTour extends GraphPropagator {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	DirectedGraphVar g;
 	int n;
+	IntVar[] intVars;
+	int[][] dist;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropPosIntervals(IntVar[] vars, Constraint constraint, Solver solver) {
-		super(vars, solver, constraint, PropagatorPriority.BINARY,true);
-		this.n = vars.length;
+	public PropTimeInTour(IntVar[] intVars, DirectedGraphVar graph, int[][] dist, Constraint constraint, Solver solver) {
+		super(intVars, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		this.intVars = intVars;
+		this.n = g.getEnvelopGraph().getNbNodes();
+		this.dist = dist;
 	}
 
 	//***********************************************************************************
@@ -72,77 +79,69 @@ public class PropPosIntervals extends Propagator<IntVar> {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				check(i,j);
-			}
-		}
-	}
-
-	private void check(int i, int j) throws ContradictionException {
-		int first = Math.min(vars[i].getLB(),vars[j].getLB());
-		int last  = Math.max(vars[i].getUB(),vars[j].getUB())+1;
-		if(first>last){
-			throw new UnsupportedOperationException();
-		}
-		int q = 0;
-		int tot = 0;
-		for(int k=0;k<n;k++){
-			tot ++;
-			if(vars[k].getLB()>=first && vars[k].getUB()+1<=last){
-				q++;
-			}
-		}
-
-		if(tot>vars[n-1].getUB()+1){
-			contradiction(vars[n-1],"");
-		}
-		int mandFirst = last-q;
-		int mandLast  = first+q;
-//		System.out.println(first+" + "+q+" -> "+last);
-		if(mandFirst<mandLast){
-			for(int k=0;k<n;k++){
-				if(vars[k].getLB()<first || vars[k].getUB()+1>last){
-//					checkEnergy(k,mandFirst,mandLast);
-					checkEnergy(k,first,last,q,mandFirst,mandLast);
-				}
-			}
-		}
-	}
-
-	private void checkEnergy(int i, int first, int last , int dur, int mandFirst , int mandLast) throws ContradictionException {
-		// can be done after the box
-		boolean right= vars[i].getUB()>=mandLast;
-		// cannot be done inside the box
-		if(1>last-first-dur){
-			// can be done before the box
-			if(vars[i].getLB()+1<=mandFirst){
-				if(!right){
-					vars[i].updateUpperBound(mandFirst-1,this);
-				}
-			}
-			// cannot be done before the box
-			else{
-				if(right){
-						vars[i].updateLowerBound(mandLast, this);
-				}else{
-					contradiction(vars[i],"sweep");
-				}
-			}
+			upUB(i);
+			upLB(i);
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		forcePropagate(EventType.FULL_PROPAGATION);
+		if(ALWAYS_COARSE){
+			propagate(0);return;
+		}
+		if((mask & EventType.INCLOW.mask)!=0){
+			upLB(idxVarInProp);
+		}
+		if((mask & EventType.DECUPP.mask)!=0){
+			upUB(idxVarInProp);
+		}
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.FULL_PROPAGATION.mask+EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
+		return EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
 	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private void upUB(int var) throws ContradictionException {
+		int val = intVars[var].getUB();
+		int p = g.getKernelGraph().getPredecessorsOf(var).getFirstElement();
+		if(p!=-1){
+			if(intVars[p].updateUpperBound(val-dist[p][var],this)){
+				upUB(p);
+			}
+		}else{
+			INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(var);
+			for(p=nei.getFirstElement();p>=0;p=nei.getNextElement()){
+				if(intVars[p].getLB()>val-dist[p][var]){
+					g.removeArc(p,var,this);
+				}
+			}
+		}
+	}
+	private void upLB(int var) throws ContradictionException {
+		int val = intVars[var].getLB();
+		int s = g.getKernelGraph().getSuccessorsOf(var).getFirstElement();
+		if(s!=-1){
+			if(intVars[s].updateLowerBound(val+dist[var][s],this)){
+				upLB(s);
+			}
+		}else{
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(var);
+			for(s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+				if(intVars[s].getUB()<val+dist[var][s]){
+					g.removeArc(var,s,this);
+				}
+			}
+		}
+	}
+
 }

@@ -93,7 +93,8 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<nUndir;i++){
 			if(undir.getKernelGraph().getNeighborsOf(i).neighborhoodSize()>0){
-				throw new UnsupportedOperationException("not implemented yet");
+//				throw new UnsupportedOperationException("not implemented yet");
+				
 			}
 			for(int j=1;j<nUndir;j++){
 				if(!undir.getEnvelopGraph().edgeExists(i,j)){

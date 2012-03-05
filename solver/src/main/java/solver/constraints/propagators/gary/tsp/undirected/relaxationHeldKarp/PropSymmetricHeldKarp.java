@@ -89,14 +89,14 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	}
 
 	/** MST based HK */
-	public static PropSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-//		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);
-		phk.HK = new PrimMSTFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
-		phk.treeMode = MST;
-		return phk;
-	}
+//	public static PropSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+//		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+////		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);
+//		phk.HK = new PrimMSTFinder(phk.n,phk);
+//		phk.HKfilter = phk.HK;
+//		phk.treeMode = MST;
+//		return phk;
+//	}
 	/** ONE TREE based HK */
 	public static PropSymmetricHeldKarp oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
@@ -107,14 +107,14 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		return phk;
 	}
 	/** TWO TREE based HK */
-	public static PropSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-//		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
-		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
-		phk.treeMode = TWO_TREE;
-		return phk;
-	}
+//	public static PropSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+//		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
+////		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
+//		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
+//		phk.HKfilter = phk.HK;
+//		phk.treeMode = TWO_TREE;
+//		return phk;
+//	}
 
 	//***********************************************************************************
 	// HK Algorithm(s) 
@@ -167,9 +167,10 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		HKfilter.performPruning((double) (obj.getUB()) + getTotalPen() + 0.001);
 		for(int iter=5;iter>0;iter--){
 			improved = true;
-			while(improved){
+//			while(improved){
 				improved = false;
-				for(int i=(n-treeMode)/2;i>0;i--){
+				for(int i=30;i>0;i--){
+//				for(int i=(n-treeMode)/2;i>0;i--){
 					HK.computeMST(costs,g.getEnvelopGraph());
 					hkb = HK.getBound()-getTotalPen();
 					if(hkb>bestHKB+1){
@@ -189,7 +190,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 					HKPenalities();
 					updateCostMatrix();
 				}
-			}
+//			}
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
 			hkb = HKfilter.getBound()-getTotalPen();
 			if(hkb>bestHKB+1){
@@ -417,6 +418,6 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		return mst;
 	}
 	public double getRepCost(int from, int to){
-		throw new UnsupportedOperationException("not implemented yet");
+		return HKfilter.getRepCost(from,to);
 	}
 }

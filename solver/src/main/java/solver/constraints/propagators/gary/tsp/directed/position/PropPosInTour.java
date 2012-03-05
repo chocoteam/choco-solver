@@ -32,11 +32,9 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.tsp.directed.position;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -45,11 +43,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
-import java.awt.*;
 
 /**
  * @PropAnn(tested = {BENCHMARK})

@@ -555,9 +555,9 @@ public class TSP_Cycle_Path {
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,nbNeigh,solver,gc));
 		gc.addAdHocProp(new PropChainEvalObj(undi,totalCost,matrix,0,n-1,gc,solver));
 		if(fast){
-			propHK = PropFastSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+//			propHK = PropFastSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		}else{
-			propHK = PropSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+//			propHK = PropSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		}
 
 //		gc.addAdHocProp(propHK);

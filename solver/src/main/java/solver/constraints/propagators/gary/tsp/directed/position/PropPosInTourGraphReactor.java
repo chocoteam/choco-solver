@@ -32,7 +32,7 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.tsp.directed.position;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -146,7 +146,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 	}
 
 	//***********************************************************************************
-	// PROCEDURES
+	// GRAPH TRASVERSALS
 	//***********************************************************************************
 
 	private void graphTrasversal() throws ContradictionException {
@@ -351,6 +351,10 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
 			level = nbNodes;
 		}
 	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
 
 	private void enfArc(int from, int to) throws ContradictionException {
 		intVars[from].updateUpperBound(intVars[to].getUB() - 1, this);

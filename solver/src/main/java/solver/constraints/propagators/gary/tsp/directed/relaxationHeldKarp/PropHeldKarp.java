@@ -45,7 +45,6 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
 /**
  * @PropAnn(tested = {BENCHMARK})
@@ -97,8 +96,10 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	/** MST based HK */
 	public static PropHeldKarp mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
-//		phk.HKfilter = new PrimMSTFinder(phk.n,phk);
+//		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
+////	phk.HKfilter = new PrimMSTFinder(phk.n,phk);
+//		phk.HK = new PrimMSTFinder(phk.n,phk);
+		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		return phk;
 	}
@@ -108,7 +109,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	/** BST based HK */
 	public static PropHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		PropHeldKarp phk = new PropHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
+//		phk.HKfilter = new KruskalBSTFinderWithFiltering(phk.n,phk,nR,sccOf,outArcs);
+		phk.HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
 //		phk.HKfilter = new KruskalMSTFinderWithFiltering(phk.n,phk);
 		phk.sccOf = sccOf;
 		phk.nr = nR;
@@ -124,7 +126,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 
 	public void HK_algorithm() throws ContradictionException {
 		if(waitFirstSol && solver.getMeasures().getSolutionCount()==0){
-			return;//the UB does not allow to prune
+			//return;//the UB does not allow to prune
 		}
 		if(inPenalities==null){
 			inPenalities = new IStateDouble[n];
@@ -135,8 +137,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 			}
 		}
 		// initialisation
-		clearStructures();
-		rebuildGraph();
+		resetMA();
 		setupMatrix();
 		HK_Pascals();
 	}
@@ -172,11 +173,13 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + getTotalPenalties() + 0.001);
+//		for(int iter=2;iter>0;iter--){
 		for(int iter=5;iter>0;iter--){
 			improved = true;
-			while(improved){
+//			while(improved){
 				improved = false;
-				for(int i=n/2;i>0;i--){
+				for(int i=30;i>0;i--){
+//				for(int i=n/2;i>0;i--){
 					HK.computeMST(costs,g.getEnvelopGraph());
 					hkb = HK.getBound()-getTotalPenalties();
 					if(hkb>bestHKB+1){
@@ -184,9 +187,6 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 						improved = true;
 					}
 					mst = HK.getMST();
-//					if(DEBUG){
-//						checkExtremities();
-//					}
 					if(hkb-Math.floor(hkb)<0.001){
 						hkb = Math.floor(hkb);
 					}
@@ -209,7 +209,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 					HKPenalities();
 					updateCostMatrix();
 				}
-			}
+//			}
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
 			hkb = HKfilter.getBound()-getTotalPenalties();
 			if(hkb>bestHKB+1){
@@ -217,9 +217,6 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 				improved = true;
 			}
 			mst = HKfilter.getMST();
-//			if(DEBUG){
-//				checkExtremities();
-//			}
 			if(hkb-Math.floor(hkb)<0.001){
 				hkb = Math.floor(hkb);
 			}
@@ -255,10 +252,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	// DETAILS
 	//***********************************************************************************
 
-	protected void clearStructures() {
+	protected void resetMA() {
 		mandatoryArcsList.clear();
-	}
-	protected void rebuildGraph() {
 		INeighbors nei;
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
@@ -398,18 +393,16 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		HK_algorithm();
 		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * (n-1))) + "%)");
 		System.out.println("current lower bound : "+obj.getLB());
-//		int lb2 = Simplex.directedLPbound(g.getEnvelopGraph(), originalCosts);
-//		System.out.println("LP bound : "+lb2);
-//		System.exit(0);
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+//		System.out.println("PROP "+AbstractSearchLoop.timeStamp);
 		HK_algorithm();
 	}
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask+EventType.INCLOW.mask+EventType.INSTANTIATE.mask;
 	}
 	@Override
 	public ESat isEntailed() {
@@ -423,7 +416,8 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	@Override
 	public boolean isInMST(int i, int j) {
 		if(mst==null){
-			return true;
+			throw new UnsupportedOperationException();
+//			return true;
 		}
 		return mst.arcExists(i,j);
 	}
@@ -439,7 +433,6 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	public void waitFirstSolution(boolean b){
 		waitFirstSol = b;
 	}
-
 	public void provideBranchingOpinion(int[][] branchingQuality){
 		if(mst!=null){
 			INeighbors succs;
@@ -455,7 +448,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 		}
 	}
 	public DirectedGraph getMST(){
-		return mst;
+		return HKfilter.getMST();
 	}
 	public double getRepCost(int from, int to){
 		return HKfilter.getRepCost(from,to);

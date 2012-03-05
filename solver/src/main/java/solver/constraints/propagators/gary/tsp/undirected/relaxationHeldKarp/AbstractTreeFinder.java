@@ -76,4 +76,8 @@ public abstract class AbstractTreeFinder {
 	public double getBound() {
 		return treeCost;
 	}
+
+	public double getRepCost(int from, int to){
+		throw new UnsupportedOperationException("not implemented yet");
+	}
 }

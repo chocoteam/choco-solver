@@ -39,6 +39,8 @@ import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
+import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.measure.IMeasures;
