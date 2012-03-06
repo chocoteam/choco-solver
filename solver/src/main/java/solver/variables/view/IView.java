@@ -29,6 +29,8 @@ package solver.variables.view;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
+import solver.variables.Variable;
+import solver.variables.delta.IDelta;
 
 /**
  * <br/>
@@ -36,11 +38,12 @@ import solver.variables.EventType;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView extends ICause{
+public interface IView<D extends IDelta, W extends IView> extends ICause, Variable<D, W> {
 
     /**
      * Transform the original event wrt the view
-     * @param evt original event
+     *
+     * @param evt   original event
      * @param cause cause of the modification
      * @throws ContradictionException can encounter a contradiction
      */

@@ -33,8 +33,9 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.NoDelta;
+import solver.variables.view.IView;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVariable> implements Variable<NoDelta> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IView, MetaVariable<V>> implements Variable<NoDelta, IView> {
 
     protected V[] components;
     protected int dim;

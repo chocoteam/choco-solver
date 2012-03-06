@@ -87,7 +87,7 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             Generator gen = generators.get(i);
             elts.addAll(gen.populate(propagationEngine, solver));
         }
-        this.elements = (S[])elts.toArray(new ISchedulable[elts.size()]);
+        this.elements = (S[]) elts.toArray(new ISchedulable[elts.size()]);
         Arrays.sort(elements, comparator);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
@@ -95,6 +95,20 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         this.toPropagate = new BitSet(elements.length);
         return Collections.singletonList(this);
 
+    }
+
+    /**
+     * A specific method to prevent the engine to be incomplete, do not populate!
+     */
+
+    public static <S extends ISchedulable> Sort<S> corker(S... elts) {
+        Sort<S> corker = new Sort<S>(Collections.<Generator>emptyList());
+        corker.elements = elts.clone();
+        for (int e = 0; e < corker.elements.length; e++) {
+            corker.elements[e].setScheduler(corker, e);
+        }
+        corker.toPropagate = new BitSet(corker.elements.length);
+        return corker;
     }
 
     //-->

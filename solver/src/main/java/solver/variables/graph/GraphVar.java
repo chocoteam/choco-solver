@@ -39,6 +39,7 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.view.IView;
 
 
 /**
@@ -46,7 +47,7 @@ import solver.variables.delta.IGraphDelta;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<GraphVar> implements Variable<IGraphDelta>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IView, GraphVar<E>> implements Variable<IGraphDelta, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************

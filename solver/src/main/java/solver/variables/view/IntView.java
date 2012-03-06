@@ -24,12 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package solver.variables.view;
 
+import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
@@ -38,33 +43,58 @@ import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
 /**
- * An abstract class for common services of a view
+ * "A view implements the same operations as a variable. A view stores a reference to a variable.
+ * Invoking an operation on the view exectutes the appropriate operation on the view's varaible."
+ * <p/>
+ * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
+ * C. Shulte and G. Tack.<br/>
+ * Eleventh International Conference on Principles and Practice of Constraint Programming
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/12/11
+ * @since 18/03/11
  */
-public abstract class AbstractView extends AbstractVariable<IntVar> implements IntVar, IView {
+public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntView> implements IView<IntDelta, IntView>, IntVar {
+
+    protected final IntVar var;
 
     protected IntDelta delta;
 
-    protected HeuristicVal heuristicVal;
-
     protected boolean reactOnRemoval;
 
-    protected AbstractView(String name, Solver solver) {
+    protected HeuristicVal heuristicVal;
+
+    public IntView(String name, IntVar var, Solver solver) {
         super(name, solver);
-        solver.associates(this);
+        this.var = var;
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
+        makeList(this);
+        this.var.subscribeView(this);
     }
 
-    protected AbstractView(Solver solver) {
-        this(AbstractVariable.NO_NAME, solver);
+    @Override
+    public int getType() {
+        return VIEW;
     }
 
-    public IntDelta getDelta() {
-        return delta;
+    public IntVar getVariable() {
+        return var;
+    }
+
+    @Override
+    public int getDomainSize() {
+        return var.getDomainSize();
+    }
+
+    @Override
+    public boolean hasEnumeratedDomain() {
+        return var.hasEnumeratedDomain();
+    }
+
+    @Override
+    public boolean instantiated() {
+        return var.instantiated();
     }
 
     @Override
@@ -77,14 +107,37 @@ public abstract class AbstractView extends AbstractVariable<IntVar> implements I
         return heuristicVal;
     }
 
+    public IntDelta getDelta() {
+        return delta;
+    }
+
+
     @Override
-    public String getName() {
-        return name;
+    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            records.forEach(afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
     }
 
     @Override
-    public int getType() {
-        return VIEW;
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+        notifyMonitors(evt, cause);
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        return var.explain(what);
+    }
+
+    @Override
+    public Explanation explain(@Nullable Deduction d) {
+        return var.explain(VariableState.DOM);
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return reactOnRemoval;
     }
 
     @Override
@@ -97,11 +150,6 @@ public abstract class AbstractView extends AbstractVariable<IntVar> implements I
     @Override
     public Constraint getConstraint() {
         return null;
-    }
-
-    @Override
-    public boolean reactOnPromotion() {
-        return reactOnRemoval;
     }
 
     @Override

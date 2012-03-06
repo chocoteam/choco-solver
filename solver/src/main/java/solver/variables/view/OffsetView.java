@@ -54,7 +54,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends View<IntVar> {
+public final class OffsetView extends IntView {
 
     final int cste;
     DisposableValueIterator _viterator;

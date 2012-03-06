@@ -55,7 +55,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends View<IntVar> {
+public final class AbsView extends IntView {
 
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;

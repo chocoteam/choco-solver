@@ -47,7 +47,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>, Identity, Serializable {
+public interface Variable<D extends IDelta, W extends IView> extends IActivable<IVariableMonitor>, Identity, Serializable {
 
 
     public final static int INTEGER = 0;
@@ -55,6 +55,7 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
     public final static int META = 2;
     public final static int GRAPH = 3;
     public final static int REAL = 4;
+    public final static int CSTE =5;
 
 
     /**
@@ -73,23 +74,28 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
 
     /**
      * Returns the array of constraints <code>this</code> appears in.
+     *
      * @return array of constraints
      */
     Constraint[] getConstraints();
 
     /**
      * Link a constraint within a variable
+     *
      * @param constraint a constraint
      */
     void declareIn(Constraint constraint);
 
     /**
      * Return the arrau of propagators this
+     *
      * @return
      */
     Propagator[] getPropagators();
 
     int[] getPIndices();
+
+    W[] getViews();
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -106,7 +112,7 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
 
     int nbMonitors();
 
-    void subscribeView(IView view);
+    void subscribeView(W view);
 
     /**
      * Returns the number of constraints involving <code>this</code>
@@ -140,6 +146,7 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
 
     /**
      * Analysis propagator event reaction on this, and adapt this
+     *
      * @param mask
      */
     void analyseAndAdapt(int mask);
@@ -147,6 +154,7 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
     /**
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
+     *
      * @param propagator the propagator to remove
      */
     void unlink(Propagator propagator);

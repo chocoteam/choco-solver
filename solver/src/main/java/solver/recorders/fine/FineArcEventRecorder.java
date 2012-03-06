@@ -94,11 +94,6 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     }
 
     @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
-
-    @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
@@ -127,11 +122,6 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
                 }
             }
         }
-    }
-
-    @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-        // nothing required here
     }
 
     public void virtuallyExecuted(Propagator propagator) {

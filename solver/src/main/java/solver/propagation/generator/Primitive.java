@@ -27,6 +27,7 @@
 package solver.propagation.generator;
 
 import choco.kernel.common.util.tools.ArrayUtils;
+import gnu.trove.set.hash.THashSet;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -42,6 +43,7 @@ import solver.recorders.conditions.ICondition;
 import solver.recorders.fine.*;
 import solver.search.loop.monitors.VariableClearing;
 import solver.variables.Variable;
+import solver.variables.view.IView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -312,6 +314,16 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private static List<Variable> varAndViews(Variable var) {
+        List<Variable> vNv = new ArrayList<Variable>();
+        vNv.add(var);
+        IView[] views = var.getViews();
+        for (int i = 0; i < views.length; i++) {
+            vNv.addAll(varAndViews(views[i]));
+        }
+        return vNv;
+    }
+
     //<---- ARC-ORIENTED
 
     public static Primitive<FineArcEventRecorder> arcs(Constraint... constraints) {
@@ -324,6 +336,15 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
 
     public static Primitive<FineArcEventRecorder> arcs(Propagator... propagators) {
         return new Primitive<FineArcEventRecorder>(arc, var0, propagators, All.singleton, null);
+    }
+
+    public static Primitive<FineArcEventRecorder> arcs(Variable... variables) {
+        List<Variable> varsNviews = new ArrayList<Variable>();
+        for (int i = 0; i < variables.length; i++) {
+            varsNviews.addAll(varAndViews(variables[i]));
+        }
+        variables = varsNviews.toArray(new Variable[varsNviews.size()]);
+        return new Primitive<FineArcEventRecorder>(arc, variables, prop0, All.singleton, null);
     }
 
     public static Primitive<ArcEventRecorder> arcs(ICondition<ArcEventRecorder> condition,
@@ -344,11 +365,19 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     //<---- VARIABLE-ORIENTED
 
     public static Primitive<FineVarEventRecorder> vars(Variable... variables) {
+        List<Variable> varsNviews = new ArrayList<Variable>();
+        for (int i = 0; i < variables.length; i++) {
+            varsNviews.addAll(varAndViews(variables[i]));
+        }
+        variables = varsNviews.toArray(new Variable[varsNviews.size()]);
         return new Primitive<FineVarEventRecorder>(var, variables, prop0, All.singleton, null);
     }
 
     public static Primitive<FineVarEventRecorder> vars(Variable variable, Propagator... propagators) {
-        return new Primitive<FineVarEventRecorder>(var, new Variable[]{variable}, propagators, All.singleton, null);
+        List<Variable> varsNviews = new ArrayList<Variable>();
+        varsNviews.addAll(varAndViews(variable));
+        Variable[] variables = varsNviews.toArray(new Variable[varsNviews.size()]);
+        return new Primitive<FineVarEventRecorder>(var, variables, propagators, All.singleton, null);
     }
 
     //---->
@@ -366,6 +395,16 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         return new Primitive<FinePropEventRecorder>(prop, var0, propagators, All.singleton, null);
     }
 
+    public static Primitive<FinePropEventRecorder> props(Variable... variables) {
+        THashSet<Propagator> distinct = new THashSet<Propagator>();
+        for (int i = 0; i < variables.length; i++) {
+            Propagator[] ps = variables[i].getPropagators();
+            for (int j = 0; j < ps.length; j++) {
+                distinct.add(ps[j]);
+            }
+        }
+        return props(distinct.toArray(new Propagator[distinct.size()]));
+    }
     //---->
     //<---- COARSE UNARY
 

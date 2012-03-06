@@ -34,6 +34,7 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.delta.IntDelta;
+import solver.variables.view.IntView;
 
 
 /**
@@ -45,7 +46,7 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable<IntDelta> {
+public interface IntVar extends Variable<IntDelta, IntView> {
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.

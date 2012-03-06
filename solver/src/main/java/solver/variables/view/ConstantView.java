@@ -101,6 +101,11 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public IntView[] getViews() {
+        return new IntView[0];
+    }
+
+    @Override
     public int getId() {
         return ID;
     }
@@ -283,7 +288,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void subscribeView(IView view) {
+    public void subscribeView(IntView view) {
     }
 
     @Override
@@ -326,7 +331,7 @@ public class ConstantView implements IntVar {
 
     @Override
     public int getType() {
-        return Variable.INTEGER;
+        return Variable.CSTE;
     }
 
     @Override

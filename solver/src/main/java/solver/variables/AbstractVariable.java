@@ -36,6 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
+import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -49,7 +50,7 @@ import java.util.Arrays;
  * @author Jean-Guillaume Fages
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<V extends Variable> implements Serializable {
+public abstract class AbstractVariable<D extends IDelta, W extends IView, V extends Variable<D, W>> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String
@@ -76,7 +77,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     protected int[] pindices;    // but it indices must be different
     protected int pIdx;
 
-    protected IView[] views; // views to inform of domain modification
+    protected W[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
 
@@ -97,7 +98,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = new IView[2];
+        views = (W[])new IView[2];
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
@@ -225,10 +226,10 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         records.remove(monitor);
     }
 
-    public void subscribeView(IView view) {
+    public void subscribeView(W view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
-            views = new IView[tmp.length * 3 / 2 + 1];
+            views = (W[])new IView[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
         }
         views[vIdx++] = view;
@@ -248,6 +249,10 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
 
     public Solver getSolver() {
         return solver;
+    }
+
+    public W[] getViews() {
+        return Arrays.copyOfRange(views, 0, vIdx);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

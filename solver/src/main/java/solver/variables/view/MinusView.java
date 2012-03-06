@@ -52,7 +52,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends View<IntVar> {
+public class MinusView extends IntView {
 
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
@@ -66,15 +66,15 @@ public class MinusView extends View<IntVar> {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(),this) {
+            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(), this) {
 
                 @Override
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                     if (EventType.isRemove(eventType.mask)) {
                         for (int i = frozenFirst; i < frozenLast; i++) {
-							if(propagator!=delta.getCause(i)){
-                            	proc.execute(-delta.get(i));
-							}
+                            if (propagator != delta.getCause(i)) {
+                                proc.execute(-delta.get(i));
+                            }
                         }
                     }
                 }
@@ -404,5 +404,4 @@ public class MinusView extends View<IntVar> {
         }
         notifyMonitors(evt, cause);
     }
-
 }

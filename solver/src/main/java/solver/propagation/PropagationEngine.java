@@ -27,6 +27,7 @@
 package solver.propagation;
 
 
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -84,16 +85,19 @@ public class PropagationEngine implements IPropagationEngine {
             Constraint[] constraints = solver.getCstrs();
             // 1. water mark every couple variable-propagator of the solver
             waterMark(constraints);
-            // 2. add default strategy, default group => arc and coarse in a queue
-            propagationStrategy = Sort.build(propagationStrategy, buildDefault(solver));
-            // 3. build groups based on the strategy defined
+            // 2. build groups based on the strategy defined
             propagationStrategy.populate(this, solver);
             if (!watermarks.isEmpty()) {
-                throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+                // 3. add the default strategy if required
+                LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
+                PropagationStrategy _default = buildDefault(solver);
+                _default.populate(this, solver);
+                propagationStrategy = Sort.corker(propagationStrategy, _default);
+                if (!watermarks.isEmpty()) {
+                    throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+                }
             }
-            // 4. remove default if empty
-            ///cpru a faire
-            //Then, schedule constraints for initial propagation
+            // 5. schedule constraints for initial propagation
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] propagators = constraints[c].propagators;
                 for (int p = 0; p < propagators.length; p++) {
@@ -116,8 +120,10 @@ public class PropagationEngine implements IPropagationEngine {
                 int nbV = propagator.getNbVars();
                 for (int v = 0; v < nbV; v++) {
                     Variable variable = propagator.getVar(v);
-                    int idV = variable.getId();
-                    watermarks.putMark(idV, idP, v);
+                    if (variable.getType() != Variable.CSTE) {
+                        int idV = variable.getId();
+                        watermarks.putMark(idV, idP, v);
+                    }
                 }
             }
         }
@@ -140,7 +146,7 @@ public class PropagationEngine implements IPropagationEngine {
             return watermarks.isMarked(id1);
         } else {
             return watermarks.isMarked(id1, id2, id3);
-    }
+        }
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {

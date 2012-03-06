@@ -49,6 +49,7 @@ import solver.variables.Variable;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.view.IntView;
 
 /**
  * <br/>
@@ -56,7 +57,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
+public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView, IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
