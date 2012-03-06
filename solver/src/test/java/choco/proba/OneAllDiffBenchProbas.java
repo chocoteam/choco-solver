@@ -45,11 +45,12 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
             default:
                 this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
         }
+
         this.allVars = vars;
         if (proba) {
             this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.dist, this.count)};
         } else {
-            this.cstrs = new Constraint[]{new AllDifferent(this.vars, solver, type)};
+            this.cstrs = new Constraint[]{new AllDifferent(vars, solver, type)};
         }
     }
 

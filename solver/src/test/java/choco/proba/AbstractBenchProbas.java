@@ -5,6 +5,7 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.CounterProba;
 import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -40,8 +41,9 @@ public abstract class AbstractBenchProbas {
     private long nbSolutions;
     private long nbNodes;
     private long nbBcks;
-    private long nbPropag;
-    private long nbTrig;
+    private long nbPropag; // number of propagation for the meta-propagator of alldiff
+    private long nbAlldiffProp;  // number of time the real algorithm (AC or BC or RC) has been executed
+    private long nbNeqsProp;  // number of time the neq algorithm has been executed
     private float time;
 
     // output averages
@@ -49,7 +51,8 @@ public abstract class AbstractBenchProbas {
     private long avgNodes;
     private long avgBcks;
     private long avgPropag;
-    private long avgNbTrig;
+    private long avgNbAlldiffProp;
+    private long avgNbNeqsProp;
     private long avgTime;
 
     AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
@@ -69,9 +72,11 @@ public abstract class AbstractBenchProbas {
     abstract void buildProblem(int size, boolean proba);
 
     void restartProblem(int size, int seed) {
+        //System.out.println("---------------- new instance -------------");
         this.solver = new Solver();
         this.seed = seed;
         this.size = size;
+        this.count = new CounterProba();
     }
 
     void recordResults() throws IOException {
@@ -79,8 +84,13 @@ public abstract class AbstractBenchProbas {
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
         this.nbBcks = mes.getBackTrackCount();
-        this.nbPropag = mes.getPropagationsCount()+mes.getEventsCount();
-        this.nbTrig = count.getValue();
+        if (this.dist.equals(CondAllDiffBCProba.Distribution.NONE)) {
+            this.nbPropag = mes.getPropagationsCount()+mes.getEventsCount();
+        } else {
+            this.nbPropag = count.getNbProp();
+        }
+        this.nbAlldiffProp = count.getNbAllDiff();
+        this.nbNeqsProp = count.getNbNeq();
         if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
             this.time = mes.getTimeCount();
         } else {
@@ -96,7 +106,8 @@ public abstract class AbstractBenchProbas {
         s += ((double) this.avgNodes / this.nbTests) + "\t";
         s += ((double) this.avgBcks / this.nbTests) + "\t";
         s += ((double) this.avgPropag / this.nbTests) + "\t";
-        s += ((double) this.avgNbTrig / this.nbTests) + "\t";
+        s += ((double) this.avgNbAlldiffProp / this.nbTests) + "\t";
+        s += ((double) this.avgNbNeqsProp / this.nbTests) + "\t";
         s += ((double) this.avgTime / this.nbTests) + "\t";
         s += "-" + "\t";
         results.write(s);
@@ -108,7 +119,8 @@ public abstract class AbstractBenchProbas {
         this.avgNodes += this.nbNodes;
         this.avgBcks += this.nbBcks;
         this.avgPropag += this.nbPropag;
-        this.avgNbTrig += this.nbTrig;
+        this.avgNbAlldiffProp += this.nbAlldiffProp;
+        this.avgNbNeqsProp += this.nbNeqsProp;
         this.avgTime += this.time;
         this.nbTests++;
     }
@@ -119,7 +131,8 @@ public abstract class AbstractBenchProbas {
         s += this.nbNodes + "\t";
         s += this.nbBcks + "\t";
         s += this.nbPropag + "\t";
-        s += this.nbTrig + "\t";
+        s += this.nbAlldiffProp + "\t";
+        s += this.nbNeqsProp + "\t";
         if (this.time == 0) {
             s += "NaN" + "\t";
         } else {
@@ -131,7 +144,9 @@ public abstract class AbstractBenchProbas {
     }
 
     void configSearchStrategy() {
-        this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
+        //this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
+        //this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver));
+        this.solver.set(StrategyFactory.minDomMinVal(this.vars, this.solver.getEnvironment()));
     }
 
     void solveProcess() {
@@ -139,9 +154,16 @@ public abstract class AbstractBenchProbas {
     }
 
     void execute() throws IOException {
-        this.buildProblem(size, false);
+        if (this.dist.equals(CondAllDiffBCProba.Distribution.NONE)) {
+            //System.out.println("cas non proba");
+            this.buildProblem(size, false);
+        } else {
+            //System.out.println("cas avec proba");
+            this.buildProblem(size, true);
+        }
         this.solver.post(this.cstrs);
 //        solver.set(PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver));
+        SearchMonitorFactory.log(this.solver, true, true);
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         this.configSearchStrategy();
         this.solveProcess();

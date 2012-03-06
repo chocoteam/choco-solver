@@ -7,17 +7,37 @@ package solver.constraints.nary.alldifferent;
  */
 public class CounterProba {
 
-    long trigger; // number of times the proba says there is nothing to do.
+    long neq;
+    long alldiff;
+    long allProp;
 
     public CounterProba() {
-        this.trigger = 0;
+        this.neq = 0;
+        this.alldiff = 0;
+        this.allProp = 0;
     }
 
-    public void incr() {
-        this.trigger++;
+    public void incrNeq() {
+        this.neq++;
     }
 
-    public long getValue() {
-        return trigger;
+    public void incrAllDiff() {
+        this.alldiff++;
+    }
+
+    public void incrAllProp() {
+        this.allProp++;
+    }
+
+    public long getNbNeq() {
+        return neq;
+    }
+
+    public long getNbAllDiff() {
+        return alldiff;
+    }
+
+    public long getNbProp() {
+        return allProp;
     }
 }

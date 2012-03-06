@@ -69,19 +69,58 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
     }
 
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
+    }
+
+    /*public void propagate(int evtmask) throws ContradictionException {
+        count.incrAllProp();
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             if (condition.isValid()) {
+                count.incrAllDiff();
+                System.out.println("IF [alldiff]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
                 propAllDiff.propagate(evtmask);
             } else {
-                count.incr();
+                count.incrNeq();
+                System.out.println("IF [neq]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
                 propCliqueNeq.propagate(evtmask);
             }
         } else {
             // if CUSTOM => promote for AllDiff
+            count.incrAllDiff();
+            System.out.println("ELSE [initPropag]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
             propAllDiff.propagate(EventType.FULL_PROPAGATION.mask);
         }
+    }*/
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        count.incrAllProp();
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            count.incrAllDiff();
+            //System.out.println("initPropag:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
+            propAllDiff.propagate(EventType.FULL_PROPAGATION.mask);
+        } else {
+            count.incrAllDiff();
+            //System.out.println("full alldiff:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
+            propAllDiff.propagate(evtmask);
+        }
     }
+
+
+    /*public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        count.incrAllProp();
+        // 1. update the condition wrt the event received
+        condition.update(eventRecorder, this, mask);
+        // 2. switch on the condition to execute the correct propagator
+        if (condition.isValid()) {
+            count.incrAllDiff();
+            forcePropagate(EventType.CUSTOM_PROPAGATION);
+        } else {
+            count.incrNeq();
+            propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);
+        }
+    } */
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
@@ -89,9 +128,11 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
         condition.update(eventRecorder, this, mask);
         // 2. switch on the condition to execute the correct propagator
         if (condition.isValid()) {
+            //count.incrAllDiff();
             forcePropagate(EventType.CUSTOM_PROPAGATION);
         } else {
-            count.incr();
+            count.incrNeq();
+            //System.out.println("neq:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
             propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);
         }
     }

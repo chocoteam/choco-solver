@@ -121,6 +121,9 @@ public class CondAllDiffBCProba {
     boolean isValid() {
         return rand.nextDouble() >= proba();
     }
+    /*boolean isValid() {
+        return rand.nextDouble() >= 0.5;
+    }*/
 
 
     void update(AbstractFineEventRecorder recorder, Propagator propagator, int evtmask) {
@@ -192,8 +195,9 @@ public class CondAllDiffBCProba {
 
     private double tauNuMu(double nu, double mu) {
         int valmu = (int) Math.floor(1000 * mu - 49);
+        //System.out.println(f.length);
         double fmu = this.f[valmu];
-        double gmu = this.g[(int) Math.floor(1000 * mu - 49)];
+        double gmu = this.g[valmu];
         if (nu > 1 - mu) {
             if (nu < mu) {
                 return fmu;  // case 1: theo. 2 p.10
