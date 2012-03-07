@@ -67,14 +67,40 @@ public enum Views {
         return cste;
     }
 
+
     public static IntVar offset(IntVar ivar, int cste) {
         if (cste == 0) {
             return ivar;
         }
+        int fhc = ivar.fastHashCode();
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i].fastHashCode() == fhc) {
+                if (views[i] instanceof OffsetView) {
+                    OffsetView ov = (OffsetView) views[i];
+                    if (ivar == ov.getVariable() && ov.cste == cste) {
+                        return ov;
+                    }
+                }
+            }
+        }
         return new OffsetView(ivar, cste, ivar.getSolver());
     }
 
+
     public static IntVar minus(IntVar ivar) {
+        int fhc = ivar.fastHashCode();
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i].fastHashCode() == fhc) {
+                if (views[i] instanceof MinusView) {
+                    MinusView mv = (MinusView) views[i];
+                    if (ivar == mv.getVariable()) {
+                        return mv;
+                    }
+                }
+            }
+        }
         return new MinusView(ivar, ivar.getSolver());
     }
 
@@ -88,6 +114,18 @@ public enum Views {
             } else if (cste == -1) {
                 var = Views.minus(ivar);
             } else {
+                int fhc = ivar.fastHashCode();
+                IView[] views = ivar.getViews();
+                for (int i = 0; i < views.length; i++) {
+                    if (views[i].fastHashCode() == fhc) {
+                        if (views[i] instanceof ScaleView) {
+                            ScaleView sv = (ScaleView) views[i];
+                            if (ivar == sv.getVariable() && sv.cste == cste) {
+                                return sv;
+                            }
+                        }
+                    }
+                }
                 var = new ScaleView(ivar, cste, ivar.getSolver());
             }
         }
@@ -102,6 +140,18 @@ public enum Views {
         } else if (ivar.getUB() <= 0) {
             return minus(ivar);
         } else {
+            int fhc = ivar.fastHashCode();
+            IView[] views = ivar.getViews();
+            for (int i = 0; i < views.length; i++) {
+                if (views[i].fastHashCode() == fhc) {
+                    if (views[i] instanceof AbsView) {
+                        AbsView av = (AbsView) views[i];
+                        if (ivar == av.getVariable()) {
+                            return av;
+                        }
+                    }
+                }
+            }
             return new AbsView(ivar, ivar.getSolver());
         }
     }
@@ -110,6 +160,18 @@ public enum Views {
         if (ivar.instantiated()) {
             int value = ivar.getValue();
             return fixed(value * value, ivar.getSolver());
+        }
+        int fhc = ivar.fastHashCode();
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i].fastHashCode() == fhc) {
+                if (views[i] instanceof SqrView) {
+                    SqrView sv = (SqrView) views[i];
+                    if (ivar == sv.getVariable()) {
+                        return sv;
+                    }
+                }
+            }
         }
         return new SqrView(ivar, ivar.getSolver());
     }
