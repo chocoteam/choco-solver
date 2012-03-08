@@ -65,7 +65,7 @@ public enum Reporting {
         for (int c = 0; c < constraints.length; c++) {
             ESat satC = constraints[c].isSatisfied();
             if (!ESat.TRUE.equals(satC)) {
-                sb.append("FAILURE >> ").append(constraints[c].toString());
+                sb.append("FAILURE >> ").append(constraints[c].toString()).append("\n");
             }
         }
         return sb.toString();

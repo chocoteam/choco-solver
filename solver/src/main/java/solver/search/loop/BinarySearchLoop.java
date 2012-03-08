@@ -90,9 +90,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void recordSolution() {
         //todo: checker d'Žtat
         solver.setFeasible(Boolean.TRUE);
+        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         solutionpool.recordSolution(solver);
         objectivemanager.update();
-        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         if (stopAtFirstSolution) {
             moveTo(RESUME);
             interrupt();

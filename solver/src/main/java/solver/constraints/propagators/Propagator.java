@@ -235,7 +235,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         for (int i = 0; i < lastER; i++) {
             fineER[i].desactivate(this);
         }
-        coarseER.getScheduler().remove(coarseER);
+        if (coarseER.enqueued()) {
+            coarseER.getScheduler().remove(coarseER);
+        }
     }
 
     public boolean isStateLess() {
