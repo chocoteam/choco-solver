@@ -44,7 +44,6 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -558,8 +557,8 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
 
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return VAR + INT;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

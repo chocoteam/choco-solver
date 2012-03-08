@@ -109,7 +109,7 @@ public class PropNProperPreds<V extends DirectedGraphVar> extends GraphPropagato
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
+        if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
 			if ((mask & EventType.REMOVEARC.mask)!=0){
                 eventRecorder.getDeltaMonitor(this, g).forEach(rem, EventType.REMOVEARC);
 			}

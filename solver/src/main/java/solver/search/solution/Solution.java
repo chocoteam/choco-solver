@@ -80,17 +80,20 @@ public class Solution implements ICause {
         intvalues = new int[vars.length];
         graphValues = new LinkedList<boolean[][]>();
         for (int i = 0; i < vars.length; i++) {
-            assert (vars[i].instantiated()):vars[i]+" is not instantiated"; // BEWARE only decision variables should be instantiated
-            switch(vars[i].getType()){
-            case Variable.INTEGER : 
-            	intvalues[i] = ((IntVar) vars[i]).getValue();break;
-            case Variable.GRAPH : 
-            	if(!vars[i].instantiated()){
-            		System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
-            		System.out.println(((GraphVar) vars[i]).getKernelGraph());
-            		throw new UnsupportedOperationException("solution graph not instantiated");
-            	}
-            	graphValues.add(((GraphVar) vars[i]).getValue());break;
+            assert (vars[i].instantiated()) : vars[i] + " is not instantiated"; // BEWARE only decision variables should be instantiated
+            int kind = vars[i].getTypeAndKind() & Variable.KIND;
+            switch (kind) {
+                case Variable.INT:
+                    intvalues[i] = ((IntVar) vars[i]).getValue();
+                    break;
+                case Variable.GRAPH:
+                    if (!vars[i].instantiated()) {
+                        System.out.println(((GraphVar) vars[i]).getEnvelopGraph());
+                        System.out.println(((GraphVar) vars[i]).getKernelGraph());
+                        throw new UnsupportedOperationException("solution graph not instantiated");
+                    }
+                    graphValues.add(((GraphVar) vars[i]).getValue());
+                    break;
             }
         }
 //        measures = solver.getSearchLoop().getMeasures().
@@ -102,19 +105,21 @@ public class Solution implements ICause {
             Variable[] vars = solver.getVars();
             int nbGV = 0;
             for (int i = 0; i < vars.length; i++) {
-            	switch(vars[i].getType()){
-                case Variable.INTEGER : 
-                	((IntVar) vars[i]).instantiateTo(intvalues[i], this);break;
-                case Variable.GRAPH :
-					boolean[][] gv = graphValues.get(nbGV);
-                	((GraphVar) vars[i]).instantiateTo(gv, this);
-					nbGV++;
-					break;
+                int kind = vars[i].getTypeAndKind() & Variable.KIND;
+                switch (kind) {
+                    case Variable.INT:
+                        ((IntVar) vars[i]).instantiateTo(intvalues[i], this);
+                        break;
+                    case Variable.GRAPH:
+                        boolean[][] gv = graphValues.get(nbGV);
+                        ((GraphVar) vars[i]).instantiateTo(gv, this);
+                        nbGV++;
+                        break;
                 }
-                
+
             }
         } catch (ContradictionException ex) {
-			ex.printStackTrace();
+            ex.printStackTrace();
             LoggerFactory.getLogger("solver").error("BUG in restoring solution !!");
             throw new SolverException("Restored solution not consistent !!");
         }

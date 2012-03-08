@@ -39,6 +39,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -74,8 +75,8 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
     }
 
     @Override
-    public int getType() {
-        return VIEW;
+    public final int getTypeAndKind() {
+        return Variable.VIEW + Variable.INT;
     }
 
     public IntVar getVariable() {

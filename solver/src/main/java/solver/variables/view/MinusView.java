@@ -37,7 +37,6 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
@@ -248,11 +247,6 @@ public class MinusView extends IntView {
         int value = var.nextValue(-v);
         if (value == Integer.MAX_VALUE) return Integer.MIN_VALUE;
         return -value;
-    }
-
-    @Override
-    public int getType() {
-        return Variable.INTEGER;
     }
 
     @Override

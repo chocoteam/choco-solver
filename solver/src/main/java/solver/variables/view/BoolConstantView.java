@@ -32,6 +32,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.variables.BoolVar;
+import solver.variables.Variable;
 
 /**
  * A constant view specific to boolean variable
@@ -46,6 +47,11 @@ public class BoolConstantView extends ConstantView implements BoolVar {
 
     protected BoolConstantView(String name, int constante, Solver solver) {
         super(name, constante, solver);
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.BOOL + Variable.CSTE;
     }
 
     @Override

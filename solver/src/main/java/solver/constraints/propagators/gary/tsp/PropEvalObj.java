@@ -144,7 +144,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 		toCompute.clear();
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];
-        if (variable.getType() == Variable.GRAPH) {
+        if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
                 eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
             }

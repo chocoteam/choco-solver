@@ -100,7 +100,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
     }
 
     @Override
-    public int getType() {
-        return Variable.META;
+    public int getTypeAndKind() {
+        return VAR + META;
     }
 }

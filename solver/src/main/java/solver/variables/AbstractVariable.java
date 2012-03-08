@@ -83,8 +83,6 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     protected int modificationEvents;
 
-    protected int uniqueID;
-
     protected final OnBeforeProc beforeModification = new OnBeforeProc();
     protected final OnAfterProc afterModification = new OnAfterProc();
     protected final OnContradiction onContradiction = new OnContradiction();
@@ -98,7 +96,7 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = (W[])new IView[2];
+        views = (W[]) new IView[2];
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
@@ -136,14 +134,6 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
             System.arraycopy(tmp, 0, constraints, 0, cLast);
         }
         constraints[cLast++] = constraint;
-    }
-
-    public int getID() {
-        return uniqueID;
-    }
-
-    public void setID(int uniqueID) {
-        this.uniqueID = uniqueID;
     }
 
     public void link(Propagator propagator, int idxInProp) {
@@ -229,7 +219,7 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
     public void subscribeView(W view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
-            views = (W[])new IView[tmp.length * 3 / 2 + 1];
+            views = (W[]) new IView[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
         }
         views[vIdx++] = view;

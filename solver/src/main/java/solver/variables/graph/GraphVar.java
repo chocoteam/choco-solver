@@ -183,8 +183,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 	
 	@Override
-	public int getType() {
-		return Variable.GRAPH;
+	public int getTypeAndKind() {
+		return VAR + GRAPH;
 	}
 
     @Override

@@ -68,14 +68,14 @@ public final class ScaleView extends IntView {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(),this) {
+            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(), this) {
                 @Override
                 public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                     if (EventType.isRemove(eventType.mask)) {
                         for (int i = frozenFirst; i < frozenLast; i++) {
-							if(propagator!=delta.getCause(i)){
-                            	proc.execute(delta.get(i) * cste);
-							}
+                            if (propagator != delta.getCause(i)) {
+                                proc.execute(delta.get(i) * cste);
+                            }
                         }
                     }
                 }
@@ -268,12 +268,6 @@ public final class ScaleView extends IntView {
     public String toString() {
         return "(" + this.var.toString() + " * " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
     }
-
-    @Override
-    public int getType() {
-        return INTEGER;
-    }
-
 
     @Override
     public Explanation explain(VariableState what, int val) {

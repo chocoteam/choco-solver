@@ -120,7 +120,7 @@ public class PropagationEngine implements IPropagationEngine {
                 int nbV = propagator.getNbVars();
                 for (int v = 0; v < nbV; v++) {
                     Variable variable = propagator.getVar(v);
-                    if (variable.getType() != Variable.CSTE) {
+                    if ((variable.getTypeAndKind() & Variable.CSTE) == 0) { // this is not a constant
                         int idV = variable.getId();
                         watermarks.putMark(idV, idP, v);
                     }

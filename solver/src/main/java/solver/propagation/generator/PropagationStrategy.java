@@ -63,27 +63,27 @@ public abstract class PropagationStrategy<E extends ISchedulable>
 
     //<-- DSL
 
-    protected final void set(P policy) {
+    protected void set(P policy) {
         this.iteration = policy;
     }
 
     public final PropagationStrategy<E> pickOne() {
-        iteration = P.pickOne;
+        set(P.pickOne);
         return this;
     }
 
     public final PropagationStrategy<E> sweepUp() {
-        iteration = P.sweepUp;
+        set(P.sweepUp);
         return this;
     }
 
     public final PropagationStrategy<E> clearOut() {
-        iteration = P.clearOut;
+        set(P.clearOut);
         return this;
     }
 
     public final PropagationStrategy<E> loopOut() {
-        iteration = P.loopOut;
+        set(P.loopOut);
         return this;
     }
 

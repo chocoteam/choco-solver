@@ -110,6 +110,7 @@ public class ConstantView implements IntVar {
         return ID;
     }
 
+
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
@@ -275,7 +276,7 @@ public class ConstantView implements IntVar {
 
     @Override
     public Explanation explain(VariableState what, int val) {
-         Explanation explanation = new Explanation();
+        Explanation explanation = new Explanation();
         if (empty.get()) {
             explanation.add(solver.getExplainer().explain(this, constante));
         }
@@ -330,8 +331,8 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int getType() {
-        return Variable.CSTE;
+    public int getTypeAndKind() {
+        return Variable.INT + Variable.CSTE;
     }
 
     @Override

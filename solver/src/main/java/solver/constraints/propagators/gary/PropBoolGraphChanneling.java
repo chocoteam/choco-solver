@@ -126,7 +126,7 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		long tps = System.currentTimeMillis();
         Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
+        if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
 			if((mask & EventType.ENFORCEARC.mask) !=0){
                 eventRecorder.getDeltaMonitor(this, var).forEach(enf, EventType.ENFORCEARC);
 			}

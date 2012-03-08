@@ -44,7 +44,6 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
@@ -408,8 +407,8 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
     }
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return VAR + BOOL;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

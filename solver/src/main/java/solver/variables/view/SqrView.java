@@ -39,7 +39,6 @@ import solver.explanations.VariableState;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
@@ -344,11 +343,6 @@ public final class SqrView extends IntView {
     @Override
     public boolean hasEnumeratedDomain() {
         return true;
-    }
-
-    @Override
-    public int getType() {
-        return Variable.INTEGER;
     }
 
     @Override
