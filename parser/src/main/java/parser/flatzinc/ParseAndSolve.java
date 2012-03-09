@@ -30,6 +30,8 @@ package parser.flatzinc;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 
@@ -44,6 +46,8 @@ import java.net.URISyntaxException;
  * @since 27/01/11
  */
 public class ParseAndSolve {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
     @Option(name = "-f", usage = "Flatzinc file.", required = true)
     private static String instance;
@@ -74,9 +78,13 @@ public class ParseAndSolve {
 
     private void parseandsolve() {
         FZNParser parser = new FZNParser();
+        LOGGER.info("% load file ...");
         parser.loadInstance(new File(instance));
+        LOGGER.info("% parse instance...");
         parser.parse();
+        LOGGER.info("% solve instance...");
         Solver solver = parser.solver;
+//        SearchMonitorFactory.statEveryXXms(solver, 1000);
         parser = null;
         if(tl > -1){
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);

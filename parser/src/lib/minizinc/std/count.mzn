@@ -5,5 +5,13 @@
 % sentence to be something else, eg. greater-than.
 %-----------------------------------------------------------------------------%
 predicate count(array[int] of var int: x, var int: y, var int: c) =
-    c = sum(i in index_set(x)) ( bool2int(x[i] == y) );
+    count(x, y, v);
 
+%-----------------------------------------------------------------------------%
+
+% The implementation of the constraint in the choco solver.
+% This should not be called directly, instead the definition above should
+% be used.
+predicate count(array[int] of var int: x, var int: y, var int: c);
+
+%-----------------------------------------------------------------------------%

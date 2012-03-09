@@ -3,4 +3,13 @@
 %-----------------------------------------------------------------------------%
 
 predicate exactly_int(int: n, array[int] of var int: x, int: v) =
-    n == sum(i in index_set(x)) ( bool2int(x[i] == v) );
+    among(n,x,v);
+
+%-----------------------------------------------------------------------------%
+
+% The implementation of the constraint in the choco solver.
+% This should not be called directly, instead the definition above should
+% be used.
+predicate among(var int: n, array[int] of var int: x, set of int: v);
+
+%-----------------------------------------------------------------------------%
