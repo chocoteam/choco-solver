@@ -24,42 +24,31 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator.sorter;
 
-package solver.propagation.comparators.predicate;
 
-import gnu.trove.set.hash.TIntHashSet;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.recorders.IEventRecorder;
+import solver.variables.Variable;
+
+import java.util.Comparator;
 
 /**
- * P1 and not P2
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 07/04/11
+ * @since 09/03/12
  */
-public class But implements Predicate {
-    int[] cached;
+public class Decreasing<V extends Variable, E extends IEventRecorder<V>> implements Comparator<E> {
 
-    final Predicate p1;
-    final Predicate p2;
+    final IEvaluator<E> evaluator;
 
-    But(Predicate p1, Predicate p2) {
-        this.p1 = p1;
-        this.p2 = p2;
+    public Decreasing(IEvaluator<E> evaluator) {
+        this.evaluator = evaluator;
     }
 
     @Override
-    public boolean eval(IEventRecorder evtrec) {
-        return p1.eval(evtrec) & !p2.eval(evtrec);
-    }
-
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.removeAll(p2.extract(all));
-            cached = tmp.toArray();
-        }
-        return cached;
+    public int compare(E o1, E o2) {
+        return evaluator.eval(o2) - evaluator.eval(o1);
     }
 }

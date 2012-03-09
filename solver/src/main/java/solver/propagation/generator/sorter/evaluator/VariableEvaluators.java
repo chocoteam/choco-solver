@@ -24,40 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.comparators.predicate;
+package solver.propagation.generator.sorter.evaluator;
 
-import solver.recorders.IEventRecorder;
+import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/09/11
+ * @since 09/03/12
  */
-public class All implements Predicate {
-
-    public static All singleton = new All();
-
-    int[] cached;
-
-    protected All() {
+public class VariableEvaluators {
+    private VariableEvaluators() {
     }
 
-    @Override
-    public boolean eval(IEventRecorder evtrec) {
-        return true;
-    }
+    public static IEvaluator<Variable> Arity = new IEvaluator<Variable>() {
+        @Override
+        public int eval(Variable element) {
+            return element.nbConstraints();
+        }
+    };
 
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        /*if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < all.length; i++) {
-                int idx = all[i].getIndex(IRequest.IN_GROUP);
-                tmp.add(idx);
-            }
-            cached = tmp.toArray();
-        }*/
-        return cached;
-    }
+    public static IEvaluator<IntVar> DomSize = new IEvaluator<IntVar>() {
+        @Override
+        public int eval(IntVar element) {
+            return element.getDomainSize();
+        }
+    };
 }

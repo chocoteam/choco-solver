@@ -26,13 +26,14 @@
  */
 package solver.propagation.generator;
 
-import solver.Solver;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
 import solver.recorders.IEventRecorder;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Comparator;
 
 /**
  * A specific propagation engine that works like a list, each element has a fixed index.
@@ -43,75 +44,41 @@ import java.util.*;
  */
 public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    Comparator<S> comparator = new Comparator<S>() {
-        @Override
-        public int compare(S o1, S o2) {
-            return 0;
-        }
-    };
-
+    protected Comparator<S> comparator;
     protected S lastPopped;
 
     protected S[] elements;
     protected BitSet toPropagate;
     protected boolean init = false;
 
-    private Sort(List<Generator> generators) {
-        super(generators);
+    public Sort(Generator<S>... generators) {
+        this(null, generators);
     }
 
-    private Sort(List<Generator> generator, Comparator<S> comparator) {
-        super(generator);
+    @SuppressWarnings({"unchecked"})
+    public Sort(Comparator<S> comparator, Generator<S>... generators) {
+        this.elements = (S[]) new ISchedulable[0];
+        for (int i = 0; i < generators.length; i++) {
+            Generator gen = generators[i];
+            elements = ArrayUtils.append(elements, (S[]) gen.getElements());
+        }
         this.comparator = comparator;
-    }
-
-    //<-- DSL
-    public static <S extends ISchedulable> Sort<S> build(Comparator<S> comparator, Generator... generators) {
-        if (generators.length == 0) {
-            throw new RuntimeException("Sort::Empty generators array");
+        if (comparator != null) {
+            Arrays.sort(elements, comparator);
         }
-        return new Sort<S>(Arrays.asList(generators), comparator);
-    }
-
-    public static Sort build(Generator... generators) {
-        if (generators.length == 0) {
-            throw new RuntimeException("Sort::Empty generators array");
-        }
-        return new Sort(Arrays.asList(generators));
-    }
-
-    @Override
-    public List<Sort<S>> populate(PropagationEngine propagationEngine, Solver solver) {
-        List<S> elts = new ArrayList<S>();
-        for (int i = 0; i < generators.size(); i++) {
-            Generator gen = generators.get(i);
-            elts.addAll(gen.populate(propagationEngine, solver));
-        }
-        this.elements = (S[]) elts.toArray(new ISchedulable[elts.size()]);
-        Arrays.sort(elements, comparator);
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
         this.toPropagate = new BitSet(elements.length);
-        return Collections.singletonList(this);
-
     }
 
-    /**
-     * A specific method to prevent the engine to be incomplete, do not populate!
-     */
 
-    public static <S extends ISchedulable> Sort<S> corker(S... elts) {
-        Sort<S> corker = new Sort<S>(Collections.<Generator>emptyList());
-        corker.elements = elts.clone();
-        for (int e = 0; e < corker.elements.length; e++) {
-            corker.elements[e].setScheduler(corker, e);
-        }
-        corker.toPropagate = new BitSet(corker.elements.length);
-        return corker;
+
+    @Override
+    public S[] getElements() {
+        return (S[]) new ISchedulable[]{this};
     }
 
-    //-->
     //<-- PROPAGATION ENGINE
     @Override
     public void schedule(ISchedulable element) {

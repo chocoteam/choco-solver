@@ -24,41 +24,41 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator.predicate;
 
-package solver.propagation.comparators.predicate;
-
-import gnu.trove.set.hash.TIntHashSet;
-import solver.recorders.IEventRecorder;
+import java.io.Serializable;
 
 /**
+ * A Predicate abstract class restricted to handle Variable or Constraint object.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 08/03/12
  */
-public class Or implements Predicate {
+public abstract class Predicate<E> implements Serializable {
 
-    int[] cached;
+    private final boolean isVar;
+    private final boolean isProp;
 
-    final Predicate p1, p2;
-
-    Or(Predicate p1, Predicate p2) {
-        this.p2 = p2;
-        this.p1 = p1;
+    protected Predicate(boolean var, boolean prop) {
+        isVar = var;
+        isProp = prop;
     }
 
-    @Override
-    public boolean eval(IEventRecorder evtrec) {
-        return p1.eval(evtrec) || p2.eval(evtrec);
+    public final boolean isVar() {
+        return isVar;
     }
 
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet(p1.extract(all));
-            tmp.addAll(p2.extract(all));
-            cached = tmp.toArray();
-        }
-        return cached;
+    public final boolean isProp() {
+        return isProp;
     }
+
+    /**
+     * Validate an element wrt rules express by <code>this</code>.
+     *
+     * @param element object to validate
+     */
+    public abstract boolean isValid(E element);
+
+
 }

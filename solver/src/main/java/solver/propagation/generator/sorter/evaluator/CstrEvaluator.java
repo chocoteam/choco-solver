@@ -24,46 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator.sorter.evaluator;
 
-package solver.propagation.comparators.predicate;
-
-import gnu.trove.set.hash.TIntHashSet;
-import solver.recorders.IEventRecorder;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/04/11
+ * @since 09/03/12
  */
-public class And implements Predicate {
-    int[] cached;
-
-    final Predicate p1, p2;
-
-    And(Predicate p1, Predicate p2) {
-        this.p2 = p2;
-        this.p1 = p1;
+public class CstrEvaluator {
+    private CstrEvaluator() {
     }
 
-    @Override
-    public boolean eval(IEventRecorder evtrec) {
-        return p1.eval(evtrec) && p2.eval(evtrec);
-    }
+    /**
+     * Return the maximum priority among propgators of the constraint
+     */
+    public static IEvaluator<Constraint> MaxPriority = new IEvaluator<Constraint>() {
 
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            TIntHashSet tmp2 = new TIntHashSet(p2.extract(all));
-            int[] A = p1.extract(all);
-            for (int i = 0; i < A.length; i++) {
-                if (tmp2.contains(A[i])) {
-                    tmp.add(A[i]);
+        @Override
+        public int eval(Constraint element) {
+            Propagator[] propagators = element.propagators;
+            int p = Integer.MIN_VALUE;
+            for (int i = 0; i < propagators.length; i++) {
+                int pp = propagators[i].getPriority().priority;
+                if (pp > p) {
+                    p = pp;
                 }
             }
-            cached = tmp.toArray();
+            return p;
+
         }
-        return cached;
-    }
+    };
+
+    /**
+     * Return the minimum priority among propgators of the constraint
+     */
+    public static IEvaluator<Constraint> MinPriority = new IEvaluator<Constraint>() {
+
+        @Override
+        public int eval(Constraint element) {
+            Propagator[] propagators = element.propagators;
+            int p = Integer.MAX_VALUE;
+            for (int i = 0; i < propagators.length; i++) {
+                int pp = propagators[i].getPriority().priority;
+                if (pp < p) {
+                    p = pp;
+                }
+            }
+            return p;
+
+        }
+    };
+
+    /**
+     * Return the maximum priority among propgators of the constraint
+     */
+    public static IEvaluator<Constraint> Arity = new IEvaluator<Constraint>() {
+
+        @Override
+        public int eval(Constraint element) {
+            return element.vars.length;
+        }
+    };
+
 }

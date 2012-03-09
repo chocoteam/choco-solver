@@ -24,30 +24,25 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.propagation.comparators;
-
-import solver.recorders.IEventRecorder;
+package solver.propagation.generator.sorter.evaluator;
 
 import java.io.Serializable;
-import java.util.Comparator;
 
-public class IncrArityC implements Comparator<IEventRecorder>, Serializable {
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 09/03/12
+ */
+public interface IEvaluator<E> extends Serializable {
 
-    private static final IncrArityC singleton = new IncrArityC();
+    /**
+     * Evaluate an element <code>E</code> and return its evaluation wrt <code>this</code>.
+     *
+     * @param element object to evaluate
+     * @return its evaluation
+     */
+    int eval(E element);
 
-    public static IncrArityC get() {
-        return singleton;
-    }
 
-    private IncrArityC() {
-    }
-
-    public int compare(IEventRecorder v1, IEventRecorder v2) {
-        return 0;//v1.getPropagator().getConstraint().vars.length - v2.getPropagator().getConstraint().vars.length;
-    }
-
-    public String toString() {
-        return "IncrArityC";
-    }
 }

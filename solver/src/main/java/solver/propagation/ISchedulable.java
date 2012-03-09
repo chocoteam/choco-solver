@@ -33,7 +33,7 @@ package solver.propagation;
  * @author Charles Prud'homme
  * @since 05/12/11
  */
-public interface ISchedulable extends IQueable, IExecutable {
+public interface ISchedulable<S extends IScheduler> extends IQueable, IExecutable {
 
     /**
      * Override the default scheduler with <code>scheduler</code>
@@ -41,14 +41,14 @@ public interface ISchedulable extends IQueable, IExecutable {
      * @param scheduler the new scheduler
      * @param idxInS index in the scheduler
      */
-    void setScheduler(IScheduler scheduler, int idxInS);
+    void setScheduler(S scheduler, int idxInS);
 
     /**
      * Return the current scheduler
      *
      * @return the current scheduler
      */
-    IScheduler getScheduler();
+    S getScheduler();
 
     /**
      * Some scheduler requires a fix index for element, this is given by this service

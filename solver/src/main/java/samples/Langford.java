@@ -29,8 +29,9 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -68,25 +69,30 @@ public class Langford extends AbstractProblem {
 
     IntVar[] position;
 
+    Constraint[] lights;
+    Constraint alldiff;
+
     @Override
     public void buildModel() {
         solver = new Solver("Langford's number");
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
-        position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
-        for (int i = 0; i < k - 1; i++) {
-            for (int j = 0; j < n; j++) {
-                solver.post(new Relation(
-                        Views.sum(position[j + (i + 1) * n], Views.minus(position[j + i * n])),
-                        Relation.R.EQ, j+2, solver));
+        position = VariableFactory.boundedArray("p", n * k, 0, k * n - 1, solver);
+        lights = new Constraint[(k - 1) * n + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < this.k - 1; j++) {
+                lights[i + j * n] = ConstraintFactory.eq(Views.offset(position[i + j * n], i + 2), position[i + (j + 1) * n], solver);
             }
         }
-        solver.post(new AllDifferent(position, solver));
+        lights[(k - 1) * n] = ConstraintFactory.lt(position[0], position[n * k - 1], solver);
+        solver.post(lights);
+        alldiff = new AllDifferent(position, solver);
+        solver.post(alldiff);
     }
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMaxVal(position, solver.getEnvironment()));
         /*IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
         peng.addGroup(Group.buildQueue(

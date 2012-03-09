@@ -3,17 +3,10 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.nary.PropAllDiffBC;
 import solver.constraints.propagators.nary.PropCliqueNeq;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
-import solver.recorders.conditions.CondAllDiffBCFreq;
 import solver.recorders.conditions.CondAllDiffBCProba;
-import solver.recorders.conditions.ICondition;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -164,7 +157,7 @@ public abstract class AbstractBenchProbas {
             }
         }
 
-        Primitive[] primitives = null;
+        /*Primitive[] primitives = null;
         if (this.frequency >= 0) {
             ICondition condition = null;
             primitives = new Primitive[hall.size() * 2];
@@ -183,9 +176,9 @@ public abstract class AbstractBenchProbas {
                     primitives[i + hall.size()] = Primitive.coarses(prop);
                 }
             }
-        }
+        }*/
 
-        Propagator[] _cliques = clique.toArray(new Propagator[clique.size()]);
+        /*Propagator[] _cliques = clique.toArray(new Propagator[clique.size()]);
         PropagationStrategy qneq = Queue.build(Sort.build(Primitive.arcs(_cliques)), Primitive.coarses(_cliques));
 
         Propagator[] _others = others.toArray(new Propagator[others.size()]);
@@ -215,7 +208,7 @@ public abstract class AbstractBenchProbas {
                             qothers.clearOut()
                     ).clearOut()
             );
-        }
+        }*/
 
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));

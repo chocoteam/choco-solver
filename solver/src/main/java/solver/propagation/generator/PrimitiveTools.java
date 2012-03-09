@@ -24,60 +24,46 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator;
 
-package solver.propagation.comparators.predicate;
+import solver.constraints.propagators.Propagator;
+import solver.propagation.generator.predicate.Predicate;
+import solver.variables.Variable;
+import solver.variables.view.IView;
 
-import choco.kernel.common.util.tools.ArrayUtils;
-import solver.constraints.Constraint;
-import solver.recorders.IEventRecorder;
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 09/03/12
+ */
+enum PrimitiveTools {
+    ;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-
-public class MemberC implements Predicate {
-
-    int[] cached;
-
-    Constraint[] cons;
-    Set<Constraint> s_cons;
-
-    MemberC(Constraint[] cons) {
-        this.cons = cons.clone();
-        s_cons = new HashSet<Constraint>(Arrays.asList(cons));
+    static Variable getVar(Variable var) {
+        if ((var.getTypeAndKind() & Variable.VIEW) != 0) {  // this is a view
+            return getVar(((IView) var).getVariable());  // to go up to the main variable
+        }
+        return var;
     }
 
-    MemberC(Constraint cons0, Constraint... cons) {
-        this(ArrayUtils.append(new Constraint[]{cons0}, cons));
-    }
-
-    public boolean eval(IEventRecorder evtrec) {
-        return false;//this.s_cons.contains(evtrec.getPropagator().getConstraint());
-    }
-
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        /*if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < cons.length; i++) {
-                Constraint c = cons[i];
-                for (int j = 0; j < c.propagators.length; j++) {
-                    Propagator p = c.propagators[j];
-                    for (int k = 0; k < p.nbRecorders(); k++) {
-                        int idx = p.getRecorder(k).getIndex(IRequest.IN_GROUP);
-                        tmp.add(idx);
-                    }
-                    //-1 is the PropRequest in a propagator
-                    tmp.add(p.getRecorder(-1).getIndex(IRequest.IN_GROUP));
-                }
+    static boolean validate(Variable var, Predicate[] preds) {
+        int k = -1;
+        while (++k < preds.length) {
+            if (preds[k].isVar() && !preds[k].isValid(var)) {
+                return false;
             }
-            cached = tmp.toArray();
-        }*/
-        return cached;
+        }
+        return true;
     }
 
-    public String toString() {
-        return "MemberC";
+    static boolean validate(Propagator prop, Predicate[] preds) {
+        int k = -1;
+        while (++k < preds.length) {
+            if (preds[k].isProp() && !preds[k].isValid(prop)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

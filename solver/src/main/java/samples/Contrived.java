@@ -26,14 +26,21 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
 import solver.constraints.nary.AllDifferent;
+import solver.propagation.generator.PArc;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+
+import java.util.Arrays;
 
 /**
  * It consists of two vectors v and w.
@@ -61,10 +68,12 @@ public class Contrived extends AbstractProblem {
     @Override
     public void buildModel() {
         l = Math.max(4, l);
-
+        if (d == 0) {
+            d = l + 1;
+        }
         solver = new Solver();
-        v = VariableFactory.enumeratedArray("v", 5, 1, 50, solver);
-        w = VariableFactory.enumeratedArray("v", l, 1, d, solver);
+        v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
+        w = VariableFactory.boundedArray("v", l, 1, d, solver);
 
         solver.post(new AllDifferent(v, solver));
         solver.post(new AllDifferent(w, solver));
@@ -78,23 +87,16 @@ public class Contrived extends AbstractProblem {
 
     @Override
     public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMinVal(v, solver.getEnvironment()));
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.setDeal(IPropagationEngine.Deal.QUEUE);
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.member(w),
-                        new IncrOrderV(w),
-                        Policy.FIXPOINT
-                )
-        );
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.member(v),
-                        new IncrOrderV(v),
-                        Policy.FIXPOINT
-                )
-        );*/
+        solver.set(StrategyFactory.minDomMinVal(v,
+                solver.getEnvironment()));
+        // <2012-03-02:cp> works fine
+        if (true) {
+            Sort first = new Sort(new PArc(v[3], v[4]));
+            Queue then = new Queue(new PArc(ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
+            Queue coarses = new Queue(new PCoarse(solver.getCstrs()));
+            solver.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut());
+        }
+
     }
 
     @Override

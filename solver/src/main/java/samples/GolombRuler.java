@@ -32,9 +32,17 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.unary.Relation;
+import solver.propagation.generator.PArc;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.recorders.IEventRecorder;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -69,7 +77,7 @@ public class GolombRuler extends AbstractProblem {
 
         ticks = new IntVar[m];
         for (int i = 0; i < ticks.length; i++) {
-            ticks[i] = VariableFactory.enumerated("a_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
+            ticks[i] = VariableFactory.bounded("a_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
         }
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
@@ -86,8 +94,9 @@ public class GolombRuler extends AbstractProblem {
 //                diffs[k] = VariableFactory.enumerated("d_" + k, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
 //                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
                 diffs[k] = Views.sum(ticks[j], Views.minus(ticks[i]));
+                solver.post(ConstraintFactory.leq(diffs[k],
+                        Views.offset(ticks[m - 1], -((m - 1 - j + i) * (m - j + i)) / 2), solver));
                 solver.post(new Relation(diffs[k], Relation.R.GQ, (j - i) * (j - i + 1) / 2, solver));
-                solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
             }
         }
         solver.post(new AllDifferent(diffs, solver, type));
@@ -101,19 +110,13 @@ public class GolombRuler extends AbstractProblem {
     @Override
     public void configureSolver() {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
-        /*IPropagationEngine engine = solver.getEngine();
-        engine.addGroup(Group.buildQueue(
-                Predicates.member(ticks),
-                Policy.FIXPOINT
-        ));
-        engine.addGroup(Group.buildQueue(
-                Predicates.member(diffs),
-                Policy.FIXPOINT
-        ));
-        engine.addGroup(Group.buildQueue(
-                Predicates.all(),
-                Policy.ONE
-        ));*/
+        // <2012-03-08 cp> works fine
+        Queue _ticks = new Queue<AbstractFineEventRecorder>(new PArc(ticks));
+        Queue _diffs = new Queue<AbstractFineEventRecorder>(new PArc(diffs));
+        Queue _vars = new Queue<AbstractFineEventRecorder>(_ticks.clearOut(), _diffs.clearOut());
+        Sort _coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxPriorityC),
+                new PCoarse(solver.getCstrs()));
+        solver.set(new Sort<IEventRecorder>(_vars, _coar.pickOne()).clearOut());
     }
 
     @Override

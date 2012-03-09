@@ -33,6 +33,14 @@ import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.unary.Member;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PCons;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -82,7 +90,7 @@ public class AllIntervalSeries extends AbstractProblem {
         {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
-                solver.post(new Member(dist[i], 1, m-1, solver));
+                solver.post(new Member(dist[i], 1, m - 1, solver));
             }
         }
 
@@ -116,20 +124,12 @@ public class AllIntervalSeries extends AbstractProblem {
         // Or, c'est cet algo qui coute.
         // Il se dŽclenche lorsque la derniere requete du propagateur est propagee,
         // il faut donc que celle-ci soit propagee le plus tard possible
-        /*IPropagationEngine peng = solver.getEngine();
-        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
-        Predicate light = Predicates.light();
-        peng.addGroup(Group.buildGroup(
-                Predicates.member_light(ALLDIFF[0]),
-                new IncrOrderV(vars),
-                Policy.ITERATE
-        ));
-        peng.addGroup(Group.buildGroup(
-                Predicates.member(ALLDIFF[1]),
-                new Cond(light, new IncrOrderV(vars), IncrArityV.get()),
-                Policy.ONE
-        ));*/
-        // + default one
+
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PCons(ALLDIFF));
+        Queue others = new Queue<AbstractFineEventRecorder>(new PCons(solver.getCstrs()));
+        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
+        solver.set(new Sort(ad1.clearOut(), others.clearOut(), coar.pickOne()).clearOut());
+
     }
 
     @Override

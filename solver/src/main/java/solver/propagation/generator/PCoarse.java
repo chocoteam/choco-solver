@@ -26,43 +26,56 @@
  */
 package solver.propagation.generator;
 
-
 import solver.Solver;
-import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
-import solver.recorders.IEventRecorder;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.generator.predicate.Predicate;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
+import solver.recorders.coarse.CoarseEventRecorder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static solver.propagation.generator.PrimitiveTools.validate;
+
 /**
- * A generator specific that flattens elements of n generators
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/11
+ * @since 08/03/12
  */
-public class Flatten<E extends ISchedulable> extends Generator<E> {
+public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
 
-    private Flatten(List<Generator> generators) {
-        super(generators);
+    final List<AbstractCoarseEventRecorder> eventRecorders;
+
+    public PCoarse(Constraint... constraints) {
+        this(constraints, PArc.NOV);
     }
 
-    public static Flatten build(Generator... generators) {
-        if (generators.length == 0) {
-            throw new RuntimeException("Sort::Empty generators array");
+    public PCoarse(Constraint[] constraints, Predicate[] validations) {
+        super();
+        Solver solver = constraints[0].getVariables()[0].getSolver();
+        IPropagationEngine propagationEngine = solver.getEngine();
+        propagationEngine.prepareWM(solver);
+        eventRecorders = new ArrayList<AbstractCoarseEventRecorder>();
+        for (int i = 0; i < constraints.length; i++) {
+            Propagator[] propagators = constraints[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                if (validations.length == 0 || validate(propagator, validations)) {
+                    int pidx = propagator.getId();
+                    if (propagationEngine.isMarked(0, pidx, 0)) {
+                        propagationEngine.clearWatermark(0, pidx, 0);
+                        eventRecorders.add(new CoarseEventRecorder(propagator, solver));
+                    }
+                }
+            }
         }
-        return new Flatten(Arrays.asList(generators));
     }
 
     @Override
-    public List<E> populate(PropagationEngine propagationEngine, Solver solver) {
-        List<E> elements = new ArrayList<E>();
-        for (int g = 0; g < generators.size(); g++) {
-            Generator gen = generators.get(g);
-            elements.addAll(gen.populate(propagationEngine, solver));
-        }
-        return elements;
+    public AbstractCoarseEventRecorder[] getElements() {
+        return eventRecorders.toArray(new AbstractCoarseEventRecorder[eventRecorders.size()]);
     }
 }

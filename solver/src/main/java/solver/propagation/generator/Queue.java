@@ -26,13 +26,10 @@
  */
 package solver.propagation.generator;
 
-import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
+import solver.propagation.queues.FixSizeCircularQueue;
 import solver.recorders.IEventRecorder;
-
-import java.util.*;
 
 /**
  * A specific propagation strategy that works like a queue (fifo).
@@ -44,38 +41,28 @@ import java.util.*;
 public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected S lastPopped;
-
-    //protected FixSizeCircularQueue<S> toPropagate;
-    protected java.util.Queue<S> toPropagate;
+    protected FixSizeCircularQueue<S> toPropagate;
 
 
-    private Queue(List elements) {
-        super(elements);
-    }
-
-    //<-- DSL
-
-    public static Queue build(Generator... generators) {
-        if (generators.length == 0) {
-            throw new RuntimeException("Sort::Empty generators array");
+    @SuppressWarnings({"unchecked"})
+    public Queue(Generator<S>... generators) {
+        int nbe = 0;
+        for (int i = 0; i < generators.length; i++) {
+            Generator gen = generators[i];
+            S[] elts = (S[]) gen.getElements();
+            for (int e = 0; e < elts.length; e++) {
+                elts[e].setScheduler(this, 0);
+                nbe++;
+            }
         }
-        return new Queue(Arrays.asList(generators));
+        toPropagate = new FixSizeCircularQueue<S>(nbe);
     }
 
     @Override
-    public List<Queue<S>> populate(PropagationEngine propagationEngine, Solver solver) {
-        List<S> elements = new ArrayList<S>();
-        for (int i = 0; i < generators.size(); i++) {
-            Generator gen = generators.get(i);
-            elements.addAll(gen.populate(propagationEngine, solver));
-        }
-        for (int e = 0; e < elements.size(); e++) {
-            elements.get(e).setScheduler(this, 0);
-        }
-        //toPropagate = new FixSizeCircularQueue<S>(elements.size());
-        toPropagate = new ArrayDeque();
-        return Collections.singletonList(this);
+    public S[] getElements() {
+        return (S[]) new ISchedulable[]{this};
     }
+
     //-->
 
     //<-- PROPAGATION ENGINE

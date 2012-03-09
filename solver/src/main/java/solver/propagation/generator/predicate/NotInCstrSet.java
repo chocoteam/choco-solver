@@ -24,43 +24,37 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator.predicate;
 
-package solver.propagation.comparators.predicate;
-
+import gnu.trove.set.hash.TIntHashSet;
 import solver.constraints.Constraint;
-import solver.recorders.IEventRecorder;
+import solver.constraints.propagators.Propagator;
 
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 08/03/12
+ */
+public class NotInCstrSet extends Predicate<Propagator> {
 
-public class EqualC implements Predicate {
-    Constraint cstr;
-    int[] cached;
+    final TIntHashSet forbiddenIndices;
 
-    EqualC(Constraint cstr) {
-        this.cstr = cstr;
-    }
-
-    public boolean eval(IEventRecorder evtrec) {
-        return false;//this.cstr == evtrec.getPropagator().getConstraint();
+    public NotInCstrSet(Constraint... constraints) {
+        super(false, true);
+        forbiddenIndices = new TIntHashSet();
+        for (int i = 0; i < constraints.length; i++) {
+            Propagator[] propagators = constraints[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                forbiddenIndices.add(propagator.getId());
+            }
+        }
     }
 
     @Override
-    public int[] extract(IEventRecorder[] all) {
-        /*if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int j = 0; j < cstr.propagators.length; j++) {
-                Propagator p = cstr.propagators[j];
-                for (int k = 0; k < p.nbRecorders(); k++) {
-                    tmp.add(cstr.propagators[j].getRecorder(k).getIndex(IRequest.IN_GROUP));
-                }
-                //-1 is the PropRequest in a propagator
-                tmp.add(p.getRecorder(-1).getIndex(IRequest.IN_GROUP));
-            }
-            cached = tmp.toArray();
-        }*/
-        return cached;
+    public boolean isValid(Propagator element) {
+        return !forbiddenIndices.contains(element.getId());
     }
 
-    public String toString() {
-        return "EqualC";
-    }
 }

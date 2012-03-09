@@ -25,46 +25,39 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.comparators;
+package solver.propagation.generator.sorter;
 
 import solver.recorders.IEventRecorder;
-import solver.variables.IntVar;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Random;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 30/03/11
+ * @since 29/03/11
  */
-public class IncrDomDeg<V extends IntVar> implements Comparator<IEventRecorder>, Serializable {
+public class Shuffle implements Comparator<IEventRecorder>, Serializable {
 
-    private static final IncrDomDeg singleton = new IncrDomDeg();
+    private final Random random;
 
-    public static IncrDomDeg get() {
-        return singleton;
+    public Shuffle() {
+         random = new Random();
     }
 
-    private IncrDomDeg() {
+    public Shuffle(long seed) {
+         random = new Random(seed);
     }
 
     @Override
     public int compare(IEventRecorder o1, IEventRecorder o2) {
-        /*if (o1.getVariable().nbMonitors() == 0) {
-            return 1;
-        } else if (o2.getVariable().nbMonitors() == 0) {
-            return -1;
-        } else {
-            return o1.getVariable().getDomainSize() / o1.getVariable().nbMonitors()
-                    - o2.getVariable().getDomainSize() / o2.getVariable().nbMonitors();
-        }*/
-        return 0;
+        return random.nextInt();
     }
 
     @Override
     public String toString() {
-        return "IncrDomDeg";
+        return "Shuffle";
     }
 }

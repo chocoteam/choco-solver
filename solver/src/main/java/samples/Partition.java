@@ -33,9 +33,11 @@ import solver.Solver;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.unary.Relation;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.comparators.predicate.Predicate;
-import solver.propagation.comparators.predicate.Predicates;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -64,7 +66,7 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class Partition extends AbstractProblem {
     @Option(name = "-n", usage = "Partition size.", required = false)
-    int N = 48;
+    int N = 2 * 24;
 
     IntVar[] vars;
 
@@ -129,8 +131,6 @@ public class Partition extends AbstractProblem {
 
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
-        IPropagationEngine engine = solver.getEngine();
-        Predicate light = Predicates.light();
         /*engine.addGroup(
                 Group.buildGroup(
                         Predicates.priority_light(PropagatorPriority.TERNARY),
@@ -150,7 +150,9 @@ public class Partition extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
-
+        Sort ad1 = new Sort(new PVar(vars));
+        Sort coar = new Sort(new Increasing(EvtRecEvaluators.MaxPriorityC), new PCoarse(solver.getCstrs()));
+        solver.set(new Sort(ad1.loopOut(), coar.pickOne()).clearOut());
     }
 
     @Override

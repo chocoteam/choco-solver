@@ -31,7 +31,6 @@ import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * An abstract class for DSL to define a propagation strategy.
@@ -45,8 +44,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 15/12/11
  */
-public abstract class PropagationStrategy<E extends ISchedulable>
-        extends Generator<E> implements IScheduler<E>, ISchedulable, Serializable {
+public abstract class PropagationStrategy<E extends ISchedulable> implements Generator<E>, IScheduler<E>, ISchedulable, Serializable {
 
     static enum P {
         pickOne, sweepUp, clearOut, loopOut
@@ -55,11 +53,7 @@ public abstract class PropagationStrategy<E extends ISchedulable>
     protected P iteration = P.clearOut; // type of iteration
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
-    protected boolean enqueued; // to check wether this is enqueud or not.
-
-    protected PropagationStrategy(List<Generator> generators) {
-        super(generators);
-    }
+    protected boolean enqueued = false; // to check wether this is enqueud or not.
 
     //<-- DSL
 

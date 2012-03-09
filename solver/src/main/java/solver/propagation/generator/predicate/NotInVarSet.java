@@ -24,39 +24,31 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.comparators.predicate;
+package solver.propagation.generator.predicate;
 
-import solver.recorders.IEventRecorder;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.variables.Variable;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/09/11
+ * @since 08/03/12
  */
-public class LeftHandSide implements Predicate {
-    int[] cached;
+public class NotInVarSet extends Predicate<Variable> {
 
-    LeftHandSide() {
+    final TIntHashSet forbiddenIndices;
+
+    public NotInVarSet(Variable... variables) {
+        super(true, false);
+        forbiddenIndices = new TIntHashSet();
+        for (int i = 0; i < variables.length; i++) {
+            forbiddenIndices.add(variables[i].getId());
+        }
     }
 
     @Override
-    public boolean eval(IEventRecorder evtrec) {
-        return false;//evtrec.getVariable() != null && evtrec.getIndex(IRequest.VAR_IN_PROP) == 0;
-    }
-
-    @Override
-    public int[] extract(IEventRecorder[] all) {
-        /*if (cached == null) {
-            TIntHashSet tmp = new TIntHashSet();
-            for (int i = 0; i < all.length; i++) {
-                if (all[i].getIndex(IRequest.VAR_IN_PROP) == 0) {
-                    int idx = all[i].getIndex(IRequest.IN_GROUP);
-                    tmp.add(idx);
-                }
-                cached = tmp.toArray();
-            }
-        }*/
-        return cached;
+    public boolean isValid(Variable element) {
+        return forbiddenIndices.contains(element.getId());
     }
 }

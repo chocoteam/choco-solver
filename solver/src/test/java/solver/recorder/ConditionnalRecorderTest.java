@@ -34,10 +34,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.propagation.generator.Flatten;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
 import solver.recorders.conditions.CompletlyInstantiated;
 import solver.recorders.conditions.ICondition;
 import solver.search.strategy.StrategyFactory;
@@ -78,8 +74,9 @@ public class ConditionnalRecorderTest {
 
         //castRecords(cstrs, solver, solver.getEnvironment(), 2);
         ICondition cond = new CompletlyInstantiated(solver.getEnvironment(), 2);
-        PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
-        solver.set(q);
+//        PropagationStrategy q = Queue.build(Flatten.build(new PArc(cond, cstrs), new PCoarse(cstrs))).clearOut();
+//        solver.set(q);
+        Assert.assertTrue(false);
 
         solver.post(cstrs);
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
@@ -102,8 +99,9 @@ public class ConditionnalRecorderTest {
 
             //castRecords(cstrs, solver, solver.getEnvironment(), n / 2);
             ICondition cond = new CompletlyInstantiated(solver.getEnvironment(), n / 2);
-            PropagationStrategy q = Queue.build(Flatten.build(Primitive.arcs(cond, cstrs), Primitive.coarses(cstrs))).clearOut();
-            solver.set(q);
+//            PropagationStrategy q = Queue.build(Flatten.build(new PArc(cond, cstrs), new PCoarse(cstrs))).clearOut();
+//            solver.set(q);
+            Assert.assertTrue(false);
 
             solver.post(cstrs);
             solver.set(StrategyFactory.random(x, solver.getEnvironment()));

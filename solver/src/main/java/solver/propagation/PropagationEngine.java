@@ -81,23 +81,17 @@ public class PropagationEngine implements IPropagationEngine {
 
     public void init(Solver solver) {
         if (!initialized) {
-            pivot = solver.getNbIdElt();
-            Constraint[] constraints = solver.getCstrs();
-            // 1. water mark every couple variable-propagator of the solver
-            waterMark(constraints);
-            // 2. build groups based on the strategy defined
-            propagationStrategy.populate(this, solver);
+            // 1. add the default strategy if required
             if (!watermarks.isEmpty()) {
-                // 3. add the default strategy if required
                 LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
                 PropagationStrategy _default = buildDefault(solver);
-                _default.populate(this, solver);
-                propagationStrategy = Sort.corker(propagationStrategy, _default);
+                propagationStrategy = new Sort(propagationStrategy, _default);
                 if (!watermarks.isEmpty()) {
                     throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
                 }
             }
-            // 5. schedule constraints for initial propagation
+            // 2. schedule constraints for initial propagation
+            Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] propagators = constraints[c].propagators;
                 for (int p = 0; p < propagators.length; p++) {
@@ -107,6 +101,15 @@ public class PropagationEngine implements IPropagationEngine {
 
         }
         initialized = true;
+    }
+
+    public void prepareWM(Solver solver) {
+        if (watermarks == null) {
+            pivot = solver.getNbIdElt();
+            Constraint[] constraints = solver.getCstrs();
+            // 1. water mark every couple variable-propagator of the solver
+            waterMark(constraints);
+        }
     }
 
     private void waterMark(Constraint[] constraints) {
@@ -180,91 +183,4 @@ public class PropagationEngine implements IPropagationEngine {
         propagationStrategy = null;
         initialized = false;
     }
-
-    //    /**
-//     * Initialize this <code>IPropagationEngine</code> object with the array of <code>Constraint</code> and <code>Variable</code> objects.
-//     * It automatically pushes an event (call to <code>propagate</code>) for each constraints, the initial awake.
-//     */
-//    public void init() {
-//        if (engine != null) {
-//            throw new SolverException("PropagationEngine.init() has already been called once");
-//        }
-//        final IRequest[] tmp = records;
-//        records = new IRequest[size];
-//        System.arraycopy(tmp, 0, records, 0, size);
-//
-//        // FIRST: sort records, give them a unique group
-//        // build a default group
-//        addGroup(Group.buildQueue(Predicates.all(), Policy.FIXPOINT));
-//
-////        eval();
-//        extract();
-//
-//
-//        switch (deal) {
-//            case SEQUENCE:
-//                engine = new WhileEngine();
-//                break;
-//            case QUEUE:
-//                engine = new OldestEngine();
-//                break;
-//        }
-//        engine.setGroups(Arrays.copyOfRange(groups, 0, nbGroup));
-//
-//        // FINALLY, post initial propagation event for every heavy records
-//        for (int i = offset; i < size; i++) {
-//            records[i].update(EventType.FULL_PROPAGATION); // post initial propagation
-//        }
-//
-//    }
-//
-//    private void eval() {
-//        int i, j;
-//        for (i = 0; i < size; i++) {
-//            lastPoppedRequest = records[i];
-//            j = 0;
-//            // look for the first right group
-//            while (!groups[j].getPredicate().eval(lastPoppedRequest)) {
-//                j++;
-//            }
-//            groups[j].addRecorder(lastPoppedRequest);
-//        }
-//        for (j = 0; j < nbGroup; j++) {
-//            if (groups[j].isEmpty()) {
-//                groups[j] = groups[nbGroup - 1];
-//                groups[j].setIndex(j);
-//                groups[nbGroup - 1] = null;
-//                nbGroup--;
-//                j--;
-//            } else {
-//                groups[j].make();
-//            }
-//        }
-//    }
-//
-//
-//    private void extract() {
-//        int i, j;
-//        for (i = 0; i < size; i++) {
-//            records[i].setIndex(IRequest.IN_GROUP,i);
-//        }
-//        for (j = 0; j < nbGroup; j++) {
-//            int[] indices = groups[j].getPredicate().extract(records);
-//            Arrays.sort(indices);
-//            for (i = 0; i < indices.length; i++) {
-//                if (records[indices[i]].getIndex(IRequest.GROUP_ID) < 0) {
-//                    groups[j].addRecorder(records[indices[i]]);
-//                }
-//            }
-//            if (groups[j].isEmpty()) {
-//                groups[j] = groups[nbGroup - 1];
-//                groups[j].setIndex(j);
-//                groups[nbGroup - 1] = null;
-//                nbGroup--;
-//                j--;
-//            } else {
-//                groups[j].make();
-//            }
-//        }
-//    }
 }

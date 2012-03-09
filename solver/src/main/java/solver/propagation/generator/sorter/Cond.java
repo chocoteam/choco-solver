@@ -25,29 +25,43 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.comparators.predicate;
+package solver.propagation.generator.sorter;
 
+import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
-public interface Predicate<E extends IEventRecorder> extends Serializable {
+public class Cond<E extends IEventRecorder> implements Comparator<E>, Serializable {
+    Predicate<E> p;
+    Comparator<E> c1;
+    Comparator<E> c2;
 
-    /**
-     * Evaluate a request regarding <code>this</code>
-     *
-     * @param evtrec an event recorder
-     * @return <code>true</code> if <code>request</code> corresponds to the predicate given by <code>this</code>,
-     * false otherwise
-     */
-    public boolean eval(E evtrec);
+    public Cond(Predicate<E> p, Comparator<E> c1, Comparator<E> c2) {
+        this.p = p;
+        this.c1 = c1;
+        this.c2 = c2;
+    }
 
-    /**
-     * Extract the set of indices, in <code>all</code>, that corresponds to the predicate expressed by <code>this</code>.
-     * <p/>This allows using cached structures.
-     *
-     * @param all arrays of records
-     * @return list of indices, wihtin <code>all</code>, of records corresponding to <code>this</code>, unsorted.
-     */
-    public int[] extract(IEventRecorder[] all);
+    public int compare(E v1, E v2) {
+        boolean b1 = p.isValid(v1);
+        boolean b2 = p.isValid(v2);
+        if (b1 && b2) {
+            return c1.compare(v1, v2);
+        }
+        if (!b1 && !b2) {
+            return c2.compare(v1, v2);
+        }
+        if (b1 && !b2) {
+            return -1;
+        }
+        //if (!b1 && b2) {
+        return 1;
+        //}
+    }
+
+    public String toString() {
+        return "Cond(" + p + "," + c1 + "," + c2 + ")";
+    }
 }

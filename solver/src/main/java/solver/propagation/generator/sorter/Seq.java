@@ -25,43 +25,32 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.propagation.comparators;
+package solver.propagation.generator.sorter;
 
-import solver.propagation.comparators.predicate.Predicate;
 import solver.recorders.IEventRecorder;
 
 import java.io.Serializable;
 import java.util.Comparator;
 
-public class Cond implements Comparator<IEventRecorder>, Serializable {
-    Predicate p;
-    Comparator<IEventRecorder> c1;
-    Comparator<IEventRecorder> c2;
+public class Seq<E extends IEventRecorder> implements Comparator<E>, Serializable {
+    Comparator<E> c1;
+    Comparator<E> c2;
 
-    public Cond(Predicate p, Comparator<IEventRecorder> c1, Comparator<IEventRecorder> c2) {
-        this.p = p;
+    public Seq(Comparator<E> c1, Comparator<E> c2) {
         this.c1 = c1;
         this.c2 = c2;
     }
 
-    public int compare(IEventRecorder v1, IEventRecorder v2) {
-        boolean b1 = p.eval(v1);
-        boolean b2 = p.eval(v2);
-        if (b1 && b2) {
-            return c1.compare(v1, v2);
-        }
-        if (!b1 && !b2) {
+    public int compare(E v1, E v2) {
+        int cmp1 = c1.compare(v1, v2);
+        if (cmp1 == 0) {
             return c2.compare(v1, v2);
+        } else {
+            return cmp1;
         }
-        if (b1 && !b2) {
-            return -1;
-        }
-        //if (!b1 && b2) {
-        return 1;
-        //}
     }
 
     public String toString() {
-        return "Cond(" + p + "," + c1 + "," + c2 + ")";
+        return c1 + ";" + c2;
     }
 }

@@ -32,8 +32,6 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.ternary.Times;
-import solver.propagation.comparators.predicate.Predicate;
-import solver.propagation.comparators.predicate.Predicates;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -98,8 +96,6 @@ public class Grocery extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
         //FIRST propagators on tmp, natural order
-        Predicate inVARS = Predicates.member(vars);
-        Predicate ALL = Predicates.all();
         /*solver.getEngine().addGroup(
                 Group.buildGroup(
                         Predicates.but(ALL, inVARS),

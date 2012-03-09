@@ -24,39 +24,40 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.propagation.generator.predicate;
 
-package solver.propagation.comparators;
-
-import solver.recorders.IEventRecorder;
-import solver.variables.IntVar;
-
-import java.io.Serializable;
-import java.util.Comparator;
+import gnu.trove.set.hash.TIntHashSet;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 30/03/11
+ * @since 08/03/12
  */
-public class IncrDomSize<V extends IntVar> implements Comparator<IEventRecorder>, Serializable {
+public class InCstrSet extends Predicate<Propagator> {
 
-    private static final IncrDomSize singleton = new IncrDomSize();
+    final TIntHashSet allowIndices;
 
-    public static IncrDomSize get() {
-        return singleton;
+    public InCstrSet(Constraint... constraints) {
+        super(false, true);
+        allowIndices = new TIntHashSet();
+        add(constraints);
     }
 
-    private IncrDomSize() {
+    public void add(Constraint[] constraints) {
+        for (int i = 0; i < constraints.length; i++) {
+            Propagator[] propagators = constraints[i].propagators;
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                allowIndices.add(propagator.getId());
+            }
+        }
     }
 
     @Override
-    public int compare(IEventRecorder o1, IEventRecorder o2) {
-        return 0; //o1.getVariable().getDomainSize() - o2.getVariable().getDomainSize();
-    }
-
-    @Override
-    public String toString() {
-        return "IncrDomSize";
+    public boolean isValid(Propagator element) {
+        return allowIndices.contains(element.getId());
     }
 }
