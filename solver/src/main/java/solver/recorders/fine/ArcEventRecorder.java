@@ -62,8 +62,8 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
+    public V[] getVariables() {
+        return (V[]) new Variable[]{variable};
     }
 
     @Override
@@ -119,7 +119,7 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::"+propagator.toString() + " >>";
+        return "<< " + variable.toString() + "::" + propagator.toString() + " >>";
     }
 
     @Override

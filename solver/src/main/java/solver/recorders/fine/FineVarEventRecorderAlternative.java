@@ -90,8 +90,8 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
     }
 
     @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
+    public V[] getVariables() {
+        return (V[])new Variable[]{variable};
     }
 
     @Override

@@ -73,8 +73,8 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     }
 
     @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
+    public V[] getVariables() {
+        return (V[])new Variable[]{variable};
     }
 
     @Override

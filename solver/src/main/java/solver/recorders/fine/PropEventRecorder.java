@@ -85,7 +85,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     }
 
     @Override
-    public Variable[] getVariables() {
+    public V[] getVariables() {
         return variables;
     }
 

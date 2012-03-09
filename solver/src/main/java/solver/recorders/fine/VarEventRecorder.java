@@ -92,8 +92,8 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
+    public V[] getVariables() {
+        return (V[])new Variable[]{variable};
     }
 
     @Override
