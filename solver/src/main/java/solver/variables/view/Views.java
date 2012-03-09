@@ -72,15 +72,12 @@ public enum Views {
         if (cste == 0) {
             return ivar;
         }
-        int fhc = ivar.fastHashCode();
         IView[] views = ivar.getViews();
         for (int i = 0; i < views.length; i++) {
-            if (views[i].fastHashCode() == fhc) {
-                if (views[i] instanceof OffsetView) {
-                    OffsetView ov = (OffsetView) views[i];
-                    if (ivar == ov.getVariable() && ov.cste == cste) {
-                        return ov;
-                    }
+            if (views[i] instanceof OffsetView) {
+                OffsetView ov = (OffsetView) views[i];
+                if (ivar == ov.getVariable() && ov.cste == cste) {
+                    return ov;
                 }
             }
         }
@@ -89,15 +86,12 @@ public enum Views {
 
 
     public static IntVar minus(IntVar ivar) {
-        int fhc = ivar.fastHashCode();
         IView[] views = ivar.getViews();
         for (int i = 0; i < views.length; i++) {
-            if (views[i].fastHashCode() == fhc) {
-                if (views[i] instanceof MinusView) {
-                    MinusView mv = (MinusView) views[i];
-                    if (ivar == mv.getVariable()) {
-                        return mv;
-                    }
+            if (views[i] instanceof MinusView) {
+                MinusView mv = (MinusView) views[i];
+                if (ivar == mv.getVariable()) {
+                    return mv;
                 }
             }
         }
@@ -114,15 +108,12 @@ public enum Views {
             } else if (cste == -1) {
                 var = Views.minus(ivar);
             } else {
-                int fhc = ivar.fastHashCode();
                 IView[] views = ivar.getViews();
                 for (int i = 0; i < views.length; i++) {
-                    if (views[i].fastHashCode() == fhc) {
-                        if (views[i] instanceof ScaleView) {
-                            ScaleView sv = (ScaleView) views[i];
-                            if (ivar == sv.getVariable() && sv.cste == cste) {
-                                return sv;
-                            }
+                    if (views[i] instanceof ScaleView) {
+                        ScaleView sv = (ScaleView) views[i];
+                        if (ivar == sv.getVariable() && sv.cste == cste) {
+                            return sv;
                         }
                     }
                 }
@@ -140,15 +131,12 @@ public enum Views {
         } else if (ivar.getUB() <= 0) {
             return minus(ivar);
         } else {
-            int fhc = ivar.fastHashCode();
             IView[] views = ivar.getViews();
             for (int i = 0; i < views.length; i++) {
-                if (views[i].fastHashCode() == fhc) {
-                    if (views[i] instanceof AbsView) {
-                        AbsView av = (AbsView) views[i];
-                        if (ivar == av.getVariable()) {
-                            return av;
-                        }
+                if (views[i] instanceof AbsView) {
+                    AbsView av = (AbsView) views[i];
+                    if (ivar == av.getVariable()) {
+                        return av;
                     }
                 }
             }
@@ -161,15 +149,12 @@ public enum Views {
             int value = ivar.getValue();
             return fixed(value * value, ivar.getSolver());
         }
-        int fhc = ivar.fastHashCode();
         IView[] views = ivar.getViews();
         for (int i = 0; i < views.length; i++) {
-            if (views[i].fastHashCode() == fhc) {
-                if (views[i] instanceof SqrView) {
-                    SqrView sv = (SqrView) views[i];
-                    if (ivar == sv.getVariable()) {
-                        return sv;
-                    }
+            if (views[i] instanceof SqrView) {
+                SqrView sv = (SqrView) views[i];
+                if (ivar == sv.getVariable()) {
+                    return sv;
                 }
             }
         }
