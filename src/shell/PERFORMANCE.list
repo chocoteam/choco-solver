@@ -8,64 +8,112 @@
 ##############################
 
 ## ALL INTERVAL SERIES
-samples.AllIntervalSeries -o 500
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_ARCS
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.AllIntervalSeries -o 1000
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_ARCS
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## BALANCED INCOMPLETE BLOCK DESIGNS
-samples.BIBD -v 7 -k 3 -l 20
+samples.BIBD -v 7 -k 3 -l 20 -policy TWO_QUEUES_WITH_ARCS
+samples.BIBD -v 7 -k 3 -l 20 -policy TWO_QUEUES_WITH_VARS
+samples.BIBD -v 7 -k 3 -l 20 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.BIBD -v 7 -k 3 -l 60
+samples.BIBD -v 7 -k 3 -l 60 -policy TWO_QUEUES_WITH_ARCS
+samples.BIBD -v 7 -k 3 -l 60 -policy TWO_QUEUES_WITH_VARS
+samples.BIBD -v 7 -k 3 -l 60 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## CAR SEQUENCING
-#samples.CarSequencing -d myPb
+samples.CarSequencing -d myPb -policy TWO_QUEUES_WITH_ARCS
+samples.CarSequencing -d myPb -policy TWO_QUEUES_WITH_VARS
+samples.CarSequencing -d myPb -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.CarSequencing -d P4_72
+samples.CarSequencing -d P4_72 -policy TWO_QUEUES_WITH_ARCS
+samples.CarSequencing -d P4_72 -policy TWO_QUEUES_WITH_VARS
+samples.CarSequencing -d P4_72 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## GOLOMB RULER
-samples.GolombRuler -m 9 -c BC
+samples.GolombRuler -m 9 -c BC -policy TWO_QUEUES_WITH_ARCS
+samples.GolombRuler -m 9 -c BC -policy TWO_QUEUES_WITH_VARS
+samples.GolombRuler -m 9 -c BC -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.GolombRuler -m 10 -c BC
+samples.GolombRuler -m 10 -c BC -policy TWO_QUEUES_WITH_ARCS
+samples.GolombRuler -m 10 -c BC -policy TWO_QUEUES_WITH_VARS
+samples.GolombRuler -m 10 -c BC -policy TWO_QUEUES_WITH_PROPS
 ##
 ## LATIN SQUARE
-samples.LatinSquare -n 30
+samples.LatinSquare -n 30 -policy TWO_QUEUES_WITH_ARCS
+samples.LatinSquare -n 30 -policy TWO_QUEUES_WITH_VARS
+samples.LatinSquare -n 30 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## LATIN SQUARE
-samples.LatinSquare -n 40
+samples.LatinSquare -n 40 -policy TWO_QUEUES_WITH_ARCS
+samples.LatinSquare -n 40 -policy TWO_QUEUES_WITH_VARS
+samples.LatinSquare -n 40 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## PARTITION PROBLEM
-samples.Partition -n 48
+samples.Partition -n 48 -policy TWO_QUEUES_WITH_ARCS
+samples.Partition -n 48 -policy TWO_QUEUES_WITH_VARS
+samples.Partition -n 48 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.Partition -n 64
+samples.Partition -n 64 -policy TWO_QUEUES_WITH_ARCS
+samples.Partition -n 64 -policy TWO_QUEUES_WITH_VARS
+samples.Partition -n 64 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## PHOTO
-samples.Photo -d large
+samples.Photo -d large -policy TWO_QUEUES_WITH_ARCS
+samples.Photo -d large -policy TWO_QUEUES_WITH_VARS
+samples.Photo -d large -policy TWO_QUEUES_WITH_PROPS
 ##
 ## FAMOUS NQUEEN, my favourite
-samples.nqueen.NQueenBinary -q 12
+samples.nqueen.NQueenBinary -q 12 -policy TWO_QUEUES_WITH_ARCS
+samples.nqueen.NQueenBinary -q 12 -policy TWO_QUEUES_WITH_VARS
+samples.nqueen.NQueenBinary -q 12 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.nqueen.NQueenGlobal -q 400
+samples.nqueen.NQueenGlobal -q 200 -policy TWO_QUEUES_WITH_ARCS
+samples.nqueen.NQueenGlobal -q 200 -policy TWO_QUEUES_WITH_VARS
+samples.nqueen.NQueenGlobal -q 200 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## MAGIC SERIES
-samples.MagicSeries -n 400
+samples.MagicSeries -n 400 -policy TWO_QUEUES_WITH_ARCS
+samples.MagicSeries -n 400 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 400 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.MagicSeries -n 500
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_ARCS
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## MAGIC SQUARE
-samples.MagicSquare -n 5 -c BC
+samples.MagicSquare -n 5 -c BC -policy TWO_QUEUES_WITH_ARCS
+samples.MagicSquare -n 5 -c BC -policy TWO_QUEUES_WITH_VARS
+samples.MagicSquare -n 5 -c BC -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.MagicSquare -n 7 -c BC
+samples.MagicSquare -n 7 -c BC -policy TWO_QUEUES_WITH_ARCS
+samples.MagicSquare -n 7 -c BC -policy TWO_QUEUES_WITH_VARS
+samples.MagicSquare -n 7 -c BC -policy TWO_QUEUES_WITH_PROPS
 ##
 ## SOCIAL GOLFER
-samples.SocialGolfer -g 5 -w 7 -s 3
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy TWO_QUEUES_WITH_ARCS
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy TWO_QUEUES_WITH_VARS
+samples.SocialGolfer -g 5 -w 7 -s 3 -policy TWO_QUEUES_WITH_PROPS
 ##
-samples.SocialGolfer -g 5 -w 4 -s 3
+samples.SocialGolfer -g 5 -w 4 -s 3 -policy TWO_QUEUES_WITH_ARCS
+samples.SocialGolfer -g 5 -w 4 -s 3 -policy TWO_QUEUES_WITH_VARS
+samples.SocialGolfer -g 5 -w 4 -s 3 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## LANGFORD NUMBER
-samples.Langford -k 3 -n 17
+samples.Langford -k 3 -n 17 -policy TWO_QUEUES_WITH_ARCS
+samples.Langford -k 3 -n 17 -policy TWO_QUEUES_WITH_VARS
+samples.Langford -k 3 -n 17 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## SCHUR LEMMA
-samples.SchurLemma -k 4 -n 44
+samples.SchurLemma -k 4 -n 44 -policy TWO_QUEUES_WITH_ARCS
+samples.SchurLemma -k 4 -n 44 -policy TWO_QUEUES_WITH_VARS
+samples.SchurLemma -k 4 -n 44 -policy TWO_QUEUES_WITH_PROPS
 ##
 ## AIR PLANE LANDING
-samples.AirPlaneLanding -d airland1
+samples.AirPlaneLanding -d airland1 -policy TWO_QUEUES_WITH_ARCS
+samples.AirPlaneLanding -d airland1 -policy TWO_QUEUES_WITH_VARS
+samples.AirPlaneLanding -d airland1 -policy TWO_QUEUES_WITH_PROPS

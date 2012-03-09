@@ -79,8 +79,8 @@ def readParameters(paramlist):
     if len(paramlist) > 0:
         if paramlist[0] == "-l": # option for number of time a problem must be run
             loop = int(paramlist[1])
-        elif paramlist[0] == "-t":
-            timelimit = int(paramlist[1]) # time limit before killing a process
+        elif paramlist[0] == "-t": # time limit before killing a process
+            timelimit = int(paramlist[1])
         elif paramlist[0] == "-j": # number of thread to use in a loop
             thread = int(paramlist[1])
         elif paramlist[0] == "-n": # subname of output files
