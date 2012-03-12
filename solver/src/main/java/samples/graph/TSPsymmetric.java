@@ -51,14 +51,12 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -66,7 +64,6 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
 import java.util.BitSet;
 
@@ -79,7 +76,7 @@ public class TSPsymmetric {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 120000;
+	private static final long TIMELIMIT = 300000;
 	private static final int MAX_SIZE = 1200;
 	private static long seed = 0;
 	private static String outFile;
@@ -101,7 +98,7 @@ public class TSPsymmetric {
 
 	public static void main(String[] args) {
 		clearFile(outFile = "tsp.csv");
-		writeTextInto("instance;sols;fails;time;obj;allDiffAC;search;\n", outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;allDiffAC;search;\n", outFile);
 		bench();
 	}
 
@@ -346,28 +343,15 @@ public class TSPsymmetric {
 		for (String s : list) {
 			if (s.contains(".tsp") && (!s.contains("gz"))){
 				matrix = parseInstance(dir + "/" + s);
-				if(matrix!=null && matrix.length>=0 && matrix.length<200){
-					int n = matrix.length;
-//					int maxArcCost = 0;
-//					for(int i=0;i<n;i++){
-//						for(int j=0;j<n;j++){
-//							if(matrix[i][j]>maxArcCost){
-//								maxArcCost = matrix[i][j];
-//							}
-//						}
-//					}
-//					upperBound = maxArcCost*n;
+				if((matrix!=null && matrix.length>=140 && matrix.length<2000) || (s.contains("pr226"))){
 					if(optProofOnly){
 						setUB(s.split("\\.")[0]);
 						System.out.println("optimum : "+upperBound);
 					}
-//					solveDirected(matrix, s);
-//					allDiffAC = false;
-//					solveUndirected(matrix, s);
-//					restart = true;
-//					search = 2;
 					degHeur = true;
 					solveUndirected(matrix, s);
+//					degHeur = false;
+//					solveUndirected(matrix, s);
 //					System.exit(0);
 				}else{
 					System.out.println("CANNOT LOAD");
@@ -429,6 +413,7 @@ public class TSPsymmetric {
 			mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		}
 		gc.addAdHocProp(mst);
+//		gc.addAdHocProp(new Prop_LP_GRB(undi,totalCost,matrix,solver,gc));
 		switch (search){
 			case 0: solver.set(new RCSearch(undi));break;
 			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),new RCSearch(undi)));break;
@@ -453,6 +438,7 @@ public class TSPsymmetric {
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
+				+ solver.getMeasures().getNodeCount() + ";"
 				+ (int)(solver.getMeasures().getTimeCount()) + ";" + bestCost + ";"+allDiffAC+";"+search+";\n";
 		writeTextInto(txt, outFile);
 	}
@@ -461,7 +447,7 @@ public class TSPsymmetric {
 		int n = matrix.length;
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
 			writeTextInto("BUG\n",outFile);
-//			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount() > 0){
 			int sum = 0;
@@ -474,7 +460,7 @@ public class TSPsymmetric {
 			}
 			if(sum!=solver.getSearchLoop().getObjectivemanager().getBestValue()){
 				writeTextInto("BUG\n",outFile);
-//				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException();
 			}
 		}
 	}
@@ -684,656 +670,6 @@ public class TSPsymmetric {
 	// HEURISTICS
 	//***********************************************************************************
 
-	private static class MinCostMinNeigh extends ArcStrategy {
-		int[][] dist;
-
-		public MinCostMinNeigh(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-		}
-
-		@Override
-		public int nextArc() {
-			if(g.instantiated()){
-				System.out.println("over");
-				return -1;
-			}
-			INeighbors suc;
-			int cost = -1;
-			BitSet list = new BitSet(n);
-			for(int i=0;i<n;i++){
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()){
-					if(!g.getKernelGraph().arcExists(i,j)){
-						if(cost == -1 || cost>dist[i][j]){
-							list.clear();
-							list.set(i);
-							cost = dist[i][j];
-						}else if(cost==dist[i][j]){
-							list.set(i);
-						}
-					}
-				}
-			}
-			int from = -1;
-			int size = n + 1;
-			size = 0;
-			for (int i = list.nextSetBit(0); i>=0; i=list.nextSetBit(i+1)) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize() > size) {
-					from = i;
-					size = suc.neighborhoodSize();
-				}
-			}
-			if (from == -1) {
-				throw new UnsupportedOperationException();
-			}
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(dist[from][j]==cost && !g.getKernelGraph().arcExists(from,j)){
-					System.out.println(from+" -> "+j+" : "+cost);
-					return (from + 1) * n + j;
-				}
-			}
-			throw new UnsupportedOperationException("error in branching");
-		}
-	}
-
-	private static class MaxRegretMinCost extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			INeighbors suc;
-			int from;
-			if(g.isDirected()){
-				from = nextFromDir();
-			}else{
-				from = nextFromUndir();
-			}
-			if(from==-1){
-				if(!g.instantiated()){
-					throw new UnsupportedOperationException();
-				}
-				return -1;
-			}
-			int val;
-			int to = -1;
-			int minCost = -1;
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(!g.getKernelGraph().arcExists(from,j)){
-					val = dist[from][j];
-					if(minCost == -1 || val<minCost){
-						minCost = val;
-						to = j;
-					}
-				}
-			}
-			if (to == -1 || g.getKernelGraph().arcExists(from, to)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
-			return (from+1)*n+to;
-		}
-		public int nextFromDir() {
-			INeighbors suc;
-			int from = -1;
-			int difMax = -1;
-			for (int i = 0; i < n; i++) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()>1) {
-					int best = getBest(i,-2,-2, suc);
-					int secondBest = getBest(i,best,-2, suc);
-					if(dist[i][secondBest]-dist[i][best]>difMax){
-						difMax = dist[i][secondBest]-dist[i][best];
-						from = i;
-					}
-				}
-			}
-			return from;
-		}
-
-		public int nextFromUndir() {
-			INeighbors suc;
-			int from = -1;
-			int difMax = -1;
-			for (int i = 0; i < n; i++) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()>2) {
-					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-					int best = mand;
-					if(mand==-1){
-						best = getBest(i,-2,-2,suc);
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						int val = dist[i][thirdBest]+dist[i][thirdBest]-dist[i][secondBest]-dist[i][best];
-						if(dist[i][secondBest]<dist[i][best]){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]<dist[i][secondBest]){
-							throw new UnsupportedOperationException();
-						}
-						if(val<0){
-							throw new UnsupportedOperationException();
-						}
-						if(val>difMax){
-							difMax = val;
-							from = i;
-						}
-					}else{
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						if(dist[i][thirdBest]-dist[i][secondBest]<0){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-							difMax = dist[i][thirdBest]-dist[i][secondBest];
-							from = i;
-						}
-					}
-//					int secondBest = getBest(i,best,-2,suc);
-//					int thirdBest = getBest(i,best,secondBest,suc);
-//					if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-//						difMax = dist[i][thirdBest]-dist[i][secondBest];
-//						from = i;
-//					}
-				}
-			}
-			return from;
-		}
-
-		private int getBest(int from, int not1, int not2, INeighbors nei) {
-			int best = -1;
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(j!=not1 && j!=not2){
-					if(best==-1 || dist[from][j]<dist[from][best]){
-						best = j;
-					}
-				}
-			}
-			if(best == -1){
-				throw new UnsupportedOperationException();
-			}
-			return best;
-		}
-	}
-
-	private static class MSTMaxRegretMinCost extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MSTMaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			INeighbors suc;
-			int from=-1,to=-1;
-			int size = n+1;
-			int val;
-			int minCost = -1;
-			for(int i=0;i<n;i++){
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(suc.neighborhoodSize()>2 && suc.neighborhoodSize()<size){
-					size = suc.neighborhoodSize();
-				}
-				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-					if(mst.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
-						val = dist[i][j];
-						if(minCost == -1 || val<minCost){
-							minCost = val;
-							from = i;
-							to = j;
-						}
-					}
-				}
-			}
-			if (to == -1 || g.getKernelGraph().arcExists(from, to)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
-			return (from+1)*n+to;
-		}
-
-		public int nextFromUndir(int size) {
-			INeighbors suc;
-			int from = -1;
-			int difMax = -1;
-			for (int i = 0; i < n; i++) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()==size) {
-					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-					int best = mand;
-					if(mand==-1){
-						best = getBest(i,-2,-2,suc);
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						int val = dist[i][thirdBest]+dist[i][thirdBest]-dist[i][secondBest]-dist[i][best];
-						if(dist[i][secondBest]<dist[i][best]){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]<dist[i][secondBest]){
-							throw new UnsupportedOperationException();
-						}
-						if(val<0){
-							throw new UnsupportedOperationException();
-						}
-						if(val>difMax){
-							difMax = val;
-							from = i;
-						}
-					}else{
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						if(dist[i][thirdBest]-dist[i][secondBest]<0){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-							difMax = dist[i][thirdBest]-dist[i][secondBest];
-							from = i;
-						}
-					}
-//					int secondBest = getBest(i,best,-2,suc);
-//					int thirdBest = getBest(i,best,secondBest,suc);
-//					if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-//						difMax = dist[i][thirdBest]-dist[i][secondBest];
-//						from = i;
-//					}
-				}
-			}
-			return from;
-		}
-
-		private int getBest(int from, int not1, int not2, INeighbors nei) {
-			int best = -1;
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(j!=not1 && j!=not2){
-					if(best==-1 || dist[from][j]<dist[from][best]){
-						best = j;
-					}
-				}
-			}
-			if(best == -1){
-				throw new UnsupportedOperationException();
-			}
-			return best;
-		}
-	}
-
-	private static class MinDomMaxRegretMinCost extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MinDomMaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			INeighbors suc;
-			int from;
-			int size = n+1;
-			for(int i=0;i<n;i++){
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(suc.neighborhoodSize()>2 && suc.neighborhoodSize()<size){
-					size = suc.neighborhoodSize();
-				}
-			}
-			from = nextFromUndir(size);
-			if(from==-1){
-				if(!g.instantiated()){
-					throw new UnsupportedOperationException();
-				}
-				return -1;
-			}
-			int val;
-			int to = -1;
-			int minCost = -1;
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(!g.getKernelGraph().arcExists(from,j)){
-					val = dist[from][j];
-					if(minCost == -1 || val<minCost){
-						minCost = val;
-						to = j;
-					}
-				}
-			}
-			if (to == -1 || g.getKernelGraph().arcExists(from, to)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
-			return (from+1)*n+to;
-		}
-
-		public int nextFromUndir(int size) {
-			INeighbors suc;
-			int from = -1;
-			int difMax = -1;
-			for (int i = 0; i < n; i++) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize()==size) {
-					int mand = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-					int best = mand;
-					if(mand==-1){
-						best = getBest(i,-2,-2,suc);
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						int val = dist[i][thirdBest]+dist[i][thirdBest]-dist[i][secondBest]-dist[i][best];
-						if(dist[i][secondBest]<dist[i][best]){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]<dist[i][secondBest]){
-							throw new UnsupportedOperationException();
-						}
-						if(val<0){
-							throw new UnsupportedOperationException();
-						}
-						if(val>difMax){
-							difMax = val;
-							from = i;
-						}
-					}else{
-						int secondBest = getBest(i,best,-2,suc);
-						int thirdBest = getBest(i,best,secondBest,suc);
-						if(dist[i][thirdBest]-dist[i][secondBest]<0){
-							throw new UnsupportedOperationException();
-						}
-						if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-							difMax = dist[i][thirdBest]-dist[i][secondBest];
-							from = i;
-						}
-					}
-//					int secondBest = getBest(i,best,-2,suc);
-//					int thirdBest = getBest(i,best,secondBest,suc);
-//					if(dist[i][thirdBest]-dist[i][secondBest]>difMax){
-//						difMax = dist[i][thirdBest]-dist[i][secondBest];
-//						from = i;
-//					}
-				}
-			}
-			return from;
-		}
-
-		private int getBest(int from, int not1, int not2, INeighbors nei) {
-			int best = -1;
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(j!=not1 && j!=not2){
-					if(best==-1 || dist[from][j]<dist[from][best]){
-						best = j;
-					}
-				}
-			}
-			if(best == -1){
-				throw new UnsupportedOperationException();
-			}
-			return best;
-		}
-	}
-
-	private static class MinNeighMinCost extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MinNeighMinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			INeighbors suc;
-			int from = -1;
-			int size = n + 1;
-			int sizi;
-			for (int i = 0; i < n; i++) {
-				sizi = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()-g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				if (sizi < size && sizi>0) {
-					from = i;
-					size = sizi;
-				}
-			}
-			if (from == -1) {
-//				System.out.println("over");
-				return -1;
-			}
-			int val;
-			int to = -1;
-			int minCost = -1;
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(!g.getKernelGraph().arcExists(from,j)){
-					val = dist[from][j];
-					if(minCost == -1 || val<minCost){
-						minCost = val;
-						to = j;
-					}
-				}
-			}
-			if (to == -1) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-			if (g.getKernelGraph().arcExists(from, to)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-//			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
-			return (from+1)*n+to;
-		}
-	}
-
-	private static class MinNeighMinCostOriginal extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MinNeighMinCostOriginal(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			if(g.instantiated()){
-				return -1;
-			}
-			INeighbors suc;
-			int from = -1;
-			int size = n + 1;
-			for (int i = 0; i < n-offSet; i++) {
-				if(g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()>2-offSet){
-					System.out.println(i+":"+g.getKernelGraph().getSuccessorsOf(i)+":"+g.isDirected()+" : "+n);
-					throw new UnsupportedOperationException();
-				}
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize() < size && suc.neighborhoodSize() > 2-offSet) {
-					from = i;
-					size = suc.neighborhoodSize();
-				}
-			}
-			if (from == -1) {
-				return -1;
-			}
-			int val;
-			int minArc = -1;
-			int minCost = -1;
-			suc = g.getEnvelopGraph().getSuccessorsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if(!g.getKernelGraph().arcExists(from,j)){
-					val = dist[from][j];
-					if(minCost == -1 || val<minCost){
-						minCost = val;
-						minArc = (from + 1) * n + j;
-					}
-				}
-			}
-			if (minArc == -1) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-			if (g.getKernelGraph().arcExists(from, minArc % n)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-			return minArc;
-		}
-	}
-
-	private static class MinRealNeighMinCost extends ArcStrategy {
-		int[][] dist;
-
-		public MinRealNeighMinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-		}
-
-		@Override
-		public int nextArc() {
-			if(g.instantiated()){
-				return -1;
-			}
-			INeighbors suc;
-			int from = -1;
-			int size = n + 1;
-			for (int i = 0; i < n; i++) {
-				if(g.getKernelGraph().getNeighborsOf(i).neighborhoodSize()>2){
-					System.out.println(i+":"+g.getKernelGraph().getSuccessorsOf(i)+":"+g.isDirected()+" : "+n);
-					throw new UnsupportedOperationException();
-				}
-				suc = g.getEnvelopGraph().getNeighborsOf(i);
-				if (suc.neighborhoodSize() < size && suc.neighborhoodSize() > 2) {
-					from = i;
-					size = suc.neighborhoodSize();
-				}
-			}
-			if (from == -1) {
-				return -1;
-			}
-			int val;
-			int minArc = -1;
-			int minCost = -1;
-			suc = g.getEnvelopGraph().getNeighborsOf(from);
-			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-				if((!g.getKernelGraph().arcExists(from,j)) && (!g.getKernelGraph().arcExists(j,from))){
-					if(g.getEnvelopGraph().arcExists(from,j)){
-						val = dist[from][j];
-						if(minCost == -1 || val<minCost){
-							minCost = val;
-							minArc = (from + 1) * n + j;
-						}
-					}else{
-						val = dist[j][from];
-						if(minCost == -1 || val<minCost){
-							minCost = val;
-							minArc = (j + 1) * n + from;
-						}
-					}
-				}
-			}
-			if (minArc == -1) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-			if (g.getKernelGraph().arcExists(from, minArc % n)) {
-				throw new UnsupportedOperationException("error in branching");
-			}
-			return minArc;
-		}
-	}
-
-	private static class MinCost extends ArcStrategy {
-		int[][] dist;
-		int offSet;
-
-		public MinCost(GraphVar graphVar, int[][] costMatrix) {
-			super(graphVar);
-			dist = costMatrix;
-			if(graphVar.isDirected()){
-				offSet = 1;
-			}else{
-				offSet = 0;
-			}
-		}
-
-		@Override
-		public int nextArc() {
-			if(g.instantiated()){
-				return -1;
-			}
-			int val;
-			int minArc = -1;
-			int minCost = -1;
-			INeighbors suc;
-			int size = n + 1;
-			for (int i = 0; i < n-offSet; i++) {
-				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-				if (suc.neighborhoodSize() < size && suc.neighborhoodSize() > 2-offSet) {
-					size = suc.neighborhoodSize();
-					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-						if(!g.getKernelGraph().arcExists(i,j)){
-							val = dist[i][j];
-							if(minCost == -1 || val<minCost){
-								minCost = val;
-								minArc = (i + 1) * n + j;
-							}
-						}
-					}
-				}
-			}
-			if (minArc == -1) {
-				return -1;
-			}
-			return minArc;
-		}
-	}
-
-//	private static class MaxRC extends ArcStrategy {
-//		public MaxRC(GraphVar graphVar) {
-//			super(graphVar);
-//		}
-//		@Override
-//		public int nextArc() {
-//			int minArc = mst.getHighestRC();
-//			if (minArc == -1) {
-//				if(!g.instantiated()){
-//					throw new UnsupportedOperationException();
-//				}
-//				return -1;
-//			}
-//			return minArc;
-//		}
-//	}
-
 	private static class ConstructorHeur extends ArcStrategy {
 		BitSet seen;
 		int[][] matrix;
@@ -1418,12 +754,21 @@ public class TSPsymmetric {
 			if(degHeur){
 				val = minDomMaxRepCost();
 			}else{
-				val = maxDomMaxCost();
+				val = maxRepCost();
 			}
 			if(val == -1){
 				if(g.instantiated()){
 					return null;
-				}throw new UnsupportedOperationException();
+				}
+				INeighbors n0 = g.getEnvelopGraph().getSuccessorsOf(0);
+				if(n0.neighborhoodSize()==2){
+					throw new UnsupportedOperationException();
+				}
+				for(int j=n0.getFirstElement();j>=0;j=n0.getNextElement()){
+					if(!g.getKernelGraph().arcExists(0,j)){
+						val = g.getEnvelopOrder()+j;
+					}
+				}
 			}
 			return new GraphDecision(g,val, Assignment.graph_remover);
 		}
@@ -1487,6 +832,29 @@ public class TSPsymmetric {
 							}
 							if (sizi < size) {
 								size = sizi;
+								repCost = repCostIJ;
+								to = j;
+								from = i;
+							}
+						}
+					}
+				}
+			}
+			return (from+1)*n+to;
+		}
+		public int maxRepCost() {
+			int n = g.getEnvelopOrder();
+			INeighbors suc;
+			double repCost=-1,repCostIJ;
+			int to = -1;
+			int from=-1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(suc.neighborhoodSize()>2){
+					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+						if(i<j && mst.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){//mst.isInMST(i,j) &&
+							repCostIJ = mst.getRepCost(i,j);
+							if(repCost < repCostIJ){
 								repCost = repCostIJ;
 								to = j;
 								from = i;

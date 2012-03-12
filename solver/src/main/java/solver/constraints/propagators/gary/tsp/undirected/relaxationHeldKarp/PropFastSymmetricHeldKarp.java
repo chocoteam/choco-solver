@@ -30,6 +30,8 @@ package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
@@ -87,6 +89,24 @@ public class PropFastSymmetricHeldKarp<V extends Variable> extends PropSymmetric
 //		phk.treeMode = TWO_TREE;
 //		return phk;
 //	}
+
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		nbSprints = 5*n;
+		super.propagate(evtmask);
+		nbSprints = 30;
+		for(int i=0;i<n;i++){
+			penalities[i] = 0;
+		}
+		totalPenalities = 0;
+	}
+
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		//int depth = (int)(solver.getSearchLoop().getMeasures().getNodeCount()-solver.getSearchLoop().getMeasures().getFailCount());
+		//nbSprints = 10+n/(1+depth);
+		HK_algorithm();
+	}
 
 	//***********************************************************************************
 	// HK Algorithm(s)

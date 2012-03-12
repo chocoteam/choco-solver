@@ -70,6 +70,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	protected static boolean waitFirstSol;
 	protected int treeMode; // 0=MST; 1=OneTree; 2=TwoTree
 	protected static final int MST=0,ONE_TREE=1,TWO_TREE=2;
+	protected int nbSprints = 30;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -169,7 +170,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 			improved = true;
 //			while(improved){
 				improved = false;
-				for(int i=30;i>0;i--){
+				for(int i=nbSprints;i>0;i--){
 //				for(int i=(n-treeMode)/2;i>0;i--){
 					HK.computeMST(costs,g.getEnvelopGraph());
 					hkb = HK.getBound()-getTotalPen();

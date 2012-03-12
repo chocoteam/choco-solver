@@ -176,7 +176,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 //		for(int iter=2;iter>0;iter--){
 		for(int iter=5;iter>0;iter--){
 			improved = true;
-//			while(improved){
+//			while(improved){ // only for p43
 				improved = false;
 				for(int i=30;i>0;i--){
 //				for(int i=n/2;i>0;i--){
