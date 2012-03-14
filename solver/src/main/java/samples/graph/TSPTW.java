@@ -41,6 +41,7 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.disjunctive.*;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -141,7 +142,7 @@ public class TSPTW extends AbstractProblem{
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
-		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropSumArcCosts(graph,totalCost,distanceMatrix,gc,solver));
 		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
 		if(rg){// reduced-graph based filtering
 			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
@@ -196,7 +197,7 @@ public class TSPTW extends AbstractProblem{
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
-		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropSumArcCosts(graph,totalCost,distanceMatrix,gc,solver));
 		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
 		if(arbo){
 			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
@@ -306,7 +307,7 @@ public class TSPTW extends AbstractProblem{
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1,gc,solver));
-		gc.addAdHocProp(new PropEvalObj(graph,totalCost,distanceMatrix,gc,solver));
+		gc.addAdHocProp(new PropSumArcCosts(graph,totalCost,distanceMatrix,gc,solver));
 		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
 
 		gc.addAdHocProp(new PropTaskDefinition(time, end, duration, graph, distanceMatrix, gc, solver));

@@ -38,7 +38,6 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.directed.PropKhun;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.HeldKarp;
@@ -49,11 +48,11 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -163,7 +162,7 @@ public class TSP {
 		gc.addAdHocProp(new PropOneSuccBut(graph, n - 1, gc, solver));
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-		gc.addAdHocProp(new PropEvalObj(graph, totalCost, distanceMatrix, gc, solver));
+		gc.addAdHocProp(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
 			gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
 		}

@@ -52,6 +52,7 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
+import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
@@ -174,7 +175,7 @@ public class TSPTW2 {
 		gc.addAdHocProp(new PropOneSuccBut(graph, n - 1, gc, solver));
 		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-		gc.addAdHocProp(new PropEvalObj(graph, totalCost, distanceMatrix, gc, solver));
+		gc.addAdHocProp(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropTimeInTour(time,graph,distanceMatrix,gc,solver));
 		// STRUCTURAL FILTERING
 		if(config.get(allDiff)){

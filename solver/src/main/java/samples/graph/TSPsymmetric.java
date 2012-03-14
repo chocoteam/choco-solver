@@ -35,7 +35,7 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.directed.PropEvalObj;
+import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
@@ -488,7 +488,7 @@ public class TSPsymmetric {
 		gc.addAdHocProp(new PropOneSuccBut(dir, n - 1, gc, solver));
 		gc.addAdHocProp(new PropOnePredBut(dir, 0, gc, solver));
 		gc.addAdHocProp(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
-		gc.addAdHocProp(new PropEvalObj(dir, totalCost, matrix, gc, solver));
+		gc.addAdHocProp(new PropSumArcCosts(dir, totalCost, matrix, gc, solver));
 		if(allDiffAC){
 			gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
 		}
