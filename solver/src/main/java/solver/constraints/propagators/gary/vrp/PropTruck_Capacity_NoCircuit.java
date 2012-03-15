@@ -138,7 +138,12 @@ public class PropTruck_Capacity_NoCircuit<V extends DirectedGraphVar> extends Gr
 		end[start].set(last);
 		currentCapa[last].add(currentCapa[i].get());
 		int capa = currentCapa[last].get();
-		if(capa>truckCapa || currentCapa[j].get()+currentCapa[i].get()>truckCapa){
+		int offSet = 0;
+		if(currentCapa[start].get()<0){
+			offSet = -currentCapa[start].get();
+			capa += offSet;
+		}
+		if(capa>truckCapa || currentCapa[j].get()+currentCapa[i].get()+offSet>truckCapa){
 			contradiction(g,"");
 		}
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(last);

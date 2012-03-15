@@ -93,16 +93,12 @@ public class PDPTW {
 		for(int i=0;i<2*nbTrucks;i+=2){
 			truck[i] = truck[i+1] = VariableFactory.bounded("t" + i, i / 2, i / 2, solver);
 		}
-		//System.out.println(nbTrucks+" trucks "+precedFrom.size()+" links");
-
 		for(int i=0;i<precedFrom.size();i++){
-			//System.out.println(precedFrom.get(i)+" - "+precedTo.get(i));
 			truck[precedFrom.get(i)] = truck[precedTo.get(i)] = VariableFactory.enumerated("t"+i,0,nbTrucks-1,solver);
 		}
 		for(int i=0;i<n;i++){
 			if(truck[i]==null){
-				//System.out.println(i+" has no truck var");
-				throw new UnsupportedOperationException();
+				throw new UnsupportedOperationException("node "+i+" has no truck variable");
 			}
 		}
 		for(int i=0;i<n;i++){
@@ -130,7 +126,8 @@ public class PDPTW {
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		gc.addAdHocProp(new Prop1Succ_butEndingDepot(graph, nbTrucks, gc, solver));
 		gc.addAdHocProp(new Prop1Pred_butStartingDepot(graph, nbTrucks, gc, solver));
-		gc.addAdHocProp(new PropNoCircuit(graph, gc, solver));// could be removed
+//		gc.addAdHocProp(new PropNoCircuit(graph, gc, solver));// could be removed
+		gc.addAdHocProp(new PropTruck_Capacity_NoCircuit(graph,demand,capacity,gc,solver));
 		gc.addAdHocProp(new PropTruckCompatibility(graph,truck,nbTrucks,gc,solver));
 
 		// structral redundant filtering
@@ -139,10 +136,7 @@ public class PDPTW {
 		// --- Reachability
 		gc.addAdHocProp(new PropTruckReachability(graph,truck,nbTrucks,gc,solver));
 		// --- ArboAntiArbo GAC (slow)
-		gc.addAdHocProp(new PropArborescences(graph,gc,solver,true));gc.addAdHocProp(new PropAntiArborescences(graph,gc,solver,true));
-
-		// capacity
-		gc.addAdHocProp(new PropTruck_Capacity_NoCircuit(graph,demand,capacity,gc,solver));
+		// gc.addAdHocProp(new PropArborescences(graph,gc,solver,true));gc.addAdHocProp(new PropAntiArborescences(graph,gc,solver,true));
 
 		// costs
 		gc.addAdHocProp(new PropSumArcCosts(graph, length, distanceMatrix, gc, solver));

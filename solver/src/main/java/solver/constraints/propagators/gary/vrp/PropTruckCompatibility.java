@@ -35,6 +35,7 @@
 package solver.constraints.propagators.gary.vrp;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -53,6 +54,7 @@ public class PropTruckCompatibility extends GraphPropagator {
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+	IStateInt[][] truckInCommom;
 	int n;
 	int nbTrucks;
 	IntVar[] trucks;
@@ -68,6 +70,28 @@ public class PropTruckCompatibility extends GraphPropagator {
 		this.nbTrucks = nbTrucks;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.trucks = trucks;
+		truckInCommom = new IStateInt[n][n];
+		IStateInt noArc = environment.makeInt(-1);
+		for(int i=0;i<n;i++){
+			for(int j=i+1;j<n;j++){
+				if(g.getEnvelopGraph().arcExists(i,j)||g.getEnvelopGraph().arcExists(j,i)){
+					truckInCommom[i][j] = truckInCommom[j][i] = environment.makeInt(getTruckInCommon(i,j));
+				}else{
+					truckInCommom[i][j] = truckInCommom[j][i] = noArc;
+				}
+			}
+		}
+	}
+
+	private int getTruckInCommon(int i, int j) {
+		int lb = Math.max(trucks[i].getLB(),trucks[j].getLB());
+		int ub = Math.min(trucks[i].getUB(),trucks[j].getUB());
+		for(int t=lb;t<=ub;t=trucks[i].nextValue(t+1)){
+			if(trucks[j].contains(t)){
+				return t;
+			}
+		}
+		return -1;
 	}
 
 	//***********************************************************************************
@@ -77,28 +101,44 @@ public class PropTruckCompatibility extends GraphPropagator {
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
-			lookAround(i);
+			for(int j=i+1;j<n;j++){
+				if(g.getEnvelopGraph().arcExists(i,j)||g.getEnvelopGraph().arcExists(j,i)){
+					truckInCommom[i][j].set(getTruckInCommon(i,j));
+					if(truckInCommom[i][j].get()==-1){
+						g.removeArc(i,j,this);
+						g.removeArc(j,i,this);
+					}
+				}else{
+					truckInCommom[i][j].set(-1);
+				}
+			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		lookAround(idxVarInProp);
+		checkNode(idxVarInProp);
 	}
 
-	private void lookAround(int i) throws ContradictionException {
-		int lb = trucks[i].getLB();
-		int ub = trucks[i].getUB();
+	private void checkNode(int i) throws ContradictionException {
 		INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(i);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(trucks[j].getUB()<lb || trucks[j].getLB()>ub){
-				g.removeArc(j,i,this);
+			if(!trucks[i].contains(truckInCommom[i][j].get())){
+				truckInCommom[i][j].set(getTruckInCommon(i,j));
+				if(truckInCommom[i][j].get()==-1){
+					g.removeArc(j,i,this);
+					g.removeArc(i,j,this);
+				}
 			}
 		}
 		nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(trucks[j].getUB()<lb || trucks[j].getLB()>ub){
-				g.removeArc(i,j,this);
+			if(!trucks[i].contains(truckInCommom[i][j].get())){
+				truckInCommom[i][j].set(getTruckInCommon(i,j));
+				if(truckInCommom[i][j].get()==-1){
+					g.removeArc(i,j,this);
+					g.removeArc(j,i,this);
+				}
 			}
 		}
 	}
