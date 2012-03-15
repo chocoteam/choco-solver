@@ -69,8 +69,10 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public void schedule(S element) {
-        toPropagate.add(element);
-        element.enqueue();
+        if (!element.enqueued()) { // to avoid multiple occurrences of element in toPropagate
+            toPropagate.add(element);
+            element.enqueue();
+        }
         if (!this.enqueued) {
             scheduler.schedule(this);
         }
@@ -78,8 +80,8 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public void remove(S element) {
-        element.deque();
         toPropagate.remove(element);
+        element.deque();
         if (this.enqueued && toPropagate.isEmpty()) {
             scheduler.remove(this);
         }

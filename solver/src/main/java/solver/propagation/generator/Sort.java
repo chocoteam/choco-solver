@@ -83,8 +83,10 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     @Override
     public void schedule(ISchedulable element) {
         int idx = element.getIndexInScheduler();
-        toPropagate.set(idx);
-        element.enqueue();
+        if (!element.enqueued()) { // to avoid multiple occurrences of element in toPropagate --
+            toPropagate.set(idx);
+            element.enqueue();
+        }
         if (!this.enqueued) {
             scheduler.schedule(this);
         }

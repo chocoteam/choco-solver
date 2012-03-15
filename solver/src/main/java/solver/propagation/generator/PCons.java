@@ -102,7 +102,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
                 if (validations.length == 0 || validate(var, validations)) {
                     propagationEngine.clearWatermark(vidx, pidx, j);
                     variables[i] = var;
-                    pindices[i++] = pindices[j];
+                    pindices[i++] = j;
                 }
             }
         }
