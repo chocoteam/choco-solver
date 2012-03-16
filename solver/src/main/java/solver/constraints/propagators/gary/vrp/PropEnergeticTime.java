@@ -35,7 +35,7 @@
 package solver.constraints.propagators.gary.vrp;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -44,60 +44,33 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-public class PropTruckCompatibility extends GraphPropagator {
+public class PropEnergeticTime extends GraphPropagator {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	DirectedGraphVar g;
-	IStateInt[][] truckInCommom;
-	int n;
-	int nbTrucks;
-	IntVar[] trucks;
+	int n,nbTrucks,horizon;
+	IntVar[] time;
+	int[][] travelTime;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTruckCompatibility(DirectedGraphVar graph, IntVar[] trucks, int nbTrucks,
-								  Constraint constraint, Solver solver) {
-		super(trucks, solver, constraint, PropagatorPriority.LINEAR);
+	public PropEnergeticTime(IntVar[] time, DirectedGraphVar graph, int[][] travelTimeMatrix, int nbTrucks, int horizon, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(time,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-		this.nbTrucks = nbTrucks;
+		this.time = time;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		this.trucks = trucks;
-		truckInCommom = new IStateInt[n][n];
-		IStateInt noArc = environment.makeInt(-1);
-		int tic;
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				if(g.getEnvelopGraph().arcExists(i,j)||g.getEnvelopGraph().arcExists(j,i)){
-					tic = getTruckInCommon(i,j);
-					if(tic==-1){
-						truckInCommom[i][j] = truckInCommom[j][i] = noArc;
-					}else{
-						truckInCommom[i][j] = truckInCommom[j][i] = environment.makeInt(tic);
-					}
-				}else{
-					truckInCommom[i][j] = truckInCommom[j][i] = noArc;
-				}
-			}
-		}
-	}
-
-	private int getTruckInCommon(int i, int j) {
-		int lb = Math.max(trucks[i].getLB(),trucks[j].getLB());
-		int ub = Math.min(trucks[i].getUB(),trucks[j].getUB());
-		for(int t=lb;t<=ub;t=trucks[i].nextValue(t)){
-			if(trucks[j].contains(t)){
-				return t;
-			}
-		}
-		return -1;
+		this.travelTime = travelTimeMatrix;
+		this.nbTrucks = nbTrucks;
+		this.horizon  = horizon;
 	}
 
 	//***********************************************************************************
@@ -106,52 +79,60 @@ public class PropTruckCompatibility extends GraphPropagator {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		INeighbors nei;
+		int totalTime = 0;
+		int tmp,ub,minD;
 		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				if(g.getEnvelopGraph().arcExists(i,j)||g.getEnvelopGraph().arcExists(j,i)){
-					truckInCommom[i][j].set(getTruckInCommon(i,j));
-					if(truckInCommom[i][j].get()==-1){
-						g.removeArc(i,j,this);
-						g.removeArc(j,i,this);
-					}
-				}else{
-					truckInCommom[i][j].set(-1);
+			ub = time[i].getUB();
+			minD = Integer.MAX_VALUE;
+			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				tmp = Math.max(time[j].getLB()-ub,travelTime[i][j]);
+				if(tmp<minD){
+					minD = tmp;
 				}
 			}
+			totalTime+=minD;
+		}
+		if(totalTime>(nbTrucks*horizon)){
+			contradiction(g,"");
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		checkNode(idxVarInProp);
+		propagate(0);
 	}
 
-	private void checkNode(int i) throws ContradictionException {
-		INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(i);
+	private void simpleCheckPrec(int from, int to) throws ContradictionException {
+		INeighbors nei;
+		int tmp;
+		int minD = Integer.MAX_VALUE;
+		int lb  = time[from].getLB();
+		nei = g.getEnvelopGraph().getSuccessorsOf(from);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(!trucks[i].contains(truckInCommom[i][j].get())){
-				truckInCommom[i][j].set(getTruckInCommon(i,j));
-				if(truckInCommom[i][j].get()==-1){
-					g.removeArc(j,i,this);
-					g.removeArc(i,j,this);
-				}
+			tmp = Math.max(time[j].getLB(),lb+travelTime[from][j]);
+			if(tmp<minD){
+				minD = tmp;
 			}
 		}
-		nei = g.getEnvelopGraph().getSuccessorsOf(i);
+		time[to].updateLowerBound(minD,this);
+
+		minD = 0;
+		int ub  = time[to].getUB();
+		nei = g.getEnvelopGraph().getPredecessorsOf(to);
 		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(!trucks[i].contains(truckInCommom[i][j].get())){
-				truckInCommom[i][j].set(getTruckInCommon(i,j));
-				if(truckInCommom[i][j].get()==-1){
-					g.removeArc(i,j,this);
-					g.removeArc(j,i,this);
-				}
+			tmp = Math.min(time[j].getUB(),ub-travelTime[j][to]);
+			if(tmp>minD){
+				minD = tmp;
 			}
 		}
+		time[from].updateUpperBound(minD, this);
 	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
+		return EventType.INCLOW.mask+EventType.DECUPP.mask+EventType.INSTANTIATE.mask+EventType.REMOVEARC.mask;
 	}
 
 	@Override

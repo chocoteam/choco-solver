@@ -116,6 +116,9 @@ public class PropTruckReachability extends GraphPropagator {
 				}
 			}
 		}
+		for(int i=inStack.nextClearBit(0);i<n;i=inStack.nextClearBit(i+1)){
+			trucks[i].removeValue(truck,this);
+		}
 		size = 0;
 		idx  = 0;
 		inStack.clear();

@@ -55,7 +55,7 @@ public class PropTruck_Capacity_NoCircuit<V extends DirectedGraphVar> extends Gr
 	//***********************************************************************************
 
 	DirectedGraphVar g;
-	int n, truckCapa;
+	int n, truckCapa, nbTrucks;
 	int[] supply;
 	private IntProcedure arcEnforced;
 	private IStateInt[] origin,end,currentCapa;
@@ -65,10 +65,11 @@ public class PropTruck_Capacity_NoCircuit<V extends DirectedGraphVar> extends Gr
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTruck_Capacity_NoCircuit(DirectedGraphVar graph, int[] capaSupply, int trucksCapacity,
+	public PropTruck_Capacity_NoCircuit(DirectedGraphVar graph, int[] capaSupply, int trucksCapacity,int nbtrucks,
 										Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+		this.nbTrucks = nbtrucks;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
 		origin = new IStateInt[n];
@@ -137,25 +138,32 @@ public class PropTruck_Capacity_NoCircuit<V extends DirectedGraphVar> extends Gr
 		origin[last].set(start);
 		end[start].set(last);
 		currentCapa[last].add(currentCapa[i].get());
-		int capa = currentCapa[last].get();
-		int offSet = 0;
-		if(currentCapa[start].get()<0){
-			offSet = -currentCapa[start].get();
-			capa += offSet;
+		int offPath = Math.max(-currentCapa[start].get(),0);
+		if(currentCapa[j].get()+currentCapa[i].get()+offPath>truckCapa){
+			contradiction(g,"");
 		}
-		if(capa>truckCapa || currentCapa[j].get()+currentCapa[i].get()+offSet>truckCapa){
+		int endCapa = currentCapa[last].get();
+		int capaPath = endCapa+offPath;
+		if(capaPath>truckCapa || (capaPath>0 && last<2*nbTrucks) || (capaPath<0 && start<2*nbTrucks)){
 			contradiction(g,"");
 		}
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(last);
 		for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
-			if(capa+currentCapa[k].get()>truckCapa){
+			if((capaPath+currentCapa[k].get()>truckCapa)
+			|| (capaPath+currentCapa[end[k].get()].get()>truckCapa)
+			|| (end[k].get()<2*nbTrucks && capaPath+currentCapa[end[k].get()].get()>0)
+					){
 				g.removeArc(last,k,this);
 			}
 		}
-		capa = currentCapa[start].get();
+		int capa;
+		int startCapa = currentCapa[start].get();
 		nei = g.getEnvelopGraph().getPredecessorsOf(start);
 		for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
-			if(capa+currentCapa[k].get()>truckCapa){
+			capa = Math.max(-currentCapa[origin[k].get()].get(),0);
+			capa += currentCapa[k].get();
+			if(capa+startCapa>truckCapa || capa+endCapa>truckCapa
+			|| (origin[k].get()<2*nbTrucks && (capa+startCapa<0 || capa+endCapa<0))){
 				g.removeArc(k,start,this);
 			}
 		}

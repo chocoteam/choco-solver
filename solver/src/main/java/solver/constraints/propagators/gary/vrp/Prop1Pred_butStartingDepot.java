@@ -77,8 +77,8 @@ public class Prop1Pred_butStartingDepot<V extends DirectedGraphVar> extends Grap
 	// METHODS
 	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		INeighbors preds;
 		int pre;
 		for(int i=0;i<n;i++){
@@ -101,14 +101,18 @@ public class Prop1Pred_butStartingDepot<V extends DirectedGraphVar> extends Grap
 						}
 					}
 				}
+			}else{
+				if(!g.getEnvelopGraph().getPredecessorsOf(i).isEmpty()){
+					throw new UnsupportedOperationException("start depot node "+i+" should have no predecessors");
+				}
 			}
 		}
 	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-        eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -146,14 +150,13 @@ public class Prop1Pred_butStartingDepot<V extends DirectedGraphVar> extends Grap
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
+			// starting depots have no predecessors anyway (see initial propagate)
+			int from = i/n-1;
 			int to = i%n;
-			if(to>=nbTrucks*2 || to%2==1){
-				int from = i/n-1;
-				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
-				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
-					if(i!=from){
-						g.removeArc(i,to,p);
-					}
+			INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
+			for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
+				if(i!=from){
+					g.removeArc(i,to,p);
 				}
 			}
 		}
@@ -166,15 +169,14 @@ public class Prop1Pred_butStartingDepot<V extends DirectedGraphVar> extends Grap
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
+			// starting depots have no predecessors anyway (see initial propagate)
 			int to = i%n;
-			if(to>=nbTrucks*2 || to%2==1){
-				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
-				if (preds.neighborhoodSize()==0){
-					p.contradiction(g,to+" has no predecessor");
-				}
-				if (preds.neighborhoodSize()==1){
-					g.enforceArc(preds.getFirstElement(),to,p);
-				}
+			int element = g.getEnvelopGraph().getPredecessorsOf(to).getFirstElement();
+			if (element==-1){
+				p.contradiction(g,to+" has no predecessor");
+			}
+			if (g.getEnvelopGraph().getPredecessorsOf(to).getNextElement()==-1){
+				g.enforceArc(element,to,p);
 			}
 		}
 	}

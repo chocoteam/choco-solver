@@ -102,6 +102,10 @@ public class Prop1Succ_butEndingDepot<V extends DirectedGraphVar> extends GraphP
 						}
 					}
 				}
+			}else{
+				if(!g.getEnvelopGraph().getSuccessorsOf(i).isEmpty()){
+					throw new UnsupportedOperationException();
+				}
 			}
 		}
 	}
@@ -148,14 +152,13 @@ public class Prop1Succ_butEndingDepot<V extends DirectedGraphVar> extends GraphP
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
+			// ending depots have no successors anyway (see initial propagate)
 			int from = i/n-1;
-			if(from>=nbTrucks*2 || from%2==0){
-				int to   = i%n;
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
-					if(i!=to){
-						g.removeArc(from,i,p);
-					}
+			int to   = i%n;
+			INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
+			for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
+				if(i!=to){
+					g.removeArc(from,i,p);
 				}
 			}
 		}
@@ -169,15 +172,14 @@ public class Prop1Succ_butEndingDepot<V extends DirectedGraphVar> extends GraphP
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
+			// ending depots have no successors anyway (see initial propagate)
 			int from = i/n-1;
-			if(from>=nbTrucks*2 || from%2==0){
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				if (succs.neighborhoodSize()==0){
-					p.contradiction(g,from+" has no successor");
-				}
-				if (succs.neighborhoodSize()==1){
-					g.enforceArc(from,succs.getFirstElement(),p);
-				}
+			int element = g.getEnvelopGraph().getSuccessorsOf(from).getFirstElement();
+			if (element==-1){
+				p.contradiction(g,from+" has no successor");
+			}
+			if (g.getEnvelopGraph().getSuccessorsOf(from).getNextElement()==-1){
+				g.enforceArc(from,element,p);
 			}
 		}
 	}

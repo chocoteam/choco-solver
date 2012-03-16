@@ -35,6 +35,10 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.vrp.*;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.Sort;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -47,6 +51,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.view.Views;
 import java.io.*;
+import java.util.BitSet;
 
 /**
  * Parse and solve an Li and Lim PDPTW instances
@@ -73,6 +78,10 @@ public class PDPTW {
 	private static GraphConstraint gc;
 	private static int[] open,close,dur,demand;
 	private static TIntArrayList precedFrom,precedTo;
+	private final static int FLOOR = 0;
+	private final static int ROUND = 1;
+	private final static int CEIL = 2;
+	private final static int ROUNDING = FLOOR;
 
 	//***********************************************************************************
 	// MODEL-SEARCH-RESOLUTION-OUTPUT
@@ -87,37 +96,37 @@ public class PDPTW {
 	private static void buildModel() {
 		solver = new Solver();
 		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
-		length = VariableFactory.bounded("total cost ", 0,100000, solver);
+		length = VariableFactory.bounded("total cost ", 0,1000000, solver);
 		time = new IntVar[n];
 		truck = new IntVar[n];
+		for(int i=0;i<n;i++){
+			if(i<2*nbTrucks && i%2==0){
+				time[i] = VariableFactory.bounded("time "+i,open[i],open[i],solver);
+			}else{
+				time[i] = VariableFactory.bounded("time "+i,open[i],close[i],solver);
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			graph.getKernelGraph().activateNode(i);
+			for (int j = 0; j < n; j++) {
+				if (i!=j && distanceMatrix[i][j]!=noVal	&& open[i]+distanceMatrix[i][j]<=close[j]) {
+					graph.getEnvelopGraph().addArc(i, j);
+				}
+			}
+		}
 		for(int i=0;i<2*nbTrucks;i+=2){
 			truck[i] = truck[i+1] = VariableFactory.bounded("t" + i, i / 2, i / 2, solver);
 		}
 		for(int i=0;i<precedFrom.size();i++){
 			truck[precedFrom.get(i)] = truck[precedTo.get(i)] = VariableFactory.enumerated("t"+i,0,nbTrucks-1,solver);
+			if(demand[precedFrom.get(i)]+demand[precedTo.get(i)]!=0){
+				throw new UnsupportedOperationException("case not handled");
+			}
 		}
 		for(int i=0;i<n;i++){
 			if(truck[i]==null){
 				throw new UnsupportedOperationException("node "+i+" has no truck variable");
 			}
-		}
-		for(int i=0;i<n;i++){
-			time[i] = VariableFactory.bounded("time "+i,open[i],close[i],solver);
-		}
-		try {
-			for (int i = 0; i < n; i++) {
-				graph.getKernelGraph().activateNode(i);
-				for (int j = 0; j < n; j++) {
-					if (i!=j && distanceMatrix[i][j]!=noVal	&& open[i]+distanceMatrix[i][j]<=close[j]) {
-						graph.getEnvelopGraph().addArc(i, j);
-					}
-				}
-			}
-			for (int i = 0; i < nbTrucks*2; i+=2) {
-				time[i].instantiateTo(open[i], Cause.Null);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();System.exit(0);
 		}
 	}
 
@@ -126,8 +135,8 @@ public class PDPTW {
 		gc = GraphConstraintFactory.makeConstraint(graph, solver);
 		gc.addAdHocProp(new Prop1Succ_butEndingDepot(graph, nbTrucks, gc, solver));
 		gc.addAdHocProp(new Prop1Pred_butStartingDepot(graph, nbTrucks, gc, solver));
-//		gc.addAdHocProp(new PropNoCircuit(graph, gc, solver));// could be removed
-		gc.addAdHocProp(new PropTruck_Capacity_NoCircuit(graph,demand,capacity,gc,solver));
+		gc.addAdHocProp(new PropNoCircuit(graph, gc, solver));// could be removed
+		gc.addAdHocProp(new PropTruck_Capacity_NoCircuit(graph,demand,capacity,nbTrucks,gc,solver));
 		gc.addAdHocProp(new PropTruckCompatibility(graph,truck,nbTrucks,gc,solver));
 
 		// structral redundant filtering
@@ -136,7 +145,8 @@ public class PDPTW {
 		// --- Reachability
 		gc.addAdHocProp(new PropTruckReachability(graph,truck,nbTrucks,gc,solver));
 		// --- ArboAntiArbo GAC (slow)
-		// gc.addAdHocProp(new PropArborescences(graph,gc,solver,true));gc.addAdHocProp(new PropAntiArborescences(graph,gc,solver,true));
+		gc.addAdHocProp(new PropArborescences(graph,gc,solver,true));
+		gc.addAdHocProp(new PropAntiArborescences(graph,gc,solver,false));
 
 		// costs
 		gc.addAdHocProp(new PropSumArcCosts(graph, length, distanceMatrix, gc, solver));
@@ -144,23 +154,30 @@ public class PDPTW {
 		// time
 		gc.addAdHocProp(new PropTimeGraphChanneling(time,graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropGraphTimeChanneling(time,truck,graph, distanceMatrix,nbTrucks, gc, solver));
+		gc.addAdHocProp(new PropGlobalPrecedences(time,graph, distanceMatrix,precedFrom,precedTo, gc, solver));
+		gc.addAdHocProp(new PropEnergeticTime(time,graph, distanceMatrix,nbTrucks,close[1], gc, solver));
 		// precedences
 		for(int i=0;i<precedFrom.size();i++){
-			solver.post(ConstraintFactory.geq(time[precedTo.get(i)],
-					Views.offset(time[precedFrom.get(i)], distanceMatrix[precedFrom.get(i)][precedTo.get(i)]),
-					solver));
+			solver.post(ConstraintFactory.gt(time[precedTo.get(i)], time[precedFrom.get(i)], solver));
 		}
 		// cumulatif-geost ???
+
+		// truck + time
+		gc.addAdHocProp(new PropTruckTimeChanneling(time,truck,graph, distanceMatrix,nbTrucks, gc, solver));
 
 		solver.post(gc);
 	}
 
 	private static void configureAndSolve() {
 		//CONFIGURE
-		//solver.set(StrategyFactory.graphLexico(graph));solver.set(new Earliest(graph));solver.set(new MilleFeuille(graph));
-		solver.set(new BestFit(graph));
-//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+//		solver.set(StrategyFactory.graphLexico(graph));
+//		solver.set(new Earliest(graph));
+		solver.set(new MilleFeuille(graph));
+//		solver.set(new MinDeg(graph));
+//		solver.set(new BestFit(graph));
+		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+//		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
 //		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
 		solver.findSolution();
@@ -173,8 +190,8 @@ public class PDPTW {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		bench();
-		test();
+		bench();
+//		test();
 	}
 
 	private static void bench() {
@@ -182,8 +199,10 @@ public class PDPTW {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		for (String s : list) {
-			if (s.contains(".txt") && !s.contains("br")){
-				loadInstance(dir+"/"+s, 1);
+			if (s.contains(".txt") && s.contains("lc2") && !s.contains("000")){
+				System.out.println("parsing instance "+s+".../n");
+				loadInstance(dir + "/" + s, 1);
+				instanceName = s;
 				if(n%2!=1){
 					for(int i=1;i<nbMaxTrucks;i++){
 						loadInstance(dir+"/"+s, i);
@@ -193,6 +212,8 @@ public class PDPTW {
 							break;
 						}else if(solver.getMeasures().getTimeCount()>TIMELIMIT){
 							System.out.println(s+" UNDEFINED for "+i+" trucks");
+						}else{
+							System.out.println("no sol with "+i+" trucks");
 						}
 					}
 				}else{
@@ -207,8 +228,10 @@ public class PDPTW {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		for (String s : list) {
-			if (s.contains("101.txt")){
-				loadInstance(dir+"/"+s, 20);
+			if (s.contains("lc201.txt")){
+				System.out.println("parsing instance "+s+".../n");
+				instanceName = s;
+				loadInstance(dir+"/"+s, 10);
 				solve();
 				if(solver.getMeasures().getSolutionCount()>0){
 					System.out.println(s+" SOLVED (cost="+length+")");
@@ -221,13 +244,10 @@ public class PDPTW {
 
 	private static void loadInstance(String url, int nb){
 		File file = new File(url);
-		double prec = 1;//10000;
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
-			String[] lineNumbers = url.split("/");
-			instanceName = lineNumbers[lineNumbers.length-1];
+			String[] lineNumbers;
 			String line = buf.readLine();
-//			System.out.println("\n parsing instance "+url+".../n");
 			nbTrucks = nb;
 			n = 2*nb-2;
 			while(line!=null && line!=""){
@@ -274,7 +294,6 @@ public class PDPTW {
 				if(f==0 && t==0){
 					throw new UnsupportedOperationException("case not handled");
 				}else if(f!=0){
-					//System.out.println(line);
 					precedFrom.add(f+2*nbTrucks-1);
 					precedTo.add(i);
 				}
@@ -285,6 +304,11 @@ public class PDPTW {
 					d = (x[i]-x[j])*(x[i]-x[j]);
 					d+= (y[i]-y[j])*(y[i]-y[j]);
 					d = Math.sqrt(d);
+					switch (ROUNDING){
+						case FLOOR: d = Math.floor(d);break;
+						case ROUND: Math.round(d);break;
+						case CEIL: Math.ceil(d);break;
+					}
 					distanceMatrix[i][j] = dur[i]+(int)d;
 					distanceMatrix[j][i] = dur[j]+(int)d;
 				}
@@ -300,6 +324,12 @@ public class PDPTW {
 					distanceMatrix[i][j] = distanceMatrix[j+1][i] = noVal;
 				}
 				distanceMatrix[i][i]   = noVal;
+			}
+			for(int i=0;i<precedFrom.size();i++){
+				for(t=0;t<2*nbTrucks;t+=2){
+					distanceMatrix[t][precedTo.get(i)] = distanceMatrix[precedFrom.get(i)][t+1] = noVal;
+				}
+				distanceMatrix[precedTo.get(i)][precedFrom.get(i)] = noVal;
 			}
 		}catch(Exception e){
 			e.printStackTrace();
@@ -387,14 +417,14 @@ public class PDPTW {
 		public Decision getDecision() {
 			int fromTo;
 			for(int i=idx+2;i<2*nbTrucks;i+=2){
-				fromTo = nextArcFromTruck(i);
+				fromTo = earliest(i);
 				if(fromTo!=-1){
 					idx = i;
 					return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
 				}
 			}
 			for(int i=0;i<=idx;i+=2){
-				fromTo = nextArcFromTruck(i);
+				fromTo = earliest(i);
 				if(fromTo!=-1){
 					idx = i;
 					return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
@@ -406,7 +436,7 @@ public class PDPTW {
 			return null;
 		}
 
-		public int nextArcFromTruck(int tr) {
+		public int earliest(int tr) {
 			int x = tr;
 			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
 			while(y>=2*nbTrucks){
@@ -435,6 +465,94 @@ public class PDPTW {
 				throw new UnsupportedOperationException();
 			}
 		}
+		public int smallestUB(int tr) {
+			int x = tr;
+			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+			while(y>=2*nbTrucks){
+				x = y;
+				y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+			}
+			if(y!=-1){
+				return -1;
+			}
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+			if(nei.neighborhoodSize()>1){
+				int min = length.getUB()+1;
+				int next = -1;
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(time[j].getUB()<min){
+						min = time[j].getUB();
+						next = j;
+					}
+				}
+				if(next == -1)throw new UnsupportedOperationException();
+				return (x+1)*n+next;
+			}else{
+				System.out.println(x+" : "+nei.neighborhoodSize());
+				throw new UnsupportedOperationException();
+			}
+		}
+		public int closest(int tr) {
+			int x = tr;
+			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+			while(y>=2*nbTrucks){
+				x = y;
+				y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+			}
+			if(y!=-1){
+				return -1;
+			}
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
+			if(nei.neighborhoodSize()>1){
+				int min = length.getUB()+1;
+				int next = -1;
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(distanceMatrix[x][j]<min){
+						min = distanceMatrix[x][j];
+						next = j;
+					}
+				}
+				if(next == -1)throw new UnsupportedOperationException();
+				return (x+1)*n+next;
+			}else{
+				System.out.println(x+" : "+nei.neighborhoodSize());
+				throw new UnsupportedOperationException();
+			}
+		}
+	}
+
+	private static class MinDeg extends GraphStrategy{
+
+		public MinDeg(GraphVar graphVar) {
+			super(graphVar);
+		}
+
+		@Override
+		public Decision getDecision() {
+			int size = n*2;
+			int next = -1;
+			int ss;
+			INeighbors nei;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				ss  = nei.neighborhoodSize();
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().arcExists(i,j)){
+						if(ss+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize()<size){
+							size = ss+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
+							next = (i+1)*n+j;
+						}
+					}
+				}
+			}
+			if(next!=-1){
+				return new GraphDecision(g, next, Assignment.graph_enforcer);
+			}
+			if(!g.instantiated()){
+				throw new UnsupportedOperationException();
+			}
+			return null;
+		}
 	}
 
 	private static class BestFit extends GraphStrategy{
@@ -447,6 +565,7 @@ public class PDPTW {
 		public Decision getDecision() {
 			int fromTo = getBestTruck();
 			if(fromTo!=-1){
+//				System.out.println((fromTo/n-1)+" -> "+(fromTo%n));
 				return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
 			}
 			if(!g.instantiated()){

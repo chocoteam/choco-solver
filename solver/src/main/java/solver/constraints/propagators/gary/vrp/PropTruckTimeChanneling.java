@@ -66,10 +66,9 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 	int[][] dist;
 	int nbTrucks;
 	// algo data
-	int[] bound;
+	int[] bound,globalBound;
 	BitSet done;
 	Heap heap;
-	// RG data
 	int[] minMate, minOut;
 	TIntArrayList tempNextSCC;
 
@@ -86,6 +85,7 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 		this.nbTrucks = nbTrucks;
 		dist = matrix;
 		tempNextSCC = new TIntArrayList();
+		globalBound = new int[n];
 		bound = new int[n];
 		done = new BitSet(n);
 		heap = new FastArrayHeap(n);
@@ -111,6 +111,7 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 	public int getPropagationConditions(int vIdx) {
 		return EventType.FULL_PROPAGATION.mask
 				+EventType.INCLOW.mask+EventType.DECUPP.mask+EventType.INSTANTIATE.mask
+//				+EventType.INT_ALL_MASK()
 				+EventType.REMOVEARC.mask+ EventType.ENFORCEARC.mask;
 	}
 
@@ -124,8 +125,22 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 	//***********************************************************************************
 
 	private void graphTrasversal() throws ContradictionException {
-		dijsktra_lb();
-		dijsktra_ub();
+		for(int i=0;i<n;i++){
+			globalBound[i] = Integer.MAX_VALUE;
+		}
+		for(int i=0;i<nbTrucks;i++){
+			dijsktra_lb(i);
+		}
+		for(int i=0;i<n;i++){
+			time[i].updateLowerBound(globalBound[i],this);
+			globalBound[i] = 0;
+		}
+		for(int i=0;i<nbTrucks;i++){
+			dijsktra_ub(i);
+		}
+		for(int i=0;i<n;i++){
+			time[i].updateUpperBound(globalBound[i],this);
+		}
 	}
 
 	private void enfArc(int from, int to) throws ContradictionException {
@@ -143,23 +158,22 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 		trucks[from].updateUpperBound(trucks[to].getUB(),this);
 		trucks[to].updateLowerBound(trucks[from].getLB(),this);
 		trucks[to].updateUpperBound(trucks[from].getUB(),this);
+		//TODO enumerated reasoning?
 	}
 
 	//***********************************************************************************
 	// LB
 	//***********************************************************************************
 
-	private void dijsktra_lb() throws ContradictionException {
+	private void dijsktra_lb(int truck) throws ContradictionException {
 		heap.clear();
 		done.clear();
 		for(int i=0;i<n;i++){
 			bound[i] = Integer.MAX_VALUE;
 		}
-		int x;
-		for(int i=0;i<nbTrucks*2; i+=2){
-			bound[i] = time[i].getLB();
-			heap.add(i, bound[i],-1);
-		}
+		int x = 2*truck;
+		bound[x] = time[x].getLB();
+		heap.add(x, bound[x],-1);
 		int nb;
 		INeighbors nei;
 		while(!heap.isEmpty()){
@@ -167,20 +181,26 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 			done.set(x);
 			nei = g.getEnvelopGraph().getSuccessorsOf(x);
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				if(g.getKernelGraph().arcExists(x,i)){
-					enfArc(x,i);
-				}
-				nb = bound[x]+dist[x][i];
-				if(nb>time[i].getUB()){
-					g.removeArc(x,i,this);
-				}else if(nb<bound[i]){
-					bound[i] = nb;
-					heap.add(i,bound[i],x);
+				if(trucks[i].contains(truck) && !done.get(i)){
+					if(g.getKernelGraph().arcExists(x,i)){
+						enfArc(x,i);
+					}
+					nb = bound[x]+dist[x][i];
+					if(nb<bound[i]){
+						bound[i] = nb;
+						heap.add(i,bound[i],x);
+					}
 				}
 			}
 		}
+		if(bound[truck*2+1]==Integer.MAX_VALUE){
+			contradiction(g,"cannot reach depot");
+		}
 		for(int i=0;i<n;i++){
-			time[i].updateLowerBound(bound[i],this);
+			if(bound[i]>time[i].getUB()){
+				trucks[i].removeValue(truck,this);
+			}
+			globalBound[i] = Math.min(globalBound[i],bound[i]);
 		}
 	}
 
@@ -188,18 +208,16 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 	// UB
 	//***********************************************************************************
 
-	private void dijsktra_ub() throws ContradictionException {
+	private void dijsktra_ub(int truck) throws ContradictionException {
 		heap.clear();
 		done.clear();
 		for(int i=0;i<n;i++){
 			bound[i] = Integer.MAX_VALUE;
 		}
-		int x;
+		int x = 2*truck+1;
 		int max = time[1].getUB();
-		for(int i=1;i<2*nbTrucks;i+=2){
-			bound[i] = 0;
-			heap.add(i, bound[i],-1);
-		}
+		bound[x] = 0;
+		heap.add(x, bound[x],-1);
 		int nb;
 		INeighbors nei;
 		while(!heap.isEmpty()){
@@ -207,24 +225,26 @@ public class PropTruckTimeChanneling extends GraphPropagator {
 			done.set(x);
 			nei = g.getEnvelopGraph().getPredecessorsOf(x);
 			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-				if(g.getKernelGraph().arcExists(i,x)){
-					enfArc(i,x);
-				}
-				nb = bound[x]+dist[i][x];
-				if(nb>max-time[i].getLB()){
-					g.removeArc(i,x,this);
-				}else if(nb<bound[i]){
-					if(done.get(i)){
-						throw new UnsupportedOperationException();
-					}else{
+				if(trucks[i].contains(truck) && !done.get(i)){
+					if(g.getKernelGraph().arcExists(i,x)){
+						enfArc(i,x);
+					}
+					nb = bound[x]+dist[i][x];
+					if(nb<bound[i]){
 						bound[i] = nb;
 						heap.add(i,bound[i],x);
 					}
 				}
 			}
 		}
+		if(bound[truck*2]==Integer.MAX_VALUE){
+			contradiction(g,"cannot reach depot");
+		}
 		for(int i=0;i<n;i++){
-			time[i].updateUpperBound(max - bound[i], this);
+			if(bound[i]>max-time[i].getLB()){
+				trucks[i].removeValue(truck,this);
+			}
+			globalBound[i] = Math.max(globalBound[i],max-bound[i]);
 		}
 	}
 }
