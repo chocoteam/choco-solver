@@ -24,59 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package samples.nqueen;
-
+import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 14/03/12
  */
-public class NQueenGlobal extends AbstractNQueen {
+public class BigLeq extends AbstractProblem {
+    @Option(name = "-o", usage = "All interval series size.", required = false)
+    private int m = 10;
+
+    IntVar[] vars;
 
     @Override
     public void buildModel() {
         solver = new Solver();
+        vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
 
-        vars = new IntVar[n];
-        IntVar[] diag1 = new IntVar[n];
-        IntVar[] diag2 = new IntVar[n];
-
-        for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            diag1[i] = Views.offset(vars[i], i);
-            diag2[i] = Views.offset(vars[i], -i);
+        for (int i = 0; i < m - 1; i++) {
+            solver.post(ConstraintFactory.leq(vars[i], vars[i + 1], solver));
         }
-
         solver.post(new AllDifferent(vars, solver));
-        solver.post(new AllDifferent(diag1, solver));
-        solver.post(new AllDifferent(diag2, solver));
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMidVal(vars, solver.getEnvironment()));
+    }
 
-        IntVar[] orderedVars = orederIt2();
-        /*IPropagationEngine engine = solver.getEngine();
-        // default group
-        engine.addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        new IncrOrderV(orderedVars),
-                        Policy.ITERATE
-                ));*/
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
+
+    @Override
+    public void prettyOut() {
+        LoggerFactory.getLogger("bench").info("bigleq({})", m);
+        StringBuilder st = new StringBuilder();
+        st.append("\t");
+        for (int i = 0; i < m - 1; i++) {
+            st.append(String.format("%d ", vars[i].getValue()));
+            if (i % 10 == 9) {
+                st.append("\n\t");
+            }
+        }
+        st.append(String.format("%d", vars[m - 1].getValue()));
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {
-        new NQueenGlobal().execute(args);
+        new BigLeq().execute(args);
     }
 }

@@ -66,7 +66,7 @@ public class MagicSquare extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
+        solver = new Solver("Magic Square "+n);
         int ms = n * (n * n + 1) / 2;
 
         IntVar[][] matrix = new IntVar[n][n];
@@ -108,7 +108,7 @@ public class MagicSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
 
 
         //solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
@@ -118,7 +118,14 @@ public class MagicSquare extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
 
+        if (n > 4) {
+            long nl = (long) Math.pow(10, n);
+            solver.getSearchLoop().getLimitsBox().setNodeLimit(nl);
+        }
+    }
 
+    @Override
+    public void configureEngine() {
         //TODO: choisir une meilleure stratŽgie
         // default group
         /*solver.getEngine().addGroup(
@@ -130,10 +137,6 @@ public class MagicSquare extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
-        if (n > 4) {
-            long nl = (long) Math.pow(10, n);
-            solver.getSearchLoop().getLimitsBox().setNodeLimit(nl);
-        }
     }
 
     @Override

@@ -108,8 +108,12 @@ public class GolombRuler extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(ticks, solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
         // <2012-03-08 cp> works fine
         Queue _ticks = new Queue<AbstractFineEventRecorder>(new PArc(ticks));
         Queue _diffs = new Queue<AbstractFineEventRecorder>(new PArc(diffs));

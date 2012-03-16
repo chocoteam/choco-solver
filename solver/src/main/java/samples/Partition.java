@@ -127,10 +127,13 @@ public class Partition extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
 
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+    }
 
+    @Override
+    public void configureEngine() {
         /*engine.addGroup(
                 Group.buildGroup(
                         Predicates.priority_light(PropagatorPriority.TERNARY),

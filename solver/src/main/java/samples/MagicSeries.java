@@ -76,9 +76,13 @@ public class MagicSeries extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         // default group
+    }
+
+    @Override
+    public void configureEngine() {
         //TODO: trouver un propagation appropriée : en shuffle, on propage 2 fois moins!
         /*IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);

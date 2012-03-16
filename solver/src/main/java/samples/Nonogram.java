@@ -103,9 +103,13 @@ public class Nonogram extends AbstractProblem {
 
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
         //TODO: find a propagation policy
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

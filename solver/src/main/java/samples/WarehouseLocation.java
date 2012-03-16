@@ -33,8 +33,6 @@ import solver.Solver;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -108,15 +106,19 @@ public class WarehouseLocation extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
-        StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
-                );
-        solver.set(strat);
+    public void configureSearch() {
+//        StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
+//                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
+//                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+//                );
+//        solver.set(strat);
 
         //TODO: find a propagation strat
 
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

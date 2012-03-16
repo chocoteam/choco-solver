@@ -207,7 +207,7 @@ public class VRP extends AbstractProblem {
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		SearchMonitorFactory.log(solver, true, false);
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIME_LIMIT);
 		AbstractStrategy objStrat =  StrategyFactory.inputOrderMinVal(new IntVar[]{nTrucks}, solver.getEnvironment()); //AbstractStrategy objStrat =  setDichotomicSearch();
@@ -228,7 +228,11 @@ public class VRP extends AbstractProblem {
 		return  StrategyVarValAssign.dyn(objs,SorterFactory.inputOrder(objs),ValidatorFactory.instanciated,Assignment.int_eq,solver.getEnvironment());
 	}
 
-	@Override
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
 	public void solve() {
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, nTrucks);
 		solvingTime = solver.getMeasures().getTimeCount();

@@ -111,7 +111,7 @@ public class Knapsack extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
 
         AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
         AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
@@ -123,6 +123,10 @@ public class Knapsack extends AbstractProblem {
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
 
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

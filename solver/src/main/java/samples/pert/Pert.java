@@ -105,7 +105,7 @@ public class Pert extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 
         int[] rank = new int[n];
@@ -126,7 +126,11 @@ public class Pert extends AbstractProblem {
                 }
             }
         }
+    }
 
+
+    @Override
+    public void configureEngine() {
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
                 Group.buildGroup(
@@ -143,8 +147,6 @@ public class Pert extends AbstractProblem {
                         IncrArityP.get(),
                         Policy.FIXPOINT
                 ));*/
-
-
     }
 
     @Override

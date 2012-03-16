@@ -88,8 +88,6 @@ public interface IPropagationEngine extends Serializable {
 
     ContradictionException getContradictionException();
 
-    //TODO: to remove
-
     void clear();
 
     void prepareWM(Solver solver);

@@ -35,7 +35,6 @@ import solver.constraints.MetaVarConstraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -43,6 +42,7 @@ import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -120,13 +120,17 @@ public class NVector extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		solver.set(strategy);
 		// TODO : ajouter goal sur les variables restantes
 	}
 
-	@Override
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
 	public void solve() {
 		System.out.println("resolution");
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(10000);

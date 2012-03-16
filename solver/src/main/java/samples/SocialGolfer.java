@@ -66,10 +66,10 @@ public class SocialGolfer extends AbstractProblem {
     // SPORT SCHEDULING: s=2, w = g - 1
 
     @Option(name = "-g", aliases = "--group", usage = "Number of groups.", required = false)
-    int g = 5;
+    int g = 4;
 
     @Option(name = "-w", aliases = "--week", usage = "Number of weeks.", required = false)
-    int w = 7;
+    int w = 4;
 
     @Option(name = "-s", aliases = "--player", usage = "Number of players per group.", required = false)
     int s = 3;
@@ -79,7 +79,7 @@ public class SocialGolfer extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
+        solver = new Solver("Social golfer "+g+"-"+w+"-"+s);
         int p = g * s;  // number of players
 
         P = new BoolVar[p][g][w];
@@ -142,7 +142,7 @@ public class SocialGolfer extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         BoolVar[] vars = ArrayUtils.flatten(P);
         solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
@@ -164,6 +164,10 @@ public class SocialGolfer extends AbstractProblem {
                 )
         );*/
 
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

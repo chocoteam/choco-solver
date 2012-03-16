@@ -50,7 +50,7 @@ public class MagicSquareTest {
         MagicSquare pb = new MagicSquare();
         pb.readArgs("-n", Integer.toString(n));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         return pb.getSolver();
     }
 

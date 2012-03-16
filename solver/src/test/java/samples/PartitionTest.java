@@ -44,7 +44,7 @@ public class PartitionTest {
         pb = new Partition();
         pb.readArgs("-n", Integer.toString(size));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         return pb.getSolver();
     }
 

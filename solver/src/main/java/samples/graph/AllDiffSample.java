@@ -74,11 +74,15 @@ public class AllDiffSample extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment());
 //		AbstractStrategy strategy = StrategyFactory.random(vars, solver.getEnvironment());
 		solver.set(strategy);
 	}
+
+    @Override
+    public void configureEngine() {
+    }
 
 	@Override
 	public void solve() {

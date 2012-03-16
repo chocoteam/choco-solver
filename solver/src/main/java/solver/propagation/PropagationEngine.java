@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Sort;
 import solver.propagation.wm.IWaterMarking;
@@ -180,7 +181,10 @@ public class PropagationEngine implements IPropagationEngine {
 
     @Override
     public void clear() {
-        propagationStrategy = null;
+        watermarks = null; // CPRU : to improve
         initialized = false;
+        propagationStrategy = null;
+        throw new SolverException("Clearing the engine is not enough!");//CPRU: to do
+
     }
 }

@@ -122,7 +122,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
@@ -139,6 +139,10 @@ public class DecomposedAllDifferent extends AbstractProblem {
                         IncrArityP.get(),
                         Policy.ITERATE
                 ));*/
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

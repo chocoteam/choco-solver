@@ -38,7 +38,7 @@ import solver.variables.VariableFactory;
  * A verbal arithmetic puzzle:
  * <br/> <br/>
  * Attribute a value to each letter, such that the equations are correct.
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -88,10 +88,13 @@ public class Alpha extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
         solver.set(StrategyFactory.minDomMinVal(letters, solver.getEnvironment()));
+    }
 
+    @Override
+    public void configureEngine() {
         // TODO chercher un meilleur ordre de propagation
         /*solver.getEngine().addGroup(
                 Group.buildGroup(

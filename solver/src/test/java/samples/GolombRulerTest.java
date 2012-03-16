@@ -50,7 +50,7 @@ public class GolombRulerTest {
         GolombRuler pb = new GolombRuler();
         pb.readArgs("-m", Integer.toString(m));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         return pb.getSolver();
     }
 

@@ -92,7 +92,7 @@ public class PertReified extends Pert {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(
                 new StrategiesSequencer(
                         solver.getEnvironment(),

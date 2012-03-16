@@ -180,7 +180,7 @@ public class AirPlaneLanding extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         Arrays.sort(planes, new Comparator<IntVar>() {
             @Override
             public int compare(IntVar o1, IntVar o2) {
@@ -193,8 +193,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
         ));
 
-        solver.getSearchLoop().getLimitsBox().setNodeLimit(500000);
+    }
 
+    @Override
+    public void configureEngine() {
         /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
@@ -214,8 +216,6 @@ public class AirPlaneLanding extends AbstractProblem {
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.statEveryXXms(solver, 2000);
-//        solver.getSearchLoop().getLimitsBox().setSolutionLimit(2);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

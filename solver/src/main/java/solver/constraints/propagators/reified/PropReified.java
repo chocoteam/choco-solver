@@ -57,14 +57,25 @@ public class PropReified extends Propagator<Variable> {
 
     protected final IStateInt lastActiveR, lastActiveL;
 
+    private static PropagatorPriority extractPriority(Constraint cons, Constraint oppCons) {
+        int pc = 0;
+        int poc = 0;
+        for (int i = 0; i < cons.propagators.length; i++) {
+            pc = Math.max(pc, cons.propagators[i].getPriority().priority);
+        }
+        for (int i = 0; i < cons.propagators.length; i++) {
+            poc = Math.max(poc, oppCons.propagators[i].getPriority().priority);
+        }
+        return PropagatorPriority.get(Math.max(pc, poc));
+
+    }
 
     public PropReified(Variable[] vars,
                        Constraint cons,
                        Constraint oppCons,
                        Solver solver,
-                       Constraint<Variable, Propagator<Variable>> owner,
-                       PropagatorPriority priority, boolean reactOnPromotion) {
-        super(vars, solver, owner, priority, reactOnPromotion);
+                       Constraint<Variable, Propagator<Variable>> owner) {
+        super(vars, solver, owner, extractPriority(cons, oppCons), false);
         this.bVar = (BoolVar) vars[0];
         left = cons.propagators.clone();
         right = oppCons.propagators.clone();

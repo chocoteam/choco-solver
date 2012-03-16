@@ -32,6 +32,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.propagation.generator.*;
+import solver.propagation.generator.predicate.InCstrSet;
+import solver.propagation.generator.predicate.Predicate;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -65,7 +68,7 @@ public class Langford extends AbstractProblem {
     private int k = 3;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 17;
+    private int n = 13;
 
     IntVar[] position;
 
@@ -74,7 +77,7 @@ public class Langford extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver("Langford's number");
+        solver = new Solver("Langford number");
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = VariableFactory.boundedArray("p", n * k, 0, k * n - 1, solver);
@@ -91,8 +94,12 @@ public class Langford extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMaxVal(position, solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
         /*IPropagationEngine peng = solver.getEngine();
         peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
         peng.addGroup(Group.buildQueue(
@@ -103,6 +110,9 @@ public class Langford extends AbstractProblem {
                 Predicates.all(),
                 Policy.ONE
         ));*/
+        Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
+        Generator g2 = new PCons(alldiff);
+        solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());
     }
 
     @Override

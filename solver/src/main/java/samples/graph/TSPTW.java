@@ -196,7 +196,7 @@ public class TSPTW extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy;
 		strategy = StrategyFactory.graphRandom(graph,seed);
 //		if(nR==null){
@@ -214,7 +214,11 @@ public class TSPTW extends AbstractProblem{
 		SearchMonitorFactory.log(solver, true, false);
 	}
 
-	@Override
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
 	public void solve() {
 //		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
 		status = solver.findSolution();

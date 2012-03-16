@@ -189,12 +189,17 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	//***********************************************************************************
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy;
 		strategy = StrategyFactory.graphRandom(graph, seed);
 		solver.set(strategy);
 	}
-	@Override
+    @Override
+    public void configureEngine() {
+
+    }
+
+    @Override
 	public void solve() {
 		solver.findAllSolutions();
 	}

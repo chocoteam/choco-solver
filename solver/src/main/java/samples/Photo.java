@@ -85,7 +85,7 @@ public class Photo extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(positions, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
 //        engine.addGroup(Group.buildGroup(
@@ -103,6 +103,10 @@ public class Photo extends AbstractProblem {
                 Policy.ONE
         ));*/
 
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

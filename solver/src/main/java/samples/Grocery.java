@@ -87,7 +87,7 @@ public class Grocery extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         //AVOID dom/wdeg: it can change the tree search
         //solver.set(StrategyFactory.domwdegMindom(vars, solver));
         HeuristicValFactory.indomainSplitMax(vars);
@@ -95,6 +95,10 @@ public class Grocery extends AbstractProblem {
                 SorterFactory.inputOrder(vars),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
         //FIRST propagators on tmp, natural order
         /*solver.getEngine().addGroup(
                 Group.buildGroup(

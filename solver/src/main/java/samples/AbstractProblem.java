@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
-import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -84,7 +83,9 @@ public abstract class AbstractProblem {
 
     public abstract void buildModel();
 
-    public abstract void configureSolver();
+    public abstract void configureSearch();
+
+    public abstract void configureEngine();
 
     public abstract void solve();
 
@@ -105,18 +106,6 @@ public abstract class AbstractProblem {
         return true;
     }
 
-    protected void overridePolicy() {
-        IPropagationEngine engine = solver.getEngine();
-        switch (policy) {
-            case DEFAULT:
-                break;
-            default:
-                engine.clear();
-                solver.set(policy.make(solver));
-                break;
-        }
-    }
-
     protected void overrideExplanation() {
         expeng.make(solver);
     }
@@ -126,10 +115,17 @@ public abstract class AbstractProblem {
             Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
             this.buildModel();
-            this.configureSolver();
+            this.configureSearch();
 
             overrideExplanation();
-            overridePolicy();
+            switch (policy) {
+                case DEFAULT:
+                    configureEngine();
+                    break;
+                default:
+                    solver.set(policy.make(solver));
+                    break;
+            }
 
             if (level.getLevel() > Level.QUIET.getLevel()) {
                 SearchMonitorFactory.log(solver,

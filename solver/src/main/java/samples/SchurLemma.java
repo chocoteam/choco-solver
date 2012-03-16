@@ -82,8 +82,12 @@ public class SchurLemma extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(M), solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

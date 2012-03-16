@@ -60,7 +60,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver("Latin square" + m);
+        solver = new Solver("Ortho Latin square " + m);
         int mm = m * m;
         square1 = VariableFactory.boundedArray("s1", mm, 1, m, solver);
         square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);
@@ -132,12 +132,16 @@ public class OrthoLatinSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         HeuristicValFactory.indomainMiddle(vars);
         solver.set(StrategyVarValAssign.dyn(vars,
                 SorterFactory.minDomain(),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
         //TODO: propagation
         /*solver.getEngine().addGroup(
                 Group.buildQueue(

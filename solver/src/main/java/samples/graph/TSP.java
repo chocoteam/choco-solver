@@ -209,13 +209,17 @@ public class TSP extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         AbstractStrategy strategy;
         strategy = StrategyFactory.graphStrategy(graph, null, new MinDomMinCost(graph), GraphStrategy.NodeArcPriority.ARCS);
         solver.set(strategy);
 //		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
         solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         SearchMonitorFactory.log(solver, true, false);
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

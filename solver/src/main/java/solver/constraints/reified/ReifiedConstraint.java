@@ -31,12 +31,9 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.reified.PropReified;
-import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.BoolVar;
-import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -73,24 +70,12 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         return union.toArray(new Variable[union.size()]);
     }
 
-    private static PropagatorPriority extractPriority(Constraint cons, Constraint oppCons) {
-        int pc = cons.getPriority();
-        int poc = oppCons.getPriority();
-        return PropagatorPriority.get(Math.max(pc, poc));
-
-    }
-
     public ReifiedConstraint(BoolVar bVar, Constraint constraint, Constraint oppositeConstraint,
-                             Solver solver, PropagatorPriority storeThreshold) {
+                             Solver solver) {
         super(extractVariable(bVar, constraint, oppositeConstraint), solver);
         cons = constraint;
         oppcons = oppositeConstraint;
-        setPropagators(new PropReified(vars, constraint, oppositeConstraint, solver, this, storeThreshold, true));
-    }
-
-    public ReifiedConstraint(BoolVar bVar, Constraint constraint, Constraint oppositeConstraint,
-                             Solver solver) {
-        this(bVar, constraint, oppositeConstraint, solver, extractPriority(constraint, oppositeConstraint));
+        setPropagators(new PropReified(vars, constraint, oppositeConstraint, solver, this));
     }
 
     @Override

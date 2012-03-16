@@ -86,17 +86,18 @@ public class Contrived extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(v,
                 solver.getEnvironment()));
-        // <2012-03-02:cp> works fine
-        if (true) {
-            Sort first = new Sort(new PArc(v[3], v[4]));
-            Queue then = new Queue(new PArc(ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
-            Queue coarses = new Queue(new PCoarse(solver.getCstrs()));
-            solver.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut());
-        }
+    }
 
+    @Override
+    public void configureEngine() {
+        // <2012-03-02:cp> works fine
+        Sort first = new Sort(new PArc(v[3], v[4]));
+        Queue then = new Queue(new PArc(ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
+        Queue coarses = new Queue(new PCoarse(solver.getCstrs()));
+        solver.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut());
     }
 
     @Override

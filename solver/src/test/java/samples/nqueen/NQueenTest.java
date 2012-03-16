@@ -97,7 +97,7 @@ public class NQueenTest {
     protected Solver modeler(AbstractNQueen nq, int size) {
         nq.readArgs("-q", Integer.toString(size));
         nq.buildModel();
-        nq.configureSolver();
+        nq.configureSearch();
         return nq.getSolver();
     }
 

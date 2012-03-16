@@ -33,10 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.unary.Member;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PCons;
-import solver.propagation.generator.Queue;
-import solver.propagation.generator.Sort;
+import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
@@ -107,29 +104,22 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
-        //TODO: changer la strategie pour une plus efficace
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+    }
 
-        IntVar[] all = new IntVar[vars.length + dist.length];
-        all[0] = vars[0];
-        for (int i = 1, k = 1; i < vars.length - 1; i++, k++) {
-            all[k++] = vars[i];
-            all[k] = dist[i - 1];
-        }
-
-        // BEWARE:
+    @Override
+    public void configureEngine() {
+    // BEWARE:
         // tout se joue sur le nombre d'appel ˆ la mŽthode filter des contraitne AllDiff BC
         // OLDEST n'appelle que m fois le filtrage lourd de AllDiff, les autres l'appellent 2 * m-1
         // Or, c'est cet algo qui coute.
         // Il se dŽclenche lorsque la derniere requete du propagateur est propagee,
         // il faut donc que celle-ci soit propagee le plus tard possible
 
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PCons(ALLDIFF));
-        Queue others = new Queue<AbstractFineEventRecorder>(new PCons(solver.getCstrs()));
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PVar(vars), new PVar(dist), new PCons(ALLDIFF));
         Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.clearOut(), others.clearOut(), coar.pickOne()).clearOut());
-
+        solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
     }
 
     @Override
