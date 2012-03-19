@@ -65,15 +65,15 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
+            if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP)) != 0) {
                 // 1. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagator.decArity();
+                    propagators[PINDEX].decArity();
                 }
                 // 2. schedule this if condition is valid
-                if (condition.validateScheduling(this, propagator, evt)) {
-                    propagator.forcePropagate(EventType.FULL_PROPAGATION);
+                if (condition.validateScheduling(this, propagators[PINDEX], evt)) {
+                    propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
                 }
             }
         }
@@ -81,6 +81,6 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + propagator.toString() + "::" + condition.toString() + " >>";
+        return "<< " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + "::" + condition.toString() + " >>";
     }
 }

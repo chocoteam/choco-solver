@@ -48,17 +48,15 @@ import java.util.Arrays;
  */
 public class PropEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final Propagator<V> propagator; // one propagator
-    protected final V[] variables; // its variables
     protected final TIntIntHashMap v2i; // a hash map to retrieve idx of variable in this data structures
-    protected final int[] varIdx; // an array of indices helping retrieving data of a variable, thanks to v2i and var.id
+    protected int[] varIdx; // an array of indices helping retrieving data of a variable, thanks to v2i and var.id
     protected int nbUVar;// number of unique variable, a bound for arrays
     protected final int[] idxVs; // index of this within variable structures -- mutable
 
 
     PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, int n) {
         super(solver);
-        this.propagator = propagator;
+        this.propagators = new Propagator[]{propagator};
         propagator.addRecorder(this);
         this.variables = variables.clone();
         // create max size arrays
@@ -69,29 +67,25 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver) {
         this(variables, propagator, solver, variables.length);
+        int n = variables.length;
         int k = 0; // count the number of unique variable
-        for (int i = 0; i < variables.length; i++) {
+        for (int i = 0; i < n; i++) {
             V variable = variables[i];
             int vid = variable.getId();
             int idx = v2i.get(vid);
             if (idx == -1) { // first occurrence of the variable
+                this.variables[k] = variable;
                 v2i.put(vid, k);
                 varIdx[k] = k;
                 variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
                 k++;
             }
         }
+        if (k < n) {
+            this.variables = Arrays.copyOfRange(variables, 0, k);
+            this.varIdx = Arrays.copyOfRange(varIdx, 0, k);
+        }
         nbUVar = k;
-    }
-
-    @Override
-    public V[] getVariables() {
-        return variables;
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[]{propagator};
     }
 
     @Override
@@ -107,13 +101,13 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
             // 1. if instantiation, then decrement arity of the propagator
             if (EventType.anInstantiationEvent(evt.mask)) {
-                propagator.decArity();
+                propagators[PINDEX].decArity();
             }
             // 2. schedule the coarse event recorder associated to thos
-            propagator.forcePropagate(EventType.FULL_PROPAGATION);
+            propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
         }
     }
 
@@ -148,7 +142,7 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
 
     @Override
     public String toString() {
-        return "<< " + Arrays.toString(variables) + "::" + propagator.toString() + " >>";
+        return "<< " + Arrays.toString(variables) + "::" + propagators[PINDEX].toString() + " >>";
     }
 
     @Override
@@ -168,12 +162,12 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     @Override
     public void enqueue() {
         enqueued = true;
-        propagator.incNbRecorderEnqued();
+        propagators[PINDEX].incNbRecorderEnqued();
     }
 
     @Override
     public void deque() {
         enqueued = false;
-        propagator.decNbRecrodersEnqued();
+        propagators[PINDEX].decNbRecrodersEnqued();
     }
 }

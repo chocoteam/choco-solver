@@ -33,6 +33,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -86,17 +87,8 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
             p2i.put(propagator.getId(), i);
             deltamon[i] = delta.createDeltaMonitor(propagator);
         }
+        throw new SolverException("Do not handle indices correctly!");
 
-    }
-
-    @Override
-    public V[] getVariables() {
-        return (V[])new Variable[]{variable};
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return propagators;
     }
 
     @Override

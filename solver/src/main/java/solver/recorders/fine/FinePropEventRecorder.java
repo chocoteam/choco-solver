@@ -47,20 +47,16 @@ import java.util.Arrays;
  */
 public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder<V> {
 
-    protected final IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
+    protected IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
     protected final long[] timestamps; // a timestamp lazy clear the event structures
     protected final int[] evtmasks; // reference to events occuring -- inclusive OR over event mask
     // BEWARE a variable can occur more than one time in a propagator !!
-    protected final int[][] idxVinP; //; // index of each variable within P -- immutable
+    protected int[][] idxVinP; //; // index of each variable within P -- immutable
 
     public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver) {
         super(variables, propagator, solver, variables.length);
-
         int n = variables.length;
         this.deltamon = new IDeltaMonitor[n];
-        this.timestamps = new long[n];
-        Arrays.fill(timestamps, -1);
-        this.evtmasks = new int[n];
         this.idxVinP = new int[n][];
         int k = 0; // count the number of unique variable
         for (int i = 0; i < n; i++) {
@@ -68,6 +64,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
             int vid = variable.getId();
             int idx = v2i.get(vid);
             if (idx == -1) { // first occurrence of the variable
+                this.variables[k] = variable;
                 v2i.put(vid, k);
                 varIdx[k] = k;
                 variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
@@ -82,6 +79,15 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
             }
         }
         nbUVar = k;
+        if (k < n) {
+            this.variables = Arrays.copyOfRange(variables, 0, k);
+            this.varIdx = Arrays.copyOfRange(varIdx, 0, k);
+            this.deltamon = Arrays.copyOfRange(deltamon, 0, k);
+            this.idxVinP = Arrays.copyOfRange(idxVinP, 0, k);
+        }
+        this.timestamps = new long[k];
+        Arrays.fill(timestamps, -1);
+        this.evtmasks = new int[k];
     }
 
     @Override
@@ -95,10 +101,10 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                 deltamon[i].freeze();
                 evtmasks[i] = 0; // and clean up mask
 
-                assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
-                propagator.fineERcalls++;
+                assert (propagators[PINDEX].isActive()) : this + " is not active (" + propagators[PINDEX].isStateLess() + " & " + propagators[PINDEX].isPassive() + ")";
+                propagators[PINDEX].fineERcalls++;
                 for (int j = 0; j < idxVinP[i].length; j++) { // a loop for variable appearing more than once in a propagator
-                    propagator.propagate(this, idxVinP[i][j], evtmask_);
+                    propagators[PINDEX].propagate(this, idxVinP[i][j], evtmask_);
                 }
                 deltamon[i].unfreeze();
             }
@@ -110,15 +116,15 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             int vid = var.getId();
             int idx = v2i.get(vid);
             for (int j = 0; j < idxVinP[idx].length; j++) { // a loop for variable appearing more than once in a propagator
-                if ((evt.mask & propagator.getPropagationConditions(idxVinP[idx][j])) != 0) {
+                if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP[idx][j])) != 0) {
                     // 1. if instantiation, then decrement arity of the propagator
                     if (EventType.anInstantiationEvent(evt.mask)) {
-                        propagator.decArity();
+                        propagators[PINDEX].decArity();
                     }
                     // 2. clear the structure if necessary
                     if (LAZY) {
@@ -157,7 +163,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public void virtuallyExecuted(Propagator propagator) {
-        assert this.propagator == propagator : "wrong propagator";
+        assert this.propagators[PINDEX] == propagator : "wrong propagator";
         if (LAZY) {
             for (int i = 0; i < nbUVar; i++) {
                 variables[varIdx[i]].getDelta().lazyClear(); // to prevent from unfreezing delta no yet lazy cleared
@@ -182,6 +188,6 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public String toString() {
-        return "<< {F} " + Arrays.toString(variables) + "::" + propagator.toString() + " >>";
+        return "<< {F} " + Arrays.toString(variables) + "::" + propagators[PINDEX].toString() + " >>";
     }
 }

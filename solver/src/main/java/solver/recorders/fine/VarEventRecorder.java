@@ -50,8 +50,6 @@ import java.util.Arrays;
  */
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final V variable; // one variable
-    protected Propagator<V>[] propagators; // its propagators -- distinct
     protected int idxV; // index of this within the variable structure -- mutable
     protected final TIntIntHashMap p2i; // hashmap to retrieve the position of a propagator in propagators thanks to its pid
     protected int[] propIdx; // an array of indices helping to get active propagators
@@ -60,7 +58,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     VarEventRecorder(V variable, Solver solver, int n) {
         super(solver);
-        this.variable = variable;
+        this.variables = (V[]) new Variable[]{variable};
         variable.addMonitor(this);
         p2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
         this.propagators = new Propagator[n];
@@ -89,16 +87,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         }
         firstAP = solver.getEnvironment().makeInt(k);
         firstPP = solver.getEnvironment().makeInt(k);
-    }
-
-    @Override
-    public V[] getVariables() {
-        return (V[])new Variable[]{variable};
-    }
-
-    @Override
-    public Propagator<V>[] getPropagators() {
-        return propagators;
     }
 
     @Override
@@ -182,7 +170,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void activate(Propagator<V> element) {
         int firstA = firstAP.get();
         if (firstA == propagators.length) { // if this is the first propagator activated
-            variable.activate(this); // activate this
+            variables[VINDEX].activate(this); // activate this
         }
         // then, swap the propagator to the active part (between firstAP and firstPP)
         int id = p2i.get(element.getId());
@@ -216,7 +204,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         swapP(i, last - 1); //swap it with the last active
         firstPP.add(-1); // decrease pointer to last active
         if (last == 1) { // if it was the last active propagator, desactivate this
-            variable.desactivate(this);
+            variables[VINDEX].desactivate(this);
             flush();
         }
     }
@@ -245,6 +233,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return "<< " + variable + "::" + Arrays.toString(propagators) + ">>";
+        return "<< " + variables[VINDEX] + "::" + Arrays.toString(propagators) + ">>";
     }
 }

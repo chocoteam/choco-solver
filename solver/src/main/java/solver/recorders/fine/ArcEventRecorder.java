@@ -43,27 +43,15 @@ import solver.variables.delta.IDeltaMonitor;
  */
 public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final V variable; // variable to observe
-    protected final Propagator<V> propagator; // propagator to inform
-
     protected int idxV; // index of this within the variable structure -- mutable
 
     public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver) {
         super(solver);
-        this.variable = variable;
-        this.propagator = propagator;
         variable.addMonitor(this);
         propagator.addRecorder(this);
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[]{propagator};
-    }
-
-    @Override
-    public V[] getVariables() {
-        return (V[]) new Variable[]{variable};
+        // BEWARE : required by AbstractFineEventRecorder
+        this.variables = (V[]) new Variable[]{variable};
+        this.propagators = new Propagator[]{propagator};
     }
 
     @Override
@@ -79,13 +67,13 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
             // 1. if instantiation, then decrement arity of the propagator
             if (EventType.anInstantiationEvent(evt.mask)) {
-                propagator.decArity();
+                propagators[PINDEX].decArity();
             }
             // 2. schedule the coarse event recorder associated to thos
-            propagator.forcePropagate(EventType.FULL_PROPAGATION);
+            propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
         }
     }
 
@@ -119,29 +107,29 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + propagator.toString() + " >>";
+        return "<< " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + " >>";
     }
 
     @Override
     public void activate(Propagator<V> element) {
-        variable.activate(this);
+        variables[VINDEX].activate(this);
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
-        variable.desactivate(this);
+        variables[VINDEX].desactivate(this);
     }
 
     @Override
     public void enqueue() {
         enqueued = true;
-        propagator.incNbRecorderEnqued();
+        propagators[PINDEX].incNbRecorderEnqued();
     }
 
     @Override
     public void deque() {
         enqueued = false;
-        propagator.decNbRecrodersEnqued();
+        propagators[PINDEX].decNbRecrodersEnqued();
     }
 
 }

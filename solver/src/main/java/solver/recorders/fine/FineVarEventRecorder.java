@@ -65,11 +65,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         int n = props.length;
         // CREATE EMPTY STRUCTURE
         this.deltamon = new IDeltaMonitor[n];
-        this.evtmasks = new int[n];
         this.idxVinPs = new int[n][];
-
-        this.timestamps = new long[n];
-        Arrays.fill(timestamps, -1);
 
         IDelta delta = variable.getDelta();
         int k = 0; // count the number of distinct propagator
@@ -96,9 +92,12 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
             propagators = Arrays.copyOfRange(propagators, 0, k);
             propIdx = Arrays.copyOfRange(propIdx, 0, k);
             deltamon = Arrays.copyOfRange(deltamon, 0, k);
-            evtmasks = Arrays.copyOfRange(evtmasks, 0, k);
             idxVinPs = Arrays.copyOfRange(idxVinPs, 0, k);
         }
+        this.evtmasks = new int[k];
+        this.timestamps = new long[k];
+        Arrays.fill(timestamps, -1);
+
         firstAP = solver.getEnvironment().makeInt(k);
         firstPP = solver.getEnvironment().makeInt(k);
     }
@@ -213,7 +212,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     @Override
     public void virtuallyExecuted(Propagator propagator) {
         if (LAZY) {
-            variable.getDelta().lazyClear();
+            variables[VINDEX].getDelta().lazyClear();
         }
         int idx = p2i.get(propagator.getId());
         this.evtmasks[idx] = 0;
@@ -236,6 +235,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public String toString() {
-        return "<< {F} " + variable.toString() + "::" + Arrays.toString(propagators) + " >>";
+        return "<< {F} " + variables[VINDEX].toString() + "::" + Arrays.toString(propagators) + " >>";
     }
 }

@@ -90,7 +90,7 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + Arrays.toString(propagators) + "::" + condition.toString() + " >>";
+        return "<< " + variables[0].toString() + "::" + Arrays.toString(propagators) + "::" + condition.toString() + " >>";
     }
 
 }

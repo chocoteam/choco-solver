@@ -40,7 +40,6 @@ import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.propagation.generator.*;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -148,12 +147,12 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        if (true) {
+       /* if (true) {
             solver.set(new Sort(
                     new SortDyn(EvtRecEvaluators.MinDomSize, SortDyn.Op.MAX, new PVar(scheds)),
                     new SortDyn(EvtRecEvaluators.MaxArityV, SortDyn.Op.MAX, new PVar(solver.getVars())),
                     new Queue(new PCoarse(solver.getCstrs()))));
-        } else {
+        } else*/ {
             solver.set(new Sort(
                     new Queue(new PArc(scheds)),
                     new Queue(new PVar(solver.getVars())),
