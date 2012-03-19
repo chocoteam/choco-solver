@@ -160,7 +160,7 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
         int idx = dIdx.get();
         if (dElements.length <= idx) {
             E[] tmp = dElements;
-            dElements = (E[]) new IVariableMonitor[3 / 2 * sElements.length + 1];
+            dElements = (E[]) new IVariableMonitor[3 / 2 * dElements.length + 1];
             System.arraycopy(tmp, 0, dElements, 0, idx);
         }
         element.setIdxInV(parent, idx + OFFSET);
