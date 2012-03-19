@@ -97,7 +97,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public Propagator[] getPropagators() {
+    public Propagator<V>[] getPropagators() {
         return propagators;
     }
 

@@ -112,7 +112,7 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PVar(variables));
             Sort coarses = new Sort(new Increasing(EvtRecEvaluators.MaxPriorityC), new PCoarse(constraints));
-            return new Sort(coarses.pickOne(), arcs.clearOut()).clearOut();
+            return new Sort(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     },
     INCREASING_DEGREE_VARS() {
@@ -153,7 +153,7 @@ public enum PropagationStrategies {
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PCons(constraints));
             Queue coarses = new Queue(new PCoarse(constraints));
-            return new Sort(coarses.pickOne(), arcs.clearOut()).clearOut();
+            return new Sort(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     },
     PRIORITY_QUEUES_WITH_PROPS() {

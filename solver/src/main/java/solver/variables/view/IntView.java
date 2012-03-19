@@ -76,7 +76,7 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
 
     @Override
     public final int getTypeAndKind() {
-        return Variable.VIEW + Variable.INT;
+        return Variable.VIEW + var.getTypeAndKind();
     }
 
     public IntVar getVariable() {

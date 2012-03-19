@@ -84,6 +84,7 @@ public class Solution implements ICause {
             int kind = vars[i].getTypeAndKind() & Variable.KIND;
             switch (kind) {
                 case Variable.INT:
+                case Variable.BOOL:
                     intvalues[i] = ((IntVar) vars[i]).getValue();
                     break;
                 case Variable.GRAPH:
@@ -108,6 +109,7 @@ public class Solution implements ICause {
                 int kind = vars[i].getTypeAndKind() & Variable.KIND;
                 switch (kind) {
                     case Variable.INT:
+                    case Variable.BOOL:
                         ((IntVar) vars[i]).instantiateTo(intvalues[i], this);
                         break;
                     case Variable.GRAPH:

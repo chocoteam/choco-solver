@@ -93,13 +93,6 @@ public class PropCount extends Propagator<IntVar> {
         this.nbListVars = ovIdx;
         nbPossible = environment.makeBitSet(vars.length);
         nbSure = environment.makeBitSet(vars.length);
-        int cpt = 0;
-        for (int i = 0; i < ovIdx; i++) {
-            if (vars[i].contains(this.occval)) {
-                nbPossible.set(i);
-                cpt++;
-            }
-        }
         rem_proc = new RemProc(this);
     }
 
@@ -114,11 +107,15 @@ public class PropCount extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < (nbListVars); i++) {
-            if (vars[i].contains(occval)) {
-                nbPossible.set(i);
-                if (vars[i].instantiatedTo(occval)) {
-                    nbSure.set(i);
+        if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
+            nbPossible.clear();
+            nbSure.clear();
+            for (int i = 0; i < (nbListVars); i++) {
+                if (vars[i].contains(occval)) {
+                    nbPossible.set(i);
+                    if (vars[i].instantiatedTo(occval)) {
+                        nbSure.set(i);
+                    }
                 }
             }
         }
