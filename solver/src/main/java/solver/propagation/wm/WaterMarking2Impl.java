@@ -64,7 +64,7 @@ public class WaterMarking2Impl implements IWaterMarking {
     public int size() {
         int s = 0;
         for (int i = 0; i < elements.length; i++) {
-            s += (elements[i]==null?0:elements[i].size());
+            s += (elements[i] == null ? 0 : elements[i].size());
         }
         return s;
     }
@@ -83,8 +83,9 @@ public class WaterMarking2Impl implements IWaterMarking {
     public void putMark(int id1, int id2, int id3) {
         int id = _id(id1, id2);
         if (id3 + OFFSET >= elements.length) {
+            int ns = Math.max(elements.length * 3 / 2, id3 + OFFSET) + 1;
             TIntHashSet[] tmp = elements;
-            elements = new TIntHashSet[tmp.length * 3 / 2 + 1];
+            elements = new TIntHashSet[ns];
             System.arraycopy(tmp, 0, elements, 0, tmp.length);
         }
         if (elements[id3 + OFFSET] == null) {

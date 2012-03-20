@@ -28,6 +28,8 @@ package solver.propagation.generator;
 
 import solver.propagation.ISchedulable;
 
+import java.io.Serializable;
+
 /**
  * An abstract class to help defining a propagation strategy,
  * based on the DSL.
@@ -36,7 +38,7 @@ import solver.propagation.ISchedulable;
  * @author Charles Prud'homme
  * @since 15/12/11
  */
-public interface Generator<S extends ISchedulable> {
+public interface Generator<S extends ISchedulable> extends Serializable{
 
     S[] getElements();
 
