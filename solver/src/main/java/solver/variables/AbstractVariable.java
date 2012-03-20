@@ -171,11 +171,17 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
     }
 
     public Propagator[] getPropagators() {
-        return Arrays.copyOf(propagators, pIdx);
+        if (propagators.length > pIdx) {
+            propagators = Arrays.copyOf(propagators, pIdx);
+        }
+        return propagators;
     }
 
     public int[] getPIndices() {
-        return Arrays.copyOf(pindices, pIdx);
+        if (pindices.length > pIdx) {
+            pindices = Arrays.copyOf(pindices, pIdx);
+        }
+        return pindices;
     }
 
     public void activate(IVariableMonitor monitor) {

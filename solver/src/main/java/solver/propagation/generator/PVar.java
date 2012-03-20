@@ -89,12 +89,14 @@ public class PVar implements Generator<AbstractFineEventRecorder> {
                 }
             }
         }
-        if (i == 1) { // in that case, there is only one propagator, an Arc is a better alternative
-            eventRecorders.add(new FineArcEventRecorder(var, propagators[0], pindices[0], solver));
-        } else if (i < nbp) { // if some propagators has been removed -- connectected previously
-            eventRecorders.add(new FineVarEventRecorder(var, Arrays.copyOfRange(propagators, 0, i), Arrays.copyOfRange(pindices, 0, i), solver));
-        } else {
-            eventRecorders.add(new FineVarEventRecorder(var, propagators, pindices, solver));
+        if (i > 0) {
+            if (i == 1) { // in that case, there is only one propagator, an Arc is a better alternative
+                eventRecorders.add(new FineArcEventRecorder(var, propagators[0], pindices[0], solver));
+            } else if (i < nbp) { // if some propagators has been removed -- connectected previously
+                eventRecorders.add(new FineVarEventRecorder(var, Arrays.copyOfRange(propagators, 0, i), Arrays.copyOfRange(pindices, 0, i), solver));
+            } else {
+                eventRecorders.add(new FineVarEventRecorder(var, propagators, pindices, solver));
+            }
         }
         IView[] views = var.getViews();
         for (int j = 0; j < views.length; j++) {

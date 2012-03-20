@@ -196,7 +196,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return Sum.geq(new IntVar[]{x, y}, 1, solver);
+        return Sum.geq(new IntVar[]{x, y}, new int[]{1, -1}, 1, solver);
     }
 
     public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,

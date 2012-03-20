@@ -26,6 +26,7 @@
  */
 package solver.search.strategy.enumerations.sorters.metrics;
 
+import solver.constraints.propagators.Propagator;
 import solver.variables.Variable;
 
 /**
@@ -35,7 +36,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 10/05/11
  */
-public class Degree implements IMetric<Variable> {
+public class Degree<V extends Variable> implements IMetric<V> {
 
     private static Degree singleton;
 
@@ -51,7 +52,12 @@ public class Degree implements IMetric<Variable> {
 
 
     @Override
-    public int eval(Variable var) {
-        return var.nbMonitors();
+    public int eval(V var) {
+        int d = 0;
+        Propagator[] props = var.getPropagators();
+        for (int i = 0; i < props.length; i++) {
+            d += (props[i].isActive() ? 1 : 0);
+        }
+        return d;
     }
 }

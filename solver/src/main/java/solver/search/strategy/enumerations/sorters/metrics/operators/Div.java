@@ -51,6 +51,10 @@ public class Div<V extends Variable> implements IMetric<V> {
 
     @Override
     public int eval(V var) {
-        return left.eval(var) / right.eval(var);
+        int div = right.eval(var);
+        if(div == 0){
+            return Integer.MAX_VALUE;
+        }
+        return left.eval(var) /div;
     }
 }

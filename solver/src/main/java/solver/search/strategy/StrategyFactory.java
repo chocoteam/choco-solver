@@ -129,7 +129,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMinVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
+                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -144,7 +144,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMidVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainSplitMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
+                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -159,7 +159,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> minDomMaxVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMax(variables);
         return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.minDomain(),SorterFactory.inputOrder(variables)),
+                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -167,7 +167,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> maxRegMinVal(IntVar[] variables, IEnvironment environment) {
         HeuristicValFactory.indomainMin(variables);
         return StrategyVarValAssign.dyn(variables,
-                new Seq<IntVar>(SorterFactory.maxRegret(),SorterFactory.inputOrder(variables)),
+                new Seq<IntVar>(SorterFactory.maxRegret(), SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
     }
@@ -189,12 +189,23 @@ public final class StrategyFactory {
                 environment);
     }
 
+    public static AbstractStrategy<IntVar> domddegMinDom(IntVar[] vars) {
+        Solver solver = vars[0].getSolver();
+        for (IntVar var : vars) {
+            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
+        }
+        return StrategyVarValAssign.dyn(vars,
+                new Seq<IntVar>(SorterFactory.domddeg(), SorterFactory.random()),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment());
+    }
+
     public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, Solver solver) {
         for (IntVar var : vars) {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -202,7 +213,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver) {
         HeuristicValFactory.indomainMiddle(vars);
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -211,7 +222,7 @@ public final class StrategyFactory {
     public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver) {
         HeuristicValFactory.indomainMax(vars);
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random()),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
