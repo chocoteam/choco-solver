@@ -33,7 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PCons;
+import solver.propagation.generator.PVar;
 import solver.propagation.generator.Sort;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -53,7 +53,7 @@ import solver.variables.VariableFactory;
 public class MagicSeries extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 50;
+    int n = 400;
     IntVar[] vars;
 
     Constraint[] counts;
@@ -88,7 +88,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        Sort s1 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCons(solver.getCstrs()));
+        Sort s1 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PVar(solver.getVars()));
         Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
         solver.set(new Sort(s1, s2));
     }
