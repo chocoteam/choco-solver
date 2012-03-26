@@ -139,9 +139,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                         evtmasks[idx] |= evt.strengthened_mask;
                     }
                     // 4. schedule this
-                    if (!enqueued()) {
-                        scheduler.schedule(this);
-                    }
+                    scheduler.schedule(this);
                 }
             }
         }

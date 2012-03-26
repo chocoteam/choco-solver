@@ -81,7 +81,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
 
     public PArc(Constraint[] constraints, Predicate[] validations) {
         super();
-        Solver solver = constraints[0].getVariables()[0].getSolver();
+        Solver solver = constraints[0].getSolver();
         IPropagationEngine propagationEngine = solver.getEngine();
         propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
@@ -96,7 +96,7 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
 
     public PArc(Propagator[] propagators, Predicate[] validations) {
         super();
-        Solver solver = propagators[0].getVar(0).getSolver();
+        Solver solver = propagators[0].getSolver();
         IPropagationEngine propagationEngine = solver.getEngine();
         propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();

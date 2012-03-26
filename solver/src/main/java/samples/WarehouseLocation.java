@@ -28,11 +28,18 @@ package samples;
 
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.tools.ArrayUtils;
+import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Queue;
+import solver.propagation.generator.Sort;
+import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -56,28 +63,40 @@ import java.util.Arrays;
  */
 public class WarehouseLocation extends AbstractProblem {
 
-    int nWH = 5, nS = 10, cost = 30;
-    int[] capacity = {1, 4, 2, 1, 3};
-    int[][] c_supply = {
-            {20, 24, 11, 25, 30},
-            {28, 27, 82, 83, 74},
-            {74, 97, 71, 96, 70},
-            {2, 55, 73, 69, 61},
-            {46, 96, 59, 83, 4},
-            {42, 22, 29, 67, 59},
-            {1, 5, 73, 59, 56},
-            {10, 73, 13, 43, 96},
-            {93, 35, 63, 85, 46},
-            {47, 65, 55, 71, 95}
-    };
+    @Option(name = "-d", aliases = "--data", usage = "Warehouse location instance.", required = false)
+    Data data = Data.med;
+
+    int nWH, nS, cost;
+    int[] capacity;
+    int[][] c_supply;
 
     IntVar[] suppliers;
     BoolVar[] open;
     IntVar[] costPerStore;
     IntVar totCost;
 
+
+    public void setUp() {
+        int k = 0;
+        nWH = data.data[k++];
+        nS = data.data[k++];
+        cost = data.data[k++];
+        capacity = new int[nWH];
+        for (int i = 0; i < nWH; i++) {
+            capacity[i] = data.data[k++];
+        }
+        c_supply = new int[nS][nWH];
+        for (int j = 0; j < nS; j++) {
+            for (int i = 0; i < nWH; i++) {
+                c_supply[j][i] = data.data[k++];
+            }
+        }
+    }
+
+
     @Override
     public void buildModel() {
+        setUp();
         solver = new Solver();
         suppliers = VariableFactory.enumeratedArray("sup", nS, 0, nWH - 1, solver);
         open = VariableFactory.boolArray("o", nWH, solver);
@@ -93,6 +112,9 @@ public class WarehouseLocation extends AbstractProblem {
         for (int s = 0; s < nS; s++) {
             solver.post(new Element(costPerStore[s], c_supply[s], suppliers[s], solver));
         }
+        for (int w = 0; w < nWH; w++) {
+            solver.post(new Count(w, suppliers, Count.Relop.GEQ, open[w], solver));
+        }
         // Do not exceed capacity
         for (int w = 0; w < nWH; w++) {
             IntVar counter = Views.fixed(capacity[w], solver);
@@ -107,18 +129,30 @@ public class WarehouseLocation extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-//        StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
-//                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
-//                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
-//                );
-//        solver.set(strat);
+        StrategiesSequencer strat = new StrategiesSequencer(solver.getEnvironment(),
+                StrategyFactory.inputOrderMinVal(suppliers, solver.getEnvironment()),
+                StrategyFactory.maxRegMinVal(costPerStore, solver.getEnvironment())
+        );
+        solver.set(strat);
 
-        //TODO: find a propagation strat
 
     }
 
     @Override
     public void configureEngine() {
+        //TODO: find a propagation strat
+        solver.set(
+                new Sort(
+                        new Queue(
+                                new Queue(new PVar(open)),
+                                new Queue(new PVar(suppliers)),
+                                new Queue(new PVar(costPerStore)),
+                                new PVar(costPerStore)
+
+                        ),
+                        new Queue(new PCoarse(solver.getCstrs()))
+                )
+        );
     }
 
     @Override
@@ -130,18 +164,22 @@ public class WarehouseLocation extends AbstractProblem {
     public void prettyOut() {
         LoggerFactory.getLogger("bench").info("Warehouse location problem");
         StringBuilder st = new StringBuilder();
-        for (int i = 0; i < nWH; i++) {
-            if (open[i].getValue() > 0) {
-                st.append(String.format("\tw#%d:\n\t", i));
-                for (int j = 0; j < nS; j++) {
-                    if (suppliers[j].getValue() == i) {
-                        st.append(String.format("%d (%d) ", j, costPerStore[j].getValue()));
+        if (solver.isFeasible() == Boolean.TRUE) {
+            for (int i = 0; i < nWH; i++) {
+                if (open[i].getValue() > 0) {
+                    st.append(String.format("\tw#%d:\n\t", i));
+                    for (int j = 0; j < nS; j++) {
+                        if (suppliers[j].getValue() == i) {
+                            st.append(String.format("%d (%d) ", j, costPerStore[j].getValue()));
+                        }
                     }
+                    st.append("\n");
                 }
-                st.append("\n");
             }
+            st.append("\tTotal cost: ").append(totCost.getValue());
+        } else {
+            st.append("\tINFEASIBLE");
         }
-        st.append("\tTotal cost: ").append(totCost.getValue());
 
         LoggerFactory.getLogger("bench").info(st.toString());
     }
@@ -150,7 +188,79 @@ public class WarehouseLocation extends AbstractProblem {
         new WarehouseLocation().execute(args);
     }
 
-    /////////////////////////////////// DATA //////////////////////////////////////////////////
 
+    ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
+    static enum Data {
+        small(new int[]{
+                5, 10, 30, //nWH = 5, nS = 10, cost = 30
+                1, 4, 2, 1, 3, // capacity
+                // c_supply
+                20, 24, 11, 25, 30,
+                28, 27, 82, 83, 74,
+                74, 97, 71, 96, 70,
+                2, 55, 73, 69, 61,
+                46, 96, 59, 83, 4,
+                42, 22, 29, 67, 59,
+                1, 5, 73, 59, 56,
+                10, 73, 13, 43, 96,
+                93, 35, 63, 85, 46,
+                47, 65, 55, 71, 95
+        }),
+        med(new int[]{
+                7, 14, 30,
+                1, 4, 2, 1, 3, 3, 1,
+                // c_supply
+                20, 24, 11, 25, 30, 15, 23,
+                28, 27, 82, 83, 74, 24, 11,
+                74, 97, 71, 96, 70, 82, 27,
+                2, 55, 73, 69, 61, 10, 96,
+                46, 96, 59, 83, 4, 36, 58,
+                42, 22, 29, 67, 59, 64, 23,
+                1, 5, 73, 59, 56, 48, 13,
+                10, 73, 13, 43, 96, 1, 82,
+                93, 35, 63, 85, 46, 99, 17,
+                47, 65, 55, 71, 95, 25, 35,
+                67, 59, 42, 22, 2, 46, 96,
+                56, 1, 5, 73, 5, 42, 22,
+                43, 96, 10, 73, 1, 1, 5,
+                85, 46, 93, 35, 6, 10, 73,
+
+        }),
+        large(new int[]{
+                10, 20, 30,
+                1, 4, 2, 1, 3, 1, 4, 2, 1, 3, // capacity
+                // c_supply
+                20, 24, 11, 25, 30, 20, 24, 11, 25, 30,
+                28, 27, 82, 83, 74, 28, 27, 82, 83, 74,
+                74, 97, 71, 96, 70, 74, 97, 71, 96, 70,
+                2, 55, 73, 69, 61, 2, 55, 73, 69, 61,
+                46, 96, 59, 83, 4, 46, 96, 59, 83, 4,
+                42, 22, 29, 67, 59, 42, 22, 29, 67, 59,
+                1, 5, 73, 59, 56, 1, 5, 73, 59, 56,
+                10, 73, 13, 43, 96, 10, 73, 13, 43, 96,
+                93, 35, 63, 85, 46, 93, 35, 63, 85, 46,
+                47, 65, 55, 71, 95, 47, 65, 55, 71, 95,
+                20, 24, 11, 25, 30, 20, 24, 11, 25, 30,
+                28, 27, 82, 83, 74, 28, 27, 82, 83, 74,
+                74, 97, 71, 96, 70, 74, 97, 71, 96, 70,
+                2, 55, 73, 69, 61, 2, 55, 73, 69, 61,
+                46, 96, 59, 83, 4, 46, 96, 59, 83, 4,
+                42, 22, 29, 67, 59, 42, 22, 29, 67, 59,
+                1, 5, 73, 59, 56, 1, 5, 73, 59, 56,
+                10, 73, 13, 43, 96, 10, 73, 13, 43, 96,
+                93, 35, 63, 85, 46, 93, 35, 63, 85, 46,
+                47, 65, 55, 71, 95, 47, 65, 55, 71, 95
+
+        });
+        final int[] data;
+
+        Data(int[] data) {
+            this.data = data;
+        }
+
+        public int get(int i) {
+            return data[i];
+        }
+    }
 
 }

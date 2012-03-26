@@ -62,7 +62,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
 
     public PCons(Constraint[] constraints, Predicate[] validations) {
         super();
-        Solver solver = constraints[0].getVariables()[0].getSolver();
+        Solver solver = constraints[0].getSolver();
         IPropagationEngine propagationEngine = solver.getEngine();
         propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
@@ -79,7 +79,7 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
 
     public PCons(Propagator[] propagators, Predicate[] validations) {
         super();
-        Solver solver = propagators[0].getVar(0).getSolver();
+        Solver solver = propagators[0].getSolver();
         IPropagationEngine propagationEngine = solver.getEngine();
         propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();

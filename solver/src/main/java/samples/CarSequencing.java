@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
+import solver.propagation.generator.*;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -126,17 +128,9 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-    /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.light(),
-                        new Seq(IncrArityP.get(),
-                                IncrDomDeg.get()),
-                        Policy.FIXPOINT));
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.ONE));*/
+        solver.set(new Sort(
+                    new SortDyn2(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
+                    new Queue(new PCoarse(solver.getCstrs()))));
     }
 
     @Override

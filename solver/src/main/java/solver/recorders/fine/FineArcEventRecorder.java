@@ -107,9 +107,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
                     evtmask |= evt.strengthened_mask;
                 }
                 // 4. schedule this
-                if (!enqueued()) {
-                    scheduler.schedule(this);
-                }
+                scheduler.schedule(this);
             }
         }
     }

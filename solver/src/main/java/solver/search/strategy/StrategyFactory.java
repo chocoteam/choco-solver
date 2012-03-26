@@ -210,6 +210,16 @@ public final class StrategyFactory {
                 solver.getEnvironment());
     }
 
+    public static AbstractStrategy<IntVar> domwdeginputorderMindom(IntVar[] vars, Solver solver) {
+        for (IntVar var : vars) {
+            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
+        }
+        return StrategyVarValAssign.dyn(vars,
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.inputOrder(vars)),
+                ValidatorFactory.instanciated,
+                solver.getEnvironment());
+    }
+
     public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver) {
         HeuristicValFactory.indomainMiddle(vars);
         return StrategyVarValAssign.dyn(vars,

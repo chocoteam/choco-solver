@@ -177,9 +177,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         }
         if (oneoremore) {
             // 4. schedule this
-            if (!enqueued()) {
-                scheduler.schedule(this);
-            }
+            scheduler.schedule(this);
         }
 
     }

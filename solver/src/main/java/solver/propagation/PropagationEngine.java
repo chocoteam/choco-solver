@@ -185,6 +185,10 @@ public class PropagationEngine implements IPropagationEngine {
         initialized = false;
         propagationStrategy = null;
         throw new SolverException("Clearing the engine is not enough!");//CPRU: to do
+    }
 
+    @Override
+    public String toString() {
+        return propagationStrategy.toString();
     }
 }

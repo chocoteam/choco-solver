@@ -150,9 +150,7 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
         }
         if (oneoremore) {
             // 4. schedule this
-            if (!enqueued()) {
-                scheduler.schedule(this);
-            }
+            scheduler.schedule(this);
         }
 
     }

@@ -32,6 +32,11 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PCons;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -83,14 +88,9 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        //TODO: trouver un propagation appropriée : en shuffle, on propage 2 fois moins!
-        /*IPropagationEngine peng = solver.getEngine();
-        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
-        peng.addGroup(Group.buildGroup(Predicates.light(),
-                IncrArityV.get(),
-                Policy.ITERATE));
-*/
-        // + default one
+        Sort s1 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCons(solver.getCstrs()));
+        Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
+        solver.set(new Sort(s1, s2));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MagicSeries extends AbstractProblem {
                 }
             }
         } else {
-             st.append("\tINFEASIBLE");
+            st.append("\tINFEASIBLE");
         }
         LoggerFactory.getLogger("bench").info(st.toString());
 

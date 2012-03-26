@@ -165,6 +165,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return ID;
     }
 
+    public Solver getSolver() {
+        return solver;
+    }
+
     /**
      * Return the specific mask indicating the <b>propagation events</b> on which <code>this</code> can react. <br/>
      *

@@ -115,13 +115,13 @@ public class GolombRuler extends AbstractProblem {
     @Override
     public void configureEngine() {
         // <2012-03-08 cp> works fine
-        Queue _ticks = new Queue<AbstractFineEventRecorder>(new PArc(ticks));
-        Queue _diffs = new Queue<AbstractFineEventRecorder>(new PArc(diffs));
-        Queue _vars = new Queue<AbstractFineEventRecorder>(_ticks.clearOut(), _diffs.clearOut());
-        Sort _coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxPriorityC),
-                new PCoarse(solver.getCstrs()));
-        solver.set(new Sort<IEventRecorder>(_vars, _coar.pickOne()).clearOut());
-    }
+            Queue _ticks = new Queue<AbstractFineEventRecorder>(new PArc(ticks));
+            Queue _diffs = new Queue<AbstractFineEventRecorder>(new PArc(diffs));
+            Queue _vars = new Queue<AbstractFineEventRecorder>(_ticks.clearOut(), _diffs.clearOut());
+            Sort _coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxPriorityC),
+                    new PCoarse(solver.getCstrs()));
+            solver.set(new Sort<IEventRecorder>(_vars, _coar.pickOne()).clearOut());
+        }
 
     @Override
     public void solve() {

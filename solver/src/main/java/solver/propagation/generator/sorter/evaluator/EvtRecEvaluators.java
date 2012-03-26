@@ -174,12 +174,11 @@ public class EvtRecEvaluators {
      */
     public static IEvaluator<IEventRecorder<IntVar>> MinDomSize = new IEvaluator<IEventRecorder<IntVar>>() {
         @Override
-        public int eval
-                (IEventRecorder<IntVar> eventRecorder) {
-            IntVar[] variables = eventRecorder.getVariables();
+        public int eval(IEventRecorder<IntVar> eventRecorder) {
+            Variable[] variables = eventRecorder.getVariables();
             int a = Integer.MAX_VALUE;
             for (int i = 0; i < variables.length; i++) {
-                int aa = variables[i].nbConstraints();
+                int aa = ((IntVar)variables[i]).getDomainSize();
                 if (aa < a) {
                     a = aa;
                 }
