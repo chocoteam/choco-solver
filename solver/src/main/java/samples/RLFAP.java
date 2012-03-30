@@ -26,13 +26,17 @@
  */
 package samples;
 
+import choco.kernel.ResolutionPolicy;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.hash.TIntHashSet;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.DistanceXYC;
+import solver.constraints.nary.Count;
 import solver.propagation.generator.*;
+import solver.propagation.generator.Queue;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -43,10 +47,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * <a href="http://www.inra.fr/mia/T/schiex/Doc/CELAR.shtml">CELAR Radio Link Frequency Assignment Problem</a>:
@@ -67,12 +68,19 @@ public class RLFAP extends AbstractProblem {
     private static String CTR = "ctr.txt";
 
     @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
-    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05";
+    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen02";
+
+    @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
+    boolean opt = false;
 
     int[][] _dom, _ctr;
     int[][] _var;
 
     IntVar[] vars;
+    IntVar[] cards;
+    IntVar nb0;
+    int[] freqs;
+    int[] rank;
 
 
     @Override
@@ -81,10 +89,13 @@ public class RLFAP extends AbstractProblem {
         _var = readVAR(dir + File.separator + VAR);
         _ctr = readCTR(dir + File.separator + CTR);
 
-        solver = new Solver("RLFAP "+dir);
+        TIntHashSet values = new TIntHashSet();
+
+        solver = new Solver("RLFAP " + dir);
         vars = new IntVar[_var.length];
 
         vars = new IntVar[_var[_var.length - 1][0]];
+        int n = vars.length;
         int prev = 0;
         for (int i = 0; i < _var.length; i++) {
             int vidx = _var[i][0] - 1;
@@ -98,38 +109,77 @@ public class RLFAP extends AbstractProblem {
                 vars[vidx] = Views.fixed(_var[i][2], solver);
             } else {
                 vars[vidx] = VariableFactory.enumerated("v_" + vidx, _dom[didx], solver);
+                values.addAll(_dom[didx]);
             }
             prev = vidx + 1;
         }
+        int[][] graph = new int[n][n];
+
         for (int i = 0; i < _ctr.length; i++) {
             int[] ci = _ctr[i];
             solver.post(new DistanceXYC(vars[ci[0] - 1], vars[ci[1] - 1],
                     (ci[2] == 0 ? DistanceXYC.Op.EQ : DistanceXYC.Op.GT),
                     ci[3], solver));
-        }
 
+            // MARK BOTH SPOTS IN "PRECEDENCE" GRAPH
+            graph[ci[0] - 1][ci[1] - 1] = 1;
+            graph[ci[1] - 1][ci[0] - 1] = 1;
+
+        }
+        if (opt) {
+            cards = VariableFactory.boundedArray("c", values.size(), 0, vars.length, solver);
+            freqs = values.toArray();
+            Arrays.sort(freqs);
+            for (int i = 0; i < freqs.length; i++) {
+                solver.post(new Count(freqs[i], vars, Count.Relop.EQ, cards[i], solver));
+            }
+            nb0 = VariableFactory.bounded("nb0", 0, freqs.length, solver);
+            solver.post(new Count(0, cards, Count.Relop.EQ, nb0, solver));
+        }
+        // RANKING VARIABLES PER LAYER OF DISTINCT SPOT
+        rank = new int[n];
+        boolean[] treated = new boolean[n];
+        int i = 0;
+        Deque<Integer> toTreat = new ArrayDeque<Integer>();
+        toTreat.push(i);
+        rank[i] = 0;
+        while (!toTreat.isEmpty()) {
+            i = toTreat.pop();
+            treated[i] = true;
+            for (int j = 0; j < n; j++) {
+                if (graph[i][j] == 1) {
+                    rank[j] = Math.max(rank[i] + 1, rank[j]);
+                    if (!treated[j] && !toTreat.contains(j)) {
+                        toTreat.push(j);
+                    }
+                }
+            }
+        }
     }
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
-//        solver.set(StrategyFactory.domwdeginputorderMindom(vars, solver));
-        solver.set(StrategyFactory.domddegMinDom(vars));
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.domddegMinDom(vars));
+//        solver.set(StrategyFactory.domwdegMindom(vars, 3));
+//        SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
+//                LimitBox.failLimit(solver, 2), 25000);
     }
 
     @Override
     public void configureEngine() {
-       solver.set(new Sort(
-           new Queue(new PCoarse(solver.getCstrs())),
-           new SortDyn2(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
-       ));
-
+        solver.set(new Sort(
+                new Queue(new PCoarse(solver.getCstrs())),
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
+        ));
     }
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.log(solver, true, false);
-        solver.findSolution();
+        if (opt)
+            solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
+        else
+            solver.findSolution();
     }
 
     @Override
@@ -144,6 +194,12 @@ public class RLFAP extends AbstractProblem {
                     st.append("\n\t");
                 }
             }
+            if (opt) {
+                st.append("\n\tnb assigned freq.:").append(freqs.length - nb0.getValue());
+                for (int i = 0; i < freqs.length; i++) {
+                    st.append("\n\tF ").append(freqs[i]).append(" : ").append(cards[i].getValue());
+                }
+            }
         } else {
             st.append("\tINFEASIBLE");
         }
@@ -152,7 +208,7 @@ public class RLFAP extends AbstractProblem {
 
     public static void main(String[] args) {
         new RLFAP().execute(args);
-    }
+        }
 
     /////////////////////
 

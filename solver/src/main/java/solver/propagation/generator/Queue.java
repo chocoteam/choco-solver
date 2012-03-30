@@ -43,7 +43,6 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
     protected S lastPopped;
     protected FixSizeCircularQueue<S> toPropagate;
 
-
     @SuppressWarnings({"unchecked"})
     public Queue(Generator<S>... generators) {
         int nbe = 0;
@@ -73,9 +72,7 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.add(element);
             element.enqueue();
         }
-        if (!this.enqueued) {
-            scheduler.schedule(this);
-        }
+        scheduler.schedule(this);
     }
 
     @Override
@@ -101,6 +98,11 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     protected boolean _sweepUp() throws ContradictionException {
+        return _clearOut();
+    }
+
+    @Override
+    protected boolean _loopOut() throws ContradictionException {
         return _clearOut();
     }
 
@@ -141,4 +143,4 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     //-->
 
-}
+    }

@@ -53,9 +53,13 @@ public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
         this(constraints, PArc.NOV);
     }
 
+    public PCoarse(Propagator[] propagators) {
+        this(propagators, PArc.NOV);
+    }
+
     public PCoarse(Constraint[] constraints, Predicate[] validations) {
         super();
-        Solver solver = constraints[0].getVariables()[0].getSolver();
+        Solver solver = constraints[0].getSolver();
         IPropagationEngine propagationEngine = solver.getEngine();
         propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractCoarseEventRecorder>();
@@ -69,6 +73,25 @@ public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
                         propagationEngine.clearWatermark(0, pidx, 0);
                         eventRecorders.add(new CoarseEventRecorder(propagator, solver));
                     }
+                }
+            }
+        }
+    }
+
+
+    public PCoarse(Propagator[] propagators, Predicate[] validations) {
+        super();
+        Solver solver = propagators[0].getSolver();
+        IPropagationEngine propagationEngine = solver.getEngine();
+        propagationEngine.prepareWM(solver);
+        eventRecorders = new ArrayList<AbstractCoarseEventRecorder>();
+        for (int i = 0; i < propagators.length; i++) {
+            Propagator propagator = propagators[i];
+            if (validations.length == 0 || validate(propagator, validations)) {
+                int pidx = propagator.getId();
+                if (propagationEngine.isMarked(0, pidx, 0)) {
+                    propagationEngine.clearWatermark(0, pidx, 0);
+                    eventRecorders.add(new CoarseEventRecorder(propagator, solver));
                 }
             }
         }

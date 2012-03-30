@@ -51,17 +51,17 @@ import java.util.Deque;
  */
 public class Pert extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Number of nodes.", required = true)
-    int n = 10;
+    @Option(name = "-n", usage = "Number of nodes.", required = false)
+    int n = 1000;
 
-    @Option(name = "-l", usage = "Number of layers.", required = true)
-    int layers;
+    @Option(name = "-l", usage = "Number of layers.", required = false)
+    int layers = 200;
 
-    @Option(name = "-d", usage = "Number of layers in disjunction.", required = true)
-    int disjunctions;
+    @Option(name = "-d", usage = "Number of layers in disjunction.", required = false)
+    int disjunctions = 2;
 
-    @Option(name = "-s", usage = "Random seed.", required = true)
-    long seed;
+    @Option(name = "-s", usage = "Random seed.", required = false)
+    long seed = 0;
 
     int horizon;
     IntVar[] vars;
@@ -147,6 +147,7 @@ public class Pert extends AbstractProblem {
                         IncrArityP.get(),
                         Policy.FIXPOINT
                 ));*/
+
     }
 
     @Override

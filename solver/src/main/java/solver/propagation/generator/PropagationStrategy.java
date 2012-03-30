@@ -47,7 +47,7 @@ import java.io.Serializable;
 public abstract class PropagationStrategy<E extends ISchedulable> implements Generator<E>, IScheduler<E>, ISchedulable, Serializable {
 
     static enum P {
-        pickOne, sweepUp, clearOut, loopOut
+        pickOne, sweepUp, clearOut, loopOut;
     }
 
     protected P iteration = P.clearOut; // type of iteration
@@ -130,6 +130,8 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
 
     protected abstract boolean _sweepUp() throws ContradictionException;
 
+    protected abstract boolean _loopOut() throws ContradictionException;
+
     protected abstract boolean _clearOut() throws ContradictionException;
 
     @Override
@@ -139,6 +141,8 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
                 return _pickOne();
             case sweepUp:
                 return _sweepUp();
+            case loopOut:
+                return _loopOut();
             case clearOut:
             default:
                 return _clearOut();

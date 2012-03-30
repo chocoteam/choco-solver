@@ -27,70 +27,67 @@
 package samples;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Count;
-import solver.constraints.nary.Sum;
+import solver.constraints.ConstraintFactory;
+import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
+import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
-import solver.search.strategy.StrategyFactory;
+import solver.propagation.generator.predicate.InCstrSet;
+import solver.propagation.generator.predicate.Predicate;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 /**
- * CSPLib prob019:<br/>
- * "A magic sequence of length n is a sequence of integers x0 . . xn-1 between 0 and n-1, such that
- * for all i in 0 to n-1, the number i occurs exactly xi times in the sequence."
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 08/06/11
+ * @since 28/03/12
  */
-public class MagicSeries extends AbstractProblem {
+public class Ordering extends AbstractProblem {
 
-    @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 400;
+    @Option(name = "-n", aliases = "--number", usage = "number of variables.", required = false)
+    int n = 1000;
+
     IntVar[] vars;
-
-    Constraint[] counts;
+    Constraint[] cstrs;
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-        vars = new IntVar[n];
-
-        vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
-
-        counts = new Count[n];
-        for (int i = 0; i < n; i++) {
-            counts[i] = new Count(i, vars, Count.Relop.EQ, vars[i], solver);
-            solver.post(counts[i]);
+        solver = new Solver("Ordering " + n);
+        vars = VariableFactory.boundedArray("v", n, 1, n, solver);
+        cstrs = new Constraint[n - 1];
+        for (int i = 0; i < n - 1; i++) {
+            cstrs[i] = ConstraintFactory.lt(vars[i], vars[i + 1], solver);
         }
-        solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1
-        int[] coeff2 = new int[n - 1];
-        IntVar[] vs2 = new IntVar[n - 1];
-        for (int i = 1; i < n; i++) {
-            coeff2[i - 1] = i;
-            vs2[i - 1] = vars[i];
-        }
-        solver.post(Sum.eq(vs2, coeff2, n, solver)); // cstr redundant 1
+        solver.post(cstrs);
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMaxVal(vars, solver.getEnvironment()));
-        // default group
     }
 
     @Override
     public void configureEngine() {
-        Sort s1 = new Sort( new PVar(solver.getVars()));
-        Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(s1, s2));
+        PArc[] arc1 = new PArc[n - 1];
+        for (int i = 0; i < n - 1; i++) {
+            arc1[i] = new PArc(new IntVar[]{vars[i]}, new Predicate[]{new InCstrSet(cstrs[i])});
+        }
+        Sort s1 = new Sort(arc1);
+        PArc[] arc2 = new PArc[n - 1];
+        for (int i = n - 2; i >= 0; i--) {
+            arc2[n - 2 - i] = new PArc(new IntVar[]{vars[i + 1]}, new Predicate[]{new InCstrSet(cstrs[i])});
+        }
+        Sort s2 = new Sort(arc2);
+
+        solver.set(
+                new Sort(
+                        s1.loopOut(),
+                        s2.loopOut(),
+                        new Queue(new PCoarse(cstrs)).clearOut()
+                )
+        );
     }
 
     @Override
@@ -100,24 +97,9 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-        LoggerFactory.getLogger("bench").info("Magic series({})", n);
-        StringBuilder st = new StringBuilder();
-        if (solver.isFeasible() == Boolean.TRUE) {
-            st.append("\t");
-            for (int i = 0; i < n; i++) {
-                st.append(vars[i].getValue()).append(" ");
-                if (i % 10 == 9) {
-                    st.append("\n\t");
-                }
-            }
-        } else {
-            st.append("\tINFEASIBLE");
-        }
-        LoggerFactory.getLogger("bench").info(st.toString());
-
     }
 
     public static void main(String[] args) {
-        new MagicSeries().execute(args);
+        new Ordering().execute(args);
     }
 }

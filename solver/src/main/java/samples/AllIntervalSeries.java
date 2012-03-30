@@ -110,7 +110,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-    // BEWARE:
+        // BEWARE:
         // tout se joue sur le nombre d'appel à la méthode filter des contraitne AllDiff BC
         // OLDEST n'appelle que m fois le filtrage lourd de AllDiff, les autres l'appellent 2 * m-1
         // Or, c'est cet algo qui coute.

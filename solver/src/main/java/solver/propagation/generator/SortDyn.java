@@ -29,11 +29,9 @@ package solver.propagation.generator;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
+import solver.propagation.generator.sorter.evaluator.IEvaluator;
+import solver.propagation.queues.MinHeap;
 import solver.recorders.IEventRecorder;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Comparator;
 
 /**
  * A specific propagation engine that works like a list, each element has a fixed index.
@@ -42,34 +40,28 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 15/12/11
  */
-public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
+public class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    protected Comparator<S> comparator;
+    protected IEvaluator<S> evaluator;
+    protected MinHeap toPropagate;
     protected S lastPopped;
 
     protected S[] elements;
-    protected BitSet toPropagate;
     protected boolean init = false;
 
-    public Sort(Generator<S>... generators) {
-        this(null, generators);
-    }
 
     @SuppressWarnings({"unchecked"})
-    public Sort(Comparator<S> comparator, Generator<S>... generators) {
+    public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
         this.elements = (S[]) new ISchedulable[0];
         for (int i = 0; i < generators.length; i++) {
             Generator gen = generators[i];
             elements = ArrayUtils.append(elements, (S[]) gen.getElements());
         }
-        this.comparator = comparator;
-        if (comparator != null) {
-            Arrays.sort(elements, comparator);
-        }
+        this.evaluator = evaluator;
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = new MinHeap(elements.length);
     }
 
 
@@ -80,28 +72,29 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     //<-- PROPAGATION ENGINE
     @Override
-    public void schedule(ISchedulable element) {
+    public void schedule(S element) {
         int idx = element.getIndexInScheduler();
-        if (!element.enqueued()) { // to avoid multiple occurrences of element in toPropagate --
-            toPropagate.set(idx);
+        if (element.enqueued()) {
+            toPropagate.update(evaluator.eval(element), idx);
+        } else {
+            toPropagate.insert(evaluator.eval(element), idx);
             element.enqueue();
         }
         scheduler.schedule(this);
     }
 
     @Override
-    public void remove(ISchedulable element) {
+    public void remove(S element) {
         element.deque();
         int idx = element.getIndexInScheduler();
-        toPropagate.clear(idx);
+        toPropagate.remove(idx);
     }
 
 
     @Override
     protected boolean _pickOne() throws ContradictionException {
         if (!toPropagate.isEmpty()) {
-            int idx = toPropagate.nextSetBit(0);
-            toPropagate.clear(idx);
+            int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
             if (!lastPopped.execute()) {
@@ -113,40 +106,16 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     protected boolean _sweepUp() throws ContradictionException {
-        int idx = toPropagate.nextSetBit(0);
-        while (idx >= 0) {
-            toPropagate.clear(idx);
-            lastPopped = elements[idx];
-            lastPopped.deque();
-            if (!lastPopped.execute()) {
-                schedule(lastPopped);
-            }
-            idx = toPropagate.nextSetBit(idx + 1);
-        }
-        return toPropagate.isEmpty();
+        return _clearOut();
     }
 
     protected boolean _loopOut() throws ContradictionException {
-        int idx = toPropagate.nextSetBit(0);
-        while (!toPropagate.isEmpty()) {
-            toPropagate.clear(idx);
-            lastPopped = elements[idx];
-            lastPopped.deque();
-            if (!lastPopped.execute()) {
-                schedule(lastPopped);
-            }
-            idx = toPropagate.nextSetBit(idx + 1);
-            if (idx == -1) {
-                idx = toPropagate.nextSetBit(0);
-            }
-        }
-        return true;
+        return _clearOut();
     }
 
     protected boolean _clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            int idx = toPropagate.nextSetBit(0);
-            toPropagate.clear(idx);
+            int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
             if (!lastPopped.execute()) {
@@ -161,9 +130,10 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         if (lastPopped != null) {
             lastPopped.flush();
         }
-        for (int i = toPropagate.nextSetBit(0); i >= 0; i = toPropagate.nextSetBit(i)) {
-            toPropagate.clear(i);
-            lastPopped = elements[i];
+        //CPRU : should be improved
+        while (!toPropagate.isEmpty()) {
+            int idx = toPropagate.removemin();
+            lastPopped = elements[idx];
             if (IEventRecorder.LAZY) {
                 lastPopped.flush();
             }
@@ -178,7 +148,7 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public int size() {
-        return toPropagate.cardinality();
+        return toPropagate.size();
     }
 
     //-->

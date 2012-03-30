@@ -33,8 +33,7 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.propagation.generator.*;
-import solver.propagation.generator.predicate.InCstrSet;
-import solver.propagation.generator.predicate.Predicate;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -65,10 +64,10 @@ import solver.variables.view.Views;
 public class Langford extends AbstractProblem {
 
     @Option(name = "-k", usage = "Number of sets.", required = false)
-    private int k = 3;
+    private int k = 2;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 13;
+    private int n = 10;
 
     IntVar[] position;
 
@@ -110,9 +109,13 @@ public class Langford extends AbstractProblem {
                 Predicates.all(),
                 Policy.ONE
         ));*/
-        Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
+        /*Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
         Generator g2 = new PCons(alldiff);
-        solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());
+        solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
+        solver.set(new Sort(
+                    new Queue(new PCoarse(solver.getCstrs())),
+                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
+            ));
     }
 
     @Override
@@ -143,7 +146,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Langford().execute(args);
+        for(int i = 0; i < 5; i++)new Langford().execute("-log", "QUIET");
     }
 
 }
