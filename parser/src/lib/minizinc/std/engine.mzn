@@ -1,7 +1,7 @@
 annotation group(string:name);
 
 
-annotation engine_def(list of ann: s);
+annotation engine_def(ann: s);
 
 annotation revision(
     array[int] of string: groups,
@@ -16,8 +16,8 @@ annotation queue_engine(
 
 annotation list_engine(
     array[int] of ann: groups,
-    ann: compannotation,
     ann: itert, % iteration type
+    ann: compannotation,
 );
 
 %-----------------------------------------------------------------------------%
