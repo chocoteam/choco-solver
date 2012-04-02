@@ -39,6 +39,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * and execute a <code>Procedure</code> for each value stored.
  */
 public final class Delta implements IntDelta {
+    private static final int SIZE  =16;
 
 	int[] rem;
 	ICause[] causes;
@@ -46,8 +47,8 @@ public final class Delta implements IntDelta {
     int timestamp = -1;
 
     public Delta() {
-        rem = new int[16];
-        causes = new ICause[16];
+        rem = new int[SIZE];
+        causes = new ICause[SIZE];
     }
 
     @Override
