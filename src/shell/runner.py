@@ -97,11 +97,11 @@ def readParameters(paramlist):
             dbname = paramlist[1]
         elif paramlist[0] == "-h": # user pwd for db connexion
             home = paramlist[1]
-        elif paramlist[0] == "-db": # no database
-            db = True & (database is not None)
+        elif paramlist[0] == "-db": # database
+            db = True and (database is not None)
             offset = 1
         elif paramlist[0] == "-plot": # no plot
-            plot = True & (database is not None) & (plotmysql is not None)
+            plot = True and (database is not None) and (plotmysql is not None)
             offset = 1
         elif paramlist[0] == "-nofe": # no front end
             frontend = False
@@ -110,8 +110,8 @@ def readParameters(paramlist):
 
 
 def checkParam():
-    if not frontend & loop > 1:
-        print 'Loop parameter is not considered as no front end option is on'
+    if not frontend and loop > 1:
+        print 'Loop parameter is not considered as front end option is off'
     if db | plot:
         print host
         if host == '': raise Exception('database cnx : host must be defined')
@@ -125,7 +125,7 @@ def buildCmd():
         CMD += ' samples.FrontEndBenchmarking -loop ' + str(loop) + ' -args "' + line + ' -log QUIET"'
     else:
         CMD += line + ' -log QUIET'
-    #    print CMD
+    print CMD
     return CMD
 
 
@@ -250,18 +250,15 @@ txt = open(join(dir, name + '.txt'), 'w', 10)
 
 err = buildLog(name, '.log', logging.INFO)
 
-if len(sys.argv) > 1:
-    if sys.argv[1] == "-l":
-        loop = int(sys.argv[2])
 print ">> Run " + str(loop) + " time(s)"
 
 f = open(join(dir, name + '.list'), 'r')
 
 mydatab = None
-if (database is not None) & (db | plot):
+if (database is not None) and (db | plot):
     mydatab = database.Database(host, user, pwd, dbname)
 
-if (database is not None) & db:
+if (database is not None) and db:
     mydatab.createTables()
     mydatab.openSession(name)
 
@@ -286,7 +283,7 @@ for i in range(len(runlist)):
     runner = []
     for t in range(len(runlist[i])):
         line = runlist[i][t]
-        txt.write(line+": ")
+        txt.write(line+": \n")
         command = buildCmd()
         args = shlex.split(command)
         current = runit(command, i, t)
@@ -296,14 +293,14 @@ for i in range(len(runlist)):
     for run in runner:
         run.join()
         computeXLS(line, run.results)
-        if (database is not None) & db:
+        if (database is not None) and db:
             storeInDB(mydatab, line, run.results)
     print str((i + 1) * 100 / len(runlist)) + '% done'
 
 csv.close()
 txt.close()
 
-if (database is not None) & (plotmysql is not None) & plot:
+if (database is not None) and (plotmysql is not None) and plot:
     mydatab.plot()
 
 print ">> End of script"
