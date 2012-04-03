@@ -40,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import static choco.annotations.PropAnn.Status.*;
@@ -51,7 +50,8 @@ import static choco.annotations.PropAnn.Status.*;
  * A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
  * <br/>
  *
- * @author Hadrien Cambazard
+ * @author Hadrien Cambazard, Charles Prud'homme
+ * @version 04/03/12 : change sort
  * @since 07/02/11
  */
 @PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})
@@ -67,6 +67,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     int nbBounds;
 
+    Interval[] intervals;
     Interval[] minsorted;
     Interval[] maxsorted;
 
@@ -85,7 +86,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         h = new int[2 * n + 2];
         bounds = new int[2 * n + 2];
 
-        Interval[] intervals = new Interval[n];
+        intervals = new Interval[n];
         minsorted = new Interval[n];
         maxsorted = new Interval[n];
 
@@ -101,6 +102,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
         }
+        intervals = minsorted.clone();
         ivIdx = environment.makeInt(idx);
     }
 
@@ -152,9 +154,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        /*if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
-        }
+        }*/
         filter();
     }
 
@@ -228,15 +230,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getLB()) {
-                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
-            }
-            if (instantiatedValues[j] == vars[i].getUB()) {
-                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
-            }
-        }*/
     }
 
     protected void awakeOnInf(int i) throws ContradictionException {
@@ -249,12 +242,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getLB()) {
-                vars[i].updateLowerBound(instantiatedValues[j] + 1, this);
-            }
-        }*/
     }
 
     protected void awakeOnSup(int i) throws ContradictionException {
@@ -267,12 +254,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
             }
         }
-        /*int idx = ivIdx.get();
-        for (int j = 0; j < idx; j++) {
-            if (instantiatedValues[j] == vars[i].getUB()) {
-                vars[i].updateUpperBound(instantiatedValues[j] - 1, this);
-            }
-        }*/
     }
 
     protected void awakeOnInst(int i) throws ContradictionException {   // Propagation classique
@@ -284,40 +265,50 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 vars[j].removeValue(val, this);
             }
         }
-        /*int idx = ivIdx.get();
-        instantiatedValues[idx++] = val;
-        ivIdx.set(idx);*/
-    }
-
-    private void filter() throws ContradictionException {
-        while (infBoundModified || supBoundModified) {
-            sortIt();
-            infBoundModified = filterLower();
-            supBoundModified = filterUpper();
-        }
     }
 
     static enum SORT implements Comparator<Interval> {
         MAX {
             @Override
-            public int compare(Interval o1, Interval o2) {
-                return o1.var.getUB() - o2.var.getUB();
+            public final int compare(Interval o1, Interval o2) {
+                return o1.ub - o2.ub;
             }
         },
         MIN {
             @Override
-            public int compare(Interval o1, Interval o2) {
-                return o1.var.getLB() - o2.var.getLB();
+            public final int compare(Interval o1, Interval o2) {
+                return o1.lb - o2.lb;
             }
         },;
     }
 
-    protected void sortIt() {
-        Arrays.sort(minsorted, SORT.MIN);
-        Arrays.sort(maxsorted, SORT.MAX);
+    private void filter() throws ContradictionException {
+        if (infBoundModified || supBoundModified) {
+            initSort();
+            do {
+                sortIt();
+                infBoundModified = filterLower();
+                supBoundModified = filterUpper();
+            } while (infBoundModified || supBoundModified);
+        }
+    }
 
-        int min = minsorted[0].var.getLB();
-        int max = maxsorted[0].var.getUB() + 1;
+
+    protected void initSort() {
+        IntVar vt;
+        for (int i = 0; i < vars.length; i++) {
+            vt = intervals[i].var;
+            intervals[i].lb = vt.getLB();
+            intervals[i].ub = vt.getUB();
+        }
+    }
+
+    protected void sortIt() {
+        mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
+        mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
+
+        int min = minsorted[0].lb;
+        int max = maxsorted[0].ub + 1;
         int last = min - 2;
         int nb = 0;
         bounds[0] = last;
@@ -330,7 +321,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 }
                 minsorted[i].minrank = nb;
                 if (++i < this.vars.length) {
-                    min = minsorted[i].var.getLB();
+                    min = minsorted[i].lb;
                 }
             } else {
                 if (max != last) {
@@ -340,7 +331,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 if (++j == this.vars.length) {
                     break;
                 }
-                max = maxsorted[j].var.getUB() + 1;
+                max = maxsorted[j].ub + 1;
             }
         }
 
@@ -401,6 +392,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
                 filter |= maxsorted[i].var.updateLowerBound(bounds[w], this);
+                maxsorted[i].lb = bounds[w];
                 pathset(h, x, w, w);
             }
 
@@ -439,6 +431,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
                 filter |= minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
+                minsorted[i].ub = bounds[w] - 1;
                 pathset(h, x, w, w);
             }
             if (d[z] == bounds[y] - bounds[z]) {
@@ -453,5 +446,56 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         int minrank, maxrank;
         IntVar var;
         int idx;
+        int lb, ub;
+    }
+
+    ///////////////////
+
+    /**
+     * Src is the source array that starts at index 0
+     * Dest is the (possibly larger) array destination with a possible offset
+     * low is the index in dest to start sorting
+     * high is the end index in dest to end sorting
+     * off is the offset into src corresponding to low in dest
+     */
+    private static void mergeSort(Interval[] src,
+                                  Interval[] dest,
+                                  int low, int high,
+                                  Comparator c) {
+        int length = high - low;
+
+        // Insertion sort on smallest arrays
+        if (length < 7) {
+            for (int i = low; i < high; i++)
+                for (int j = i; j > low && c.compare(dest[j - 1], dest[j]) > 0; j--)
+                    swap(dest, j, j - 1);
+            return;
+        }
+
+        // Recursively sort halves of dest into src
+        int mid = (low + high) >>> 1;
+        mergeSort(dest, src, low, mid, c);
+        mergeSort(dest, src, mid, high, c);
+
+        // If list is already sorted, just copy from src to dest.  This is an
+        // optimization that results in faster sorts for nearly ordered lists.
+        if (c.compare(src[mid - 1], src[mid]) <= 0) {
+            System.arraycopy(src, low, dest, low, length);
+            return;
+        }
+
+        // Merge sorted halves (now in src) into dest
+        for (int i = low, p = low, q = mid; i < high; i++) {
+            if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0)
+                dest[i] = src[p++];
+            else
+                dest[i] = src[q++];
+        }
+    }
+
+    private static void swap(Interval[] x, int a, int b) {
+        Interval t = x[a];
+        x[a] = x[b];
+        x[b] = t;
     }
 }
