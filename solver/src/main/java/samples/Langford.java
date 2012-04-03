@@ -60,6 +60,7 @@ import solver.variables.view.Views;
  *
  * @author Charles Prud'homme
  * @since 19/08/11
+ * @revision 04/03/12 revise model
  */
 public class Langford extends AbstractProblem {
 
@@ -79,7 +80,7 @@ public class Langford extends AbstractProblem {
         solver = new Solver("Langford number");
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
-        position = VariableFactory.boundedArray("p", n * k, 0, k * n - 1, solver);
+        position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
         lights = new Constraint[(k - 1) * n + 1];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
@@ -88,27 +89,17 @@ public class Langford extends AbstractProblem {
         }
         lights[(k - 1) * n] = ConstraintFactory.lt(position[0], position[n * k - 1], solver);
         solver.post(lights);
-        alldiff = new AllDifferent(position, solver);
+        alldiff = new AllDifferent(position, solver, AllDifferent.Type.AC);
         solver.post(alldiff);
     }
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMaxVal(position, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMaxVal(position, solver.getEnvironment()));
     }
 
     @Override
     public void configureEngine() {
-        /*IPropagationEngine peng = solver.getEngine();
-        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
-        peng.addGroup(Group.buildQueue(
-                Predicates.light(),
-                Policy.FIXPOINT
-        ));
-        peng.addGroup(Group.buildQueue(
-                Predicates.all(),
-                Policy.ONE
-        ));*/
         /*Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
         Generator g2 = new PCons(alldiff);
         solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
@@ -146,7 +137,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        for(int i = 0; i < 5; i++)new Langford().execute("-log", "QUIET");
+        new Langford().execute();
     }
 
 }

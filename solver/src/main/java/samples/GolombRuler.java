@@ -32,6 +32,7 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.unary.Relation;
 import solver.propagation.generator.PArc;
@@ -46,7 +47,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 /**
  * CSPLib prob006:<br/>
@@ -59,6 +59,7 @@ import solver.variables.view.Views;
  *
  * @author Charles Prud'homme
  * @since 31/03/11
+ * @revision 04/03/12 revise model : remove views
  */
 public class GolombRuler extends AbstractProblem {
 
@@ -75,28 +76,20 @@ public class GolombRuler extends AbstractProblem {
     public void buildModel() {
         solver = new Solver("Golomb Ruler " + m);
 
-        ticks = new IntVar[m];
-        for (int i = 0; i < ticks.length; i++) {
-            ticks[i] = VariableFactory.bounded("a_" + i, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-        }
+        ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
-//        for (int i = 0; i < ticks.length - 1; i++) {
-//            solver.post(ConstraintFactory.lt(ticks[i], ticks[i + 1], solver));
-//        }
+
         solver.post(new LexChain(true, solver, ticks));
 
-        diffs = new IntVar[(m * m - m) / 2];
-
+        diffs = VariableFactory.enumeratedArray("d", (m * m - m) / 2, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
         for (int k = 0, i = 0; i < m - 1; i++) {
             for (int j = i + 1; j < m; j++, k++) {
                 // d[k] is m[j]-m[i] and must be at least sum of first j-i integers
-//                diffs[k] = VariableFactory.enumerated("d_" + k, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
-//                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
-                diffs[k] = Views.sum(ticks[j], Views.minus(ticks[i]));
-                solver.post(ConstraintFactory.leq(diffs[k],
-                        Views.offset(ticks[m - 1], -((m - 1 - j + i) * (m - j + i)) / 2), solver));
+                // <cpru 04/03/12> it worths adding a constraint instead of a view
+                solver.post(Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver));
                 solver.post(new Relation(diffs[k], Relation.R.GQ, (j - i) * (j - i + 1) / 2, solver));
+                solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
             }
         }
         solver.post(new AllDifferent(diffs, solver, type));
@@ -114,7 +107,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // <2012-03-08 cp> works fine
+        // <cpru 03/08/12> works fine
             Queue _ticks = new Queue<AbstractFineEventRecorder>(new PArc(ticks));
             Queue _diffs = new Queue<AbstractFineEventRecorder>(new PArc(diffs));
             Queue _vars = new Queue<AbstractFineEventRecorder>(_ticks.clearOut(), _diffs.clearOut());
