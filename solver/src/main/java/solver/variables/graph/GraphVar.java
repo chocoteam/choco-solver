@@ -211,8 +211,19 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
 	public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
 		int n = value.length;
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
+//		for (int i = 0; i < n; i++) {
+//			for (int j = 0; j < n; j++) {
+//				if (value[i][j]) {
+//					enforceArc(i, j, cause);
+//				} else {
+//					removeArc(i, j, cause);
+//				}
+//			}
+//		}
+		INeighbors nei;
+		for(int i=0;i<n;i++){
+			nei = getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if (value[i][j]) {
 					enforceArc(i, j, cause);
 				} else {

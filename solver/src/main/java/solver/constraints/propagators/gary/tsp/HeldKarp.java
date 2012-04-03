@@ -35,11 +35,11 @@
 package solver.constraints.propagators.gary.tsp;
 
 import gnu.trove.list.array.TIntArrayList;
+import solver.constraints.propagators.gary.IRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.IGraph;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
-public interface HeldKarp {
+public interface HeldKarp extends IRelaxation {
 
 	IGraph getMST();
 	boolean isMandatory(int i, int j);
@@ -47,8 +47,6 @@ public interface HeldKarp {
 	void contradiction() throws ContradictionException;
 	void remove(int i, int i1) throws ContradictionException;
 	double getMinArcVal();
-	boolean isInMST(int i, int j);
 	void waitFirstSolution(boolean b);
 	void enforce(int i, int j)throws ContradictionException;
-	double getRepCost(int i, int j);
 }

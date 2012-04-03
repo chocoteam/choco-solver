@@ -34,6 +34,7 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
+
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
@@ -62,6 +63,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	protected BitSet useful;
 	protected double minTArc,maxTArc;
 	protected int[][] map;
+	protected double[][] repCosts;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -83,6 +85,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		useful = new BitSet(n);
 		lca = new LCAGraphManager(ccN);
 		map = new int[n][n];
+		repCosts = new double[n][n];
 	}
 
 	protected void sortArcs(double[][] costMatrix){
@@ -276,13 +279,12 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 
 	protected void pruning(double delta) throws ContradictionException {
 		int i,j;
-		double repCost;
 		for(int arc=activeArcs.nextSetBit(0); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i,j)){
-				repCost = ccTEdgeCost[lca.getLCA(i,j)];
-				if(costs[i*n+j]-repCost > delta){
+				repCosts[i][j] = costs[i*n+j]-ccTEdgeCost[lca.getLCA(i,j)];
+				if(repCosts[i][j] > delta){
 					activeArcs.clear(arc);
 					propHK.remove(i,j);
 				}else{
@@ -294,9 +296,15 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 		for(i=0;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(map[i][j]==-1 || costs[map[i][j]]-costs[i*n+j]>delta){
+				if(map[i][j]!=-1){
+					repCosts[i][j] = costs[map[i][j]]-costs[i*n+j];
+					if(repCosts[i][j]>delta){
+						propHK.enforce(i,j);
+					}
+				}else{
 					propHK.enforce(i,j);
 				}
+
 //					repCost = costs[map[i][j]];
 //					if(repCost-costs[i*n+j]>delta){
 //						propHK.enforce(i,j);
@@ -395,7 +403,8 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	}
 
 	public double getRepCost(int from, int to){
-		return costs[map[from][to]]-costs[from*n+to];
+//		return costs[map[from][to]]-costs[from*n+to];
+		return repCosts[from][to];
 	}
 
 //	private int getLCA(int i, int j) {

@@ -39,16 +39,15 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
-import solver.constraints.propagators.gary.tsp.directed.PropKhun;
 import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
-import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTour;
-import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.*;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropFastHeldKarp;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropFastHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTour;
+import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
@@ -75,6 +74,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 import java.util.BitSet;
 
@@ -948,7 +948,7 @@ public class TSPTW2 {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				if(suc.neighborhoodSize()>1){
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-						if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+						if(hk.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
 							if((!config.get(rg)) || sccOf[i].get()==sccOf[j].get()){
 								sizi = suc.neighborhoodSize();
 								sizi += g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
@@ -977,7 +977,7 @@ public class TSPTW2 {
 					suc = g.getEnvelopGraph().getSuccessorsOf(i);
 					if(suc.neighborhoodSize()>1){
 						for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-							if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							if(hk.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
 								sizi = suc.neighborhoodSize();
 								sizi += g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
 								if (sizi == size) {
@@ -1019,7 +1019,7 @@ public class TSPTW2 {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				if(suc.neighborhoodSize()>1){
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-						if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+						if(hk.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
 							if((!config.get(rg)) || sccOf[i].get()==sccOf[j].get()){
 								sizi = suc.neighborhoodSize();
 								sizi += g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
@@ -1048,7 +1048,7 @@ public class TSPTW2 {
 					suc = g.getEnvelopGraph().getSuccessorsOf(i);
 					if(suc.neighborhoodSize()>1){
 						for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-							if(hk.isInMST(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							if(hk.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
 								sizi = suc.neighborhoodSize();
 								sizi += g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize();
 								if (sizi == size) {

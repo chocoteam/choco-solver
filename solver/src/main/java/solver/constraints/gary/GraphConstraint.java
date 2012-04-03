@@ -180,8 +180,7 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 
 	@Override
 	public ESat isSatisfied() {
-		if(true)throw new UnsupportedOperationException("error ");
-
+		if(true)throw new UnsupportedOperationException("");
 		return isEntailed();
 	}
 

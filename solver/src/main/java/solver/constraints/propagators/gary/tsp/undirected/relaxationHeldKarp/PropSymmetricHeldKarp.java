@@ -409,7 +409,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		waitFirstSol = b;
 	}
 
-	public boolean isInMST(int i, int j){
+	public boolean contains(int i, int j){
 		if(mst==null){
 			return true;
 		}

@@ -103,7 +103,7 @@ public class Solution implements ICause {
             int nbGV = 0;
             for (int i = 0; i < vars.length; i++) {
             	switch(vars[i].getType()){
-                case Variable.INTEGER : 
+                case Variable.INTEGER :
                 	((IntVar) vars[i]).instantiateTo(intvalues[i], this);break;
                 case Variable.GRAPH :
 					boolean[][] gv = graphValues.get(nbGV);
@@ -111,7 +111,7 @@ public class Solution implements ICause {
 					nbGV++;
 					break;
                 }
-                
+
             }
         } catch (ContradictionException ex) {
 			ex.printStackTrace();

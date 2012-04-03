@@ -56,21 +56,24 @@ public class PropEnergeticTime extends GraphPropagator {
 
 	DirectedGraphVar g;
 	int n,nbTrucks,horizon;
-	IntVar[] time;
+	IntVar[] time,truck;
 	int[][] travelTime;
+	int[] duration;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEnergeticTime(IntVar[] time, DirectedGraphVar graph, int[][] travelTimeMatrix, int nbTrucks, int horizon, Constraint constraint, Solver solver) {
+	public PropEnergeticTime(IntVar[] time, IntVar[] truck, DirectedGraphVar graph, int[][] travelTimeMatrix, int nbTrucks, int horizon, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(time,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.time = time;
+		this.truck= truck;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.travelTime = travelTimeMatrix;
 		this.nbTrucks = nbTrucks;
 		this.horizon  = horizon;
+		duration = new int[n];
 	}
 
 	//***********************************************************************************
@@ -90,6 +93,7 @@ public class PropEnergeticTime extends GraphPropagator {
 				tmp = Math.max(time[j].getLB()-ub,travelTime[i][j]);
 				if(tmp<minD){
 					minD = tmp;
+					duration[i] = minD;
 				}
 			}
 			totalTime+=minD;
@@ -97,37 +101,40 @@ public class PropEnergeticTime extends GraphPropagator {
 		if(totalTime>(nbTrucks*horizon)){
 			contradiction(g,"");
 		}
+		heavyTaskInter();
+	}
+
+	private void heavyTaskInter() throws ContradictionException {
+		for(int i=0;i<n;i++){
+			if(!truck[i].instantiated()){
+				for(int j=i+1;j<n;j++){
+					if(!truck[j].instantiated())
+						check(i,j);
+				}
+			}
+		}
+	}
+
+	private void check(int i, int j) throws ContradictionException {
+		int first = Math.min(time[i].getLB(),time[j].getLB());
+		int last  = Math.max(time[i].getUB()+duration[i],time[j].getUB()+duration[i]);
+		if(first>last){
+			throw new UnsupportedOperationException();
+		}
+		int q = 0;
+		for(int k=0;k<n;k++){
+			if(time[k].getLB()>=first && time[k].getUB()+duration[k]<=last){
+				q+=duration[k];
+			}
+		}
+		if(q > nbTrucks*(last-first)){
+			contradiction(g,"");
+		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		propagate(0);
-	}
-
-	private void simpleCheckPrec(int from, int to) throws ContradictionException {
-		INeighbors nei;
-		int tmp;
-		int minD = Integer.MAX_VALUE;
-		int lb  = time[from].getLB();
-		nei = g.getEnvelopGraph().getSuccessorsOf(from);
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			tmp = Math.max(time[j].getLB(),lb+travelTime[from][j]);
-			if(tmp<minD){
-				minD = tmp;
-			}
-		}
-		time[to].updateLowerBound(minD,this);
-
-		minD = 0;
-		int ub  = time[to].getUB();
-		nei = g.getEnvelopGraph().getPredecessorsOf(to);
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			tmp = Math.min(time[j].getUB(),ub-travelTime[j][to]);
-			if(tmp>minD){
-				minD = tmp;
-			}
-		}
-		time[from].updateUpperBound(minD, this);
 	}
 
 	@Override

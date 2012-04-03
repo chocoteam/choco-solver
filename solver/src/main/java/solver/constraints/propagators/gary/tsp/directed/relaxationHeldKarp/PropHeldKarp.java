@@ -414,7 +414,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	}
 
 	@Override
-	public boolean isInMST(int i, int j) {
+	public boolean contains(int i, int j) {
 		if(mst==null){
 			throw new UnsupportedOperationException();
 //			return true;

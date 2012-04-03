@@ -31,6 +31,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.IRelaxation;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -44,7 +45,7 @@ import solver.variables.graph.directedGraph.StoredDirectedGraph;
 
 import java.util.BitSet;
 
-public class PropKhun extends GraphPropagator<Variable> {
+public class PropKhun extends GraphPropagator<Variable> implements IRelaxation{
 
 	DirectedGraphVar g;
 	IntVar obj;
@@ -497,10 +498,17 @@ public class PropKhun extends GraphPropagator<Variable> {
 		return ESat.UNDEFINED;
 	}
 
-	//***********************************************************************************
-	// INCREMENTAL PROCEDURE
-	//***********************************************************************************
-
-	// TODO
-
+	public boolean contains(int i, int j){
+		if(j==n){
+			return lineZero[i] == 0;
+		}
+		return lineZero[i] == j;
+	}
+	
+	public double getRepCost(int i, int j){
+		if(j==n){
+			return costs[i][0];
+		}
+		return costs[i][j];
+	}
 }

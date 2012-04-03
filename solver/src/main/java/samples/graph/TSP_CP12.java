@@ -52,6 +52,8 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
+import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -72,14 +74,14 @@ import java.util.BitSet;
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class TSPsymmetric {
+public class TSP_CP12 {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 300000;
-	private static final int MAX_SIZE = 100;
+	private static final long TIMELIMIT = 60000;
+	private static final int MAX_SIZE = 600;
 	private static long seed = 0;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
@@ -92,6 +94,7 @@ public class TSPsymmetric {
 	private static boolean fast;
 	private static PropSymmetricHeldKarp mst;
 	private static int search;
+	private static TSP_heuristics heuristic;
 	private static boolean restart;
 
 	//***********************************************************************************
@@ -342,10 +345,16 @@ public class TSPsymmetric {
 		allDiffAC = false;
 		fast = true;
 		search = 0;
+		heuristic = TSP_heuristics.enf_sparse;
+		boolean pursue = true;//false;
 		for (String s : list) {
-			if (s.contains(".tsp") && (!s.contains("gz"))){
+			if (s.contains("lin318")){
+				pursue = true;
+			}
+			if(pursue)
+			if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
 				matrix = parseInstance(dir + "/" + s);
-				if((matrix!=null && matrix.length>=10 && matrix.length<200) || (s.contains("pr226"))){
+				if((matrix!=null && matrix.length>=0 && matrix.length<2000) || (s.contains("pr226"))){
 					if(optProofOnly){
 						setUB(s.split("\\.")[0]);
 						System.out.println("optimum : "+upperBound);
@@ -416,17 +425,23 @@ public class TSPsymmetric {
 		}
 		gc.addAdHocProp(mst);
 //		gc.addAdHocProp(new Prop_LP_GRB(undi,totalCost,matrix,solver,gc));
-		switch (search){
-			case 0: solver.set(new RCSearch(undi));break;
-			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),new RCSearch(undi)));break;
-			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),new RCSearch(undi)));break;
-			default: throw new UnsupportedOperationException();
-		}
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphRandom(undi,seed));
 //		solver.set(new RCSearch(undi));
 //		solver.set(new StrategiesSequencer(solver.getEnvironment(),new BottomUp(totalCost),new RCSearch(undi)));
+
+		if(search!=0){
+			throw new UnsupportedOperationException("not implemented");
+		}
+		solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));
+//		switch (search){
+//			case 0: solver.set(new RCSearch(undi));break;
+//			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),new RCSearch(undi)));break;
+//			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),new RCSearch(undi)));break;
+//			default: throw new UnsupportedOperationException();
+//		}
+
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		if(restart){

@@ -24,87 +24,18 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.search.loop.monitors;
-
-import solver.exception.ContradictionException;
 
 /**
- * An empty ISearchMonitor.
- * <p/>
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 05/10/11
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 14/01/12
+ * Time: 01:03
  */
-public class VoidSearchMonitor implements ISearchMonitor{
 
-    public void beforeInitialize() {
-    }
+package solver.constraints.propagators.gary;
 
-    public void afterInitialize() {
-    }
+public interface IRelaxation {
 
-
-    public void beforeInitialPropagation() {
-    }
-
-
-    public void afterInitialPropagation() {
-    }
-
-
-    public void beforeOpenNode() {
-    }
-
-
-    public void afterOpenNode() {
-    }
-
-
-    public void onSolution() {
-    }
-
-
-    public void beforeDownLeftBranch() {
-    }
-
-
-    public void afterDownLeftBranch() {
-    }
-
-
-    public void beforeDownRightBranch() {
-    }
-
-
-    public void afterDownRightBranch() {
-    }
-
-
-    public void beforeUpBranch() {
-    }
-
-
-    public void afterUpBranch() {
-    }
-
-
-    public void onContradiction(ContradictionException cex) {
-    }
-
-
-    public void beforeRestart() {
-    }
-
-
-    public void afterRestart() {
-    }
-
-
-    public void beforeClose() {
-    }
-
-
-    public void afterClose() {
-    }
+	boolean contains(int i, int j);
+	double getRepCost(int i, int j);
 }

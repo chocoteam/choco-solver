@@ -32,8 +32,8 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
@@ -51,6 +51,7 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 import java.util.BitSet;
 
@@ -63,7 +64,7 @@ public class HCPsymmetric {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 10000;
+	private static final long TIMELIMIT = 100000;
 	private static final int MAX_SIZE = 200000;
 	private static String outFile;
 	private static Solver solver;
@@ -74,8 +75,8 @@ public class HCPsymmetric {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		tsplib_bench();
-//		kingTour();
+//		tsplib_bench();
+		kingTour();
 	}
 
 	// King Tour
@@ -85,15 +86,18 @@ public class HCPsymmetric {
 		writeTextInto("instance;nbSols;nbFails;time;orientation;allDiffAC;\n",outFile);
 //		int size = 50;
 		int[] sizes = {10,20,50,100,200,500};
-		for(int size:sizes){
+//		for(int size:sizes){
+		for(int size=8; size<500;size+=2){
 			String s = "king_"+size;
+			System.out.println(s);
 			boolean[][] matrix = generateKingTourInstance(size);
 			alldifferentAC = false;
 			solveUndirected(matrix,s);
-			solveDirected(matrix,s);
-			alldifferentAC = true;
-			solveUndirected(matrix,s);
-			solveDirected(matrix,s);
+			System.exit(0);
+//			solveDirected(matrix,s);
+//			alldifferentAC = true;
+//			solveUndirected(matrix,s);
+//			solveDirected(matrix,s);
 		}
 	}
 
@@ -238,7 +242,8 @@ public class HCPsymmetric {
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 //		solver.findAllSolutions();
-		solver.findSolution();
+//		solver.findSolution();
+		solver.findAllSolutions();
 		checkUndirected(solver, undi);
 		//output
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"

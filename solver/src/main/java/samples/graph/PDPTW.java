@@ -27,8 +27,8 @@
 
 package samples.graph;
 
+import choco.kernel.ResolutionPolicy;
 import gnu.trove.list.array.TIntArrayList;
-import solver.Cause;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
@@ -38,7 +38,6 @@ import solver.constraints.propagators.gary.vrp.*;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -49,9 +48,8 @@ import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.view.Views;
+
 import java.io.*;
-import java.util.BitSet;
 
 /**
  * Parse and solve an Li and Lim PDPTW instances
@@ -155,7 +153,7 @@ public class PDPTW {
 		gc.addAdHocProp(new PropTimeGraphChanneling(time,graph, distanceMatrix, gc, solver));
 		gc.addAdHocProp(new PropGraphTimeChanneling(time,truck,graph, distanceMatrix,nbTrucks, gc, solver));
 		gc.addAdHocProp(new PropGlobalPrecedences(time,graph, distanceMatrix,precedFrom,precedTo, gc, solver));
-		gc.addAdHocProp(new PropEnergeticTime(time,graph, distanceMatrix,nbTrucks,close[1], gc, solver));
+		gc.addAdHocProp(new PropEnergeticTime(time,truck,graph, distanceMatrix,nbTrucks,close[1], gc, solver));
 		// precedences
 		for(int i=0;i<precedFrom.size();i++){
 			solver.post(ConstraintFactory.gt(time[precedTo.get(i)], time[precedFrom.get(i)], solver));
@@ -169,19 +167,19 @@ public class PDPTW {
 	}
 
 	private static void configureAndSolve() {
-		//CONFIGURE
 //		solver.set(StrategyFactory.graphLexico(graph));
-//		solver.set(new Earliest(graph));
-		solver.set(new MilleFeuille(graph));
+		solver.set(new Earliest(graph));
+//		solver.set(new MilleFeuille(graph));
 //		solver.set(new MinDeg(graph));
 //		solver.set(new BestFit(graph));
+//		solver.set(new StrategiesSequencer(solver.getEnvironment(),StrategyFactory.random(truck,solver.getEnvironment()),new BestFit(graph)));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 //		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
-//		SearchMonitorFactory.log(solver, true, false);
-		//SOLVE
-		solver.findSolution();
-//		System.out.println(length);
+		SearchMonitorFactory.log(solver, true, false);
+//		solver.findAllSolutions();
+		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,length);
+		System.out.println(length);
 //		System.out.println(graph.getEnvelopGraph());
 	}
 
@@ -190,8 +188,8 @@ public class PDPTW {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		bench();
-//		test();
+//		bench();
+		test();
 	}
 
 	private static void bench() {
@@ -231,7 +229,7 @@ public class PDPTW {
 			if (s.contains("lc201.txt")){
 				System.out.println("parsing instance "+s+".../n");
 				instanceName = s;
-				loadInstance(dir+"/"+s, 10);
+				loadInstance(dir+"/"+s, 3);
 				solve();
 				if(solver.getMeasures().getSolutionCount()>0){
 					System.out.println(s+" SOLVED (cost="+length+")");
@@ -453,12 +451,13 @@ public class PDPTW {
 				int next = -1;
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					d = Math.max(time[j].getLB(),time[x].getLB()+distanceMatrix[x][j]);
-					if(d<min){
+					if(j>=2*nbTrucks && d<min){
 						min = d;
 						next = j;
 					}
 				}
 				if(next == -1)throw new UnsupportedOperationException();
+//				System.out.println(x+" - "+next);
 				return (x+1)*n+next;
 			}else{
 				System.out.println(x+" : "+nei.neighborhoodSize());
@@ -507,7 +506,7 @@ public class PDPTW {
 				int min = length.getUB()+1;
 				int next = -1;
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(distanceMatrix[x][j]<min){
+					if(j>=2*nbTrucks && distanceMatrix[x][j]<min){
 						min = distanceMatrix[x][j];
 						next = j;
 					}
@@ -515,7 +514,6 @@ public class PDPTW {
 				if(next == -1)throw new UnsupportedOperationException();
 				return (x+1)*n+next;
 			}else{
-				System.out.println(x+" : "+nei.neighborhoodSize());
 				throw new UnsupportedOperationException();
 			}
 		}
