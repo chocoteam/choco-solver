@@ -37,8 +37,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
-import java.io.Serializable;
-
 /**
  * A propagator for SUM(x_i) <= b
  * <br/>
@@ -48,17 +46,16 @@ import java.io.Serializable;
  * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
  *
  * @author Charles Prud'homme
- * @revision add Interval to avoid numerous calls to getLB() and getUB()
  * @since 18/03/11
+ * @revision 04/03/12 use I in filterOn{G,L}eg
  */
 public class PropSumEq extends Propagator<IntVar> {
 
-
-    final IntVar[] x; // list of variable
+    final IntVar[] x; // list of variable -- probably IntVarTimePosCste
     final int l; // number of variables
     final int b; // bound to respect
+    final int[] I; // variability of each variable -- domain amplitude
     int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
-    Interval[] intervals;
 
 
     protected static PropagatorPriority computePriority(int nbvars) {
@@ -79,20 +76,18 @@ public class PropSumEq extends Propagator<IntVar> {
         this.x = vars.clone();
         l = x.length;
         this.b = b;
-        intervals = new Interval[l];
-        IntVar vt;
-        for (int i = 0; i < l; i++) {
-            vt = x[i];
-            intervals[i] = new Interval(vt, i);
-        }
+        I = new int[l];
     }
 
     protected void prepare() {
         int f = 0, e = 0, i = 0;
+        int lb, ub;
         for (; i < l; i++) {
-            intervals[i].update();
-            f += intervals[i].lb;
-            e += intervals[i].ub;
+            lb = x[i].getLB();
+            ub = x[i].getUB();
+            f += lb;
+            e += ub;
+            I[i] = (ub - lb);
         }
         sumLB = f;
         sumUB = e;
@@ -135,15 +130,16 @@ public class PropSumEq extends Propagator<IntVar> {
         }
         do {
             doIt = false;
-            int lb, nub, i = 0;
+            int lb, ub, i = 0;
+            // positive coefficients first
             for (; i < l; i++) {
-                if (intervals[i].card - (b - sumLB) > 0) {
-                    lb = intervals[i].lb;
-                    nub = b - sumLB + lb;
-                    if (x[i].updateUpperBound(nub, this)) {
-                        intervals[i].updateUB();
-                        sumUB -= intervals[i].ub - nub;
-                        intervals[i].card = nub - lb;
+                if (I[i] - (b - sumLB) > 0) {
+                    lb = x[i].getLB();
+                    ub = lb + I[i];
+                    if (x[i].updateUpperBound(b - sumLB + lb, this)) {
+                        int nub = x[i].getUB();
+                        sumUB -= ub - nub;
+                        I[i] = nub - lb;
                         anychange = doIt = true;
                     }
                 }
@@ -160,15 +156,16 @@ public class PropSumEq extends Propagator<IntVar> {
         }
         do {
             doIt = false;
-            int ub, nlb, i = 0;
+            int lb, ub, i = 0;
+            // positive coefficients first
             for (; i < l; i++) {
-                if (intervals[i].card > -(b - sumUB)) {
-                    ub = intervals[i].ub;
-                    nlb = b - sumUB + ub;
-                    if (x[i].updateLowerBound(nlb, this)) {
-                        intervals[i].updateLB();
-                        sumLB += nlb - intervals[i].lb;
-                        intervals[i].card = ub - nlb;
+                if (I[i] > -(b - sumUB)) {
+                    ub = x[i].getUB();
+                    lb = ub - I[i];
+                    if (x[i].updateLowerBound(b - sumUB + ub, this)) {
+                        int nlb = x[i].getLB();
+                        sumLB += nlb - lb;
+                        I[i] = ub - nlb;
                         doIt = anychange = true;
                     }
                 }
@@ -219,35 +216,5 @@ public class PropSumEq extends Propagator<IntVar> {
         linComb.append(" = ");
         linComb.append(b);
         return linComb.toString();
-    }
-
-    private static class Interval implements Serializable {
-        IntVar var;
-        int idx;
-        int lb, ub;
-        int card;
-
-        private Interval(IntVar var, int idx) {
-            this.var = var;
-            this.idx = idx;
-        }
-
-        protected void update() {
-            this.lb = var.getLB();
-            this.ub = var.getUB();
-            this.card = ub - lb;
-        }
-
-        protected void updateLB() {
-            int t = this.lb;
-            this.lb = var.getLB();
-            card -= (lb - t);
-        }
-
-        protected void updateUB() {
-            int t = this.ub;
-            this.ub = var.getUB();
-            card -= (t - ub);
-        }
     }
 }
