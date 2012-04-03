@@ -39,8 +39,10 @@ import solver.recorders.IEventRecorder;
  *
  * @author Charles Prud'homme
  * @since 15/12/11
+ * @revision 04/03/12 add update feature
+ * @revision 04/03/12 change schedule
  */
-public class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
+public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected IEvaluator<S> evaluator;
     protected MinHeap toPropagate;
@@ -73,14 +75,13 @@ public class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
     //<-- PROPAGATION ENGINE
     @Override
     public void schedule(S element) {
+        // CONDITION: the element must not be already present (checked in element)
         int idx = element.getIndexInScheduler();
-        if (element.enqueued()) {
-            toPropagate.update(evaluator.eval(element), idx);
-        } else {
-            toPropagate.insert(evaluator.eval(element), idx);
-            element.enqueue();
+        toPropagate.insert(evaluator.eval(element), idx);
+        element.enqueue();
+        if (!enqueued) {
+            scheduler.schedule(this);
         }
-        scheduler.schedule(this);
     }
 
     @Override
@@ -151,5 +152,15 @@ public class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
         return toPropagate.size();
     }
 
+    @Override
+    public boolean needUpdate() {
+        return true;
+    }
+
+    @Override
+    public void update(S element) {
+        int idx = element.getIndexInScheduler();
+        toPropagate.update(evaluator.eval(element), idx);
+    }
     //-->
 }

@@ -38,6 +38,7 @@ import solver.variables.EventType;
  *
  * @author Charles Prud'homme
  * @since 05/12/11
+ * @revision 04/03/12 restore enque test
  */
 public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
@@ -73,8 +74,13 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                 evtmask |= e.strengthened_mask;
             }
-            // 3. schedule this
-            scheduler.schedule(this);
+            if(!enqueued){
+                // 3. schedule this
+                scheduler.schedule(this);
+            }else if(scheduler.needUpdate()){
+                // 4. inform scheduler if required
+                scheduler.update(this);
+            }
         }
     }
 

@@ -41,8 +41,9 @@ import java.util.Comparator;
  *
  * @author Charles Prud'homme
  * @since 15/12/11
+ * @revision 04/03/12 change schedule
  */
-public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
+public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected Comparator<S> comparator;
     protected S lastPopped;
@@ -81,12 +82,13 @@ public class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     //<-- PROPAGATION ENGINE
     @Override
     public void schedule(ISchedulable element) {
+        // CONDITION: the element must not be already present (checked in element)
         int idx = element.getIndexInScheduler();
-        if (!element.enqueued()) { // to avoid multiple occurrences of element in toPropagate --
-            toPropagate.set(idx);
-            element.enqueue();
+        toPropagate.set(idx);
+        element.enqueue();
+        if (!enqueued) {
+            scheduler.schedule(this);
         }
-        scheduler.schedule(this);
     }
 
     @Override

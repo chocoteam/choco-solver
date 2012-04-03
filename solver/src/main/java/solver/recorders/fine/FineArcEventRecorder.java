@@ -106,8 +106,13 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
                 if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                     evtmask |= evt.strengthened_mask;
                 }
-                // 4. schedule this
-                scheduler.schedule(this);
+                if (!enqueued) {
+                    // 4. schedule this
+                    scheduler.schedule(this);
+                } else if (scheduler.needUpdate()) {
+                    // 5. inform the scheduler of update if necessary
+                    scheduler.update(this);
+                }
             }
         }
     }

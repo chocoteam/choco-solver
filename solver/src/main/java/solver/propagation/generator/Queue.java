@@ -37,8 +37,9 @@ import solver.recorders.IEventRecorder;
  *
  * @author Charles Prud'homme
  * @since 15/12/11
+ * @revision 04/03/12 change schedule
  */
-public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
+public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected S lastPopped;
     protected FixSizeCircularQueue<S> toPropagate;
@@ -68,11 +69,12 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @Override
     public void schedule(S element) {
-        if (!element.enqueued()) { // to avoid multiple occurrences of element in toPropagate
-            toPropagate.add(element);
-            element.enqueue();
+        // CONDITION: the element must not be already present (checked in element)
+        toPropagate.add(element);
+        element.enqueue();
+        if (!enqueued) {
+            scheduler.schedule(this);
         }
-        scheduler.schedule(this);
     }
 
     @Override
@@ -143,4 +145,4 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     //-->
 
-    }
+}

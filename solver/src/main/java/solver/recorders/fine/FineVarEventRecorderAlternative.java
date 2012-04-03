@@ -149,8 +149,13 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
             }
         }
         if (oneoremore) {
-            // 4. schedule this
-            scheduler.schedule(this);
+            if (!enqueued) {
+                // 4. schedule this
+                scheduler.schedule(this);
+            } else if (scheduler.needUpdate()) {
+                // 5. inform the scheduler of update if necessary
+                scheduler.update(this);
+            }
         }
 
     }

@@ -51,7 +51,7 @@ import static choco.annotations.PropAnn.Status.*;
  * <br/>
  *
  * @author Hadrien Cambazard, Charles Prud'homme
- * @version 04/03/12 : change sort
+ * @revision 04/03/12 : change sort
  * @since 07/02/11
  */
 @PropAnn(tested = {BENCHMARK, CORRECTION, CONSISTENCY})

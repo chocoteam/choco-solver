@@ -138,8 +138,13 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                     if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
                         evtmasks[idx] |= evt.strengthened_mask;
                     }
-                    // 4. schedule this
-                    scheduler.schedule(this);
+                    if (!enqueued) {
+                        // 4. schedule this
+                        scheduler.schedule(this);
+                    } else if (scheduler.needUpdate()) {
+                        // 5. inform the scheduler of update if necessary
+                        scheduler.update(this);
+                    }
                 }
             }
         }

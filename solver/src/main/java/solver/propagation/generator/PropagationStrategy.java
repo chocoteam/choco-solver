@@ -43,11 +43,12 @@ import java.io.Serializable;
  *
  * @author Charles Prud'homme
  * @since 15/12/11
+ * @revision 04/03/12 add update feature
  */
 public abstract class PropagationStrategy<E extends ISchedulable> implements Generator<E>, IScheduler<E>, ISchedulable, Serializable {
 
     static enum P {
-        pickOne, sweepUp, clearOut, loopOut;
+        pickOne, sweepUp, clearOut, loopOut
     }
 
     protected P iteration = P.clearOut; // type of iteration
@@ -120,6 +121,16 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
     @Override
     public void deque() {
         enqueued = false;
+    }
+
+    @Override
+    public boolean needUpdate() {
+        return false;
+    }
+
+    @Override
+    public void update(E element) {
+        // empty
     }
 
     public abstract boolean isEmpty();
