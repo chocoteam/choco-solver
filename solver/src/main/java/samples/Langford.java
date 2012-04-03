@@ -89,7 +89,7 @@ public class Langford extends AbstractProblem {
         }
         lights[(k - 1) * n] = ConstraintFactory.lt(position[0], position[n * k - 1], solver);
         solver.post(lights);
-        alldiff = new AllDifferent(position, solver, AllDifferent.Type.AC);
+        alldiff = new AllDifferent(position, solver);
         solver.post(alldiff);
     }
 
