@@ -1,0 +1,63 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+##
+## MAGIC SERIES
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_PROPS
+samples.MagicSeries -n 500 -policy DEFAULT
+##
+samples.MagicSeries -n 1000 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.MagicSeries -n 1000 -policy DEFAULT
+##
+## ORDERING
+samples.Ordering -n 1000 -policy TWO_QUEUES_WITH_VARS
+samples.Ordering -n 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.Ordering -n 1000 -policy DEFAULT
+##
+samples.Ordering -n 5000 -policy TWO_QUEUES_WITH_VARS
+samples.Ordering -n 5000 -policy TWO_QUEUES_WITH_PROPS
+samples.Ordering -n 5000 -policy DEFAULT
+##
+## ALL INTERVAL SERIES
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_PROPS
+samples.AllIntervalSeries -o 500 -policy DEFAULT
+##
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.AllIntervalSeries -o 1000 -policy DEFAULT
+#
+## LANGFORD NUMBER
+#
+samples.Langford -k 2 -n 10 -policy TWO_QUEUES_WITH_VARS
+samples.Langford -k 2 -n 10 -policy TWO_QUEUES_WITH_PROPS
+samples.Langford -k 2 -n 10 -policy DEFAULT
+##
+samples.Langford -k 3 -n 11 -policy TWO_QUEUES_WITH_VARS
+samples.Langford -k 3 -n 11 -policy TWO_QUEUES_WITH_PROPS
+samples.Langford -k 3 -n 11 -policy DEFAULT
+##
+## RLFAP
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy TWO_QUEUES_WITH_ARCS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy PRIORITY_QUEUES_WITH_ARCS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy TWO_QUEUES_WITH_VARS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy INCREASING_DEGREE_VARS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy TWO_QUEUES_WITH_PROPS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy PRIORITY_QUEUES_WITH_PROPS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen05" -policy DEFAULT
+##
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy TWO_QUEUES_WITH_ARCS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy PRIORITY_QUEUES_WITH_ARCS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy TWO_QUEUES_WITH_VARS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy INCREASING_DEGREE_VARS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy TWO_QUEUES_WITH_PROPS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy PRIORITY_QUEUES_WITH_PROPS
+samples.RLFAP -d "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen08" -policy DEFAULT

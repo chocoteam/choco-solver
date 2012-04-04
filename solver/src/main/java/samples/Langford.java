@@ -59,8 +59,8 @@ import solver.variables.view.Views;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 19/08/11
  * @revision 04/03/12 revise model
+ * @since 19/08/11
  */
 public class Langford extends AbstractProblem {
 
@@ -104,9 +104,9 @@ public class Langford extends AbstractProblem {
         Generator g2 = new PCons(alldiff);
         solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
         solver.set(new Sort(
-                    new Queue(new PCoarse(solver.getCstrs())),
-                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
-            ));
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PArc(solver.getVars())),
+                new Queue(new PCoarse(solver.getCstrs()))
+        ));
     }
 
     @Override
@@ -137,7 +137,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Langford().execute();
+        for (int i = 0; i < 10; i++) new Langford().execute("-log", "QUIET");
     }
 
 }

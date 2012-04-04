@@ -100,15 +100,18 @@ public class MinHeap {
         if (PRINT) System.out.printf("<< INSERT (%d, %d)\n", key, elem);
         if (PRINT) print();
         size++;
-        keys[size] = key;
-        elts[size] = elem;
-        elts2pos.put(elem, size);
-
         int current = size;
-        while (keys[current] < keys[parent(current)]) {
-            swap(current, parent(current));
-            current = parent(current);
+        int parent = parent(current);
+        while (current > 0 && keys[parent] > key) {
+            keys[current] = keys[parent];
+            elts[current] = elts[parent];
+            elts2pos.put(elts[current], current);
+            current = parent;
+            parent = parent(current);
         }
+        keys[current] = key;
+        elts[current] = elem;
+        elts2pos.put(elem, current);
         if (PRINT) print();
         if (PRINT) System.out.printf(">>>>>>>>\n");
     }
