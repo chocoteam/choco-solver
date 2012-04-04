@@ -114,88 +114,40 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            if (operator == EQ) {
-                if (idx == 0) {
-                    filterOnInst(vars[1], vars[0].getValue());
+        int idx2 = idx == 0 ? 1 : 0;
+        switch (operator) {
+            case EQ:
+                if (EventType.isInstantiate(mask)) {
+                    filterOnInst(vars[idx2], vars[idx].getValue());
                 } else {
-                    filterOnInst(vars[0], vars[1].getValue());
-                }
-            } else if (operator == GT) {
-                if (idx == 0) {
-                    filterGTonVar(vars[0], vars[1]);
-                } else {
-                    filterGTonVar(vars[1], vars[0]);
-                }
-            } else if (operator == LT) {
-                if (idx == 0) {
-                    filterLTonVar(vars[0], vars[1]);
-                } else {
-                    filterLTonVar(vars[1], vars[0]);
-                }
-            } else {
-                filterNeq();
-            }
-        } else {
-            if (vars[idx].hasEnumeratedDomain()) {
-                if (EventType.isRemove(mask)) {
-                    if (operator == EQ) {
+                    if (EventType.isRemove(mask) && vars[idx].hasEnumeratedDomain()) {
                         eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(remproc.set(idx), EventType.REMOVE);
-                    } else if (operator == NQ) {
-                        filterNeq();
                     }
-
-                }
-            } else {
-                if (EventType.isInclow(mask)) {
-                    if (operator == EQ) {
-                        if (idx == 0) {
-                            filterOnInf(vars[0], vars[1]);
-                        } else {
-                            filterOnInf(vars[1], vars[0]);
-                        }
-                    } else if (operator == GT) {
-                        if (idx == 0) {
-                            filterGTonVar(vars[0], vars[1]);
-                        } else {
-                            filterGTonVar(vars[1], vars[0]);
-                        }
-                    } else if (operator == LT) {
-                        if (idx == 0) {
-                            filterLTonVar(vars[0], vars[1]);
-                        } else {
-                            filterLTonVar(vars[1], vars[0]);
-                        }
-                    } else {
-                        filterNeq();
+                    if (EventType.isInclow(mask)) {
+                        filterOnInf(vars[idx], vars[idx2]);
                     }
-
-                }
-                if (EventType.isDecupp(mask)) {
-                    if (operator == EQ) {
-                        if (idx == 0) {
-                            filterOnSup(vars[0], vars[1]);
-                        } else {
-                            filterOnSup(vars[1], vars[0]);
-                        }
-                    } else if (operator == GT) {
-                        if (idx == 0) {
-                            filterGTonVar(vars[0], vars[1]);
-                        } else {
-                            filterGTonVar(vars[1], vars[0]);
-                        }
-                    } else if (operator == LT) {
-                        if (idx == 0) {
-                            filterLTonVar(vars[0], vars[1]);
-                        } else {
-                            filterLTonVar(vars[1], vars[0]);
-                        }
-                    } else {
-                        filterNeq();
+                    if (EventType.isDecupp(mask)) {
+                        filterOnSup(vars[idx], vars[idx2]);
                     }
-
                 }
-            }
+                break;
+            case NQ:
+                filterNeq();
+                break;
+            case GT:
+                if (EventType.isInstantiate(mask)) {
+                    filterGTonVar(vars[idx], vars[idx2]);
+                } else if (EventType.isBound(mask)) {
+                    filterGTonVar(vars[idx], vars[idx2]);
+                }
+                break;
+            case LT:
+                if (EventType.isInstantiate(mask)) {
+                    filterLTonVar(vars[idx], vars[idx2]);
+                } else if (EventType.isBound(mask)) {
+                    filterLTonVar(vars[idx], vars[idx2]);
+                }
+                break;
         }
     }
 

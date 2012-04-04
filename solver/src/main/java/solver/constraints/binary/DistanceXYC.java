@@ -82,4 +82,26 @@ public class DistanceXYC extends IntConstraint<IntVar> {
             throw new SolverException("operator not known");
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append("|").append(vars[0].getName()).append(" - ").append(vars[1].getName()).append("|");
+        switch (operator) {
+            case EQ:
+                st.append("=");
+                break;
+            case GT:
+                st.append(">");
+                break;
+            case LT:
+                st.append("<");
+                break;
+            case NQ:
+                st.append("=/=");
+                break;
+        }
+        st.append(cste);
+        return st.toString();
+    }
 }
