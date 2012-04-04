@@ -26,27 +26,25 @@
  */
 package solver.propagation.queues;
 
-import gnu.trove.map.hash.TIntIntHashMap;
-
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 29/03/12
  */
-public class MinHeap {
+public class MinHeap implements IHeap {
 
     private static final boolean PRINT = false;
 
     private int[] keys;
     private int[] elts;
-    private TIntIntHashMap elts2pos;
+    private int[] posOf;
     private int size;
 
     public MinHeap(int max) {
         keys = new int[max + 1];
         elts = new int[max + 1];
-        elts2pos = new TIntIntHashMap(max + 1);
+        posOf = new int[max+1];
         size = 0;
         keys[0] = Integer.MIN_VALUE;
         elts[0] = Integer.MIN_VALUE;
@@ -88,8 +86,8 @@ public class MinHeap {
         keys[pos1] = keys[pos2];
         keys[pos2] = tmp;
 
-        elts2pos.put(elts[pos1], pos2);
-        elts2pos.put(elts[pos2], pos1);
+        posOf[elts[pos1]] = pos2;
+        posOf[elts[pos2]] = pos1;
 
         tmp = elts[pos1];
         elts[pos1] = elts[pos2];
@@ -105,25 +103,22 @@ public class MinHeap {
         while (current > 0 && keys[parent] > key) {
             keys[current] = keys[parent];
             elts[current] = elts[parent];
-            elts2pos.put(elts[current], current);
+            posOf[elts[current]] = current;
             current = parent;
             parent = parent(current);
         }
         keys[current] = key;
         elts[current] = elem;
-        elts2pos.put(elem, current);
+        posOf[elem] = current;
         if (PRINT) print();
         if (PRINT) System.out.printf(">>>>>>>>\n");
     }
 
-    private int indexOf(int elem) {
-        return elts2pos.get(elem);
-    }
 
     public void update(int new_value, int elem) {
         if (PRINT) System.out.printf("<< UPDATE (%d, %d)\n", new_value, elem);
         if (PRINT) print();
-        int current = indexOf(elem);
+        int current = posOf[elem];//indexOf(elem);
         int amount = new_value - keys[current];
         keys[current] = new_value;
         if (amount < 0) {
@@ -157,11 +152,11 @@ public class MinHeap {
     public int remove(int elem) {
         if (PRINT) System.out.printf("<< REMOVE (%d)\n", elem);
         if (PRINT) print();
-        int idx = indexOf(elem);
+        int idx = posOf[elem];//indexOf(elem);
         swap(idx, size);
         size--;
-        if (size != 0)
-            pushdown(1);
+        if (size != 0 && idx < size)
+            pushdown(idx);
         if (PRINT) print();
         if (PRINT) System.out.printf("- - - - ->\n");
         return elts[size + 1];
@@ -188,27 +183,19 @@ public class MinHeap {
 
     public static void main(String[] args) {
         MinHeap mh = new MinHeap(10);
-        mh.insert(1, 1);
-        mh.insert(2, 2);
-        mh.insert(3, 3);
-        mh.insert(4, 4);
-        mh.insert(5, 5);
-        mh.insert(6, 6);
-        mh.insert(7, 7);
-        mh.insert(8, 8);
-        mh.insert(9, 9);
-        mh.insert(10, 10);
+        for (int i = 1; i < 9; i++) {
+            mh.insert(i, i);
+        }
         mh.print();
-        System.out.printf("%d\n", mh.removemin());
-        System.out.printf("%d\n", mh.remove(10));
+        mh.remove(2);
         mh.print();
-        mh.update(1, 2);
+        mh.remove(5);
         mh.print();
-        System.out.printf("%d\n", mh.removemin());
-        System.out.printf("%d\n", mh.remove(9));
+        mh.remove(8);
         mh.print();
-        mh.insert(1, 10);
-        mh.update(10, 10);
-        mh.print();
+        while (!mh.isEmpty()) {
+            System.out.printf("%d\n", mh.removemin());
+            mh.print();
+        }
     }
 }

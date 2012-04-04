@@ -30,6 +30,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.generator.sorter.evaluator.IEvaluator;
+import solver.propagation.queues.IHeap;
 import solver.propagation.queues.MinHeap;
 import solver.recorders.IEventRecorder;
 
@@ -38,19 +39,18 @@ import solver.recorders.IEventRecorder;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/11
  * @revision 04/03/12 add update feature
  * @revision 04/03/12 change schedule
+ * @since 15/12/11
  */
 public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected IEvaluator<S> evaluator;
-    protected MinHeap toPropagate;
+    protected IHeap toPropagate;
     protected S lastPopped;
 
     protected S[] elements;
     protected boolean init = false;
-
 
     @SuppressWarnings({"unchecked"})
     public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
@@ -63,6 +63,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
+//        this.toPropagate = new BinaryTreeHeap(elements.length);
         this.toPropagate = new MinHeap(elements.length);
     }
 
