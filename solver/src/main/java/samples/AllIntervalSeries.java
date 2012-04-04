@@ -119,7 +119,7 @@ public class AllIntervalSeries extends AbstractProblem {
 
         Queue ad1 = new Queue<AbstractFineEventRecorder>(new PVar(vars), new PVar(dist), new PCons(ALLDIFF));
         Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.clearOut(), coar).clearOut());
+        solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
     }
 
     @Override

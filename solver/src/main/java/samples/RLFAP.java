@@ -38,6 +38,9 @@ import solver.constraints.nary.Count;
 import solver.propagation.generator.*;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.search.limits.LimitBox;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.restart.RestartFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -159,11 +162,11 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
-//        solver.set(StrategyFactory.domwdegMindom(vars, 3));
-//        SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
-//                LimitBox.failLimit(solver, 2), 25000);
+        solver.set(StrategyFactory.domwdegMindom(vars, 3));
+        SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
+                LimitBox.failLimit(solver, 2), 25000);
     }
 
     @Override
