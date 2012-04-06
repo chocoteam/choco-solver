@@ -108,18 +108,21 @@ public class TestProbaBAllDiff {
 
     public static void hamiltonianCycleTest(int size, BufferedWriter results) throws IOException {
         String name = "hamiltonianCycle";
-        int neighbors = 10; //3
-        BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("hamiltonianCycle", ".csv")));
-        HamiltonianCycleBenchProbas.GenerateStrat strat = HamiltonianCycleBenchProbas.GenerateStrat.ARC;
-        HamiltonianCycleBenchProbas gac = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, -1, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
-        HamiltonianCycleBenchProbas rangeBC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.RC, -1, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
-        HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.NEQS, 0, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
-        HamiltonianCycleBenchProbas uniformGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1, neighbors, strat);
-        HamiltonianCycleBenchProbas diracGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1, neighbors, strat);
-        // end test
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
-        launchEval(name, 50, size, problems, out, results);
-        out.close();
+        for (int i = 30; i < 41; i=i+10) {
+            HamiltonianCycleBenchProbas.GenerateStrat strat = HamiltonianCycleBenchProbas.GenerateStrat.ARC;
+            results = new BufferedWriter(new FileWriter(fileIt("ham-"+size+"-"+i+"-"+HamiltonianCycleBenchProbas.GenerateStrat.ARC, ".csv")));
+            int neighbors = i; //3
+            BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("hamiltonianCycle", ".csv")));
+            HamiltonianCycleBenchProbas gac = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, -1, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas rangeBC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.RC, -1, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.NEQS, 0, false, CondAllDiffBCProba.Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas uniformGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.UNIFORM, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas diracGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, CondAllDiffBCProba.Distribution.DIRAC, out, -1, neighbors, strat);
+            // end test
+            AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+            launchEval(name, 50, size, problems, out, results);
+            out.close();
+        }
     }
 
     public static void partitionTest(int size, BufferedWriter results) throws IOException {

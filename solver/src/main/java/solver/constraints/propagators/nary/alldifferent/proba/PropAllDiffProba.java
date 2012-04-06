@@ -96,15 +96,8 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         count.incrAllProp();
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            count.incrAllDiff();
-            //System.out.println("initPropag:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
-            propAllDiff.propagate(EventType.FULL_PROPAGATION.mask);
-        } else {
-            count.incrAllDiff();
-            //System.out.println("full alldiff:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
-            propAllDiff.propagate(evtmask);
-        }
+        count.incrAllDiff();
+        propAllDiff.propagate(evtmask);
     }
 
 
@@ -131,6 +124,7 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
             //count.incrAllDiff();
             forcePropagate(EventType.CUSTOM_PROPAGATION);
         } else {
+            count.incrAllProp();
             count.incrNeq();
             //System.out.println("neq:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
             propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);

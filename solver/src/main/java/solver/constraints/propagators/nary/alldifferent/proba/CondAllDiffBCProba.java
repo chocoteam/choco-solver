@@ -173,20 +173,30 @@ public class CondAllDiffBCProba {
         int n = this.nbFreeVars.get();
         int m = unionset.getSize();
         int v = unionset.getPositionLastRemVal();
-        double d = (double) sumDomSize.get() / nbFreeVars.get();
+        double d = (double) sumDomSize.get() / n;
         double rho = (double) n / m;
         double nu = (double) v / (m - 1);
         double mu = d / m;
+        /*if (mu < 0) {
+            System.out.println("union = " + m);
+            System.out.println("free vars = " + nbFreeVars);
+            System.out.println("sum dom = " + sumDomSize);
+            System.exit(0);
+        }*/
         if (nu == 0 || nu == 1 || mu >= rho) {
             res = 1.0;    // case 1: theo. 2 p.10
         } else {
             if (rho < 1) {
                 res = 1.0; // case 2: theo. 2 p.10
             } else {
-                if (rho == 1) {
-                    res = 1 - (tauNuMu(nu, mu) / (m * psiNuMu(nu, mu)));  // case 3: theo. 2 p.10
+                if (mu < 0.05) {
+                    res = 0; // allow to avoid to find a bad case in the table representing values of function tauNuMu
                 } else {
-                    res = 0; // cas rho > 1 ? couvert par mu >= rho ?
+                    if (rho == 1) {
+                        res = 1 - (tauNuMu(nu, mu) / (m * psiNuMu(nu, mu)));  // case 3: theo. 2 p.10
+                    } else {
+                        res = 0; // cas rho > 1 ? couvert par mu >= rho ?
+                    }
                 }
             }
         }
@@ -195,6 +205,11 @@ public class CondAllDiffBCProba {
 
     private double tauNuMu(double nu, double mu) {
         int valmu = (int) Math.floor(1000 * mu - 49);
+        /*if (valmu < 0) {
+            System.out.println("mu = " + mu);
+            System.out.println("valmu = " + valmu);
+            System.exit(0);
+        }*/
         //System.out.println(f.length);
         double fmu = this.f[valmu];
         double gmu = this.g[valmu];
