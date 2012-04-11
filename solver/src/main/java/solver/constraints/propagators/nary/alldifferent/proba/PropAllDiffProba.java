@@ -73,25 +73,11 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
         return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
-    /*public void propagate(int evtmask) throws ContradictionException {
-        count.incrAllProp();
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            if (condition.isValid()) {
-                count.incrAllDiff();
-                System.out.println("IF [alldiff]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
-                propAllDiff.propagate(evtmask);
-            } else {
-                count.incrNeq();
-                System.out.println("IF [neq]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
-                propCliqueNeq.propagate(evtmask);
-            }
-        } else {
-            // if CUSTOM => promote for AllDiff
-            count.incrAllDiff();
-            System.out.println("ELSE [initPropag]:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
-            propAllDiff.propagate(EventType.FULL_PROPAGATION.mask);
-        }
-    }*/
+    @Override
+    public void setActive() {
+        super.setActive();
+        condition.activate();
+    }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -101,25 +87,9 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
     }
 
 
-    /*public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        count.incrAllProp();
-        // 1. update the condition wrt the event received
-        condition.update(eventRecorder, this, mask);
-        // 2. switch on the condition to execute the correct propagator
-        if (condition.isValid()) {
-            count.incrAllDiff();
-            forcePropagate(EventType.CUSTOM_PROPAGATION);
-        } else {
-            count.incrNeq();
-            propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);
-        }
-    } */
-
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        // 1. update the condition wrt the event received
-        condition.update(eventRecorder, this, mask);
-        // 2. switch on the condition to execute the correct propagator
+        // 1. switch on the condition to execute the correct propagator
         if (condition.isValid()) {
             //count.incrAllDiff();
             System.out.println("alldiff:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
