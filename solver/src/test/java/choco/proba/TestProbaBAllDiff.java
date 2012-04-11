@@ -2,7 +2,6 @@ package choco.proba;
 
 import org.slf4j.LoggerFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -33,8 +32,9 @@ public class TestProbaBAllDiff {
     public static String fileIt(String name, String ext) {
         String path = null;
         try {
-            File dir = new File("/private/var/folders/vh/cfkwx09174l9vr5bfjktdxp80000gp/T/probaResults");
-            path = File.createTempFile(name, ext, dir).toString();
+            //File dir = new File("/private/var/folders/vh/cfkwx09174l9vr5bfjktdxp80000gp/T/probaResults");
+            //path = File.createTempFile(name, ext, dir).toString();
+            path = File.createTempFile(name, ext).toString();
             LoggerFactory.getLogger("solver").error("Tmp file : " + path);
         } catch (IOException e) {
             e.printStackTrace();

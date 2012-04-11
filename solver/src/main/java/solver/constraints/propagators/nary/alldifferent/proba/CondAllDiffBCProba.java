@@ -2,7 +2,6 @@ package solver.constraints.propagators.nary.alldifferent.proba;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -262,30 +261,27 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             this.max = Integer.MIN_VALUE;
         }
 
-        public int getMin() {
-            return min;
+        public MinMaxProc init() {
+            this.min = Integer.MAX_VALUE;
+            this.max = Integer.MIN_VALUE;
+            return this;
         }
 
-        public void setMin() {
-            this.min = Integer.MAX_VALUE;
+        public int getMin() {
+            return min;
         }
 
         public int getMax() {
             return max;
         }
 
-        public void setMax() {
-            this.max = Integer.MIN_VALUE;
-        }
-
         @Override
         public void execute(int i) throws ContradictionException {
             if (i < min) {
                 this.min = i;
-            } else {
-                if (i > max) {
-                    this.max = i;
-                }
+            }
+            if (i > max) {
+                this.max = i;
             }
         }
     }
@@ -307,10 +303,11 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
         }
         IDeltaMonitor dm = deltamon.get(var.getId());
+        dm.freeze();
         //System.out.printf("CND : %s on %s\n", var, evt);
         //-------------------------------------------------------
         try {
-            dm.forEach(minMax_proc, EventType.REMOVE);
+            dm.forEach(minMax_proc.init(), EventType.REMOVE);
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBCProba#update encounters an exception");
         }
@@ -333,8 +330,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         this.al.set(unionset.getPosition(lastInstLow.get()));
         this.be.set(unionset.getPosition(lastInstUpp.get()));
         this.m.set(unionset.getSize());
-        this.minMax_proc.setMax();
-        this.minMax_proc.setMin();
+        dm.unfreeze();
         dm.clear();
         assert checkUnion();
     }
