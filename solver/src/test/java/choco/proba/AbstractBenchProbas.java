@@ -17,6 +17,7 @@ import java.io.IOException;
  * User: xavier lorca
  */
 public abstract class AbstractBenchProbas {
+    public static final String sep =";";
     public static int TIMELIMIT = 20000;
 
     public enum Distribution {
@@ -105,14 +106,14 @@ public abstract class AbstractBenchProbas {
 
     void recordAverage(BufferedWriter results) throws IOException {
         String s = "";
-        s += ((double) this.avgSolutions / this.nbTests) + "\t";
-        s += ((double) this.avgNodes / this.nbTests) + "\t";
-        s += ((double) this.avgBcks / this.nbTests) + "\t";
-        s += ((double) this.avgPropag / this.nbTests) + "\t";
-        s += ((double) this.avgNbAlldiffProp / this.nbTests) + "\t";
-        s += ((double) this.avgNbNeqsProp / this.nbTests) + "\t";
-        s += ((double) this.avgTime / this.nbTests) + "\t";
-        s += "-" + "\t";
+        s += ((double) this.avgSolutions / this.nbTests) + sep;
+        s += ((double) this.avgNodes / this.nbTests) + sep;
+        s += ((double) this.avgBcks / this.nbTests) + sep;
+        s += ((double) this.avgPropag / this.nbTests) + sep;
+        s += ((double) this.avgNbAlldiffProp / this.nbTests) + sep;
+        s += ((double) this.avgNbNeqsProp / this.nbTests) + sep;
+        s += ((double) this.avgTime / this.nbTests) + sep;
+        s += "-" + sep;
         results.write(s);
         results.flush();
     }
@@ -130,18 +131,18 @@ public abstract class AbstractBenchProbas {
 
     private void writeResults() throws IOException {
         String s = "";
-        s += this.nbSolutions + "\t";
-        s += this.nbNodes + "\t";
-        s += this.nbBcks + "\t";
-        s += this.nbPropag + "\t";
-        s += this.nbAlldiffProp + "\t";
-        s += this.nbNeqsProp + "\t";
+        s += this.nbSolutions + sep;
+        s += this.nbNodes + sep;
+        s += this.nbBcks + sep;
+        s += this.nbPropag + sep;
+        s += this.nbAlldiffProp + sep;
+        s += this.nbNeqsProp + sep;
         if (this.time == 0) {
-            s += "NaN" + "\t";
+            s += "NaN" + sep;
         } else {
-            s += this.time + "\t";
+            s += this.time + sep;
         }
-        s += "-" + "\t";
+        s += "-" + sep;
         this.out.write(s);
         this.out.flush();
     }

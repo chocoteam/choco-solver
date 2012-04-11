@@ -40,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import static choco.annotations.PropAnn.Status.*;
@@ -306,8 +305,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     protected void sortIt() {
         mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
         mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
-        //Arrays.sort(minsorted, SORT.MIN);
-        //Arrays.sort(maxsorted, SORT.MAX);
+//        Arrays.sort(minsorted, SORT.MIN);
+//        Arrays.sort(maxsorted, SORT.MAX);
 
         int min = minsorted[0].lb;
         int max = maxsorted[0].ub + 1;
@@ -475,19 +474,21 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         }
 
         // Recursively sort halves of dest into src
+        int destLow  = low;
+        int destHigh = high;
         int mid = (low + high) >>> 1;
-        mergeSort(src, dest, low, mid, c);
-        mergeSort(src, dest, mid, high, c);
+        mergeSort(dest, src, low, mid, c);
+        mergeSort(dest, src, mid, high, c);
 
         // If list is already sorted, just copy from src to dest.  This is an
         // optimization that results in faster sorts for nearly ordered lists.
         if (c.compare(src[mid - 1], src[mid]) <= 0) {
-            System.arraycopy(src, low, dest, low, length);
+            System.arraycopy(src, low, dest, destLow, length);
             return;
         }
 
         // Merge sorted halves (now in src) into dest
-        for (int i = low, p = low, q = mid; i < high; i++) {
+        for (int i = destLow, p = low, q = mid; i < destHigh; i++) {
             if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0)
                 dest[i] = src[p++];
             else
