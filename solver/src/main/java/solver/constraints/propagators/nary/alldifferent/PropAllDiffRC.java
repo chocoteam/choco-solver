@@ -2,7 +2,6 @@ package solver.constraints.propagators.nary.alldifferent;
 
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.probabilistic.propagators.nary.PropProbaAllDiffBC;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
