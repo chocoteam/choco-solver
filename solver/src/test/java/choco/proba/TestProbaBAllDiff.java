@@ -18,7 +18,7 @@ public class TestProbaBAllDiff {
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
         //TestProbaBAllDiff.debug(results);
-        TestProbaBAllDiff.oneAllDiffTest(4, results);
+        TestProbaBAllDiff.oneAllDiffTest(12, results);
         /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(5, results);
         TestProbaBAllDiff.nQueensTest(10, results);
@@ -32,9 +32,9 @@ public class TestProbaBAllDiff {
     public static String fileIt(String name, String ext) {
         String path = null;
         try {
-            //File dir = new File("/private/var/folders/vh/cfkwx09174l9vr5bfjktdxp80000gp/T/probaResults");
-            //path = File.createTempFile(name, ext, dir).toString();
-            path = File.createTempFile(name, ext).toString();
+            File dir = new File("/private/var/folders/vh/cfkwx09174l9vr5bfjktdxp80000gp/T/probaResults");
+            path = File.createTempFile(name, ext, dir).toString();
+            //path = File.createTempFile(name, ext).toString();
             LoggerFactory.getLogger("solver").error("Tmp file : " + path);
         } catch (IOException e) {
             e.printStackTrace();
@@ -59,11 +59,14 @@ public class TestProbaBAllDiff {
         String name = "OneAllDiff";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("OneAllDiff", ".csv")));
         OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
-        OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        OneAllDiffBenchProbas bounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        //OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, AbstractBenchProbas.Distribution.NONE, out, -1);
-        OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
-        OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
+        //OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        //OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        //OneAllDiffBenchProbas uniformBounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique/*, uniformGAC, uniformBounded*/};
         launchEval(name, 100, size, problems, out, results);
         out.close();
     }

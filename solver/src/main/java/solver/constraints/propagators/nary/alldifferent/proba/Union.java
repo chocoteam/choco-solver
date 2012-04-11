@@ -94,53 +94,45 @@ public class Union {
     }
 
     public void remove(int value) {
-        for (int i = 0; i <= idx.get(); i++) {
+        /*for (int i = 0; i <= idx.get(); i++) {
             System.out.print(values[i] + ";");
         }
         System.out.println(); //*/
         int lastPresent = idx.get();
         int indice = val2idx.get(value);
-        Value v = values[indice];
-        v.decrOcc();
-        System.out.println("apres ");
-        for (int i = 0; i <= idx.get(); i++) {
-            System.out.print(values[i] + ";");
-        }
-        System.out.println("\n--------");//*/
-        if (v.getOcc() == 0) {
-            Value lastElement = values[lastPresent];
-            values[lastPresent] = values[indice];
-            values[indice] = lastElement;
-            val2idx.put(lastElement.getValue(), indice);
-            val2idx.put(value, lastPresent);
-            idx.add(-1);
-        }
-    }
-
-    public void removeInst(int value) {
-        for (int i = 0; i <= idx.get(); i++) {
-            System.out.print(values[i] + ";");
-        }
-        System.out.println();//*/
-        int lastPresent = idx.get();
-        int indice = val2idx.get(value);
-        Value v = values[indice];
-        v.reset();
-        System.out.println("apres ");
-        for (int i = 0; i <= idx.get(); i++) {
-            System.out.print(values[i] + ";");
-        }
-        System.out.println("\n--------"); //*/
-        Value lastElement = values[lastPresent];
-        values[lastPresent] = values[indice];
-        values[indice] = lastElement;
-        val2idx.put(lastElement.getValue(), indice);
-        val2idx.put(value, lastPresent);
-        idx.add(-1);
+        if (indice <= lastPresent) {
+            Value v = values[indice];
+            v.decrOcc();
+            /*System.out.println("indice:" + indice + " -- idx:" + lastPresent);
+            System.out.println("apres ");
+            for (int i = 0; i <= idx.get(); i++) {
+                System.out.print(values[i] + ";");
+            }
+            System.out.println("\n--------");//*/
+            if (v.getOcc() == 0) {
+                Value lastElement = values[lastPresent];
+                values[lastPresent] = values[indice];
+                values[indice] = lastElement;
+                val2idx.put(lastElement.getValue(), indice);
+                val2idx.put(value, lastPresent);
+                idx.add(-1);
+            }
+        } /*else {
+            System.out.println("deja traite");
+        }//*/
     }
 
     public int getSize() {
-        return idx.get()+1;
+        return idx.get() + 1;
+    }
+
+    public int getOccOf(int value) {
+        int indice = val2idx.get(value);
+        if (indice > idx.get()) {
+            return 0;
+        } else {
+            return values[indice].getOcc();
+        }
     }
 
     public int[] getValues() {

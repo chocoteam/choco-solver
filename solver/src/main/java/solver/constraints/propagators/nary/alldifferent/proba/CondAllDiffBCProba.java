@@ -5,16 +5,20 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.probabilities.ProbaUtils;
+import solver.recorders.IEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDeltaMonitor;
+import sun.plugin2.ipc.Event;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -78,6 +82,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
     //////
     protected final TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
     protected final TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
+    protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
 
 
     public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars) {
@@ -97,6 +102,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
         this.deltamon = new TIntObjectHashMap<IDeltaMonitor>(vars.length);
         this.idxVs = new TIntIntHashMap(vars.length, (float) 0.5, -2, -2);
+        this.timestamps = new TIntLongHashMap(vars.length, (float) 0.5, -2, -2);
 
         for (int i = 0; i < vars.length; i++) {
             IntVar v = vars[i];
@@ -104,8 +110,10 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
                 n.add(-1);
             }
             v.analyseAndAdapt(EventType.REMOVE.mask); // to be sure delta is created and maintained
-            deltamon.put(v.getId(), v.getDelta().getMonitor(Cause.Null));
+            int vid = v.getId();
+            deltamon.put(vid, v.getDelta().getMonitor(Cause.Null));
             v.addMonitor(this); // attach this as a variable monitor
+            timestamps.put(vid, -1);
 
         }
         this.unionset = new Union(vars, environment);
@@ -129,7 +137,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
     private static double probaCase2(long m, long l, long v, long al, long be) {
         long sum1 = 0;
-        int max = Math.min((int) Math.sqrt(m), 26);
+        long max = Math.min((m - l - 1), 26);
         for (int j = 1; j <= max; j++) {
             sum1 += fi(m, m - l - j - 1, v, al, be) * Math.log(1 - f(l, j));
         }
@@ -167,59 +175,45 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
      * @return true if unionset is ok
      */
     public boolean checkUnion() {
-        int[] toCheck = unionset.getValues();
-        Arrays.sort(toCheck);
-        int[] computed = computeUnion();
-        Arrays.sort(computed);
-        for (IntVar vs : vars) {
-            System.out.println(vs);
+        Set<Integer> allVals = computeUnion();
+        for (Integer value : allVals) {
+            if (!checkOcc(value)) {
+                return false;
+            }
         }
-        if (toCheck.length != computed.length) {
-            System.out.println(printTab("incr", toCheck));
-            System.out.println("--------------------");
-            System.out.println(printTab("comp1", computed));
+        return true;
+    }
+
+    public boolean checkOcc(int value) {
+        int occ = 0;
+        for (IntVar v : vars) {
+            if (v.contains(value) && !v.instantiated()) {
+                occ++;
+            }
+        }
+        if (occ != unionset.getOccOf(value)) {
+            /*System.out.println("value " + value + ": " + occ + " VS " + unionset.getOccOf(value));
+            for (IntVar v : vars) {
+                System.out.println(v);
+            } */
             return false;
         } else {
-            int i = 0;
-            while (i < toCheck.length && toCheck[i] == computed[i]) {
-                i++;
-            }
-            if (i != toCheck.length) {
-                System.out.println(printTab("incr", toCheck));
-                System.out.println("--------------------");
-                System.out.println(printTab("comp2", computed));
-                return false;
-            } else {
-                System.out.println("assert ok");
-                return true;
-            }
+            return true;
         }
     }
 
-    private int[] computeUnion() {
-        Set<Integer> instVals = new HashSet<Integer>();
+    private Set<Integer> computeUnion() {
+        //System.out.println("*********** calcul manuel de l'union");
         Set<Integer> vals = new HashSet<Integer>();
+        //System.out.println(instVals);
         for (IntVar var : vars) {
-            if (var.instantiated()) {
-                instVals.add(var.getValue());
+            int ub = var.getUB();
+            for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+                vals.add(i);
             }
         }
-        for (IntVar var : vars) {
-            if (!var.instantiated()) {
-                int ub = var.getUB();
-                for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-                    if (!instVals.contains(i)) {
-                        vals.add(i);
-                    }
-                }
-            }
-        }
-        int[] res = new int[vals.size()];
-        int j = 0;
-        for (Integer i : vals) {
-            res[j++] = i;
-        }
-        return res;
+        //System.out.println("calcul manuel de l'union ***********");
+        return vals;
     }
 
     private String printTab(String s, int[] tab) {
@@ -247,8 +241,9 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
         @Override
         public void execute(int i) throws ContradictionException {
-            System.out.println("traitement du retrait de " + i);
+            //System.out.println("traitement du retrait de " + i);
             p.unionset.remove(i);
+            assert p.checkOcc(i);
         }
     }
 
@@ -303,9 +298,15 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
         }
         IDeltaMonitor dm = deltamon.get(var.getId());
+        int vid = var.getId();
+        long t = timestamps.get(vid);
+        if (t - AbstractSearchLoop.timeStamp != 0) {
+            deltamon.get(vid).clear();
+            timestamps.adjustValue(vid, AbstractSearchLoop.timeStamp - t);
+        }
+
         dm.freeze();
-        //System.out.printf("CND : %s on %s\n", var, evt);
-        //-------------------------------------------------------
+        //System.out.printf("\n\nCND : %s on %s\n", var, evt);
         try {
             dm.forEach(minMax_proc.init(), EventType.REMOVE);
         } catch (ContradictionException e) {
@@ -318,11 +319,14 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             lastInstLow.set(low);
             lastInstUpp.set(upp);
             lastInstVal.set(var.getValue());
-            System.out.println("traitement de l'instanciation de " + var);
-            unionset.removeInst(var.getValue());
+            //System.out.println("traitement de l'instanciation de " + var);
+            unionset.remove(var.getValue());
         }
         try {
+            //System.out.print("****** debut retrait sur ");
+            //System.out.println(var + ": ");
             dm.forEach(rem_proc, EventType.REMOVE);
+            //System.out.println("fin retrait ******");
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBCProba#update encounters an exception");
         }
@@ -331,7 +335,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         this.be.set(unionset.getPosition(lastInstUpp.get()));
         this.m.set(unionset.getSize());
         dm.unfreeze();
-        dm.clear();
         assert checkUnion();
     }
 
