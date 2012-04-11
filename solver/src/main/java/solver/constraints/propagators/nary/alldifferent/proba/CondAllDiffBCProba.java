@@ -295,6 +295,13 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             this.proba.set(0); // propage
         } else {
             assert m == unionset.getSize() : m + " - " + unionset;
+            if (m < n) {
+                System.out.println(m+","+n);
+                for (IntVar vs : vars) {
+                    System.out.println(vs);
+                }
+                assert false;
+            }
             this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
         }
         IDeltaMonitor dm = deltamon.get(var.getId());

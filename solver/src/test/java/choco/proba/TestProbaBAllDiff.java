@@ -20,8 +20,8 @@ public class TestProbaBAllDiff {
 
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
-        //TestProbaBAllDiff.debug(results);
-        TestProbaBAllDiff.oneAllDiffTest(12, results);
+        TestProbaBAllDiff.debug(results);
+        //TestProbaBAllDiff.oneAllDiffTest(12, results);
         /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(5, results);
         TestProbaBAllDiff.nQueensTest(10, results);
@@ -49,9 +49,16 @@ public class TestProbaBAllDiff {
         int size = 5;
         String name = "debug";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("debug", ".csv")));
+<<<<<<< HEAD
         OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, Distribution.NONE, out, -1);
         OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, uniformGAC};
+=======
+        //OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        //OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{uniformRC/*gac, uniformGAC*/};
+>>>>>>> fix limit case
         //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{uniformGAC};
         launchEval(name, 10, size, problems, out, results);
         out.close();
@@ -61,15 +68,23 @@ public class TestProbaBAllDiff {
     public static void oneAllDiffTest(int size, BufferedWriter results) throws IOException {
         String name = "OneAllDiff";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("OneAllDiff", ".csv")));
+<<<<<<< HEAD
         OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, Distribution.NONE, out, -1);
         OneAllDiffBenchProbas bounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, -1, false, Distribution.NONE, out, -1);
         //OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         //OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+=======
+        OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        //OneAllDiffBenchProbas bounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, AbstractBenchProbas.Distribution.NONE, out, -1);
+        OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+>>>>>>> fix limit case
         //OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
         //OneAllDiffBenchProbas uniformBounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
-        //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique/*, uniformGAC, uniformBounded*/};
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC/*, uniformRC*/};
+        //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique/*, uniformGAC, uniformBounded*/};
         launchEval(name, 100, size, problems, out, results);
         out.close();
     }

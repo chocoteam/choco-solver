@@ -303,10 +303,17 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     }
 
     protected void sortIt() {
+<<<<<<< HEAD
         mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
         mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
 //        Arrays.sort(minsorted, SORT.MIN);
 //        Arrays.sort(maxsorted, SORT.MAX);
+=======
+        //mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
+        //mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
+        Arrays.sort(minsorted, SORT.MIN);
+        Arrays.sort(maxsorted, SORT.MAX);
+>>>>>>> fix limit case
 
         int min = minsorted[0].lb;
         int max = maxsorted[0].ub + 1;
