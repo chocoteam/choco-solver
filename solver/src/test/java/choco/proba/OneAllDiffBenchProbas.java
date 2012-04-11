@@ -36,15 +36,7 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
     @Override
     void buildProblem(int size, boolean proba) {
         this.inst = new Instance(size, 0, size - 1, seed, 0, solver);
-        switch (dist) {
-            case DIRAC:
-                this.vars = inst.generate(Distribution.ALL_EQUAL_INTERVALS_SIZEFREE);
-                break;
-            case UNIFORM:
-            default:
-                this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
-        }
-
+        this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
         this.allVars = vars;
         if (proba) {
             this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.count)};

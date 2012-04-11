@@ -21,7 +21,7 @@ public abstract class AbstractBenchProbas {
     public static int TIMELIMIT = 20000;
 
     public enum Distribution {
-        NONE, DIRAC, UNIFORM
+        NONE, UNIFORM
     }
 
     BufferedWriter out;

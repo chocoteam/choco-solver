@@ -20,9 +20,9 @@ public class TestProbaBAllDiff {
 
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
-        TestProbaBAllDiff.debug(results);
-        //TestProbaBAllDiff.oneAllDiffTest(12, results);
-        /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
+        //TestProbaBAllDiff.debug(results);
+        TestProbaBAllDiff.oneAllDiffTest(12, results);
+        TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(5, results);
         TestProbaBAllDiff.nQueensTest(10, results);
         TestProbaBAllDiff.allIntervalSeriesTest(8, results);
@@ -49,16 +49,10 @@ public class TestProbaBAllDiff {
         int size = 5;
         String name = "debug";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("debug", ".csv")));
-<<<<<<< HEAD
-        OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, Distribution.NONE, out, -1);
-        OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, uniformGAC};
-=======
         //OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         //OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
         OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{uniformRC/*gac, uniformGAC*/};
->>>>>>> fix limit case
         //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{uniformGAC};
         launchEval(name, 10, size, problems, out, results);
         out.close();
@@ -68,22 +62,14 @@ public class TestProbaBAllDiff {
     public static void oneAllDiffTest(int size, BufferedWriter results) throws IOException {
         String name = "OneAllDiff";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("OneAllDiff", ".csv")));
-<<<<<<< HEAD
-        OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, Distribution.NONE, out, -1);
-        OneAllDiffBenchProbas bounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, -1, false, Distribution.NONE, out, -1);
-        //OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
-        OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
-        //OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
-=======
         OneAllDiffBenchProbas gac = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         //OneAllDiffBenchProbas bounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas rangeBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas clique = new OneAllDiffBenchProbas(size, AllDifferent.Type.NEQS, 0, false, AbstractBenchProbas.Distribution.NONE, out, -1);
         OneAllDiffBenchProbas uniformGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
->>>>>>> fix limit case
-        //OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
+        OneAllDiffBenchProbas uniformRC = new OneAllDiffBenchProbas(size, AllDifferent.Type.RC, 0, true,AbstractBenchProbas.Distribution.UNIFORM, out, -1);
         //OneAllDiffBenchProbas uniformBounded = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC/*, uniformRC*/};
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique/*, uniformGAC, uniformBounded*/};
         launchEval(name, 100, size, problems, out, results);
         out.close();
@@ -96,8 +82,9 @@ public class TestProbaBAllDiff {
         NqueensBenchProbas rangeBC = new NqueensBenchProbas(size, AllDifferent.Type.RC, -1, false, Distribution.NONE, out, -1);
         NqueensBenchProbas clique = new NqueensBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         NqueensBenchProbas uniformGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        NqueensBenchProbas diracGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+        NqueensBenchProbas uniformRC = new NqueensBenchProbas(size, AllDifferent.Type.RC, 0, true, Distribution.UNIFORM, out, -1);
+        //NqueensBenchProbas diracGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 10, size, problems, out, results);
         out.close();
     }
@@ -109,8 +96,9 @@ public class TestProbaBAllDiff {
         AllIntervalSeriesBenchProbas rangeBC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.RC, -1, false, Distribution.NONE, out, -1);
         AllIntervalSeriesBenchProbas clique = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         AllIntervalSeriesBenchProbas uniformGAC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        AllIntervalSeriesBenchProbas diracGAC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+        AllIntervalSeriesBenchProbas uniformRC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.RC, 0, true, Distribution.UNIFORM, out, -1);
+        //AllIntervalSeriesBenchProbas diracGAC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 10, size, problems, out, results);
         out.close();
     }
@@ -122,8 +110,9 @@ public class TestProbaBAllDiff {
         MagicSquareBenchProbas rangeBC = new MagicSquareBenchProbas(size, AllDifferent.Type.RC, -1, false, Distribution.NONE, out, -1);
         MagicSquareBenchProbas clique = new MagicSquareBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         MagicSquareBenchProbas uniformGAC = new MagicSquareBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        MagicSquareBenchProbas diracGAC = new MagicSquareBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+        MagicSquareBenchProbas uniformRC = new MagicSquareBenchProbas(size, AllDifferent.Type.RC, 0, true, Distribution.UNIFORM, out, -1);
+        //MagicSquareBenchProbas diracGAC = new MagicSquareBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 10, size, problems, out, results);
         out.close();
     }
@@ -136,15 +125,15 @@ public class TestProbaBAllDiff {
             results = new BufferedWriter(new FileWriter(fileIt("ham-"+size+"-"+neighbors+"-"+HamiltonianCycleBenchProbas.GenerateStrat.ARC, ".csv")));
             BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("hamiltonianCycle", ".csv")));
             HamiltonianCycleBenchProbas gac = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, -1, false, Distribution.NONE, out, -1, neighbors, strat);
-            HamiltonianCycleBenchProbas bounded = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.BC, -1, false, Distribution.NONE, out, -1, neighbors, strat);
-            //HamiltonianCycleBenchProbas rangeBC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1, neighbors, strat);
-            //HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.NEQS, 0, false, AbstractBenchProbas.Distribution.NONE, out, -1, neighbors, strat);
-            //HamiltonianCycleBenchProbas uniformGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1, neighbors, strat);
+            //HamiltonianCycleBenchProbas bounded = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.BC, -1, false, Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas rangeBC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.RC, -1, false, AbstractBenchProbas.Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas clique = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.NEQS, 0, false, AbstractBenchProbas.Distribution.NONE, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas uniformGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1, neighbors, strat);
+            HamiltonianCycleBenchProbas uniformRC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.RC, 0, true, AbstractBenchProbas.Distribution.UNIFORM, out, -1, neighbors, strat);
             //HamiltonianCycleBenchProbas diracGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, 0, true, AbstractBenchProbas.Distribution.DIRAC, out, -1, neighbors, strat);
             // end test
-            //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
-            AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded};//, rangeBC};
-            launchEval(name, 1, size, problems, out, results);
+            AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
+            launchEval(name, 5, size, problems, out, results);
             out.close();
         }
     }
@@ -156,8 +145,9 @@ public class TestProbaBAllDiff {
         PartitionBenchProbas rangeBC = new PartitionBenchProbas(size, AllDifferent.Type.RC, -1, false, Distribution.NONE, out, -1);
         PartitionBenchProbas clique = new PartitionBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         PartitionBenchProbas uniformGAC = new PartitionBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        PartitionBenchProbas diracGAC = new PartitionBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+        PartitionBenchProbas uniformRC = new PartitionBenchProbas(size, AllDifferent.Type.RC, 0, true, Distribution.UNIFORM, out, -1);
+        //PartitionBenchProbas diracGAC = new PartitionBenchProbas(size, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 5, size, problems, out, results);
         out.close();
     }
@@ -168,8 +158,8 @@ public class TestProbaBAllDiff {
         GolombRulerBenchProbas bounded = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, -1, false, Distribution.NONE, out, -1);
         GolombRulerBenchProbas clique = new GolombRulerBenchProbas(size, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         GolombRulerBenchProbas uniformBC = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, 0, true, Distribution.UNIFORM, out, -1);
-        GolombRulerBenchProbas diracBC = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{bounded, clique, uniformBC, diracBC};
+        //GolombRulerBenchProbas diracBC = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{bounded, clique, uniformBC};
         //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{bounded,uniformBC};
         launchEval(name, 5, size, problems, out, results);
         out.close();
@@ -182,8 +172,9 @@ public class TestProbaBAllDiff {
         LangfordBenchProbas rangeBC = new LangfordBenchProbas(k, n, AllDifferent.Type.RC, -1, false, Distribution.NONE, out, -1);
         LangfordBenchProbas clique = new LangfordBenchProbas(k, n, AllDifferent.Type.NEQS, 0, false, Distribution.NONE, out, -1);
         LangfordBenchProbas uniformGAC = new LangfordBenchProbas(k, n, AllDifferent.Type.AC, 0, true, Distribution.UNIFORM, out, -1);
-        LangfordBenchProbas diracGAC = new LangfordBenchProbas(k, n, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, diracGAC};
+        LangfordBenchProbas uniformRC = new LangfordBenchProbas(k, n, AllDifferent.Type.RC, 0, true, Distribution.UNIFORM, out, -1);
+        //LangfordBenchProbas diracGAC = new LangfordBenchProbas(k, n, AllDifferent.Type.AC, 0, true, Distribution.DIRAC, out, -1);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, rangeBC, clique, uniformGAC, uniformRC};
         launchEval(name, 5, k * n, problems, out, results);
         out.close();
     }
