@@ -19,7 +19,7 @@ public class TestProbaBAllDiff {
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
         //TestProbaBAllDiff.debug(results);
-        TestProbaBAllDiff.oneAllDiffTest(3, results);
+        TestProbaBAllDiff.oneAllDiffTest(4, results);
         /*TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(5, results);
         TestProbaBAllDiff.nQueensTest(10, results);

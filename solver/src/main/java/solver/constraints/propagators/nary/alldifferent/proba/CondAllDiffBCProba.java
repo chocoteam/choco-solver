@@ -29,7 +29,7 @@ import java.util.Set;
  */
 public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
-    public static double[] fact = {
+    public static final double[] fact = {
             ProbaUtils.fact(1),
             ProbaUtils.fact(2),
             ProbaUtils.fact(3),
@@ -69,7 +69,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
     protected IStateInt lastInstLow; // the lower bound of the value of the last instanciated variable
     protected IStateInt lastInstUpp; // the upper bound of the value of the last instanciated variable
 
-    IStateBool asInst;
     IStateDouble proba;
     IStateInt n; // number of variables not yet instanciated before the last instanciation
     IStateInt m; // size of unionset before the last instanciation
@@ -87,12 +86,12 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         this.minMax_proc = new MinMaxProc();
         this.environment = environment;
         this.vars = vars;
-        this.asInst = environment.makeBool(false);
         this.lastInstVal = environment.makeInt(-1);
         this.lastInstLow = environment.makeInt(-1);
         this.lastInstUpp = environment.makeInt(-1);
         this.proba = environment.makeFloat();
         this.n = environment.makeInt(vars.length);
+        this.m = environment.makeInt(-1);
         this.v = environment.makeInt(-1);
         this.al = environment.makeInt(-1);
         this.be = environment.makeInt(-1);
@@ -103,15 +102,15 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             IntVar v = vars[i];
             if (v.instantiated()) {
-                asInst.set(true);
                 n.add(-1);
             }
-            deltamon.put(i, v.getDelta().getMonitor(Cause.Null));
-            v.addMonitor(this); // attach this as a variable monitor
             v.analyseAndAdapt(EventType.REMOVE.mask); // to be sure delta is created and maintained
+            deltamon.put(v.getId(), v.getDelta().getMonitor(Cause.Null));
+            v.addMonitor(this); // attach this as a variable monitor
+
         }
         this.unionset = new Union(vars, environment);
-        this.m = this.unionset.getSize();
+        this.m.set(this.unionset.getSize());
     }
 
     boolean isValid() {
@@ -120,65 +119,8 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         //return true;
     }
 
-    /*void update(AbstractFineEventRecorder recorder, Propagator propagator, int evtmask) {
-        System.out.println(recorder);
-        //-------------------------------------------------------
-        try {
-            recorder.getDeltaMonitor(propagator, recorder.getVariables()[0]).forEach(minMax_proc, EventType.REMOVE);
-        } catch (ContradictionException e) {
-            throw new SolverException("CondAllDiffBCProba#update encounters an exception");
-        }
-        int low = minMax_proc.getMin();
-        int upp = minMax_proc.getMax();
-        IntVar lastInst = null;
-        if (EventType.isInstantiate(evtmask)) {
-            lastInst = (IntVar) recorder.getVariables()[0];
-            lastInstLow.set(low);
-            lastInstUpp.set(upp);
-            lastInstVal.set(lastInst.getValue());
-        }
-
-        // si une variable au moins a ŽtŽ inst OU on vient de bck OU acas divers
-        long m = this.m.get();
-        long n = this.n.get();
-        long v = this.v.get();
-        long al = this.al.get();
-        long be = this.be.get();
-        if (!this.asInst.get() || v > m - 1 || al > m - 1 || be > m - 1) {
-            this.proba.set(0); // propage
-        } else {
-            this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
-        }
-
-
-        //-------------------------------------------------------
-
-        // WARNING: Initially, the paper proposes to only react to variable assignment... But in practice, a value in
-        // the union can be removed only by a propagation which is not induced by an assignment.
-        try {
-            recorder.getDeltaMonitor(propagator, recorder.getVariables()[0]).forEach(rem_proc, EventType.REMOVE);
-        } catch (ContradictionException e) {
-            throw new SolverException("CondAllDiffBCProba#update encounters an exception");
-        }
-
-        if (EventType.isInstantiate(evtmask)) {
-            this.asInst.set(true);
-            this.n.add(-1);
-            //unionset.forceRemove(lastInstVal.get());
-        }
-        this.v.set(unionset.getPosition(lastInstVal.get()));
-        this.al.set(unionset.getPosition(lastInstLow.get()));
-        this.be.set(unionset.getPosition(lastInstUpp.get()));
-        this.m = unionset.getSize();
-        this.minMax_proc.setMax();
-        this.minMax_proc.setMin();
-        assert checkUnion();
-    }*/
 
     private static double proba(long m, long n, long v, long al, long be) {
-        //assert m>0:""+n+","+m;
-        //assert n>=0:""+n+","+m;
-        //System.out.println("("+n+","+m+")");
         return (m - n < (2 * Math.sqrt(m))) ? probaCase2(m, m - n, v, al, be) : probaCase1(m, n / m, v, al, be);
     }
 
@@ -188,11 +130,12 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
     private static double probaCase2(long m, long l, long v, long al, long be) {
         long sum1 = 0;
-        for (int j = 1; j <= 26; j++) {
+        int max = Math.min((int) Math.sqrt(m), 26);
+        for (int j = 1; j <= max; j++) {
             sum1 += fi(m, m - l - j - 1, v, al, be) * Math.log(1 - f(l, j));
         }
         long sum2 = 0;
-        for (int j = 1; j <= 26; j++) {
+        for (int j = 1; j <= max; j++) {
             sum2 += fi(m, m - l - j - 1, v, al, be) * ((g(l, j)) / (1 - f(l, j)));
         }
         return Math.exp(sum1) * (1 - (1 / m) * (fi(m, 1, v, al, be) * 2 * (1 - Math.exp(-4)) + sum2));
@@ -229,10 +172,10 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         Arrays.sort(toCheck);
         int[] computed = computeUnion();
         Arrays.sort(computed);
+        for (IntVar vs : vars) {
+            System.out.println(vs);
+        }
         if (toCheck.length != computed.length) {
-            for (IntVar vs : vars) {
-                System.out.println(vs);
-            }
             System.out.println(printTab("incr", toCheck));
             System.out.println("--------------------");
             System.out.println(printTab("comp1", computed));
@@ -243,26 +186,32 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
                 i++;
             }
             if (i != toCheck.length) {
-                for (IntVar vs : vars) {
-                    System.out.println(vs);
-                }
                 System.out.println(printTab("incr", toCheck));
                 System.out.println("--------------------");
                 System.out.println(printTab("comp2", computed));
                 return false;
             } else {
+                System.out.println("assert ok");
                 return true;
             }
         }
     }
 
     private int[] computeUnion() {
+        Set<Integer> instVals = new HashSet<Integer>();
         Set<Integer> vals = new HashSet<Integer>();
+        for (IntVar var : vars) {
+            if (var.instantiated()) {
+                instVals.add(var.getValue());
+            }
+        }
         for (IntVar var : vars) {
             if (!var.instantiated()) {
                 int ub = var.getUB();
                 for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-                    vals.add(i);
+                    if (!instVals.contains(i)) {
+                        vals.add(i);
+                    }
                 }
             }
         }
@@ -285,7 +234,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
     }
 
     public void activate() {
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             vars[i].activate(this);
         }
     }
@@ -299,6 +248,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
         @Override
         public void execute(int i) throws ContradictionException {
+            System.out.println("traitement du retrait de " + i);
             p.unionset.remove(i);
         }
     }
@@ -345,8 +295,19 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
     @Override
     public void afterUpdate(IntVar var, EventType evt, ICause cause) {
+        long m = this.m.get();
+        long n = this.n.get();
+        long v = this.v.get();
+        long al = this.al.get();
+        long be = this.be.get();
+        if (v < 0 || al < 0 || be < 0 || v > m - 1 || al > m - 1 || be > m - 1) {
+            this.proba.set(0); // propage
+        } else {
+            assert m == unionset.getSize() : m + " - " + unionset;
+            this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
+        }
         IDeltaMonitor dm = deltamon.get(var.getId());
-        System.out.printf("CND : %s on %s\n", var, evt);
+        //System.out.printf("CND : %s on %s\n", var, evt);
         //-------------------------------------------------------
         try {
             dm.forEach(minMax_proc, EventType.REMOVE);
@@ -356,47 +317,26 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         int low = minMax_proc.getMin();
         int upp = minMax_proc.getMax();
         if (EventType.isInstantiate(evt.mask)) {
+            this.n.add(-1);
             lastInstLow.set(low);
             lastInstUpp.set(upp);
             lastInstVal.set(var.getValue());
+            System.out.println("traitement de l'instanciation de " + var);
+            unionset.removeInst(var.getValue());
         }
-
-        // si une variable au moins a ŽtŽ inst OU on vient de bck OU acas divers
-        long m = this.m.get();
-        long n = this.n.get();
-        long v = this.v.get();
-        long al = this.al.get();
-        long be = this.be.get();
-        if (!this.asInst.get() || v > m - 1 || al > m - 1 || be > m - 1) {
-            this.proba.set(0); // propage
-        } else {
-            this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
-        }
-
-        //-------------------------------------------------------
-
-        // WARNING: Initially, the paper proposes to only react to variable assignment... But in practice, a value in
-        // the union can be removed only by a propagation which is not induced by an assignment.
         try {
             dm.forEach(rem_proc, EventType.REMOVE);
         } catch (ContradictionException e) {
             throw new SolverException("CondAllDiffBCProba#update encounters an exception");
         }
-
-        if (EventType.isInstantiate(evt.mask)) {
-            this.asInst.set(true);
-            this.n.add(-1);
-            //unionset.forceRemove(lastInstVal.get());
-        }
         this.v.set(unionset.getPosition(lastInstVal.get()));
         this.al.set(unionset.getPosition(lastInstLow.get()));
         this.be.set(unionset.getPosition(lastInstUpp.get()));
-        this.m = unionset.getSize();
+        this.m.set(unionset.getSize());
         this.minMax_proc.setMax();
         this.minMax_proc.setMin();
-        assert checkUnion();
-
         dm.clear();
+        assert checkUnion();
     }
 
     @Override
