@@ -14,7 +14,7 @@ import java.util.Deque;
  * User: chameau
  * Date: 27/02/12
  */
-public class PropAllDiffRC extends PropProbaAllDiffBC {
+public class PropAllDiffRC extends PropAllDiffBC {
 
 
     public PropAllDiffRC(IntVar[] vars, Solver solver, IntConstraint constraint) {
@@ -22,6 +22,7 @@ public class PropAllDiffRC extends PropProbaAllDiffBC {
     }
 
     protected void initialize() throws ContradictionException {
+        //super.initialize();
         Deque<IntVar> modified = new ArrayDeque<IntVar>();
         for (IntVar init : vars) {
             if (init.instantiated()) {
@@ -43,6 +44,7 @@ public class PropAllDiffRC extends PropProbaAllDiffBC {
     }
 
     protected void awakeOnInst(int i) throws ContradictionException {   // Propagation classique
+        //super.awakeOnInst(i);
         infBoundModified = true;
         supBoundModified = true;
         Deque<IntVar> modified = new ArrayDeque<IntVar>();

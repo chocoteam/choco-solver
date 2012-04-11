@@ -40,6 +40,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 25 nov. 2010
  */
+@Deprecated
 public class PropProbaAllDiffBC extends PropAllDiffBC {
 
     final CondAllDiffBC cond;

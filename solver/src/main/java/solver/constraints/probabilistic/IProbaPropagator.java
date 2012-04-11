@@ -33,6 +33,7 @@ package solver.constraints.probabilistic;
  * @author Charles Prud'homme
  * @since 15 nov. 2010
  */
+@Deprecated
 public interface IProbaPropagator {
 
     boolean toPropagate();

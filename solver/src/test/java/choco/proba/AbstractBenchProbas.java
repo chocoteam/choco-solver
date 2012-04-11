@@ -4,7 +4,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.CounterProba;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
@@ -20,6 +19,10 @@ import java.io.IOException;
 public abstract class AbstractBenchProbas {
     public static int TIMELIMIT = 20000;
 
+    public enum Distribution {
+        NONE, DIRAC, UNIFORM
+    }
+
     BufferedWriter out;
 
     int frequency; // only for the case of a CondAllDiffBCFreq case
@@ -33,7 +36,7 @@ public abstract class AbstractBenchProbas {
     IntVar[] vars; // decision variables for the problem
     Constraint[] cstrs; // all the cstrs involved in the problem (including alldiff)
     AllDifferent.Type type;
-    CondAllDiffBCProba.Distribution dist; // kind of distribution considered for the probability
+    Distribution dist; // kind of distribution considered for the probability
     CounterProba count;
 
     // output data
@@ -56,7 +59,7 @@ public abstract class AbstractBenchProbas {
     private long avgTime;
 
     AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
-                        boolean active, CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) {
+                        boolean active, Distribution dist, BufferedWriter out, int seed) {
         this.solver = solver;
         this.type = type;
         //this.mode = mode;
@@ -84,7 +87,7 @@ public abstract class AbstractBenchProbas {
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
         this.nbBcks = mes.getBackTrackCount();
-        if (this.dist.equals(CondAllDiffBCProba.Distribution.NONE)) {
+        if (this.dist.equals(Distribution.NONE)) {
             this.nbPropag = mes.getPropagationsCount()+mes.getEventsCount();
         } else {
             this.nbPropag = count.getNbProp();
@@ -154,7 +157,7 @@ public abstract class AbstractBenchProbas {
     }
 
     void execute() throws IOException {
-        if (this.dist.equals(CondAllDiffBCProba.Distribution.NONE)) {
+        if (this.dist.equals(Distribution.NONE)) {
             //System.out.println("cas non proba");
             this.buildProblem(size, false);
         } else {

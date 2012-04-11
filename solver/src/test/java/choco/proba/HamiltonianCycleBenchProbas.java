@@ -6,7 +6,6 @@ import solver.constraints.nary.InverseChanneling;
 import solver.constraints.nary.NoSubTours;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -30,7 +29,7 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
     GenerateStrat strat;
 
     public HamiltonianCycleBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                       CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed, int neighbor,
+                                       AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed, int neighbor,
                                        GenerateStrat strat) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
         this.neighbor = neighbor;
@@ -71,8 +70,8 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
         }
         // contraintes
         if (proba) {
-            this.cstrs[0] = new AllDifferentProba(vars, solver, type, this.dist, this.count);
-            this.cstrs[2] = new AllDifferentProba(preds, solver, type, this.dist, this.count);
+            this.cstrs[0] = new AllDifferentProba(vars, solver, type, this.count);
+            this.cstrs[2] = new AllDifferentProba(preds, solver, type, this.count);
         } else {
             this.cstrs[0] = new AllDifferent(vars, solver, type);
             this.cstrs[2] = new AllDifferent(preds, solver, type);

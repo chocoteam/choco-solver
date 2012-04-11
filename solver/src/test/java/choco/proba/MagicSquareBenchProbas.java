@@ -6,7 +6,6 @@ import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -22,7 +21,7 @@ import java.util.Arrays;
 public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
     public MagicSquareBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                  CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                  AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
@@ -60,7 +59,7 @@ public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
         int c = 0;
         if (proba) {
-            this.cstrs[c++] = new AllDifferentProba(vars, solver, type, this.dist, this.count);
+            this.cstrs[c++] = new AllDifferentProba(vars, solver, type, this.count);
         } else {
             this.cstrs[c++] = new AllDifferent(vars, solver, type);
         }

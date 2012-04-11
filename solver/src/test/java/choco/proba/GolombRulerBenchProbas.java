@@ -8,8 +8,8 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.constraints.unary.Relation;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -28,18 +28,21 @@ import java.util.Collection;
 public class GolombRulerBenchProbas extends AbstractBenchProbas {
 
     public GolombRulerBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                 CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                 AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
     @Override
     void configSearchStrategy() {
+        //System.out.println("---------------------------");
+        //SearchMonitorFactory.log(solver,true,true);
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
     }
 
     @Override
     void solveProcess() {
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) solver.getVars()[size - 1]);
+        //System.out.println(dist + ": "+ solver.getVars()[size - 1]);
     }
 
     @Override
@@ -67,7 +70,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
             }
         }
         if (proba) {
-            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.dist, this.count));
+            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.count));
         } else {
             allCstrs.add(new AllDifferent(diffs, solver, type));
         }

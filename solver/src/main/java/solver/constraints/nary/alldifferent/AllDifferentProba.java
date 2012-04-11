@@ -49,13 +49,13 @@ import solver.variables.Variable;
  */
 public class AllDifferentProba extends IntConstraint<IntVar> {
 
-    public AllDifferentProba(IntVar[] vars, Solver solver, CondAllDiffBCProba.Distribution dist, CounterProba count) {
-        this(vars, solver, AllDifferent.Type.AC, dist, count);
+    public AllDifferentProba(IntVar[] vars, Solver solver, CounterProba count) {
+        this(vars, solver, AllDifferent.Type.AC, count);
     }
 
-    public AllDifferentProba(IntVar[] vars, Solver solver, AllDifferent.Type type, CondAllDiffBCProba.Distribution dist, CounterProba count) {
+    public AllDifferentProba(IntVar[] vars, Solver solver, AllDifferent.Type type, CounterProba count) {
         super(vars, solver);
-        CondAllDiffBCProba condition = new CondAllDiffBCProba(solver.getEnvironment(), vars, dist);
+        CondAllDiffBCProba condition = new CondAllDiffBCProba(solver.getEnvironment(), vars);
         switch (type) {
             case NEQS: {
                 int s = vars.length;

@@ -34,6 +34,7 @@ import solver.recorders.conditions.CondAllDiffBC;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
+@Deprecated
 public class PropProbaAllDiffGAC extends PropAllDiffAC_new {
 
     final CondAllDiffBC cond;

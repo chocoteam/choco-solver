@@ -5,7 +5,6 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -29,7 +28,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
     int n;
 
     public LangfordBenchProbas(int k, int n, AllDifferent.Type type, int frequency, boolean active,
-                                 CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), k*n, type, frequency, active, dist, out, seed);
         this.k = k;
         this.n = n;
@@ -54,7 +53,7 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
         }
         allCstrs.add(ConstraintFactory.lt(position[0], position[n*k-1], solver));
         if (proba) {
-            allCstrs.add(new AllDifferentProba(position, solver, type, this.dist, this.count));
+            allCstrs.add(new AllDifferentProba(position, solver, type, this.count));
         } else {
             allCstrs.add(new AllDifferent(position, solver, type));
         }

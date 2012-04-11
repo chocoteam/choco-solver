@@ -4,7 +4,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.alldifferent.AllDifferentProba;
-import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -25,7 +24,7 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
     Instance inst;
 
     public OneAllDiffBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                 CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
+                                 AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
         super(new Solver(), n, type, frequency, active, dist, out, seed);
     }
 
@@ -48,7 +47,7 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
 
         this.allVars = vars;
         if (proba) {
-            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.dist, this.count)};
+            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.count)};
         } else {
             this.cstrs = new Constraint[]{new AllDifferent(vars, solver, type)};
         }
