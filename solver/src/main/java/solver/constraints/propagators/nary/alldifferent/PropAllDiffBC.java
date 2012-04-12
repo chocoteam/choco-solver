@@ -93,16 +93,16 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         int idx = 0;
         instantiatedValues = new int[n];
         for (int i = 0; i < vars.length; i++) {
-            intervals[i] = new Interval();
-            intervals[i].var = vars[i];
-            intervals[i].idx = i;
-            minsorted[i] = intervals[i];
-            maxsorted[i] = intervals[i];
+            Interval interval = new Interval();
+            interval.var = vars[i];
+            interval.idx = i;
+            intervals[i] = interval;
+            minsorted[i] = interval;
+            maxsorted[i] = interval;
             if (vars[i].instantiated()) {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
         }
-        intervals = minsorted.clone();
         ivIdx = environment.makeInt(idx);
     }
 
@@ -297,18 +297,28 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     protected void initSort() {
         IntVar vt;
         for (int i = 0; i < vars.length; i++) {
-            vt = intervals[i].var;
-            intervals[i].lb = vt.getLB();
-            intervals[i].ub = vt.getUB();
+            vt = minsorted[i].var;
+            minsorted[i].lb = vt.getLB();
+            minsorted[i].ub = vt.getUB();
         }
     }
 
-    protected void sortIt() {
-//        mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
-//        mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
-        Arrays.sort(minsorted, SORT.MIN);
-        Arrays.sort(maxsorted, SORT.MAX);
+    /**
+     * appears to be more efficient than Arrays.sort() because
+     * it does not clone the array before sorting it,
+     * but "simply" copy it into a temporary one -- intervals
+     */
+    private void _sort() {
 
+        int n = vars.length;
+        System.arraycopy(minsorted, 0, intervals, 0, n);
+        mergeSort(intervals, minsorted, 0, n, SORT.MIN);
+        System.arraycopy(maxsorted, 0, intervals, 0, n);
+        mergeSort(intervals, maxsorted, 0, n, SORT.MAX);
+    }
+
+    protected void sortIt() {
+        _sort();
 
         int min = minsorted[0].lb;
         int max = maxsorted[0].ub + 1;
@@ -476,8 +486,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         }
 
         // Recursively sort halves of dest into src
-        int destLow  = low;
-        int destHigh = high;
         int mid = (low + high) >>> 1;
         mergeSort(dest, src, low, mid, c);
         mergeSort(dest, src, mid, high, c);
@@ -485,12 +493,12 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         // If list is already sorted, just copy from src to dest.  This is an
         // optimization that results in faster sorts for nearly ordered lists.
         if (c.compare(src[mid - 1], src[mid]) <= 0) {
-            System.arraycopy(src, low, dest, destLow, length);
+            System.arraycopy(src, low, dest, low, length);
             return;
         }
 
         // Merge sorted halves (now in src) into dest
-        for (int i = destLow, p = low, q = mid; i < destHigh; i++) {
+        for (int i = low, p = low, q = mid; i < high; i++) {
             if (q >= high || p < mid && c.compare(src[p], src[q]) <= 0)
                 dest[i] = src[p++];
             else
