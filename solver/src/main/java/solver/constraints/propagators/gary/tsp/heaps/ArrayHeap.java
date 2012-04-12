@@ -45,17 +45,22 @@ public class ArrayHeap implements Heap{
 	BitSet in;
 	double[] value;
 	int[] mate;
+	int size;
 
 	public ArrayHeap(int n){
 		in = new BitSet(n);
 		value = new double[n];
 		mate = new int[n];
+		size = 0;
 	}
 
 	@Override
 	public void add(int element, double element_key, int i) {
-		if(element_key<value[element] || !in.get(element)){
-			in.set(element);
+		if(!in.get(element)){
+			in.set(element); size++;
+			value[element] = element_key;
+			mate[element] = i;
+		}else if(element_key<value[element]){
 			value[element] = element_key;
 			mate[element] = i;
 		}
@@ -78,17 +83,24 @@ public class ArrayHeap implements Heap{
 			}
 		}
 		in.clear(min);
+		size--;
 		return min;
 	}
 
 	@Override
 	public void clear() {
 		in.clear();
+		size = 0;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return in.isEmpty();
+		return size==0;
+	}
+
+	@Override
+	public int size() {
+		return size;
 	}
 
 	@Override
@@ -96,7 +108,7 @@ public class ArrayHeap implements Heap{
 		return mate[to];
 	}
 
-	@Override
+//	@Override
 	public void remove(int element) {
 		throw new UnsupportedOperationException();
 	}

@@ -42,7 +42,6 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.tsp.undirected.*;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropFastSymmetricHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
@@ -61,14 +60,11 @@ import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.BitSet;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
@@ -90,7 +86,6 @@ public class TSP_Cycle_Path {
 	private static int[][] dist;
 	private static boolean allDiffAC    = false;
 	private static boolean optProofOnly = true;
-	private static boolean fast;
 	private static PropSymmetricHeldKarp propHK;
 	private static int search;
 	private static boolean restart;
@@ -440,11 +435,7 @@ public class TSP_Cycle_Path {
 		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,solver,gc));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,solver,gc));
 		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
-		if(fast){
-			propHK = PropFastSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}else{
-			propHK = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}
+		propHK = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 //		gc.addAdHocProp(propHK);
 		solver.post(gc);
 		configAndSolve(matrix,instanceName,"cycle");
@@ -554,11 +545,6 @@ public class TSP_Cycle_Path {
 		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,nbNeigh,solver,gc));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,nbNeigh,solver,gc));
 		gc.addAdHocProp(new PropChainEvalObj(undi,totalCost,matrix,0,n-1,gc,solver));
-		if(fast){
-//			propHK = PropFastSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}else{
-//			propHK = PropSymmetricHeldKarp.twoTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}
 
 //		gc.addAdHocProp(propHK);
 		solver.post(gc);

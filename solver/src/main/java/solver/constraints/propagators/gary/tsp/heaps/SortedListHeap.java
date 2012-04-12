@@ -130,7 +130,7 @@ public class SortedListHeap implements Heap{
 		return mate[i];
 	}
 
-	@Override
+//	@Override
 	public void remove(int element) {
 		if(path.getActiveNodes().isActive(element)){
 			if(root==element){
@@ -149,5 +149,9 @@ public class SortedListHeap implements Heap{
 
 	public boolean isEmpty() {
 		return root==-1;
+	}
+
+	public int size(){
+		return path.getActiveNodes().neighborhoodSize();
 	}
 }

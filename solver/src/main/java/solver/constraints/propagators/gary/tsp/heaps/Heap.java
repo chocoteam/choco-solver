@@ -48,5 +48,6 @@ public interface Heap {
 
 	int getMate(int to);
 
-	void remove(int element);
+//	void remove(int element);
+	int size();
 }

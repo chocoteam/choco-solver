@@ -31,7 +31,15 @@ import solver.constraints.propagators.gary.tsp.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 
+import java.util.Random;
+
 public class PrimOneTreeFinder extends PrimMSTFinder {
+
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	protected int oneNode;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -51,8 +59,9 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 		if(FILTER){
 			maxTArc = minVal;
 		}
-		inTree.set(0);
-		INeighbors nei = g.getSuccessorsOf(0);
+		chooseOneNode();
+		inTree.set(oneNode);
+		INeighbors nei = g.getSuccessorsOf(oneNode);
 		int min1 = -1;
 		int min2 = -1;
 		boolean b1=false,b2=false;
@@ -61,11 +70,11 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 				if(min1==-1){
 					min1 = j;
 				}
-				if(costs[0][j]<costs[0][min1]){
+				if(costs[oneNode][j]<costs[oneNode][min1]){
 					min2 = min1;
 					min1 = j;
 				}
-				if(propHK.isMandatory(0,j)){
+				if(propHK.isMandatory(oneNode,j)){
 					if(min1!=j){
 						min2 = min1;
 					}
@@ -74,29 +83,30 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 				}
 			}
 			if(min1!=j && !b2){
-				if(min2==-1 || costs[0][j]<costs[0][min2]){
+				if(min2==-1 || costs[oneNode][j]<costs[oneNode][min2]){
 					min2 = j;
 				}
-				if(propHK.isMandatory(0,j)){
+				if(propHK.isMandatory(oneNode,j)){
 					min2 = j;
 					b2 = true;
 				}
 			}
 		}
-		if(FILTER){
-			if(!propHK.isMandatory(0,min1)){
-				maxTArc = Math.max(maxTArc, costs[0][min1]);
-			}
-			if(!propHK.isMandatory(0,min2)){
-				maxTArc = Math.max(maxTArc, costs[0][min2]);
-			}
-		}
 		if(min1 == -1 || min2 == -1){
 			propHK.contradiction();
 		}
+		if(FILTER){
+			if(!propHK.isMandatory(oneNode,min1)){
+				maxTArc = Math.max(maxTArc, costs[oneNode][min1]);
+			}
+			if(!propHK.isMandatory(oneNode,min2)){
+				maxTArc = Math.max(maxTArc, costs[oneNode][min2]);
+			}
+		}
+//		boolean findCuts = nei.neighborhoodSize()==2; // TAG: cut, not very helpful
 		int first=-1,sizeFirst=n+1;
-		for(int i=1;i<n;i++){
-			if(g.getSuccessorsOf(i).neighborhoodSize()<sizeFirst){
+		for(int i=0;i<n;i++){
+			if(i!=oneNode && g.getSuccessorsOf(i).neighborhoodSize()<sizeFirst){
 				first = i;
 				sizeFirst = g.getSuccessorsOf(i).neighborhoodSize();
 			}
@@ -109,15 +119,53 @@ public class PrimOneTreeFinder extends PrimMSTFinder {
 		while (tSize<n-2 && !heap.isEmpty()){
 			to = heap.pop();
 			from = heap.getMate(to);
+//			if(findCuts && heap.size()==1 && (inTree.get(min1) == inTree.get(min2))){ // TAG: cut, not very helpful
+//				findCuts(from,to);
+//			}
 			addArc(from,to);
 		}
 		if(tSize!=n-2){
 			propHK.contradiction();
 		}
-		addArc(0,min1);
-		addArc(0,min2);
-		if(Tree.getNeighborsOf(0).neighborhoodSize()!=2){
+		addArc(oneNode,min1);
+		addArc(oneNode,min2);
+		if(Tree.getNeighborsOf(oneNode).neighborhoodSize()!=2){
 			throw new UnsupportedOperationException();
 		}
+	}
+
+//	// TAG: cut, not very helpful
+//	private void findCuts(int from, int to) throws ContradictionException {
+//		INeighbors nei = g.getSuccessorsOf(to);
+//		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//			if(j!=from && inTree.get(j)){
+//				return;
+//			}
+//		}
+//		propHK.enforce(from,to);
+//		to = heap.pop();
+//		from = heap.getMate(to);
+//		nei = g.getSuccessorsOf(to);
+//		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//			if(j!=from && inTree.get(j)){
+//				heap.add(to,costs[from][to],from);
+//				return;
+//			}
+//		}
+//		propHK.enforce(from,to);
+//		heap.add(to,minVal,from);
+//	}
+
+	private void chooseOneNode(){
+		oneNode = 0;
+//		int size = 0;
+//		int s;
+//		for(int i=0;i<n;i++){
+//			s = g.getSuccessorsOf(i).neighborhoodSize();
+//			if(s>size){
+//				size = g.getSuccessorsOf(i).neighborhoodSize();
+//				oneNode = i;
+//			}
+//		}
 	}
 }

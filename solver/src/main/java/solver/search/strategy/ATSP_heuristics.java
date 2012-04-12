@@ -89,13 +89,49 @@ public enum ATSP_heuristics {
 			for (int i = 0; i < n; i++) {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
+					if(relax.contains(i, j) && (!g.getKernelGraph().arcExists(i,j))){
+						repCost = relax.getRepCost(i,j);
+						if(repCost<0){
+							System.out.println(repCost);
+							throw new UnsupportedOperationException();
+						}
+						if (repCost > maxRepCost) {
+							maxRepCost = repCost;
+							to = j;
+							from = i;
+						}
+					}
+				}
+			}
+			if(from<0 || to==0){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.set(g,(from+1)*n+to, Assignment.graph_remover);
+			return fd;
+		}
+	},
+
+	rem_MaxMargCost  {
+		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			INeighbors suc;
+			double maxRepCost = -1;
+			double repCost;
+			int to = -1;
+			int from=-1;
+			for (int i = 0; i < n; i++) {
+				suc = g.getEnvelopGraph().getSuccessorsOf(i);
+				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if((!relax.contains(i, j)) && (!g.getKernelGraph().arcExists(i,j))){
 						repCost = relax.getRepCost(i,j);
 						if(repCost<0){
 							System.out.println(repCost);
 							throw new UnsupportedOperationException();
 						}
-						if (repCost >= maxRepCost) {
+						if (repCost > maxRepCost) {
 							maxRepCost = repCost;
 							to = j;
 							from = i;

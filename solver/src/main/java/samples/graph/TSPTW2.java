@@ -44,7 +44,6 @@ import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropFastHeldKarp;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTour;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTimeInTourGraphReactor;
@@ -266,13 +265,13 @@ public class TSPTW2 {
 		// COST BASED FILTERING
 		if(config.get(rg) && bst){// BST-based HK
 			System.out.println("BST");
-			PropHeldKarp propHK_bst = PropFastHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 			hk = propHK_bst;
 			gc.addAdHocProp(propHK_bst);
 		}
 		else{// MST-based HK
 			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropFastHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
 			hk = propHK_mst;
 			gc.addAdHocProp(propHK_mst);
 		}

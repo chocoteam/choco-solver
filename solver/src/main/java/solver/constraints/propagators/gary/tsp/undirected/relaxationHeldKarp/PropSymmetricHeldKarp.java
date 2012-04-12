@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IStateDouble;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -60,16 +59,14 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	protected int n;
 	protected int[][] originalCosts;
 	protected double[][] costs;
-	private IStateDouble[] penalities;
+	double[] penalities;
+	double totalPenalities;
 	protected UndirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
 	protected  double step;
-	private  IStateDouble totalPenalities;
 	protected AbstractTreeFinder HKfilter, HK;
 	public static long nbRem;
 	protected static boolean waitFirstSol;
-	protected int treeMode; // 0=MST; 1=OneTree; 2=TwoTree
-	protected static final int MST=0,ONE_TREE=1,TWO_TREE=2;
 	protected int nbSprints = 30;
 
 	//***********************************************************************************
@@ -84,38 +81,19 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 		obj = cost;
 		originalCosts = costMatrix;
 		costs = new double[n][n];
-		totalPenalities= environment.makeFloat(0);
+		totalPenalities = 0;
+		penalities = new double[n];
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
 	}
 
-	/** MST based HK */
-//	public static PropSymmetricHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-//		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-////		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);
-//		phk.HK = new PrimMSTFinder(phk.n,phk);
-//		phk.HKfilter = phk.HK;
-//		phk.treeMode = MST;
-//		return phk;
-//	}
 	/** ONE TREE based HK */
 	public static PropSymmetricHeldKarp oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-//		phk.HKfilter = new KruskalOneTreeFinder(phk.n,phk);
+		phk.HKfilter = new KruskalOneTree_GAC(phk.n,phk);
 		phk.HK = new PrimOneTreeFinder(phk.n,phk);
-		phk.HKfilter = phk.HK;
-		phk.treeMode = ONE_TREE;
 		return phk;
 	}
-	/** TWO TREE based HK */
-//	public static PropSymmetricHeldKarp twoTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-//		PropSymmetricHeldKarp phk = new PropSymmetricHeldKarp(graph,cost,costMatrix,constraint,solver);
-////		phk.HKfilter = new KruskalTwoTreeFinder(phk.n,phk);
-//		phk.HK = new PrimTwoTreeFinder(phk.n,phk);
-//		phk.HKfilter = phk.HK;
-//		phk.treeMode = TWO_TREE;
-//		return phk;
-//	}
 
 	//***********************************************************************************
 	// HK Algorithm(s) 
@@ -138,62 +116,55 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				if(i<j){
-					costs[i][j] = originalCosts[i][j] + penalities[i].get() + penalities[j].get();
+					costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
 					costs[j][i] = costs[i][j];
 				}
 			}
 		}
 	}
 
-	protected double getTotalPen(){
-		return totalPenalities.get();
-	}
-
 	protected void HK_Pascals() throws ContradictionException {
 		double hkb;
 		double alpha = 2;
+//		double beta = 0.95;
 		double beta = 0.5;
+//		if(nbSprints==31){
+//			beta = 0.95;
+//		}
 		double bestHKB;
 		boolean improved;
 		int count = 2;
 		bestHKB = 0;
 		HKfilter.computeMST(costs,g.getEnvelopGraph());
-		hkb = HKfilter.getBound()-getTotalPen();
+		hkb = HKfilter.getBound()-totalPenalities;
 		bestHKB = hkb;
 		mst = HKfilter.getMST();
 		if(hkb-Math.floor(hkb)<0.001){
 			hkb = Math.floor(hkb);
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
-		HKfilter.performPruning((double) (obj.getUB()) + getTotalPen() + 0.001);
+		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 		for(int iter=5;iter>0;iter--){
-			improved = true;
-//			while(improved){
-				improved = false;
-				for(int i=nbSprints;i>0;i--){
-//				for(int i=(n-treeMode)/2;i>0;i--){
-					HK.computeMST(costs,g.getEnvelopGraph());
-					hkb = HK.getBound()-getTotalPen();
-					if(hkb>bestHKB+1){
-						bestHKB = hkb;
-						improved = true;
-					}
-					mst = HK.getMST();
-					if(hkb-Math.floor(hkb)<0.001){
-						hkb = Math.floor(hkb);
-					}
-					obj.updateLowerBound((int)Math.ceil(hkb), this);
-					//	DO NOT FILTER HERE TO FASTEN CONVERGENCE (not always true)
-//					if(i%10==0){
-//						HK.performPruning((double) (obj.getUB()) + getTotalPen() + 0.001);
-//					}
-					updateStep(hkb,alpha);
-					HKPenalities();
-					updateCostMatrix();
+			improved = false;
+			for(int i=nbSprints;i>0;i--){
+				HK.computeMST(costs,g.getEnvelopGraph());
+				hkb = HK.getBound()-totalPenalities;
+				if(hkb>bestHKB+1){
+					bestHKB = hkb;
+					improved = true;
 				}
-//			}
+				mst = HK.getMST();
+				if(hkb-Math.floor(hkb)<0.001){
+					hkb = Math.floor(hkb);
+				}
+				obj.updateLowerBound((int)Math.ceil(hkb), this);
+				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE (not always true)
+				updateStep(hkb,alpha);
+				HKPenalities();
+				updateCostMatrix();
+			}
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
-			hkb = HKfilter.getBound()-getTotalPen();
+			hkb = HKfilter.getBound()-totalPenalities;
 			if(hkb>bestHKB+1){
 				bestHKB = hkb;
 				improved = true;
@@ -203,7 +174,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 				hkb = Math.floor(hkb);
 			}
 			obj.updateLowerBound((int)Math.ceil(hkb), this);
-			HKfilter.performPruning((double) (obj.getUB()) + getTotalPen() + 0.001);
+			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 			updateStep(hkb,alpha);
 			HKPenalities();
 			updateCostMatrix();
@@ -244,18 +215,9 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 			target = hkb+0.1;
 		}
 		int deg;
-		for(int i=1;i<n-1;i++){
+		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
 			nb2viol += (2-deg)*(2-deg);
-		}
-		int degFirst = mst.getNeighborsOf(0).neighborhoodSize();
-		int degLast = mst.getNeighborsOf(n-1).neighborhoodSize();
-		switch(treeMode){
-			case MST:
-				nb2viol += (1-degFirst)*(1-degFirst)+(1-degLast)*(1-degLast);break;
-			case ONE_TREE:
-				nb2viol += (2-degLast)*(2-degLast);break;
-			case TWO_TREE: break;
 		}
 		if(nb2viol == 0){
 			step = 0;
@@ -263,44 +225,34 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 			step = alpha*(target-hkb)/nb2viol;
 		}
 	}
+
 	protected void HKPenalities() {
 		if(step==0){
 			return;
 		}
 		double sumPenalities = 0;
 		int deg;
-		for(int i=1;i<n-1;i++){
+		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			penalities[i].add((deg-2)*step);
-			sumPenalities += penalities[i].get();
+			penalities[i] += (deg-2)*step;
+			if(penalities[i]>Double.MAX_VALUE/(n-1) || penalities[i]<-Double.MAX_VALUE/(n-1)){
+				throw new UnsupportedOperationException();
+			}
+			sumPenalities += penalities[i];
 		}
-		int degFirst = mst.getNeighborsOf(0).neighborhoodSize();
-		int degLast = mst.getNeighborsOf(n-1).neighborhoodSize();
-		switch(treeMode){
-			case MST:
-				penalities[0].add((degFirst-1)*step);
-				penalities[n-1].add((degLast-1)*step);
-				sumPenalities += (penalities[0].get()+penalities[n-1].get())/2;break;
-			case ONE_TREE:
-				penalities[n-1].add((degLast-2)*step);
-				sumPenalities += penalities[n-1].get();
-				if(degFirst!=2){
-					throw new UnsupportedOperationException();
-				}break;
-			case TWO_TREE:
-				if(degFirst!=1||degFirst!=1){
-					throw new UnsupportedOperationException();
-				}break;
-		}
-		this.totalPenalities.set(2*sumPenalities);
+//		if(mst.getNeighborsOf(0).neighborhoodSize()!=2){
+//			throw new UnsupportedOperationException();
+//		};
+		this.totalPenalities = 2*sumPenalities;
 	}
+
 	protected void updateCostMatrix() {
 		INeighbors nei;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				if(i<j){
-					costs[i][j] = originalCosts[i][j] + penalities[i].get() + penalities[j].get();
+					costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
 					costs[j][i] = costs[i][j];
 				}
 			}
@@ -328,56 +280,32 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if(penalities==null){
-			penalities = new IStateDouble[n];
-			for(int i=0;i<n;i++){
-				penalities[i] = environment.makeFloat(0);
-			}
-		}
-		if(treeMode==ONE_TREE){
-			System.out.println("avant");
-			int nb = 0;
-			for(int i=1;i<n;i++){
-				nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-			}
-			nb-=g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize();
-			System.out.println((nb/2)+" edges");
-		}else if(treeMode==TWO_TREE){
-			System.out.println("avant");
-			int nb = 0;
-			for(int i=1;i<n-1;i++){
-				nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-			}
-			nb-=g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize();
-			nb-=g.getEnvelopGraph().getSuccessorsOf(n-1).neighborhoodSize();
-			System.out.println((nb/2)+" edges");
-			System.out.println("size(0)=size(n) : "+
-			(g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize()==g.getEnvelopGraph().getSuccessorsOf(n-1).neighborhoodSize()));
-		}
-			System.out.println(obj);
+//		nbSprints = n/2;
+//		nbSprints = 31;
+		_propagate(evtmask);
+		nbSprints = 30;
+//		for(int i=0;i<n;i++){
+//			penalities[i] = 0;
+//		}
+//		totalPenalities = 0;
+	}
 
-		HK_algorithm();
-		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 200) / (n * (n-1))) + "%)");
-		System.out.println("current lower bound : "+obj.getLB());
-		System.out.println(obj);
-		if(treeMode==ONE_TREE){
-			int nb = 0;
-			for(int i=1;i<n;i++){
-				nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-			}
-			nb-=g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize();
-			System.out.println((nb/2)+" edges");
-		}else if(treeMode==TWO_TREE){
-			int nb = 0;
-			for(int i=1;i<n-1;i++){
-				nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-			}
-			nb-=g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize();
-			nb-=g.getEnvelopGraph().getSuccessorsOf(n-1).neighborhoodSize();
-			System.out.println((nb/2)+" edges");
-			System.out.println("size(0)=size(n) : "+
-			(g.getEnvelopGraph().getSuccessorsOf(0).neighborhoodSize()==g.getEnvelopGraph().getSuccessorsOf(n-1).neighborhoodSize()));
+	public void _propagate(int evtmask) throws ContradictionException {
+		int nb = 0;
+		for(int i=0;i<n;i++){
+			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
+		nb /= 2;
+		System.out.println(nb+" edges");
+		System.out.println(obj);
+		HK_algorithm();
+		int nb2 = 0;
+		for(int i=0;i<n;i++){
+			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+		}nb2 /= 2;
+		System.out.println("current lower bound : "+obj.getLB());
+		System.out.println("initial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)");
+		System.out.println(nb2+" edges");
 	}
 
 	@Override
@@ -386,7 +314,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	}
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.DECUPP.mask+EventType.INCLOW.mask+EventType.INSTANTIATE.mask;
 	}
 	@Override
 	public ESat isEntailed() {
@@ -394,7 +322,7 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	}
 
 	public double getMinArcVal() {
-		return -(((double)obj.getUB())+getTotalPen());
+		return -(((double)obj.getUB())+totalPenalities);
 	}
 
 	public TIntArrayList getMandatoryArcsList() {

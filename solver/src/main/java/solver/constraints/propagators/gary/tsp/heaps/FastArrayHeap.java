@@ -34,39 +34,39 @@
 
 package solver.constraints.propagators.gary.tsp.heaps;
 
-import java.util.BitSet;
-
 /**
  * Same worst case complexity but much better in practice
  * Especially when several nodes have same -infinity value 
  */
 public class FastArrayHeap extends ArrayHeap{
 
-	BitSet best;
+	int[] best;
+	int bestSize;
 	double bestVal;
 
 	public FastArrayHeap(int n){
 		super(n);
-		best = new BitSet(n);
+		best = new int[n];
 	}
 
 	@Override
 	public void add(int element, double element_key, int i) {
 		if(isEmpty() || element_key<bestVal){
 			bestVal = element_key;
-			best.clear();
-			best.set(element);
-		}else if(element_key==bestVal){
-			best.set(element);
+			bestSize = 0;
+			best[bestSize++]=element;
+		}else if(element_key==bestVal && element_key<value[element]){
+			best[bestSize++]=element;
 		}
 		super.add(element,element_key,i);
 	}
 	@Override
 	public int pop() {
-		if(!best.isEmpty()){
-			int min = best.nextSetBit(0);
-			best.clear(min);
+		if(bestSize>0){
+			int min = best[bestSize-1];
+			bestSize--;
 			in.clear(min);
+			size--;
 			return min;
 		}
 		return super.pop();

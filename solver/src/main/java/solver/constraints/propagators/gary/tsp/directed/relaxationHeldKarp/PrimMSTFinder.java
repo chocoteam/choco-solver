@@ -93,7 +93,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 		}
 	}
 
-	private void addArc(int from, int to) {
+	private void addArc(int from, int to) throws ContradictionException {
 		if(from<n){
 			if(Tree.arcExists(to,from)){
 				return;
@@ -110,7 +110,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 			if(Tree.arcExists(from,to)){
 				return;
 			}
-			Tree.addArc(to,from);
+			Tree.addArc(to, from);
 			treeCost += costs[to][from];
 			if(FILTER){
 				if(!propHK.isMandatory(to,from)){
@@ -161,8 +161,11 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 				}
 			}
 		}else{
-//			throw new UnsupportedOperationException("bound computation only, no filtering!");
+			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
 	}
 
+	public double getRepCost(int from, int to){
+		return costs[from][to];// approximation of course
+	}
 }

@@ -25,17 +25,17 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.trash;
 
 import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.KruskalMSTFinder;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
 import java.util.Arrays;
 import java.util.Comparator;
 
-public class KruskalTwoTreeFinder extends KruskalMSTFinder {
+public class KruskalOneTreeFinder extends KruskalMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -47,7 +47,7 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalTwoTreeFinder(int nbNodes, HeldKarp propagator) {
+	public KruskalOneTreeFinder(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 	}
 
@@ -57,7 +57,7 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 
 	public void computeMST(double[][] costs, UndirectedGraph graph) throws ContradictionException {
 		super.computeMST(costs,graph);
-		addExtremities();
+		add0Node();
 	}
 
 	protected void sortArcs(){
@@ -75,8 +75,7 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 		};
 		int size = 0;
 		Tree.getNeighborsOf(0).clear();
-		Tree.getNeighborsOf(n-1).clear();
-		for(int i=1;i<n-1;i++){
+		for(int i=1;i<n;i++){
 			p[i] = i;
 			rank[i] = 0;
 			ccTp[i] = i;
@@ -86,7 +85,6 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 			size += g.getSuccessorsOf(i).neighborhoodSize();
 		}
 		size -= g.getSuccessorsOf(0).neighborhoodSize();
-		size -= g.getSuccessorsOf(n-1).neighborhoodSize();
 		if(size%2!=0){
 			throw new UnsupportedOperationException();
 		}
@@ -94,10 +92,10 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 		INeighbors nei;
 		Integer[] integers = new Integer[size];
 		int idx  = 0;
-		for(int i=1;i<n-1;i++){
+		for(int i=1;i<n;i++){
 			nei =g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				if(i<j && j!=n-1){
+				if(i<j){
 					integers[idx]=i*n+j;
 					costs[i*n+j] = distMatrix[i][j];
 					idx++;
@@ -122,17 +120,9 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 		int i;
 		INeighbors nei = g.getNeighborsOf(0);
 		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-			if(i!=min1){
-				if(distMatrix[0][i]-distMatrix[0][min1] > delta){
+			if(i!=min1 && i!=min2){
+				if(distMatrix[0][i]-distMatrix[0][min2] > delta){
 					propHK.remove(0,i);
-				}
-			}
-		}
-		nei = g.getNeighborsOf(n-1);
-		for(i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
-			if(i!=min2){
-				if(distMatrix[n-1][i]-distMatrix[n-1][min2] > delta){
-					propHK.remove(n-1,i);
 				}
 			}
 		}
@@ -152,7 +142,7 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 			arc = ma.get(i);
 			from = arc/n;
 			to = arc%n;
-			if(from!=0 && to!=n-1){
+			if(from!=0 && to!=0){
 				rFrom = FIND(from);
 				rTo   = FIND(to);
 				if(rFrom != rTo){
@@ -175,7 +165,7 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 		minTArc = -propHK.getMinArcVal();
 		maxTArc = propHK.getMinArcVal();
 		double cost;
-		while(tSize < n-3){
+		while(tSize < n-2){
 			if(idx<0){
 				propHK.contradiction();
 			}
@@ -201,79 +191,52 @@ public class KruskalTwoTreeFinder extends KruskalMSTFinder {
 		}
 	}
 
-	protected void addExtremities(){
-		int mc1 = -1,mc2 = -1;
-		if(g.getSuccessorsOf(0).neighborhoodSize()==1){
-			mc1 = g.getSuccessorsOf(0).getFirstElement();
-		}
-		if(g.getSuccessorsOf(n-1).neighborhoodSize()==1){
-			mc2 = g.getSuccessorsOf(n-1).getFirstElement();
-		}
-		if(mc1!=-1){
-			if(mc2!=-1){
-			}else{
-				mc2 = getBestNot(n-1,mc1);
-			}
-		}else{
-			if(mc2!=-1){
-				mc1 = getBestNot(0,mc2);
-			}else{
-				mc2 = getBestNot(n-1,-2);
-				mc1 = getBestNot(0,mc2);
-				double k = distMatrix[0][mc1]+distMatrix[n-1][mc2];
-				int mc1bis = getBestNot(0,-1);
-				int mc2bis = getBestNot(n-1,mc1bis);
-				double kbis = distMatrix[0][mc1bis]+distMatrix[n-1][mc2bis];
-				if(kbis<k){
-					mc2 = mc2bis;
-					mc1 = mc1bis;
+	private void add0Node() throws ContradictionException {
+		INeighbors nei = g.getSuccessorsOf(0);
+		min1 = -1;
+		min2 = -1;
+		boolean b1=false,b2=false;
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			if(!b1){
+				if(min1==-1){
+					min1 = j;
+				}
+				if(distMatrix[0][j]<distMatrix[0][min1]){
+					min2 = min1;
+					min1 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					if(min1!=j){
+						min2 = min1;
+					}
+					min1 = j;
+					b1 = true;
 				}
 			}
+			if(min1!=j && !b2){
+				if(min2==-1 || distMatrix[0][j]<distMatrix[0][min2]){
+					min2 = j;
+				}
+				if(propHK.isMandatory(0,j)){
+					min2 = j;
+					b2 = true;
+				}
+			}
+		}
+		if(min1 == min2){
+			throw new UnsupportedOperationException();
+		}
+		if(min1 == -1 || min2 == -1){
+			propHK.contradiction();
 		}
 		if(!propHK.isMandatory(0,min1)){
 			maxTArc = Math.max(maxTArc, distMatrix[0][min1]);
 		}
-		if(!propHK.isMandatory(n-1,min2)){
-			maxTArc = Math.max(maxTArc, distMatrix[n-1][min2]);
+		if(!propHK.isMandatory(0,min2)){
+			maxTArc = Math.max(maxTArc, distMatrix[0][min2]);
 		}
-		Tree.addEdge(0,mc1);
-		Tree.addEdge(n-1,mc2);
-		min1 = mc1;
-		min2 = mc2;
-		treeCost += distMatrix[0][mc1]+distMatrix[n-1][mc2];
-	}
-
-	protected int getBestNot(int i, int not) {
-		if(not==0 || not==n-1){
-			INeighbors nei = g.getSuccessorsOf(i);
-			double cost = -1;
-			int idx = -1;
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(j!=0 && j!=n-1 && (idx==-1 || cost>distMatrix[i][j])){
-					idx = j;
-					cost = distMatrix[i][j];
-				}
-			}
-			if(idx==-1){
-				throw new UnsupportedOperationException();
-			}
-			return idx;
-		}else{
-			INeighbors nei = g.getSuccessorsOf(i);
-			double cost = -1;
-			int idx = -1;
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(j!=not && (idx==-1 || cost>distMatrix[i][j])){
-					idx = j;
-					cost = distMatrix[i][j];
-				}
-			}
-			if(idx==-1){
-				System.out.println(nei);
-				System.out.println(propHK.isMandatory(i,nei.getFirstElement()));
-				throw new UnsupportedOperationException();
-			}
-			return idx;
-		}
+		Tree.addEdge(0,min1);
+		Tree.addEdge(0,min2);
+		treeCost += distMatrix[0][min1]+distMatrix[0][min2];
 	}
 }

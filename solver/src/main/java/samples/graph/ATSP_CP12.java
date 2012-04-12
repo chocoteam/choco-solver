@@ -43,7 +43,6 @@ import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropFastHeldKarp;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
@@ -59,8 +58,10 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
@@ -147,7 +148,7 @@ public class ATSP_CP12 {
 		solver = new Solver();
 		initialUB = optimum;
 		System.out.println("initial UB : "+optimum);
-		graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
 			for (int i = 0; i < n - 1; i++) {
@@ -238,14 +239,14 @@ public class ATSP_CP12 {
 		}else{
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
-				PropHeldKarp propHK_bst = PropFastHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addAdHocProp(propHK_bst);
 				relax = propHK_bst;
 			}
 			else{// MST-based HK
 				System.out.println("MST");
-				PropHeldKarp propHK_mst = PropFastHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
 				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addAdHocProp(propHK_mst);
 				relax = propHK_mst;
@@ -257,7 +258,8 @@ public class ATSP_CP12 {
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
 		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
-//		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
+
+//		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
 		solver.set(mainStrat);
 //		switch (main_search){
 //			case 0: solver.set(mainStrat);
@@ -311,7 +313,7 @@ public class ATSP_CP12 {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-		bench();
+		bench_heur();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
 	}
@@ -320,17 +322,17 @@ public class ATSP_CP12 {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		File folder = new File(dir);
 		String[] list = folder.list();
-		heuristic = ATSP_heuristics.enf_MaxRepCost;
+		heuristic = ATSP_heuristics.rem_MaxRepCost;
 		main_search = 0;
 		configParameters(0);
 		for (String s : list) {
-			if ((s.contains(".atsp"))  && !s.contains("pxx43")){
+			if ((s.contains(".atsp"))  && !s.contains("p43")){
 //				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
-				if(n>440 && n<2070){// || s.contains("p43.atsp")){
-//					bst = false;
-//					configParameters(0);
-//					solve();
+				if(n>30 && n<80){// || s.contains("p43.atsp")){
+					bst = false;
+					configParameters(0);
+					solve();
 //					configParameters((1<<arbo));
 //					solve();
 //					configParameters((1<<pos));
@@ -338,11 +340,10 @@ public class ATSP_CP12 {
 //					configParameters((1<<allDiff));
 //					solve();
 					bst = true;
-//					configParameters((1<<rg));
-//					solve();
-					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+					configParameters((1<<rg));
 					solve();
-					System.exit(0);
+//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+//					solve();
 				}
 			}
 		}
@@ -355,17 +356,22 @@ public class ATSP_CP12 {
 		main_search = 0;
 		bst = false;
 		configParameters(0);
-		ATSP_heuristics[] toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxRepCost,ATSP_heuristics.enf_MaxRepCost,ATSP_heuristics.enf_MinDeg,ATSP_heuristics.enf_MinDegMaxRepCost,ATSP_heuristics.sparse};
-//		ATSP_heuristics[] toTry = new ATSP_heuristics[]{ATSP_heuristics.enf_MaxRepCost};
+		ATSP_heuristics[] toTry = new ATSP_heuristics[]{
+				ATSP_heuristics.rem_MaxRepCost
+				,ATSP_heuristics.enf_MaxRepCost
+				,ATSP_heuristics.rem_MaxMargCost
+				,ATSP_heuristics.sparse
+//				,ATSP_heuristics.enf_sparse
+		};
+		toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxRepCost};
 		for (String s : list) {
-			if (s.contains("ftv70.atsp")){//!s.contains("p43")){
+			if (s.contains(".atsp") || s.contains(".atsp")){//!s.contains("p43")){
 				loadInstance(dir + "/" + s);
-				if(n>4 && n<1070){
+				if(n>0 && n<2070){
 					for(ATSP_heuristics atsp_h:toTry){
 						heuristic = atsp_h;
-//						heuristic = ATSP_heuristics.sparse;
 						bst = true;
-						configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+						configParameters(1<<rg);
 						solve();
 					}
 				}
@@ -699,67 +705,3 @@ public class ATSP_CP12 {
 	}
 
 }
-
-//		public int p43() {
-//			int n = g.getEnvelopOrder();
-//			INeighbors suc;
-//			int size = 2*n + 1;
-//			int sizi;
-//			int to = -1;
-//			int from=-1;
-//			for (int i = 0; i < n; i++) {
-//				suc = g.getEnvelopGraph().getSuccessorsOf(i);
-//				if(suc.neighborhoodSize()>1){
-//					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-//						if(sccOf[i].get()!=sccOf[j].get() && !g.getKernelGraph().arcExists(i,j)){ //hk.getMST().arcExists(i,j) &&
-//							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
-//							if (sizi < size) {
-//								size = sizi;
-//								to = j;
-//								from = i;
-//							}
-//						}
-//					}
-//				}
-//			}
-//			return (from+1)*n+to;
-//		}
-//
-//		int[] nbP,nbS;
-//		public int best() {
-//			IGraph mst = hk.getMST();
-//			if(nbP==null){
-//				nbP = new int[n];
-//				nbS = new int[n];
-//			}
-//			for(int i=0;i<n;i++){
-//				nbP[i] = mst.getPredecessorsOf(i).neighborhoodSize();
-//				nbS[i] = mst.getSuccessorsOf(i).neighborhoodSize();
-//			}
-//			INeighbors suc;
-//			double maxRepCost = -1;
-//			double repCost;
-//			int maxSize = 0;
-//			int size;
-//			int to = -1;
-//			int from=-1;
-//			for (int i = 0; i < n; i++) {
-//				suc = hk.getMST().getSuccessorsOf(i);
-//				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-//					if(!g.getKernelGraph().arcExists(i,j)){
-////						if((!config.get(rg)) || sccOf[i].get()!=sccOf[j].get()){
-//						size = nbS[i]+nbP[j];
-//						repCost = hk.getRepCost(i,j);
-//						if(repCost<0){throw new UnsupportedOperationException();}
-//						if(repCost > maxRepCost || (repCost == maxRepCost && size>maxSize)) {
-//							maxRepCost = repCost;
-//							maxSize = size;
-//							from = i;
-//							to = j;
-//						}
-////					}
-//					}
-//				}
-//			}
-//			return (from+1)*n+to;
-//		}

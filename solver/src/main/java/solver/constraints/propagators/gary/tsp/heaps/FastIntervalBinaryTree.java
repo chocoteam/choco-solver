@@ -25,21 +25,51 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 30/01/12
+ * Time: 17:10
+ */
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.variables.Variable;
+package solver.constraints.propagators.gary.tsp.heaps;
 
-public abstract class GraphPropagator<V extends Variable> extends Propagator<V> {
+import java.util.BitSet;
 
-	public final static boolean ALWAYS_COARSE = false;
-	
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+/**
+ * Same worst case complexity but much better in practice
+ * Especially when several nodes have same -infinity value 
+ */
+public class FastIntervalBinaryTree extends IntervalBinaryTree{
 
-    protected GraphPropagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
-        super(vars, solver, constraint, priority, true);
-    }
+	BitSet best;
+	double bestVal;
+
+	public FastIntervalBinaryTree(int n){
+		super(n);
+		best = new BitSet(n);
+	}
+
+	@Override
+	public void add(int element, double element_key, int i) {
+		if(isEmpty() || element_key<bestVal){
+			bestVal = element_key;
+			best.clear();
+			best.set(element);
+		}else if(element_key==bestVal){
+			best.set(element);
+		}
+		super.add(element,element_key,i);
+	}
+	@Override
+	public int pop() {
+		if(!best.isEmpty()){
+			int min = best.nextSetBit(0);
+			best.clear(min);
+//			in.clear(min);
+			remove(min);
+			return min;
+		}
+		return super.pop();
+	}
 }

@@ -41,7 +41,6 @@ import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropFastSymmetricHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
 import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
@@ -409,11 +408,7 @@ public class TSPsymmetric {
 		if(allDiffAC){
 			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
 		}
-		if(fast){
-			mst = PropFastSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}else{
-			mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		}
+		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		gc.addAdHocProp(mst);
 //		gc.addAdHocProp(new Prop_LP_GRB(undi,totalCost,matrix,solver,gc));
 		switch (search){
