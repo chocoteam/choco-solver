@@ -44,7 +44,6 @@ import java.util.Set;
  */
 public class Union {
 
-
     /**
      * link between a value and its position among all the values
      */
@@ -55,6 +54,16 @@ public class Union {
      */
     Value[] values;
     IStateInt idx;
+
+    /**
+     * Position of the last instantiated value before update according to its instantiation
+     */
+    int lastInstValuePos;
+
+    int lastLowValuePos;
+
+    int lastUppValuePos;
+
 
 
     public Union(IntVar[] variables, IEnvironment environment) {
@@ -86,11 +95,11 @@ public class Union {
         for (int i = 0; i < values.length; i++) {
             val2idx.put(values[i].getValue(), i);
         }
-        /*System.out.println("initialisation ");
+        /*System.out.print("Union incremental: ");
         for (int i = 0; i <= idx.get(); i++) {
             System.out.print(values[i] + ";");
         }
-        System.out.println("\n-----------------");*/
+        System.out.println("\n-----------------");//*/
     }
 
     public void remove(int value) {
@@ -120,6 +129,25 @@ public class Union {
         } /*else {
             System.out.println("deja traite");
         }//*/
+    }
+
+    public void instantiatedValue(int value, int low, int upp) {
+        lastInstValuePos = val2idx.get(value);
+        lastLowValuePos = val2idx.get(low);
+        lastUppValuePos = val2idx.get(upp);
+        remove(value);
+    }
+
+    public int getLastInstValuePos() {
+        return lastInstValuePos;
+    }
+
+    public int getLastLowValuePos() {
+        return lastLowValuePos;
+    }
+
+    public int getLastUppValuePos() {
+        return lastUppValuePos;
     }
 
     public int getSize() {
@@ -185,12 +213,6 @@ final class Value {
         if (occ.get() > 0) {
             this.occ.add(-1);
         }
-    }
-
-    public final int reset() {
-        int rem = this.occ.get();
-        this.occ.set(0);
-        return rem;
     }
 
     public boolean equals(Object o) {

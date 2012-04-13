@@ -18,7 +18,7 @@ import java.io.IOException;
  */
 public abstract class AbstractBenchProbas {
     public static final String sep =";";
-    public static int TIMELIMIT = 20000;
+    public static int TIMELIMIT = 60000;
 
     public enum Distribution {
         NONE, UNIFORM
@@ -112,7 +112,12 @@ public abstract class AbstractBenchProbas {
         s += ((double) this.avgPropag / this.nbTests) + sep;
         s += ((double) this.avgNbAlldiffProp / this.nbTests) + sep;
         s += ((double) this.avgNbNeqsProp / this.nbTests) + sep;
-        s += ((double) this.avgTime / this.nbTests) + sep;
+        double avgTime = (double) this.avgTime / this.nbTests;
+        if (avgTime == 0) {
+            s += "NaN" + sep;
+        } else {
+            s += avgTime + sep;
+        }
         s += "-" + sep;
         results.write(s);
         results.flush();
@@ -174,7 +179,11 @@ public abstract class AbstractBenchProbas {
     }
 
     public String toString() {
-        return "" + type + "-" + this.dist;
+        if(this.dist.equals(Distribution.NONE)) {
+            return "" + type;
+        } else {
+            return "" + type + "-prob";
+        }
     }
 
 

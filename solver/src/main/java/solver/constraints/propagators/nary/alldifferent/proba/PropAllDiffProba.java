@@ -89,15 +89,13 @@ public class PropAllDiffProba<V extends IntVar> extends Propagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        // 1. switch on the condition to execute the correct propagator
+        // switch on the condition to execute the correct propagator
         if (condition.isValid()) {
-            //count.incrAllDiff();
-            //System.out.println("alldiff:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
             forcePropagate(EventType.CUSTOM_PROPAGATION);
+            //propAllDiff.propagate(eventRecorder, idxVarInProp, mask);
         } else {
             count.incrAllProp();
             count.incrNeq();
-            //System.out.println("neq:" + count.getNbProp() + "--" + count.getNbAllDiff() + "--" + count.getNbNeq());
             propCliqueNeq.propagate(eventRecorder, idxVarInProp, mask);
         }
     }

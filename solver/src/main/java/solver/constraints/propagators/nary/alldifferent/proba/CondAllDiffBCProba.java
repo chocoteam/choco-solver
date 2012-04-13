@@ -2,7 +2,6 @@ package solver.constraints.propagators.nary.alldifferent.proba;
 
 import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateDouble;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
@@ -11,16 +10,12 @@ import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.probabilities.ProbaUtils;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDeltaMonitor;
-import sun.plugin2.ipc.Event;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -32,34 +27,7 @@ import java.util.Set;
  */
 public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
-    public static final double[] fact = {
-            ProbaUtils.fact(1),
-            ProbaUtils.fact(2),
-            ProbaUtils.fact(3),
-            ProbaUtils.fact(4),
-            ProbaUtils.fact(5),
-            ProbaUtils.fact(6),
-            ProbaUtils.fact(7),
-            ProbaUtils.fact(8),
-            ProbaUtils.fact(9),
-            ProbaUtils.fact(10),
-            ProbaUtils.fact(11),
-            ProbaUtils.fact(12),
-            ProbaUtils.fact(13),
-            ProbaUtils.fact(14),
-            ProbaUtils.fact(15),
-            ProbaUtils.fact(16),
-            ProbaUtils.fact(17),
-            ProbaUtils.fact(18),
-            ProbaUtils.fact(19),
-            ProbaUtils.fact(20),
-            ProbaUtils.fact(21),
-            ProbaUtils.fact(22),
-            ProbaUtils.fact(23),
-            ProbaUtils.fact(24),
-            ProbaUtils.fact(25),
-            ProbaUtils.fact(26)
-    };
+    public static final double[] fact = fact(26);
 
     IEnvironment environment;
     protected final RemProc rem_proc;
@@ -68,16 +36,9 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
     protected Union unionset; // the union of the domains
     protected IntVar[] vars;
-    protected IStateInt lastInstVal; // the value of the last instanciated variable
-    protected IStateInt lastInstLow; // the lower bound of the value of the last instanciated variable
-    protected IStateInt lastInstUpp; // the upper bound of the value of the last instanciated variable
 
-    IStateDouble proba;
-    IStateInt n; // number of variables not yet instanciated before the last instanciation
-    IStateInt m; // size of unionset before the last instanciation
-    IStateInt v; // position (in unionset) of lastInstVal
-    IStateInt al; // position (in unionset) of lastInstLow
-    IStateInt be; // position (in unionset) of lastInstUpp
+    IStateInt nbNotInstVar;
+    double proba;
 
     //////
     protected final TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
@@ -90,25 +51,12 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         this.minMax_proc = new MinMaxProc();
         this.environment = environment;
         this.vars = vars;
-        this.lastInstVal = environment.makeInt(-1);
-        this.lastInstLow = environment.makeInt(-1);
-        this.lastInstUpp = environment.makeInt(-1);
-        this.proba = environment.makeFloat();
-        this.n = environment.makeInt(vars.length);
-        this.m = environment.makeInt(-1);
-        this.v = environment.makeInt(-1);
-        this.al = environment.makeInt(-1);
-        this.be = environment.makeInt(-1);
-
+        this.nbNotInstVar = environment.makeInt(vars.length);
         this.deltamon = new TIntObjectHashMap<IDeltaMonitor>(vars.length);
         this.idxVs = new TIntIntHashMap(vars.length, (float) 0.5, -2, -2);
         this.timestamps = new TIntLongHashMap(vars.length, (float) 0.5, -2, -2);
-
         for (int i = 0; i < vars.length; i++) {
             IntVar v = vars[i];
-            if (v.instantiated()) {
-                n.add(-1);
-            }
             v.analyseAndAdapt(EventType.REMOVE.mask); // to be sure delta is created and maintained
             int vid = v.getId();
             deltamon.put(vid, v.getDelta().getMonitor(Cause.Null));
@@ -116,19 +64,37 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             timestamps.put(vid, -1);
 
         }
-        this.unionset = new Union(vars, environment);
-        this.m.set(this.unionset.getSize());
     }
 
+    private void init() {
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i].instantiated()) {
+                nbNotInstVar.add(-1);
+            }
+        }
+        this.unionset = new Union(vars, environment);
+        assert checkUnion();
+    }
+
+    /**
+     * @return true if the strong propag has to be called
+     */
     boolean isValid() {
         double cut = rand.nextGaussian();
-        return (1 - proba.get() > cut);  // ici appeler le calcul de la proba : on retourne vrai avec une chance de 1-proba ?
+        return (1 - proba > cut);
         //return true;
     }
 
+    private static double probaAfterOther(long m, long n) {
+        return (m - n < (2 * Math.sqrt(m))) ? 0 : 1;
+    }
 
-    private static double proba(long m, long n, long v, long al, long be) {
-        return (m - n < (2 * Math.sqrt(m))) ? probaCase2(m, m - n, v, al, be) : probaCase1(m, n / m, v, al, be);
+    private static double probaAfterInst(long m, long n, long v, long al, long be) {
+        if (m < n || v < 0 || al < 0 || be < 0 || v > m - 1 || al > m - 1 || be > m - 1) {
+            return 0; // propage
+        } else {
+            return (m - n < (2 * Math.sqrt(m))) ? probaCase2(m, m - n, v, al, be) : probaCase1(m, n / m, v, al, be);
+        }
     }
 
     private static double probaCase1(long m, long l, long v, long al, long be) {
@@ -169,67 +135,11 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         return Math.min(v, m - l - 1) - Math.max(0, v - l) + 1 - heavyiside(l - (be - al)) * (Math.min(al, m - l - 1) - Math.max(0, be - l) + 1);
     }
 
-    /**
-     * test for unionset => has to be executed in the search loop at the beginning of downBranch method
-     *
-     * @return true if unionset is ok
-     */
-    public boolean checkUnion() {
-        Set<Integer> allVals = computeUnion();
-        for (Integer value : allVals) {
-            if (!checkOcc(value)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean checkOcc(int value) {
-        int occ = 0;
-        for (IntVar v : vars) {
-            if (v.contains(value) && !v.instantiated()) {
-                occ++;
-            }
-        }
-        if (occ != unionset.getOccOf(value)) {
-            /*System.out.println("value " + value + ": " + occ + " VS " + unionset.getOccOf(value));
-            for (IntVar v : vars) {
-                System.out.println(v);
-            } */
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    private Set<Integer> computeUnion() {
-        //System.out.println("*********** calcul manuel de l'union");
-        Set<Integer> vals = new HashSet<Integer>();
-        //System.out.println(instVals);
-        for (IntVar var : vars) {
-            int ub = var.getUB();
-            for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
-                vals.add(i);
-            }
-        }
-        //System.out.println("calcul manuel de l'union ***********");
-        return vals;
-    }
-
-    private String printTab(String s, int[] tab) {
-        String res = s + " : [";
-        for (int aTab : tab) {
-            res += aTab + ", ";
-        }
-        res = res.substring(0, res.length() - 2);
-        res += "]";
-        return res;
-    }
-
     public void activate() {
         for (int i = 0; i < vars.length; i++) {
             vars[i].activate(this);
         }
+        init();
     }
 
     private static class RemProc implements IntProcedure {
@@ -281,29 +191,13 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         }
     }
 
-    //////////////////////////////////////////
-
-
     @Override
     public void afterUpdate(IntVar var, EventType evt, ICause cause) {
-        long m = this.m.get();
-        long n = this.n.get();
-        long v = this.v.get();
-        long al = this.al.get();
-        long be = this.be.get();
-        if (m < n || v < 0 || al < 0 || be < 0 || v > m - 1 || al > m - 1 || be > m - 1) {
-            this.proba.set(0); // propage
-        } else {
-            assert m == unionset.getSize() : m + " - " + unionset;
-            /*if (m < n) {
-                System.out.println(m+","+n);
-                for (IntVar vs : vars) {
-                    System.out.println(vs);
-                }
-                assert false;
-            }*/
-            this.proba.set(proba(m, n, v, al, be)); // je calcule la proba avant de prendre en compte les changements courrant
-        }
+        /*System.out.printf("\n\nCND : %s on %s\n", var, evt);
+        for (IntVar vs : vars) {
+            System.out.println(vs);
+        }//*/
+        ////////////////////// Sauce a Charles pour utiliser le delta domaine de var
         IDeltaMonitor dm = deltamon.get(var.getId());
         int vid = var.getId();
         long t = timestamps.get(vid);
@@ -311,36 +205,48 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
             deltamon.get(vid).clear();
             timestamps.adjustValue(vid, AbstractSearchLoop.timeStamp - t);
         }
-
         dm.freeze();
-        //System.out.printf("\n\nCND : %s on %s\n", var, evt);
-        try {
-            dm.forEach(minMax_proc.init(), EventType.REMOVE);
-        } catch (ContradictionException e) {
-            throw new SolverException("CondAllDiffBCProba#update encounters an exception");
+        //////////////////////////////////
+        int m = unionset.getSize();
+        int n = nbNotInstVar.get();
+        if (EventType.isInstantiate(evt.mask)) { // la proba sur l'instantiation
+            nbNotInstVar.add(-1);
+            /*try {
+                dm.forEach(minMax_proc.init(), EventType.REMOVE);
+            } catch (ContradictionException e) {
+                throw new SolverException("CondAllDiffBCProba#update encounters an exception");
+            }
+            int low = minMax_proc.getMin();
+            int upp = minMax_proc.getMax();
+            unionset.instantiatedValue(var.getValue(), low, upp); */
+            unionset.instantiatedValue(var.getValue(), -1, -1);
+            //int v = unionset.getLastInstValuePos();
+            //int al = unionset.getLastLowValuePos();
+            //int be = unionset.getLastUppValuePos();
+            try {
+                //System.out.print("****** INST debut retrait sur ");
+                //System.out.println(var + ": ");
+                dm.forEach(rem_proc, EventType.REMOVE);
+                //System.out.println("fin retrait ******");
+            } catch (ContradictionException e) {
+                throw new SolverException("CondAllDiffBCProba#update encounters an exception");
+            }
+
+            /*this.proba = probaAfterInst(m, n, v, al, be); // je calcule la proba avant de prendre en compte les changements courrant */
+            this.proba = probaAfterOther(m, n);
+        } else {   // la proba sur un autre type d'evenement
+            try {
+                //System.out.print("****** REM debut retrait sur ");
+                //System.out.println(var + ": ");
+                dm.forEach(rem_proc, EventType.REMOVE);
+                //System.out.println("fin retrait ******");
+            } catch (ContradictionException e) {
+                throw new SolverException("CondAllDiffBCProba#update encounters an exception");
+            }
+            this.proba = probaAfterOther(m, n);
         }
-        int low = minMax_proc.getMin();
-        int upp = minMax_proc.getMax();
-        if (EventType.isInstantiate(evt.mask)) {
-            this.n.add(-1);
-            lastInstLow.set(low);
-            lastInstUpp.set(upp);
-            lastInstVal.set(var.getValue());
-            //System.out.println("traitement de l'instanciation de " + var);
-            unionset.remove(var.getValue());
-        }
-        try {
-            //System.out.print("****** debut retrait sur ");
-            //System.out.println(var + ": ");
-            dm.forEach(rem_proc, EventType.REMOVE);
-            //System.out.println("fin retrait ******");
-        } catch (ContradictionException e) {
-            throw new SolverException("CondAllDiffBCProba#update encounters an exception");
-        }
-        this.v.set(unionset.getPosition(lastInstVal.get()));
-        this.al.set(unionset.getPosition(lastInstLow.get()));
-        this.be.set(unionset.getPosition(lastInstUpp.get()));
-        this.m.set(unionset.getSize());
+
+        ////////////////////////// liberation de l'iterateur sur le delta
         dm.unfreeze();
         assert checkUnion();
     }
@@ -361,5 +267,66 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
 
     @Override
     public void contradict(IntVar var, EventType evt, ICause cause) {
+    }
+
+    public static double[] fact(int n) {
+        double[] tabRes = new double[n];
+        tabRes[0] = 1;
+        int idx = 1;
+        while (idx < n) {
+            tabRes[idx] = tabRes[idx - 1] * (idx + 1);
+            idx++;
+        }
+        return tabRes;
+    }
+
+    /**
+     * test for unionset => has to be executed in the search loop at the beginning of downBranch method
+     *
+     * @return true if unionset is ok
+     */
+    public boolean checkUnion() {
+        //System.out.print("Union from sctrach: ");
+        Set<Integer> allVals = computeUnion();
+        for (Integer value : allVals) {
+            if (!checkOcc(value)) {
+                return false;
+            }
+        }
+        //System.out.println();
+        return true;
+    }
+
+    public boolean checkOcc(int value) {
+        int occ = 0;
+        for (IntVar v : vars) {
+            if (v.contains(value) && !v.instantiated()) {
+                occ++;
+            }
+        }
+        //System.out.print("[" + value + "," + occ + "];");
+        if (occ != unionset.getOccOf(value)) {
+            /*System.out.println("value " + value + ": " + occ + " VS " + unionset.getOccOf(value));
+            for (IntVar v : vars) {
+                System.out.println(v);
+            } //*/
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private Set<Integer> computeUnion() {
+        //System.out.println("*********** calcul manuel de l'union");
+        Set<Integer> vals = new HashSet<Integer>();
+        //System.out.println(instVals);
+        for (IntVar var : vars) {
+            int ub = var.getUB();
+            for (int i = var.getLB(); i <= ub; i = var.nextValue(i)) {
+                vals.add(i);
+            }
+        }
+        //System.out.println("calcul manuel de l'union ***********");
+        return vals;
     }
 }
