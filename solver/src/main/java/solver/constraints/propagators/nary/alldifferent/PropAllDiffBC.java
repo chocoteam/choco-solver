@@ -296,9 +296,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     protected void initSort() {
         IntVar vt;
         for (int i = 0; i < vars.length; i++) {
-            vt = minsorted[i].var;
-            minsorted[i].lb = vt.getLB();
-            minsorted[i].ub = vt.getUB();
+            vt = intervals[i].var;
+            intervals[i].lb = vt.getLB();
+            intervals[i].ub = vt.getUB();
         }
     }
 
@@ -308,7 +308,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
      * but "simply" copy it into a temporary one -- intervals
      */
     private void _sort() {
-
         int n = vars.length;
         System.arraycopy(minsorted, 0, intervals, 0, n);
         mergeSort(intervals, minsorted, 0, n, SORT.MIN);
@@ -403,9 +402,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
-                if (minsorted[i].var.updateLowerBound(bounds[w], this)) {
+                if (maxsorted[i].var.updateLowerBound(bounds[w], this)) {
                     filter |= true;
-                    maxsorted[i].lb = minsorted[i].var.getLB();
+                    maxsorted[i].lb = maxsorted[i].var.getLB();//bounds[w];
                 }
                 pathset(h, x, w, w);
             }
@@ -446,7 +445,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
                 int w = pathmin(h, h[x]);
                 if (minsorted[i].var.updateUpperBound(bounds[w] - 1, this)) {
                     filter |= true;
-                    minsorted[i].ub = minsorted[i].var.getUB();
+                    minsorted[i].ub = minsorted[i].var.getUB();//bounds[w] - 1;
                 }
                 pathset(h, x, w, w);
             }
