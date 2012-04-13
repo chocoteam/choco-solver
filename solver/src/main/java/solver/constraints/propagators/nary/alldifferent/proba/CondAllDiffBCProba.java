@@ -8,8 +8,11 @@ import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Cause;
 import solver.ICause;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.recorders.coarse.CoarseEventRecorderWithCondition;
+import solver.recorders.conditions.ICondition;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
@@ -25,7 +28,7 @@ import java.util.Set;
  * User: chameau
  * Date: 22/11/11
  */
-public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
+public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<CoarseEventRecorderWithCondition> {
 
     public static final double[] fact = fact(26);
 
@@ -79,7 +82,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
     /**
      * @return true if the strong propag has to be called
      */
-    boolean isValid() {
+    public boolean isValid() {
         double cut = rand.nextGaussian();
         return (1 - proba > cut);
         //return true;
@@ -328,5 +331,22 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar> {
         }
         //System.out.println("calcul manuel de l'union ***********");
         return vals;
+    }
+
+    ///// CPRU: A NETTOYER ///
+
+    @Override
+    public boolean validateScheduling(CoarseEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
+        return isValid();
+//        return true;
+    }
+
+    @Override
+    public ICondition next() {
+        return null;
+    }
+
+    @Override
+    public void linkRecorder(CoarseEventRecorderWithCondition recorder) {
     }
 }

@@ -4,7 +4,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.constraints.unary.Relation;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -21,8 +20,8 @@ import java.io.IOException;
 public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
 
     public AllIntervalSeriesBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                        AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), n, type, frequency, active, dist, out, seed);
+                                        BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, frequency, active, out, seed, isProba);
     }
 
     @Override
@@ -47,13 +46,8 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
             this.allVars[k++] = vars[i];
             this.allVars[k] = dist[i - 1];
         }
-        if (proba) {
-            this.cstrs[2 * (size - 1)] = new AllDifferentProba(vars, solver, type, this.count);
-            this.cstrs[2 * (size - 1) + 1] = new AllDifferentProba(dist, solver, type, this.count);
-        } else {
-            this.cstrs[2 * (size - 1)] = new AllDifferent(vars, solver, type);
-            this.cstrs[2 * (size - 1) + 1] = new AllDifferent(dist, solver, type);
-        }
+        this.cstrs[2 * (size - 1)] = new AllDifferent(vars, solver, type);
+        this.cstrs[2 * (size - 1) + 1] = new AllDifferent(dist, solver, type);
         Constraint o1 = new GreaterOrEqualX_YC(vars[1], vars[0], 1, solver);
         Constraint o2 = new GreaterOrEqualX_YC(dist[0], dist[size - 2], 1, solver);
 

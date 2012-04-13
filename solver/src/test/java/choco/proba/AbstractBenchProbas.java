@@ -2,27 +2,27 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.IntConstraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.CounterProba;
-import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
+import solver.propagation.generator.Primitive;
+import solver.propagation.generator.Queue;
+import solver.recorders.conditions.ICondition;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
  * User: xavier lorca
  */
 public abstract class AbstractBenchProbas {
-    public static final String sep =";";
+    public static final String sep = ";";
     public static int TIMELIMIT = 60000;
-
-    public enum Distribution {
-        NONE, UNIFORM
-    }
 
     BufferedWriter out;
 
@@ -37,8 +37,7 @@ public abstract class AbstractBenchProbas {
     IntVar[] vars; // decision variables for the problem
     Constraint[] cstrs; // all the cstrs involved in the problem (including alldiff)
     AllDifferent.Type type;
-    Distribution dist; // kind of distribution considered for the probability
-    CounterProba count;
+    boolean isProba;
 
     // output data
     private int nbTests; // number of tests executed
@@ -46,8 +45,6 @@ public abstract class AbstractBenchProbas {
     private long nbNodes;
     private long nbBcks;
     private long nbPropag; // number of propagation for the meta-propagator of alldiff
-    private long nbAlldiffProp;  // number of time the real algorithm (AC or BC or RC) has been executed
-    private long nbNeqsProp;  // number of time the neq algorithm has been executed
     private float time;
 
     // output averages
@@ -55,12 +52,10 @@ public abstract class AbstractBenchProbas {
     private long avgNodes;
     private long avgBcks;
     private long avgPropag;
-    private long avgNbAlldiffProp;
-    private long avgNbNeqsProp;
     private long avgTime;
 
     AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
-                        boolean active, Distribution dist, BufferedWriter out, int seed) {
+                        boolean active, BufferedWriter out, int seed, boolean isProba) {
         this.solver = solver;
         this.type = type;
         //this.mode = mode;
@@ -68,9 +63,8 @@ public abstract class AbstractBenchProbas {
         this.seed = seed;
         this.frequency = frequency;
         this.active = active;
-        this.dist = dist;
         this.size = size;
-        this.count = new CounterProba();
+        this.isProba = isProba;
     }
 
     abstract void buildProblem(int size, boolean proba);
@@ -80,7 +74,6 @@ public abstract class AbstractBenchProbas {
         this.solver = new Solver();
         this.seed = seed;
         this.size = size;
-        this.count = new CounterProba();
     }
 
     void recordResults() throws IOException {
@@ -88,13 +81,7 @@ public abstract class AbstractBenchProbas {
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
         this.nbBcks = mes.getBackTrackCount();
-        if (this.dist.equals(Distribution.NONE)) {
-            this.nbPropag = mes.getPropagationsCount()+mes.getEventsCount();
-        } else {
-            this.nbPropag = count.getNbProp();
-        }
-        this.nbAlldiffProp = count.getNbAllDiff();
-        this.nbNeqsProp = count.getNbNeq();
+        this.nbPropag = mes.getPropagationsCount() + mes.getEventsCount();
         if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
             this.time = mes.getTimeCount();
         } else {
@@ -110,8 +97,6 @@ public abstract class AbstractBenchProbas {
         s += ((double) this.avgNodes / this.nbTests) + sep;
         s += ((double) this.avgBcks / this.nbTests) + sep;
         s += ((double) this.avgPropag / this.nbTests) + sep;
-        s += ((double) this.avgNbAlldiffProp / this.nbTests) + sep;
-        s += ((double) this.avgNbNeqsProp / this.nbTests) + sep;
         double avgTime = (double) this.avgTime / this.nbTests;
         if (avgTime == 0) {
             s += "NaN" + sep;
@@ -128,8 +113,6 @@ public abstract class AbstractBenchProbas {
         this.avgNodes += this.nbNodes;
         this.avgBcks += this.nbBcks;
         this.avgPropag += this.nbPropag;
-        this.avgNbAlldiffProp += this.nbAlldiffProp;
-        this.avgNbNeqsProp += this.nbNeqsProp;
         this.avgTime += this.time;
         this.nbTests++;
     }
@@ -140,8 +123,6 @@ public abstract class AbstractBenchProbas {
         s += this.nbNodes + sep;
         s += this.nbBcks + sep;
         s += this.nbPropag + sep;
-        s += this.nbAlldiffProp + sep;
-        s += this.nbNeqsProp + sep;
         if (this.time == 0) {
             s += "NaN" + sep;
         } else {
@@ -158,28 +139,45 @@ public abstract class AbstractBenchProbas {
         this.solver.set(StrategyFactory.minDomMinVal(this.vars, this.solver.getEnvironment()));
     }
 
+    void configPropStrategy() {
+        Queue arcs = Queue.build(Primitive.arcs(cstrs));
+        Queue coarses;
+        if (!isProba) {
+            coarses = Queue.build(Primitive.coarses(cstrs));
+        } else {
+            java.util.List<Primitive> coarses_ = new ArrayList<Primitive>();
+            for (int i = 0; i < cstrs.length; i++) {
+                if (cstrs[i] instanceof AllDifferent) {
+                    IntConstraint icstr = (IntConstraint) cstrs[i];
+                    IntVar[] myvars = icstr.getVariables();
+                    ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars);
+                    coarses_.add(Primitive.coarses(condition, cstrs[i]));
+                } else {
+                    coarses_.add(Primitive.coarses(cstrs[i]));
+                }
+            }
+            coarses = Queue.build(coarses_.toArray(new Primitive[coarses_.size()]));
+        }
+        solver.set(Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut());
+    }
+
     void solveProcess() {
         this.solver.findSolution();
     }
 
     void execute() throws IOException {
-        if (this.dist.equals(Distribution.NONE)) {
-            //System.out.println("cas non proba");
-            this.buildProblem(size, false);
-        } else {
-            //System.out.println("cas avec proba");
-            this.buildProblem(size, true);
-        }
+        this.buildProblem(size, false);
         this.solver.post(this.cstrs);
 //        solver.set(PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver));
-        SearchMonitorFactory.log(this.solver, true, true);
+//        SearchMonitorFactory.log(this.solver, true, true);
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         this.configSearchStrategy();
+        this.configPropStrategy();
         this.solveProcess();
     }
 
     public String toString() {
-        if(this.dist.equals(Distribution.NONE)) {
+        if (!isProba) {
             return "" + type;
         } else {
             return "" + type + "-prob";

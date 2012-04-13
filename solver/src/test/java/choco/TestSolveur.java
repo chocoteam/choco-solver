@@ -33,8 +33,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
-import solver.constraints.nary.alldifferent.CounterProba;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -102,32 +100,6 @@ public class TestSolveur {
             System.out.println("nb solutions : " + s.findAllSolutions());
             t = System.currentTimeMillis() - t;
             System.out.println("time : " + t);
-            Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
-        }
-    }
-
-    @Test(groups = "1m")
-    public void testOneProbaAllDiff() {
-        int nbSol = 1;
-        for (int k = 2; k <= 9; k++) {
-            int n = k;
-            int m = 1;
-            int min = 1;
-            int max = n;
-            nbSol *= k;
-            Solver s = new Solver();
-            IntVar[] vars = new IntVar[n];
-            for (int i = 0; i < vars.length; i++) {
-                vars[i] = VariableFactory.enumerated("v_" + i, min, max, s);
-            }
-            Constraint[] cstrs = new Constraint[m];
-            for (int i = 0; i < cstrs.length; i++) {
-                cstrs[i] = new AllDifferentProba(vars, s, AllDifferent.Type.AC, new CounterProba());
-            }
-
-            s.post(cstrs);
-            s.set(StrategyFactory.presetI(vars, s.getEnvironment()));
-            s.findAllSolutions();
             Assert.assertEquals(s.getMeasures().getSolutionCount(), nbSol, "nb sol");
         }
     }

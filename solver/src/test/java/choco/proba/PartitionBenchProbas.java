@@ -4,7 +4,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -27,8 +26,8 @@ import static solver.constraints.ConstraintFactory.lt;
 public class PartitionBenchProbas extends AbstractBenchProbas {
 
     public PartitionBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), n, type, frequency, active, dist, out, seed);
+                                BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, frequency, active, out, seed, isProba);
     }
 
     @Override
@@ -96,11 +95,7 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
         allCstrs.add(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
         allCstrs.add(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
 
-        if (proba) {
-            allCstrs.add(new AllDifferentProba(xy, solver, type, this.count));
-        } else {
-            allCstrs.add(new AllDifferent(xy, solver, type));
-        }
+        allCstrs.add(new AllDifferent(xy, solver, type));
 
         this.cstrs = allCstrs.toArray(new Constraint[allCstrs.size()]);
         this.allVars = allVars.toArray(new IntVar[allVars.size()]);

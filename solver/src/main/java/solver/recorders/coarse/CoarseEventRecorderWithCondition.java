@@ -24,60 +24,52 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.recorders.coarse;
 
-package solver.constraints;
-
-import choco.kernel.ESat;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.SolverException;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
-import solver.variables.IntVar;
+import solver.recorders.conditions.ICondition;
+import solver.variables.EventType;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 nov. 2010
+ * @since 05/12/11
  */
-public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Propagator<I>> {
+public class CoarseEventRecorderWithCondition extends CoarseEventRecorder {
 
-    public IntConstraint(I[] vars, Solver solver) {
-        super(vars, solver);
+    protected ICondition<CoarseEventRecorder> condition;
+    protected boolean forceInitialPropag = true;
+
+    public CoarseEventRecorderWithCondition(Propagator propagator, Solver solver, ICondition condition) {
+        super(propagator, solver);
+        this.condition = condition;
     }
 
-    public ESat isSatisfied() {
-        int[] tuple = new int[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i].instantiated()) {
-                tuple[i] = vars[i].getValue();
-            } else {
-                return ESat.UNDEFINED;
+    public void update(EventType e) {
+        if ((e.mask & propagator.getPropagationConditions()) != 0) {
+            if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+            // 1. store information concerning event
+            if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                evtmask |= e.strengthened_mask;
+            }
+            // 3. schedule this
+//            LoggerFactory.getLogger("solver").info("try to schedule");
+            // TODO: generify and remove the call to this method, must be replaced by isValid()
+            if ((condition.validateScheduling(this, propagator, e) && !enqueued)
+                    || forceInitialPropag) {
+//                LoggerFactory.getLogger("solver").info("... schedule!");
+                scheduler.schedule(this);
+                forceInitialPropag = false;
             }
         }
-        return isSatisfied(tuple);
     }
 
-    @Override
-    public I[] getVariables() {
-        return vars;
-    }
-
-    /**
-     * Test if the <code>tuple</code> satisfies this <code>Constraint</code> object.
-     * The <i>i^th</i> cell corresponds to the value attributed to the <i>i^th</i> <code>Variable</code> object
-     *
-     * @param tuple array of values
-     * @return <code>ESat.TRUE</code> if this <code>Constraint</code> object is satisfied regarding <code>tuple</code>, <code>ESat.FALSE</code> otherwise.
-     */
-    public abstract ESat isSatisfied(int[] tuple);
 
     @Override
-    public HeuristicVal getIterator(String name, I var) {
-        if (name.equals(VAL_DEFAULT)) {
-            return HeuristicValFactory.fastenumVal(var);
-        }
-        throw new SolverException("Unknown comparator name :" + name);
+    public String toString() {
+        return "<< ::" + propagator.toString() + "::" + condition + ">>";
     }
 }

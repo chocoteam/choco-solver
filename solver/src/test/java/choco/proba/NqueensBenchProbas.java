@@ -3,7 +3,6 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -19,8 +18,8 @@ import java.io.IOException;
 public class NqueensBenchProbas extends AbstractBenchProbas {
 
     public NqueensBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                              AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), n, type, frequency, active, dist, out, seed);
+                              BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, frequency, active, out, seed, isProba);
     }
 
     @Override
@@ -43,17 +42,10 @@ public class NqueensBenchProbas extends AbstractBenchProbas {
             allVars[k++] = diag1[i];
             allVars[k++] = diag2[i];
         }
-        if (proba) {
-            AllDifferentProba alldiff = new AllDifferentProba(vars, solver, type, this.count);
-            AllDifferentProba alldiffdiag1 = new AllDifferentProba(diag1, solver, type, this.count);
-            AllDifferentProba alldiffdiag2 = new AllDifferentProba(diag2, solver, type, this.count);
-            this.cstrs = new Constraint[]{alldiff, alldiffdiag1, alldiffdiag2};
-        } else {
-            AllDifferent alldiff = new AllDifferent(vars, solver, type);
-            AllDifferent alldiffdiag1 = new AllDifferent(diag1, solver, type);
-            AllDifferent alldiffdiag2 = new AllDifferent(diag2, solver, type);
-            this.cstrs = new Constraint[]{alldiff, alldiffdiag1, alldiffdiag2};
-        }
+        AllDifferent alldiff = new AllDifferent(vars, solver, type);
+        AllDifferent alldiffdiag1 = new AllDifferent(diag1, solver, type);
+        AllDifferent alldiffdiag2 = new AllDifferent(diag2, solver, type);
+        this.cstrs = new Constraint[]{alldiff, alldiffdiag1, alldiffdiag2};
     }
 
 }

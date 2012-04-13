@@ -3,7 +3,6 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -24,8 +23,8 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
     Instance inst;
 
     public OneAllDiffBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                 AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), n, type, frequency, active, dist, out, seed);
+                                 BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, frequency, active, out, seed, isProba);
     }
 
     @Override
@@ -38,11 +37,7 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
         this.inst = new Instance(size, 0, size - 1, seed, 0, solver);
         this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
         this.allVars = vars;
-        if (proba) {
-            this.cstrs = new Constraint[]{new AllDifferentProba(vars, solver, type, this.count)};
-        } else {
-            this.cstrs = new Constraint[]{new AllDifferent(vars, solver, type)};
-        }
+        this.cstrs = new Constraint[]{new AllDifferent(vars, solver, type)};
     }
 
 

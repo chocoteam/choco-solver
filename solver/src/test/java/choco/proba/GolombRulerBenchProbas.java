@@ -6,10 +6,8 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.nary.alldifferent.AllDifferentProba;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.unary.Relation;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -28,8 +26,8 @@ import java.util.Collection;
 public class GolombRulerBenchProbas extends AbstractBenchProbas {
 
     public GolombRulerBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                 AbstractBenchProbas.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), n, type, frequency, active, dist, out, seed);
+                                  BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, frequency, active, out, seed, isProba);
     }
 
     @Override
@@ -69,11 +67,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
                 allCstrs.add(Sum.leq(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, -((size - 1 - j + i) * (size - j + i)) / 2, solver));
             }
         }
-        if (proba) {
-            allCstrs.add(new AllDifferentProba(diffs, solver, type, this.count));
-        } else {
-            allCstrs.add(new AllDifferent(diffs, solver, type));
-        }
+        allCstrs.add(new AllDifferent(diffs, solver, type));
 
         // break symetries
         if (size > 2) {

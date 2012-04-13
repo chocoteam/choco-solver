@@ -38,6 +38,7 @@ import solver.propagation.comparators.predicate.Predicate;
 import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
+import solver.recorders.coarse.CoarseEventRecorderWithCondition;
 import solver.recorders.conditions.ICondition;
 import solver.recorders.fine.*;
 import solver.search.loop.monitors.VariableClearing;
@@ -301,7 +302,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         //if(predicate.eval()){
         if (condition != null) {
             //cpru :
-            return new CoarseEventRecorder(prop, solver);
+            return new CoarseEventRecorderWithCondition(prop, solver, condition);
         } else {
             return new CoarseEventRecorder(prop, solver);
         }
@@ -326,7 +327,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     }
 
     public static Primitive<ArcEventRecorder> arcs(ICondition<ArcEventRecorder> condition,
-                                                                Constraint... constraints) {
+                                                   Constraint... constraints) {
         Propagator[] propagators = prop0;
         for (int c = 0; c < constraints.length; c++) {
             propagators = ArrayUtils.append(propagators, constraints[c].propagators);
@@ -335,7 +336,7 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
     }
 
     public static Primitive<ArcEventRecorder> arcs(ICondition<ArcEventRecorder> condition,
-                                                                Propagator... propagators) {
+                                                   Propagator... propagators) {
         return new Primitive<ArcEventRecorder>(arc, var0, propagators, All.singleton, condition);
     }
 
@@ -371,6 +372,15 @@ public class Primitive<E extends IEventRecorder> extends Generator<IEventRecorde
         }
         return new Primitive<CoarseEventRecorder>(coarse, var0, propagators, All.singleton, null);
     }
+
+    public static Primitive<CoarseEventRecorder> coarses(ICondition<CoarseEventRecorder> condition, Constraint... constraints) {
+        Propagator[] propagators = prop0;
+        for (int c = 0; c < constraints.length; c++) {
+            propagators = ArrayUtils.append(propagators, constraints[c].propagators);
+        }
+        return new Primitive<CoarseEventRecorder>(coarse, var0, propagators, All.singleton, condition);
+    }
+
 
     public static Primitive<CoarseEventRecorder> coarses(Propagator... propagators) {
         return new Primitive<CoarseEventRecorder>(coarse, var0, propagators, All.singleton, null);
