@@ -35,7 +35,6 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.nary.PropInverseChanneling;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffRC;
 import solver.variables.IntVar;
 
 /**
@@ -81,20 +80,14 @@ public class InverseChanneling extends IntConstraint<IntVar> {
         Oy = -_oY;
         setPropagators(new PropInverseChanneling(this.X, this.Y, Ox, Oy, solver, this));
         switch (type) {
-            case NONE :
-                break;
             case AC:
                 addPropagators(new PropAllDiffAC(this.X, this, solver));
                 addPropagators(new PropAllDiffAC(this.Y, this, solver));
                 break;
             case BC:
+            default:
                 addPropagators(new PropAllDiffBC(this.X, solver, this));
                 addPropagators(new PropAllDiffBC(this.Y, solver, this));
-                break;
-            case RC:
-            default:
-                addPropagators(new PropAllDiffRC(this.X, solver, this));
-                addPropagators(new PropAllDiffRC(this.Y, solver, this));
                 break;
     }
     }

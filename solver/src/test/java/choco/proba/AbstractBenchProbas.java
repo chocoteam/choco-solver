@@ -26,9 +26,7 @@ public abstract class AbstractBenchProbas {
 
     BufferedWriter out;
 
-    int frequency; // only for the case of a CondAllDiffBCFreq case
     int seed;
-    boolean active; // true iff the probability is effectively applied
 
     //boolean mode; // true iff we search for all the solutions
     int size;
@@ -54,15 +52,11 @@ public abstract class AbstractBenchProbas {
     private long avgPropag;
     private long avgTime;
 
-    AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int frequency,
-                        boolean active, BufferedWriter out, int seed, boolean isProba) {
+    AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) {
         this.solver = solver;
         this.type = type;
-        //this.mode = mode;
         this.out = out;
         this.seed = seed;
-        this.frequency = frequency;
-        this.active = active;
         this.size = size;
         this.isProba = isProba;
     }
@@ -81,7 +75,7 @@ public abstract class AbstractBenchProbas {
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
         this.nbBcks = mes.getBackTrackCount();
-        this.nbPropag = mes.getPropagationsCount() + mes.getEventsCount();
+        this.nbPropag = mes.getPropagationsCount(); //+ mes.getEventsCount();  => on compte juste les propag lourdes
         if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
             this.time = mes.getTimeCount();
         } else {

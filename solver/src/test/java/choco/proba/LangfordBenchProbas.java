@@ -26,9 +26,8 @@ public class LangfordBenchProbas extends AbstractBenchProbas {
     int k;
     int n;
 
-    public LangfordBenchProbas(int k, int n, AllDifferent.Type type, int frequency, boolean active,
-                               BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), k * n, type, frequency, active, out, seed, isProba);
+    public LangfordBenchProbas(int k, int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), k * n, type, out, seed, isProba);
         this.k = k;
         this.n = n;
     }

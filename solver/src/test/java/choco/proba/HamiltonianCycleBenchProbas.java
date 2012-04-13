@@ -27,10 +27,9 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
     int neighbor;
     GenerateStrat strat;
 
-    public HamiltonianCycleBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                                       BufferedWriter out, int seed, int neighbor,
+    public HamiltonianCycleBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, int neighbor,
                                        GenerateStrat strat, boolean isProba) throws IOException {
-        super(new Solver(), n, type, frequency, active, out, seed, isProba);
+        super(new Solver(), n, type, out, seed, isProba);
         this.neighbor = neighbor;
         this.strat = strat;
     }
@@ -71,7 +70,7 @@ public class HamiltonianCycleBenchProbas extends AbstractBenchProbas {
         this.cstrs[0] = new AllDifferent(vars, solver, type);
         this.cstrs[2] = new AllDifferent(preds, solver, type);
         this.cstrs[1] = new NoSubTours(vars, solver);
-        this.cstrs[3] = new InverseChanneling(this.vars, preds, solver, AllDifferent.Type.NONE);
+        this.cstrs[3] = new InverseChanneling(this.vars, preds, solver, AllDifferent.Type.BC);
     }
 }
 

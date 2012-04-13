@@ -79,15 +79,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         assert checkUnion();
     }
 
-    /**
-     * @return true if the strong propag has to be called
-     */
-    public boolean isValid() {
-        double cut = rand.nextGaussian();
-        return (1 - proba > cut);
-        //return true;
-    }
-
     private static double probaAfterOther(long m, long n) {
         return (m - n < (2 * Math.sqrt(m))) ? 0 : 1;
     }
@@ -221,11 +212,11 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
             }
             int low = minMax_proc.getMin();
             int upp = minMax_proc.getMax();
-            unionset.instantiatedValue(var.getValue(), low, upp); */
+            unionset.instantiatedValue(var.getValue(), low, upp);
             unionset.instantiatedValue(var.getValue(), -1, -1);
-            //int v = unionset.getLastInstValuePos();
-            //int al = unionset.getLastLowValuePos();
-            //int be = unionset.getLastUppValuePos();
+            int v = unionset.getLastInstValuePos();
+            int al = unionset.getLastLowValuePos();
+            int be = unionset.getLastUppValuePos(); //*/
             try {
                 //System.out.print("****** INST debut retrait sur ");
                 //System.out.println(var + ": ");
@@ -234,8 +225,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
             } catch (ContradictionException e) {
                 throw new SolverException("CondAllDiffBCProba#update encounters an exception");
             }
-
-            /*this.proba = probaAfterInst(m, n, v, al, be); // je calcule la proba avant de prendre en compte les changements courrant */
+            //this.proba = probaAfterInst(m, n, v, al, be); // je calcule la proba avant de prendre en compte les changements courrant */
             this.proba = probaAfterOther(m, n);
         } else {   // la proba sur un autre type d'evenement
             try {
@@ -252,6 +242,22 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         ////////////////////////// liberation de l'iterateur sur le delta
         dm.unfreeze();
         assert checkUnion();
+    }
+
+    @Override
+    public boolean validateScheduling(CoarseEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
+        double cut = rand.nextGaussian();
+        return (1 - proba > cut);         // todo tester car on economise pas tant que ça de proba !
+//        return true;
+    }
+
+    @Override
+    public ICondition next() {
+        return null;
+    }
+
+    @Override
+    public void linkRecorder(CoarseEventRecorderWithCondition recorder) {
     }
 
     @Override
@@ -331,22 +337,5 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         }
         //System.out.println("calcul manuel de l'union ***********");
         return vals;
-    }
-
-    ///// CPRU: A NETTOYER ///
-
-    @Override
-    public boolean validateScheduling(CoarseEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
-        return isValid();
-//        return true;
-    }
-
-    @Override
-    public ICondition next() {
-        return null;
-    }
-
-    @Override
-    public void linkRecorder(CoarseEventRecorderWithCondition recorder) {
     }
 }

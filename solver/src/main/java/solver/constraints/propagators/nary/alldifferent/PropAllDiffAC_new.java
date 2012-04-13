@@ -44,8 +44,10 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Deque;
 
 /**
  * Propagator for AllDifferent AC constraint for integer variables
@@ -254,20 +256,34 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (n2 < n * 2) {
-            contradiction(null, "");
-        }
-        for (int v = 0; v < n; v++) {
-            if (vars[v].instantiated()) {
-                int val = vars[v].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != v) {
-                        vars[i].removeValue(val, this);
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            for (int v = 0; v < n; v++) {
+                if (vars[v].instantiated()) {
+                    int val = vars[v].getValue();
+                    for (int i = 0; i < n; i++) {
+                        if (i != v) {
+                            vars[i].removeValue(val, this);
+                        }
                     }
                 }
             }
+            buildDigraph();
+        } else {
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
         }
-        buildDigraph();
         repairMatching();
         filter();
     }
@@ -291,8 +307,9 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
                 digraph.removeEdge(i, j);
                 vars[i].removeValue(val, this);
             }
+            //cliqueNeq(idxVarInProp);
         }
-        if (nbPendingER == 0) {
+        /*if (nbPendingER == 0) {
             free.clear();
             for (int i = 0; i < n; i++) {
                 if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
@@ -306,6 +323,24 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
             }
             repairMatching();
             filter();
+        }*/
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
+
+    private void cliqueNeq(int i) throws ContradictionException {
+        Deque<IntVar> modified = new ArrayDeque<IntVar>();
+        modified.push(vars[i]);
+        while (!modified.isEmpty()) {
+            IntVar cur = modified.pop();
+            int valCur = cur.getValue();
+            for (IntVar toCheck : vars) {
+                if (toCheck != cur && toCheck.contains(valCur)) {
+                    toCheck.removeValue(valCur, this);
+                    if (toCheck.instantiated()) {
+                        modified.push(toCheck);
+                    }
+                }
+            }
         }
     }
 
@@ -320,7 +355,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override

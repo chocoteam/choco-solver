@@ -17,9 +17,8 @@ import java.io.IOException;
  */
 public class NqueensBenchProbas extends AbstractBenchProbas {
 
-    public NqueensBenchProbas(int n, AllDifferent.Type type, int frequency, boolean active,
-                              BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, frequency, active, out, seed, isProba);
+    public NqueensBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, out, seed, isProba);
     }
 
     @Override

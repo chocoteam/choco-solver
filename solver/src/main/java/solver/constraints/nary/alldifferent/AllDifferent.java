@@ -34,7 +34,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.binary.PropNotEqualXY;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC_new;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
-import solver.constraints.propagators.nary.alldifferent.PropAllDiffRC;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -47,11 +46,11 @@ import solver.variables.Variable;
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, BC, RC, NEQS, NONE
+        AC, BC, NEQS
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
-        this(vars, solver, Type.RC);
+        this(vars, solver, Type.BC);
     }
 
     public AllDifferent(IntVar[] vars, Solver solver, Type type) {
@@ -72,11 +71,8 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
                 break;
             case BC:
-                setPropagators(new PropAllDiffBC(this.vars, solver, this));
-                break;
-            case RC:
             default:
-                setPropagators(new PropAllDiffRC(this.vars, solver, this));
+                setPropagators(new PropAllDiffBC(this.vars, solver, this));
                 break;
         }
     }
