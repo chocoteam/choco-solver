@@ -205,7 +205,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         int n = nbNotInstVar.get();
         if (EventType.isInstantiate(evt.mask)) { // la proba sur l'instantiation
             nbNotInstVar.add(-1);
-            /*try {
+            try {
                 dm.forEach(minMax_proc.init(), EventType.REMOVE);
             } catch (ContradictionException e) {
                 throw new SolverException("CondAllDiffBCProba#update encounters an exception");
@@ -225,8 +225,8 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
             } catch (ContradictionException e) {
                 throw new SolverException("CondAllDiffBCProba#update encounters an exception");
             }
-            //this.proba = probaAfterInst(m, n, v, al, be); // je calcule la proba avant de prendre en compte les changements courrant */
-            this.proba = probaAfterOther(m, n);
+            this.proba = probaAfterInst(m, n, v, al, be); // je calcule la proba avant de prendre en compte les changements courrant */
+            //this.proba = probaAfterOther(m, n);
         } else {   // la proba sur un autre type d'evenement
             try {
                 //System.out.print("****** REM debut retrait sur ");

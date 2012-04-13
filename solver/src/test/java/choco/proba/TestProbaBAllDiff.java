@@ -22,11 +22,11 @@ public class TestProbaBAllDiff {
     public static void main(String[] args) throws IOException {
         BufferedWriter results = new BufferedWriter(new FileWriter(fileIt("results", ".csv")));
         //TestProbaBAllDiff.debug(results);
-        /*TestProbaBAllDiff.oneAllDiffTest(15, results);
+        TestProbaBAllDiff.oneAllDiffTest(14, results);
         TestProbaBAllDiff.hamiltonianCycleTest(200, results);
         TestProbaBAllDiff.magicSquareTest(5, results);//*/
         TestProbaBAllDiff.nQueensTest(12, results);
-        /*TestProbaBAllDiff.allIntervalSeriesTest(10, results);
+        TestProbaBAllDiff.allIntervalSeriesTest(10, results);
         TestProbaBAllDiff.partitionTest(24, results);
         TestProbaBAllDiff.golombRulerTest(9, results);
         TestProbaBAllDiff.langfordTest(3,17, results); //*/
@@ -56,7 +56,7 @@ public class TestProbaBAllDiff {
         OneAllDiffBenchProbas probaBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, out, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, probaBC, probaGAC};
         //AbstractBenchProbas[] problems = new AbstractBenchProbas[]{probaGAC};
-        launchEval(name, 30, size, problems, out, results);
+        launchEval(name, 40, size, problems, out, results);
         out.close();
     }
 
@@ -70,7 +70,7 @@ public class TestProbaBAllDiff {
         OneAllDiffBenchProbas probaGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, out, seed, true);
         OneAllDiffBenchProbas probaBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, out, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique, probaGAC, probaBC};
-        launchEval(name, 25, size, problems, out, results);
+        launchEval(name, 40, size, problems, out, results);
         out.close();
     }
 
@@ -80,10 +80,10 @@ public class TestProbaBAllDiff {
         NqueensBenchProbas gac = new NqueensBenchProbas(size, AllDifferent.Type.AC, out, seed, false);
         NqueensBenchProbas bounded = new NqueensBenchProbas(size, AllDifferent.Type.BC, out, seed, false);
         NqueensBenchProbas clique = new NqueensBenchProbas(size, AllDifferent.Type.NEQS, out, seed, false);
-        //NqueensBenchProbas probaGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, out, seed, true);
-        //NqueensBenchProbas probaBC = new NqueensBenchProbas(size, AllDifferent.Type.BC, out, seed, true);
-        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique, /*probaGAC, probaBC*/};
-        launchEval(name, 1, size, problems, out, results);  //5
+        NqueensBenchProbas probaGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, out, seed, true);
+        NqueensBenchProbas probaBC = new NqueensBenchProbas(size, AllDifferent.Type.BC, out, seed, true);
+        AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, bounded, clique, probaGAC, probaBC};
+        launchEval(name, 5, size, problems, out, results);
         out.close();
     }
 
