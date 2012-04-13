@@ -40,7 +40,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Comparator;
 
 import static choco.annotations.PropAnn.Status.*;
@@ -404,8 +403,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
-                filter |= maxsorted[i].var.updateLowerBound(bounds[w], this);
-                maxsorted[i].lb = bounds[w];
+                if (minsorted[i].var.updateLowerBound(bounds[w], this)) {
+                    filter |= true;
+                    maxsorted[i].lb = minsorted[i].var.getLB();
+                }
                 pathset(h, x, w, w);
             }
 
@@ -443,8 +444,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
-                filter |= minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
-                minsorted[i].ub = bounds[w] - 1;
+                if (minsorted[i].var.updateUpperBound(bounds[w] - 1, this)) {
+                    filter |= true;
+                    minsorted[i].ub = minsorted[i].var.getUB();
+                }
                 pathset(h, x, w, w);
             }
             if (d[z] == bounds[y] - bounds[z]) {
