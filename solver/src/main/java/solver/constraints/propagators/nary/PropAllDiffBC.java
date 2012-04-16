@@ -74,8 +74,8 @@ public class PropAllDiffBC extends Propagator<IntVar> {
     int[] instantiatedValues;
     IStateInt ivIdx;
 
-    boolean infBoundModified = true;
-    boolean supBoundModified = true;
+    public boolean infBoundModified = true;
+    public boolean supBoundModified = true;
 
     public PropAllDiffBC(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
@@ -93,16 +93,16 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         int idx = 0;
         instantiatedValues = new int[n];
         for (int i = 0; i < vars.length; i++) {
-            intervals[i] = new Interval();
-            intervals[i].var = vars[i];
-            intervals[i].idx = i;
-            minsorted[i] = intervals[i];
-            maxsorted[i] = intervals[i];
+            Interval interval = new Interval();
+            interval.var = vars[i];
+            interval.idx = i;
+            intervals[i] = interval;
+            minsorted[i] = interval;
+            maxsorted[i] = interval;
             if (vars[i].instantiated()) {
                 instantiatedValues[idx++] = vars[i].getValue();
             }
         }
-        intervals = minsorted.clone();
         ivIdx = environment.makeInt(idx);
     }
 
@@ -303,9 +303,23 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         }
     }
 
+    /**
+     * appears to be more efficient than Arrays.sort() because
+     * it does not clone the array before sorting it,
+     * but "simply" copy it into a temporary one -- intervals
+     */
+    private void _sort() {
+        int n = vars.length;
+        System.arraycopy(minsorted, 0, intervals, 0, n);
+        mergeSort(intervals, minsorted, 0, n, SORT.MIN);
+        System.arraycopy(maxsorted, 0, intervals, 0, n);
+        mergeSort(intervals, maxsorted, 0, n, SORT.MAX);
+//        Arrays.sort(minsorted, SORT.MIN);
+//        Arrays.sort(maxsorted, SORT.MAX);
+    }
+
     protected void sortIt() {
-        mergeSort(intervals, minsorted, 0, intervals.length, SORT.MIN);
-        mergeSort(intervals, maxsorted, 0, intervals.length, SORT.MAX);
+        _sort();
 
         int min = minsorted[0].lb;
         int max = maxsorted[0].ub + 1;
@@ -391,8 +405,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
-                filter |= maxsorted[i].var.updateLowerBound(bounds[w], this);
-                maxsorted[i].lb = bounds[w];
+                if (maxsorted[i].var.updateLowerBound(bounds[w], this)) {
+                    filter |= true;
+                    maxsorted[i].lb = maxsorted[i].var.getLB();//bounds[w];
+                }
                 pathset(h, x, w, w);
             }
 
@@ -430,8 +446,10 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
-                filter |= minsorted[i].var.updateUpperBound(bounds[w] - 1, this);
-                minsorted[i].ub = bounds[w] - 1;
+                if (minsorted[i].var.updateUpperBound(bounds[w] - 1, this)) {
+                    filter |=true;
+                    minsorted[i].ub = minsorted[i].var.getUB();//bounds[w] - 1;
+                }
                 pathset(h, x, w, w);
             }
             if (d[z] == bounds[y] - bounds[z]) {
