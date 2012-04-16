@@ -125,7 +125,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(max - min);
         this.SIZE = env.makeInt(capacity);
-        assert capacity == VALUES.capacity();
         LENGTH = capacity;
         this.makeList(this);
     }
