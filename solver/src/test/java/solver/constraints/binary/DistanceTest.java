@@ -33,7 +33,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.propagators.Propagator;
+import solver.constraints.ternary.DistanceXYZ;
 import solver.exception.ContradictionException;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.enumerations.values.heuristics.zeroary.Random;
 import solver.variables.IntVar;
@@ -128,6 +130,19 @@ public class DistanceTest {
             }
         }
 
+    }
+
+    @Test
+    public void test3() {
+        Solver solver = new Solver();
+        IntVar X = VariableFactory.bounded("X", -5, 5, solver);
+        IntVar Y = VariableFactory.bounded("Y", -5, 5, solver);
+        IntVar Z = VariableFactory.bounded("Z", 0, 10, solver);
+        solver.post(new DistanceXYZ(X, Y, DistanceXYZ.Relop.EQ, Z, solver));
+        solver.set(StrategyFactory.inputOrderMinVal(new IntVar[]{Z,X,Y,Z}, solver.getEnvironment()));
+        SearchMonitorFactory.log(solver, true, true);
+        solver.findAllSolutions();
+        System.out.printf("end\n");
     }
 
 }

@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
@@ -60,7 +61,10 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 500;
+    private int m = 5;
+
+    @Option(name = "-v", usage = " use views instead of constraints.", required = false)
+    private boolean use_views = false;
 
     IntVar[] vars;
     IntVar[] dist;
@@ -76,15 +80,12 @@ public class AllIntervalSeries extends AbstractProblem {
         dist = new IntVar[m - 1];
 
 
-        /*if (false) {
+        if (!use_views) {
             dist = VariableFactory.enumeratedArray("dist", m - 1, 1, m - 1, solver);
-            IntVar[] tmp = VariableFactory.enumeratedArray("tmp", m - 1, -(m - 1), m - 1, solver);
             for (int i = 0; i < m - 1; i++) {
-                solver.post(Sum.eq(new IntVar[]{vars[i + 1], Views.minus(vars[i]), Views.minus(tmp[i])}, 0, solver));
-                solver.post(new Absolute(dist[i], tmp[i], solver));
+                solver.post(new DistanceXYZ(vars[i + 1], vars[i], DistanceXYZ.Relop.EQ, dist[i], solver));
             }
-        } else*/
-        {
+        } else {
             for (int i = 0; i < m - 1; i++) {
                 dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
                 solver.post(new Member(dist[i], 1, m - 1, solver));
@@ -110,21 +111,13 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // BEWARE:
-        // tout se joue sur le nombre d'appel ˆ la mŽthode filter des contraitne AllDiff BC
-        // OLDEST n'appelle que m fois le filtrage lourd de AllDiff, les autres l'appellent 2 * m-1
-        // Or, c'est cet algo qui coute.
-        // Il se dŽclenche lorsque la derniere requete du propagateur est propagee,
-        // il faut donc que celle-ci soit propagee le plus tard possible
-
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PVar(vars), new PVar(dist), new PCons(ALLDIFF));
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(vars), new PArc(dist), new PCons(ALLDIFF));
         Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
         solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
     }
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
     }
 

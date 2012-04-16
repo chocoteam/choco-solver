@@ -111,7 +111,7 @@ def readParameters(paramlist):
 
 def checkParam():
     if not frontend and loop > 1:
-        print 'Loop parameter is not considered as front end option is off'
+        print 'Loop parameter is ignored: front end option is off'
     if db | plot:
         print host
         if host == '': raise Exception('database cnx : host must be defined')

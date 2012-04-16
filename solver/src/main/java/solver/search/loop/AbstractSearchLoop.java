@@ -319,6 +319,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public void restaureRootNode() {
         env.worldPopUntil(searchWorldIndex);
+        timeStamp++; // to force clear delta, on solution recording
     }
 
     /**
