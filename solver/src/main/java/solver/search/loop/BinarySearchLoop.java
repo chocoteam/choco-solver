@@ -142,7 +142,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         downBranch();
     }
 
-    private void downBranch() {
+    protected void downBranch() {
         env.worldPush();
         try {
             decision.buildNext();
@@ -188,7 +188,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public final void restartSearch() {
+    public void restartSearch() {
         restaureRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {

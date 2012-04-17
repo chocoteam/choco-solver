@@ -51,6 +51,7 @@ import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
+import solver.search.loop.SearchLoops;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
@@ -146,6 +147,7 @@ public class ATSP_CP12 {
 	public static void createModel() {
 		// create model
 		solver = new Solver();
+//		solver.
 		initialUB = optimum;
 		System.out.println("initial UB : "+optimum);
 		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
@@ -277,6 +279,12 @@ public class ATSP_CP12 {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 			}
+//			public void onSolution() {
+//				System.out.println("youhou");
+//			}
+//			public void onContradiction(ContradictionException cex) {
+//				System.out.println("yaha");
+//			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
@@ -365,13 +373,13 @@ public class ATSP_CP12 {
 		};
 		toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxRepCost};
 		for (String s : list) {
-			if (s.contains(".atsp") || s.contains(".atsp")){//!s.contains("p43")){
+			if (s.contains(".atsp") && (!s.contains("170.atsp")) && (!s.contains("p43.atsp"))){//!s.contains("p43")){
 				loadInstance(dir + "/" + s);
 				if(n>0 && n<2070){
 					for(ATSP_heuristics atsp_h:toTry){
 						heuristic = atsp_h;
-						bst = true;
-						configParameters(1<<rg);
+						bst = false;
+						configParameters(0);
 						solve();
 					}
 				}

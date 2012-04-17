@@ -25,10 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary;
+package samples.graph.jg_sandbox;
 
 import choco.kernel.ESat;
-import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -41,12 +40,8 @@ import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import java.util.BitSet;
 
-/**Propagator that ensures that the final graph consists in K cliques
- * @author Jean-Guillaume Fages
- */
-public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
+public class PropKWorkers<V extends Variable> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -54,142 +49,89 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 
 	private GraphVar g;
 	private IntVar k;
-	int n;
-	BitSet in;
-	BitSet inMIS;
-	int[] nbNeighbors;
+	int n,firstTaskIndex;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCliques(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);//
+	public PropKWorkers(GraphVar graph, int firstTaskIdx,IntVar k, GraphConstraint constraint,Solver solver) {
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();
-		in = new BitSet(n);
-		inMIS = new BitSet(n);
-		nbNeighbors = new int[n];
+		firstTaskIndex = firstTaskIdx;
 	}
 
 	//***********************************************************************************
-	// FILTERING
+	// PROPAGATIONS
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-//		int min = simpleSearch();
-		int min = efficientSearch();
-		k.updateLowerBound(min, this);
-		if(min == k.getUB()){
-			filter();
-		}
+		filter();
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
+		filter();
 	}
 
-	private void filter() throws ContradictionException {
-		IActiveNodes nodes = g.getEnvelopGraph().getActiveNodes();
+	private void filter() throws ContradictionException{
+		int nbK = 0;
+		int nbE = 0;
+		int nbKNotWorking = 0;
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for(int i=env.getFirstElement();i>=0 && i<firstTaskIndex;i=env.getNextElement()){
+			nbE++;
+			if(ker.isActive(i)){
+				nbK++;
+				if(g.getKernelGraph().getNeighborsOf(i).isEmpty()){
+					nbKNotWorking++;
+				}
+			}
+		}
 		INeighbors nei;
-		int mate;
-		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-			if(!inMIS.get(i)){
-				mate = -1;
-				nei = g.getEnvelopGraph().getNeighborsOf(i);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(inMIS.get(j)){
-						if(mate == -1){
-							mate = j;
-						}else{
-							mate = -2;
-							break;
-						}
+		int nbNotAssigned = 0;
+		for(int i=firstTaskIndex;i<n;i++){
+			nei = g.getKernelGraph().getNeighborsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(j<firstTaskIndex){
+					nbNotAssigned--;break;
+				}
+			}
+			nbNotAssigned++;
+		}
+		if(nbNotAssigned<nbKNotWorking ){
+			contradiction(g,"");
+		}
+		if(nbNotAssigned==nbKNotWorking ){
+			for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+				if(!ker.isActive(i)){
+					g.removeNode(i,this);
+					nbE--;
+				}
+			}
+		}
+		k.updateLowerBound(nbK,this);
+		k.updateUpperBound(nbE,this);
+		if(nbK!=nbE && k.instantiated()){
+			if(k.getValue()==nbK){
+				for(int i=env.getFirstElement();i>=0 && i<firstTaskIndex;i=env.getNextElement()){
+					if(!ker.isActive(i)){
+						g.removeNode(i,this);
 					}
 				}
-				if(mate>=0){
-					g.enforceArc(i,mate,this);
+			}
+			else if(k.getValue()==nbE){
+				for(int i=env.getFirstElement();i>=0 && i<firstTaskIndex;i=env.getNextElement()){
+					if(!ker.isActive(i)){
+						g.enforceNode(i,this);
+					}
 				}
 			}
 		}
-	}
-
-	private int simpleSearch(){
-		in.clear();
-		inMIS.clear();
-		int nb = 0;
-		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-			in.set(i);
-			nb++;
-		}
-		int idx = -1;
-		INeighbors nei;
-		int min = 0;
-		while (nb>0){
-			idx = in.nextSetBit(idx+1);
-			nei = g.getEnvelopGraph().getNeighborsOf(idx);
-			in.clear(idx);
-			inMIS.set(idx);
-			nb--;
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(in.get(j)){
-					in.clear(j);
-					nb--;
-				}
-			}
-			min ++;
-		}
-		return min;
-	}
-
-	private int efficientSearch(){
-		in.clear();
-		inMIS.clear();
-		int nb = 0;
-		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
-		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-			in.set(i);
-			nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-			nb++;
-		}
-		int idx;
-		INeighbors nei;
-		TIntArrayList list = new TIntArrayList();
-		int min = 0;
-		while (nb>0){
-			idx = in.nextSetBit(0);
-			for(int i=in.nextSetBit(idx+1);i>=0;i=in.nextSetBit(i+1)){
-				if(nbNeighbors[i]<nbNeighbors[idx]){
-					idx = i;
-				}
-			}
-			nei = g.getEnvelopGraph().getNeighborsOf(idx);
-			in.clear(idx);
-			inMIS.set(idx);
-			nb--;
-			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				if(in.get(j)){
-					in.clear(j);
-					nb--;
-					list.add(j);
-				}
-			}
-			for(int i=list.size()-1;i>=0;i--){
-				nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//					if(in.get(j)){
-						nbNeighbors[j]--;
-//					}
-				}
-			}
-			list.clear();
-			min ++;
-		}
-		return min;
 	}
 
 	//***********************************************************************************
@@ -198,7 +140,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVENODE.mask + EventType.ENFORCENODE.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override

@@ -36,15 +36,14 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**Propagator that ensures that the relation of the graph is transitive
- * 
+ *
  * TODO Incrementalite ? Pas sur que ce soit utile
- * 
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
@@ -55,7 +54,6 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 
 	private V g;
 	private int n;
-	public static long duration;
 	private IntProcedure arcEnforced;
 	private IntProcedure arcRemoved;
 
@@ -81,24 +79,18 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	@Override
-	public void propagate(int evtmask) throws ContradictionException {duration=0;}
+	public void propagate(int evtmask) throws ContradictionException {
+		//TODO
+	}
 
-	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		long time = System.currentTimeMillis();
-        Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
-			if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, var).forEach(arcEnforced, EventType.ENFORCEARC);
-            }
-            if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, var).forEach(arcRemoved, EventType.REMOVEARC);
-            }
-		}else{
-			throw new UnsupportedOperationException("error ");
+		if ((mask & EventType.ENFORCEARC.mask) != 0) {
+			eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
 		}
-		duration+=System.currentTimeMillis()-time;
+		if ((mask & EventType.REMOVEARC.mask) != 0) {
+			eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+		}
 	}
 
 	//***********************************************************************************
@@ -114,7 +106,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
 	}
-	
+
 	//***********************************************************************************
 	// PROCEDURE
 	//***********************************************************************************
@@ -122,7 +114,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	// undirected case
 	private class EnfArcUndig implements IntProcedure{
 		private GraphPropagator p;
-		
+
 		private EnfArcUndig(GraphPropagator p){
 			this.p = p;
 		}
@@ -140,10 +132,13 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 			INeighbors env = g.getEnvelopGraph().getNeighborsOf(node);
 			INeighbors envMate = g.getEnvelopGraph().getNeighborsOf(mate);
 			for(int i=env.getFirstElement(); i>=0; i = env.getNextElement()){
-				if(ker.contain(i)){
-					g.enforceArc(i, mate, p);
-				}else if (!envMate.contain(i)){
-					g.removeArc(i, node, p);
+				if(i!=mate){
+					if(ker.contain(i)){
+						g.enforceArc(i, mate, p);
+					}
+					else if (!envMate.contain(i)){
+						g.removeArc(node, i, p);
+					}
 				}
 			}
 		}
@@ -152,7 +147,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	private class EnfArcDig implements IntProcedure{
 		private GraphPropagator p;
 		private DirectedGraphVar g;
-		
+
 		private EnfArcDig(GraphPropagator p, V g){
 			this.p = p;
 			this.g = (DirectedGraphVar) g;
@@ -177,12 +172,12 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 			}
 		}
 	}
-	
+
 	// --- Arc removals
 	// undirected case
 	private class RemArcUndig implements IntProcedure{
 		private GraphPropagator p;
-		
+
 		private RemArcUndig(GraphPropagator p){
 			this.p = p;
 		}
@@ -195,7 +190,6 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 				apply(to,from);
 			}
 		}
-
 		private void apply(int node, int mate) throws ContradictionException {
 			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(node);
 			for(int i=nei.getFirstElement(); i>=0; i = nei.getNextElement()){
@@ -209,7 +203,7 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	private class RemArcDig implements IntProcedure{
 		private GraphPropagator p;
 		private DirectedGraphVar g;
-		
+
 		private RemArcDig(GraphPropagator p, V g){
 			this.p = p;
 			this.g = (DirectedGraphVar) g;

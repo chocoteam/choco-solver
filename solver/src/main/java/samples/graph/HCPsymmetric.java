@@ -85,7 +85,7 @@ public class HCPsymmetric {
 		clearFile(outFile);
 		writeTextInto("instance;nbSols;nbFails;time;orientation;allDiffAC;\n",outFile);
 //		int size = 50;
-		int[] sizes = {10,20,50,100,200,500};
+//		int[] sizes = {10,20,50,100,200,500};
 //		for(int size:sizes){
 		for(int size=8; size<500;size+=2){
 			String s = "king_"+size;
@@ -93,7 +93,7 @@ public class HCPsymmetric {
 			boolean[][] matrix = generateKingTourInstance(size);
 			alldifferentAC = false;
 			solveUndirected(matrix,s);
-			System.exit(0);
+//			System.exit(0);
 //			solveDirected(matrix,s);
 //			alldifferentAC = true;
 //			solveUndirected(matrix,s);
@@ -238,17 +238,16 @@ public class HCPsymmetric {
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		solver.getSearchLoop().plugSearchMonitor(new MyMon());
+//		solver.getSearchLoop().plugSearchMonitor(new MyMon());
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 //		solver.findAllSolutions();
-//		solver.findSolution();
-		solver.findAllSolutions();
+		solver.findSolution();
 		checkUndirected(solver, undi);
 		//output
-		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) + ";undirected;"+alldifferentAC+";\n";
-		writeTextInto(txt, outFile);
+//		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
+//				+ (int)(solver.getMeasures().getTimeCount()) + ";undirected;"+alldifferentAC+";\n";
+//		writeTextInto(txt, outFile);
 	}
 
 	private static void checkUndirected(Solver solver, UndirectedGraphVar undi) {

@@ -54,8 +54,7 @@ public class CostasArrays extends AbstractProblem {
 	@Option(name = "-o", usage = "Costas array size.", required = false)
 	private static int n = 14;  // should be <15 to be solve quickly
 
-	IntVar[] vars;
-	IntVar[] vectors;
+	IntVar[] vars,vectors;
 
 	@Override
 	public void buildModel() {
@@ -71,13 +70,13 @@ public class CostasArrays extends AbstractProblem {
 				}
 			}
 		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.GRAPH));
-		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.CLIQUE));
+		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE));
+		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.CLIQUE_IN_ONE));
 	}
 
 	@Override
 	public void configureSolver() {
-		solver.set(StrategyFactory.forceInputOrderMinVal(vars, solver.getEnvironment()));
+		solver.set(StrategyFactory.forceInputOrderMinVal(vectors, solver.getEnvironment()));
 	}
 
 	@Override
@@ -89,6 +88,7 @@ public class CostasArrays extends AbstractProblem {
 	public void prettyOut() {
 		String s = "";
 		for(int i=0;i<n;i++){
+			s+="|";
 			for(int j=0;j<n;j++){
 				if(j==vars[i].getValue()){
 					s+="x|";
