@@ -83,6 +83,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     @Override
     public void schedule(ISchedulable element) {
         // CONDITION: the element must not be already present (checked in element)
+        assert !element.enqueued();
         int idx = element.getIndexInScheduler();
         toPropagate.set(idx);
         element.enqueue();
@@ -106,7 +107,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -120,7 +121,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
             idx = toPropagate.nextSetBit(idx + 1);
@@ -171,6 +172,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             }
             lastPopped.deque();
         }
+        assert !enqueued;
     }
 
     @Override

@@ -36,8 +36,8 @@ import solver.recorders.IEventRecorder;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/11
  * @revision 04/03/12 change schedule
+ * @since 15/12/11
  */
 public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
@@ -70,6 +70,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
     @Override
     public void schedule(S element) {
         // CONDITION: the element must not be already present (checked in element)
+        assert !element.enqueued();
         toPropagate.add(element);
         element.enqueue();
         if (!enqueued) {
@@ -91,7 +92,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         if (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.remove();//pop();
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -112,7 +113,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.remove();//.pop();
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }

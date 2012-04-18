@@ -77,6 +77,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     @Override
     public void schedule(S element) {
         // CONDITION: the element must not be already present (checked in element)
+        assert !element.enqueued();
         int idx = element.getIndexInScheduler();
         toPropagate.insert(evaluator.eval(element), idx);
         element.enqueue();
@@ -99,7 +100,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&&!lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -120,7 +121,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&&!lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
