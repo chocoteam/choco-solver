@@ -172,7 +172,6 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             }
             lastPopped.deque();
         }
-        assert !enqueued;
     }
 
     @Override
