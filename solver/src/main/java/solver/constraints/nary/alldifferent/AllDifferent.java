@@ -67,6 +67,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 }
                 setPropagators(props);
             }
+            break;
             case AC:
                 setPropagators(new PropAllDiffAC_new(this.vars, this, solver));
                 break;

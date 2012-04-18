@@ -87,6 +87,8 @@ public final class Delta implements IntDelta {
         rem[last++] = value;
     }
 
+
+
     @Override
     public int get(int idx) {
         return rem[idx];

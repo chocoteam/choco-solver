@@ -38,17 +38,12 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public final class ViewDelta implements IntDelta {
+public abstract class ViewDelta implements IntDelta {
 
-    protected final IDeltaMonitor<IntDelta> deltaMonitor;
+    protected final IntDelta delta;
 
-    public ViewDelta(IDeltaMonitor<IntDelta> deltaMonitor) {
-        this.deltaMonitor = deltaMonitor;
-    }
-
-    @Override
-    public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
-        return deltaMonitor;
+    public ViewDelta(IntDelta delta) {
+        this.delta = delta;
     }
 
     @Override
@@ -58,24 +53,26 @@ public final class ViewDelta implements IntDelta {
 
     @Override
     public int get(int idx) throws IndexOutOfBoundsException {
-        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
+        return delta.get(idx);
     }
 
 	@Override
     public ICause getCause(int idx) throws IndexOutOfBoundsException {
-        throw new UnsupportedOperationException("Delta#get(int) unavailable for view");
+        return delta.getCause(idx);
     }
 
     @Override
     public int size() {
-        return 0;
+        return delta.size();
     }
 
 	@Override
     public void clear() {
+        delta.clear();
     }
 
     @Override
     public void lazyClear() {
+        delta.lazyClear();
     }
 }

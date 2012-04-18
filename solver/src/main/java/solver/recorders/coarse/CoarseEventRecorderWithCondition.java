@@ -29,6 +29,7 @@ package solver.recorders.coarse;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 
@@ -66,6 +67,22 @@ public class CoarseEventRecorderWithCondition extends CoarseEventRecorder {
             }
         }
     }
+
+    /*@Override
+    public boolean execute() throws ContradictionException {
+        boolean activate = false;
+        if (propagator.isStateLess()) {
+            //promote event to top level event FULL_PROPAGATION
+            evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
+            activate = true;
+            propagator.setActive();
+        }
+        boolean ret = super.execute();
+        if (activate) {
+            condition.activate();
+        }
+        return ret;
+    } */
 
 
     @Override

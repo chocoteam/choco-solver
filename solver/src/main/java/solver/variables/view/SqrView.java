@@ -40,6 +40,8 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
@@ -68,30 +70,35 @@ public final class SqrView extends View<IntVar> {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(), this) {
+            delta = new ViewDelta(var.getDelta()) {
+
                 @Override
-                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                    if (EventType.isRemove(eventType.mask)) {
-                        for (int i = frozenFirst; i < frozenLast; i++) {
-                            if (propagator != delta.getCause(i)) {
-                                int v = delta.get(i);
-                                if (!var.contains(-v)) {
-                                    boolean found = false;
-                                    for (int j = i + 1; !found && j < frozenLast; j++) {
-                                        if (delta.get(j) == -v) {
-                                            found = true;
+                public IDeltaMonitor<IntDelta> getMonitor(ICause propagator) {
+                    return new IntDeltaMonitor(this, propagator) {
+                        @Override
+                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                            if (EventType.isRemove(eventType.mask)) {
+                                for (int i = frozenFirst; i < frozenLast; i++) {
+                                    if (propagator != delta.getCause(i)) {
+                                        int v = delta.get(i);
+                                        if (!var.contains(-v)) {
+                                            boolean found = false;
+                                            for (int j = i + 1; !found && j < frozenLast; j++) {
+                                                if (delta.get(j) == -v) {
+                                                    found = true;
+                                                }
+                                            }
+                                            if (!found) {
+                                                proc.execute(v * v);
+                                            }
                                         }
                                     }
-                                    if (!found) {
-                                        proc.execute(v * v);
-                                    }
                                 }
-
                             }
                         }
-                    }
+                    };
                 }
-            });
+            };
             reactOnRemoval = true;
         }
     }

@@ -21,10 +21,10 @@ public class NqueensBenchProbas extends AbstractBenchProbas {
         super(new Solver(), n, type, out, seed, isProba);
     }
 
-    @Override
+    /*@Override
     void solveProcess() {
         this.solver.findAllSolutions();
-    }
+    } */
 
     @Override
     void buildProblem(int size, boolean proba) {

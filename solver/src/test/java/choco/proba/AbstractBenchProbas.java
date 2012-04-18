@@ -8,13 +8,17 @@ import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Queue;
 import solver.recorders.conditions.ICondition;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
+import javax.swing.*;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -41,15 +45,15 @@ public abstract class AbstractBenchProbas {
     private int nbTests; // number of tests executed
     private long nbSolutions;
     private long nbNodes;
-    private long nbBcks;
     private long nbPropag; // number of propagation for the meta-propagator of alldiff
+    private double ratioPropagByNodes;
     private float time;
 
     // output averages
     private long avgSolutions;
     private long avgNodes;
-    private long avgBcks;
     private long avgPropag;
+    private double avgRatio;
     private long avgTime;
 
     AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) {
@@ -72,10 +76,16 @@ public abstract class AbstractBenchProbas {
 
     void recordResults() throws IOException {
         IMeasures mes = this.solver.getMeasures();
+        //this.nbSolutions = mes.getObjectiveValue();//mes.getSolutionCount();
         this.nbSolutions = mes.getSolutionCount();
         this.nbNodes = mes.getNodeCount();
-        this.nbBcks = mes.getBackTrackCount();
         this.nbPropag = mes.getPropagationsCount(); //+ mes.getEventsCount();  => on compte juste les propag lourdes
+        if (this.nbNodes > 0) {
+            this.ratioPropagByNodes = ((double) this.nbPropag) / this.nbNodes;
+        } else {
+            this.ratioPropagByNodes = this.nbPropag; // on a que le noeud root
+        }
+
         if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
             this.time = mes.getTimeCount();
         } else {
@@ -89,8 +99,8 @@ public abstract class AbstractBenchProbas {
         String s = "";
         s += ((double) this.avgSolutions / this.nbTests) + sep;
         s += ((double) this.avgNodes / this.nbTests) + sep;
-        s += ((double) this.avgBcks / this.nbTests) + sep;
         s += ((double) this.avgPropag / this.nbTests) + sep;
+        s += (this.avgRatio / this.nbTests) + sep;
         double avgTime = (double) this.avgTime / this.nbTests;
         if (avgTime == 0) {
             s += "NaN" + sep;
@@ -105,18 +115,22 @@ public abstract class AbstractBenchProbas {
     private void incrAverage() {
         this.avgSolutions += this.nbSolutions;
         this.avgNodes += this.nbNodes;
-        this.avgBcks += this.nbBcks;
         this.avgPropag += this.nbPropag;
+        this.avgRatio += this.ratioPropagByNodes;
         this.avgTime += this.time;
         this.nbTests++;
     }
 
     private void writeResults() throws IOException {
         String s = "";
-        s += this.nbSolutions + sep;
+        if (this.nbSolutions == Integer.MAX_VALUE) {
+            s += "NaN" + sep;
+        } else {
+            s += this.nbSolutions + sep;
+        }
         s += this.nbNodes + sep;
-        s += this.nbBcks + sep;
         s += this.nbPropag + sep;
+        s += this.ratioPropagByNodes + sep;
         if (this.time == 0) {
             s += "NaN" + sep;
         } else {
@@ -139,12 +153,15 @@ public abstract class AbstractBenchProbas {
         if (!isProba) {
             coarses = Queue.build(Primitive.coarses(cstrs));
         } else {
+            ActivateCond sm = new ActivateCond();
+            solver.getSearchLoop().plugSearchMonitor(sm);
             java.util.List<Primitive> coarses_ = new ArrayList<Primitive>();
             for (int i = 0; i < cstrs.length; i++) {
                 if (cstrs[i] instanceof AllDifferent) {
                     IntConstraint icstr = (IntConstraint) cstrs[i];
                     IntVar[] myvars = icstr.getVariables();
                     ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars);
+                    sm.add(condition);
                     coarses_.add(Primitive.coarses(condition, cstrs[i]));
                 } else {
                     coarses_.add(Primitive.coarses(cstrs[i]));
@@ -162,8 +179,6 @@ public abstract class AbstractBenchProbas {
     void execute() throws IOException {
         this.buildProblem(size, false);
         this.solver.post(this.cstrs);
-//        solver.set(PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver));
-//        SearchMonitorFactory.log(this.solver, true, true);
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
         this.configSearchStrategy();
         this.configPropStrategy();
@@ -175,6 +190,22 @@ public abstract class AbstractBenchProbas {
             return "" + type;
         } else {
             return "" + type + "-prob";
+        }
+    }
+
+    private static class ActivateCond extends VoidSearchMonitor implements ISearchMonitor {
+
+        List<ICondition> conds = new ArrayList<ICondition>();
+
+        public void add(ICondition cond) {
+            conds.add(cond);
+        }
+
+        @Override
+        public void afterInitialize() {
+            for (ICondition cond : conds) {
+                cond.activate();
+            }
         }
     }
 

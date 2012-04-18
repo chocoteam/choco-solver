@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Xavier Lorca
  * @since 28 nov. 2011
  */
-public class Union {
+public class Union implements IUnion {
 
     /**
      * link between a value and its position among all the values
@@ -55,30 +55,24 @@ public class Union {
     Value[] values;
     IStateInt idx;
 
-    /**
-     * Position of the last instantiated value before update according to its instantiation
-     */
     int lastInstValuePos;
-
     int lastLowValuePos;
-
     int lastUppValuePos;
-
 
 
     public Union(IntVar[] variables, IEnvironment environment) {
         Set<Value> vals = new HashSet<Value>();
-        Set<Integer> instVals = new HashSet<Integer>();
+        //Set<Integer> instVals = new HashSet<Integer>();
         TIntObjectHashMap<Value> int2Value = new TIntObjectHashMap<Value>();
-        for (IntVar var : variables) {
+        /*for (IntVar var : variables) {
             if (var.instantiated()) {
                 instVals.add(var.getValue());
             }
-        }
+        }*/
         for (IntVar var : variables) {
             int ub = var.getUB();
             for (int value = var.getLB(); value <= ub; value = var.nextValue(value)) {
-                if (!instVals.contains(value)) {
+                //if (!instVals.contains(value)) {
                     Value v = int2Value.get(value);
                     if (v == null) {
                         v = new Value(value, environment);
@@ -86,7 +80,7 @@ public class Union {
                         int2Value.put(value, v);
                     }
                     v.incrOcc();
-                }
+                //}
             }
         }
         values = vals.toArray(new Value[vals.size()]);
@@ -102,35 +96,25 @@ public class Union {
         System.out.println("\n-----------------");//*/
     }
 
+    @Override
     public void remove(int value) {
-        /*for (int i = 0; i <= idx.get(); i++) {
-            System.out.print(values[i] + ";");
-        }
-        System.out.println(); //*/
         int lastPresent = idx.get();
         int indice = val2idx.get(value);
         if (indice <= lastPresent) {
             Value v = values[indice];
             v.decrOcc();
-            /*System.out.println("indice:" + indice + " -- idx:" + lastPresent);
-            System.out.println("apres ");
-            for (int i = 0; i <= idx.get(); i++) {
-                System.out.print(values[i] + ";");
-            }
-            System.out.println("\n--------");//*/
             if (v.getOcc() == 0) {
                 Value lastElement = values[lastPresent];
                 values[lastPresent] = values[indice];
                 values[indice] = lastElement;
-                val2idx.put(lastElement.getValue(), indice);
-                val2idx.put(value, lastPresent);
+                val2idx.adjustValue(lastElement.getValue(),indice-lastPresent);
+                val2idx.adjustValue(value,lastPresent-indice);
                 idx.add(-1);
             }
-        } /*else {
-            System.out.println("deja traite");
-        }//*/
+        }
     }
 
+    @Override
     public void instantiatedValue(int value, int low, int upp) {
         lastInstValuePos = val2idx.get(value);
         lastLowValuePos = val2idx.get(low);
@@ -138,29 +122,23 @@ public class Union {
         remove(value);
     }
 
+    @Override
     public int getLastInstValuePos() {
         return lastInstValuePos;
     }
 
+    @Override
     public int getLastLowValuePos() {
         return lastLowValuePos;
     }
 
+    @Override
     public int getLastUppValuePos() {
         return lastUppValuePos;
     }
 
     public int getSize() {
-        return idx.get() + 1;
-    }
-
-    public int getOccOf(int value) {
-        int indice = val2idx.get(value);
-        if (indice > idx.get()) {
-            return 0;
-        } else {
-            return values[indice].getOcc();
-        }
+        return idx.get()+1;
     }
 
     public int[] getValues() {
@@ -171,8 +149,13 @@ public class Union {
         return tmp;
     }
 
-    public int getPosition(int value) {
-        return val2idx.get(value);
+    public int getOccOf(int value) {
+        int indice = val2idx.get(value);
+        if (indice > idx.get()) {
+            return 0;
+        } else {
+            return values[indice].getOcc();
+        }
     }
 
     public String toString() {
@@ -210,9 +193,7 @@ final class Value {
     }
 
     public final void decrOcc() {
-        if (occ.get() > 0) {
-            this.occ.add(-1);
-        }
+        this.occ.add(-1);
     }
 
     public boolean equals(Object o) {
