@@ -135,7 +135,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
             idx = toPropagate.nextSetBit(idx + 1);
@@ -152,7 +152,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
