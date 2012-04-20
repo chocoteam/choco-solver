@@ -157,6 +157,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         boolean change = false;
@@ -185,23 +186,23 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                     LB.set(VALUES.nextSetBit(aValue));
                     e = EventType.INCLOW;
                     if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
+                       cause = Cause.Null;    // todo
                     }
                 } else if (value == sup) {
                     UB.set(VALUES.prevSetBit(aValue));
                     e = EventType.DECUPP;
                     if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
+                        cause = Cause.Null;   // todo
                     }
                 }
                 if (change && !VALUES.isEmpty()) {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
                         if (cause.reactOnPromotion()) {
-                            cause = Cause.Null;
+                            cause = Cause.Null;  // todo
                         }
                     }
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                 } else {
                     if (VALUES.isEmpty()) {
                         solver.getExplainer().removeValue(this, value, antipromo);
@@ -282,7 +283,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
             if (VALUES.isEmpty()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-            this.notifyMonitors(EventType.INSTANTIATE, cause);
+            this.notifyMonitors(EventType.INSTANTIATE, cause, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -309,6 +310,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *          if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         boolean change;
         ICause antipromo = cause;
         int old = this.getLB();
@@ -336,11 +338,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (instantiated()) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
+                       cause = Cause.Null;      // todo
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
@@ -368,6 +370,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
      *          if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         boolean change;
         ICause antipromo = cause;
         int old = this.getUB();
@@ -394,11 +397,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
                 if (card == 1) {
                     e = EventType.INSTANTIATE;
                     if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
+                        cause = Cause.Null;         // todo
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
@@ -514,11 +517,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntVar> implements 
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, @NotNull ICause cause, @NotNull ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }
-        notifyViews(event, cause);
+        notifyViews(event, ori_cause);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

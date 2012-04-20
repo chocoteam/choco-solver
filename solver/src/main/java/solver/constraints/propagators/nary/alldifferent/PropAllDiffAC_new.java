@@ -344,6 +344,17 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(alldiff_ac,");
+        for (IntVar v : vars) {
+            bf.append(v.getName()).append(" ");
+        }
+        bf.append(")");
+        return bf.toString();
+    }
+
     //***********************************************************************************
     // INFO
     //***********************************************************************************

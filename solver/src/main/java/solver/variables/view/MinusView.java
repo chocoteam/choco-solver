@@ -38,7 +38,6 @@ import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
@@ -93,6 +92,7 @@ public class MinusView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -120,7 +120,7 @@ public class MinusView extends View<IntVar> {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
                     }
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
@@ -138,7 +138,7 @@ public class MinusView extends View<IntVar> {
         } else {
             boolean done = var.removeInterval(-to, -from, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyMonitors(EventType.REMOVE, cause, cause);
             }
             return done;
         }
@@ -156,7 +156,7 @@ public class MinusView extends View<IntVar> {
         } else if (contains(value)) {
             boolean done = var.instantiateTo(-value, this);
             if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyMonitors(EventType.INSTANTIATE, cause, cause);
                 return true;
             }
         } else {
@@ -167,6 +167,7 @@ public class MinusView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -183,7 +184,7 @@ public class MinusView extends View<IntVar> {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -194,6 +195,7 @@ public class MinusView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > value) {
@@ -210,7 +212,7 @@ public class MinusView extends View<IntVar> {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -410,7 +412,7 @@ public class MinusView extends View<IntVar> {
         } else if (evt == EventType.DECUPP) {
             evt = EventType.INCLOW;
         }
-        notifyMonitors(evt, cause);
+        notifyMonitors(evt, cause, cause);
     }
 
 }

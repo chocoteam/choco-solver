@@ -19,8 +19,8 @@ import java.util.Arrays;
  */
 public class MagicSquareBenchProbas extends AbstractBenchProbas {
 
-    public MagicSquareBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    public MagicSquareBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     @Override

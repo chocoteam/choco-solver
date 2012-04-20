@@ -1,22 +1,19 @@
 package solver.constraints.propagators.nary.alldifferent.proba;
 
+import solver.variables.IntVar;
+
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
  */
 public interface IUnion {
 
-    void remove(int value);
+    void remove(int value, IntVar var);
 
-    void instantiatedValue(int value, int low, int upp);
+    int[] instantiatedValue(int value, IntVar var);
 
     int getSize();
 
     int getOccOf(int value);
 
-    int getLastInstValuePos();
-
-    int getLastLowValuePos();
-
-    int getLastUppValuePos();
 }

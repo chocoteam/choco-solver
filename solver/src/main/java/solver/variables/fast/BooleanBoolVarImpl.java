@@ -175,6 +175,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      *          if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
@@ -192,7 +193,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
                 return true;
             } else {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -365,7 +366,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, @NotNull ICause cause, ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }

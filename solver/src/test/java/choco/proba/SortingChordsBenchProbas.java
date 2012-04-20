@@ -26,14 +26,6 @@ import java.util.Random;
  */
 public class SortingChordsBenchProbas extends AbstractBenchProbas {
 
-    public static void main(String[] args) throws IOException {
-        int seed = 1986;
-        for (int i = 0; i < 100; i++) {
-            SortingChordsBenchProbas gac = new SortingChordsBenchProbas(10, 6, AllDifferent.Type.AC, null, seed+i, false);
-            gac.execute();
-        }
-    }
-
     // makeChords
     int[][] costs; // indexes are costs
     int nbnotesmax;
@@ -64,8 +56,8 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         return costs;
     }
 
-    public SortingChordsBenchProbas(int n, int notesmax, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    public SortingChordsBenchProbas(int n, int notesmax, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
         this.nbnotesmax = notesmax;
 
     }
@@ -91,7 +83,6 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
             if (i < size - 1) {
                 costvars[i] = VariableFactory.enumerated("costs[" + i + "]", 0, (nbnotesmax - 1), solver);
             }
-
         }
         obj = VariableFactory.enumerated("obj", 0, ((size-1) * (nbnotesmax - 1)), solver);
         int i;
@@ -149,12 +140,13 @@ public class SortingChordsBenchProbas extends AbstractBenchProbas {
         //this.cstrs[nbCstrs] = Sum.leq(sumVars, coeffs, 0, solver);
     }
 
+    /*@Override
     void solveProcess() {
         //System.out.printf("%s\n", solver.toString());
         //SearchMonitorFactory.log(solver,true,false);
         this.solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,obj);
         assert checkSolution() : solver.toString();
-    }
+    } */
 
     boolean checkSolution() {
         for (int i = 0; i < chords.length; i++) {

@@ -3,10 +3,15 @@ package solver.constraints.propagators.nary.alldifferent.proba;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.IStateLong;
+import gnu.trove.map.hash.TIntLongHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
+import solver.probabilities.DedicatedS64BitSet;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.IntVar;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,73 +19,107 @@ import java.util.Set;
  */
 public class BitSetUnion implements IUnion {
 
-    IStateBitSet values;
+    TIntObjectHashMap<IStateInt[]> bounds;
+
+    DedicatedS64BitSet values;
     IStateInt[] occurrences;
     int offset;
 
-    int lastInstValuePos;
-    int lastLowValuePos;
-    int lastUppValuePos;
-
     public BitSetUnion(IntVar[] variables, IEnvironment environment) {
+        this.bounds = new TIntObjectHashMap<IStateInt[]>(variables.length);
         offset = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
         Set<Integer> vals = new HashSet<Integer>();
         for (IntVar var : variables) {
             int ub = var.getUB();
             int lb = var.getLB();
-            if(offset > lb) {
+            if (offset > lb) {
                 offset = lb;
+            }
+            if (max < ub) {
+                max = ub;
             }
             for (int value = lb; value <= ub; value = var.nextValue(value)) {
                 vals.add(value);
             }
         }
-        //System.out.println(vals);
-        values = environment.makeBitSet(vals.size());
-        occurrences = new IStateInt[vals.size()];
-        for (int i = 0; i < vals.size(); i++) {
+        int size = max-offset+1;
+        values = new DedicatedS64BitSet(environment,size);//environment.makeBitSet(size);
+        occurrences = new IStateInt[size];
+        for (int i = 0; i < size; i++) {
             occurrences[i] = environment.makeInt(0);
         }
         for (IntVar var : variables) {
+            int vid = var.getId();
             int ub = var.getUB();
             int lb = var.getLB();
+            IStateInt[] iBounds = new IStateInt[]{environment.makeInt(lb - offset), environment.makeInt(ub - offset)};
+            bounds.put(vid, iBounds);
             for (int value = lb; value <= ub; value = var.nextValue(value)) {
-                values.set(value-offset,true);
-                occurrences[value-offset].add(1);
+                values.set(value - offset, true);
+                if (!var.instantiated()) {
+                    occurrences[value - offset].add(1);
+                }
             }
         }
     }
 
     @Override
-    public void remove(int value) {
-        int idxValue = value-offset;
-        occurrences[idxValue].add(-1);
-        if (occurrences[idxValue].get() == 0) {
-            values.set(idxValue,false);
+    public void remove(int value, IntVar var) {
+        int varid = var.getId();
+        bounds.get(varid)[0].set(var.getLB() - offset);
+        bounds.get(varid)[1].set(var.getUB() - offset);
+        int idxValue = value - offset;
+        if (this.contain(idxValue)) {
+            // mise a jour des occurrences
+            occurrences[idxValue].add(-1);
+            if (occurrences[idxValue].get() <= 0) {
+                values.set(idxValue, false);
+            }
         }
+        assert check() : "remove " + idxValue + " on " + var + " // " + toString();
     }
 
     @Override
-    public void instantiatedValue(int value, int low, int upp) {
-        lastInstValuePos = value-offset; // todo : false
-        lastLowValuePos = value-offset; // todo : false
-        lastUppValuePos = value-offset; // todo : false
-        remove(value);
-    }
+    public int[] instantiatedValue(int value, IntVar var) {
+        int[] positions = new int[3];
+        int vinst = value - offset;
+        int varid = var.getId();
+        int vlow = bounds.get(varid)[0].get();
+        int vupp = bounds.get(varid)[1].get();
+        assert contain(vinst) : var + " instanciated value " + vinst + " does not exist in " + values;
+        assert contain(vlow);
+        assert contain(vupp);
 
-    @Override
-    public int getLastInstValuePos() {
-        return lastInstValuePos;
-    }
+        positions[0] = values.cardinality(vinst);
+        positions[1] = values.cardinality(vlow);
+        positions[2] = values.cardinality(vupp);// */
 
-    @Override
-    public int getLastLowValuePos() {
-        return lastLowValuePos;
-    }
-
-    @Override
-    public int getLastUppValuePos() {
-        return lastUppValuePos;
+        /*int pos = 0;
+        int lastInstValuePos = -1;
+        int lastLowValuePos = -1;
+        int lastUppValuePos = -1;
+        for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
+            if (i == vlow) {
+                lastLowValuePos = pos;
+            }
+            if (i == vinst) {
+                lastInstValuePos = pos;
+            }
+            if (i == vupp) {
+                lastUppValuePos = pos;
+            }
+            pos++;
+        }
+        positions[0] = lastInstValuePos;
+        positions[1] = lastLowValuePos;
+        positions[2] = lastUppValuePos;
+        assert lastLowValuePos <= lastInstValuePos && lastInstValuePos <= lastUppValuePos : lastLowValuePos + " - " + lastInstValuePos + " - " + lastUppValuePos + " // " + vlow + " - " + vinst + " - " + vupp + " // " + values + " // " + var; //*/
+        occurrences[vinst].add(-1);
+        if (!this.contain(vinst)) {
+            values.set(vinst, false);
+        }
+        return positions;
     }
 
     @Override
@@ -90,7 +129,31 @@ public class BitSetUnion implements IUnion {
 
     @Override
     public int getOccOf(int value) {
-        int idxValue = value-offset;
+        int idxValue = value - offset;
         return occurrences[idxValue].get();
+    }
+
+    private boolean contain(int normValue) {
+        return occurrences[normValue].get() > 0;
+    }
+
+    public String toString() {
+        String s = "";
+        for (int i = 0; i < occurrences.length; i++) {
+            s += "<" + i + "[" + offset + "]," + values.get(i) + "," + occurrences[i].get() + ">;";
+        }
+        return s;
+    }
+
+    private boolean check() {
+        for (int i = 0; i < occurrences.length; i++) {
+            if (values.get(i) && occurrences[i].get() <= 0) {
+                return false;
+            }
+            if (!values.get(i) && occurrences[i].get() > 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

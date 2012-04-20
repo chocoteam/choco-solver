@@ -22,8 +22,8 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
 
     Instance inst;
 
-    public OneAllDiffBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    public OneAllDiffBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     @Override

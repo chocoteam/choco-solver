@@ -295,7 +295,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause, ICause ori_cause) throws ContradictionException {
         //void
     }
 

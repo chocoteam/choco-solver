@@ -123,6 +123,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
@@ -152,7 +153,7 @@ public final class SqrView extends View<IntVar> {
                 }
             }
             if (done) {
-                notifyMonitors(evt, cause);
+                notifyMonitors(evt, cause, ori_cause);
             }
         }
         return false;
@@ -170,7 +171,7 @@ public final class SqrView extends View<IntVar> {
             boolean done = var.removeInterval(-to, -from, cause);
             done |= var.removeInterval(from, to, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyMonitors(EventType.REMOVE, cause, cause);
             }
             return done;
         }
@@ -193,7 +194,7 @@ public final class SqrView extends View<IntVar> {
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
-                notifyMonitors(evt, cause);
+                notifyMonitors(evt, cause, cause);
             }
             return done;
         } else { //otherwise, impossible value for instantiation
@@ -206,6 +207,7 @@ public final class SqrView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
@@ -220,13 +222,14 @@ public final class SqrView extends View<IntVar> {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyMonitors(evt, cause, ori_cause);
         }
         return done;
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
@@ -243,14 +246,19 @@ public final class SqrView extends View<IntVar> {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyMonitors(evt, cause, ori_cause);
         }
         return done;
     }
 
     @Override
     public boolean contains(int value) {
-        return var.contains(value) || var.contains(-value);
+        value = floor_sqrt(value);
+        if (var.contains(value) || var.contains(-value)) {
+            return var.instantiated() ||
+                    (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed SQR bug
+        }
+        return false;
     }
 
     @Override
@@ -774,12 +782,12 @@ public final class SqrView extends View<IntVar> {
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyMonitors(EventType.INSTANTIATE, cause, cause);
             } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyMonitors(EventType.BOUND, cause);
+                notifyMonitors(EventType.BOUND, cause, cause);
             }
         } else {
-            notifyMonitors(evt, cause);
+            notifyMonitors(evt, cause, cause);
         }
     }
 }

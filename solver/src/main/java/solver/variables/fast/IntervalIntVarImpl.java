@@ -116,6 +116,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         int inf = getLB();
@@ -153,7 +154,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
             } else if (SIZE.get() == 0) {
                 solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
@@ -217,7 +218,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
             this.UB.set(value);
             this.SIZE.set(1);
 
-            this.notifyMonitors(e, cause);
+            this.notifyMonitors(e, cause, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -243,6 +244,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         ICause antipromo = cause;
         int old = this.getLB();
         if (old < value) {
@@ -266,7 +268,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
 
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
@@ -294,6 +296,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
@@ -318,7 +321,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyMonitors(e, cause, ori_cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
@@ -424,7 +427,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, @NotNull ICause cause, ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }

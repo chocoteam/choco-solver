@@ -113,7 +113,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
                 delta.add(x,IGraphDelta.NR,cause);
             }
             EventType e = EventType.REMOVENODE;
-            notifyMonitors(e, cause);
+            notifyMonitors(e, cause, cause);
             return true;
         }
         return false;
@@ -127,7 +127,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
                     delta.add(x,IGraphDelta.NE,cause);
                 }
                 EventType e = EventType.ENFORCENODE;
-                notifyMonitors(e, cause);
+                notifyMonitors(e, cause, cause);
                 return true;
             }
             return false;
@@ -200,7 +200,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, @NotNull ICause cause, ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }

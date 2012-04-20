@@ -47,11 +47,11 @@ public class S64BitSet implements IStateBitSet {
     * The choice of word size is determined purely by performance concerns.
     */
     private final static int ADDRESS_BITS_PER_WORD = 6;
-    private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
+    protected final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
     private final static int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
     /* Used to shift left or right for a partial word mask */
-    private static final long WORD_MASK = 0xffffffffffffffffL;
+    protected static final long WORD_MASK = 0xffffffffffffffffL;
 
     /**
      * The current environment.
@@ -61,12 +61,12 @@ public class S64BitSet implements IStateBitSet {
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    private IStateLong[] words;
+    protected IStateLong[] words;
 
     /**
      * The number of words in the logical size of this BitSet.
      */
-    private final IStateInt wordsInUse;
+    protected final IStateInt wordsInUse;
 
 
     /**
@@ -74,7 +74,7 @@ public class S64BitSet implements IStateBitSet {
      *
      * @param bitIndex bit index
      */
-    private static int wordIndex(int bitIndex) {
+    protected static int wordIndex(int bitIndex) {
         return bitIndex >> ADDRESS_BITS_PER_WORD;
     }
 

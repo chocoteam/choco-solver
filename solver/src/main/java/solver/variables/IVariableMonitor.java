@@ -27,6 +27,7 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.exception.ContradictionException;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -54,7 +55,7 @@ public interface IVariableMonitor<V extends Variable> {
      * @param evt   modification event
      * @param cause origin of the modification
      */
-    void afterUpdate(V var, EventType evt, ICause cause);
+    void afterUpdate(V var, EventType evt, ICause cause) throws ContradictionException;
 
     /**
      * Operations to execute if a contradiction occurs during variable modification

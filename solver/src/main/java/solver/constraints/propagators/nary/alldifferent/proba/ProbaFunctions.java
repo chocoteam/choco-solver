@@ -24,10 +24,28 @@ public class ProbaFunctions {
     }
 
     public static double probaAfterInst(double m, double n, double v, double al, double be) {
-        if (m < n || v < 0 || al < 0 || be < 0 || v > m - 1 || al > m - 1 || be > m - 1) {
+        if (v < 0 || al < 0 || be < 0 || m < n || v > m - 1 || al > m - 1 || be > m - 1) {
             return 0; // propage
         } else {
-            return (m - n < (2 * Math.sqrt(m))) ? probaCase2(m, (m - n), v, al, be) : probaCase1(m, (n / m), v, al, be);
+            if (m - n < (2 * Math.sqrt(m))) {
+                assert al <= be && al <= v && v <= be : "case 2: "+ m+" - "+n+" - "+v+" - "+al+" - "+be;
+                double value  = probaCase2(m, (m - n), v, al, be);
+                assert value <= 1 : "case 2: " + value + " - "+m+" - "+n+" - "+v+" - "+al+" - "+be;
+                if (value < 0) {
+                    return 0;
+                } else {
+                    return value;
+                }
+            } else {
+                assert al <= be && al <= v && v <= be : "case 1: " + m+" - "+n+" - "+v+" - "+al+" - "+be;
+                double value = probaCase1(m, (n / m), v, al, be);
+                assert value <= 1 : "case 1: " + value + " - "+m+" - "+n+" - "+v+" - "+al+" - "+be;
+                if (value < 0) {
+                    return 0;
+                } else {
+                    return value;
+                }
+            }
         }
     }
 
@@ -67,6 +85,12 @@ public class ProbaFunctions {
 
     private static double fi(double m, double l, double v, double al, double be) {
         return Math.min(v, m - l - 1) - Math.max(0, v - l) + 1 - heavyiside(l - (be - al)) * (Math.min(al, m - l - 1) - Math.max(0, be - l) + 1);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(fi(0,0,0,1,0));
+        System.out.println(Math.log(1 - f(0, 1)));
+        System.out.println(fi(0,0,0,1,0)*Math.log(1 - f(0, 1)));
     }
 
 }

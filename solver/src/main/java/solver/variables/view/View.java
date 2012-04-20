@@ -83,7 +83,7 @@ public abstract class View<IV extends IntVar> extends AbstractView {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, ICause cause, ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }
@@ -92,7 +92,7 @@ public abstract class View<IV extends IntVar> extends AbstractView {
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyMonitors(evt, cause);
+        notifyMonitors(evt, cause, cause);
     }
 
     @Override

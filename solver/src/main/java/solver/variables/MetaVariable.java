@@ -57,7 +57,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<MetaVaria
         return true;
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyMonitors(EventType event, @NotNull ICause cause, ICause ori_cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
             records.forEach(afterModification.set(this, event, cause));
         }

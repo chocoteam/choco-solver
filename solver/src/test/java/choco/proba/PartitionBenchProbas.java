@@ -25,8 +25,8 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class PartitionBenchProbas extends AbstractBenchProbas {
 
-    public PartitionBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    public PartitionBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     @Override

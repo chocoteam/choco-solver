@@ -58,7 +58,7 @@ public class MetaVarPropagator extends Propagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyMonitors(EventType.META, this);
+		meta.notifyMonitors(EventType.META, this, this);
 	}
 
 	@Override

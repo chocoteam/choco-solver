@@ -148,12 +148,14 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
      * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *
+     *
      * @param event event on this object
      * @param cause object which leads to the modification of this object
+     * @param ori_cause
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs during notification
      */
-    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
+    void notifyMonitors(EventType event, @NotNull ICause cause, @NotNull ICause ori_cause) throws ContradictionException;
 
 
     void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;

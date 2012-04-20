@@ -97,6 +97,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
@@ -126,7 +127,7 @@ public final class OffsetView extends View<IntVar> {
                             cause = Cause.Null;
                         }
                     }
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
@@ -144,7 +145,7 @@ public final class OffsetView extends View<IntVar> {
         } else {
             boolean done = var.removeInterval(from - cste, to - cste, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyMonitors(EventType.REMOVE, cause, cause);
             }
             return done;
         }
@@ -164,7 +165,7 @@ public final class OffsetView extends View<IntVar> {
 
             boolean done = var.instantiateTo(value - cste, this);
             if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyMonitors(EventType.INSTANTIATE, cause, cause);
                 return true;
             }
 
@@ -176,6 +177,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
@@ -192,7 +194,7 @@ public final class OffsetView extends View<IntVar> {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -203,6 +205,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        ICause ori_cause = cause;
         records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         ICause antipromo = cause;
         int old = this.getUB();
@@ -220,7 +223,7 @@ public final class OffsetView extends View<IntVar> {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyMonitors(e, cause, ori_cause);
                     solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                     return true;
                 }

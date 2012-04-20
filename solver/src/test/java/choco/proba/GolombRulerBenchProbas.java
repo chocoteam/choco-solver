@@ -25,8 +25,13 @@ import java.util.Collection;
  */
 public class GolombRulerBenchProbas extends AbstractBenchProbas {
 
-    public GolombRulerBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    // TODO : size 26 max
+    public static int[] length = new int[] {
+        0,1,3,6,11,17,25,34,44,55,72,85,106,127,151,177,199,216,246,283,333,356,372,425,480,492
+    };
+
+    public GolombRulerBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     @Override
@@ -36,11 +41,12 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
     }
 
-    @Override
+    /*@Override
     void solveProcess() {
-        solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) solver.getVars()[size - 1]);
+        //solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, (IntVar) solver.getVars()[size - 1]);
+        //solver.findAllSolutions();
         //System.out.println(dist + ": "+ solver.getVars()[size - 1]);
-    }
+    } //*/
 
     @Override
     void buildProblem(int size, boolean proba) {
@@ -50,7 +56,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
         IntVar[] diffs;
         ticks = new IntVar[size];
         for (int i = 0; i < ticks.length; i++) {
-            ticks[i] = VariableFactory.bounded("a_" + i, 0, ((size < 31) ? (1 << (size + 1)) - 1 : 9999), solver);
+            ticks[i] = VariableFactory.enumerated("a_" + i, 0, length[size], solver);
             allVars.add(ticks[i]);
         }
 

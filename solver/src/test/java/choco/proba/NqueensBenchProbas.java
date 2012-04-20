@@ -3,6 +3,7 @@ package choco.proba;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -17,14 +18,14 @@ import java.io.IOException;
  */
 public class NqueensBenchProbas extends AbstractBenchProbas {
 
-    public NqueensBenchProbas(int n, AllDifferent.Type type, BufferedWriter out, int seed, boolean isProba) throws IOException {
-        super(new Solver(), n, type, out, seed, isProba);
+    public NqueensBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     /*@Override
     void solveProcess() {
         this.solver.findAllSolutions();
-    } */
+    }//*/
 
     @Override
     void buildProblem(int size, boolean proba) {
