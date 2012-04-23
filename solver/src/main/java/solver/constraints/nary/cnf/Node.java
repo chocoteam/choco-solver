@@ -270,6 +270,14 @@ public final class Node extends ALogicTree {
         return varsAsArray;
     }
 
+    @Override
+    public void cleanFlattenBoolVar() {
+        for (int i = 0; i < children.length; i++) {
+            children[i].cleanFlattenBoolVar();
+        }
+        varsAsArray = null;
+    }
+
     private void buildVarsArray() {
         final BoolVar[][] childrenVars = new BoolVar[children.length][];
         for (int i = 0; i < children.length; i++) {

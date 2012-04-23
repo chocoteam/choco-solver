@@ -208,6 +208,7 @@ public class LogicTreeToolBox {
         }
         t = simplify(t);
         t = simplifySingleton(t);
+        t.cleanFlattenBoolVar();
         return t;
     }
 
