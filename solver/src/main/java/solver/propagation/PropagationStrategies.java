@@ -28,10 +28,7 @@ package solver.propagation;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.propagation.generator.Flatten;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
-import solver.propagation.generator.Queue;
+import solver.propagation.generator.*;
 import solver.variables.Variable;
 
 /**
@@ -58,7 +55,7 @@ public enum PropagationStrategies {
             Queue arcs = Queue.build(Primitive.arcs(constraints));
             Queue coarses = Queue.build(Primitive.coarses(constraints));
             //return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
-            return Queue.build(arcs.clearOut(), coarses.pickOne()).clearOut();
+            return Sort.build(arcs.clearOut(), coarses.pickOne()).clearOut();
         }
     },
     ONE_QUEUE_WITH_VARS() {

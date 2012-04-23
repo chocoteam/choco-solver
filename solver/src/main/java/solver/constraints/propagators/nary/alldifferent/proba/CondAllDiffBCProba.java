@@ -35,8 +35,8 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
 
     Random rand;
 
-    protected IUnion unionset; // the union of the domains
     protected IntVar[] vars;
+    protected BitSetUnion unionset; // the union of the domains
     IStateInt nbNotInstVar;
     double proba;
     int seed;
@@ -118,13 +118,13 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     }// */
 
     @Override
-    public void afterUpdate(IntVar var, EventType evt, ICause cause) throws ContradictionException {
+    public final void afterUpdate(IntVar var, EventType evt, ICause cause) throws ContradictionException {
         int vid = var.getId();
-        /*ShowDelta delta = new ShowDelta();
-        System.out.printf("\n\nCND : %s (%d) on %s cause: %s\n", var, vid, evt, cause);
-        for (IntVar vs : vars) {
-            System.out.println(vs);
-        }//*/
+//        ShowDelta delta = new ShowDelta();
+//        System.out.printf("\n\nCND : %s (%d) on %s cause: %s\n", var, vid, evt, cause);
+//        for (IntVar vs : vars) {
+//            System.out.println(vs);
+//        }
         ////////////////////// Sauce a Charles pour utiliser le delta domaine de var
         IDeltaMonitor dm = deltamon.get(var.getId());
         long t = timestamps.get(vid);
@@ -134,9 +134,9 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         }
         dm.freeze();
         /////////////////////// afficher le delta
-        /*dm.forEach(delta, EventType.REMOVE);
-        String d = delta.toString();
-        assert !d.isEmpty() : "delta {" + d + "} is empty while an " + evt + " has been detected on variable " + var + " by "+ cause;//*/
+//        dm.forEach(delta, EventType.REMOVE);
+//        String d = delta.toString();
+//        assert !d.isEmpty() : "delta {" + d + "} is empty while an " + evt + " has been detected on variable " + var + " by "+ cause;
         /////////////////////////////// Mise a jour des donnees dans le cas de l'instanciation
         int m = unionset.getSize(); // taille de l'union avant evenement courrant
         int n = nbNotInstVar.get(); // nombre de vars non instanciees avant evenement courrant
@@ -161,12 +161,11 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         //////////////////////////////////  liberation du delta
         dm.unfreeze();
         assert test();
-    }
+    } //*/
 
     @Override
     public boolean validateScheduling(CoarseEventRecorderWithCondition recorder, Propagator propagator, EventType event) {
         double cut = rand.nextDouble();
-        //System.out.println((1-proba) + "(" + proba + ") >? " + cut);
         return (1 - proba > cut); //*/
         //return true;
     }

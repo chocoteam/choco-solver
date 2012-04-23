@@ -254,9 +254,14 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
     // PROPAGATION
     //***********************************************************************************
 
+
+    //public static long nbFull = 0;
+    //public static long nbCustom = 0;
+
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            //nbFull++;
             if (n2 < n * 2) {
                 contradiction(null, "");
             }
@@ -272,6 +277,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
             }
             buildDigraph();
         } else {
+            //nbCustom++;
             free.clear();
             for (int i = 0; i < n; i++) {
                 if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {

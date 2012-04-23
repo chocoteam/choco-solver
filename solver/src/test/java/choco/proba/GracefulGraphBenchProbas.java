@@ -58,7 +58,6 @@ public class GracefulGraphBenchProbas extends AbstractBenchProbas {
             }
         }
         assert e == edges: e+":"+edges;
-
         this.cstrs[c++] = new AllDifferent(nodeLabel, solver, type);
         this.cstrs[c] = new AllDifferent(edgeLabel, solver, type);
     }

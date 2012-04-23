@@ -26,7 +26,7 @@ public class TestProbaBAllDiff {
         //TestProbaBAllDiff.debugAlone(results);
         //TestProbaBAllDiff.debugFull(results);
 
-        it = 30;
+        it = 5;
         TestProbaBAllDiff.graceFulGraphsTest(13,results);
         /*TestProbaBAllDiff.gc();
         TestProbaBAllDiff.nQueensTest(300, results); // tres bon en solve => pas de fails
@@ -221,10 +221,13 @@ public class TestProbaBAllDiff {
             String solutions = type + "-sols";
             String nodes = type + "-nodes";
             String fails = type + "-fails";
+            String finePropag = type + "-fineProp";
             String propag = type + "-prop";
             String ratio = type + "-ratio";
+            String itime = type + "-initTime";
+            String pftime = type+ "-firstPropTime";
             String time = type + "-time";
-            entete += solutions + sep + nodes + sep + fails + sep + propag + sep + ratio + sep + time + sep + "-" + sep;
+            entete += solutions + sep + nodes + sep + fails + sep + finePropag + sep + propag + sep + ratio + sep + itime + sep + pftime + sep + time + sep + "-" + sep;
 
         }
         out.write(entete);

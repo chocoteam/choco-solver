@@ -1,14 +1,9 @@
 package solver.constraints.propagators.nary.alldifferent.proba;
 
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
-import choco.kernel.memory.IStateLong;
-import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import solver.probabilities.DedicatedS64BitSet;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.IntVar;
 
 import java.util.*;
@@ -17,13 +12,14 @@ import java.util.*;
  * Created by IntelliJ IDEA.
  * User: chameau
  */
-public class BitSetUnion implements IUnion {
+public class BitSetUnion {
 
-    TIntObjectHashMap<IStateInt[]> bounds;
+    private TIntObjectHashMap<IStateInt[]> bounds;
 
-    DedicatedS64BitSet values;
-    IStateInt[] occurrences;
-    int offset;
+    private DedicatedS64BitSet values;
+    private IStateInt[] occurrences;
+    private int[] positions;
+    private int offset;
 
     public BitSetUnion(IntVar[] variables, IEnvironment environment) {
         this.bounds = new TIntObjectHashMap<IStateInt[]>(variables.length);
@@ -62,9 +58,9 @@ public class BitSetUnion implements IUnion {
                 }
             }
         }
+        this.positions = new int[3];
     }
 
-    @Override
     public void remove(int value, IntVar var) {
         int varid = var.getId();
         bounds.get(varid)[0].set(var.getLB() - offset);
@@ -80,9 +76,7 @@ public class BitSetUnion implements IUnion {
         assert check() : "remove " + idxValue + " on " + var + " // " + toString();
     }
 
-    @Override
     public int[] instantiatedValue(int value, IntVar var) {
-        int[] positions = new int[3];
         int vinst = value - offset;
         int varid = var.getId();
         int vlow = bounds.get(varid)[0].get();
@@ -122,12 +116,10 @@ public class BitSetUnion implements IUnion {
         return positions;
     }
 
-    @Override
     public int getSize() {
         return values.cardinality();
     }
 
-    @Override
     public int getOccOf(int value) {
         int idxValue = value - offset;
         return occurrences[idxValue].get();

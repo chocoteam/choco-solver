@@ -46,7 +46,7 @@ import solver.variables.Variable;
 public class AllDifferent extends IntConstraint<IntVar> {
 
     public static enum Type {
-        AC, BC, NEQS
+        AC, BC, NEQS, ACPROBA
     }
 
     public AllDifferent(IntVar[] vars, Solver solver) {
