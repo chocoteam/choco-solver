@@ -6,7 +6,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.probabilities.DedicatedS64BitSet;
 import solver.variables.IntVar;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,14 +64,15 @@ public class BitSetUnion {
 
     public void remove(int value, IntVar var) {
         int varid = var.getId();
-        bounds.get(varid)[0].set(var.getLB() - offset);
-        bounds.get(varid)[1].set(var.getUB() - offset);
+        IStateInt[] t = bounds.get(varid);
+        t[0].set(var.getLB() - offset);
+        t[1].set(var.getUB() - offset);
         int idxValue = value - offset;
         if (this.contain(idxValue)) {
             // mise a jour des occurrences
             occurrences[idxValue].add(-1);
             if (occurrences[idxValue].get() <= 0) {
-                values.set(idxValue, false);
+                values.clear(idxValue);
             }
         }
         assert check() : "remove " + idxValue + " on " + var + " // " + toString();
@@ -79,8 +81,9 @@ public class BitSetUnion {
     public int[] instantiatedValue(int value, IntVar var) {
         int vinst = value - offset;
         int varid = var.getId();
-        int vlow = bounds.get(varid)[0].get();
-        int vupp = bounds.get(varid)[1].get();
+        IStateInt[] t = bounds.get(varid);
+        int vlow = t[0].get();
+        int vupp = t[1].get();
         assert contain(vinst) : var + " instanciated value " + vinst + " does not exist in " + values;
         assert contain(vlow);
         assert contain(vupp);
@@ -111,7 +114,7 @@ public class BitSetUnion {
         assert lastLowValuePos <= lastInstValuePos && lastInstValuePos <= lastUppValuePos : lastLowValuePos + " - " + lastInstValuePos + " - " + lastUppValuePos + " // " + vlow + " - " + vinst + " - " + vupp + " // " + values + " // " + var; //*/
         occurrences[vinst].add(-1);
         if (!this.contain(vinst)) {
-            values.set(vinst, false);
+            values.clear(vinst);
         }
         return positions;
     }
