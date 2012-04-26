@@ -264,9 +264,9 @@ public final class Node extends ALogicTree {
 
     @Override
     public BoolVar[] flattenBoolVar() {
-        if (varsAsArray == null) {
+//        if (varsAsArray == null) {
             buildVarsArray();
-        }
+//        }
         return varsAsArray;
     }
 

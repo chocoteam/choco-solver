@@ -27,8 +27,6 @@
 package samples.graph.jg_sandbox;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
-import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -40,13 +38,11 @@ import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 
 public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 
@@ -54,19 +50,15 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int n,n2;
-	private GraphVar g;
+	private int firstTaskIndex,n2;
 	private IntVar kWorkers;
-	private DirectedGraph digraph;
-	private int[] matching;
-	private int[] nodeSCC;
-	private BitSet free;
-	private IntProcedure remProc;
-	int firstTaskIndex;
+	private GraphVar g;
+	private IActiveNodes activeNodes;
 	// for augmenting matching
-	int[] father;
-	BitSet in;
-	LinkedList<Integer> list;
+	private DirectedGraph digraph;
+	private int[] matching,fifo,father;
+	private BitSet free,in;
+	private StrongConnectivityFinder SCCfinder;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -74,23 +66,18 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 
 	public PropAtLeastKWorkers(GraphVar graph, IntVar kworkers, int firstTaskIndex, Constraint constraint, Solver sol) {
 		super(new Variable[]{graph,kworkers}, sol, constraint, PropagatorPriority.QUADRATIC);
-		n = graph.getEnvelopGraph().getNbNodes();
-		n2=n;
+		n2 = graph.getEnvelopGraph().getNbNodes();
 		g = graph;
 		this.firstTaskIndex = firstTaskIndex;
 		matching = new int[n2];
-		nodeSCC = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(),n2, GraphType.LINKED_LIST);
+		digraph = new DirectedGraph(n2+1, GraphType.LINKED_LIST);
 		free = new BitSet(n2);
-		if(g.isDirected()){
-			remProc = new DirectedRemProc();
-		}else{
-			remProc = new UndirectedRemProc();
-		}
 		this.kWorkers = kworkers;
 		father = new int[n2];
 		in = new BitSet(n2);
-		list = new LinkedList<Integer>();
+		fifo = new int[n2];
+		SCCfinder = new StrongConnectivityFinder(digraph);
+		activeNodes = g.getEnvelopGraph().getActiveNodes();
 	}
 
 	//***********************************************************************************
@@ -101,15 +88,16 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 		free.set(0,n2);
 		int j;
 		INeighbors nei;
-		for(int i=0;i<n;i++){
+		for(int i=0;i<n2;i++){
 			digraph.getSuccessorsOf(i).clear();
 			digraph.getPredecessorsOf(i).clear();
+			matching[i] = -1;
 		}
 		for(int i=0;i<firstTaskIndex;i++){
-			if(g.getEnvelopGraph().getActiveNodes().isActive(i)){
+			if(activeNodes.isActive(i)){
+				digraph.activateNode(i);
 				nei = g.getEnvelopGraph().getSuccessorsOf(i);
 				for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//				j+=n;
 					if(free.get(i) && free.get(j)){
 						digraph.addArc(j, i);
 						free.clear(i);
@@ -118,7 +106,9 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 						digraph.addArc(i,j);
 					}
 				}
-			}else{
+			}
+			else{
+				digraph.desactivateNode(i);
 				free.clear(i);
 			}
 		}
@@ -129,12 +119,12 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 	//***********************************************************************************
 
 	private int repairMatching() throws ContradictionException {
-		for(int i=free.nextSetBit(0);i>=0 && i<n; i=free.nextSetBit(i+1)){
+		for(int i=free.nextSetBit(0);i>=0 && i<firstTaskIndex; i=free.nextSetBit(i+1)){
 			tryToMatch(i);
 		}
 		int p;
 		int cardinality = 0;
-		for (int i=0;i<n;i++) {
+		for (int i=0;i<firstTaskIndex;i++) {
 			p = digraph.getPredecessorsOf(i).getFirstElement();
 			if(p!=-1){
 				cardinality++;
@@ -159,50 +149,51 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 		}
 	}
 
-	private int augmentPath_BFS(int root){
-		in.clear();
-		list.clear();
-		list.add(root);
-		int x,y;
-		INeighbors succs;
-		while(!list.isEmpty()){
-			x = list.removeFirst();
-			succs = digraph.getSuccessorsOf(x);
-			for(y=succs.getFirstElement();y>=0;y=succs.getNextElement()){
-				if(!in.get(y)){
-					father[y] = x;
-					list.addLast(y);
-					in.set(y);
-					if(free.get(y)){
-						return y;
-					}
-				}
-			}
-		}
-		return -1;
-	}
+	private int augmentPath_BFS(int root) {
+        in.clear();
+        int indexFirst = 0, indexLast = 0;
+        fifo[indexLast++] = root;
+        int x, y;
+        INeighbors succs;
+        while (indexFirst != indexLast) {
+            x = fifo[indexFirst++];
+            succs = digraph.getSuccessorsOf(x);
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    fifo[indexLast++] = y;
+                    in.set(y);
+                    if (free.get(y)) {
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
 
 	//***********************************************************************************
 	// PRUNING
 	//***********************************************************************************
 
-	private void buildSCC() {
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-		int scc = 0;
-		for (TIntArrayList in : allSCC) {
-			for (int i = 0; i < in.size(); i++) {
-				nodeSCC[in.get(i)] = scc;
-			}
-			scc++;
-		}
-	}
-
 	private void filter() throws ContradictionException {
-		buildSCC();
+		digraph.desactivateNode(n2);
+		digraph.activateNode(n2);
+		for (int i = firstTaskIndex; i < n2; i++) {
+			if (free.get(i)) {
+				digraph.addArc(i, n2);
+			} else {
+				digraph.addArc(n2, i);
+			}
+		}
+		SCCfinder.findAllSCC();
+		int[] nodeSCC = SCCfinder.getNodesSCC();
+		digraph.desactivateNode(n2);
+
 		INeighbors succ;
 		int j;
 		for (int node = 0;node<firstTaskIndex;node++) {
-			if(g.getEnvelopGraph().getActiveNodes().isActive(node)){
+			if(activeNodes.isActive(node)){
 				succ = g.getEnvelopGraph().getSuccessorsOf(node);
 				for (j = succ.getFirstElement(); j >= 0; j = succ.getNextElement()) {
 					if (nodeSCC[node] != nodeSCC[j]) {
@@ -211,6 +202,7 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 						} else {
 							g.removeArc(node, j, this);
 							digraph.removeArc(node, j);
+							digraph.removeArc(j, node);
 						}
 					}
 				}
@@ -234,17 +226,6 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-//		if(idxVarInProp==0){
-//			free.clear();
-//			eventRecorder.getDeltaMonitor(this,g).forEach(remProc, EventType.REMOVEARC);
-//			int card = repairMatching();
-//			kWorkers.updateUpperBound(card,this);
-//			if(card == kWorkers.getLB()){
-//				filter();
-//			}
-//		}else{
-//
-//		}
 		propagate(0);
 	}
 
@@ -255,44 +236,11 @@ public class PropAtLeastKWorkers extends GraphPropagator<Variable> {
 	@Override
 	public int getPropagationConditions(int vIdx) {
 		return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask
-			 + EventType.INCLOW.mask+ EventType.INSTANTIATE.mask+ EventType.DECUPP.mask;
+			 + EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		return ESat.TRUE;
-	}
-
-	private class DirectedRemProc implements IntProcedure{
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n+n;
-			if(digraph.arcExists(to,from)){
-				free.set(to);
-				free.set(from);
-				digraph.removeArc(to, from);
-			}
-			if(digraph.arcExists(from,to)){
-				digraph.removeArc(from,to);
-			}
-		}
-	}
-	private class UndirectedRemProc implements IntProcedure{
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
-			check(from,to+n);
-			check(to,from+n);
-		}
-		private void check(int from, int to){
-			if(digraph.arcExists(to,from)){
-				free.set(to);
-				free.set(from);
-				digraph.removeArc(to, from);
-			}
-			if(digraph.arcExists(from,to)){
-				digraph.removeArc(from,to);
-			}
-		}
 	}
 }

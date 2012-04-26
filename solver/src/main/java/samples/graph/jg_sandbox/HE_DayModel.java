@@ -31,15 +31,18 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.nary.IntLinComb;
 import solver.constraints.propagators.gary.PropKCliques;
 import solver.constraints.propagators.gary.PropTransitivity;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
+import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -56,76 +59,40 @@ public class HE_DayModel {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 2000;
-	private final static String repo = "/Users/jfages07/Documents/instancesTLF";
-	private static Solver solver;
+	private Solver solver;
 	// parameters
-	private static int minTime, maxTime;
-	private static int n, ne, nt;// nbNodes, nbEmployees, nbTasks : n = ne + nt
-	private static int nbSkills;
-	private static boolean[][] skills;
-	private static int[] task_skill, task_start, task_end;
-	private static String instanceName;
+	public int minTime, maxTime;
+	public int n, ne, nt;// nbNodes, nbEmployees, nbTasks : n = ne + nt
+	public int[] LO,LB,LW;
+	private int nbSkills;
+	private boolean[][] skills;
+	private int[] task_skill, task_start, task_end;
+	private boolean[][] matrix;
 	// variables
-	private static UndirectedGraphVar graph;
-	private static IntVar[] start,end;
-	private static IntVar kWorkers;
-	private static GraphConstraint gc;
+	public UndirectedGraphVar graph;
+	public IntVar[] start,end;
+	public BoolVar[] workToday;
+	public BoolVar[] conge;
+	public IntVar kWorkers;
+	private GraphConstraint gc;
 
 	//***********************************************************************************
-	// METHODS
+	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public static void main(String[] args) {
-		File folder = new File(repo);
-		String[] list = folder.list();
-		for(String file : list){
-//			if(file.contains("Day0_Ta100_Ti130_SkC_i016")
-//			|| file.contains("Day0_Ta100_Ti130_SkCR_i000")){
-			solve(parseInstance(repo + "/" + file));
-//				System.exit(0);
-//			}
-		}
+	public HE_DayModel(String url, Solver solver) {
+		this.solver = solver;
+		parseInstance(url);
+		transformMatrix();
+		buildVariables();
+		postConstraints();
 	}
 
 	//***********************************************************************************
 	// BUILD MODEL
 	//***********************************************************************************
 
-	private static void solve(boolean[][] matrix) {
-		solver = new Solver();
-		matrix = transformMatrix(matrix);
-		buildVariables(matrix);
-		postConstraints();
-		configure();
-		solver.findSolution();
-		if(solver.getSearchLoop().getMeasures().getSolutionCount()==0 &&
-				solver.getSearchLoop().getMeasures().getTimeCount()<TIMELIMIT){
-//			throw new UnsupportedOperationException();
-//			writeTextInto(instanceName+"\n","tl.csv");
-		}
-//		System.out.println(graph.getEnvelopGraph());
-//		for(int i=0;i<ne;i++){
-//			System.out.println(start[i]+"  :  "+end[i]);
-//		}
-	}
-
-	private static void print(boolean[][] matrix) {
-		String s = "";
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(matrix[i][j]){
-					s+="1;";
-				}else{
-					s+="0;";
-				}
-			}
-			s+="\n";
-		}
-		System.out.println(s);
-	}
-
-	private static void buildVariables(boolean[][] matrix) {
+	private void buildVariables() {
 		for(int i=0;i<n;i++){
 			for(int j=0;j<n;j++){
 				if(matrix[i][j] != matrix[j][i]){
@@ -134,11 +101,14 @@ public class HE_DayModel {
 			}
 		}
 		// variables
-		graph = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
-		start = VariableFactory.boundedArray("start", ne, minTime, maxTime, solver);
-		end = VariableFactory.boundedArray("end", ne, minTime, maxTime, solver);
+		graph = new UndirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.MATRIX);
+//		start = VariableFactory.boundedArray("start", ne, minTime, maxTime, solver);
+//		end = VariableFactory.boundedArray("end", ne, minTime, maxTime, solver);
+		start = VariableFactory.boundedArray("start", ne, -10000, 30000, solver);
+		end = VariableFactory.boundedArray("end", ne, -10000, 30000, solver);
+		workToday = VariableFactory.boolArray("work", ne, solver);
+		conge = VariableFactory.boolArray("conge", ne, solver);
 		kWorkers = VariableFactory.bounded("nbWork",0,ne,solver);
-//		kWorkers = VariableFactory.bounded("nbWork",Math.min(ne,nt),ne,solver);
 		for(int i=ne;i<n;i++){
 			graph.getKernelGraph().activateNode(i);
 		}
@@ -151,55 +121,46 @@ public class HE_DayModel {
 		}
 	}
 
-	private static void postConstraints() {
+	private void postConstraints() {
 		gc = GraphConstraintFactory.makeConstraint(graph,solver);
-		gc.addAdHocProp(new PropAtLeastNNeighbors(graph,solver,gc,1));
+		gc.addAdHocProp(new PropAtLeastNNeighbors(graph,1,gc,solver));
 		gc.addAdHocProp(new PropAtLeastOneGuy(graph,ne,gc,solver));
-		// cliques
-		gc.addAdHocProp(new PropTransitivity(graph,solver, gc));
-		gc.addAdHocProp(new PropKCliques(graph,solver, gc, kWorkers));
+		// presence of nurses
+		gc.addAdHocProp(new PropGraphNurse(graph,workToday,gc,solver));
 		gc.addAdHocProp(new PropKWorkers(graph,ne,kWorkers,gc,solver));
 		gc.addAdHocProp(new PropAtLeastKWorkers(graph,kWorkers,ne,gc,solver));
 		gc.addAdHocProp(new PropAtMostKWorkers(graph,kWorkers,ne,gc,solver));
+		solver.post(ConstraintFactory.sum(workToday, IntLinComb.Operator.EQ, kWorkers, 1, solver));
+		// cliques
+		gc.addAdHocProp(new PropTransitivity(graph,solver, gc));
+		gc.addAdHocProp(new PropKCliques(graph,solver, gc, kWorkers));
 		// time
 		gc.addAdHocProp(new PropGraphTime(graph,ne,start,end,task_start,task_end,gc,solver));
 		gc.addAdHocProp(new PropTimeGraph(graph,ne,start,end,task_start,task_end,gc,solver));
 		for(int i=0;i<ne;i++){
+//			solver.post(ConstraintFactory.leq(start[i], end[i],solver));
 			solver.post(ConstraintFactory.leq(end[i], Views.offset(start[i],600),solver));
+//			Not necessary
+//			solver.post(new ReifiedConstraint(workToday[i],
+//					ConstraintFactory.neq(end[i], start[i], solver),
+//					ConstraintFactory.eq(end[i], start[i], solver), solver));
+//
+//			solver.post(new ReifiedConstraint(workToday[i],
+//					ConstraintFactory.neq(end[i], start[i].getLB(), solver),
+//					ConstraintFactory.eq(end[i], start[i].getLB(), solver), solver));
 		}
 		solver.post(gc);
 	}
 
-	private static void configure() {
-//		solver.set(StrategyFactory.graphLexico(graph));
-//		solver.set(StrategyFactory.graphStrategy(graph, null, new Strat(graph), GraphStrategy.NodeArcPriority.ARCS));
-//		solver.set(StrategyFactory.graphStrategy(graph, null, new MilleFeuillesNurse(graph), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(StrategyFactory.graphStrategy(graph, null, new MilleFeuillesTask(graph), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		SearchMonitorFactory.log(solver, true, false);
-//		solver.getSearchLoop().getLimitsBox().setFailLimit(1);
-//		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
-//			int count = 100;
-//			public void onContradiction(ContradictionException cex) {
-//				count--;
-//				if(count==0){
-//					count = 100;
-//					solver.getSearchLoop().restart();
-//				}
-//			}
-//		});
-	}
-
 	//***********************************************************************************
-	//TRANSFORMATION DE MATRICE
+	// TRANSFORMATION DE MATRICE
 	//***********************************************************************************
 
-	private static boolean[][] transformMatrix(boolean[][] matrix) {
-		return gloutonSimple(matrix);
+	private void transformMatrix() {
+		// matrix = gloutonSimple(matrix);
 	}
 
-	private static boolean[][] gloutonSimple(boolean[][] matrix) {
+	private boolean[][] gloutonSimple(boolean[][] matrix) {
 		boolean[][] m2 = new boolean[n][n];
 		int[] mapping = new int[n];
 		BitSet done = new BitSet(n);
@@ -224,13 +185,12 @@ public class HE_DayModel {
 	}
 
 	//***********************************************************************************
-	//PARSER
+	// PARSER
 	//***********************************************************************************
 
-	public static boolean[][] parseInstance(String url) {
-		System.out.println(url);
+	private void parseInstance(String url) {
+		//System.out.println(url);
 		File file = new File(url);
-		instanceName = file.getName();
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();
@@ -248,14 +208,24 @@ public class HE_DayModel {
 			n = ne + nt;
 			line = buf.readLine();
 			numbers = line.split(":");
-			nbSkills = Integer.parseInt(numbers[1]+1);
+			nbSkills = Integer.parseInt(numbers[1] + 1);
 			skills = new boolean[ne][nbSkills];
+			LO = new int[ne];
+			LB = new int[ne];
+			LW = new int[ne];
 			for(int e=0;e<ne;e++){
 				line = buf.readLine();
 				numbers = line.split(":")[1].split(",");
 				for(int i=0;i<numbers.length;i++){
 					skills[e][Integer.parseInt(numbers[i])] = true;
 				}
+				line = buf.readLine();//LO : nb jours travailles depuis dernier conge
+				LO[e] = Integer.parseInt(line.split(": ")[1]);
+				line = buf.readLine();//LB : nb minutes sŽparant la fin du dernier repos de 35h au dimanche minuit
+				LB[e] = Integer.parseInt(line.split(": ")[1]);
+				line = buf.readLine();//LW : nb minutes sŽparant la fin du dernier travail au dimanche minuit
+				LW[e] = Integer.parseInt(line.split(": ")[1]);
+				line = buf.readLine();
 			}
 			task_skill = new int[nt];
 			task_start = new int[nt];
@@ -283,104 +253,64 @@ public class HE_DayModel {
 					}
 				}
 			}
-			return initialDomains;
+			this.matrix = initialDomains;
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		return null;
 	}
 
 	//***********************************************************************************
-	// RECORDING RESULTS
+	// UTILITIES
 	//***********************************************************************************
 
-	public static void writeTextInto(String text, String file) {
-		try {
-			FileWriter out = new FileWriter(file, true);
-			out.write(text);
-			out.flush();
-			out.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void clearFile(String file) {
-		try {
-			FileWriter out = new FileWriter(file, false);
-			out.write("");
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	//***********************************************************************************
-	//BRANCHING HEURISTICS
-	//***********************************************************************************
-
-	private static class Strat extends ArcStrategy<GraphVar> {
-		Strat (GraphVar g){
-			super(g);
-		}
-		@Override
-		public int nextArc() {
-			INeighbors envSuc, kerSuc;
-			for (int i=n-1;i>ne;i--){
-				envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
-				kerSuc = g.getKernelGraph().getSuccessorsOf(i);
-				if(envSuc.neighborhoodSize()!=kerSuc.neighborhoodSize()){
-					for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
-						if(j<ne && !kerSuc.contain(j)){
-							return (i+1)*n+j;
-						}
-					}
+	public void print() {
+		StringBuffer buf = new StringBuffer();
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(matrix[i][j]){
+					buf.append("1;");
+				}else{
+					buf.append("0;");
 				}
 			}
-			return -1;
+			buf.append("\n");
+		}
+		System.out.println(buf);
+	}
+
+	public static void main(String[] args) {
+		String repo  = "/Users/jfages07/Documents/instancesTLF";
+		File folder = new File(repo);
+		String[] list = folder.list();
+		for(String file : list){
+			if (file.equals("Day5_Ta100_Ti100_SkC_i000.txt")){
+				Solver solver = new Solver();
+				HE_DayModel day = new HE_DayModel(repo + "/" + file,solver);
+				solver.set(StrategyFactory.graphStrategy(day.graph, null, new LexArc(day.graph), GraphStrategy.NodeArcPriority.ARCS));
+				solver.set(Sort.build(Primitive.arcs(day.gc)).clearOut());
+				solver.getSearchLoop().getLimitsBox().setTimeLimit(2000);
+				SearchMonitorFactory.log(solver, true, false);
+				solver.findSolution();
+			}
 		}
 	}
 
-	private static class MilleFeuillesNurse extends ArcStrategy<GraphVar> {
-		MilleFeuillesNurse (GraphVar g){
-			super(g);
-		}
-		@Override
-		public int nextArc() {
-			int size = n;
-			int node = -1;
-			INeighbors envSuc, kerSuc;
-			for(int i=0;i<ne;i++){
-				envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
-				kerSuc = g.getKernelGraph().getSuccessorsOf(i);
-				if(envSuc.neighborhoodSize()!=kerSuc.neighborhoodSize()
-						&& kerSuc.neighborhoodSize()<size){
-					size = kerSuc.neighborhoodSize();
-					node = i;
-				}
-			}
-			if(node == -1){
-				return -1;
-			}
-			envSuc = g.getEnvelopGraph().getSuccessorsOf(node);
-			kerSuc = g.getKernelGraph().getSuccessorsOf(node);
-			for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
-				if(!kerSuc.contain(j)){
-					return (node+1)*n+j;
-				}
-			}
-			throw new UnsupportedOperationException();
-		}
+	//***********************************************************************************
+	// BRANCHING
+	//***********************************************************************************
+
+	public ArcStrategy getHeuristic(){
+		return new MilleFeuillesTask(graph);
 	}
 
-	private static class MilleFeuillesTask extends ArcStrategy<GraphVar> {
+	private class MilleFeuillesTask extends ArcStrategy<GraphVar> {
 		MilleFeuillesTask (GraphVar g){
 			super(g);
 		}
 		@Override
 		public int nextArc() {
-			int size = n;
+			int size = n+1;
 			int node = -1;
 			INeighbors envSuc, kerSuc;
 			for(int i=ne;i<n;i++){

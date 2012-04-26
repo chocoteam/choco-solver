@@ -31,6 +31,8 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
 import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.nary.AtLeastNValues;
+import solver.constraints.nary.AtMostNValues;
 import solver.constraints.nary.IntLinComb;
 import solver.constraints.nary.Sum;
 import solver.constraints.unary.EqualXC;
@@ -50,213 +52,260 @@ import java.util.Arrays;
  */
 public class ConstraintFactory {
 
-    protected ConstraintFactory() {
-    }
+	protected ConstraintFactory() {
+	}
 
-    /**
-     * Create a <b>X = c</b> constraint.
-     * <br/>Based on <code>EqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, int c, Solver solver) {
-        return new EqualXC(x, c, solver);
-    }
+	/**
+	 * Create a <b>X = c</b> constraint.
+	 * <br/>Based on <code>EqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, int c, Solver solver) {
+		return new EqualXC(x, c, solver);
+	}
 
-    /**
-     * Create a <b>X = Y</b> constraint.
-     * <br/>Based on <code>EqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, IntVar y, Solver solver) {
-        return new EqualX_YC(x, y, 0, solver);
-    }
+	/**
+	 * Create a <b>X = Y</b> constraint.
+	 * <br/>Based on <code>EqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, IntVar y, Solver solver) {
+		return new EqualX_YC(x, y, 0, solver);
+	}
 
-    /**
-     * Create a <b>X = Y + C</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
-        return new EqualX_YC(x, y, c, solver);
-    }
+	/**
+	 * Create a <b>X = Y + C</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
+		return new EqualX_YC(x, y, c, solver);
+	}
 
-    /**
-     * Create a <b>X =/= c</b> constraint.
-     * <br/>Based on <code>NotEqualXC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, int c, Solver solver) {
-        return new NotEqualXC(x, c, solver);
-    }
+	/**
+	 * Create a <b>X =/= c</b> constraint.
+	 * <br/>Based on <code>NotEqualXC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, int c, Solver solver) {
+		return new NotEqualXC(x, c, solver);
+	}
 
-    /**
-     * Create a <b>X =/= Y</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, IntVar y, Solver solver) {
-        return new NotEqualX_YC(x, y, 0, solver);
-    }
+	/**
+	 * Create a <b>X =/= Y</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, IntVar y, Solver solver) {
+		return new NotEqualX_YC(x, y, 0, solver);
+	}
 
-    /**
-     * Create a <b>X =/= Y + C</b> constraint.
-     * <br/>Based on <code>NotEqualX_YC</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
-        return new NotEqualX_YC(x, y, c, solver);
-    }
+	/**
+	 * Create a <b>X =/= Y + C</b> constraint.
+	 * <br/>Based on <code>NotEqualX_YC</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
+		return new NotEqualX_YC(x, y, c, solver);
+	}
 
-    /**
-     * Create a <b>X <= Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint leq(IntVar x, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
-    }
+	/**
+	 * Create a <b>X <= Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint leq(IntVar x, IntVar y, Solver solver) {
+		return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
+	}
 
-    /**
-     * Create a <b>X <= c</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant
-     * @param solver
-     */
-    public static Constraint leq(IntVar x, int c, Solver solver) {
-        return Sum.leq(new IntVar[]{x}, new int[]{1}, c, solver);
-    }
+	/**
+	 * Create a <b>X <= c</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant
+	 * @param solver
+	 */
+	public static Constraint leq(IntVar x, int c, Solver solver) {
+		return Sum.leq(new IntVar[]{x}, new int[]{1}, c, solver);
+	}
 
-    /**
-     * Create a <b>X < Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint lt(IntVar x, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -1, solver);
-    }
+	/**
+	 * Create a <b>X < Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint lt(IntVar x, IntVar y, Solver solver) {
+		return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -1, solver);
+	}
 
-    /**
-     * Create a <b>X >= Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint geq(IntVar x, IntVar y, Solver solver) {
-        return Sum.geq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
-    }
+	/**
+	 * Create a <b>X >= Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint geq(IntVar x, IntVar y, Solver solver) {
+		return Sum.geq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
+	}
 
-    /**
-     * Create a <b>X >= c</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param c      a constant object
-     * @param solver
-     */
-    public static Constraint geq(IntVar x, int c, Solver solver) {
-        return Sum.geq(new IntVar[]{x}, new int[]{1}, c, solver);
-    }
+	/**
+	 * Create a <b>X >= c</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param c      a constant object
+	 * @param solver
+	 */
+	public static Constraint geq(IntVar x, int c, Solver solver) {
+		return Sum.geq(new IntVar[]{x}, new int[]{1}, c, solver);
+	}
 
-    /**
-     * Create a <b>X > Y</b> constraint.
-     * <br/>Based on <code>Sum</code> constraint.
-     *
-     * @param x      a <code>IntVar</code> object
-     * @param y      a <code>IntVar</code> object
-     * @param solver
-     */
-    public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return Sum.geq(new IntVar[]{x, y}, 1, solver);
-    }
+	/**
+	 * Create a <b>X > Y</b> constraint.
+	 * <br/>Based on <code>Sum</code> constraint.
+	 *
+	 * @param x      a <code>IntVar</code> object
+	 * @param y      a <code>IntVar</code> object
+	 * @param solver
+	 */
+	public static Constraint gt(IntVar x, IntVar y, Solver solver) {
+//        return Sum.geq(new IntVar[]{x, y}, 1, solver); // ne marche pas en reification
+		return Sum.geq(new IntVar[]{x, y}, new int[]{1, -1}, 1, solver);
+	}
 
-    public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
-                                    int c, Solver solver) {
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        for (int i = 0; i < vars.length; i++) {
-            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
-            if (map.get(vars[i]) == 0) {
-                map.remove(vars[i]);
-            }
-        }
+	public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
+									int c, Solver solver) {
+		TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
+		for (int i = 0; i < vars.length; i++) {
+			map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
+			if (map.get(vars[i]) == 0) {
+				map.remove(vars[i]);
+			}
+		}
 
-        IntVar[] nvars = map.keys(new IntVar[map.size()]);
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-        // iteration over the paramater array to avoid non-deterministic behavior introduced by the map
-        for (int i = 0; i < vars.length; i++) {
-            IntVar var = vars[i];
-            if (map.contains(vars[i])) {
-                int coeff = map.get(var);
-                if (coeff > 0) {
-                    tmpV[b] = var;
-                    tmpC[b++] = coeff;
-                } else if (coeff < 0) {
-                    tmpV[--e] = var;
-                    tmpC[e] = coeff;
-                }
-            }
-        }
-        return new IntLinComb(tmpV, tmpC, b, op, -c, solver);
-    }
+		IntVar[] nvars = map.keys(new IntVar[map.size()]);
+		int b = 0, e = map.size();
+		IntVar[] tmpV = new IntVar[e];
+		int[] tmpC = new int[e];
+		// iteration over the paramater array to avoid non-deterministic behavior introduced by the map
+		for (int i = 0; i < vars.length; i++) {
+			IntVar var = vars[i];
+			if (map.contains(vars[i])) {
+				int coeff = map.get(var);
+				if (coeff > 0) {
+					tmpV[b] = var;
+					tmpC[b++] = coeff;
+				} else if (coeff < 0) {
+					tmpV[--e] = var;
+					tmpC[e] = coeff;
+				}
+			}
+		}
+		return new IntLinComb(tmpV, tmpC, b, op, -c, solver);
+	}
 
 
-    public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
-                                    IntVar v, int c, Solver solver) {
-        int size = vars.length;
-        IntVar[] vtmp = new IntVar[size + 1];
-        System.arraycopy(vars, 0, vtmp, 0, size);
-        vtmp[size] = v;
-        int[] ctmp = new int[size + 1];
-        System.arraycopy(coeffs, 0, ctmp, 0, size);
-        ctmp[size] = -c;
-        return scalar(vtmp, ctmp, op, 0, solver);
+	public static Constraint scalar(IntVar[] vars, int[] coeffs, IntLinComb.Operator op,
+									IntVar v, int c, Solver solver) {
+		int size = vars.length;
+		IntVar[] vtmp = new IntVar[size + 1];
+		System.arraycopy(vars, 0, vtmp, 0, size);
+		vtmp[size] = v;
+		int[] ctmp = new int[size + 1];
+		System.arraycopy(coeffs, 0, ctmp, 0, size);
+		ctmp[size] = -c;
+		return scalar(vtmp, ctmp, op, 0, solver);
 
-    }
+	}
 
-    public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
-                                 IntVar v, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return scalar(vars, coeffs, op, v, c, solver);
-    }
+	public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
+								 IntVar v, int c, Solver solver) {
+		int[] coeffs = new int[vars.length];
+		Arrays.fill(coeffs, 1);
+		return scalar(vars, coeffs, op, v, c, solver);
+	}
 
-    public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
-                                 int c, Solver solver) {
+	public static Constraint sum(IntVar[] vars, IntLinComb.Operator op,
+								 int c, Solver solver) {
 
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return scalar(vars, coeffs, op, c, solver);
-    }
+		int[] coeffs = new int[vars.length];
+		Arrays.fill(coeffs, 1);
+		return scalar(vars, coeffs, op, c, solver);
+	}
+
+	/**
+	 * AtLeastNValues Constraint (similar to SoftAllDiff)
+	 * The number of distinct values in vars is at least nValues
+	 * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
+	 * The worst case time complexity is O(nm) but this is very pessimistic
+	 * In practice it is more like O(m) where m is the number of variable-value pairs
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 */
+	public static Constraint atLeastNValues(IntVar[] vars, IntVar nValues, Solver solver){
+		return new AtLeastNValues(vars,nValues,solver);
+	}
+
+	/**
+	 * AtMostNValues constraint
+	 * The number of distinct values in vars is at most nValues
+	 * Performs Bound Consistency in O(n+d) with
+	 * 		n = |vars|
+	 * 		d = maxValue - minValue (from initial domains)
+	 *
+	 * 	=> very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
+	 * 	=>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 */
+	public static Constraint atMostNValues(IntVar[] vars, IntVar nValues, Solver solver){
+		return new AtMostNValues(vars,nValues,solver);
+	}
+
+	/**The number of distinct values in vars is at most nValues
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 * @param algos propagator(s) for the constraint
+	 * (BC, BC_wr and/or Greedy)
+	 *  Note that if domains are not enumerated, only the BC makes sense
+	 */
+	public static Constraint atMostNValues(IntVar[] vars, IntVar nValues, Solver solver, AtMostNValues.Algo... algos){
+		return new AtMostNValues(vars,nValues,solver,algos);
+	}
 
 }

@@ -32,10 +32,10 @@ import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
-import solver.constraints.propagators.gary.directed.PropNSuccs;
+import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
+import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -45,7 +45,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -77,13 +76,16 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	 * @param graph the graph variable (directed)
 	 * @param nTree the expected number of trees (IntVar)
 	 * @param solver 
-	 * @param storeThreshold
-     * TODO CPRU: il sert ˆ quoi le storeThreshold? Je pense qu'il n'est pas utilise correctement...
 	 */
-	public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver, PropagatorPriority storeThreshold) {
+	public NTree(DirectedGraphVar graph, IntVar nTree, Solver solver) {
 		super((V[]) new Variable[]{graph,nTree}, solver);
+//		setPropagators(
+////			new PropNSuccs(graph, solver, this, 1),
+//				new PropNLoopsTree(graph, nTree, solver, this),
+//				new PropNTree(graph, nTree,solver,this));
 		setPropagators(
-				new PropNSuccs(graph, solver, this, 1),
+				(Propagator) new PropAtLeastNSuccessors(graph, 1, this, solver),
+				(Propagator) new PropAtMostNSuccessors(graph, 1, this, solver),
 				new PropNLoopsTree(graph, nTree, solver, this),
 				new PropNTree(graph, nTree,solver,this));
 		this.g = graph;

@@ -41,7 +41,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * Propagator that ensures that a node has at least N Predecessors
+ * Propagator that ensures that a node has at least N Successors
  *
  * @author Jean-Guillaume Fages
  */
@@ -52,42 +52,42 @@ public class PropAtLeastNSuccessors extends GraphPropagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	private DirectedGraphVar g;
-	private int[] n_preds;
+	private int[] n_succs;
 	private IntProcedure enf_nodes_proc,rem_arc_proc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtLeastNSuccessors(DirectedGraphVar graph, int[] nbPreds, Constraint constraint, Solver solver) {
+	public PropAtLeastNSuccessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		n_preds = nbPreds;
+		n_succs = nbSuccs;
 		int n = g.getEnvelopGraph().getNbNodes();
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem(n);
 	}
 
-	public PropAtLeastNSuccessors(DirectedGraphVar graph, int nbPreds, Constraint constraint, Solver solver) {
+	public PropAtLeastNSuccessors(DirectedGraphVar graph, int nbSuccs, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();
-		n_preds = new int[n];
+		n_succs = new int[n];
 		for(int i=0;i<n;i++){
-			n_preds[i] = nbPreds;
+			n_succs[i] = nbSuccs;
 		}
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem(n);
 	}
 
 	@Deprecated
-	public PropAtLeastNSuccessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds) {
+	public PropAtLeastNSuccessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbSuccs) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();
-		n_preds = new int[n];
+		n_succs = new int[n];
 		for(int i=0;i<n;i++){
-			n_preds[i] = nbPreds;
+			n_succs[i] = nbSuccs;
 		}
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem(n);
@@ -133,13 +133,13 @@ public class PropAtLeastNSuccessors extends GraphPropagator<DirectedGraphVar>{
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getPredecessorsOf(node).neighborhoodSize()<n_preds[node]){
+			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()<n_succs[node]){
 				return ESat.FALSE;
 			}
 		}
 		act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getPredecessorsOf(node).neighborhoodSize()<n_preds[node]){
+			if(g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()<n_succs[node]){
 				return ESat.UNDEFINED;
 			}
 		}
@@ -151,33 +151,32 @@ public class PropAtLeastNSuccessors extends GraphPropagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	/** When a node is enforced,
-	 * if it has less than N neighbors then a contradiction should be raised
-	 * if it has N neighbors in the envelop then they must figure in the kernel */
+	 * if it has less than N successors then a contradiction should be raised
+	 * if it has N successors in the envelop then they must figure in the kernel */
 	private void enforceNode(int i) throws ContradictionException {
-		INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(i);
+		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int size = nei.neighborhoodSize();
-		if(size<n_preds[i]){
+		if(size<n_succs[i]){
 			contradiction(g,"");
-		}else if(size==n_preds[i] && g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()<size){
-			for(int p = nei.getFirstElement(); p >= 0; p = nei.getNextElement()){
-				g.enforceArc(p,i, this);
+		}else if(size==n_succs[i] && g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()<size){
+			for(int s = nei.getFirstElement(); s >= 0; s = nei.getNextElement()){
+				g.enforceArc(i, s, this);
 			}
 		}
 	}
 
-	/** When a node has less than N neighbors then it must be removed,
-	 *  If it has N neighbors and is in the kernel then its incident edges
+	/** When a node has less than N successors then it must be removed,
+	 *  If it has N successors and is in the kernel then its incident edges
 	 *  should be enforced */
 	private void checkNode(int i) throws ContradictionException {
-		INeighbors nei = g.getEnvelopGraph().getPredecessorsOf(i);
+		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int size = nei.neighborhoodSize();
-		if(size<n_preds[i]){
+		if(size<n_succs[i]){
 			g.removeNode(i, this);
-		}else if (g.getKernelGraph().getActiveNodes().isActive(i)
-				&& size==n_preds[i]
-				&& g.getKernelGraph().getPredecessorsOf(i).neighborhoodSize()<size){
-			for(int p = nei.getFirstElement(); p>=0; p = nei.getNextElement()){
-				g.enforceArc(p,i, this);
+		}else if (size==n_succs[i] && g.getKernelGraph().getActiveNodes().isActive(i)
+				&& g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()<size){
+			for(int s = nei.getFirstElement(); s>=0; s = nei.getNextElement()){
+				g.enforceArc(i, s, this);
 			}
 		}
 	}
@@ -200,7 +199,7 @@ public class PropAtLeastNSuccessors extends GraphPropagator<DirectedGraphVar>{
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			checkNode(i%n);
+			checkNode(i/n-1);
 		}
 	}
 }

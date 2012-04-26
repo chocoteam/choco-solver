@@ -37,5 +37,6 @@ package solver.constraints.propagators.gary;
 public interface IRelaxation {
 
 	boolean contains(int i, int j);
+
 	double getRepCost(int i, int j);
 }

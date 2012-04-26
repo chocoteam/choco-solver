@@ -37,21 +37,22 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.degree.*;
 import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
+import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Sort;
-import solver.search.loop.SearchLoops;
+import solver.recorders.fine.FineArcEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
@@ -59,7 +60,6 @@ import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -84,7 +84,7 @@ public class ATSP_CP12 {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 300000;
+	private static final long TIMELIMIT = 60000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
@@ -147,7 +147,6 @@ public class ATSP_CP12 {
 	public static void createModel() {
 		// create model
 		solver = new Solver();
-//		solver.
 		initialUB = optimum;
 		System.out.println("initial UB : "+optimum);
 		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
@@ -174,8 +173,22 @@ public class ATSP_CP12 {
 
 	public static void addPropagators() {
 		// BASIC MODEL
-		gc.addAdHocProp(new PropOneSuccBut(graph, n - 1, gc, solver));
-		gc.addAdHocProp(new PropOnePredBut(graph, 0, gc, solver));
+//		Do not use to no decrease performances
+// 		(difference due to lists and fix point within non monotonicity)
+//		int[] succs = new int[n];
+//		int[] preds = new int[n];
+//		for(int i=0;i<n;i++){
+//			succs[i] = preds[i] = 1;
+//		}
+//		succs[n-1] = preds[0] = 0;
+//		gc.addAdHocProp(new PropAtMostNSuccessors(graph,succs,gc,solver));
+//		gc.addAdHocProp(new PropAtLeastNSuccessors(graph,succs,gc,solver));
+//		gc.addAdHocProp(new PropAtMostNPredecessors(graph,preds,gc,solver));
+//		gc.addAdHocProp(new PropAtLeastNPredecessors(graph,preds,gc,solver));
+
+		gc.addAdHocProp(new PropOneSuccBut(graph,n-1, gc, solver));
+		gc.addAdHocProp(new PropOnePredBut(graph,  0, gc, solver));
+		
 		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addAdHocProp(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -213,7 +226,7 @@ public class ATSP_CP12 {
 				}
 			}
 			gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-			gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,2));
+			gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
 			gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
 			gc.addAdHocProp(new PropCyclePathChanneling(graph,undi,gc,solver));
 		}
@@ -271,7 +284,10 @@ public class ATSP_CP12 {
 //				solver.getSearchLoop().restartAfterEachSolution(true);break;
 //			default: throw new UnsupportedOperationException();
 //		}
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+
+		Primitive<FineArcEventRecorder> allArcs = Primitive.arcs(gc);
+//		solver.set(Sort.build(allArcs).sweepUp());
+		solver.set(Sort.build(allArcs).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
@@ -321,7 +337,7 @@ public class ATSP_CP12 {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
 		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-		bench_heur();
+		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
 	}
@@ -330,26 +346,26 @@ public class ATSP_CP12 {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		File folder = new File(dir);
 		String[] list = folder.list();
-		heuristic = ATSP_heuristics.rem_MaxRepCost;
+		heuristic = ATSP_heuristics.enf_sparse;
 		main_search = 0;
 		configParameters(0);
 		for (String s : list) {
-			if ((s.contains(".atsp"))  && !s.contains("p43")){
+			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
-				if(n>30 && n<80){// || s.contains("p43.atsp")){
+				if(n>0 && n<170){// || s.contains("p43.atsp")){
 					bst = false;
-					configParameters(0);
-					solve();
+//					configParameters(0);
+//					solve();
 //					configParameters((1<<arbo));
 //					solve();
 //					configParameters((1<<pos));
 //					solve();
-//					configParameters((1<<allDiff));
-//					solve();
-					bst = true;
-					configParameters((1<<rg));
+					configParameters((1<<allDiff));
 					solve();
+//					bst = true;
+//					configParameters((1<<rg));
+//					solve();
 //					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
 //					solve();
 				}
@@ -371,15 +387,20 @@ public class ATSP_CP12 {
 				,ATSP_heuristics.sparse
 //				,ATSP_heuristics.enf_sparse
 		};
-		toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxRepCost};
+		toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxMargCost};
 		for (String s : list) {
-			if (s.contains(".atsp") && (!s.contains("170.atsp")) && (!s.contains("p43.atsp"))){//!s.contains("p43")){
+			if (s.contains(".atsp")){// && (!s.contains("170.atsp")) && (!s.contains("p43.atsp"))){//!s.contains("p43")){
 				loadInstance(dir + "/" + s);
-				if(n>0 && n<2070){
+				if(n>0 && n<270){
 					for(ATSP_heuristics atsp_h:toTry){
 						heuristic = atsp_h;
-						bst = false;
-						configParameters(0);
+//						bst = false;
+//						configParameters(1<<rg);
+						bst = true;
+//						configParameters((1<<rg));
+//						solve();
+						configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+//						solve();
 						solve();
 					}
 				}

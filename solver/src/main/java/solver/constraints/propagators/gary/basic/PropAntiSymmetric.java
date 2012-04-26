@@ -41,13 +41,12 @@ import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**
- * @param <V>
+/**Ensures that the final graph is antisymmetric
+ * i.e. if G has arc (x,y) then it does not have (y,x)
+ * Except for loops => (x,x) is allowed
  * @author Jean-Guillaume Fages
- *         <p/>
- *         Ensures that the final graph is antisymmetric
  */
-public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagator<V>{
+public class PropAntiSymmetric extends GraphPropagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -55,18 +54,17 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 
 	DirectedGraphVar g;
 	EnfProc enf;
+	int n;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAntiSymmetric(
-			V graph,
-			Solver solver,
-			Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
+	public PropAntiSymmetric(DirectedGraphVar graph,Constraint constraint,Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
 		enf = new EnfProc(this);
+		n = g.getEnvelopGraph().getNbNodes();
 	}
 
 	//***********************************************************************************
@@ -74,7 +72,7 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	//***********************************************************************************
 
 	@Override
-    public void propagate(int evtmask) throws ContradictionException {
+	public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
 		INeighbors succ;
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
@@ -86,11 +84,9 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	}
 
 	@Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-			if ((mask & EventType.ENFORCEARC.mask) != 0){
-            eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
-			}
-		}
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
+	}
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
@@ -104,10 +100,13 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 		for(int i=ker.getFirstElement();i>=0; i = ker.getNextElement()){
 			succ = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=succ.getFirstElement(); j>=0; j = succ.getNextElement()){
-				if(g.getKernelGraph().arcExists(j, i)){
+				if(g.getKernelGraph().getSuccessorsOf(j).contain(i)){
 					return ESat.FALSE;
 				}
 			}
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
 	}
@@ -117,25 +116,17 @@ public class PropAntiSymmetric<V extends DirectedGraphVar> extends GraphPropagat
 	//***********************************************************************************
 
 	/** Enable to remove the opposite arc */
-	private static class EnfProc implements IntProcedure {
-
-		private final PropAntiSymmetric p;
-
-		public EnfProc(PropAntiSymmetric p) {
+	private class EnfProc implements IntProcedure {
+		private final Propagator p;
+		public EnfProc(Propagator p) {
 			this.p = p;
 		}
-
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int n = p.g.getEnvelopGraph().getNbNodes();
-			if (i>=n){
-				int from = i/n-1;
-				int to   = i%n;
-				if(from!=to){
-					p.g.removeArc(to, from, p);
-				}
-			}else{
-				throw new UnsupportedOperationException();
+			int from = i/n-1;
+			int to   = i%n;
+			if(from!=to){
+				g.removeArc(to, from, p);
 			}
 		}
 	}

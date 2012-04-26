@@ -93,7 +93,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 	}
 
 	private void filter() throws ContradictionException {
-		IActiveNodes nodes = g.getEnvelopGraph().getActiveNodes();
+		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
 		INeighbors nei;
 		int mate;
 		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
@@ -198,11 +198,13 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask
+				+ EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		//TODO
 		return ESat.UNDEFINED;
 	}
 }

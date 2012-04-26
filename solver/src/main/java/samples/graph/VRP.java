@@ -40,7 +40,6 @@ import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
 import solver.constraints.propagators.gary.basic.PropEachNodeHasLoop;
 import solver.constraints.propagators.gary.constraintSpecific.PropTruckDepArr;
-import solver.constraints.propagators.gary.directed.PropNPreds;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.assignments.Assignment;
@@ -171,7 +170,7 @@ public class VRP extends AbstractProblem {
 		GraphRelation<CustomerVisitVariable> relation = GraphRelationFactory.customerVisit(nodes, distancesMatrix);
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(nodes, relation, solver);
 		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, nTrucks);
-		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
+//		gc.addProperty(GraphProperty.K_PROPER_PREDECESSORS_PER_NODE, VariableFactory.bounded("01", 0, 1, solver));
 		g = (DirectedGraphVar) gc.getGraph(); // stores the graph variable
 		BitSetNeighbors ends = new BitSetNeighbors(n);
 		BitSetNeighbors custos = new BitSetNeighbors(n);
@@ -181,9 +180,9 @@ public class VRP extends AbstractProblem {
 		for(int i=2*nbMaxTrucks; i<n; i++){
 			custos.set(i);
 		}
-		gc.addAdHocProp(new PropNPreds(g, solver, gc, 2, ends));
+//		gc.addAdHocProp(new PropNPreds(g, solver, gc, 2, ends));
 		gc.addAdHocProp(new PropEachNodeHasLoop(g, ends, solver, gc));
-		gc.addAdHocProp(new PropNPreds(g, solver, gc, 1, custos));
+//		gc.addAdHocProp(new PropNPreds(g, solver, gc, 1, custos));
 		return gc;
 	}
 

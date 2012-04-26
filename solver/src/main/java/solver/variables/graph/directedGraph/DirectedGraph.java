@@ -257,9 +257,9 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addArc(int from, int to) {
-//		System.out.println(from+" - "+to);
-//		System.out.println(successors[from]+" mm "+predecessors[to]);
-//		System.out.println(successors[from].contain(to)+" and "+predecessors[to].contain(from));
+//		TODO
+//		activateNode(from);
+//		activateNode(to);
 		if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))){
 			successors[from].add(to);
 			predecessors[to].add(from);

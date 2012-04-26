@@ -29,18 +29,31 @@ package solver.constraints.gary;
 import solver.Solver;
 import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.gary.relations.GraphRelationFactory;
-import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.PropKCliques;
+import solver.constraints.propagators.gary.PropTransitivity;
 import solver.variables.IntVar;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**Predefined graph constraints
  * @author Jean-Guillaume Fages
  *
  */
 public class GraphConstraintFactory {
+
+	// SAFE
+
+	public static GraphConstraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
+		GraphConstraint gc = makeConstraint(graph,solver);
+		gc.addAdHocProp(new PropTransitivity(graph,solver, gc));
+		gc.addAdHocProp(new PropKCliques(graph,solver, gc, nCliques));
+		return gc;
+	}
+
+
+	// UNSAFE
 
 	/** Anti arborescence partitioning constraint
 	 * also known as tree constraint

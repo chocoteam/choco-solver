@@ -29,46 +29,39 @@ package samples.graph.jg_sandbox;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.graph.INeighbors;
+import solver.variables.Variable;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-public class PropGraphNurse extends GraphPropagator<UndirectedGraphVar>{
+public class PropGraphNurse extends GraphPropagator<Variable>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private UndirectedGraphVar g;
-	private IntVar[] start,end;
+	private BoolVar[] nurses;
 	private IntProcedure enf_proc, rem_proc;
-	private int[] task_start, task_end;
-	private int n,firstTaskIndex;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropGraphNurse(UndirectedGraphVar graph, int ftIdx,
-						  IntVar[] st, IntVar[] en, int[] t_start, int[] t_end,
-						  Constraint constraint, Solver solver) {
-		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropGraphNurse(UndirectedGraphVar graph, BoolVar[] nurses, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(nurses,new Variable[]{graph}), solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
-		start = st;
-		end = en;
-		firstTaskIndex = ftIdx;
-		n = g.getEnvelopGraph().getNbNodes();
-		task_start = t_start;
-		task_end   = t_end;
-		enf_proc = new ArcEnf();
-		rem_proc = new NodeRem();
+		this.nurses = nurses;
+		enf_proc = new NodeEnf(this);
+		rem_proc = new NodeRem(this);
 	}
 
 	//***********************************************************************************
@@ -78,44 +71,36 @@ public class PropGraphNurse extends GraphPropagator<UndirectedGraphVar>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors nei;
-		for(int i=0;i<firstTaskIndex;i++){
-			if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
-				nodeRem(i);
-			}
-			nei = g.getKernelGraph().getNeighborsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				adjustTimeBounds(i,j-firstTaskIndex);
+		for(int i=0;i<nurses.length;i++){
+			if(nurses[i].getBooleanValue().equals(ESat.TRUE)){
+				g.enforceNode(i,this);
+			}else if(nurses[i].getBooleanValue().equals(ESat.TRUE)){
+				g.removeNode(i,this);
+			}else{
+				if(g.getKernelGraph().getActiveNodes().isActive(i)){
+					nurses[i].setToTrue(this,false);
+				}
+				if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
+					nurses[i].setToFalse(this,false);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
-		if((mask & EventType.REMOVENODE.mask)!=0){
+		if(idxVarInProp<nurses.length){
+			if(nurses[idxVarInProp].getBooleanValue().equals(ESat.TRUE)){
+				g.enforceNode(idxVarInProp,this);
+			}else if(nurses[idxVarInProp].getBooleanValue().equals(ESat.FALSE)){
+				g.removeNode(idxVarInProp,this);
+			}else{
+				throw new UnsupportedOperationException();
+			}
+		}else{
+			eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCENODE);
 			eventRecorder.getDeltaMonitor(this, g).forEach(rem_proc, EventType.REMOVENODE);
 		}
-//		for(int i=0;i<firstTaskIndex;i++){
-//			if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
-//				nodeRem(i);
-//			}
-//		}
-	}
-
-	private void adjustTimeBounds(int employeeIdx, int taskIdx) throws ContradictionException {
-		start[employeeIdx].updateUpperBound(task_start[taskIdx],this);
-		end[employeeIdx].updateLowerBound(task_end[taskIdx],this);
-	}
-
-	private void nodeRem(int employeeIdx) throws ContradictionException {
-//		start[employeeIdx].instantiateTo(start[employeeIdx].getLB(),this);
-//		end[employeeIdx].instantiateTo(end[employeeIdx].getLB(),this);
-		// or
-//		start[employeeIdx].updateLowerBound(end[employeeIdx].getLB(),this);
-//		start[employeeIdx].updateUpperBound(end[employeeIdx].getUB(),this);
-//		end[employeeIdx].updateLowerBound(start[employeeIdx].getLB(),this);
-//		end[employeeIdx].updateUpperBound(start[employeeIdx].getUB(),this);
 	}
 
 	//***********************************************************************************
@@ -124,11 +109,12 @@ public class PropGraphNurse extends GraphPropagator<UndirectedGraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask+EventType.REMOVENODE.mask;
+		return EventType.ENFORCENODE.mask+EventType.REMOVENODE.mask+EventType.INSTANTIATE.strengthened_mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		//TODO
 		return ESat.TRUE;
 	}
 
@@ -136,23 +122,25 @@ public class PropGraphNurse extends GraphPropagator<UndirectedGraphVar>{
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class ArcEnf implements IntProcedure{
+	private class NodeEnf implements IntProcedure{
+		Propagator p;
+		NodeEnf(Propagator p){
+			this.p = p;
+		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int a = i/n-1;
-			int b = i%n;
-			if(a<firstTaskIndex){
-				adjustTimeBounds(a,b-firstTaskIndex);
-			}else if(b<firstTaskIndex){
-				adjustTimeBounds(b,a-firstTaskIndex);
-			}
+			nurses[i].setToTrue(p,false);
 		}
 	}
 	
 	private class NodeRem implements IntProcedure{
+		Propagator p;
+		NodeRem(Propagator p){
+			this.p = p;
+		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			nodeRem(i);
+			nurses[i].setToFalse(p,false);
 		}
 	}
 }

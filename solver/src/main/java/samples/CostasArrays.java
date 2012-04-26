@@ -70,13 +70,13 @@ public class CostasArrays extends AbstractProblem {
 				}
 			}
 		}
-		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.CLIQUE_IN_ONE));
-		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.CLIQUE_IN_ONE));
+		solver.post(new AllDifferent(vars,solver, AllDifferent.Type.AC));
+		solver.post(new AllDifferent(vectors,solver, AllDifferent.Type.AC));
 	}
 
 	@Override
 	public void configureSolver() {
-		solver.set(StrategyFactory.forceInputOrderMinVal(vectors, solver.getEnvironment()));
+		solver.set(StrategyFactory.forceInputOrderMinVal(vars, solver.getEnvironment()));
 	}
 
 	@Override

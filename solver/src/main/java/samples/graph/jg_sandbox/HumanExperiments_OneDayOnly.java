@@ -27,21 +27,15 @@
 
 package samples.graph.jg_sandbox;
 
-import samples.graph.jg_sandbox.*;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.PropKCliques;
 import solver.constraints.propagators.gary.PropTransitivity;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.exception.ContradictionException;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.Sort;
+import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.strategy.graph.ArcStrategy;
 import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
@@ -81,11 +75,13 @@ public class HumanExperiments_OneDayOnly {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
+		clearFile("tl.csv");
 		File folder = new File(repo);
 		String[] list = folder.list();
 		for(String file : list){
 //			if(file.contains("Day0_Ta100_Ti130_SkC_i016")
 //			|| file.contains("Day0_Ta100_Ti130_SkCR_i000")){
+//			if(file.contains("Day5_Ta100_Ti100_SkC_i000.txt"))
 			solve(parseInstance(repo + "/" + file));
 //				System.exit(0);
 //			}
@@ -98,10 +94,7 @@ public class HumanExperiments_OneDayOnly {
 
 	private static void solve(boolean[][] matrix) {
 		solver = new Solver();
-//		print(matrix);
 		matrix = transformMatrix(matrix);
-//		print(matrix);
-//		System.exit(0);
 		buildVariables(matrix);
 		postConstraints();
 		configure();
@@ -166,6 +159,7 @@ public class HumanExperiments_OneDayOnly {
 		gc.addAdHocProp(new PropTransitivity(graph,solver, gc));
 		gc.addAdHocProp(new PropKCliques(graph,solver, gc, kWorkers));
 		gc.addAdHocProp(new PropKWorkers(graph,ne,kWorkers,gc,solver));
+		//TODO check
 		gc.addAdHocProp(new PropAtLeastKWorkers(graph,kWorkers,ne,gc,solver));
 		gc.addAdHocProp(new PropAtMostKWorkers(graph,kWorkers,ne,gc,solver));
 		// time
@@ -182,7 +176,7 @@ public class HumanExperiments_OneDayOnly {
 //		solver.set(StrategyFactory.graphStrategy(graph, null, new Strat(graph), GraphStrategy.NodeArcPriority.ARCS));
 //		solver.set(StrategyFactory.graphStrategy(graph, null, new MilleFeuillesNurse(graph), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(StrategyFactory.graphStrategy(graph, null, new MilleFeuillesTask(graph), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 //		solver.getSearchLoop().getLimitsBox().setFailLimit(1);

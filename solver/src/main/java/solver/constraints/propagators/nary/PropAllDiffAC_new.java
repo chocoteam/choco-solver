@@ -49,15 +49,6 @@ import java.util.BitSet;
 
 /**
  * Propagator for AllDifferent AC constraint for integer variables
-<<<<<<< HEAD
-<<<<<<< HEAD
- *
-=======
- * <p/>
->>>>>>> develop
-=======
- * <p/>
->>>>>>> develop
  * Uses Regin algorithm
  * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
  * per arc removed from the support
@@ -80,6 +71,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
     private int[] nodeSCC;
     private BitSet free;
     private IntProcedure remProc;
+	private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
@@ -119,12 +111,12 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
         n2 = idx;
         fifo = new int[n2];
         matching = new int[n2];
-        nodeSCC = new int[n2 + 1];
         digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];
         in = new BitSet(n2);
+		SCCfinder = new StrongConnectivityFinder(digraph);
     }
 
     //***********************************************************************************
@@ -226,14 +218,8 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
                 }
             }
         }
-        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-        int scc = 0;
-        for (TIntArrayList in : allSCC) {
-            for (int i = 0; i < in.size(); i++) {
-                nodeSCC[in.get(i)] = scc;
-            }
-            scc++;
-        }
+        SCCfinder.findAllSCC();
+		nodeSCC = SCCfinder.getNodesSCC();
         digraph.desactivateNode(n2);
     }
 
@@ -247,10 +233,16 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i] != j || matching[j] != i) {
-                        v.removeValue(k, this);
-                        digraph.removeArc(i, j);
-                    }
+//                    if (matching[i] != j || matching[j] != i) {
+//                        v.removeValue(k, this);
+//                        digraph.removeArc(i, j);
+//                    }
+					if (matching[i] == j && matching[j] == i) {
+						v.instantiateTo(k,this);
+					} else {
+						v.removeValue(k, this);
+						digraph.removeArc(i, j);
+					}
                 }
             }
         }

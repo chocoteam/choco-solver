@@ -75,7 +75,7 @@ public class PropTimeGraph extends GraphPropagator<IntVar>{
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<firstTaskIndex;i++){
-			adjustTimeBounds(i);
+			adjustGraph(i);
 		}
 	}
 
@@ -84,10 +84,10 @@ public class PropTimeGraph extends GraphPropagator<IntVar>{
 		if(idxVarInProp>=firstTaskIndex){
 			idxVarInProp -= firstTaskIndex;
 		}
-		adjustTimeBounds(idxVarInProp);
+		adjustGraph(idxVarInProp);
 	}
 
-	private void adjustTimeBounds(int employeeIdx) throws ContradictionException {
+	private void adjustGraph(int employeeIdx) throws ContradictionException {
 		INeighbors nei = g.getEnvelopGraph().getNeighborsOf(employeeIdx);
 		for(int t=nei.getFirstElement();t>=0;t=nei.getNextElement()){
 			if(task_start[t-firstTaskIndex]<start[employeeIdx].getLB()

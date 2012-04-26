@@ -73,12 +73,11 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	private BitSet free;
 	private IntProcedure remProc;
 	int matchingCardinality;
-	long timestamp;
+	private StrongConnectivityFinder SCCfinder;
 	// for augmenting matching
 	int[] father;
 	BitSet in;
 	LinkedList<Integer> list;
-	public final static boolean LAZY = false;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -111,6 +110,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 		father = new int[n2];
 		in = new BitSet(n2);
 		list = new LinkedList<Integer>();
+		SCCfinder = new StrongConnectivityFinder(digraph);
 	}
 
 	/**
@@ -211,19 +211,9 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	// PRUNING
 	//***********************************************************************************
 
-	private void buildSCC() {
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-		int scc = 0;
-		for (TIntArrayList in : allSCC) {
-			for (int i = 0; i < in.size(); i++) {
-				nodeSCC[in.get(i)] = scc;
-			}
-			scc++;
-		}
-	}
-
 	private void filter() throws ContradictionException {
-		buildSCC();
+		SCCfinder.findAllSCC();
+		nodeSCC = SCCfinder.getNodesSCC();
 		INeighbors succ;
 		int j;
 		for (int node = 0;node<n;node++) {
@@ -257,13 +247,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 		free.clear();
 		eventRecorder.getDeltaMonitor(this,g).forEach(remProc, EventType.REMOVEARC);
 		repairMatching();
-		if(!LAZY){
-			timestamp = AbstractSearchLoop.timeStamp-1;
-		}
-		if(timestamp!= AbstractSearchLoop.timeStamp){
-			timestamp = AbstractSearchLoop.timeStamp;
-			filter();
-		}
+		filter();
 	}
 
 	//***********************************************************************************

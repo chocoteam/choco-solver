@@ -32,6 +32,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.nary.nValue.PropAtMostNValues_BC;
+import solver.constraints.propagators.nary.nValue.PropAtMostNValues_Greedy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import java.util.BitSet;
@@ -51,20 +52,22 @@ public class AtMostNValues extends IntConstraint<IntVar> {
 				cons.setPropagators(new PropAtMostNValues_BC(vars,nValues,cons,sol));
 			}
 		},
-		BC_wr {
-			@Override
-			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
-				for(IntVar v:vars)
-				assert v.hasEnumeratedDomain();
-				throw new UnsupportedOperationException("not implemented yet");
-			}
-		},
+//		BC_wr { //TODO
+//			@Override
+//			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
+//				for(IntVar v:vars){
+//					assert v.hasEnumeratedDomain();
+//				}
+//				throw new UnsupportedOperationException("not implemented yet");
+//			}
+//		},
 		Greedy {
 			@Override
 			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
-				for(IntVar v:vars)
-				assert v.hasEnumeratedDomain();
-				throw new UnsupportedOperationException("not implemented yet");
+				for(IntVar v:vars){
+					assert v.hasEnumeratedDomain();
+				}
+				cons.setPropagators(new PropAtMostNValues_Greedy(vars,nValues,cons,sol));
 			}
 		};
 
@@ -125,27 +128,33 @@ public class AtMostNValues extends IntConstraint<IntVar> {
 
     @Override
     public ESat isSatisfied() {
-        for (int i = 0; i < vars.length-1; i++) {
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
+		int n = vars.length-1;
+		BitSet values = new BitSet();
+		BitSet mandatoryValues = new BitSet();
+		IntVar v;
+		int ub;
+		for(int i=0;i<n;i++){
+			v = vars[i];
+			ub = v.getUB();
+			if(v.instantiated()){
+				mandatoryValues.set(ub);
 			}
-        }
-		BitSet values = new BitSet(vars.length-1);
-        for (int i = 0; i < vars.length-1; i++) {
-			values.set(vars[i].getLB());
-        }
-		if(values.cardinality()<=vars[vars.length-1].getLB()){
+			for(int j=v.getLB();j<=ub;j++){
+				values.set(j);
+			}
+		}
+		if(values.cardinality()<=vars[n].getLB()){
 			return ESat.TRUE;
 		}
-		if(values.cardinality()<=vars[vars.length-1].getUB()){
-			return ESat.UNDEFINED;
+		if(mandatoryValues.cardinality()>vars[n].getUB()){
+			return ESat.FALSE;
 		}
-        return ESat.FALSE;
+		return ESat.UNDEFINED;
     }
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
-        sb.append("NValue({");
+        sb.append("AtMostNValue({");
         for (int i = 0; i < vars.length-1; i++) {
             if (i > 0) sb.append(", ");
             Variable var = vars[i];

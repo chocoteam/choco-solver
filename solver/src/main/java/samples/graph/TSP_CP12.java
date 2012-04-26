@@ -27,17 +27,13 @@
 
 package samples.graph;
 
-import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.PoolManager;
-import choco.kernel.common.util.tools.ArrayUtils;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
+import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
@@ -45,38 +41,20 @@ import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropH
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
-import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
-import solver.search.strategy.assignments.Assignment;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
-import solver.search.strategy.decision.graph.GraphDecision;
-import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.graph.ArcStrategy;
-import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
-import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
-import java.util.BitSet;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
@@ -410,7 +388,7 @@ public class TSP_CP12 {
 		// constraints
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
 		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,2));
+		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
 		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
 		if(allDiffAC){

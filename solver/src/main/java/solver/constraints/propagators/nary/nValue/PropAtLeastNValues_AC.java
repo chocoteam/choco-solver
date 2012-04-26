@@ -45,6 +45,15 @@ import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.BitSet;
 
+/**
+ * AtLeastNValues Propagator (similar to SoftAllDiff)
+ * The number of distinct values in vars is at least nValues
+ * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
+ * The worst case time complexity is O(nm) but this is very pessimistic
+ * In practice it is more like O(m) where m is the number of variable-value pairs
+ *
+ * @author Jean-Guillaume Fages
+ */
 public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
 	//***********************************************************************************
@@ -70,8 +79,20 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver sol) {
-		super(ArrayUtils.append(vars,new IntVar[]{nValues}), sol, constraint, PropagatorPriority.QUADRATIC, true);
+	/**
+	 * AtLeastNValues Propagator (similar to SoftAllDiff)
+	 * The number of distinct values in vars is at least nValues
+	 * Performs Generalized Arc Consistency based on Maximum Bipartite Matching
+	 * The worst case time complexity is O(nm) but this is very pessimistic
+	 * In practice it is more like O(m) where m is the number of variable-value pairs
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param constraint
+	 * @param solver
+	 */
+	public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
 		n = vars.length;
 		this.nValues = nValues;
 		map = new TIntIntHashMap();
@@ -91,7 +112,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 		n2 = idx;
 		fifo = new int[n2];
 		matching = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
+		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST);
 		free = new BitSet(n2);
 		remProc = new DirectedRemProc();
 		father = new int[n2];

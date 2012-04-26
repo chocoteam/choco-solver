@@ -42,13 +42,11 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
- * @PropAnn(tested = {CORRECTION,CONSISTENCY})
  * Propagator that ensures that a node has at most N neighbors
  *
- * @param <V>
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
+public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -56,71 +54,29 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 
 	private UndirectedGraphVar g;
 	private IntProcedure enf_proc;
-	private int n_neighbors;
+	private int[] n_neighbors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nNeigh) {
-
-		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropAtMostNNeighbors(UndirectedGraphVar graph, Solver solver, Constraint constraint, int nNeigh) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		n_neighbors = nNeigh;
-		final PropAtMostNNeighbors<V> instance = this;
-		if (n_neighbors==1){
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from,to);
-						prune(to,from);
-					}else{
-						throw new UnsupportedOperationException();
-					}
-				}
-				private void prune(int from, int mate) throws ContradictionException{
-					INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-					for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
-						if (mate!=to){
-							g.removeArc(from, to, instance);
-						}
-					}
-				}
-			};
-		}else{
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from);
-						prune(to);
-					}else{
-						throw new UnsupportedOperationException();
-					}
-				}
-				private void prune(int from) throws ContradictionException{
-					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
-						contradiction(g,"");
-					}
-					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors &&
-					   g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
-						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-						for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
-							if (!g.getKernelGraph().edgeExists(from, to)){
-								g.removeArc(from, to, instance);
-							}
-						}
-					}
-				}
-			};
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_neighbors = new int[n];
+		for(int i=0;i<n;i++){
+			n_neighbors[i] = nNeigh;
 		}
+		enf_proc = new ArcEnf(n);
+	}
+
+	public PropAtMostNNeighbors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_neighbors = nbNeigh;
+		enf_proc = new ArcEnf(n);
 	}
 
 	//***********************************************************************************
@@ -131,20 +87,8 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		int next;
-		INeighbors nei;
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			nei = g.getEnvelopGraph().getNeighborsOf(node); 
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && nei.neighborhoodSize()>n_neighbors){
-				for(next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
-					if (!g.getKernelGraph().edgeExists(node, next)){
-						g.removeArc(node, next, this);
-					}
-				}
-			}
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
-				contradiction(g,"");
-			}
+			checkNode(node);
 		}
 	}
 
@@ -166,12 +110,50 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
 				return ESat.FALSE;
 			}
 		}
-		if(g.instantiated()){
-			return ESat.TRUE;
-		}return ESat.UNDEFINED;
+		act = g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			if(g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
+				return ESat.UNDEFINED;
+			}
+		}
+		return ESat.TRUE;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	/** When a node has more than N neighbors then it must be removed,
+	 *  If it has N neighbors in the kernel then other incident edges
+	 *  should be removed */
+	private void checkNode(int i) throws ContradictionException {
+		INeighbors ker = g.getKernelGraph().getNeighborsOf(i);
+		INeighbors env = g.getEnvelopGraph().getNeighborsOf(i);
+		int size = ker.neighborhoodSize();
+		if(size>n_neighbors[i]){
+			g.removeNode(i, this);
+		}else if (size==n_neighbors[i] && env.neighborhoodSize()>size){
+			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
+				if(!ker.contain(next)){
+					g.removeArc(i, next, this);
+				}
+			}
+		}
+	}
+	
+	private class ArcEnf implements IntProcedure{
+		private int n;
+		ArcEnf(int n){
+			this.n = n;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			checkNode(i/n-1);
+			checkNode(i%n);
+		}
 	}
 }

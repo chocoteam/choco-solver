@@ -34,12 +34,11 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
+import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.Prop_LP_GRB;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
@@ -253,7 +252,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		// constraints
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
 		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,2));
+		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,1));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
 		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
 		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);

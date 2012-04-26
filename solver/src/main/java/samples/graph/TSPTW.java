@@ -35,7 +35,6 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
@@ -269,7 +268,7 @@ public class TSPTW extends AbstractProblem{
 			solver.post(new AllDifferent(positions,solver,AllDifferent.Type.BC));
 		}
 		if(allDiffAC){
-			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+//			gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
 		}
 		solver.post(gc);
 	}

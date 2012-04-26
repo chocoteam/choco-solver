@@ -41,7 +41,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * Propagator that ensures that a node has at most N successors
+ * Propagator that ensures that a node has at most N predecessors
  *
  * @author Jean-Guillaume Fages
  */
@@ -53,28 +53,28 @@ public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	private DirectedGraphVar g;
 	private IntProcedure enf_proc;
-	private int[] n_Succs;
+	private int[] n_Preds;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNPredecessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbSuccs) {
+	public PropAtMostNPredecessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();
-		n_Succs = new int[n];
+		n_Preds = new int[n];
 		for(int i=0;i<n;i++){
-			n_Succs[i] = nbSuccs;
+			n_Preds[i] = nbPreds;
 		}
 		enf_proc = new ArcEnf(n);
 	}
 
-	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
+	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbPreds, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();
-		n_Succs = nbSuccs;
+		n_Preds = nbPreds;
 		enf_proc = new ArcEnf(n);
 	}
 
@@ -93,7 +93,9 @@ public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
+//		if((mask & EventType.ENFORCEARC.mask) != 0){
+			eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
+//		}
 	}
 
 	//***********************************************************************************
@@ -102,20 +104,21 @@ public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask;
+		//return EventType.ENFORCEARC.mask;
+		return EventType.ENFORCEARC.mask+EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>n_Succs[node]){
+			if(g.getKernelGraph().getPredecessorsOf(node).neighborhoodSize()>n_Preds[node]){
 				return ESat.FALSE;
 			}
 		}
 		act = g.getEnvelopGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()>n_Succs[node]){
+			if(g.getEnvelopGraph().getPredecessorsOf(node).neighborhoodSize()>n_Preds[node]){
 				return ESat.UNDEFINED;
 			}
 		}
@@ -126,19 +129,19 @@ public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 	// PROCEDURES
 	//***********************************************************************************
 
-	/** When a node has more than N successors then it must be removed,
-	 *  If it has N successors in the kernel then other incident edges
+	/** When a node has more than N predecessors then it must be removed,
+	 *  If it has N predecessors in the kernel then other incident edges
 	 *  should be removed */
 	private void checkNode(int i) throws ContradictionException {
-		INeighbors ker = g.getKernelGraph().getSuccessorsOf(i);
-		INeighbors env = g.getEnvelopGraph().getSuccessorsOf(i);
+		INeighbors ker = g.getKernelGraph().getPredecessorsOf(i);
+		INeighbors env = g.getEnvelopGraph().getPredecessorsOf(i);
 		int size = ker.neighborhoodSize();
-		if(size>n_Succs[i]){
+		if(size>n_Preds[i]){
 			g.removeNode(i, this);
-		}else if (size==n_Succs[i] && env.neighborhoodSize()>size){
-			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
-				if(!ker.contain(next)){
-					g.removeArc(i, next, this);
+		}else if (size==n_Preds[i] && env.neighborhoodSize()>size){
+			for(int p = env.getFirstElement(); p>=0; p = env.getNextElement()){
+				if(!ker.contain(p)){
+					g.removeArc(p,i, this);
 				}
 			}
 		}
@@ -151,7 +154,7 @@ public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			checkNode(i/n-1);
+			checkNode(i%n);
 		}
 	}
 }

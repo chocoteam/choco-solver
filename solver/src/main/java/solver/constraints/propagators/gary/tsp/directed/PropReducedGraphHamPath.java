@@ -82,6 +82,8 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 	private IntProcedure arcRemoved;// incremental procedure
 	private BitSet sccComputed;		// enable incrementation
 
+	private StrongConnectivityFinder SCCfinder;
+
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
@@ -112,6 +114,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		}
 		arcRemoved = new RemArc(this);
 		sccComputed = new BitSet(n);
+		SCCfinder = new StrongConnectivityFinder(G.getEnvelopGraph());
 	}
 
 	//***********************************************************************************
@@ -134,7 +137,6 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
 	}
 
-	int count = 0;
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
@@ -143,18 +145,74 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 			mates[i].clear();
 			G_R.getActiveNodes().desactivate(i);
 		}
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph());
-		int s = allSCC.size();
+//		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph());
+//		int s = allSCC.size();
+//		n_R.set(s);
+//		int elem;
+//		TIntArrayList list;
+//		for(int i=0;i<s;i++){
+//			list = allSCC.get(i);
+//			G_R.getActiveNodes().activate(i);
+//			for(int j=list.size()-1;j>=0;j--){
+//				elem = list.get(j);
+//				sccOf[elem].set(i);
+//				addNode(i,elem);
+//			}
+//		}
+//		INeighbors succs;
+//		int x;
+//		for(int i=0;i<n;i++){
+//			x = sccOf[i].get();
+//			succs = G.getEnvelopGraph().getSuccessorsOf(i);
+//			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
+//				if(x!=sccOf[j].get()){
+//					G_R.addArc(x,sccOf[j].get());
+//					mates[x].add((i+1)*n+j);
+//				}
+//			}
+//		}
+//		int first = -1;
+//		int last  = -1;
+//		for(int i=0;i<s;i++){
+//			if(G_R.getPredecessorsOf(i).isEmpty()){
+//				first = i;
+//			}
+//			if(G_R.getSuccessorsOf(i).isEmpty()){
+//				last = i;
+//			}
+//		}
+//		if(first==-1 || last==-1 || first==last){
+//			contradiction(G, "");
+//		}
+//		if(visit(first, last)!=n_R.get()){
+//			contradiction(G, "");
+//		}
+//		int to,arc;
+//		for(int i=0;i<n;i++){
+//			to = G.getKernelGraph().getSuccessorsOf(i).getFirstElement();
+//			x  = sccOf[i].get();
+//			if(to!=-1 && sccOf[to].get()!=x && mates[x].neighborhoodSize()>1){
+//				arc = (i+1)*n+to;
+//				for(int a=mates[x].getFirstElement();a>=0;a=mates[x].getNextElement()){
+//					if(a!=arc){
+//						G.removeArc(a/n-1,a%n,this);
+//					}
+//				}
+//				mates[x].clear();
+//				mates[x].add(arc);
+//			}
+//		}
+		SCCfinder.findAllSCC();
+		int s = SCCfinder.getNbSCC();
 		n_R.set(s);
-		int elem;
-		TIntArrayList list;
+		int j;
 		for(int i=0;i<s;i++){
-			list = allSCC.get(i);
 			G_R.getActiveNodes().activate(i);
-			for(int j=list.size()-1;j>=0;j--){
-				elem = list.get(j);
-				sccOf[elem].set(i);
-				addNode(i,elem);
+			j = SCCfinder.getSCCFirstNode(i);
+			while(j!=-1){
+				sccOf[j].set(i);
+				addNode(i,j);
+				j = SCCfinder.getNextNode(j);
 			}
 		}
 		INeighbors succs;
@@ -162,7 +220,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 		for(int i=0;i<n;i++){
 			x = sccOf[i].get();
 			succs = G.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
+			for(j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
 				if(x!=sccOf[j].get()){
 					G_R.addArc(x,sccOf[j].get());
 					mates[x].add((i+1)*n+j);
@@ -335,9 +393,63 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						k = sccNext[k].get();
 					}
 					// piste1 algo faux
-					ArrayList<TIntArrayList> newSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph(), restriction);
+//					ArrayList<TIntArrayList> newSCC = StrongConnectivityFinder.findAllSCCOf(G.getEnvelopGraph(), restriction);
+//					sccComputed.set(x);
+//					int ns = newSCC.size();
+//					if(ns>1){
+//						int first = G_R.getPredecessorsOf(x).getFirstElement();
+//						int last  = G_R.getSuccessorsOf(x).getFirstElement();
+//						// SCC broken
+//						sccFirst[x].set(-1);
+//						mates[x].clear();
+//						G_R.removeArc(first,x);
+//						G_R.removeArc(x,last);
+//						// first scc
+//						for(int e=0; e<newSCC.get(0).size();e++){
+//							addNode(x,newSCC.get(0).get(e));
+//						}
+//						// others
+//						int idx=n_R.get();
+//						int elem;
+//						for(int scc=1;scc<ns;scc++){
+//							sccFirst[idx].set(-1);
+//							mates[idx].clear();
+//							G_R.getActiveNodes().activate(idx);
+//							for(int e=0; e<newSCC.get(scc).size();e++){
+//								elem = newSCC.get(scc).get(e);
+//								addNode(idx,elem);
+//								sccOf[elem].set(idx);
+//							}
+//							idx++;
+//						}
+//						n_R.set(idx);
+//						// link arcs
+//						int e,sccE;
+//						INeighbors nei;
+//						for(int scc=0;scc<ns;scc++){
+//							sccE = sccOf[newSCC.get(scc).get(0)].get();
+//							for(k=newSCC.get(scc).size()-1;k>=0;k--){
+//								e = newSCC.get(scc).get(k);
+//								nei = G.getEnvelopGraph().getSuccessorsOf(e);
+//								for(int next=nei.getFirstElement(); next>=0; next=nei.getNextElement()){
+//									if(sccE!=sccOf[next].get()){
+//										G_R.addArc(sccE,sccOf[next].get());
+//										mates[sccE].add((e+1)*n+next);
+//									}
+//								}
+//							}
+//						}
+//						for(int arc=mates[first].getFirstElement();arc>=0;arc=mates[first].getNextElement()){
+//							G_R.addArc(first,sccOf[arc%n].get());
+//						}
+//						// filter
+//						if(visit(first,last)!=ns+2){
+//							p.contradiction(G,"no Hamiltonian path");
+//						}
+//					}
+					SCCfinder.findAllSCCOf(restriction);
 					sccComputed.set(x);
-					int ns = newSCC.size();
+					int ns = SCCfinder.getNbSCC();
 					if(ns>1){
 						int first = G_R.getPredecessorsOf(x).getFirstElement();
 						int last  = G_R.getSuccessorsOf(x).getFirstElement();
@@ -347,8 +459,10 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 						G_R.removeArc(first,x);
 						G_R.removeArc(x,last);
 						// first scc
-						for(int e=0; e<newSCC.get(0).size();e++){
-							addNode(x,newSCC.get(0).get(e));
+						int e = SCCfinder.getSCCFirstNode(0);
+						while(e!=-1){
+							addNode(x,e);
+							e = SCCfinder.getNextNode(e);
 						}
 						// others
 						int idx=n_R.get();
@@ -357,21 +471,22 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 							sccFirst[idx].set(-1);
 							mates[idx].clear();
 							G_R.getActiveNodes().activate(idx);
-							for(int e=0; e<newSCC.get(scc).size();e++){
-								elem = newSCC.get(scc).get(e);
-								addNode(idx,elem);
-								sccOf[elem].set(idx);
+							e = SCCfinder.getSCCFirstNode(scc);
+							while(e!=-1){
+								addNode(idx,e);
+								sccOf[e].set(idx);
+								e = SCCfinder.getNextNode(e);
 							}
 							idx++;
 						}
 						n_R.set(idx);
 						// link arcs
-						int e,sccE;
+						int sccE;
 						INeighbors nei;
 						for(int scc=0;scc<ns;scc++){
-							sccE = sccOf[newSCC.get(scc).get(0)].get();
-							for(k=newSCC.get(scc).size()-1;k>=0;k--){
-								e = newSCC.get(scc).get(k);
+							sccE = sccOf[SCCfinder.getSCCFirstNode(scc)].get();
+							e = SCCfinder.getSCCFirstNode(scc);
+							while(e!=-1){
 								nei = G.getEnvelopGraph().getSuccessorsOf(e);
 								for(int next=nei.getFirstElement(); next>=0; next=nei.getNextElement()){
 									if(sccE!=sccOf[next].get()){
@@ -379,6 +494,7 @@ public class PropReducedGraphHamPath<V extends DirectedGraphVar> extends GraphPr
 										mates[sccE].add((e+1)*n+next);
 									}
 								}
+								e = SCCfinder.getNextNode(e);
 							}
 						}
 						for(int arc=mates[first].getFirstElement();arc>=0;arc=mates[first].getNextElement()){

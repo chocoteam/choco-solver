@@ -56,7 +56,7 @@ public class PropKNodes extends GraphPropagator{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKNodes(GraphVar graph, IntVar k, Solver sol, Constraint constraint) {
+	public PropKNodes(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
 		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
 		this.k = k;

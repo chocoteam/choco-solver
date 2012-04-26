@@ -39,6 +39,18 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import java.util.BitSet;
 
+/**
+ * Propagator for the atMostNValues constraint
+ * The number of distinct values in the set of variables vars is at most equal to nValues
+ * Performs Bound Consistency in O(n+d) with
+ * 		n = |vars|
+ * 		d = maxValue - minValue (from initial domains)
+ *
+ * 	=> very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
+ * 	=>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+ *
+ * @author Jean-Guillaume Fages
+ */
 public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 
 	//***********************************************************************************
@@ -55,8 +67,21 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNValues_BC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver sol) {
-		super(ArrayUtils.append(vars,new IntVar[]{nValues}), sol, constraint, PropagatorPriority.QUADRATIC);
+	/**The number of distinct values in vars is at most nValues
+	 * Performs Bound Consistency in O(n+d) with
+	 * 		n = |vars|
+	 * 		d = maxValue - minValue (from initial domains)
+	 *
+	 * 	=> very appropriate when d <= n It is indeed much better than the usual time complexity of O(n.log(n))
+	 * 	=>  not appropriate when d >> n (you should encode another data structure and a quick sort algorithm)
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param constraint
+	 * @param solver
+	 */
+	public PropAtMostNValues_BC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
+		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC);
 		n = vars.length;
 		minValue = vars[0].getLB();
 		int maxValue = vars[0].getUB();
@@ -64,7 +89,7 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 			minValue = Math.min(minValue,vars[i].getLB());
 			maxValue = Math.max(maxValue,vars[i].getUB());
 		}
-		nbMaxValues = maxValue - minValue;
+		nbMaxValues = maxValue - minValue+1;
 		bound = new TIntArrayList[nbMaxValues];
 		for (int i=0;i<nbMaxValues;i++){
 			bound[i] = new TIntArrayList();
@@ -74,7 +99,7 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 	}
 
 	//***********************************************************************************
-	// Initialization
+	// Initialization and sort
 	//***********************************************************************************
 
 	private void computeBounds() throws ContradictionException {
@@ -88,7 +113,7 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 		for (int i=0;i<nbMaxValues;i++){
 			bound[i].clear();
 		}
-		for(int i=nbMaxValues;i<n;i++){
+		for(int i=0;i<n;i++){
 			bound[minVal[i]-minValue].add(i);
 		}
 	}
@@ -97,7 +122,7 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 		for (int i=0;i<nbMaxValues;i++){
 			bound[i].clear();
 		}
-		for(int i=nbMaxValues;i<n;i++){
+		for(int i=0;i<n;i++){
 			bound[maxVal[i]-minValue].add(i);
 		}
 	}
@@ -231,7 +256,7 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		throw new UnsupportedOperationException();
+		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
 	//***********************************************************************************
@@ -240,8 +265,8 @@ public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.FULL_PROPAGATION.mask;
-		//return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask	+ EventType.INCLOW.mask+ EventType.INSTANTIATE.mask+ EventType.DECUPP.mask;
+		return EventType.REMOVEARC.mask + EventType.REMOVENODE.mask
+				+ EventType.INCLOW.mask+ EventType.INSTANTIATE.mask+ EventType.DECUPP.mask;
 	}
 
 	@Override

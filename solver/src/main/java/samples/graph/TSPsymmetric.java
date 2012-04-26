@@ -35,6 +35,8 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
+import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
+import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
@@ -42,8 +44,6 @@ import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropH
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.constraints.propagators.gary.undirected.PropAtLeastNNeighbors;
-import solver.constraints.propagators.gary.undirected.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;

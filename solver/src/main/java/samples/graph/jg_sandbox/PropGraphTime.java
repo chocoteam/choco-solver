@@ -48,7 +48,7 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 
 	private UndirectedGraphVar g;
 	private IntVar[] start,end;
-	private IntProcedure enf_proc, rem_proc;
+	private IntProcedure enf_proc;
 	private int[] task_start, task_end;
 	private int n,firstTaskIndex;
 
@@ -68,7 +68,6 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 		task_start = t_start;
 		task_end   = t_end;
 		enf_proc = new ArcEnf();
-		rem_proc = new NodeRem();
 	}
 
 	//***********************************************************************************
@@ -80,9 +79,6 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 	public void propagate(int evtmask) throws ContradictionException {
 		INeighbors nei;
 		for(int i=0;i<firstTaskIndex;i++){
-			if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
-				nodeRem(i);
-			}
 			nei = g.getKernelGraph().getNeighborsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				adjustTimeBounds(i,j-firstTaskIndex);
@@ -93,19 +89,11 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
-		if((mask & EventType.REMOVENODE.mask)!=0){
-			eventRecorder.getDeltaMonitor(this, g).forEach(rem_proc, EventType.REMOVENODE);
-		}
 	}
 
 	private void adjustTimeBounds(int employeeIdx, int taskIdx) throws ContradictionException {
 		start[employeeIdx].updateUpperBound(task_start[taskIdx],this);
 		end[employeeIdx].updateLowerBound(task_end[taskIdx],this);
-	}
-
-	private void nodeRem(int employeeIdx) throws ContradictionException {
-		start[employeeIdx].instantiateTo(start[employeeIdx].getLB(),this);
-		end[employeeIdx].instantiateTo(end[employeeIdx].getLB(),this);
 	}
 
 	//***********************************************************************************
@@ -114,11 +102,12 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask+EventType.REMOVENODE.mask;
+		return EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		//TODO
 		return ESat.TRUE;
 	}
 
@@ -138,11 +127,5 @@ public class PropGraphTime extends GraphPropagator<UndirectedGraphVar>{
 			}
 		}
 	}
-	
-	private class NodeRem implements IntProcedure{
-		@Override
-		public void execute(int i) throws ContradictionException {
-			nodeRem(i);
-		}
-	}
+
 }

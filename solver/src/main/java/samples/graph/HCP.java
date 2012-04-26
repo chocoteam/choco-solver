@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -106,8 +105,8 @@ public class HCP extends AbstractProblem{
 		Constraint[] cstrs;
 		switch (allDiff){
 			case 0:cstrs = new Constraint[]{gc};break;
-			case 1:gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
-				cstrs = new Constraint[]{gc};break;
+//			case 1:gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
+//				cstrs = new Constraint[]{gc};break;
 			case 2: cstrs = new Constraint[]{gc, integerAllDiff(false)};break;
 			case 3: cstrs = new Constraint[]{gc, integerAllDiff(true)};break;
 			default : throw new UnsupportedOperationException();

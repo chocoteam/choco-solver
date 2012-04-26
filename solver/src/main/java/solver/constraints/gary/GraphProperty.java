@@ -31,7 +31,8 @@ import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.gary.*;
 import solver.constraints.propagators.gary.basic.*;
 import solver.constraints.propagators.gary.constraintSpecific.*;
-import solver.constraints.propagators.gary.directed.*;
+import solver.constraints.propagators.gary.basic.PropKLoops;
+import solver.constraints.propagators.gary.basic.PropKNodes;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.variables.IntVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -81,7 +82,7 @@ public enum GraphProperty {
 			if (cons.graph instanceof UndirectedGraphVar) {
 				throw new UnsupportedOperationException("the graph is antisymmetric: a directed graph should be used");
 			}
-			return new GraphPropagator[]{new PropAntiSymmetric((DirectedGraphVar) cons.getGraph(), cons.getSolver(), cons)};
+			return new GraphPropagator[]{new PropAntiSymmetric((DirectedGraphVar) cons.getGraph(), cons, cons.getSolver())};
 		}
 	},
 	// With parameter
@@ -97,7 +98,7 @@ public enum GraphProperty {
 			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes() || k.getUB()<=0){
 				throw new UnsupportedOperationException("K_NODES requires a parameter K : (0 < K <= n)");
 			}
-			return new GraphPropagator[]{new PropKNodes(cons.graph, cons.getSolver(), cons,k)};
+			return new GraphPropagator[]{new PropKNodes(cons.graph,k,cons,cons.getSolver())};
 		}
 	},
 	/** Restrict the number of loops in the final graph
@@ -115,27 +116,27 @@ public enum GraphProperty {
 			return new GraphPropagator[]{new PropKLoops(cons.graph, cons.getSolver(), cons,k)};
 		}
 	},
-	/** Restrict the number of arcs in the final graph.
-	 * (If the graph is undirected it restricts the number of edges)
-	 * - One parameter : an IntVar representing the expected number of arcs (or edges)*/
-	K_ARCS {
-		@Override
-		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			if(parameters.length==0){
-				throw new UnsupportedOperationException("K_ARCS requires a parameter K : (0 < K <= n^2)");
-			}
-			IntVar k = parameters[0];
-			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()*cons.graph.getEnvelopGraph().getNbNodes() || k.getUB()<=0){
-				throw new UnsupportedOperationException("K_ARCS requires a parameter K : (0 < K <= n^2)");
-			}
-			if (cons.graph instanceof DirectedGraphVar) {
-				DirectedGraphVar dig = (DirectedGraphVar) cons.graph;
-				return new GraphPropagator[]{new PropKArcsDig(dig, cons.getSolver(), cons,k)};
-			}else{
-				return new GraphPropagator[]{new PropKArcsUndi((UndirectedGraphVar)cons.graph, cons.getSolver(), cons,k)};
-			}
-		}
-	},
+//	/** Restrict the number of arcs in the final graph.
+//	 * (If the graph is undirected it restricts the number of edges)
+//	 * - One parameter : an IntVar representing the expected number of arcs (or edges)*/
+//	K_ARCS {
+//		@Override
+//		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+//			if(parameters.length==0){
+//				throw new UnsupportedOperationException("K_ARCS requires a parameter K : (0 < K <= n^2)");
+//			}
+//			IntVar k = parameters[0];
+//			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes()*cons.graph.getEnvelopGraph().getNbNodes() || k.getUB()<=0){
+//				throw new UnsupportedOperationException("K_ARCS requires a parameter K : (0 < K <= n^2)");
+//			}
+//			if (cons.graph instanceof DirectedGraphVar) {
+//				DirectedGraphVar dig = (DirectedGraphVar) cons.graph;
+//				return new GraphPropagator[]{new PropKArcsDig(dig, cons.getSolver(), cons,k)};
+//			}else{
+//				return new GraphPropagator[]{new PropKArcsUndi((UndirectedGraphVar)cons.graph, cons.getSolver(), cons,k)};
+//			}
+//		}
+//	},
 	/** Restrict the number of neighbors of each node in the final graph
 	 * - One parameter : an IntVar representing the expected number of neighbors per node*/
 	K_NEIGHBORS_PER_NODE {
@@ -158,12 +159,12 @@ public enum GraphProperty {
 	},
 	/** Each node has exactly one successor in the final graph
 	 * BEWARE the graph must be directed*/
-	ONE_SUCCESSORS_PER_NODE {
-		@Override
-		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			return new GraphPropagator[]{new PropNSuccs((DirectedGraphVar) cons.getGraph(), cons.getSolver(), cons, 1)};
-		}
-	},
+//	ONE_SUCCESSORS_PER_NODE {
+//		@Override
+//		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+//			return new GraphPropagator[]{new PropNSuccs((DirectedGraphVar) cons.getGraph(), cons.getSolver(), cons, 1)};
+//		}
+//	},
 //	/** Restrict the number of predecessors of each node in the final graph
 //	 * - One parameter : an IntVar representing the expected number of predecessors per node
 //	 * BEWARE the graph must be directed*/
@@ -183,25 +184,25 @@ public enum GraphProperty {
 //			return new GraphPropagator[]{new PropNPreds((DirectedGraphVar)cons.graph, cons.getSolver(), cons,k)};
 //		}
 //	},
-	/** Restrict the number of proper predecessors of each node in the final graph (i.e. the number of predecessors without counting loops)
-	 * - One parameter : an IntVar representing the expected number of proper predecessors per node
-	 * BEWARE the graph must be directed*/
-	K_PROPER_PREDECESSORS_PER_NODE {
-		@Override
-		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
-			if(!cons.getRelation().isDirected()){
-				throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
-			}
-			if(parameters.length==0){
-				throw new UnsupportedOperationException("K_PROPER_PREDECESSORS_PER_NODE requires a parameter (0 <= K <= n)");
-			}
-			IntVar k = parameters[0];
-			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes() || k.getUB()< 0){
-				throw new UnsupportedOperationException("K_PROPER_PREDECESSORS_PER_NODE requires a parameter (0 <= K <= n)");
-			}
-			return new GraphPropagator[]{new PropNProperPreds((DirectedGraphVar)cons.graph, cons.getSolver(), cons,k)};
-		}
-	},
+//	/** Restrict the number of proper predecessors of each node in the final graph (i.e. the number of predecessors without counting loops)
+//	 * - One parameter : an IntVar representing the expected number of proper predecessors per node
+//	 * BEWARE the graph must be directed*/
+//	K_PROPER_PREDECESSORS_PER_NODE {
+//		@Override
+//		protected GraphPropagator[] getPropagators(GraphConstraint cons, IntVar... parameters) {
+//			if(!cons.getRelation().isDirected()){
+//				throw new UnsupportedOperationException("cannot have "+this.name()+" on an undirected graph");
+//			}
+//			if(parameters.length==0){
+//				throw new UnsupportedOperationException("K_PROPER_PREDECESSORS_PER_NODE requires a parameter (0 <= K <= n)");
+//			}
+//			IntVar k = parameters[0];
+//			if(k.getLB()>cons.graph.getEnvelopGraph().getNbNodes() || k.getUB()< 0){
+//				throw new UnsupportedOperationException("K_PROPER_PREDECESSORS_PER_NODE requires a parameter (0 <= K <= n)");
+//			}
+//			return new GraphPropagator[]{new PropNProperPreds((DirectedGraphVar)cons.graph, cons.getSolver(), cons,k)};
+//		}
+//	},
 	/** Restrict the number of connected components in the final graph
 	 * - One parameter : an IntVar representing the expected number of connected components*/
 	K_CC {
