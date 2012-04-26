@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.gary.constraintSpecific;
+package solver.constraints.propagators.gary.trash;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -88,7 +88,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropAllDiffGraph(UndirectedGraphVar graph, int sizeFirstSet, Solver sol, Constraint constraint) {
+    public PropAllDiffGraph(UndirectedGraphVar graph, int k, int sizeFirstSet, Solver sol, Constraint constraint) {
         super((V[]) new Variable[]{graph}, sol, constraint, PropagatorPriority.QUADRATIC);
         this.sizeFirstSet = sizeFirstSet;
         this.solver = sol;
@@ -133,23 +133,25 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
                         bitSCC.set(nodeI);
                         nodeI = nodeSCCnext[nodeI].get();
                     }
-                    ArrayList<TIntArrayList> allscc = StrongConnectivityFinder.findAllSCCOf(digraph, bitSCC);
-                    int size = allscc.size();
-                    if (size == 1) return;
-                    int node, origin, first;
-                    for (TIntArrayList scc : allscc) {
-                        origin = scc.get(0);
-                        repairedSCC.set(origin);
-                        nodeSCCref[origin].set(origin);
-                        first = origin;
-                        for (i = 1; i < scc.size(); i++) {
-                            node = scc.get(i);
-                            nodeSCCref[node].set(origin);
-                            nodeSCCnext[first].set(node);
-                            first = node;
-                        }
-                        nodeSCCnext[first].set(-1);
-                    }
+					throw new UnsupportedOperationException("should not be used anymore. Please use allDiff GAC instead because this" +
+				"needs some update.");
+//                    ArrayList<TIntArrayList> allscc = StrongConnectivityFinder.findAllSCCOf(digraph, bitSCC);
+//                    int size = allscc.size();
+//                    if (size == 1) return;
+//                    int node, origin, first;
+//                    for (TIntArrayList scc : allscc) {
+//                        origin = scc.get(0);
+//                        repairedSCC.set(origin);
+//                        nodeSCCref[origin].set(origin);
+//                        first = origin;
+//                        for (i = 1; i < scc.size(); i++) {
+//                            node = scc.get(i);
+//                            nodeSCCref[node].set(origin);
+//                            nodeSCCnext[first].set(node);
+//                            first = node;
+//                        }
+//                        nodeSCCnext[first].set(-1);
+//                    }
                 }
             }
         };
@@ -191,20 +193,22 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
     }
 
     private void buildSCC() {
-        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-        int origin, nodeI, nodeIPlus1;
-        for (TIntArrayList in : allSCC) {
-            origin = in.get(0);
-            nodeI = origin;
-            nodeSCCref[origin].set(origin);
-            for (int i = 1; i < in.size(); i++) {
-                nodeIPlus1 = in.get(i);
-                nodeSCCref[nodeIPlus1].set(origin);
-                nodeSCCnext[nodeI].set(nodeIPlus1);
-                nodeI = nodeIPlus1;
-            }
-            nodeSCCnext[nodeI].set(-1);
-        }
+//        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
+//        int origin, nodeI, nodeIPlus1;
+//        for (TIntArrayList in : allSCC) {
+//            origin = in.get(0);
+//            nodeI = origin;
+//            nodeSCCref[origin].set(origin);
+//            for (int i = 1; i < in.size(); i++) {
+//                nodeIPlus1 = in.get(i);
+//                nodeSCCref[nodeIPlus1].set(origin);
+//                nodeSCCnext[nodeI].set(nodeIPlus1);
+//                nodeI = nodeIPlus1;
+//            }
+//            nodeSCCnext[nodeI].set(-1);
+//        }
+		throw new UnsupportedOperationException("should not be used anymore. Please use allDiff GAC instead because this" +
+				"needs some update.");
     }
 
     //***********************************************************************************

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.directed;
+package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;

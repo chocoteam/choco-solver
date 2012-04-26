@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.gary.constraintSpecific;
+package solver.constraints.propagators.gary.trash;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -75,13 +75,14 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 	private DirectedGraphVar g;
 	private DirectedGraph digraph;
 	private int[] matching,nodeSCC;
+	private StrongConnectivityFinder SCCfinder;
 	private Solver solver;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAllDiffGraph2(DirectedGraphVar graph, Solver sol, Constraint constraint) {
+	public PropAllDiffGraph2(int k, DirectedGraphVar graph, Solver sol, Constraint constraint) {
 		super((V[]) new Variable[]{graph}, sol, constraint, PropagatorPriority.QUADRATIC);
 		this.solver = sol;
 		n = graph.getEnvelopGraph().getNbNodes();
@@ -90,6 +91,7 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 		matching = new int[n2];
 		nodeSCC = new int[n2];
 		digraph = new DirectedGraph(n2, GraphType.LINKED_LIST);
+		SCCfinder = new StrongConnectivityFinder(digraph);
 	}
 
 	//***********************************************************************************
@@ -117,17 +119,6 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 					digraph.addArc(i,j+n);
 				}
 			}
-		}
-	}
-
-	private void buildSCC() {
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-		int scc = 0;
-		for (TIntArrayList in : allSCC) {
-			for (int i = 0; i < in.size(); i++) {
-				nodeSCC[in.get(i)] = scc;
-			}
-			scc++;
 		}
 	}
 
@@ -173,7 +164,6 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 	public void propagate(int evtmask) throws ContradictionException {
 		buildDigraph();
 		repairMatching();
-		buildSCC();
 		filter();
 	}
 
@@ -183,6 +173,8 @@ public class PropAllDiffGraph2<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	private void filter() throws ContradictionException {
+		SCCfinder.findAllSCC();
+		nodeSCC = SCCfinder.getNodesSCC();
 		INeighbors succ;
 		int j;
 		for (int node = 0;node<n;node++) {

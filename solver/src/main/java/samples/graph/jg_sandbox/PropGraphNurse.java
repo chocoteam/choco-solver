@@ -25,9 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.basic;
+package samples.graph.jg_sandbox;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -36,68 +37,85 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
-import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**Propagator that ensures that K nodes belong to the final graph
- * @author Jean-Guillaume Fages
- */
-public class PropKNodes extends GraphPropagator{
+public class PropGraphNurse extends GraphPropagator<UndirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
-	private IntVar k;
+	private UndirectedGraphVar g;
+	private IntVar[] start,end;
+	private IntProcedure enf_proc, rem_proc;
+	private int[] task_start, task_end;
+	private int n,firstTaskIndex;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKNodes(GraphVar graph, IntVar k, Solver sol, Constraint constraint) {
-		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
-		this.g = graph;
-		this.k = k;
+	public PropGraphNurse(UndirectedGraphVar graph, int ftIdx,
+						  IntVar[] st, IntVar[] en, int[] t_start, int[] t_end,
+						  Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		start = st;
+		end = en;
+		firstTaskIndex = ftIdx;
+		n = g.getEnvelopGraph().getNbNodes();
+		task_start = t_start;
+		task_end   = t_end;
+		enf_proc = new ArcEnf();
+		rem_proc = new NodeRem();
 	}
 
 	//***********************************************************************************
 	// PROPAGATIONS
 	//***********************************************************************************
 
+
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
-		k.updateLowerBound(ker,this);
-		k.updateUpperBound(env,this);
-		if(ker==env){
-			setPassive();
-		}else if (k.instantiated()){
-			int v = k.getValue();
-			IActiveNodes envNodes = g.getEnvelopGraph().getActiveNodes();
-			if(v == env){
-				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
-					g.enforceNode(i,this);
-				}
-				setPassive();
+		INeighbors nei;
+		for(int i=0;i<firstTaskIndex;i++){
+			if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
+				nodeRem(i);
 			}
-			else if(v == ker){
-				IActiveNodes kerNodes = g.getKernelGraph().getActiveNodes();
-				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
-					if(!kerNodes.isActive(i)){
-						g.removeNode(i, this);
-					}
-				}
-				setPassive();
+			nei = g.getKernelGraph().getNeighborsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				adjustTimeBounds(i,j-firstTaskIndex);
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
+		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
+		if((mask & EventType.REMOVENODE.mask)!=0){
+			eventRecorder.getDeltaMonitor(this, g).forEach(rem_proc, EventType.REMOVENODE);
+		}
+//		for(int i=0;i<firstTaskIndex;i++){
+//			if(!g.getEnvelopGraph().getActiveNodes().isActive(i)){
+//				nodeRem(i);
+//			}
+//		}
+	}
+
+	private void adjustTimeBounds(int employeeIdx, int taskIdx) throws ContradictionException {
+		start[employeeIdx].updateUpperBound(task_start[taskIdx],this);
+		end[employeeIdx].updateLowerBound(task_end[taskIdx],this);
+	}
+
+	private void nodeRem(int employeeIdx) throws ContradictionException {
+//		start[employeeIdx].instantiateTo(start[employeeIdx].getLB(),this);
+//		end[employeeIdx].instantiateTo(end[employeeIdx].getLB(),this);
+		// or
+//		start[employeeIdx].updateLowerBound(end[employeeIdx].getLB(),this);
+//		start[employeeIdx].updateUpperBound(end[employeeIdx].getUB(),this);
+//		end[employeeIdx].updateLowerBound(start[employeeIdx].getLB(),this);
+//		end[employeeIdx].updateUpperBound(start[employeeIdx].getUB(),this);
 	}
 
 	//***********************************************************************************
@@ -106,19 +124,35 @@ public class PropKNodes extends GraphPropagator{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask + EventType.ENFORCENODE.mask + EventType.INSTANTIATE.mask + EventType.INCLOW.mask + EventType.DECUPP.mask;
+		return EventType.ENFORCEARC.mask+EventType.REMOVENODE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
-		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
-		if(env<k.getLB() || ker>k.getUB()){
-			return ESat.FALSE;
+		return ESat.TRUE;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private class ArcEnf implements IntProcedure{
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int a = i/n-1;
+			int b = i%n;
+			if(a<firstTaskIndex){
+				adjustTimeBounds(a,b-firstTaskIndex);
+			}else if(b<firstTaskIndex){
+				adjustTimeBounds(b,a-firstTaskIndex);
+			}
 		}
-		if(env==ker){
-			return ESat.TRUE;
+	}
+	
+	private class NodeRem implements IntProcedure{
+		@Override
+		public void execute(int i) throws ContradictionException {
+			nodeRem(i);
 		}
-		return ESat.UNDEFINED;
 	}
 }

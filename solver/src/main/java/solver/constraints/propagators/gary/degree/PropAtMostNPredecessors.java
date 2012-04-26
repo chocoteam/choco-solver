@@ -25,102 +25,57 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.undirected;
+package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
- * @PropAnn(tested = {CORRECTION,CONSISTENCY})
- * Propagator that ensures that a node has at most N neighbors
+ * Propagator that ensures that a node has at most N successors
  *
- * @param <V>
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPropagator<V>{
+public class PropAtMostNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private UndirectedGraphVar g;
+	private DirectedGraphVar g;
 	private IntProcedure enf_proc;
-	private int n_neighbors;
+	private int[] n_Succs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNNeighbors(V graph, Solver solver, Constraint<V, Propagator<V>> constraint, int nNeigh) {
-
-		super((V[]) new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropAtMostNPredecessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbSuccs) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		n_neighbors = nNeigh;
-		final PropAtMostNNeighbors<V> instance = this;
-		if (n_neighbors==1){
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from,to);
-						prune(to,from);
-					}else{
-						throw new UnsupportedOperationException();
-					}
-				}
-				private void prune(int from, int mate) throws ContradictionException{
-					INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-					for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
-						if (mate!=to){
-							g.removeArc(from, to, instance);
-						}
-					}
-				}
-			};
-		}else{
-			enf_proc = new IntProcedure() {
-				@Override
-				public void execute(int i) throws ContradictionException {
-					int n = g.getEnvelopGraph().getNbNodes();
-					if (i>=n){
-						int from = i/n-1;
-						int to   = i%n;
-						prune(from);
-						prune(to);
-					}else{
-						throw new UnsupportedOperationException();
-					}
-				}
-				private void prune(int from) throws ContradictionException{
-					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
-						contradiction(g,"");
-					}
-					if(g.getKernelGraph().getNeighborsOf(from).neighborhoodSize()==n_neighbors &&
-					   g.getEnvelopGraph().getNeighborsOf(from).neighborhoodSize()>n_neighbors){
-						INeighbors succs = g.getEnvelopGraph().getNeighborsOf(from);
-						for(int to = succs.getFirstElement(); to>=0; to = succs.getNextElement()){
-							if (!g.getKernelGraph().edgeExists(from, to)){
-								g.removeArc(from, to, instance);
-							}
-						}
-					}
-				}
-			};
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_Succs = new int[n];
+		for(int i=0;i<n;i++){
+			n_Succs[i] = nbSuccs;
 		}
+		enf_proc = new ArcEnf(n);
+	}
+
+	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_Succs = nbSuccs;
+		enf_proc = new ArcEnf(n);
 	}
 
 	//***********************************************************************************
@@ -131,20 +86,8 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
-		int next;
-		INeighbors nei;
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			nei = g.getEnvelopGraph().getNeighborsOf(node); 
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()==n_neighbors && nei.neighborhoodSize()>n_neighbors){
-				for(next = nei.getFirstElement(); next>=0; next = nei.getNextElement()){
-					if (!g.getKernelGraph().edgeExists(node, next)){
-						g.removeArc(node, next, this);
-					}
-				}
-			}
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
-				contradiction(g,"");
-			}
+			checkNode(node);
 		}
 	}
 
@@ -166,12 +109,49 @@ public class PropAtMostNNeighbors<V extends UndirectedGraphVar> extends GraphPro
 	public ESat isEntailed() {
 		IActiveNodes act = g.getKernelGraph().getActiveNodes();
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
-			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors){
+			if(g.getKernelGraph().getSuccessorsOf(node).neighborhoodSize()>n_Succs[node]){
 				return ESat.FALSE;
 			}
 		}
-		if(g.instantiated()){
-			return ESat.TRUE;
-		}return ESat.UNDEFINED;
+		act = g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			if(g.getEnvelopGraph().getSuccessorsOf(node).neighborhoodSize()>n_Succs[node]){
+				return ESat.UNDEFINED;
+			}
+		}
+		return ESat.TRUE;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	/** When a node has more than N successors then it must be removed,
+	 *  If it has N successors in the kernel then other incident edges
+	 *  should be removed */
+	private void checkNode(int i) throws ContradictionException {
+		INeighbors ker = g.getKernelGraph().getSuccessorsOf(i);
+		INeighbors env = g.getEnvelopGraph().getSuccessorsOf(i);
+		int size = ker.neighborhoodSize();
+		if(size>n_Succs[i]){
+			g.removeNode(i, this);
+		}else if (size==n_Succs[i] && env.neighborhoodSize()>size){
+			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
+				if(!ker.contain(next)){
+					g.removeArc(i, next, this);
+				}
+			}
+		}
+	}
+	
+	private class ArcEnf implements IntProcedure{
+		private int n;
+		ArcEnf(int n){
+			this.n = n;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			checkNode(i/n-1);
+		}
 	}
 }

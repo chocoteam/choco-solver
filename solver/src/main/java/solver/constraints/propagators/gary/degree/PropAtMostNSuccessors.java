@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.basic;
+package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
@@ -36,71 +36,64 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
- * Propagator that ensures that each node of the given subset of nodes has a loop
+ * Propagator that ensures that a node has at most N neighbors
  *
  * @author Jean-Guillaume Fages
  */
-public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
+public class PropAtMostNSuccessors extends GraphPropagator<UndirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
-	private IntProcedure enfNode, remArc;
-	private INeighbors concernedNodes;
-	private int n;
+	private UndirectedGraphVar g;
+	private IntProcedure enf_proc;
+	private int[] n_neighbors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
-		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
-		this.g = graph;
-		this.enfNode = new NodeEnf(this);
-		this.remArc = new ArcRem(this);
-		this.concernedNodes = concernedNodes;
-		this.n = g.getEnvelopGraph().getNbNodes();
+	public PropAtMostNSuccessors(UndirectedGraphVar graph, Solver solver, Constraint constraint, int nNeigh) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_neighbors = new int[n];
+		for(int i=0;i<n;i++){
+			n_neighbors[i] = nNeigh;
+		}
+		enf_proc = new ArcEnf(n);
 	}
 
-	public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
-		this(graph, graph.getEnvelopGraph().getActiveNodes(), sol, constraint);
+	public PropAtMostNSuccessors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+		g = graph;
+		int n = g.getEnvelopGraph().getNbNodes();
+		n_neighbors = nbNeigh;
+		enf_proc = new ArcEnf(n);
 	}
 
 	//***********************************************************************************
 	// PROPAGATIONS
 	//***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
-			if (concernedNodes.contain(i)) {
-				if(g.getEnvelopGraph().arcExists(i,i)){
-					if(g.getKernelGraph().getActiveNodes().isActive(i)){
-						g.enforceArc(i,i,this);
-					}
-				}else{
-					g.removeNode(i,this);
-				}
-			}
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+		IActiveNodes act = g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			checkNode(node);
 		}
 	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(remArc, EventType.REMOVEARC);
-		}
-		if ((mask & EventType.ENFORCENODE.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
-		}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
 	}
 
 	//***********************************************************************************
@@ -109,52 +102,57 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask;
+		return EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-		for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
-			if (concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)) {
+		IActiveNodes act = g.getKernelGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			if(g.getKernelGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
 				return ESat.FALSE;
 			}
 		}
-		if (g.getEnvelopOrder() != g.getKernelOrder()) {
-			return ESat.UNDEFINED;
+		act = g.getEnvelopGraph().getActiveNodes();
+		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
+			if(g.getEnvelopGraph().getNeighborsOf(node).neighborhoodSize()>n_neighbors[node]){
+				return ESat.UNDEFINED;
+			}
 		}
 		return ESat.TRUE;
 	}
 
 	//***********************************************************************************
-	// PROCEDURE
+	// PROCEDURES
 	//***********************************************************************************
 
-	private class NodeEnf implements IntProcedure {
-		private PropEachNodeHasLoop p;
-		private NodeEnf(PropEachNodeHasLoop p) {
-			this.p = p;
-		}
-		@Override
-		public void execute(int i) throws ContradictionException {
-			if (p.concernedNodes.contain(i)) {
-				g.enforceArc(i, i, p);
+	/** When a node has more than N neighbors then it must be removed,
+	 *  If it has N neighbors in the kernel then other incident edges
+	 *  should be removed */
+	private void checkNode(int i) throws ContradictionException {
+		INeighbors ker = g.getKernelGraph().getNeighborsOf(i);
+		INeighbors env = g.getEnvelopGraph().getNeighborsOf(i);
+		int size = ker.neighborhoodSize();
+		if(size>n_neighbors[i]){
+			g.removeNode(i, this);
+		}else if (size==n_neighbors[i] && env.neighborhoodSize()>size){
+			for(int next = env.getFirstElement(); next>=0; next = env.getNextElement()){
+				if(!ker.contain(next)){
+					g.removeArc(i, next, this);
+				}
 			}
 		}
 	}
-
-	private class ArcRem implements IntProcedure {
-		private PropEachNodeHasLoop p;
-		private ArcRem(PropEachNodeHasLoop p) {
-			this.p = p;
+	
+	private class ArcEnf implements IntProcedure{
+		private int n;
+		ArcEnf(int n){
+			this.n = n;
 		}
 		@Override
 		public void execute(int i) throws ContradictionException {
-			int from = i/n - 1;
-			int to = i%n;
-			if (from == to && concernedNodes.contain(to)) {
-				g.removeNode(i, p);
-			}
+			checkNode(i/n-1);
+			checkNode(i%n);
 		}
 	}
 }
