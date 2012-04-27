@@ -49,7 +49,6 @@ public class IntLinEqBuilder implements IBuilder {
         int[] coeffs = exps.get(0).toIntArray();
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
         int result = exps.get(2).intValue();
-//        return scalar(vars, coeffs, IntLinComb.Operator.EQ, result, solver);
         return Sum.eq(vars, coeffs, result, solver);
     }
 }

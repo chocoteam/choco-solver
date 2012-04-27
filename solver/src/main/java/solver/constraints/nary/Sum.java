@@ -72,34 +72,7 @@ public class Sum extends IntConstraint<IntVar> {
     TObjectIntHashMap<IntVar> shared_map; // a shared map for interanl comparator
 
     public enum Type {
-        LEQ, GEQ, EQ
-    }
-
-    private static Sum build(IntVar[] vars, int[] coeffs, Type type, int r, Solver solver) {
-        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
-        for (int i = 0; i < vars.length; i++) {
-            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
-            if (map.get(vars[i]) == 0) {
-                map.remove(vars[i]);
-            }
-        }
-        int b = 0, e = map.size();
-        IntVar[] tmpV = new IntVar[e];
-        int[] tmpC = new int[e];
-        // to fix determinism in the construction, we iterate over the original array of variables
-        for (int i = 0; i < vars.length; i++) {
-            IntVar key = vars[i];
-            int coeff = map.get(key);
-            if (coeff > 0) {
-                tmpV[b] = key;
-                tmpC[b++] = coeff;
-            } else if (coeff < 0) {
-                tmpV[--e] = key;
-                tmpC[e] = coeff;
-            }
-            map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
-        }
-        return new Sum(tmpV, tmpC, b, type, r, solver);
+        LEQ, GEQ, EQ, NQ
     }
 
     protected Sum(IntVar[] vars, int[] coeffs, int pos, Type type, int b, Solver solver) {
@@ -137,8 +110,105 @@ public class Sum extends IntConstraint<IntVar> {
             case EQ:
                 setPropagators(incr ? new PropSumEqIncr(x, b, solver, this) : new PropSumEq(x, b, solver, this));
                 break;
+            case NQ:
+                setPropagators(new PropSumNeq(x, b, solver, this));
+                break;
         }
 
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////// GENERIC /////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static Sum build(IntVar[] vars, int[] coeffs, Type type, int r, Solver solver) {
+        TObjectIntHashMap<IntVar> map = new TObjectIntHashMap<IntVar>();
+        for (int i = 0; i < vars.length; i++) {
+            map.adjustOrPutValue(vars[i], coeffs[i], coeffs[i]);
+            if (map.get(vars[i]) == 0) {
+                map.remove(vars[i]);
+            }
+        }
+        int b = 0, e = map.size();
+        IntVar[] tmpV = new IntVar[e];
+        int[] tmpC = new int[e];
+        // to fix determinism in the construction, we iterate over the original array of variables
+        for (int i = 0; i < vars.length; i++) {
+            IntVar key = vars[i];
+            int coeff = map.get(key);
+            if (coeff > 0) {
+                tmpV[b] = key;
+                tmpC[b++] = coeff;
+            } else if (coeff < 0) {
+                tmpV[--e] = key;
+                tmpC[e] = coeff;
+            }
+            map.adjustValue(key, -coeff); // to avoid multiple occurrence of the variable
+        }
+        return new Sum(tmpV, tmpC, b, type, r, solver);
+    }
+
+    public static Sum build(IntVar[] vars, int c, Type type, Solver solver) {
+        int[] coeffs = new int[vars.length];
+        Arrays.fill(coeffs, 1);
+        return build(vars, coeffs, type, c, solver);
+    }
+
+    public static Sum build(IntVar[] vars, IntVar b, Type type, Solver solver) {
+        int[] cs = new int[vars.length + 1];
+        Arrays.fill(cs, 1);
+        cs[vars.length] = -1;
+        IntVar[] x = new IntVar[vars.length + 1];
+        System.arraycopy(vars, 0, x, 0, vars.length);
+        x[vars.length] = b;
+        return build(x, cs, type, 0, solver);
+    }
+
+    public static Sum build(IntVar[] vars, int[] coeffs, int c, Type type, Solver solver) {
+        return build(vars, coeffs, type, c, solver);
+    }
+
+    public static Sum build(IntVar[] vars, int[] coeffs, IntVar b, int c, Type type, Solver solver) {
+        IntVar[] x = new IntVar[vars.length + 1];
+        System.arraycopy(vars, 0, x, 0, vars.length);
+        x[x.length - 1] = b;
+        int[] cs = new int[coeffs.length + 1];
+        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
+        cs[cs.length - 1] = -c;
+        return build(x, cs, type, 0, solver);
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// EQ ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static Sum eq(IntVar[] vars, int c, Solver solver) {
+        return build(vars, c, Type.EQ, solver);
+    }
+
+    public static Sum eq(IntVar[] vars, IntVar b, Solver solver) {
+        return build(vars, b, Type.EQ, solver);
+    }
+
+    public static Sum eq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
+        return build(vars, coeffs, Type.EQ, c, solver);
+    }
+
+    public static Sum eq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
+        return build(vars, coeffs, b, c, Type.EQ, solver);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// LEQ //////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static Sum leq(IntVar[] vars, int c, Solver solver) {
+        return build(vars, c, Type.LEQ, solver);
+    }
+
+    public static Sum leq(IntVar[] vars, IntVar b, Solver solver) {
+        return build(vars, b, Type.LEQ, solver);
     }
 
     public static Sum leq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
@@ -146,13 +216,19 @@ public class Sum extends IntConstraint<IntVar> {
     }
 
     public static Sum leq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.LEQ, 0, solver);
+        return build(vars, coeffs, b, c, Type.LEQ, solver);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// GEQ //////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static Sum geq(IntVar[] vars, int c, Solver solver) {
+        return build(vars, c, Type.GEQ, solver);
+    }
+
+    public static Sum geq(IntVar[] vars, IntVar b, Solver solver) {
+        return build(vars, b, Type.GEQ, solver);
     }
 
     public static Sum geq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
@@ -160,56 +236,31 @@ public class Sum extends IntConstraint<IntVar> {
     }
 
     public static Sum geq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.GEQ, 0, solver);
+        return build(vars, coeffs, b, c, Type.GEQ, solver);
     }
 
-    public static Sum eq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
-        return build(vars, coeffs, Type.EQ, c, solver);
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////// NEQ //////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static Sum neq(IntVar[] vars, int c, Solver solver) {
+        return build(vars, c, Type.NQ, solver);
     }
 
-    public static Sum eq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.EQ, c, solver);
+    public static Sum neq(IntVar[] vars, IntVar b, Solver solver) {
+        return build(vars, b, Type.NQ, solver);
     }
 
-    public static Sum eq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[x.length - 1] = b;
-        int[] cs = new int[coeffs.length + 1];
-        System.arraycopy(coeffs, 0, cs, 0, coeffs.length);
-        cs[cs.length - 1] = -c;
-        return build(x, cs, Type.EQ, 0, solver);
+    public static Sum neq(IntVar[] vars, int[] coeffs, int c, Solver solver) {
+        return build(vars, coeffs, Type.NQ, c, solver);
     }
 
-    public static Sum eq(IntVar[] vars, IntVar b, Solver solver) {
-        int[] cs = new int[vars.length + 1];
-        Arrays.fill(cs, 1);
-        cs[vars.length] = -1;
-        IntVar[] x = new IntVar[vars.length + 1];
-        System.arraycopy(vars, 0, x, 0, vars.length);
-        x[vars.length] = b;
-        return build(x, cs, Type.EQ, 0, solver);
+    public static Sum neq(IntVar[] vars, int[] coeffs, IntVar b, int c, Solver solver) {
+        return build(vars, coeffs, b, c, Type.NQ, solver);
     }
 
-    public static Sum leq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.LEQ, c, solver);
-    }
-
-    public static Sum geq(IntVar[] vars, int c, Solver solver) {
-        int[] coeffs = new int[vars.length];
-        Arrays.fill(coeffs, 1);
-        return build(vars, coeffs, Type.GEQ, c, solver);
-    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public ESat isSatisfied(int[] tuple) {
@@ -224,6 +275,8 @@ public class Sum extends IntConstraint<IntVar> {
                 return ESat.eval(sum >= b);
             case LEQ:
                 return ESat.eval(sum <= b);
+            case NQ:
+                return ESat.eval(sum != b);
         }
         return ESat.UNDEFINED;
     }
@@ -237,6 +290,9 @@ public class Sum extends IntConstraint<IntVar> {
         switch (op) {
             case EQ:
                 linComb.append(" = ");
+                break;
+            case NQ:
+                linComb.append(" =/= ");
                 break;
             case GEQ:
                 linComb.append(" >= ");

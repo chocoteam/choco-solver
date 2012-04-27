@@ -28,6 +28,7 @@
 package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -36,9 +37,10 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
- * A propagator for SUM(x_i) = b
+ * A propagator for SUM(x_i) =/= b
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
@@ -49,14 +51,12 @@ import solver.variables.IntVar;
  * @revision 04/03/12 use I in filterOn{G,L}eg
  * @since 18/03/11
  */
-public class PropSumEq extends Propagator<IntVar> {
+public class PropSumNeq extends Propagator<IntVar> {
 
+    private final IStateInt nb_instantiated;
     final IntVar[] x; // list of variable -- probably IntVarTimePosCste
     final int l; // number of variables
     final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
-
 
     protected static PropagatorPriority computePriority(int nbvars) {
         if (nbvars == 1) {
@@ -70,129 +70,74 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] vars, int b,
-                     Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropSumNeq(IntVar[] vars, int b,
+                      Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
         this.x = vars.clone();
         l = x.length;
         this.b = b;
-        I = new int[l];
-    }
-
-    protected void prepare() {
-        int f = 0, e = 0, i = 0;
-        int lb, ub;
-        for (; i < l; i++) {
-            lb = x[i].getLB();
-            ub = x[i].getUB();
-            f += lb;
-            e += ub;
-            I[i] = (ub - lb);
-        }
-        sumLB = f;
-        sumUB = e;
+        nb_instantiated = solver.getEnvironment().makeInt();
     }
 
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filter(true, 2);
+        int n = 0;
+        for (Variable v : vars) {
+            if (v.instantiated()) {
+                n++;
+            }
+        }
+        nb_instantiated.set(n);
+        filter();
     }
 
-    protected void filter(boolean startWithLeq, int nbRules) throws ContradictionException {
-        prepare();
-        boolean run;
-        int nbR = 0;
-        do {
-            if (startWithLeq) {
-                run = filterOnLeq();
+    /**
+     * if there is only one uninstantiated variable,
+     * then filtering can be applied on this uninstantiated variable.
+     *
+     * @throws ContradictionException if the domain of variables are inconsistent regarding to the constraint
+     */
+    private void filter() throws ContradictionException {
+        if (nb_instantiated.get() >= vars.length - 1) {
+            int index = -1;
+            int sum = b;
+            for (int i = 0; i < vars.length; i++) {
+                if (vars[i].instantiated()) {
+                    sum += vars[i].getValue();
+                } else {
+                    index = i;
+                }
+            }
+            // If every variables are instantiated (by side effects),
+            if (index == -1) {
+                // then check the sum is not equal to 0
+                if (sum == 0) {
+                    // Otherwise, FAIL, the constraint is not satisfied
+                    this.contradiction(null, "sum is equal to 0");
+                }
             } else {
-                run = filterOnGeq();
-            }
-            startWithLeq ^= true;
-            nbR++;
-        } while (run || nbR < nbRules);
-        checkEntailment();
-    }
-
-    protected void checkEntailment() {
-        if (sumUB - b <= 0 && sumLB - b >= 0) {
-            this.setPassive();
-        }
-    }
-
-
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnLeq() throws ContradictionException {
-        boolean doIt;
-        boolean anychange = false;
-        if (b - sumLB < 0) {
-            this.contradiction(null, "b - sumLB < 0");
-        }
-        do {
-            doIt = false;
-            int lb, ub, i = 0;
-            // positive coefficients first
-            for (; i < l; i++) {
-                if (I[i] - (b - sumLB) > 0) {
-                    lb = x[i].getLB();
-                    ub = lb + I[i];
-                    if (x[i].updateUpperBound(b - sumLB + lb, this)) {
-                        int nub = x[i].getUB();
-                        sumUB -= ub - nub;
-                        I[i] = nub - lb;
-                        anychange = doIt = true;
-                    }
+                // Compute the value to remove (including position in the linear combination)
+                int value = -1 * sum;
+                if (vars[index].removeValue(value, this)) {
+                    this.setPassive();
                 }
             }
-        } while (doIt);
-        return anychange;
+        }
     }
 
-    @SuppressWarnings({"NullableProblems"})
-    boolean filterOnGeq() throws ContradictionException {
-        boolean doIt;
-        boolean anychange = false;
-        if (b - sumUB > 0) {
-            this.contradiction(null, "b - sumUB > 0");
-        }
-        do {
-            doIt = false;
-            int lb, ub, i = 0;
-            // positive coefficients first
-            for (; i < l; i++) {
-                if (I[i] > -(b - sumUB)) {
-                    ub = x[i].getUB();
-                    lb = ub - I[i];
-                    if (x[i].updateLowerBound(b - sumUB + ub, this)) {
-                        int nlb = x[i].getLB();
-                        sumLB += nlb - lb;
-                        I[i] = ub - nlb;
-                        doIt = anychange = true;
-                    }
-                }
-            }
-        } while (doIt);
-        return anychange;
-    }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int i, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-            filter(true, 2);
-        } else if (EventType.isInclow(mask)) {
-            filter(true, 1);
-        } else if (EventType.isDecupp(mask)) {
-            filter(false, 1);
+        if (EventType.isInstantiate(mask)) {
+            nb_instantiated.add(1);
+            filter();
         }
-//        if (getNbPendingER() == 0){
-//            filter(true, 2);
-//        }
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+        return EventType.INSTANTIATE.mask;
     }
 
     @Override
