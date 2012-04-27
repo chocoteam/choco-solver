@@ -28,6 +28,9 @@
 package solver.constraints.nary;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
+import choco.kernel.common.util.tools.StringUtils;
+import choco.kernel.memory.IStateBitSet;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -43,6 +46,8 @@ import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.IntVar;
+import solver.variables.fast.BitsetIntVarImpl;
+import solver.variables.fast.IntervalIntVarImpl;
 import solver.variables.view.Views;
 
 import java.util.Arrays;
@@ -260,6 +265,48 @@ public class Sum extends IntConstraint<IntVar> {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static IntVar var(IntVar a, IntVar b) {
+        if (a.instantiated()) {
+            if (b.instantiated()) {
+                return Views.fixed(a.getValue() + b.getValue(), a.getSolver());
+            } else {
+                return Views.offset(b, a.getValue());
+            }
+        } else if (b.instantiated()) {
+            return Views.offset(a, b.getValue());
+        } else {
+            Solver solver = a.getSolver();
+            IntVar z;
+            //TODO: add a more complex analysis of the build domain
+            if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
+                int lbA = a.getLB();
+                int ubA = a.getUB();
+                int lbB = b.getLB();
+                int ubB = b.getUB();
+                int OFFSET = lbA + lbB;
+                IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
+                DisposableRangeIterator itA = a.getRangeIterator(true);
+                DisposableRangeIterator itB = b.getRangeIterator(true);
+                while (itA.hasNext()) {
+                    itB.bottomUpInit();
+                    while (itB.hasNext()) {
+                        VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
+                        itB.next();
+                    }
+                    itB.dispose();
+                    itA.next();
+                }
+                itA.dispose();
+                z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
+            } else {
+                z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
+            }
+            solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
+            return z;
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override

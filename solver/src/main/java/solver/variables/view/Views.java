@@ -26,15 +26,8 @@
  */
 package solver.variables.view;
 
-import choco.kernel.common.util.iterators.DisposableRangeIterator;
-import choco.kernel.common.util.tools.StringUtils;
-import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
-import solver.constraints.nary.Sum;
-import solver.constraints.ternary.MaxXYZ;
 import solver.variables.IntVar;
-import solver.variables.fast.BitsetIntVarImpl;
-import solver.variables.fast.IntervalIntVarImpl;
 
 /**
  * Factory to build views.
@@ -159,60 +152,5 @@ public enum Views {
             }
         }
         return new SqrView(ivar, ivar.getSolver());
-    }
-
-    public static IntVar sum(IntVar a, IntVar b) {
-        if (a.instantiated()) {
-            if (b.instantiated()) {
-                return fixed(a.getValue() + b.getValue(), a.getSolver());
-            } else {
-                return offset(b, a.getValue());
-            }
-        } else if (b.instantiated()) {
-            return offset(a, b.getValue());
-        } else {
-            Solver solver = a.getSolver();
-            IntVar z;
-            //TODO: add a more complex analysis of the build domain
-            if (a.hasEnumeratedDomain() || b.hasEnumeratedDomain()) {
-                int lbA = a.getLB();
-                int ubA = a.getUB();
-                int lbB = b.getLB();
-                int ubB = b.getUB();
-                int OFFSET = lbA + lbB;
-                IStateBitSet VALUES = solver.getEnvironment().makeBitSet((ubA + ubB) - (lbA + lbB) + 1);
-                DisposableRangeIterator itA = a.getRangeIterator(true);
-                DisposableRangeIterator itB = b.getRangeIterator(true);
-                while (itA.hasNext()) {
-                    itB.bottomUpInit();
-                    while (itB.hasNext()) {
-                        VALUES.set(itA.min() + itB.min() - OFFSET, itA.max() + itB.max() - OFFSET + 1);
-                        itB.next();
-                    }
-                    itB.dispose();
-                    itA.next();
-                }
-                itA.dispose();
-                z = new BitsetIntVarImpl(StringUtils.randomName(), OFFSET, VALUES, solver);
-            } else {
-                z = new IntervalIntVarImpl(StringUtils.randomName(), a.getLB() + b.getLB(), a.getUB() + b.getUB(), solver);
-            }
-            solver.post(Sum.eq(new IntVar[]{a, b}, z, solver));
-            return z;
-        }
-    }
-
-    public static IntVar max(IntVar a, IntVar b) {
-        if (a.getLB() >= b.getUB()) {
-            return a;
-        } else if (b.getLB() >= a.getUB()) {
-            return b;
-        } else {
-            Solver solver = a.getSolver();
-            IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
-                    Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
-            solver.post(new MaxXYZ(z, a, b, solver));
-            return z;
-        }
     }
 }

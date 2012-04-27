@@ -36,6 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.ternary.Max;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.PVar;
 import solver.propagation.generator.Sort;
@@ -136,8 +137,8 @@ public class AirPlaneLanding extends AbstractProblem {
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Views.max(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
-            tardiness[i] = Views.max(ZERO, Views.offset(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, Views.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();

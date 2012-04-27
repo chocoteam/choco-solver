@@ -28,11 +28,12 @@
 package solver.constraints.ternary;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.ternary.PropMax;
 import solver.variables.IntVar;
+import solver.variables.fast.IntervalIntVarImpl;
 
 /**
  * X = MAX(Y,Z)
@@ -41,11 +42,11 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class MaxXYZ extends IntConstraint<IntVar> {
+public class Max extends IntConstraint<IntVar> {
 
     IntVar X, Y, Z;
 
-    public MaxXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver, PropagatorPriority storeThreshold) {
+    public Max(IntVar X, IntVar Y, IntVar Z, Solver solver) {
         super(new IntVar[]{X, Y, Z}, solver);
         this.X = X;
         this.Y = Y;
@@ -53,12 +54,18 @@ public class MaxXYZ extends IntConstraint<IntVar> {
         setPropagators(new PropMax(X, Y, Z, solver, this));
     }
 
-    public MaxXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{X, Y, Z}, solver);
-        this.X = X;
-        this.Y = Y;
-        this.Z = Z;
-        setPropagators(new PropMax(X, Y, Z, solver, this));
+    public static IntVar var(IntVar a, IntVar b) {
+        if (a.getLB() >= b.getUB()) {
+            return a;
+        } else if (b.getLB() >= a.getUB()) {
+            return b;
+        } else {
+            Solver solver = a.getSolver();
+            IntVar z = new IntervalIntVarImpl(StringUtils.randomName(),
+                    Math.max(a.getLB(), b.getLB()), Math.max(a.getUB(), b.getUB()), solver);
+            solver.post(new Max(z, a, b, solver));
+            return z;
+        }
     }
 
     @Override

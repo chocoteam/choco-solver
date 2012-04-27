@@ -4,6 +4,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.Sum;
 import solver.constraints.unary.Relation;
 import solver.recorders.conditions.CondAllDiffBCProba;
 import solver.variables.IntVar;
@@ -33,7 +34,7 @@ public class AllIntervalSeriesBenchProbas extends AbstractBenchProbas {
 
         this.cstrs = new Constraint[2*(size-1)+4];
         for (int i = 0, k = 0; i < size - 1; i++, k++) {
-            dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
+            dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
             this.cstrs[k++] = new Relation(dist[i], Relation.R.GT, 0, solver);
             this.cstrs[k] = new Relation(dist[i], Relation.R.LT, size, solver);
         }

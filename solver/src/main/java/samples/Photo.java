@@ -72,7 +72,7 @@ public class Photo extends AbstractProblem {
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
-            dist[i] = Views.abs(Views.sum(positions[pa], Views.minus(positions[pb])));
+            dist[i] = Views.abs(Sum.var(positions[pa], Views.minus(positions[pb])));
             solver.post(new ReifiedConstraint(
                     viols[i],
                     Sum.geq(new IntVar[]{dist[i]}, 2, solver),

@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.Sum;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
 import solver.propagation.generator.*;
@@ -87,7 +88,7 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
+                dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
                 solver.post(new Member(dist[i], 1, m - 1, solver));
             }
         }
