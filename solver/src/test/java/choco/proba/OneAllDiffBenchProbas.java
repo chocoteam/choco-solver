@@ -2,12 +2,10 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,21 +19,23 @@ import java.util.Set;
  */
 public class OneAllDiffBenchProbas extends AbstractBenchProbas {
 
-    public OneAllDiffBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
-                                 CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+    Instance inst;
+
+    public OneAllDiffBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
     @Override
-    void buildProblem(int size) {
-        Instance inst = new Instance(size, 0, size - 1, seed, 0, solver);
+    void solveProcess() {
+        this.solver.findAllSolutions();
+    }
+
+    @Override
+    void buildProblem(int size, boolean proba) {
+        this.inst = new Instance(size, 0, size - 1, seed, 0, solver);
         this.vars = inst.generate(Distribution.UNIFORM_INTERVALS);
         this.allVars = vars;
-        AllDifferent alldiff = new AllDifferent(this.vars, solver, type);
-        this.cstrs = new Constraint[]{alldiff};
-        this.allDiffs = new AllDifferent[]{alldiff};
-        this.nbAllDiff = 1;
-        this.allDiffVars = new IntVar[][]{this.vars};
+        this.cstrs = new Constraint[]{new AllDifferent(vars, solver, type)};
     }
 
 
@@ -162,8 +162,8 @@ public class OneAllDiffBenchProbas extends AbstractBenchProbas {
                     System.arraycopy(values, 0, domains[v], 0, sizeMax);
                 }
             } else {
+                int size = r.nextInt(sizeMax) + 1;
                 for (int v = 0; v < n; v++) {
-                    int size = r.nextInt(sizeMax) + 1;
                     int inf = r.nextInt(sizeMax - size + 1);
                     domains[v] = new int[size];
                     System.arraycopy(values, inf, domains[v], 0, size);

@@ -35,10 +35,10 @@ import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.Absolute;
 import solver.constraints.binary.Element;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Among;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.InverseChanneling;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.Lex;
 import solver.constraints.ternary.Times;
 import solver.search.strategy.StrategyFactory;
@@ -185,7 +185,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.enumerated("v_" + i, domains[i], s);
                 map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.GRAPH);
+            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);
@@ -206,7 +206,7 @@ public interface Modeler {
                 vars[i] = VariableFactory.bounded("v_" + i, domains[i][0], domains[i][domains[i].length - 1], s);
                 map.put(domains[i], vars[i]);
             }
-            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.GRAPH);
+            Constraint ctr = new AllDifferent(vars, s, AllDifferent.Type.AC);
             Constraint[] ctrs = new Constraint[]{ctr};
 
             AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

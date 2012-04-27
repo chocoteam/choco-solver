@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;

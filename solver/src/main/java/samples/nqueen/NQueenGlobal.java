@@ -28,7 +28,7 @@
 package samples.nqueen;
 
 import solver.Solver;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;

@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.Queue;

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.nary;
+package solver.constraints.propagators.nary.alldifferent;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
@@ -314,8 +314,6 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         mergeSort(intervals, minsorted, 0, n, SORT.MIN);
         System.arraycopy(maxsorted, 0, intervals, 0, n);
         mergeSort(intervals, maxsorted, 0, n, SORT.MAX);
-//        Arrays.sort(minsorted, SORT.MIN);
-//        Arrays.sort(maxsorted, SORT.MAX);
     }
 
     protected void sortIt() {
@@ -447,7 +445,7 @@ public class PropAllDiffBC extends Propagator<IntVar> {
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
                 if (minsorted[i].var.updateUpperBound(bounds[w] - 1, this)) {
-                    filter |=true;
+                    filter |= true;
                     minsorted[i].ub = minsorted[i].var.getUB();//bounds[w] - 1;
                 }
                 pathset(h, x, w, w);

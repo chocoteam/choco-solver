@@ -59,6 +59,10 @@ public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Prop
         return isSatisfied(tuple);
     }
 
+    @Override
+    public I[] getVariables() {
+        return vars;
+    }
 
     /**
      * Test if the <code>tuple</code> satisfies this <code>Constraint</code> object.

@@ -29,8 +29,8 @@ package samples.graph;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.AllDifferent.Type;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent.Type;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
@@ -69,7 +69,7 @@ public class AllDiffSample extends AbstractProblem{
 		solver = new Solver();
 		vars = VariableFactory.boundedArray("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
 //		vars = VariableFactory.enumeratedMatrix("vars", sizeFirstSet, 0, n-sizeFirstSet-1, solver);
-		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.AC)};
 		solver.post(cstrs);
 	}
 
@@ -194,7 +194,7 @@ public class AllDiffSample extends AbstractProblem{
 		vars[2] = VariableFactory.enumerated("v2", new int[]{2,5}, solver);
 		vars[3] = VariableFactory.enumerated("v3", new int[]{5,6}, solver);
 		vars[4] = VariableFactory.enumerated("v4", new int[]{2,6}, solver);
-		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.GRAPH)};
+		Constraint[] cstrs = new Constraint[]{new AllDifferent(vars, solver, Type.AC)};
 		solver.post(cstrs);
 		AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment());
 		solver.set(strategy);
