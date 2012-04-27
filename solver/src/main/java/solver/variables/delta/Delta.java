@@ -39,7 +39,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * and execute a <code>Procedure</code> for each value stored.
  */
 public final class Delta implements IntDelta {
-    private static final int SIZE  =16;
+    private static final int SIZE  =32;
 
 	int[] rem;
 	ICause[] causes;

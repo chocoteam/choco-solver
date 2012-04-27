@@ -116,7 +116,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         int inf = getLB();
         int sup = getUB();
@@ -458,7 +458,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
