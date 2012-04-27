@@ -30,13 +30,18 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.unary.Relation;
+import solver.constraints.unary.Member;
+import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
+import solver.propagation.generator.PCons;
 import solver.propagation.generator.Sort;
+import solver.propagation.generator.predicate.NotInCstrSet;
+import solver.propagation.generator.predicate.Predicate;
 import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.Seq;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -45,6 +50,7 @@ import solver.variables.view.Views;
 
 import java.util.Arrays;
 
+import static solver.constraints.ConstraintFactory.eq;
 import static solver.constraints.ConstraintFactory.lt;
 
 /**
@@ -69,6 +75,9 @@ public class Partition extends AbstractProblem {
     int N = 2 * 24;
 
     IntVar[] vars;
+    IntVar[] Ovars;
+
+    Constraint[] heavy = new Constraint[3];
 
     @Override
     public void buildModel() {
@@ -77,13 +86,15 @@ public class Partition extends AbstractProblem {
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
         y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
+        Sum.incr = false;
 
-        // break symmetries
+//        break symmetries
         for (int i = 0; i < size - 1; i++) {
             solver.post(lt(x[i], x[i + 1], solver));
             solver.post(lt(y[i], y[i + 1], solver));
         }
         solver.post(lt(x[0], y[0], solver));
+        solver.post(eq(x[0], 1, solver));
 
         IntVar[] xy = new IntVar[2 * size];
         for (int i = size - 1; i >= 0; i--) {
@@ -91,12 +102,19 @@ public class Partition extends AbstractProblem {
             xy[size + i] = y[i];
         }
 
+        Ovars = new IntVar[2 * size];
+        for (int i = 0; i < size; i++) {
+            Ovars[i * 2] = x[i];
+            Ovars[i * 2 + 1] = y[i];
+        }
+
         int[] coeffs = new int[2 * size];
         for (int i = size - 1; i >= 0; i--) {
             coeffs[i] = 1;
             coeffs[size + i] = -1;
         }
-        solver.post(Sum.eq(xy, coeffs, 0, solver));
+        heavy[0] = Sum.eq(xy, coeffs, 0, solver);
+        solver.post(heavy[0]);
 
         IntVar[] sxy, sx, sy;
         sxy = new IntVar[2 * size];
@@ -107,12 +125,11 @@ public class Partition extends AbstractProblem {
             sxy[i] = sx[i];
             sy[i] = Views.sqr(y[i]);
             sxy[size + i] = sy[i];
-            solver.post(new Relation(sx[i], Relation.R.GQ, 1, solver));
-            solver.post(new Relation(sy[i], Relation.R.GQ, 1, solver));
-            solver.post(new Relation(sx[i], Relation.R.LQ, 4 * size * size, solver));
-            solver.post(new Relation(sy[i], Relation.R.LQ, 4 * size * size, solver));
+            solver.post(new Member(sx[i], 1, 4 * size * size, solver));
+            solver.post(new Member(sy[i], 1, 4 * size * size, solver));
         }
-        solver.post(Sum.eq(sxy, coeffs, 0, solver));
+        heavy[1] = Sum.eq(sxy, coeffs, 0, solver);
+        solver.post(heavy[1]);
 
         coeffs = new int[size];
         Arrays.fill(coeffs, 1);
@@ -121,41 +138,28 @@ public class Partition extends AbstractProblem {
         solver.post(Sum.eq(sx, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
         solver.post(Sum.eq(sy, coeffs, 2 * size * (2 * size + 1) * (4 * size + 1) / 12, solver));
 
-        solver.post(new AllDifferent(xy, solver));
+        heavy[2] = new AllDifferent(xy, solver);
+        solver.post(heavy[2]);
 
         vars = xy;
     }
 
     @Override
     public void configureSearch() {
-
-        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
     }
 
     @Override
     public void configureEngine() {
-        /*engine.addGroup(
-                Group.buildGroup(
-                        Predicates.priority_light(PropagatorPriority.TERNARY),
-                        new Cond(
-                                Predicates.lhs(),
-                                new IncrOrderV(vars),
-                                new Decr(new IncrOrderV(vars))),
-                        Policy.ITERATE
-                ));
-        // set default
-        engine.addGroup(
-                Group.buildGroup(
-                        light,
-                        new Seq(
-                                IncrArityP.get(),
-                                new Decr(IncrDomDeg.get())
-                        ),
-                        Policy.FIXPOINT
-                ));*/
-        Sort ad1 = new Sort(new PVar(vars));
-        Sort coar = new Sort(new Increasing(EvtRecEvaluators.MaxPriorityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.loopOut(), coar.pickOne()).clearOut());
+        Sort ad1 = new Sort(
+                new Seq(
+                        new Increasing(EvtRecEvaluators.MinArityC),
+                        new Increasing(EvtRecEvaluators.MinDomSize)
+                ),
+                new PArc(vars, new Predicate[]{new NotInCstrSet(heavy)}));
+        Sort ad2 = new Sort(new PCons(heavy));
+        Sort coar = new Sort(new PCoarse(heavy[2]));
+        solver.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut());
     }
 
     @Override
