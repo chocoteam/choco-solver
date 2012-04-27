@@ -24,120 +24,367 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
+import choco.kernel.common.util.procedure.IntProcedure;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.nary.matching.MatchingStructure;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.graph.GraphType;
+import solver.variables.graph.INeighbors;
+import solver.variables.graph.directedGraph.DirectedGraph;
+import solver.variables.graph.directedGraph.StoredDirectedGraph;
+import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Deque;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 30 nov. 2010
+ * Propagator for AllDifferent AC constraint for integer variables
+ * <p/>
+ * Uses Regin algorithm
+ * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
+ * per arc removed from the support
+ * Has a good average behavior in practice
+ * <p/>
+ * Runs incrementally for maintaining a matching
+ * <p/>
+ *
+ * @author Jean-Guillaume Fages
  */
 public class PropAllDiffAC extends Propagator<IntVar> {
 
-    //IntVar var;
-    //int idxVar; // index of var in struct
-    public MatchingStructure struct;
-    protected final RemProc rem_proc;
-    protected final Solver solver;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
+    private int n, n2;
+    private DirectedGraph digraph;
+    private int[] matching;
+    private int[] nodeSCC;
+    private BitSet free;
+    private IntProcedure remProc;
+    // for augmenting matching (BFS)
+    private int[] father;
+    private BitSet in;
+    private int idxVarInProp;
+    private TIntIntHashMap map;
+    int[] fifo;
 
-    @SuppressWarnings({"unchecked"})
-    public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver solver) {
-        super(vars, solver, constraint, PropagatorPriority.CUBIC, true);
-        //this.var = var;
-        //this.idxVar = idxVar;
-        this.solver = solver;
-        rem_proc = new RemProc(this);
-    }
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
     /**
-     * Static method for one parameter constructor
+     * AllDifferent constraint for integer variables
+     * enables to control the cardinality of the matching
      *
-     * @param vars domain variable list
-     * @return gap between min and max value
+     * @param vars
+     * @param constraint
+     * @param sol
      */
-    private static int getValueGap(IntVar[] vars) {
-        int minValue = Integer.MAX_VALUE, maxValue = Integer.MIN_VALUE;
-        for (IntVar var : vars) {
-            minValue = Math.min(var.getLB(), minValue);
-            maxValue = Math.max(var.getUB(), maxValue);
+    public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver sol) {
+        super(vars, sol, constraint, PropagatorPriority.QUADRATIC, true);
+        n = vars.length;
+        map = new TIntIntHashMap();
+        IntVar v;
+        int ub;
+        int idx = n;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
+                if (!map.containsKey(j)) {
+                    map.put(j, idx);
+                    idx++;
+                }
+            }
         }
-        return maxValue - minValue + 1;
+        n2 = idx;
+        fifo = new int[n2];
+        matching = new int[n2];
+        nodeSCC = new int[n2 + 1];
+        digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
+        free = new BitSet(n2);
+        remProc = new DirectedRemProc();
+        father = new int[n2];
+        in = new BitSet(n2);
     }
 
     @Override
-    public int getPropagationConditions() {
-        return EventType.CUSTOM_PROPAGATION.mask + EventType.FULL_PROPAGATION.mask;
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append("PropAllDiffAC(");
+        int i = 0;
+        for (; i < Math.min(4, vars.length); i++) {
+            st.append(vars[i].getName()).append(", ");
+        }
+        if (i < vars.length - 2) {
+            st.append("...,");
+        }
+        st.append(vars[vars.length - 1].getName()).append(")");
+        return st.toString();
     }
+
+    //***********************************************************************************
+    // Initialization
+    //***********************************************************************************
+
+    private void buildDigraph() {
+        for (int i = 0; i < n2; i++) {
+            digraph.getSuccessorsOf(i).clear();
+            digraph.getPredecessorsOf(i).clear();
+        }
+        free.set(0, n2);
+        int j, k, ub;
+        IntVar v;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                j = map.get(k);
+                if (free.get(i) && free.get(j)) {
+                    digraph.addArc(j, i);
+                    free.clear(i);
+                    free.clear(j);
+                } else {
+                    digraph.addArc(i, j);
+                }
+            }
+        }
+    }
+
+    //***********************************************************************************
+    // MATCHING
+    //***********************************************************************************
+
+    private void repairMatching() throws ContradictionException {
+        for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
+            tryToMatch(i);
+        }
+        int p;
+        for (int i = 0; i < n; i++) {
+            p = digraph.getPredecessorsOf(i).getFirstElement();
+            matching[p] = i;
+            matching[i] = p;
+        }
+    }
+
+    private void tryToMatch(int i) throws ContradictionException {
+        int mate = augmentPath_BFS(i);
+        if (mate != -1) {
+            free.clear(mate);
+            free.clear(i);
+            int tmp = mate;
+            while (tmp != i) {
+                digraph.removeArc(father[tmp], tmp);
+                digraph.addArc(tmp, father[tmp]);
+                tmp = father[tmp];
+            }
+        } else {
+            contradiction(vars[i], "no match");
+        }
+    }
+
+    private int augmentPath_BFS(int root) {
+        in.clear();
+        int indexFirst = 0, indexLast = 0;
+        fifo[indexLast++] = root;
+        int x, y;
+        INeighbors succs;
+        while (indexFirst != indexLast) {
+            x = fifo[indexFirst++];
+            succs = digraph.getSuccessorsOf(x);
+            for (y = succs.getFirstElement(); y >= 0; y = succs.getNextElement()) {
+                if (!in.get(y)) {
+                    father[y] = x;
+                    fifo[indexLast++] = y;
+                    in.set(y);
+                    if (free.get(y)) {
+                        return y;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+
+    //***********************************************************************************
+    // PRUNING
+    //***********************************************************************************
+
+    private void buildSCC() {
+        if (n2 > n * 2) {
+            digraph.desactivateNode(n2);
+            digraph.activateNode(n2);
+            for (int i = n; i < n2; i++) {
+                if (free.get(i)) {
+                    digraph.addArc(i, n2);
+                } else {
+                    digraph.addArc(n2, i);
+                }
+            }
+        }
+        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
+        int scc = 0;
+        for (TIntArrayList in : allSCC) {
+            for (int i = 0; i < in.size(); i++) {
+                nodeSCC[in.get(i)] = scc;
+            }
+            scc++;
+        }
+        digraph.desactivateNode(n2);
+    }
+
+    private void filter() throws ContradictionException {
+        buildSCC();
+        int j, ub;
+        IntVar v;
+        for (int i = 0; i < n; i++) {
+            v = vars[i];
+            ub = v.getUB();
+            for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+                j = map.get(k);
+                if (nodeSCC[i] != nodeSCC[j]) {
+                    if (matching[i] != j || matching[j] != i) {
+                        v.removeValue(k, this);
+                        digraph.removeArc(i, j);
+                    }
+                }
+            }
+        }
+    }
+
+    //***********************************************************************************
+    // PROPAGATION
+    //***********************************************************************************
+
+
+    //public static long nbFull = 0;
+    //public static long nbCustom = 0;
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            for (int v = 0; v < n; v++) {
+                if (vars[v].instantiated()) {
+                    int val = vars[v].getValue();
+                    for (int i = 0; i < n; i++) {
+                        if (i != v) {
+                            vars[i].removeValue(val, this);
+                        }
+                    }
+                }
+            }
+            buildDigraph();
+        } else {
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+        }
+        repairMatching();
+        filter();
+    }
+
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        this.idxVarInProp = idxVarInProp;
+        eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(remProc, EventType.REMOVE);
+        if ((mask & EventType.INSTANTIATE.mask) != 0) {
+            int val = vars[idxVarInProp].getValue();
+            int j = map.get(val);
+            INeighbors nei = digraph.getPredecessorsOf(j);
+            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+                if (i != idxVarInProp) {
+                    digraph.removeEdge(i, j);
+                    vars[i].removeValue(val, this);
+                }
+            }
+            int i = digraph.getSuccessorsOf(j).getFirstElement();
+            if (i != -1 && i != idxVarInProp) {
+                digraph.removeEdge(i, j);
+                vars[i].removeValue(val, this);
+            }
+            //cliqueNeq(idxVarInProp);
+        }
+        /*if (nbPendingER == 0) {
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+            repairMatching();
+            filter();
+        }*/
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    }
+
+    private void cliqueNeq(int i) throws ContradictionException {
+        Deque<IntVar> modified = new ArrayDeque<IntVar>();
+        modified.push(vars[i]);
+        while (!modified.isEmpty()) {
+            IntVar cur = modified.pop();
+            int valCur = cur.getValue();
+            for (IntVar toCheck : vars) {
+                if (toCheck != cur && toCheck.contains(valCur)) {
+                    toCheck.removeValue(valCur, this);
+                    if (toCheck.instantiated()) {
+                        modified.push(toCheck);
+                    }
+                }
+            }
+        }
+    }
+
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.INT_ALL_MASK();
     }
 
-    /**
-     * Build internal structure of the propagator, if necessary
-     *
-     * @throws solver.exception.ContradictionException
-     *          if initialisation encounters a contradiction
-     */
-    protected void initialize() throws ContradictionException {
-        this.struct = new MatchingStructure(vars, vars.length, getValueGap(vars), solver);
-    }
-
     @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        // On suppose que la structure struct est deja ete initialisee par la contrainte
-        // car elle est partagee entre tous les propagateurs
-        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
-            initialize();
-        }
-        struct.removeUselessEdges(this);
-    }
-
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-        IntVar var = vars[varIdx];
-
-        if (EventType.isInstantiate(mask)) {
-            struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
-        } else {
-            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
-        }
-        forcePropagate(EventType.CUSTOM_PROPAGATION);
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            for (IntVar v : vars) {
-                if (v.instantiated()) {
-                    int vv = v.getValue();
-                    for (IntVar w : vars) {
-                        if (w != v) {
-                            if (w.instantiated()) {
-                                if (vv == w.getValue()) {
-                                    return ESat.FALSE;
-                                }
-                            } else {
-                                return ESat.UNDEFINED;
-                            }
-                        }
+            for (int i = 0; i < n; i++) {
+                for (int j = i + 1; j < n; j++) {
+                    if (vars[i].getValue() == vars[j].getValue()) {
+                        return ESat.FALSE;
                     }
-                } else {
-                    return ESat.UNDEFINED;
                 }
             }
             return ESat.TRUE;
@@ -145,36 +392,9 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private static class RemProc implements UnaryIntProcedure<Integer> {
-
-        private final PropAllDiffAC p;
-        private int idxVar;
-
-        public RemProc(PropAllDiffAC p) {
-            this.p = p;
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
-        }
-
-        @Override
+    private class DirectedRemProc implements IntProcedure {
         public void execute(int i) throws ContradictionException {
-            p.struct.nodes[idxVar].removeEdge(i);
-            p.struct.deleteMatch(idxVar, i - p.struct.getMinValue());
+            digraph.removeEdge(idxVarInProp, map.get(i));
         }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder bf = new StringBuilder();
-        bf.append("prop(alldiff_ac,");
-        for (IntVar v : vars) {
-            bf.append(v.getName()).append(" ");
-        }
-        bf.append(")");
-        return bf.toString();
     }
 }
