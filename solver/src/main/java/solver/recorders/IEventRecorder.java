@@ -41,7 +41,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public interface IEventRecorder extends solver.propagation.ISchedulable, Serializable {
+public interface IEventRecorder<V extends Variable> extends solver.propagation.ISchedulable, Serializable {
 
     public static final boolean DEBUG_PROPAG = false;
 
@@ -51,11 +51,11 @@ public interface IEventRecorder extends solver.propagation.ISchedulable, Seriali
      * Return an array of the variables declared in <code>this</code>
      * @return array of variables
      */
-    Variable[] getVariables();
+    V[] getVariables();
 
     /**
      * Return an array of the propagators declared in <code>this</code>
      * @return array of propagators
      */
-    Propagator[] getPropagators();
+    Propagator<V>[] getPropagators();
 }

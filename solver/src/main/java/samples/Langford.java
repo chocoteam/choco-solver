@@ -29,8 +29,11 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.unary.Relation;
+import solver.propagation.generator.*;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -56,47 +59,54 @@ import solver.variables.view.Views;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 04/03/12 revise model
  * @since 19/08/11
  */
 public class Langford extends AbstractProblem {
 
     @Option(name = "-k", usage = "Number of sets.", required = false)
-    private int k = 3;
+    private int k = 2;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 17;
+    private int n = 10;
 
     IntVar[] position;
 
+    Constraint[] lights;
+    Constraint alldiff;
+
     @Override
     public void buildModel() {
-        solver = new Solver("Langford's number");
+        solver = new Solver("Langford number");
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
-        for (int i = 0; i < k - 1; i++) {
-            for (int j = 0; j < n; j++) {
-                solver.post(new Relation(
-                        Views.sum(position[j + (i + 1) * n], Views.minus(position[j + i * n])),
-                        Relation.R.EQ, j+2, solver));
+        lights = new Constraint[(k - 1) * n + 1];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < this.k - 1; j++) {
+                lights[i + j * n] = ConstraintFactory.eq(Views.offset(position[i + j * n], i + 2), position[i + (j + 1) * n], solver);
             }
         }
-        solver.post(new AllDifferent(position, solver));
+        lights[(k - 1) * n] = ConstraintFactory.lt(position[0], position[n * k - 1], solver);
+        solver.post(lights);
+        alldiff = new AllDifferent(position, solver);
+        solver.post(alldiff);
     }
 
     @Override
-    public void configureSolver() {
-        solver.set(StrategyFactory.inputOrderMinVal(position, solver.getEnvironment()));
-        /*IPropagationEngine peng = solver.getEngine();
-        peng.setDeal(IPropagationEngine.Deal.SEQUENCE);
-        peng.addGroup(Group.buildQueue(
-                Predicates.light(),
-                Policy.FIXPOINT
+    public void configureSearch() {
+        solver.set(StrategyFactory.minDomMaxVal(position, solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
+        /*Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
+        Generator g2 = new PCons(alldiff);
+        solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
+        solver.set(new Sort(
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PArc(solver.getVars())),
+                new Queue(new PCoarse(solver.getCstrs()))
         ));
-        peng.addGroup(Group.buildQueue(
-                Predicates.all(),
-                Policy.ONE
-        ));*/
     }
 
     @Override
@@ -127,7 +137,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Langford().execute(args);
+        for (int i = 0; i < 10; i++) new Langford().execute("-log", "QUIET");
     }
 
 }

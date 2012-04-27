@@ -35,7 +35,7 @@ import solver.variables.BoolVar;
  * @author Charles Prud'homme
  * @since 23 nov. 2010
  */
-public abstract class ALogicTree implements Cloneable{
+public abstract class ALogicTree implements Cloneable {
 
     public static enum Operator {
         OR, AND;
@@ -158,7 +158,7 @@ public abstract class ALogicTree implements Cloneable{
      */
     abstract void deny();
 
-    public ALogicTree clone() throws CloneNotSupportedException{
+    public ALogicTree clone() throws CloneNotSupportedException {
         return (ALogicTree) super.clone();
     }
 
@@ -168,6 +168,12 @@ public abstract class ALogicTree implements Cloneable{
      * @return array of bool variables
      */
     public abstract BoolVar[] flattenBoolVar();
+
+    /**
+     * Clean flatten array of BoolVar, required for toCNF
+     */
+    public void cleanFlattenBoolVar() {
+    }
 
     /**
      * Computes and returns the number of positive literals contained in the direct level.

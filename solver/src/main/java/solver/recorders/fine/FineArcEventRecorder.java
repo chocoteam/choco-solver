@@ -59,22 +59,12 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver) {
         super(variable, propagator, solver);
         this.idxVinP = idxVinP;
-        this.deltamon = variable.getDelta().getMonitor(propagator);
+        this.deltamon = variable.getDelta().createDeltaMonitor(propagator);
     }
 
     @Override
     public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
         return deltamon;
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[]{propagator};
-    }
-
-    @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
     }
 
     @Override
@@ -85,25 +75,20 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
             // for concurrent modification..
             deltamon.freeze();
             this.evtmask = 0; // and clean up mask
-            propagator.fineERcalls++;
-            assert (propagator.isActive()) : this + " is not active";
-            propagator.propagate(this, idxVinP, evtmask_);
+            propagators[PINDEX].fineERcalls++;
+            assert (propagators[PINDEX].isActive()) : this + " is not active";
+            propagators[PINDEX].propagate(this, idxVinP, evtmask_);
             deltamon.unfreeze();
         }
         return true;
     }
 
     @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
-
-    @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagator) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagator.getPropagationConditions(idxVinP)) != 0) {
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
+            if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP)) != 0) {
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
                 // 1. clear the structure if necessary
                 if (LAZY) {
@@ -115,30 +100,28 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
                 }
                 // 2. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagator.decArity();
+                    propagators[PINDEX].decArity();
                 }
                 // 3. record the event and values removed
                 if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                     evtmask |= evt.strengthened_mask;
                 }
-                // 4. schedule this
-                if (!enqueued()) {
+                if (!enqueued) {
+                    // 4. schedule this
                     scheduler.schedule(this);
+                } else if (scheduler.needUpdate()) {
+                    // 5. inform the scheduler of update if necessary
+                    scheduler.update(this);
                 }
             }
         }
     }
 
-    @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
-
     public void virtuallyExecuted(Propagator propagator) {
-        assert this.propagator == propagator : "wrong propagator";
+        assert this.propagators[PINDEX] == propagator : "wrong propagator";
         this.evtmask = 0;
         if (LAZY) {
-            variable.getDelta().lazyClear();
+            variables[VINDEX].getDelta().lazyClear();
             timestamp = AbstractSearchLoop.timeStamp;
         }
         deltamon.unfreeze();
@@ -155,13 +138,13 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
 
     @Override
     public void desactivate(Propagator<V> element) {
-        variable.desactivate(this);
+        variables[VINDEX].desactivate(this);
         this.evtmask = 0;
         deltamon.clear();
     }
 
     @Override
     public String toString() {
-        return "<< {F} " + variable.toString() + "::" + propagator.toString() + " >>";
+        return "<< {F} " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + " >>";
     }
 }

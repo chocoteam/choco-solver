@@ -88,7 +88,6 @@ public class AllDifferent extends IntConstraint<IntVar> {
             case RANGE:
             default:
                 setPropagators(new PropAllDiffBC(this.vars, solver, this));
-                addPropagators(new PropCliqueNeq(vars, solver, this));
                 break;
         }
     }

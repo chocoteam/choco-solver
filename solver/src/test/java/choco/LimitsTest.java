@@ -44,7 +44,7 @@ public class LimitsTest {
         NQueenBinary pb =new NQueenBinary();
         pb.readArgs("-q", "12");
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         return pb.getSolver();
     }
 

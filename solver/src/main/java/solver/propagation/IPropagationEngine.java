@@ -88,8 +88,12 @@ public interface IPropagationEngine extends Serializable {
 
     ContradictionException getContradictionException();
 
-    //TODO: to remove
-
     void clear();
+
+    void prepareWM(Solver solver);
+
+    void clearWatermark(int id1, int id2, int id3);
+
+    boolean isMarked(int id1, int id2, int id3);
 
 }

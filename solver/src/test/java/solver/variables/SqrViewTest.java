@@ -50,7 +50,7 @@ public class SqrViewTest {
         IntVar Z = Views.sqr(X);
 
         try {
-            solver.propagate();
+//            solver.propagate();
             Assert.assertFalse(Z.instantiated());
             Assert.assertEquals(Z.getLB(), 0);
             Assert.assertEquals(Z.getUB(), 144);

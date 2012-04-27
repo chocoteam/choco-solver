@@ -26,7 +26,6 @@
  */
 package solver.recorders.fine;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -51,7 +50,7 @@ import java.util.Arrays;
  */
 public class VarEventRecorderWithCondition<V extends Variable> extends VarEventRecorder<V> {
 
-    protected TIntIntHashMap idxVinPs; // index of the variable within the propagator -- immutable
+    protected final int[] idxVinPs; // index of the variable within the propagator -- immutable
 
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
@@ -60,25 +59,22 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
         super(variable, propagators, solver);
         this.condition = condition;
         condition.linkRecorder(this);
-        this.idxVinPs = new TIntIntHashMap(propagators.length, (float) 0.5, -2, -2);
-        for (int i = 0; i < propagators.length; i++) {
-            Propagator propagator = propagators[i];
-            int pid = propagator.getId();
-            idxVinPs.put(pid, idxVinP[i]);
-        }
+        this.idxVinPs = idxVinP.clone();
     }
 
     @Override
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        for (int i = 0; i < propagators.length; i++) {
+        int first = firstAP.get();
+        int last = firstPP.get();
+        for (int k = first; k < last; k++) {
+            int i = propIdx[k];
             Propagator propagator = propagators[i];
-            if (cause != propagator // due to idempotency of propagator, it should not schedule itself
-                    && propagator.isActive()) { // CPRU: could be maintained incrementally
+            if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
-                int pid = propagator.getId();
-                if ((evt.mask & propagator.getPropagationConditions(idxVinPs.get(pid))) != 0) {
+                int idx = p2i.get(propagator.getId());
+                if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx])) != 0) {
                     // 1. if instantiation, then decrement arity of the propagator
                     if (EventType.anInstantiationEvent(evt.mask)) {
                         propagator.decArity();
@@ -94,7 +90,7 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
 
     @Override
     public String toString() {
-        return "<< " + variable.toString() + "::" + Arrays.toString(propagators) + "::" + condition.toString() + " >>";
+        return "<< " + variables[0].toString() + "::" + Arrays.toString(propagators) + "::" + condition.toString() + " >>";
     }
 
 }

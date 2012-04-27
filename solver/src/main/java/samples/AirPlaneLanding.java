@@ -36,6 +36,13 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.constraints.ternary.Max;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.SortDyn;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -123,15 +130,15 @@ public class AirPlaneLanding extends AbstractProblem {
         for (int i = 0; i < n; i++) {
             planes[i] = VariableFactory.bounded("p_" + i, data[i][ELT], data[i][LLT], solver);
 
-            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
-            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
+//            earliness[i] = VariableFactory.bounded("a_" + i, 0, data[i][TT] - data[i][ELT], solver);
+//            tardiness[i] = VariableFactory.bounded("t_" + i, 0, data[i][LLT] - data[i][TT], solver);
 
             obj_ub += Math.max(
                     (data[i][TT] - data[i][ELT]) * data[i][PCBT],
                     (data[i][LLT] - data[i][TT]) * data[i][PCAT]
             );
-            earliness[i] = Views.max(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
-            tardiness[i] = Views.max(ZERO, Views.offset(planes[i], -data[i][TT]));
+            earliness[i] = Max.var(ZERO, Views.offset(Views.minus(planes[i]), data[i][TT]));
+            tardiness[i] = Max.var(ZERO, Views.offset(planes[i], -data[i][TT]));
             LLTs[i] = data[i][LLT];
         }
         List<BoolVar> booleans = new ArrayList<BoolVar>();
@@ -180,7 +187,7 @@ public class AirPlaneLanding extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         Arrays.sort(planes, new Comparator<IntVar>() {
             @Override
             public int compare(IntVar o1, IntVar o2) {
@@ -193,8 +200,10 @@ public class AirPlaneLanding extends AbstractProblem {
                 StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
         ));
 
-        solver.getSearchLoop().getLimitsBox().setNodeLimit(500000);
+    }
 
+    @Override
+    public void configureEngine() {
         /*IPropagationEngine engine = solver.getEngine();
         // default group
         engine.addGroup(
@@ -209,13 +218,14 @@ public class AirPlaneLanding extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
+        solver.set(new Sort(
+                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
+                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()))));
 
     }
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.statEveryXXms(solver, 2000);
-//        solver.getSearchLoop().getLimitsBox().setSolutionLimit(2);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

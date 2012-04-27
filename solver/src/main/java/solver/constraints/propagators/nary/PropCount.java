@@ -27,7 +27,6 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.IStateBitSet;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -69,8 +68,6 @@ public class PropCount extends Propagator<IntVar> {
 
     private final int ovIdx;
 
-    protected final RemProc rem_proc;
-
     /**
      * Constructor,
      * Define an occurence constraint setting size{forall v in lvars | v = occval} <= or >= or = occVar
@@ -93,14 +90,6 @@ public class PropCount extends Propagator<IntVar> {
         this.nbListVars = ovIdx;
         nbPossible = environment.makeBitSet(vars.length);
         nbSure = environment.makeBitSet(vars.length);
-        int cpt = 0;
-        for (int i = 0; i < ovIdx; i++) {
-            if (vars[i].contains(this.occval)) {
-                nbPossible.set(i);
-                cpt++;
-            }
-        }
-        rem_proc = new RemProc(this);
     }
 
     @Override
@@ -114,11 +103,15 @@ public class PropCount extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < (nbListVars); i++) {
-            if (vars[i].contains(occval)) {
-                nbPossible.set(i);
-                if (vars[i].instantiatedTo(occval)) {
-                    nbSure.set(i);
+        if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
+            nbPossible.clear();
+            nbSure.clear();
+            for (int i = 0; i < (nbListVars); i++) {
+                if (vars[i].contains(occval)) {
+                    nbPossible.set(i);
+                    if (vars[i].instantiatedTo(occval)) {
+                        nbSure.set(i);
+                    }
                 }
             }
         }
@@ -161,7 +154,9 @@ public class PropCount extends Propagator<IntVar> {
                 }
             }
             //assumption : we only get the inst events on all variables except the occurrence variable
-            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            if (nbPossible.get(vIdx) && !vars[vIdx].contains(occval)) {
+                nbPossible.clear(vIdx);
+            }
             filter(true, nbRule);
         }
 
@@ -256,28 +251,4 @@ public class PropCount extends Propagator<IntVar> {
         }
         return hasChanged;
     }
-
-    private static class RemProc implements UnaryIntProcedure<Integer> {
-
-        private final PropCount p;
-        private int idxVar;
-
-        public RemProc(PropCount p) {
-            this.p = p;
-        }
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.idxVar = idxVar;
-            return this;
-        }
-
-        @Override
-        public void execute(int i) throws ContradictionException {
-            if (i == p.occval) {
-                p.nbPossible.clear(idxVar);
-            }
-        }
-    }
-
 }

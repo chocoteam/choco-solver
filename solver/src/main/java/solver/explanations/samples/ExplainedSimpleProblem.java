@@ -57,11 +57,15 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
         boolean flatten = false;
         boolean trace = false;
         solver.set(ExplanationFactory.engineFactory(solver, flatten, trace));
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

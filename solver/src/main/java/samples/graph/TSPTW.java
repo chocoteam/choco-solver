@@ -27,7 +27,6 @@
 
 package samples.graph;
 
-import choco.kernel.ResolutionPolicy;
 import choco.kernel.memory.IStateInt;
 import samples.AbstractProblem;
 import solver.Cause;
@@ -35,14 +34,11 @@ import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraph2;
 import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskDefinition;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskIntervals;
 import solver.constraints.propagators.gary.tsp.disjunctive.PropTaskSweep;
 import solver.constraints.propagators.gary.tsp.relaxationHeldKarp.PropHeldKarp;
-import solver.propagation.generator.Primitive;
-import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -200,7 +196,7 @@ public class TSPTW extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy;
 		strategy = StrategyFactory.graphRandom(graph,seed);
 //		if(nR==null){
@@ -218,7 +214,11 @@ public class TSPTW extends AbstractProblem{
 		SearchMonitorFactory.log(solver, true, false);
 	}
 
-	@Override
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
 	public void solve() {
 //		status = solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
 		status = solver.findSolution();

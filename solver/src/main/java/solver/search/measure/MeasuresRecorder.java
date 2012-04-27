@@ -324,6 +324,21 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public String toOneShortLineString() {
+        StringBuilder st = new StringBuilder(256);
+        st.append(String.format("%d Solutions, Resolution %.3fs (%.6fms), Objective: %d , %d Nodes, %d Backtracks, %d Fails, %d Restarts",
+                solutionCount,
+                (timeCount - initialPropagationTimeCount) / IN_SEC,
+                (timeCount - initialPropagationTimeCount) / IN_MS,
+                hasObjective() ? objectiveIntValue : 0,
+                nodeCount,
+                backtrackCount,
+                failCount,
+                restartCount));
+        return st.toString();
+    }
+
+    @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
         st.append("- Search statistics\n");

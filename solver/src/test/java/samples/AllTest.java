@@ -55,9 +55,9 @@ public class AllTest {
     public void mainTest() {
         prob.readArgs(args);
         prob.buildModel();
-        prob.configureSolver();
+        prob.configureSearch();
+        prob.configureEngine();
         prob.overrideExplanation();
-        prob.overridePolicy();
         prob.solve();
 
         Assert.assertEquals("incorrect nb solutions", stats[0], prob.getSolver().getMeasures().getSolutionCount());

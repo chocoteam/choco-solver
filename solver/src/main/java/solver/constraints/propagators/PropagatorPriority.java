@@ -35,7 +35,7 @@ package solver.constraints.propagators;
  */
 public enum PropagatorPriority {
 
-    UNARY(7), BINARY(6), TERNARY(5), LINEAR(4), QUADRATIC(3), CUBIC(2), VERY_SLOW(1);// 0 = PROPAGATE;
+    UNARY(1), BINARY(2), TERNARY(3), LINEAR(4), QUADRATIC(5), CUBIC(6), VERY_SLOW(7);// 8 = PROPAGATE;
 
 
     public final int priority;
@@ -46,19 +46,19 @@ public enum PropagatorPriority {
 
     public static PropagatorPriority get(int prio) {
         switch (prio) {
-            case 7:
+            case 1:
                 return UNARY;
-            case 6:
+            case 2:
                 return BINARY;
-            case 5:
+            case 3:
                 return TERNARY;
             case 4:
                 return LINEAR;
-            case 3:
+            case 5:
                 return QUADRATIC;
-            case 2:
+            case 6:
                 return CUBIC;
-            case 1:
+            case 7:
                 return VERY_SLOW;
             default:
                 return VERY_SLOW;

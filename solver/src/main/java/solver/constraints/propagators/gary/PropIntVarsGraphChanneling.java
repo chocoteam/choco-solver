@@ -110,7 +110,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         Variable variable = vars[idxVarInProp];
-        if (variable.getType() == Variable.GRAPH) {
+        if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
                 eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
             }

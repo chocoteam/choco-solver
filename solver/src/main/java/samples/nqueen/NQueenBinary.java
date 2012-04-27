@@ -69,7 +69,7 @@ public class NQueenBinary extends AbstractNQueen {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();

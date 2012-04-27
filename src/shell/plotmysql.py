@@ -31,14 +31,13 @@ def plot(con):
     ids = cur.fetchall()
     k = 1
     for id in ids:
-        cur.execute("SELECT name, parameters FROM PROBLEM WHERE id=%s", id)
-        res1  = cur.fetchone()
-        name = res1[0]
-        param = res1[1]
-
-        # get time_id
-        cur.execute("SELECT time_id, exec_date FROM RESULTS WHERE pb_id = %s ORDER BY exec_date", id)
+        cur.execute("select p.name, p.parameters, t.building, t.init, t.init_prop, t.resolution, s.exec_date \
+        from TIME as t, RESULTS as r, PROBLEM as p, SESSION as s \
+        where t.id=r.time_id AND r.pb_id=p.id and r.ses_id=s.id and p.id=%s \
+        order by s.exec_date", id)
         rows = cur.fetchall()
+        name = rows[0][0]
+        param = rows[0][1]
 
         d = []
         r = []
@@ -48,13 +47,11 @@ def plot(con):
         n = []
         j = 1
         for row in rows:
-            cur.execute("SELECT building, init, init_prop, resolution FROM TIME WHERE id = %s", row[0])
-            res = cur.fetchone()
-            b.append(res[0])
-            i.append(res[1])
-            p.append(res[2])
-            r.append(res[3])
-            d.append(row[1])
+            b.append(row[2])
+            i.append(row[3])
+            p.append(row[4])
+            r.append(row[5])
+            d.append(row[6])
             n.append(j)
             j +=1
 
@@ -85,10 +82,10 @@ def plot(con):
         par3.set_ylim(min(p), max(p)*1.1)
 
         host.set_xlabel("Build #")
-    #    host.set_ylabel("Resolution")
-    #    par1.set_ylabel("Building")
-    #    par2.set_ylabel("Initialisation")
-    #    par3.set_ylabel("Init. Propagation")
+        host.set_ylabel("Resolution")
+        par1.set_ylabel("Building")
+        par2.set_ylabel("Initialisation")
+        par3.set_ylabel("Init. Propagation")
 
         host.yaxis.label.set_color(p1.get_color())
         par1.yaxis.label.set_color(p2.get_color())
@@ -120,6 +117,7 @@ def plot(con):
     filout.close()
     filout.close()
 
+
 def readParameters(paramlist):
     global host
     global user
@@ -137,6 +135,10 @@ def readParameters(paramlist):
             dbname = paramlist[1]
         readParameters(paramlist[offset:])
 
-readParameters(sys.argv[1:])
-con = MySQLdb.connect(host, user, pwd, dbname)
-plot(con)
+def main():
+    readParameters(sys.argv[1:])
+    con = MySQLdb.connect(host, user, pwd, dbname)
+    plot(con)
+
+if __name__ == "__main__":
+    main()

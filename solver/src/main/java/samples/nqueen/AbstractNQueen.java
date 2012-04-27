@@ -51,7 +51,7 @@ public abstract class AbstractNQueen extends AbstractProblem {
     IntVar[] vars;
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 
         IntVar[] orderedVars = orederIt2();
@@ -117,6 +117,10 @@ public abstract class AbstractNQueen extends AbstractProblem {
         }
 
         return orderedVars;
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
 

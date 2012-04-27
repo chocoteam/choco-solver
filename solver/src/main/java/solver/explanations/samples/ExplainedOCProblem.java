@@ -59,11 +59,16 @@ public class ExplainedOCProblem extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
 
 //        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.random(vars, solver.getEnvironment()));
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+    }
+
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

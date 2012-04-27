@@ -169,11 +169,11 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
      */
     protected void initialize() throws ContradictionException {
         int j = 0;
-        for(; j < nbVars; j++){
+        for (; j < nbVars; j++) {
             vars[j].updateLowerBound(offset, this);
             vars[j].updateUpperBound(offset + vars.length - nbVars - 1, this);
         }
-        for(;j < vars.length; j++){
+        for (; j < vars.length; j++) {
             vars[j].updateLowerBound(0, this);
             vars[j].updateUpperBound(nbVars, this);
         }
@@ -198,7 +198,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
         }
         filter();
@@ -273,7 +273,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if(isCompletelyInstantiated()){
+        if (isCompletelyInstantiated()) {
             return this.constraint.isSatisfied();
         }
         return ESat.UNDEFINED;
@@ -366,8 +366,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             public int compare(Interval o1, Interval o2) {
                 return o1.var.getLB() - o2.var.getLB();
             }
-        },
-        ;
+        },;
     }
 
     void sortIt() {
@@ -790,6 +789,29 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
                 fixpoint |= card[i].updateLowerBound(nbVars - (ub - card[i].getUB()), this);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer("GlobalCardinality(<");
+        buf.append(vars[0]);
+        for (int i = 1; i < nbVars; i++) {
+            buf.append(',').append(vars[i]);
+        }
+        buf.append(">,<");
+        if (nbVars < vars.length) {
+            buf.append(offset).append(":").append(vars[nbVars]);
+            for (int i = 1; i < vars.length - nbVars; i++) {
+                buf.append(',').append(offset + i).append(":").append(vars[nbVars + i]);
+            }
+        } else {
+            buf.append(offset).append(":[").append(minOccurrences[0]).append(",").append(maxOccurrences[0]).append("]");
+            for (int i = 1; i < minOccurrences.length; i++) {
+                buf.append(',').append(offset + i).append(":[").append(minOccurrences[i]).append(",").append(maxOccurrences[i]).append("]");
+            }
+        }
+        buf.append(">)");
+        return new String(buf);
     }
 
     private static class RemProc implements IntProcedure {

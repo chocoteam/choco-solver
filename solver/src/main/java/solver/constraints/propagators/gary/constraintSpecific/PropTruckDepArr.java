@@ -89,7 +89,7 @@ public class PropTruckDepArr<V extends Variable> extends GraphPropagator<V>{
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 
         Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
+        if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
 			if ((mask & EventType.ENFORCENODE.mask) != 0){
 				eventRecorder.getDeltaMonitor(this, var).forEach(enforceProc, EventType.ENFORCENODE);
 			}

@@ -118,6 +118,11 @@ public abstract class Constraint<V extends Variable, P extends Propagator<V>> im
         return vars;
     }
 
+
+    public Solver getSolver() {
+        return solver;
+    }
+
     /**
      * Test if this <code>Constraint</code> object is active, i.e. at least one propagator is active.
      *

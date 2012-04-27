@@ -36,6 +36,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
+import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -48,8 +49,9 @@ import java.util.Arrays;
  *
  * @author Jean-Guillaume Fages
  * @since 30 june 2011
+ * @revision CPRU: remove effectless procedures (before + on contradiction)
  */
-public abstract class AbstractVariable<V extends Variable> implements Serializable {
+public abstract class AbstractVariable<D extends IDelta, W extends IView, V extends Variable<D, W>> implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String
@@ -76,17 +78,15 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     protected int[] pindices;    // but it indices must be different
     protected int pIdx;
 
-    protected IView[] views; // views to inform of domain modification
+    protected W[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
 
     protected int modificationEvents;
 
-    protected int uniqueID;
-
-    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+//    protected final OnBeforeProc beforeModification = new OnBeforeProc();
     protected final OnAfterProc afterModification = new OnAfterProc();
-    protected final OnContradiction onContradiction = new OnContradiction();
+//    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -97,7 +97,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = new IView[2];
+        views = (W[]) new IView[2];
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
@@ -137,15 +137,7 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         constraints[cLast++] = constraint;
     }
 
-    public int getID() {
-        return uniqueID;
-    }
-
-    public void setID(int uniqueID) {
-        this.uniqueID = uniqueID;
-    }
-
-    public void attach(Propagator propagator, int idxInProp) {
+    public void link(Propagator propagator, int idxInProp) {
         //ensure capacity
         if (pIdx == propagators.length) {
             Propagator[] tmp = propagators;
@@ -165,12 +157,32 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         modificationEvents |= mask;
     }
 
+    public void unlink(Propagator propagator) {
+        // 1. find the propagator
+        int i = 0;
+        while (i < pIdx && propagators[i] != propagator) {
+            i++;
+        }
+        assert i < pIdx : "remove unknown propagator";
+
+        // 2. swap it with the last one
+        pIdx--;
+        propagators[i] = propagators[pIdx];
+        pindices[i] = pindices[pIdx];
+    }
+
     public Propagator[] getPropagators() {
-        return Arrays.copyOf(propagators, pIdx);
+        if (propagators.length > pIdx) {
+            propagators = Arrays.copyOf(propagators, pIdx);
+        }
+        return propagators;
     }
 
     public int[] getPIndices() {
-        return Arrays.copyOf(pindices, pIdx);
+        if (pindices.length > pIdx) {
+            pindices = Arrays.copyOf(pindices, pIdx);
+        }
+        return pindices;
     }
 
     public void activate(IVariableMonitor monitor) {
@@ -211,10 +223,10 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         records.remove(monitor);
     }
 
-    public void subscribeView(IView view) {
+    public void subscribeView(W view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
-            views = new IView[tmp.length * 3 / 2 + 1];
+            views = (W[]) new IView[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
         }
         views[vIdx++] = view;
@@ -236,6 +248,10 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         return solver;
     }
 
+    public W[] getViews() {
+        return Arrays.copyOfRange(views, 0, vIdx);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected static abstract class Monitoring implements TernaryProcedure<IVariableMonitor, Variable, EventType, ICause> {
@@ -252,12 +268,12 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         }
     }
 
-    protected static class OnBeforeProc extends Monitoring {
+    /*protected static class OnBeforeProc extends Monitoring {
         @Override
         public void execute(IVariableMonitor monitor) throws ContradictionException {
             monitor.beforeUpdate(var, evt, cause);
         }
-    }
+    }*/
 
     protected static class OnAfterProc extends Monitoring {
         @Override
@@ -266,11 +282,11 @@ public abstract class AbstractVariable<V extends Variable> implements Serializab
         }
     }
 
-    protected static class OnContradiction extends Monitoring {
+    /*protected static class OnContradiction extends Monitoring {
         @Override
         public void execute(IVariableMonitor monitor) throws ContradictionException {
             monitor.contradict(var, evt, cause);
         }
-    }
+    }*/
 
 }

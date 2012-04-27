@@ -94,9 +94,13 @@ public class Sudoku extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(ArrayUtils.append(rows), solver.getEnvironment()));
 
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

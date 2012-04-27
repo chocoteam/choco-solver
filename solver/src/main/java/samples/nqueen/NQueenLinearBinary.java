@@ -29,7 +29,7 @@ package samples.nqueen;
 
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.binary.NotEqualX_YC;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -54,8 +54,8 @@ public class NQueenLinearBinary extends AbstractNQueen {
             for (int j = i + 1; j < n; j++) {
                 int k = j - i;
                 solver.post(ConstraintFactory.neq(vars[i], vars[j], solver));
-                solver.post(ConstraintFactory.scalar(new IntVar[]{vars[i], vars[j]}, new int[]{1, -1}, IntLinComb.Operator.NEQ, -k, solver));
-                solver.post(ConstraintFactory.scalar(new IntVar[]{vars[i], vars[j]}, new int[]{1, -1}, IntLinComb.Operator.NEQ, k, solver));
+                solver.post(new NotEqualX_YC(vars[i], vars[j], -k, solver));
+                solver.post(new NotEqualX_YC(vars[i], vars[j], k, solver));
             }
         }
     }

@@ -26,6 +26,9 @@
  */
 package solver.recorders.fine;
 
+import choco.kernel.memory.IStateInt;
+import gnu.trove.map.hash.TIntIntHashMap;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -47,29 +50,43 @@ import java.util.Arrays;
  */
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final V variable; // one variable
-    protected final Propagator<V>[] propagators; // its propagators
     protected int idxV; // index of this within the variable structure -- mutable
+    protected final TIntIntHashMap p2i; // hashmap to retrieve the position of a propagator in propagators thanks to its pid
+    protected int[] propIdx; // an array of indices helping to get active propagators
+    protected IStateInt firstAP; // index of the first active propagator in propIdx
+    protected IStateInt firstPP; // index of the first passive propagator in propIdx
 
-    public VarEventRecorder(V variable, Propagator<V>[] propagators, Solver solver) {
+    VarEventRecorder(V variable, Solver solver, int n) {
         super(solver);
-        this.variable = variable;
+        this.variables = (V[]) new Variable[]{variable};
         variable.addMonitor(this);
-        this.propagators = propagators.clone();
+        p2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
+        this.propagators = new Propagator[n];
+        this.propIdx = new int[n];
+    }
 
-        for (int i = 0; i < propagators.length; i++) {
-            propagators[i].addRecorder(this);
+    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver) {
+        this(variable, solver, props.length);
+        int n = props.length;
+        int k = 0; // count the number of distinct propagator
+        for (int i = 0; i < n; i++) {
+            Propagator propagator = props[i];
+            int pid = propagator.getId();
+            int idx = p2i.get(pid);
+            if (idx == -1) { // first occurrence of the variable
+                this.propagators[k] = propagator;
+                propagator.addRecorder(this);
+                p2i.put(pid, k);
+                propIdx[k] = k;
+                k++;
+            }
         }
-    }
-
-    @Override
-    public Variable[] getVariables() {
-        return new Variable[]{variable};
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return propagators;
+        if (k < n) {
+            propagators = Arrays.copyOfRange(propagators, 0, k);
+            propIdx = Arrays.copyOfRange(propIdx, 0, k);
+        }
+        firstAP = solver.getEnvironment().makeInt(k);
+        firstPP = solver.getEnvironment().makeInt(k);
     }
 
     @Override
@@ -86,10 +103,14 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(V var, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        for (int i = 0; i < propagators.length; i++) {
+        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+        boolean oneoremore = false;
+        int first = firstAP.get();
+        int last = firstPP.get();
+        for (int k = first; k < last; k++) {
+            int i = propIdx[k];
             Propagator propagator = propagators[i];
-            if (cause != propagator // due to idempotency of propagator, it should not schedule itself
-                    && propagator.isActive()) { // CPRU: could be maintained incrementally
+            if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
                 // 1. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagator.decArity();
@@ -123,7 +144,11 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void enqueue() {
         enqueued = true;
-        for (int i = 0; i < propagators.length; i++) {
+        // <cp> include not yet activate propagator in the loop, to avoid maintain this outside
+//        int first = firstAP.get();
+        int last = firstPP.get();
+        for (int k = 0; k < last; k++) {
+            int i = propIdx[k];
             propagators[i].incNbRecorderEnqued();
         }
     }
@@ -132,29 +157,63 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void deque() {
         enqueued = false;
-        for (int i = 0; i < propagators.length; i++) {
+        // <cp> include not yet activate propagator in the loop, to avoid maintain this outside
+//        int first = firstAP.get();
+        int last = firstPP.get();
+        for (int k = 0; k < last; k++) {
+            int i = propIdx[k];
             propagators[i].decNbRecrodersEnqued();
         }
     }
 
     @Override
     public void activate(Propagator<V> element) {
-        variable.activate(this);
+        int firstA = firstAP.get();
+        if (firstA == propagators.length) { // if this is the first propagator activated
+            variables[VINDEX].activate(this); // activate this
+        }
+        // then, swap the propagator to the active part (between firstAP and firstPP)
+        int id = p2i.get(element.getId());
+        int i = 0;
+        // find the idx of the propagator within the array
+        while (i < firstA && propIdx[i] != id) {
+            i++;
+        }
+        if (i < firstA) { // if not already active -- otherwise, there is a problem
+            swapP(i, firstA - 1); // swap it with the last not yet active
+            firstAP.add(-1);
+        } else {
+            assert false : element + " is already active";
+        }
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
-        // must be desactivate when no propagator are active
-        int count = propagators.length;
-        for (int i = 0; i < propagators.length; i++) {
-            if (propagators[i].isPassive()) {
-                count--;
-                _desactivateP(i);
-            }
+        int first = firstAP.get();
+        int last = this.firstPP.get();
+        int id = p2i.get(element.getId());
+        _desactivateP(id);
+        // maintain active propagator indices list
+        // 1. find the position of id in propIdx
+        int i = first;
+        while (i < last && propIdx[i] != id) {
+            i++;
         }
-        if (count == 0) {
-            variable.desactivate(this);
+        assert i < last : element + " is already passive";
+        // 2. swap it with the last active
+        swapP(i, last - 1); //swap it with the last active
+        firstPP.add(-1); // decrease pointer to last active
+        if (last == 1) { // if it was the last active propagator, desactivate this
+            variables[VINDEX].desactivate(this);
             flush();
+        }
+    }
+
+    protected void swapP(int i, int j) {
+        if (i != j) {
+            int pi = propIdx[i];
+            propIdx[i] = propIdx[j];
+            propIdx[j] = pi;
         }
     }
 
@@ -174,6 +233,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     @Override
     public String toString() {
-        return "<< " + variable + "::" + Arrays.toString(propagators) + ">>";
+        return "<< " + variables[VINDEX] + "::" + Arrays.toString(propagators) + ">>";
     }
 }

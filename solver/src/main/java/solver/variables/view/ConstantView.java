@@ -101,9 +101,15 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public IntView[] getViews() {
+        return new IntView[0];
+    }
+
+    @Override
     public int getId() {
         return ID;
     }
+
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -270,7 +276,7 @@ public class ConstantView implements IntVar {
 
     @Override
     public Explanation explain(VariableState what, int val) {
-         Explanation explanation = new Explanation();
+        Explanation explanation = new Explanation();
         if (empty.get()) {
             explanation.add(solver.getExplainer().explain(this, constante));
         }
@@ -283,15 +289,19 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void subscribeView(IView view) {
+    public void subscribeView(IntView view) {
     }
 
     @Override
-    public void attach(Propagator propagator, int idxInProp) {
+    public void link(Propagator propagator, int idxInProp) {
     }
 
     @Override
     public void analyseAndAdapt(int mask) {
+    }
+
+    @Override
+    public void unlink(Propagator propagator) {
     }
 
     @Override
@@ -321,8 +331,8 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return Variable.INT + Variable.CSTE;
     }
 
     @Override

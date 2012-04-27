@@ -45,10 +45,10 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.view.IntView;
 
 /**
  * <br/>
@@ -56,7 +56,7 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implements IntVar {
+public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView, IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -116,7 +116,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
      *          if the domain become empty due to this action
      */
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         ICause antipromo = cause;
         int inf = getLB();
         int sup = getUB();
@@ -458,14 +458,14 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntVar> implement
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return VAR + INT;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

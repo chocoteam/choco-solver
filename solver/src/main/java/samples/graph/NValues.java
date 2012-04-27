@@ -32,7 +32,6 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -84,12 +83,16 @@ public class NValues extends AbstractProblem{
 	}
 
 	@Override
-	public void configureSolver() {
+	public void configureSearch() {
 		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		solver.set(strategy);
 	}
 
-	@Override
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
 	public void solve() {
 		SearchMonitorFactory.log(solver, false, false);
 		Boolean status = solver.findSolution();

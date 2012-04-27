@@ -290,7 +290,7 @@ public class PropAllDiffGraph<V extends Variable> extends GraphPropagator<V> {
         }
         if (mask != EventType.REMOVEARC.mask) return;
         Variable var = vars[idxVarInProp];
-        if (var.getType() == Variable.GRAPH) {
+        if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
 			// maintient du COUPLAGE et des SCC
             obsoleteMatching = false;
             eventRecorder.getDeltaMonitor(this, g).forEach(maintain_matching, EventType.REMOVEARC);

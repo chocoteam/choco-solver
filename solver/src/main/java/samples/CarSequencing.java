@@ -31,6 +31,12 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.SortDyn;
+import solver.propagation.generator.sorter.Increasing;
+import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -89,13 +95,13 @@ public class CarSequencing extends AbstractProblem {
                 // configurations that include given option may be chosen
                 IntVar[] atMost = new IntVar[nbConf];
                 for (int i = 0; i < nbConf; i++) {
-                // optfreq[optNum][0] times AT MOST
+                    // optfreq[optNum][0] times AT MOST
                     atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
                 }
 
                 solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
 
-                IntVar[] atLeast = VariableFactory.boundedArray("atleast_"+optNum+"_"+seqStart, idleConfs[optNum].length, 0, max, solver);
+                IntVar[] atLeast = VariableFactory.boundedArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, solver);
                 solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
                 // all others configurations may be chosen
                 solver.post(Sum.geq(atLeast, optfreq[optNum][1] - optfreq[optNum][0], solver));
@@ -104,7 +110,7 @@ public class CarSequencing extends AbstractProblem {
 
         int[] values = new int[expArray.length];
         for (int i = 0; i < expArray.length; i++) {
-            expArray[i] = VariableFactory.enumerated("var_"+i, 0, demands[i], solver);
+            expArray[i] = VariableFactory.enumerated("var_" + i, 0, demands[i], solver);
             values[i] = i;
         }
         solver.post(GlobalCardinality.make(cars, values, expArray, solver));
@@ -120,19 +126,15 @@ public class CarSequencing extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
-        /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.light(),
-                        new Seq(IncrArityP.get(),
-                                IncrDomDeg.get()),
-                        Policy.FIXPOINT));
-        solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.all(),
-                        IncrArityP.get(),
-                        Policy.ONE));*/
+    }
+
+    @Override
+    public void configureEngine() {
+        solver.set(new Sort(
+                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
+                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()))));
 
     }
 

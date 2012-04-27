@@ -28,6 +28,7 @@ package solver.search.strategy.enumerations.sorters;
 
 import solver.Solver;
 import solver.search.strategy.enumerations.sorters.metrics.*;
+import solver.search.strategy.enumerations.sorters.metrics.operators.Div;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -128,6 +129,15 @@ public class SorterFactory {
      */
     public static AbstractSorter<IntVar> occurrence() {
         return new Incr(Degree.build());
+    }
+
+    /**
+     * Variables are sorted wrt domSize / dynanmic degree
+     *
+     * @return most constrained sorter
+     */
+    public static AbstractSorter<IntVar> domddeg() {
+        return new Incr(Div.<IntVar>build(DomSize.build(), Degree.build()));
     }
 
     /**

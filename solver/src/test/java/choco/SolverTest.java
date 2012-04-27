@@ -32,8 +32,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.exception.SolverException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -66,16 +65,16 @@ public class SolverTest {
 
         IntVar[] objects = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            objects[i] = VariableFactory.enumerated("v_"+i, 0, nbOmax[i], s);
+            objects[i] = VariableFactory.enumerated("v_" + i, 0, nbOmax[i], s);
         }
 
-        power = VariableFactory.enumerated("v_"+n, 0, 999999, s);
+        power = VariableFactory.enumerated("v_" + n, 0, 999999, s);
 
         List<Constraint> lcstrs = new ArrayList<Constraint>(3);
 
-        lcstrs.add(ConstraintFactory.scalar(objects, volumes, IntLinComb.Operator.GEQ, capacites[0], s));
-        lcstrs.add(ConstraintFactory.scalar(objects, volumes, IntLinComb.Operator.LEQ, capacites[1], s));
-        lcstrs.add(ConstraintFactory.scalar(objects, energies, IntLinComb.Operator.EQ, power, 1, s));
+        lcstrs.add(Sum.geq(objects, volumes, capacites[0], s));
+        lcstrs.add(Sum.leq(objects, volumes, capacites[1], s));
+        lcstrs.add(Sum.eq(objects, energies, power, 1, s));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 

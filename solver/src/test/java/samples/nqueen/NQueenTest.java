@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.propagation.comparators.EngineStrategies;
+import solver.propagation.PropagationStrategies;
 import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -97,7 +97,7 @@ public class NQueenTest {
     protected Solver modeler(AbstractNQueen nq, int size) {
         nq.readArgs("-q", Integer.toString(size));
         nq.buildModel();
-        nq.configureSolver();
+        nq.configureSearch();
         return nq.getSolver();
     }
 
@@ -160,9 +160,9 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < EngineStrategies.values().length; t++) {
+            for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                EngineStrategies.values()[t].defineIn(sol);
+                PropagationStrategies.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -179,10 +179,10 @@ public class NQueenTest {
             sol.findAllSolutions();
             long nbsol = sol.getMeasures().getSolutionCount();
             long node = sol.getMeasures().getNodeCount();
-            for (int t = 0; t < EngineStrategies.values().length; t++) {
+            for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
                 // default group
-                EngineStrategies.values()[t].defineIn(sol);
+                PropagationStrategies.values()[t].make(sol);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

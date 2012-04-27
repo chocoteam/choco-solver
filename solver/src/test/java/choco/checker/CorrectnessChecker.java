@@ -84,6 +84,8 @@ public class CorrectnessChecker {
                                 if (test.findSolution()) {
                                     LoggerFactory.getLogger("test").error("ds :{}, ide:{}, h:{}, var:{}, val:{}, loop:{}, seed: {}",
                                             new Object[]{ds, ide, h, rvars[d], val, loop, seed});
+                                    LoggerFactory.getLogger("test").error("REF:\n{}\n", ref);
+                                    ref.getEnvironment().worldPop();
                                     LoggerFactory.getLogger("test").error("REF:\n{}\nTEST:\n{}", ref, test);
                                     Assert.fail("one solution found");
                                 }
@@ -111,6 +113,7 @@ public class CorrectnessChecker {
 
     private static Solver referencePropagation(Modeler modeler, int nbVar, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
         Solver ref = modeler.model(nbVar, domains, map, parameters);
+        ref.getEnvironment().worldPush();
         try {
             ref.propagate();
         } catch (ContradictionException e) {

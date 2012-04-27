@@ -1,0 +1,46 @@
+##############################
+##                          ##
+## LIST OF COMMANDS TO RUN  ##
+##                          ##
+## COMMENT START WITH #     ##
+## EMPTY LINES (\n) ALLOWED ##
+##                          ##
+##############################
+
+## ORDERING
+samples.Ordering -n 1000 -policy TWO_QUEUES_WITH_VARS
+samples.Ordering -n 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.Ordering -n 1000 -policy DEFAULT
+##
+samples.Ordering -n 5000 -policy TWO_QUEUES_WITH_VARS
+samples.Ordering -n 5000 -policy TWO_QUEUES_WITH_PROPS
+samples.Ordering -n 5000 -policy DEFAULT
+##
+## MAGIC SERIES
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 500 -policy TWO_QUEUES_WITH_PROPS
+samples.MagicSeries -n 500 -policy DEFAULT
+##
+samples.MagicSeries -n 1000 -policy TWO_QUEUES_WITH_VARS
+samples.MagicSeries -n 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.MagicSeries -n 1000 -policy DEFAULT
+##
+##
+## ALL INTERVAL SERIES
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 500 -policy TWO_QUEUES_WITH_PROPS
+samples.AllIntervalSeries -o 500 -policy DEFAULT
+##
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_VARS
+samples.AllIntervalSeries -o 1000 -policy TWO_QUEUES_WITH_PROPS
+samples.AllIntervalSeries -o 1000 -policy DEFAULT
+#
+## LANGFORD NUMBER
+#
+samples.Langford -k 2 -n 10 -policy TWO_QUEUES_WITH_VARS
+samples.Langford -k 2 -n 10 -policy TWO_QUEUES_WITH_PROPS
+samples.Langford -k 2 -n 10 -policy DEFAULT
+##
+samples.Langford -k 3 -n 11 -policy TWO_QUEUES_WITH_VARS
+samples.Langford -k 3 -n 11 -policy TWO_QUEUES_WITH_PROPS
+samples.Langford -k 3 -n 11 -policy DEFAULT

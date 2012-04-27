@@ -33,7 +33,6 @@ import solver.constraints.Constraint;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.lex.Lex;
-import solver.propagation.comparators.predicate.Predicate;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -44,7 +43,6 @@ import solver.variables.VariableFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static solver.propagation.comparators.predicate.Predicates.light;
 
 /**
  * Orthogonal latin square
@@ -62,7 +60,7 @@ public class OrthoLatinSquare extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        solver = new Solver("Latin square" + m);
+        solver = new Solver("Ortho Latin square " + m);
         int mm = m * m;
         square1 = VariableFactory.boundedArray("s1", mm, 1, m, solver);
         square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);
@@ -134,14 +132,17 @@ public class OrthoLatinSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         HeuristicValFactory.indomainMiddle(vars);
         solver.set(StrategyVarValAssign.dyn(vars,
                 SorterFactory.minDomain(),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
         //TODO: propagation
-        Predicate light = light();
         /*solver.getEngine().addGroup(
                 Group.buildQueue(
                         but(light, member(ALLDIFFS)),

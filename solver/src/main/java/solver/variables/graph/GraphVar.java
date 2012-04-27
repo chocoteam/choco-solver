@@ -39,6 +39,7 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.view.IView;
 
 
 /**
@@ -46,7 +47,7 @@ import solver.variables.delta.IGraphDelta;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<GraphVar> implements Variable<IGraphDelta>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IView, GraphVar<E>> implements Variable<IGraphDelta, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
     //***********************************************************************************
@@ -182,8 +183,8 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
     }
 	
 	@Override
-	public int getType() {
-		return Variable.GRAPH;
+	public int getTypeAndKind() {
+		return VAR + GRAPH;
 	}
 
     @Override
@@ -209,7 +210,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

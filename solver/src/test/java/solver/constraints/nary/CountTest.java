@@ -62,7 +62,7 @@ public class CountTest {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(4));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         Solver solver = pb.getSolver();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 2);
@@ -73,7 +73,7 @@ public class CountTest {
         MagicSeries pb = new MagicSeries();
         pb.readArgs("-n", Integer.toString(8));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         Solver solver = pb.getSolver();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 1);

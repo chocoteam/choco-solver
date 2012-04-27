@@ -54,7 +54,7 @@ public class ViewMinusTest {
         IntVar Y = Views.minus(X);
 
         try {
-            solver.propagate();
+//            solver.propagate();
             Assert.assertFalse(Y.instantiated());
             Assert.assertEquals(Y.getLB(), -10);
             Assert.assertEquals(Y.getUB(), -1);

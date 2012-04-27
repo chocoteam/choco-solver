@@ -26,73 +26,62 @@
  */
 package solver.propagation.generator;
 
-import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.PropagationEngine;
+import solver.propagation.queues.FixSizeCircularQueue;
 import solver.recorders.IEventRecorder;
-
-import java.util.*;
 
 /**
  * A specific propagation strategy that works like a queue (fifo).
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 04/03/12 change schedule
  * @since 15/12/11
  */
-public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
+public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
     protected S lastPopped;
+    protected FixSizeCircularQueue<S> toPropagate;
 
-    //protected FixSizeCircularQueue<S> toPropagate;
-    protected java.util.Queue<S> toPropagate;
-
-
-    private Queue(List elements) {
-        super(elements);
-    }
-
-    //<-- DSL
-
-    public static Queue build(Generator... generators) {
-        if (generators.length == 0) {
-            throw new RuntimeException("Sort::Empty generators array");
+    @SuppressWarnings({"unchecked"})
+    public Queue(Generator<S>... generators) {
+        int nbe = 0;
+        for (int i = 0; i < generators.length; i++) {
+            Generator gen = generators[i];
+            S[] elts = (S[]) gen.getElements();
+            for (int e = 0; e < elts.length; e++) {
+                elts[e].setScheduler(this, 0);
+                nbe++;
+            }
         }
-        return new Queue(Arrays.asList(generators));
+        toPropagate = new FixSizeCircularQueue<S>(nbe);
     }
 
     @Override
-    public List<Queue<S>> populate(PropagationEngine propagationEngine, Solver solver) {
-        List<S> elements = new ArrayList<S>();
-        for (int i = 0; i < generators.size(); i++) {
-            Generator gen = generators.get(i);
-            elements.addAll(gen.populate(propagationEngine, solver));
-        }
-        for (int e = 0; e < elements.size(); e++) {
-            elements.get(e).setScheduler(this, 0);
-        }
-        //toPropagate = new FixSizeCircularQueue<S>(elements.size());
-        toPropagate = new ArrayDeque();
-        return Collections.singletonList(this);
+    public S[] getElements() {
+        return (S[]) new ISchedulable[]{this};
     }
+
     //-->
 
     //<-- PROPAGATION ENGINE
 
     @Override
     public void schedule(S element) {
+        // CONDITION: the element must not be already present (checked in element)
+        assert !element.enqueued();
         toPropagate.add(element);
         element.enqueue();
-        if (!this.enqueued) {
+        if (!enqueued) {
             scheduler.schedule(this);
         }
     }
 
     @Override
     public void remove(S element) {
-        element.deque();
         toPropagate.remove(element);
+        element.deque();
         if (this.enqueued && toPropagate.isEmpty()) {
             scheduler.remove(this);
         }
@@ -103,7 +92,7 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
         if (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.remove();//pop();
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -115,11 +104,16 @@ public class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
         return _clearOut();
     }
 
+    @Override
+    protected boolean _loopOut() throws ContradictionException {
+        return _clearOut();
+    }
+
     protected boolean _clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
             lastPopped = toPropagate.remove();//.pop();
             lastPopped.deque();
-            if (!lastPopped.execute()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }

@@ -50,7 +50,7 @@ public interface IDelta extends Serializable{
 	 * @param propagator of the monitor
      * @return a monitor
      */
-    <D extends IDelta>IDeltaMonitor<D> getMonitor(ICause propagator);
+    <D extends IDelta>IDeltaMonitor<D> createDeltaMonitor(ICause propagator);
 
 	void clear();
 

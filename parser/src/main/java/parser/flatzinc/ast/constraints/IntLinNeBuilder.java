@@ -31,12 +31,10 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.variables.IntVar;
 
 import java.util.List;
-
-import static solver.constraints.ConstraintFactory.scalar;
 
 /**
  * <br/>
@@ -51,6 +49,6 @@ public class IntLinNeBuilder implements IBuilder {
         int[] coeffs = exps.get(0).toIntArray();
         IntVar[] vars = exps.get(1).toIntVarArray(solver);
         int result = exps.get(2).intValue();
-        return scalar(vars, coeffs, IntLinComb.Operator.NEQ, result, solver);
+        return Sum.neq(vars, coeffs, result, solver);
     }
 }

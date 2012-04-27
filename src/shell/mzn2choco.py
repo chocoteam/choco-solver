@@ -5,24 +5,13 @@ from threading import Thread
 from os.path import join
 
 ## ENVIRONMENT VARIABLES
-CHOCO_HOME = '/Users/cprudhom/Documents/Projects/Sources/Galak/trunk/'
+home = '../../'
 
 # ENVIRONMENT VARIABLES
-MINIZINC_DIR = '/Users/cprudhom/Documents/Projects/_Librairies/minizinc-1.2.2'
-
-M2_REPO = '/Users/cprudhom/.m2/repository/'
-ARGS = join(M2_REPO, 'args4j', 'args4j', '2.0.12', 'args4j-2.0.12.jar')
-LOGBACK_CL = join(M2_REPO, 'ch', 'qos', 'logback', 'logback-classic', '0.9.24', 'logback-classic-0.9.24.jar')
-LOGBACK_CO = join(M2_REPO, 'ch', 'qos', 'logback', 'logback-core', '0.9.24', 'logback-core-0.9.24.jar')
-SLF4J = join(M2_REPO, 'org', 'slf4j', 'slf4j-api', '1.6.1', 'slf4j-api-1.6.1.jar')
-TROVE = join(M2_REPO, 'gnu', 'trove', '2.1.0', 'trove-2.1.0.jar')
-JPARSEC = join(M2_REPO, 'jparsec', 'jparsec', '2.0.1', 'jparsec-2.0.1.jar')
-CGLIB = join(M2_REPO, 'cglib', 'cglib-nodep', '2.2', 'cglib-nodep-2.2.jar')
-CP = '.:' + ARGS + ':' + LOGBACK_CL + ':' + LOGBACK_CO + ':' + SLF4J + ':' + TROVE + ':'+JPARSEC +':'+CGLIB
-
-CHOCO_SOLVER = join(CHOCO_HOME, 'solver','target',  'solver-rocs-1.0-SNAPSHOT.jar')
-CHOCO_PARSERS = join(CHOCO_HOME, 'parser','target',  'parser-rocs-1.0-SNAPSHOT.jar')
-CHOCO_LIB = join(CHOCO_HOME, 'parser','src', 'lib','minizinc')
+#CHOCO_SOLVER = join(home, 'solver', 'target', 'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
+CHOCO_PARSERS = join(home, 'parser','target',  'parser-rocs-1.0-SNAPSHOT-with-dep.jar')
+CHOCO_LIB = join(home, 'parser','src', 'lib','minizinc')
+CONFIG=join(home, 'src', 'shell', 'config.xml')
 
 JAVA_OPTS = CMD = '-Xmx256m -Xms256m -XX:+AggressiveOpts'
 
@@ -30,7 +19,7 @@ MZN_FILE = ''
 DZN_FILE = ''
 
 ## time limit for a process
-TIMELIMIT = 180 #in seconds
+TIMELIMIT = 300 #in seconds
 ## number threads used
 THREAD = 1
 # AVOID CHECKING
@@ -113,7 +102,8 @@ class runit(Thread):
 def parse():
     OUTPUT = tempfile.NamedTemporaryFile(suffix='.fzn', prefix='tmp', delete=False)
 
-    COMMAND = join(MINIZINC_DIR, 'bin', 'mzn2fzn')
+    #COMMAND = join(MINIZINC_DIR, 'bin', 'mzn2fzn')
+    COMMAND = 'mzn2fzn'
     COMMAND+=' --stdlib-dir '+ CHOCO_LIB
     COMMAND+=' -G std'
     COMMAND += ' ' + MZN_FILE
@@ -125,11 +115,12 @@ def parse():
     current = runit(ARGS)
     current.start()
     current.join()
-    print ("..."+str(current.time) + 's')
+    print ("..."+str(current.time) + 's (file : '+OUTPUT.name+')')
     return OUTPUT.name
 
 def solve():
-    COMMAND = 'java -cp ' + CP + ':' + CHOCO_SOLVER + ':' + CHOCO_PARSERS + ' parser.flatzinc.ParseAndSolve'
+    COMMAND = 'java -cp .:' + CHOCO_PARSERS + '\
+     -Dlogback.configurationFile='+ CONFIG +' parser.flatzinc.ParseAndSolve'
     COMMAND += ' -f ' + FZN_FILE
     #    COMMAND += ' -o ' + OUTPUT.name
     ARGS = shlex.split(COMMAND)
@@ -152,7 +143,8 @@ def solve():
 
 def check(solution):
     ## solution to mzn file
-    COMMAND = join(MINIZINC_DIR, 'bin', 'solns2dzn')
+    #COMMAND = join(MINIZINC_DIR, 'bin', 'solns2dzn')
+    COMMAND = 'solns2dzn'
     COMMAND += ' -s ' + solution.name
     ARGS = shlex.split(COMMAND)
     current = runit(ARGS)
@@ -173,7 +165,8 @@ def check(solution):
         SOL.close()
 
         DATA='\"' + DATA +'\"'
-        COMMAND = join(MINIZINC_DIR, 'bin', 'mzn')
+        #COMMAND = join(MINIZINC_DIR, 'bin', 'mzn')
+        COMMAND = 'mzn'
         COMMAND += ' --quiet '
     #    COMMAND+=' --stdlib-dir '+ CHOCO_LIB
     #    COMMAND+=' -G choco_std'

@@ -126,7 +126,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
         Variable variable = vars[idxVarInProp];
 
-        if(variable.getType() == Variable.GRAPH){
+        if((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
 			if ((mask & EventType.REMOVEARC.mask) != 0){
                 eventRecorder.getDeltaMonitor(this, g).forEach(removeProc, EventType.REMOVEARC);
 			}

@@ -52,7 +52,7 @@ public class KnapsackTest {
         Knapsack pb = new Knapsack();
         pb.readArgs("-d", data, "-n", ""+n);
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
         power = pb.power;
         return pb.getSolver();
     }

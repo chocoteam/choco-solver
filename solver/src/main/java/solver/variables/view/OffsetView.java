@@ -38,6 +38,8 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
@@ -54,7 +56,7 @@ import solver.variables.delta.view.ViewDelta;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends View<IntVar> {
+public final class OffsetView extends IntView {
 
     final int cste;
     DisposableValueIterator _viterator;
@@ -65,32 +67,35 @@ public final class OffsetView extends View<IntVar> {
         this.cste = cste;
     }
 
-
     @Override
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(),this) {
-
+            delta = new ViewDelta(var.getDelta()) {
                 @Override
-                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                    if (EventType.isRemove(eventType.mask)) {
-                        for (int i = frozenFirst; i < frozenLast; i++) {
-							if(propagator!=delta.getCause(i)){
-                            	proc.execute(delta.get(i) + cste);
-							}
+                public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
+                    return new IntDeltaMonitor(this, propagator) {
+                        @Override
+                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                            if (EventType.isRemove(eventType.mask)) {
+                                for (int i = frozenFirst; i < frozenLast; i++) {
+                                    if (propagator != delta.getCause(i)) {
+                                        proc.execute(delta.get(i) + cste);
+                                    }
+                                }
+                            }
                         }
-                    }
+                    };
                 }
-            });
+            };
             reactOnRemoval = true;
         }
     }
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
@@ -145,7 +150,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -169,7 +174,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
@@ -196,7 +201,7 @@ public final class OffsetView extends View<IntVar> {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
+//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
@@ -268,11 +273,6 @@ public final class OffsetView extends View<IntVar> {
     @Override
     public String toString() {
         return "(" + this.var.toString() + " + " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
-    }
-
-    @Override
-    public int getType() {
-        return INTEGER;
     }
 
     @Override

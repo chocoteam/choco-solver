@@ -41,7 +41,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public abstract class AbstractCoarseEventRecorder implements IEventRecorder {
+public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Variable> {
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;

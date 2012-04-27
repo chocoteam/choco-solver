@@ -46,18 +46,35 @@ import solver.variables.delta.IDeltaMonitor;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder, IVariableMonitor<V>,
+public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder<V>, IVariableMonitor<V>,
         IActivable<Propagator<V>> {
+
+    protected static final int VINDEX = 0;
+    protected static final int PINDEX = 0;
+
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected final IMeasures measures; // for timestamp
     protected boolean enqueued; // to check wether this is enqueud or not.
 
+    protected V[] variables; // BEWARE -- must be initialized at the end of the constructor
+    protected Propagator<V>[] propagators; // BEWARE -- must be initialized at the end of the constructor
+
     protected AbstractFineEventRecorder(Solver solver) {
         measures = solver.getMeasures();
         enqueued = false;
         schedulerIdx = -1;
+    }
+
+    @Override
+    public final V[] getVariables() {
+        return variables;
+    }
+
+    @Override
+    public final Propagator<V>[] getPropagators() {
+        return propagators;
     }
 
     /**
@@ -98,6 +115,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     /**
      * Set the event recorder in the same state as the one after its execution.
      * It is dequed, mask is void and delta monitor is unfreeze.
+     *
      * @param propagator the propagator executed in the coarse recorder
      */
     public abstract void virtuallyExecuted(Propagator propagator);

@@ -35,8 +35,8 @@ import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
 import solver.objective.NoObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.variables.IntVar;
 
 import java.util.ArrayList;
@@ -119,6 +119,8 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
                 LOGGER.info("% \t Memory : {}", searchLoop.getMeasures().getUsedMemory());
                 LOGGER.info("% \t Variables : {}", searchLoop.getSolver().getVars().length);
                 LOGGER.info("% \t Constraints : {}", searchLoop.getSolver().getCstrs().length);
+                LOGGER.info("% \t Checks : {} + {}", searchLoop.getMeasures().getEventsCount(),
+                        searchLoop.getMeasures().getPropagationsCount());
             }
         }
     }

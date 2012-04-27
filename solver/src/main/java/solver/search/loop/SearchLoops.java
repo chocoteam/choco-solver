@@ -39,12 +39,15 @@ public class SearchLoops {
 
     public static int _DEFAULT = 0; // 1: AdvancedBinarySearchLoop, other : BinarySearchLoop
 
-    protected SearchLoops() {}
+    protected SearchLoops() {
+    }
 
     public static AbstractSearchLoop preset(Solver solver) {
         switch (_DEFAULT) {
             case 1:
                 return advancedBinarySearchLoop(solver);
+            case 2:
+                return binarySearchLoopWithRecomputation(solver);
             default:
                 return binarySearchLoop(solver);
         }
@@ -53,6 +56,10 @@ public class SearchLoops {
 
     public static AbstractSearchLoop binarySearchLoop(Solver solver) {
         return new BinarySearchLoop(solver);
+    }
+
+    public static AbstractSearchLoop binarySearchLoopWithRecomputation(Solver solver) {
+        return new BinarySearchLoopWithRecomputation(solver);
     }
 
     public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver) {

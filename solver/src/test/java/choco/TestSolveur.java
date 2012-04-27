@@ -33,6 +33,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.AllDifferent;
+import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -287,7 +288,7 @@ public class TestSolveur {
 
     @Test(groups = {"1s"})
     public void fakePigeonHolesTest() {
-        int n = 9999;
+        int n = 5;
         Solver solver = new Solver();
         IntVar[] vars = VariableFactory.enumeratedArray("p", n, 0, n, solver);
 
@@ -297,6 +298,7 @@ public class TestSolveur {
         solver.post(ConstraintFactory.eq(vars[0], vars[n - 1], solver));
 
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(PropagationStrategies.ONE_QUEUE_WITH_PROPS.make(solver));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), 0, "nb sol");
         Assert.assertEquals(solver.getMeasures().getNodeCount(), 0, "nb nod");

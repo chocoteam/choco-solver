@@ -54,7 +54,6 @@ public class AbsViewTest {
         IntVar X = Views.abs(Y);
         X.updateLowerBound(xl, Cause.Null);
         X.updateUpperBound(xu, Cause.Null);
-        solver.propagate();
         return new int[][]{{X.getLB(), X.getUB()}, {Y.getLB(), Y.getUB()}};
     }
 

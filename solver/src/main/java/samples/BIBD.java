@@ -34,8 +34,6 @@ import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.lex.LexChain;
 import solver.constraints.ternary.Times;
-import solver.propagation.comparators.predicate.Predicate;
-import solver.propagation.comparators.predicate.Predicates;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -136,14 +134,15 @@ public class BIBD extends AbstractProblem {
 
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         //TODO: changer la strategie pour une plus efficace
         solver.set(StrategyFactory.inputOrderMinVal(ArrayUtils.flatten(vars), solver.getEnvironment()));
+    }
 
+    @Override
+    public void configureEngine() {
         // BEWARE: etrangement, gecode effectue presque 2 fois moins de propagations...
         // BEWARE: les OCCURR peuvent être remplacees par des SUM, mais plus lent (bien que nb prop < )
-        Predicate inVARS = Predicates.member(ArrayUtils.flatten(vars));
-        Predicate ALL = Predicates.all();
         /*solver.getEngine().addGroup(
                 Group.buildQueue(
                         Predicates.but(ALL, inVARS),

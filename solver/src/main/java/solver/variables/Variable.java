@@ -47,15 +47,24 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>, Identity, Serializable {
+public interface Variable<D extends IDelta, W extends IView> extends IActivable<IVariableMonitor>, Identity, Serializable {
 
-
-    public final static int INTEGER = 0;
-    public final static int VIEW = 1;
-    public final static int META = 2;
-    public final static int GRAPH = 3;
-    public final static int REAL = 4;
-
+    // **** DEFINE THE TYPE OF A VARIABLE **** //
+    // MUST BE A COMBINATION OF TYPE AND KIND
+    // TYPE (exclusive)
+    public final int VAR = 1;
+    public final int CSTE = 1 << 1;
+    public final int VIEW = 1 << 2;
+    public final int TYPE = (1 << 3) - 1;
+    // KIND (exclusive)
+    public final int INT = 1 << 3;
+    public final int BOOL = INT + 1 << 4;
+    public final int GRAPH = 1 << 5;
+    public final int SET = 1 << 6;
+    public final int REAL = 1 << 7;
+    public final int TASK = 1 << 8;
+    public final int META = 1 << 9;
+    public final int KIND = (1 << 9) - 1 - TYPE;
 
     /**
      * Indicates wether <code>this</code> is instantiated (see implemetations to know what instantiation means).
@@ -73,23 +82,28 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
 
     /**
      * Returns the array of constraints <code>this</code> appears in.
+     *
      * @return array of constraints
      */
     Constraint[] getConstraints();
 
     /**
      * Link a constraint within a variable
+     *
      * @param constraint a constraint
      */
     void declareIn(Constraint constraint);
 
     /**
      * Return the arrau of propagators this
+     *
      * @return
      */
     Propagator[] getPropagators();
 
     int[] getPIndices();
+
+    W[] getViews();
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -106,7 +120,7 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
 
     int nbMonitors();
 
-    void subscribeView(IView view);
+    void subscribeView(W view);
 
     /**
      * Returns the number of constraints involving <code>this</code>
@@ -136,13 +150,22 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
      */
-    void attach(Propagator propagator, int idxInProp);
+    void link(Propagator propagator, int idxInProp);
 
     /**
      * Analysis propagator event reaction on this, and adapt this
+     *
      * @param mask
      */
     void analyseAndAdapt(int mask);
+
+    /**
+     * Remove a propagator from the list of propagator of <code>this</code>.
+     * SHOULD BE CONTAINED IN THIS.
+     *
+     * @param propagator the propagator to remove
+     */
+    void unlink(Propagator propagator);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
@@ -175,7 +198,29 @@ public interface Variable<D extends IDelta> extends IActivable<IVariableMonitor>
     Solver getSolver();
 
     /**
-     * @return an int representing the type of the variable
+     * Return a MASK composed of 2 main information: TYPE and KIND.
+     * <br/>TYPE is defined in the 3 first bits : VAR ( 1 << 0), CSTE (1 << 1) or VIEW (1 << 2)
+     * <br/>KIND is defined on the other bits : INT (1 << 3), BOOL (INT + 1 << 4), GRAPH (1 << 5) or META (1 << 6)
+     *
+     * <p/>
+     * To get the TYPE of a variable: </br>
+     * <pre>
+     * int type = var.getTypeAndKind() & Variable.TYPE;
+     * </pre>
+     * <p/>
+     * To get the KIND of a variable: </br>
+     * <pre>
+     * int kind = var.getTypeAndKind() & Variable.KIND;
+     * </pre>
+     * <p/>
+     * To check a specific type or kind of a variable: </br>
+     * <pre>
+     *     boolean isVar = (var.getTypeAndKind() & Variable.VAR) !=0;
+     *     boolean isInt = (var.getTypeAndKind() & Variable.INT) !=0;
+     * </pre>
+     *
+     *
+     * @return an int representing the type and kind of the variable
      */
-    int getType();
+    int getTypeAndKind();
 }

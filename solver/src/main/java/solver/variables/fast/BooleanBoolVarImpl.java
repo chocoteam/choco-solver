@@ -44,10 +44,10 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
+import solver.variables.view.IntView;
 
 /**
  * <br/>
@@ -55,7 +55,7 @@ import solver.variables.delta.OneValueDelta;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView, BoolVar> implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -176,7 +176,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -402,13 +402,13 @@ public final class BooleanBoolVarImpl extends AbstractVariable<BoolVar> implemen
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 
     @Override
-    public int getType() {
-        return Variable.INTEGER;
+    public int getTypeAndKind() {
+        return VAR + BOOL;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

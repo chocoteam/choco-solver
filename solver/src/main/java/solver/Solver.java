@@ -332,8 +332,11 @@ public class Solver implements Serializable {
         search.stopAtFirstSolution(false);
         //search.setSolutionPoolCapacity(1);
         if (search.getSolutionPoolCapacity() < 1) {
-            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
+//            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
             search.setSolutionPoolCapacity(1);
+        }
+        if(objective == null){
+            throw new SolverException("No objective variable has been defined");
         }
         switch (policy) {
             case MAXIMIZE:

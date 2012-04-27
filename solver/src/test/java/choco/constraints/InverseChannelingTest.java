@@ -317,7 +317,7 @@ public class InverseChannelingTest {
         NQueenDualGlobal nq = new NQueenDualGlobal();
         nq.readArgs("-q", Integer.toString(size));
         nq.buildModel();
-        nq.configureSolver();
+        nq.configureSearch();
         return nq.getSolver();
     }
 

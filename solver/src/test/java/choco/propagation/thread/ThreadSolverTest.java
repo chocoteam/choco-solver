@@ -47,7 +47,7 @@ public class ThreadSolverTest {
         NQueenBinary pb = new NQueenBinary();
         pb.readArgs("-q", Integer.toString(n));
         pb.buildModel();
-        pb.configureSolver();
+        pb.configureSearch();
 
         return pb.getSolver();
     }

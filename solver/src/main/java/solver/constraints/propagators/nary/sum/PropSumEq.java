@@ -38,14 +38,15 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * A propagator for SUM(x_i) <= b
+ * A propagator for SUM(x_i) = b
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
- *
+ * <p/>
  * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
  *
  * @author Charles Prud'homme
+ * @revision 04/03/12 use I in filterOn{G,L}eg
  * @since 18/03/11
  */
 public class PropSumEq extends Propagator<IntVar> {
@@ -121,6 +122,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
 
+    @SuppressWarnings({"NullableProblems"})
     boolean filterOnLeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
@@ -134,7 +136,7 @@ public class PropSumEq extends Propagator<IntVar> {
             for (; i < l; i++) {
                 if (I[i] - (b - sumLB) > 0) {
                     lb = x[i].getLB();
-                    ub = x[i].getUB();
+                    ub = lb + I[i];
                     if (x[i].updateUpperBound(b - sumLB + lb, this)) {
                         int nub = x[i].getUB();
                         sumUB -= ub - nub;
@@ -147,6 +149,7 @@ public class PropSumEq extends Propagator<IntVar> {
         return anychange;
     }
 
+    @SuppressWarnings({"NullableProblems"})
     boolean filterOnGeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
@@ -159,8 +162,8 @@ public class PropSumEq extends Propagator<IntVar> {
             // positive coefficients first
             for (; i < l; i++) {
                 if (I[i] > -(b - sumUB)) {
-                    lb = x[i].getLB();
                     ub = x[i].getUB();
+                    lb = ub - I[i];
                     if (x[i].updateLowerBound(b - sumUB + ub, this)) {
                         int nlb = x[i].getLB();
                         sumLB += nlb - lb;
@@ -177,11 +180,14 @@ public class PropSumEq extends Propagator<IntVar> {
     public void propagate(AbstractFineEventRecorder eventRecorder, int i, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             filter(true, 2);
-        }else if (EventType.isInclow(mask)) {
+        } else if (EventType.isInclow(mask)) {
             filter(true, 1);
         } else if (EventType.isDecupp(mask)) {
             filter(false, 1);
         }
+//        if (getNbPendingER() == 0){
+//            filter(true, 2);
+//        }
     }
 
     @Override

@@ -43,6 +43,7 @@ import solver.variables.Variable;
 public final class BacktrackableArrayList<V extends Variable, E extends IVariableMonitor<V>> implements IList<V, E> {
 
     protected E[] elements;
+    protected int size;
 
     protected IStateInt firstActive;
     protected IStateInt firstPassive;
@@ -51,7 +52,8 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
 
     public BacktrackableArrayList(V variable, IEnvironment environment) {
         this.parent = variable;
-        elements = (E[]) new IVariableMonitor[0];
+        elements = (E[]) new IVariableMonitor[16];
+        size = 0;
         firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
     }
@@ -92,11 +94,13 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
         if (firstActive.get() != firstPassive.get()) {
             throw new UnsupportedOperationException("Can not add an element: activation has already started");
         }
-        E[] tmp = elements;
-        elements = (E[]) new IVariableMonitor[tmp.length + 1];
-        System.arraycopy(tmp, 0, elements, 0, tmp.length);
-        elements[tmp.length] = element;
-        element.setIdxInV(parent, tmp.length);
+        if (size == elements.length - 1) {
+            E[] tmp = elements;
+            elements = (E[]) new IVariableMonitor[size * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, elements, 0, size);
+        }
+        elements[size] = element;
+        element.setIdxInV(parent, size++);
         this.firstActive.add(1);
         this.firstPassive.add(1);
     }
@@ -104,14 +108,12 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
     @Override
     public void remove(E element) {
         int i = 0;
-        for (; i < elements.length && elements[i] != element; i++) {
+        for (; i < size && elements[i] != element; i++) {
         }
-        if (i == elements.length) return;
-        E[] tmp = elements;
-        elements = (E[]) new IVariableMonitor[tmp.length - 1];
-        System.arraycopy(tmp, 0, elements, 0, i);
-        System.arraycopy(tmp, i + 1, elements, i, tmp.length - i - 1);
-        for (int j = i; j < elements.length; j++) {
+        if (i == size) return;
+        System.arraycopy(elements, i + 1, elements, i, size - i - 1);
+        size--;
+        for (int j = i; j < size; j++) {
             elements[j].setIdxInV(parent, j);
         }
         assert (this.firstPassive.getEnvironment().getWorldIndex() == 0);
@@ -123,7 +125,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
 
     @Override
     public int size() {
-        return elements.length;
+        return size;
     }
 
     @Override
@@ -144,6 +146,4 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
             proc.execute(elements[a]);
         }
     }
-
-
 }

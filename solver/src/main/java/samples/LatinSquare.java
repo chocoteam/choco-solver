@@ -26,16 +26,20 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.StringUtils;
 import org.kohsuke.args4j.Option;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
+import java.text.MessageFormat;
+
 /**
  * <a href="http://en.wikipedia.org/wiki/Latin_square">wikipedia</a>:<br/>
- * "A Latin square is an n ? n array filled with n different Latin letters,
+ * "A Latin square is an n x n array filled with n different Latin letters,
  * each occurring exactly once in each row and exactly once in each column"
  * <br/>
  *
@@ -45,7 +49,7 @@ import solver.variables.VariableFactory;
 public class LatinSquare extends AbstractProblem {
 
     @Option(name = "-n", usage = "Latin square size.", required = false)
-    int m = 10;
+    int m = 3;
     IntVar[] vars;
 
     @Override
@@ -77,7 +81,7 @@ public class LatinSquare extends AbstractProblem {
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
         //SearchMonitorFactory.log(solver, true, true);
         /*IPropagationEngine engine = solver.getEngine();
@@ -87,12 +91,32 @@ public class LatinSquare extends AbstractProblem {
     }
 
     @Override
-    public void solve() {
-        solver.findSolution();
+    public void configureEngine() {
     }
 
     @Override
+    public void solve() {
+        solver.findSolution();
+        }
+
+    @Override
     public void prettyOut() {
+        StringBuilder st = new StringBuilder();
+        String line = "+";
+        for (int i = 0; i < m; i++) {
+            line += "----+";
+        }
+        line += "\n";
+        st.append(line);
+        for (int i = 0; i < m; i++) {
+            st.append("|");
+            for (int j = 0; j < m; j++) {
+                st.append(StringUtils.pad((char)(vars[i * m + j].getValue()+97) + "", -3, " ")).append(" |");
+            }
+            st.append(MessageFormat.format("\n{0}", line));
+        }
+        st.append("\n\n\n");
+        LoggerFactory.getLogger("bench").info(st.toString());
     }
 
     public static void main(String[] args) {

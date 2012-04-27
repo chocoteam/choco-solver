@@ -50,7 +50,7 @@ public final class LogSolutions extends VoidSearchMonitor implements ISearchMoni
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("- Solution #{} found. {} \n\t{}.",
                     new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                            searchLoop.getMeasures().toOneLineString(),
+                            searchLoop.getMeasures().toOneShortLineString(),
                             print(searchLoop.getStrategy().vars)}
             );
         }

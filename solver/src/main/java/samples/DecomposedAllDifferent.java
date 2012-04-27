@@ -30,8 +30,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -115,14 +114,14 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(ConstraintFactory.sum(ai, IntLinComb.Operator.LEQ, q - p + 1, solver));
+                solver.post(Sum.leq(ai, q - p + 1, solver));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);
     }
 
     @Override
-    public void configureSolver() {
+    public void configureSearch() {
         solver.set(StrategyFactory.inputOrderMinVal(X, solver.getEnvironment()));
         /*IPropagationEngine engine = solver.getEngine();
         engine.addGroup(
@@ -139,6 +138,10 @@ public class DecomposedAllDifferent extends AbstractProblem {
                         IncrArityP.get(),
                         Policy.ITERATE
                 ));*/
+    }
+
+    @Override
+    public void configureEngine() {
     }
 
     @Override

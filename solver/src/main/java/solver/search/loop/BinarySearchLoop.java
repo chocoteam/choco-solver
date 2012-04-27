@@ -90,9 +90,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void recordSolution() {
         //todo: checker d'Žtat
         solver.setFeasible(Boolean.TRUE);
+        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         solutionpool.recordSolution(solver);
         objectivemanager.update();
-        assert (ESat.TRUE.equals(solver.isEntailed())) : Reporting.fullReport(solver);
         if (stopAtFirstSolution) {
             moveTo(RESUME);
             interrupt();
@@ -142,7 +142,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         downBranch();
     }
 
-    private void downBranch() {
+    protected void downBranch() {
         env.worldPush();
         try {
             decision.buildNext();
@@ -188,7 +188,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public final void restartSearch() {
+    public void restartSearch() {
         restaureRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {
