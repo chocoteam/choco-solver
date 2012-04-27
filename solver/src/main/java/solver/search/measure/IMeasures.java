@@ -38,6 +38,8 @@ public interface IMeasures extends ISearchMonitor, Serializable {
 
     String toOneLineString();
 
+    String toOneShortLineString();
+
     String toString();
 
     /**

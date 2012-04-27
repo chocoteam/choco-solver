@@ -53,7 +53,7 @@ class LogStatEveryXXms extends VoidSearchMonitor implements ISearchMonitor{
                         searchloop.getMeasures().updateTimeCount();
                         searchloop.getMeasures().updatePropagationCount();
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info(">> {}", searchloop.getMeasures().toOneLineString());
+                            LOGGER.info(">> {}", searchloop.getMeasures().toOneShortLineString());
                         }
                         Thread.sleep(sleep);
                     } while (true);
