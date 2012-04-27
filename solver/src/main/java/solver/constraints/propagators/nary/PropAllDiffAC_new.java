@@ -269,20 +269,34 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (n2 < n * 2) {
-            contradiction(null, "");
-        }
-        for (int v = 0; v < n; v++) {
-            if (vars[v].instantiated()) {
-                int val = vars[v].getValue();
-                for (int i = 0; i < n; i++) {
-                    if (i != v) {
-                        vars[i].removeValue(val, this);
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            if (n2 < n * 2) {
+                contradiction(null, "");
+            }
+            for (int v = 0; v < n; v++) {
+                if (vars[v].instantiated()) {
+                    int val = vars[v].getValue();
+                    for (int i = 0; i < n; i++) {
+                        if (i != v) {
+                            vars[i].removeValue(val, this);
+                        }
                     }
                 }
             }
+            buildDigraph();
+        } else {
+            free.clear();
+            for (int i = 0; i < n; i++) {
+                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
+            for (int i = n; i < n2; i++) {
+                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
+                    free.set(i);
+                }
+            }
         }
-        buildDigraph();
         repairMatching();
         filter();
     }
@@ -307,21 +321,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
                 vars[i].removeValue(val, this);
             }
         }
-        if (nbPendingER == 0) {
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
-                    free.set(i);
-                }
-            }
-            repairMatching();
-            filter();
-        }
+        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     //***********************************************************************************
@@ -335,7 +335,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions() {
-        return EventType.FULL_PROPAGATION.mask;
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override

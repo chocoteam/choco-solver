@@ -154,9 +154,9 @@ public class PropAllDiffBC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        /*if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
-        }*/
+        }
         filter();
     }
 
