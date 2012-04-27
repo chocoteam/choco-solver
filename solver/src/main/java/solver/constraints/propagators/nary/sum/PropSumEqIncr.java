@@ -28,6 +28,7 @@
 package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -49,13 +50,16 @@ import solver.variables.IntVar;
  * @revision 04/03/12 use I in filterOn{G,L}eg
  * @since 18/03/11
  */
-public class PropSumEq extends Propagator<IntVar> {
+public class PropSumEqIncr extends Propagator<IntVar> {
 
     final IntVar[] x; // list of variable -- probably IntVarTimePosCste
+    final IStateInt[] oldx;
+    final IStateInt[] I; // variability of each variable -- domain amplitude
     final int l; // number of variables
     final int b; // bound to respect
-    final int[] I; // variability of each variable -- domain amplitude
-    int sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
+    final IStateInt sumLB, sumUB; // sum of lower bounds, and sum of upper bounds
+    final IStateInt idxMaxI;
+    int sumLB_, sumUB_;
 
 
     protected static PropagatorPriority computePriority(int nbvars) {
@@ -70,37 +74,56 @@ public class PropSumEq extends Propagator<IntVar> {
         }
     }
 
-    public PropSumEq(IntVar[] vars, int b,
-                     Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    @Override
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
+    }
+
+    public PropSumEqIncr(IntVar[] vars, int b,
+                         Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, computePriority(vars.length), false);
         this.x = vars.clone();
         l = x.length;
         this.b = b;
-        I = new int[l];
-    }
-
-    protected void prepare() {
-        int f = 0, e = 0, i = 0;
-        int lb, ub;
-        for (; i < l; i++) {
-            lb = x[i].getLB();
-            ub = x[i].getUB();
-            f += lb;
-            e += ub;
-            I[i] = (ub - lb);
+        I = new IStateInt[l];
+        oldx = new IStateInt[l];
+        for (int i = 0; i < l; i++) {
+            oldx[i] = environment.makeInt();
+            I[i] = environment.makeInt();
         }
-        sumLB = f;
-        sumUB = e;
+        sumLB = environment.makeInt();
+        sumUB = environment.makeInt();
+        idxMaxI = environment.makeInt();
     }
-
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
+            // initialize
+            int f = 0, e = 0, i = 0;
+            int max = Integer.MIN_VALUE;
+            int idx = -1;
+            int lb, ub;
+            for (; i < l; i++) {
+                lb = x[i].getLB();
+                oldx[i].set(lb);
+                ub = x[i].getUB();
+                f += lb;
+                e += ub;
+                I[i].set(ub - lb);
+                if (max < (ub - lb)) {
+                    max = ub - lb;
+                    idx = i;
+                }
+            }
+            sumLB.set(f);
+            sumUB.set(e);
+            idxMaxI.set(idx);
+        }
         filter(true, 2);
     }
 
     protected void filter(boolean startWithLeq, int nbRules) throws ContradictionException {
-        prepare();
         boolean run;
         int nbR = 0;
         do {
@@ -116,7 +139,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
     protected void checkEntailment() {
-        if (sumUB - b <= 0 && sumLB - b >= 0) {
+        if (sumUB.get() - b <= 0 && sumLB.get() - b >= 0) {
             this.setPassive();
         }
     }
@@ -126,7 +149,8 @@ public class PropSumEq extends Propagator<IntVar> {
     boolean filterOnLeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
-        if (b - sumLB < 0) {
+        sumLB_ = sumLB.get();
+        if (b - sumLB_ < 0) {
             this.contradiction(null, "b - sumLB < 0");
         }
         do {
@@ -134,13 +158,17 @@ public class PropSumEq extends Propagator<IntVar> {
             int lb, ub, i = 0;
             // positive coefficients first
             for (; i < l; i++) {
-                if (I[i] - (b - sumLB) > 0) {
-                    lb = x[i].getLB();
-                    ub = lb + I[i];
-                    if (x[i].updateUpperBound(b - sumLB + lb, this)) {
+                int Ii = I[i].get();
+                if (Ii - (b - sumLB_) > 0) {
+                    lb = oldx[i].get();
+                    ub = lb + Ii;
+                    if (x[i].updateUpperBound(b - sumLB_ + lb, this)) {
                         int nub = x[i].getUB();
-                        sumUB -= ub - nub;
-                        I[i] = nub - lb;
+                        sumUB.add(nub - ub);
+                        I[i].set(nub - lb);
+                        if (idxMaxI.get() == i) {
+                            findMax();
+                        }
                         anychange = doIt = true;
                     }
                 }
@@ -153,7 +181,8 @@ public class PropSumEq extends Propagator<IntVar> {
     boolean filterOnGeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
-        if (b - sumUB > 0) {
+        sumUB_ = sumUB.get();
+        if (b - sumUB_ > 0) {
             this.contradiction(null, "b - sumUB > 0");
         }
         do {
@@ -161,13 +190,18 @@ public class PropSumEq extends Propagator<IntVar> {
             int lb, ub, i = 0;
             // positive coefficients first
             for (; i < l; i++) {
-                if (I[i] > -(b - sumUB)) {
-                    ub = x[i].getUB();
-                    lb = ub - I[i];
-                    if (x[i].updateLowerBound(b - sumUB + ub, this)) {
+                int Ii = I[i].get();
+                if (Ii > -(b - sumUB_)) {
+                    lb = oldx[i].get();
+                    ub = lb + Ii;
+                    if (x[i].updateLowerBound(b - sumUB_ + ub, this)) {
                         int nlb = x[i].getLB();
-                        sumLB += nlb - lb;
-                        I[i] = ub - nlb;
+                        sumLB.add(nlb - lb);
+                        I[i].set(ub - nlb);
+                        oldx[i].set(nlb);
+                        if (idxMaxI.get() == i) {
+                            findMax();
+                        }
                         doIt = anychange = true;
                     }
                 }
@@ -176,18 +210,47 @@ public class PropSumEq extends Propagator<IntVar> {
         return anychange;
     }
 
+    private void findMax() {
+        int id = 0;
+        int iM = I[id].get();
+        for (int i = 1; i < l; i++) {
+            if (iM < I[i].get()) {
+                iM = I[i].get();
+                id = i;
+            }
+        }
+        idxMaxI.set(id);
+    }
+
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int i, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-            filter(true, 2);
-        } else if (EventType.isInclow(mask)) {
-            filter(true, 1);
-        } else if (EventType.isDecupp(mask)) {
-            filter(false, 1);
+        int lb = x[i].getLB();
+        int ub = x[i].getUB();
+        int olb = oldx[i].get();
+        int Ii = I[i].get();
+        int oub = olb + Ii;
+        sumLB.add(lb - olb);
+        sumUB.add(ub - oub);
+        oldx[i].set(lb);
+        I[i].set(ub - lb);
+        if (idxMaxI.get() == i) {
+            findMax();
         }
-//        if (getNbPendingER() == 0){
-//            filter(true, 2);
-//        }
+
+        int max = I[idxMaxI.get()].get();
+        if ((b - sumLB.get()) < max || (sumUB.get() - b) > -max) {
+            int nbR = 1;
+            boolean swl = true;
+            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
+                nbR++;
+            }
+            if (EventType.isDecupp(mask)) {
+                swl = false;
+            }
+            filter(swl, nbR);
+        }
+//        if (getNbPendingER() == 0) filter(true, 2);
+//        forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
 
     @Override

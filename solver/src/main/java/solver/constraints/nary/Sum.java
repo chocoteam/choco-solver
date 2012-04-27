@@ -31,9 +31,7 @@ import choco.kernel.ESat;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.nary.sum.PropSumEq;
-import solver.constraints.propagators.nary.sum.PropSumGeq;
-import solver.constraints.propagators.nary.sum.PropSumLeq;
+import solver.constraints.propagators.nary.sum.*;
 import solver.exception.SolverException;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Decr;
@@ -69,6 +67,7 @@ public class Sum extends IntConstraint<IntVar> {
     final int[] coeffs;
     final int b;
     final Type op;
+    public static boolean incr = false;
 
     TObjectIntHashMap<IntVar> shared_map; // a shared map for interanl comparator
 
@@ -128,17 +127,15 @@ public class Sum extends IntConstraint<IntVar> {
             }
         }
 
-        switch (type)
-
-        {
+        switch (type) {
             case LEQ:
-                setPropagators(new PropSumLeq(x, b, solver, this));
+                setPropagators(incr ? new PropSumLeqIncr(x, b, solver, this) : new PropSumLeq(x, b, solver, this));
                 break;
             case GEQ:
-                setPropagators(new PropSumGeq(x, b, solver, this));
+                setPropagators(incr ? new PropSumGeqIncr(x, b, solver, this) : new PropSumGeq(x, b, solver, this));
                 break;
             case EQ:
-                setPropagators(new PropSumEq(x, b, solver, this));
+                setPropagators(incr ? new PropSumEqIncr(x, b, solver, this) : new PropSumEq(x, b, solver, this));
                 break;
         }
 
@@ -234,9 +231,8 @@ public class Sum extends IntConstraint<IntVar> {
     @Override
     public String toString() {
         StringBuilder linComb = new StringBuilder(20);
-        linComb.append(coeffs[0]).append('*').append(vars[0].getName());
-        for (int i = 1; i < coeffs.length; i++) {
-            linComb.append(coeffs[i] >= 0 ? " +" : " ").append(coeffs[i]).append('*').append(vars[i].getName());
+        for (int i = 0; i < coeffs.length; i++) {
+            linComb.append(coeffs[i]).append('*').append(vars[i].getName()).append(coeffs[i] < coeffs.length ? " +" : " ");
         }
         switch (op) {
             case EQ:
