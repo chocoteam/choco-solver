@@ -39,18 +39,18 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * Enforces X = |Y|
+ * Enforces X = Y^2
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 18/05/11
  */
-public class PropAbsolute extends Propagator<IntVar> {
+public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
-    public PropAbsolute(IntVar X, IntVar Y, Solver solver,
-                        Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+    public PropSquare(IntVar X, IntVar Y, Solver solver,
+                      Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
         rem_proc = new RemProc(this);
     }
@@ -80,7 +80,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) { // filter from X to Y
-            if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
+            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
                 updateLowerBoundofY();
                 updateUpperBoundofY();
                 updateHolesinY();
@@ -110,13 +110,13 @@ public class PropAbsolute extends Propagator<IntVar> {
             return ESat.FALSE;
         } else if (vars[0].instantiated()) {
             if (vars[1].instantiated()) {
-                return ESat.eval(vars[0].getValue() == Math.abs(vars[1].getValue()));
+                return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
             } else if (vars[1].getDomainSize() == 2 &&
-                    vars[1].contains(vars[0].getValue()) &&
-                    vars[1].contains(-vars[0].getValue())) {
+                    vars[1].contains(-floor_sqrt(vars[0].getValue())) &&
+                    vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
                 return ESat.TRUE;
-            } else if (!vars[1].contains(vars[0].getValue()) &&
-                    !vars[1].contains(-vars[0].getValue())) {
+            } else if (!vars[1].contains(floor_sqrt(vars[0].getValue())) &&
+                    !vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
                 return ESat.FALSE;
             } else {
                 return ESat.UNDEFINED;
@@ -128,7 +128,26 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return String.format("%s = |%s|", vars[0].toString(), vars[1].toString());
+        return String.format("%s = %s^2", vars[0].toString(), vars[1].toString());
+    }
+
+    private static int floor_sqrt(int n) {
+        if (n < 0)
+            return 0;
+        return (int) Math.floor(Math.sqrt(n));
+    }
+
+    private static int ceil_sqrt(int n) {
+        if (n < 0)
+            return 0;
+        return (int) Math.ceil(Math.sqrt(n));
+    }
+
+    private static int sqr(int n) {
+        if (n > Integer.MAX_VALUE / 2 || n < Integer.MIN_VALUE / 2) {
+            return Integer.MAX_VALUE;
+        }
+        return n * n;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,11 +155,11 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(a0, -b0), this);
+        vars[0].updateLowerBound(Math.min(sqr(a0), sqr(b0)), this);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this);
+        vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), this);
 
     }
 
@@ -150,7 +169,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
             int ub = vars[0].getUB();
             for (int value = vars[0].getLB(); value <= ub; value = vars[0].nextValue(value)) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
+                if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
                     if (value == right + 1) {
                         right = value;
                     } else {
@@ -164,7 +183,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             int value = vars[0].getLB();
             int nlb = value - 1;
             while (nlb == value - 1) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
+                if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
                     nlb = value;
                 }
                 value = vars[0].nextValue(value);
@@ -174,7 +193,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             value = vars[0].getUB();
             int nub = value + 1;
             while (nub == value + 1) {
-                if (!vars[1].contains(value) && !vars[1].contains(-value)) {
+                if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
                     nub = value;
                 }
                 value = vars[0].previousValue(value);
@@ -185,16 +204,16 @@ public class PropAbsolute extends Propagator<IntVar> {
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(Math.abs(remVal), this);
+            vars[0].removeValue(sqr(remVal), this);
         }
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-vars[0].getUB(), this);
+        vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), this);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(vars[0].getUB(), this);
+        vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -203,7 +222,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             int left = Integer.MIN_VALUE, right = Integer.MIN_VALUE;
             int ub = vars[1].getUB();
             for (int value = vars[1].getLB(); value <= ub; value = vars[1].nextValue(value)) {
-                if (!vars[0].contains(Math.abs(value))) {
+                if (!vars[0].contains(sqr(value))) {
                     if (value == right + 1) {
                         right = value;
                     } else {
@@ -214,39 +233,33 @@ public class PropAbsolute extends Propagator<IntVar> {
             }
             vars[1].removeInterval(left, right, this);
         } else {
-            int value = vars[1].getLB();
-            int nlb = value - 1;
-            while (nlb == value - 1) {
-                if (!vars[0].contains(Math.abs(value))) {
-                    nlb = value;
-                }
-                value = vars[1].nextValue(value);
+            int lb = vars[1].getLB();
+            int ub = vars[1].getUB();
+            while (!vars[0].contains(sqr(lb))) {
+                lb = vars[1].nextValue(lb + 1);
+                if(lb>ub)break;
             }
-            vars[1].updateLowerBound(nlb, this);
+            vars[1].updateLowerBound(lb, this);
 
-            value = vars[1].getUB();
-            int nub = value + 1;
-            while (nub == value + 1) {
-                if (!vars[0].contains(Math.abs(value))) {
-                    nub = value;
-                }
-                value = vars[1].previousValue(value);
+            while (!vars[0].contains(sqr(ub))) {
+                ub = vars[1].nextValue(ub + 1);
+                if(ub<lb)break;
             }
-            vars[1].updateUpperBound(nub, this);
+            vars[1].updateUpperBound(ub, this);
         }
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
-        vars[1].removeValue(remVal, this);
-        vars[1].removeValue(-remVal, this);
+        vars[1].removeValue(floor_sqrt(remVal), this);
+        vars[1].removeValue(-ceil_sqrt(remVal), this);
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {
 
-        private final PropAbsolute p;
+        private final PropSquare p;
         private int idxVar;
 
-        public RemProc(PropAbsolute p) {
+        public RemProc(PropSquare p) {
             this.p = p;
         }
 

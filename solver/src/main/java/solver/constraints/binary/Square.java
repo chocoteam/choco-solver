@@ -24,61 +24,36 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.constraints.binary;
 
-package solver.search.loop;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.variables.Variable;
-
-import java.io.Serializable;
+import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
+import solver.Solver;
+import solver.constraints.IntConstraint;
+import solver.constraints.propagators.binary.PropSquare;
+import solver.variables.IntVar;
 
 /**
+ * Enforces X = Y^2
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 27/01/11
+ * @since 18/05/11
  */
-public abstract class SearchLayout<S extends AbstractSearchLoop> extends VoidSearchMonitor implements Serializable {
+public class Square extends IntConstraint<IntVar> {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(SearchLayout.class);
-
-    protected S searchLoop;
-
-    protected SearchLayout() {
+    public Square(IntVar X, IntVar Y, Solver solver) {
+        super(ArrayUtils.toArray(X, Y), solver);
+        setPropagators(new PropSquare(X, Y, solver, this));
     }
-
-    public SearchLayout(S searchLoop) {
-        this.searchLoop = searchLoop;
-    }
-
-    static String print(Variable[] vars) {
-        StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
-        }
-        return s.toString();
-    }
-
 
     @Override
-    public void onSolution() {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("- Solution #{} found. {} \n\t{}.",
-                    new Object[]{searchLoop.getMeasures().getSolutionCount(),
-                            searchLoop.getMeasures().toOneLineString(),
-                            print(searchLoop.strategy.vars)}
-            );
-        }
+    public ESat isSatisfied(int[] tuple) {
+        return ESat.eval(tuple[1] * tuple[1] == tuple[0]);
     }
-
 
     @Override
-    public void beforeClose() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(searchLoop.getMeasures().toString());
-        }
+    public String toString() {
+        return String.format("%s = %s^2", vars[0].toString(), vars[1].toString());
     }
-
 }
