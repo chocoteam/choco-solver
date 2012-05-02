@@ -3,7 +3,7 @@ package solver.constraints.propagators.nary.alldifferent.proba;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import solver.probabilities.DedicatedS64BitSet;
+import solver.probabilities.MyS64BitSet;
 import solver.variables.IntVar;
 
 import java.util.HashSet;
@@ -17,7 +17,7 @@ public class BitSetUnion {
 
     private TIntObjectHashMap<IStateInt[]> bounds;
 
-    private DedicatedS64BitSet values;
+    private MyS64BitSet values;
     private IStateInt[] occurrences;
     private int[] positions;
     private int offset;
@@ -41,7 +41,7 @@ public class BitSetUnion {
             }
         }
         int size = max-offset+1;
-        values = new DedicatedS64BitSet(environment,size);//environment.makeBitSet(size);
+        values = new MyS64BitSet(environment,size);//environment.makeBitSet(size);
         occurrences = new IStateInt[size];
         for (int i = 0; i < size; i++) {
             occurrences[i] = environment.makeInt(0);

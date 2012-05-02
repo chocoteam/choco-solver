@@ -8,14 +8,14 @@ import choco.kernel.memory.trailing.EnvironmentTrailing;
  * Created by IntelliJ IDEA.
  * User: chameau
  */
-public class DedicatedS64BitSet extends S64BitSet {
+public class MyS64BitSet extends S64BitSet {
 
 
-    public DedicatedS64BitSet(IEnvironment environment) {
+    public MyS64BitSet(IEnvironment environment) {
         super(environment);
     }
 
-    public DedicatedS64BitSet(IEnvironment environment, int nbits) {
+    public MyS64BitSet(IEnvironment environment, int nbits) {
         super(environment, nbits);
     }
 
@@ -48,7 +48,7 @@ public class DedicatedS64BitSet extends S64BitSet {
     public static void main(String[] args) {
         int size = 134;
         IEnvironment env = new EnvironmentTrailing();
-        DedicatedS64BitSet bs = new DedicatedS64BitSet(env, size);
+        MyS64BitSet bs = new MyS64BitSet(env, size);
         for (int i = 28; i < 67; i++) {
             bs.set(i, true);
         }
