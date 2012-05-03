@@ -70,4 +70,5 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
      * @param recorder condition recorder
      */
     public void linkRecorder(R recorder);
+
 }

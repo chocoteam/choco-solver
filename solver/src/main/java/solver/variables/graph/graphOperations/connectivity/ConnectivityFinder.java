@@ -45,13 +45,13 @@ public class ConnectivityFinder {
 	//***********************************************************************************
 	// CONNECTED COMPONENTS AND ARTICULATION POINTS IN ONE DFS
 	//***********************************************************************************
-	
+
 	/**Find all connected components, articulation points and isthmus of the input graph by performing one dfs
 	 * Complexity : O(M+N)
 	 * @param graph
 	 * @return a ConnectivityObject that encapsulates all connected components, articulation points and isthmus of the given graph
 	 */
-	public static ConnectivityObject findAll(IGraph graph){
+	private static ConnectivityObject findAll(IGraph graph){
 		int nb = graph.getNbNodes();
 		ConnectivityObject co = new ConnectivityObject();
 		int[] p = new int[nb];
@@ -79,7 +79,7 @@ public class ConnectivityFinder {
 		}
 		return co;
 	}
-	
+
 	private static void firstAllOnOneCC(ConnectivityObject co, INeighbors[] neighbors, int start, int[] p, int[] numOfNode, int[] nodeOfNum, int[] inf, BitSet notOpenedNodes, BitSet notFirst, int[] ND, int[] L, int[] H){
 		co.newCC();
 		int i = start;
@@ -124,7 +124,7 @@ public class ConnectivityFinder {
 			}
 		}
 		if(nbRootChildren>1){co.addArticulationPoint(start);} // ARTICULATION POINT DETECTED
-		
+
 		// POST ORDER PASS FOR FINDING ISTHMUS
 		int n = neighbors.length;
 		int currentNode;
@@ -142,13 +142,13 @@ public class ConnectivityFinder {
 					L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
 					H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
 				}
-				if (s!=currentNode && p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s]){ 
+				if (s!=currentNode && p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s]){
 					co.addIsthmus((currentNode+1)*n+s); // ISTHMUS DETECTED
 				}
 			}
 		}
 	}
-	
+
 //	/**Find all connected components, articulation points and isthms of the input graph by performing one dfs
 //	 * Complexity : O(M+N)
 //	 * @param graph
@@ -239,11 +239,11 @@ public class ConnectivityFinder {
 //			co.addArticulationPoint(start);
 //		}
 //	}
-	
+
 	//***********************************************************************************
 	// CONNECTED COMPONENTS ONLY
 	//***********************************************************************************
-	
+
 	/**Find all connected components of graph by performing one dfs
 	 * Complexity : O(M+N) light and fast in practice
 	 * @param graph
@@ -271,8 +271,8 @@ public class ConnectivityFinder {
 		}
 		return allCC;
 	}
-	
-	
+
+
 	/**
 	 * @param cc the current CC
 	 * @param neighbors iterators for neighbors of nodes
@@ -318,4 +318,119 @@ public class ConnectivityFinder {
 			}
 		}
 	}
+
+	static int nb;
+	static int[] p,numOfNode,nodeOfNum,inf;
+	static INeighbors[] neighbors;
+	public static boolean isBiconnected(IGraph graph){
+		int n = graph.getNbNodes();
+		IActiveNodes act = graph.getActiveNodes();
+		if(nb!=n){
+			nb = n;
+			p = new int[nb];
+			neighbors = new INeighbors[nb];
+			numOfNode = new int[nb];
+			nodeOfNum = new int[nb];
+			inf = new int[nb];
+		}
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
+			inf[i] = Integer.MAX_VALUE;
+			p[i] = -1;
+			neighbors[i] = graph.getNeighborsOf(i);
+		}
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
+			inf[i] = Integer.MAX_VALUE;
+			p[i] = -1;
+			neighbors[i] = graph.getNeighborsOf(i);
+		}
+		//algo
+		int start = 0;
+		int i = start;
+		int k = 0;
+		numOfNode[start] = k;
+		nodeOfNum[k] = start;
+		p[start] = start;
+		int j,q;
+		int nbRootChildren = 0;
+		boolean first = true;
+		while(true){
+			if(first){
+				j = neighbors[i].getFirstElement();
+				first = false;
+			}else{
+				j = neighbors[i].getNextElement();
+			}
+			if(j<0){
+				if(i==start){
+					if(k<act.neighborhoodSize()-1){
+						return false;// NOT EVEN CONNECTED
+					}else{
+						return true;
+					}
+				}
+				q = inf[i];
+				i = p[i];
+				inf[i] = Math.min(q, inf[i]);
+				if (q >= numOfNode[i] && i!=start){
+					return false;
+				} // ARTICULATION POINT DETECTED
+			}else{
+				if (p[j]==-1) {
+					p[j] = i;
+					if (i == start){
+						nbRootChildren++;
+						if(nbRootChildren>1){
+							return false;// ARTICULATION POINT DETECTED
+						}
+					}
+					i = j;
+					first = true;
+					k++;
+					numOfNode[i] = k;
+					nodeOfNum[k] = i;
+					inf[i] = numOfNode[i];
+				}else if(p[i]!=j){
+					inf[i] = Math.min(inf[i], numOfNode[j]);
+				}
+			}
+		}
+	}
+
+
+//	public static boolean isBiconnectedNaive(IGraph graph){
+//		int n = graph.getNbNodes();
+//		int i,j;
+//		for(int k=0;k<n;k++){
+//			int[] list = new int[n];
+//			BitSet inList = new BitSet(n);
+//			int indexFirst=0, indexTo=0;
+//			i = 0;
+//			if(k==0){
+//				i = 1;
+//			}
+//			list[indexTo] = i;
+//			inList.set(i);
+//			indexTo++;
+//			INeighbors nei;
+//			while(indexFirst!=indexTo){
+//				i = list[indexFirst];
+//				indexFirst++;
+//				nei = graph.getNeighborsOf(i);
+//				for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//					if(j!=k && !inList.get(j)){
+//						inList.set(j);
+//						list[indexTo] = j;
+//						indexTo++;
+//					}
+//				}
+//			}
+//			if(indexTo>graph.getActiveNodes().neighborhoodSize()-1){
+//				throw new UnsupportedOperationException();
+//			}
+//			if(indexTo<graph.getActiveNodes().neighborhoodSize()-1){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 }

@@ -40,7 +40,6 @@ public enum WaterMarkers {
         if (nbe2 > Integer.MAX_VALUE) {
             return new WaterMarkingLongImpl(pivot);
         }
-//        return new WaterMarkingImpl(pivot);
-        return new WaterMarking2Impl(pivot);
+        return new WaterMarkingImpl(pivot);
     }
 }

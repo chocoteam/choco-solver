@@ -27,14 +27,16 @@
 
 package solver.search.strategy.strategy.graph;
 
-import java.util.Random;
+import choco.kernel.common.util.PoolManager;
+import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.assignments.Assignment;
 import solver.variables.graph.GraphVar;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -48,6 +50,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 	protected NodeStrategy nodeStrategy;
 	protected ArcStrategy arcStrategy;
 	protected NodeArcPriority priority;
+	protected PoolManager<GraphDecision> pool;
 
 	public enum NodeArcPriority{
 		NODES_THEN_ARCS{
@@ -87,6 +90,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 		this.nodeStrategy = ns;
 		this.arcStrategy  = as;
 		this.priority 	  = priority;
+		pool = new PoolManager<GraphDecision>();
 	}
 
 	public GraphStrategy(GraphVar g) {
@@ -102,7 +106,12 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 		if(fromTo == -1){
 			return null;
 		}
-		return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
+		GraphDecision dec = pool.getE();
+		if(dec == null){
+			dec = new GraphDecision(pool);
+		}
+		dec.set(g, fromTo, Assignment.graph_enforcer);
+		return dec;
 	}
 
 	public int nextNode(){

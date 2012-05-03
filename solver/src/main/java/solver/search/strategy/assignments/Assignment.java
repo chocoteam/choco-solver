@@ -127,6 +127,9 @@ public abstract class Assignment<V extends Variable> implements Serializable{
     	@Override
         public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
             int n = var.getEnvelopGraph().getNbNodes();
+			if(value==-1){
+				throw new UnsupportedOperationException();
+			}
             if (value>=n){
             	int from = value/n-1;
             	int to   = value%n;

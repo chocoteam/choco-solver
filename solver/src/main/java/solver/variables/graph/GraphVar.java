@@ -50,195 +50,202 @@ import solver.variables.view.IView;
 public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IView, GraphVar<E>> implements Variable<IGraphDelta, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    protected E envelop, kernel;
-    protected IEnvironment environment;
-    protected IGraphDelta delta;
-    ///////////// Attributes related to Variable ////////////
-    protected boolean reactOnModification;
+	protected E envelop, kernel;
+	protected IEnvironment environment;
+	protected IGraphDelta delta;
+	///////////// Attributes related to Variable ////////////
+	protected boolean reactOnModification;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
-    public GraphVar(Solver solver) {
-        super("G", solver);
-        solver.associates(this);
-        this.environment = solver.getEnvironment();
-        this.makeList(this);
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+	public GraphVar(Solver solver) {
+		super("G", solver);
+		solver.associates(this);
+		this.environment = solver.getEnvironment();
+		this.makeList(this);
+	}
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
 
-    @Override
-    public boolean instantiated() {
-        if (getEnvelopOrder() != getKernelOrder()) {
-            return false;
-        }
-        INeighbors suc;
-        IActiveNodes act = getEnvelopGraph().getActiveNodes();
-        for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
-            suc = envelop.getSuccessorsOf(i);
-            if (suc.neighborhoodSize() != getKernelGraph().getSuccessorsOf(i).neighborhoodSize()) {
-                for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
-                    if (!kernel.arcExists(i, j)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
+	@Override
+	public boolean instantiated() {
+		if (getEnvelopOrder() != getKernelOrder()) {
+			return false;
+		}
+		INeighbors suc;
+		IActiveNodes act = getEnvelopGraph().getActiveNodes();
+		for (int i = act.getFirstElement(); i >= 0; i = act.getNextElement()) {
+			suc = envelop.getSuccessorsOf(i);
+			if (suc.neighborhoodSize() != getKernelGraph().getSuccessorsOf(i).neighborhoodSize()) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-    @Override
-    public boolean removeNode(int x, ICause cause) throws ContradictionException {
-        if (kernel.getActiveNodes().isActive(x)) {
-            this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
-            return true;
-        } else if (!envelop.getActiveNodes().isActive(x)) {
-            return false;
-        }
-        if (reactOnModification) {
-            INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
-            for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                removeArc(x, i, cause);
-                removeArc(i, x, cause);
-            }
-        }
-        if (envelop.desactivateNode(x)) {
-            if (reactOnModification) {
-                delta.add(x,IGraphDelta.NR,cause);
-            }
-            EventType e = EventType.REMOVENODE;
-            notifyMonitors(e, cause);
-            return true;
-        }
-        return false;
-    }
+	@Override
+	public boolean removeNode(int x, ICause cause) throws ContradictionException {
+		if (kernel.getActiveNodes().isActive(x)) {
+			this.contradiction(cause, EventType.REMOVENODE, "remove mandatory node");
+			return true;
+		} else if (!envelop.getActiveNodes().isActive(x)) {
+			return false;
+		}
+		if (reactOnModification) {
+			INeighbors nei = envelop.getNeighborsOf(x); // TODO plus efficace?
+			for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
+				removeArc(x, i, cause);
+				removeArc(i, x, cause);
+			}
+		}
+		if (envelop.desactivateNode(x)) {
+			if (reactOnModification) {
+				delta.add(x,IGraphDelta.NR,cause);
+			}
+			EventType e = EventType.REMOVENODE;
+			notifyMonitors(e, cause);
+			return true;
+		}
+		return false;
+	}
 
-    @Override
-    public boolean enforceNode(int x, ICause cause) throws ContradictionException {
-        if (envelop.getActiveNodes().isActive(x)) {
-            if (kernel.activateNode(x)) {
-                if (reactOnModification) {
-                    delta.add(x,IGraphDelta.NE,cause);
-                }
-                EventType e = EventType.ENFORCENODE;
-                notifyMonitors(e, cause);
-                return true;
-            }
-            return false;
-        }
-        this.contradiction(cause, EventType.ENFORCENODE, "enforce node which is not in the domain");
-        return true;
-    }
+	@Override
+	public boolean enforceNode(int x, ICause cause) throws ContradictionException {
+		if (envelop.getActiveNodes().isActive(x)) {
+			if (kernel.activateNode(x)) {
+				if (reactOnModification) {
+					delta.add(x,IGraphDelta.NE,cause);
+				}
+				EventType e = EventType.ENFORCENODE;
+				notifyMonitors(e, cause);
+				return true;
+			}
+			return false;
+		}
+		this.contradiction(cause, EventType.ENFORCENODE, "enforce node which is not in the domain");
+		return true;
+	}
 
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
 
-    @Override
-    public int getEnvelopOrder() {
-        return envelop.getActiveNodes().neighborhoodSize();
-    }
+	@Override
+	public int getEnvelopOrder() {
+		return envelop.getActiveNodes().neighborhoodSize();
+	}
 
-    @Override
-    public int getKernelOrder() {
-        return kernel.getActiveNodes().neighborhoodSize();
-    }
+	@Override
+	public int getKernelOrder() {
+		return kernel.getActiveNodes().neighborhoodSize();
+	}
 
-    @Override
-    public IStoredGraph getKernelGraph() {
-        return kernel;
-    }
+	@Override
+	public IStoredGraph getKernelGraph() {
+		return kernel;
+	}
 
-    @Override
-    public IStoredGraph getEnvelopGraph() {
-        return envelop;
-    }
+	@Override
+	public IStoredGraph getEnvelopGraph() {
+		return envelop;
+	}
 
-    public abstract boolean isDirected();
+	public abstract boolean isDirected();
 
-    //***********************************************************************************
-    // VARIABLE STUFF
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLE STUFF
+	//***********************************************************************************
 
-    @Override
-    public Explanation explain(VariableState what) {
-        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
-    }
+	@Override
+	public Explanation explain(VariableState what) {
+		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+	}
 
-    @Override
-    public Explanation explain(VariableState what, int val) {
-        throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
-    }
+	@Override
+	public Explanation explain(VariableState what, int val) {
+		throw new UnsupportedOperationException("GraphVar does not (yet) implement method explain(...)");
+	}
 
-    @Override
-    public IGraphDelta getDelta() {
-        return delta;
-    }
-	
+	@Override
+	public IGraphDelta getDelta() {
+		return delta;
+	}
+
 	@Override
 	public int getTypeAndKind() {
 		return VAR + GRAPH;
 	}
 
-    @Override
-    public String toString() {
-        return getName();
-    }
+	@Override
+	public String toString() {
+		return getName();
+	}
 
-    @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnModification) {
-            reactOnModification = true;
-            delta = new GraphDelta();
-        }
-    }
+	@Override
+	public void analyseAndAdapt(int mask) {
+		super.analyseAndAdapt(mask);
+		if (!reactOnModification) {
+			reactOnModification = true;
+			delta = new GraphDelta();
+		}
+	}
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
-        if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
-        }
-        notifyViews(event, cause);
-    }
+	public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+		if ((modificationEvents & event.mask) != 0) {
+			records.forEach(afterModification.set(this, event, cause));
+		}
+		notifyViews(event, cause);
+	}
 
-    @Override
-    public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
+	@Override
+	public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
 //        records.forEach(onContradiction.set(this, event, cause));
-        solver.getEngine().fails(cause, this, message);
-    }
+		solver.getEngine().fails(cause, this, message);
+	}
 
-    public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
-        int n = value.length;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (value[i][j]) {
-                    enforceArc(i, j, cause);
-                } else {
-                    removeArc(i, j, cause);
-                }
-            }
-        }
+	public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
+		int n = value.length;
+//		for (int i = 0; i < n; i++) {
+//			for (int j = 0; j < n; j++) {
+//				if (value[i][j]) {
+//					enforceArc(i, j, cause);
+//				} else {
+//					removeArc(i, j, cause);
+//				}
+//			}
+//		}
+		INeighbors nei;
+		for(int i=0;i<n;i++){
+			nei = getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if (value[i][j]) {
+					enforceArc(i, j, cause);
+				} else {
+					removeArc(i, j, cause);
+				}
+			}
+		}
 
-    }
+	}
 
-    public boolean[][] getValue() {
-        int n = getEnvelopGraph().getNbNodes();
-        boolean[][] vals = new boolean[n][n];
-        IActiveNodes kerNodes = getKernelGraph().getActiveNodes();
-        INeighbors kerSuccs;
-        for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-            kerSuccs = getKernelGraph().getSuccessorsOf(i);
-            for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-                vals[i][j] = true;
-            }
-        }
-        return vals;
-    }
+	public boolean[][] getValue() {
+		int n = getEnvelopGraph().getNbNodes();
+		boolean[][] vals = new boolean[n][n];
+		IActiveNodes kerNodes = getKernelGraph().getActiveNodes();
+		INeighbors kerSuccs;
+		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
+			kerSuccs = getKernelGraph().getSuccessorsOf(i);
+			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
+				vals[i][j] = true;
+			}
+		}
+		return vals;
+	}
 }

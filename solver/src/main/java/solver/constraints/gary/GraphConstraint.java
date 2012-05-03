@@ -180,10 +180,25 @@ public class GraphConstraint<V extends Variable> extends Constraint<V, Propagato
 
 	@Override
 	public ESat isSatisfied() {
-		if(true)throw new UnsupportedOperationException("error ");
-
 		return isEntailed();
 	}
+
+//	@Override
+//	public ESat isEntailed() {
+//		// By default, consider that undefined is true when all variables are instantiated
+//		// this is done in order to perform tests...
+//		ESat sat = super.isEntailed();
+//		if(sat.equals(ESat.UNDEFINED)){
+//			if(vars!=null)
+//				for(Variable v:vars){
+//					if(!v.instantiated()){
+//						return sat;
+//					}
+//				}
+//			sat = ESat.TRUE;
+//		}
+//		return sat;
+//	}
 
 	@Override
 	public HeuristicVal getIterator(String name, V var) {

@@ -27,6 +27,7 @@
 
 package solver.search.strategy.decision.graph;
 
+import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
@@ -45,12 +46,24 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	Assignment<GraphVar> assignment;
 	int fromTo;
 	GraphVar g;
+	final PoolManager<GraphDecision> poolManager;
+	public final static PoolManager<GraphDecision> defaultPool = new PoolManager<GraphDecision>();
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 	
     public GraphDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
+		g = variable;
+		this.fromTo = fromTo;
+		assignment = graph_ass;
+		branch = 0;
+		this.poolManager = defaultPool;
+	}
+	public GraphDecision(PoolManager<GraphDecision> poolManager) {
+		this.poolManager = poolManager;
+	}
+	public void set(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
 		g = variable;
 		this.fromTo = fromTo;
 		assignment = graph_ass;
@@ -82,8 +95,8 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 
 	@Override
 	public void free() {
-		// TODO
         previous = null;
+        poolManager.returnE(this);
 	}
 
 	@Override
@@ -106,11 +119,11 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 		return EventType.VOID.mask;
 	}
 
-	@Override
-	@Deprecated
-	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
-		throw new UnsupportedOperationException();		
-	}
+//	@Override
+//	@Deprecated
+//	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
+//		throw new UnsupportedOperationException();
+//	}
 
     @Override
     public Deduction getNegativeDeduction() {

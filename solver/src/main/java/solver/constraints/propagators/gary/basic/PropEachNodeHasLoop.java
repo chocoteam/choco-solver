@@ -47,108 +47,114 @@ import solver.variables.graph.INeighbors;
  */
 public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    private GraphVar g;
-    private IntProcedure enfNode, remArc;
-    private INeighbors concernedNodes;
-    private int n;
+	private GraphVar g;
+	private IntProcedure enfNode, remArc;
+	private INeighbors concernedNodes;
+	private int n;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
-        super((GraphVar[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
-        this.g = graph;
-        this.enfNode = new NodeEnf(this);
-        this.remArc = new ArcRem(this);
-        this.concernedNodes = concernedNodes;
-        this.n = g.getEnvelopGraph().getNbNodes();
-    }
+	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
+		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
+		this.g = graph;
+		this.enfNode = new NodeEnf(this);
+		this.remArc = new ArcRem(this);
+		this.concernedNodes = concernedNodes;
+		this.n = g.getEnvelopGraph().getNbNodes();
+	}
 
-    public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
-        this(graph, graph.getEnvelopGraph().getActiveNodes(), sol, constraint);
-    }
+	public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
+		this(graph, graph.getEnvelopGraph().getActiveNodes(), sol, constraint);
+	}
 
-    //***********************************************************************************
-    // PROPAGATIONS
-    //***********************************************************************************
+	//***********************************************************************************
+	// PROPAGATIONS
+	//***********************************************************************************
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
-            if (concernedNodes.contain(i)) {
-                g.enforceArc(i, i, this);
-            }
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for (int i = env.getFirstElement(); i >= 0; i = env.getNextElement()) {
+			if (concernedNodes.contain(i)) {
+				if(g.getEnvelopGraph().arcExists(i,i)){
+					if(g.getKernelGraph().getActiveNodes().isActive(i)){
+						g.enforceArc(i,i,this);
+					}
+				}else{
+					g.removeNode(i,this);
+				}
+			}
+		}
+	}
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if ((mask & EventType.REMOVEARC.mask) != 0) {
-            eventRecorder.getDeltaMonitor(this, g).forEach(remArc, EventType.REMOVEARC);
-        }
-        if ((mask & EventType.ENFORCENODE.mask) != 0) {
-            eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
-        }
-    }
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if ((mask & EventType.REMOVEARC.mask) != 0) {
+			eventRecorder.getDeltaMonitor(this, g).forEach(remArc, EventType.REMOVEARC);
+		}
+		if ((mask & EventType.ENFORCENODE.mask) != 0) {
+			eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
+		}
+	}
 
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask;
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask;
+	}
 
-    @Override
-    public ESat isEntailed() {
-        IActiveNodes ker = g.getKernelGraph().getActiveNodes();
-        for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
-            if (concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)) {
-                return ESat.FALSE;
-            }
-        }
-        if (g.getEnvelopOrder() != g.getKernelOrder()) {
-            return ESat.UNDEFINED;
-        }
-        return ESat.TRUE;
-    }
+	@Override
+	public ESat isEntailed() {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for (int i = ker.getFirstElement(); i >= 0; i = ker.getNextElement()) {
+			if (concernedNodes.contain(i) && !g.getKernelGraph().getNeighborsOf(i).contain(i)) {
+				return ESat.FALSE;
+			}
+		}
+		if (g.getEnvelopOrder() != g.getKernelOrder()) {
+			return ESat.UNDEFINED;
+		}
+		return ESat.TRUE;
+	}
 
-    //***********************************************************************************
-    // PROCEDURE
-    //***********************************************************************************
+	//***********************************************************************************
+	// PROCEDURE
+	//***********************************************************************************
 
-    private class NodeEnf implements IntProcedure {
-        private PropEachNodeHasLoop p;
-        private NodeEnf(PropEachNodeHasLoop p) {
-            this.p = p;
-        }
-        @Override
-        public void execute(int i) throws ContradictionException {
-            if (p.concernedNodes.contain(i)) {
-                g.enforceArc(i, i, p);
-            }
-        }
-    }
+	private class NodeEnf implements IntProcedure {
+		private PropEachNodeHasLoop p;
+		private NodeEnf(PropEachNodeHasLoop p) {
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			if (p.concernedNodes.contain(i)) {
+				g.enforceArc(i, i, p);
+			}
+		}
+	}
 
-    private class ArcRem implements IntProcedure {
-        private PropEachNodeHasLoop p;
-        private ArcRem(PropEachNodeHasLoop p) {
-            this.p = p;
-        }
-        @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / p.n + 1;
-            int to = i % p.n;
-            if (from == to && p.concernedNodes.contain(to)) {
-                p.g.removeNode(i, p);
-            }
-        }
-    }
+	private class ArcRem implements IntProcedure {
+		private PropEachNodeHasLoop p;
+		private ArcRem(PropEachNodeHasLoop p) {
+			this.p = p;
+		}
+		@Override
+		public void execute(int i) throws ContradictionException {
+			int from = i/n - 1;
+			int to = i%n;
+			if (from == to && concernedNodes.contain(to)) {
+				g.removeNode(i, p);
+			}
+		}
+	}
 }

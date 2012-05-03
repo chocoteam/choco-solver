@@ -29,12 +29,16 @@ package solver.constraints.gary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
-import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 

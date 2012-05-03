@@ -28,7 +28,6 @@ package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -44,10 +43,7 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Deque;
 
 /**
  * Propagator for AllDifferent AC constraint for integer variables
@@ -74,6 +70,7 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private int[] nodeSCC;
     private BitSet free;
     private IntProcedure remProc;
+	private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
@@ -113,12 +110,12 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         n2 = idx;
         fifo = new int[n2];
         matching = new int[n2];
-        nodeSCC = new int[n2 + 1];
         digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
         free = new BitSet(n2);
         remProc = new DirectedRemProc();
         father = new int[n2];
         in = new BitSet(n2);
+		SCCfinder = new StrongConnectivityFinder(digraph);
     }
 
     @Override
@@ -235,14 +232,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 }
             }
         }
-        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(digraph);
-        int scc = 0;
-        for (TIntArrayList in : allSCC) {
-            for (int i = 0; i < in.size(); i++) {
-                nodeSCC[in.get(i)] = scc;
-            }
-            scc++;
-        }
+        SCCfinder.findAllSCC();
+		nodeSCC = SCCfinder.getNodesSCC();
         digraph.desactivateNode(n2);
     }
 
@@ -256,7 +247,13 @@ public class PropAllDiffAC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i] != j || matching[j] != i) {
+//                    if (matching[i] != j || matching[j] != i) {
+//                        v.removeValue(k, this);
+//                        digraph.removeArc(i, j);
+//                    }
+					if (matching[i] == j && matching[j] == i) {
+						v.instantiateTo(k,this);
+					} else {
                         v.removeValue(k, this);
                         digraph.removeArc(i, j);
                     }
@@ -268,10 +265,6 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     //***********************************************************************************
     // PROPAGATION
     //***********************************************************************************
-
-
-    //public static long nbFull = 0;
-    //public static long nbCustom = 0;
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -326,41 +319,8 @@ public class PropAllDiffAC extends Propagator<IntVar> {
                 digraph.removeEdge(i, j);
                 vars[i].removeValue(val, this);
             }
-            //cliqueNeq(idxVarInProp);
         }
-        /*if (nbPendingER == 0) {
-            free.clear();
-            for (int i = 0; i < n; i++) {
-                if (digraph.getPredecessorsOf(i).neighborhoodSize() == 0) {
-                    free.set(i);
-                }
-            }
-            for (int i = n; i < n2; i++) {
-                if (digraph.getSuccessorsOf(i).neighborhoodSize() == 0) {
-                    free.set(i);
-                }
-            }
-            repairMatching();
-            filter();
-        }*/
         forcePropagate(EventType.CUSTOM_PROPAGATION);
-    }
-
-    private void cliqueNeq(int i) throws ContradictionException {
-        Deque<IntVar> modified = new ArrayDeque<IntVar>();
-        modified.push(vars[i]);
-        while (!modified.isEmpty()) {
-            IntVar cur = modified.pop();
-            int valCur = cur.getValue();
-            for (IntVar toCheck : vars) {
-                if (toCheck != cur && toCheck.contains(valCur)) {
-                    toCheck.removeValue(valCur, this);
-                    if (toCheck.instantiated()) {
-                        modified.push(toCheck);
-                    }
-                }
-            }
-        }
     }
 
     //***********************************************************************************

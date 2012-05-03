@@ -72,8 +72,8 @@ public class IndexOf extends GraphRelation<IntVar> {
 	
 	@Override
 	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};
-//		return new GraphProperty[]{};
+//		return new GraphProperty[]{GraphProperty.ONE_SUCCESSORS_PER_NODE};
+		return new GraphProperty[]{};
 	}
 	
 	/**create the initial graph representing the relation between input variables 

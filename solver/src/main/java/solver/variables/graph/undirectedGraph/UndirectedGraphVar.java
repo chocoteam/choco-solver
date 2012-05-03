@@ -64,6 +64,10 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	//***********************************************************************************
 
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
+//		if((x==0 && y==27)||(x==27 && y==0)){
+//			System.out.println("rem "+cause.getClass().getSimpleName());
+//			System.exit(0);
+//		}
     	if(kernel.edgeExists(x, y)){
     		this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc");
         	return false;
@@ -110,6 +114,6 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	
 	@Override
 	public boolean isDirected(){
-		return true;
+		return false;
 	}
 }
