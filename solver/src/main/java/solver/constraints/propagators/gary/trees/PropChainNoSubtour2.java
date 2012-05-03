@@ -32,12 +32,13 @@
  * Time: 19:56
  */
 
-package solver.constraints.propagators.gary.tsp.undirected;
+package solver.constraints.propagators.gary.trees;
 
 import choco.annotations.PropAnn;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;

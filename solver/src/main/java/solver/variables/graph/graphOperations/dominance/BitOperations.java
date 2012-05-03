@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphOperations.connectivity;
+package solver.variables.graph.graphOperations.dominance;
 
 /**Class containing some Bit operations useful to LCA queries
  * @author Jean-Guillaume Fages

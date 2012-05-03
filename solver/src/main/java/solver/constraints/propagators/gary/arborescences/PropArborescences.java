@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.arborescences;
 
 import choco.kernel.ESat;
 import solver.Solver;
@@ -41,115 +41,91 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
-import java.util.BitSet;
-import java.util.LinkedList;
+import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
 
 /**
- * Arborescence constraint (simplification from tree constraint)
- * Use naive implementation in O(n.m) for testing
+ * Arborescences constraint (simplification from tree constraint) based on dominators
+ * CONSIDERS THAT EACH NODE WITH NO PREDECESSOR IS A ROOT (needs at least one such node)
+ * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
+ * but very efficient in practice
  * */
-public class PropArborescenceNM<V extends GraphVar> extends GraphPropagator<V>{
+public class PropArborescences<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
+	// flow graph
 	DirectedGraphVar g;
-	int source;
+	DirectedGraph connectedGraph;
+	// number of nodes
 	int n;
-	LinkedList<Integer> list;
-	BitSet visited;
-	DirectedGraph domTrans;
+	// dominators finder that contains the dominator tree
+	AbstractLengauerTarjanDominatorsFinder domFinder;
+	INeighbors[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**Ensures that graph is an arborescence rooted in node source
-	 * naive form: O(n.m)
-	 * @param graph
-	 * @param source root of the arborescence
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropArborescenceNM(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	public PropArborescences(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
-		this.source = source;
-		list = new LinkedList<Integer>();
-		visited = new BitSet(n);
-		domTrans= new DirectedGraph(n,GraphType.MATRIX);
+		successors = new INeighbors[n];
+		connectedGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST);
+		if(simple){
+			domFinder = new SimpleDominatorsFinder(n, connectedGraph);
+		}else{
+			domFinder = new AlphaDominatorsFinder(n, connectedGraph);
+		}
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	private boolean allReachableFrom(int x,DirectedGraph g) {
-		list.clear();
-		visited.clear();
-		list.add(x);
-		INeighbors env;
-		visited.set(x);
-		while(!list.isEmpty()){
-			x = list.removeFirst();
-			env = g.getSuccessorsOf(x);
-			for(int suc=env.getFirstElement(); suc>=0; suc=env.getNextElement()){
-				if(!visited.get(suc)){
-					visited.set(suc);
-					list.addLast(suc);
-				}
-			}
-		}
-		return visited.nextSetBit(0)>=0;
-	}
-
-	private void filtering() throws ContradictionException{
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
 		structuralPruning();
 	}
 
-    @Override
-    public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<n;i++){
-			g.enforceNode(i,this);
-			g.removeArc(i,i,this);
-		}
-		filtering();
-	}
-
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		filtering();
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
 	}
 
 	private void structuralPruning() throws ContradictionException {
-		INeighbors succ;
-		for(int i=0;i<n;i++){
-			domTrans.getSuccessorsOf(i).clear();
-			domTrans.getPredecessorsOf(i).clear();
+		for(int i=0;i<n+1;i++){
+			connectedGraph.getSuccessorsOf(i).clear();
+			connectedGraph.getPredecessorsOf(i).clear();
 		}
+		INeighbors nei;
 		for(int i=0;i<n;i++){
-			DirectedGraph dig = new DirectedGraph(n,GraphType.LINKED_LIST);
-			for(int j=0; j<n; j++){
-				if(j!=i){
-					succ = g.getEnvelopGraph().getSuccessorsOf(j);
-					for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-						dig.addArc(j,k);
-					}
+			nei = g.getEnvelopGraph().getPredecessorsOf(i);
+			if(nei.isEmpty()){
+				connectedGraph.addArc(n,i);
+			}else{
+				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
+					connectedGraph.addArc(y,i);
 				}
 			}
-			allReachableFrom(source,dig);
-			for(int z=visited.nextClearBit(0);z<n;z=visited.nextClearBit(z+1)){
-				domTrans.addArc(i,z);
-			}
 		}
-		for(int i=0;i<n;i++){
-			succ = domTrans.getSuccessorsOf(i);
-			for(int k=succ.getFirstElement();k>=0;k=succ.getNextElement()){
-				g.removeArc(k,i,this);
+		if(domFinder.findDominators()){
+			for (int x=0; x<n; x++){
+				nei = g.getEnvelopGraph().getSuccessorsOf(x);
+				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
+					//--- STANDART PRUNING
+					if(domFinder.isDomminatedBy(x,y)){
+						g.removeArc(x,y,this);
+					}
+					// ENFORCE ARC-DOMINATORS (redondant)
+				}
 			}
+		}else{
+			contradiction(g,"the source cannot reach all nodes");
 		}
 	}
 

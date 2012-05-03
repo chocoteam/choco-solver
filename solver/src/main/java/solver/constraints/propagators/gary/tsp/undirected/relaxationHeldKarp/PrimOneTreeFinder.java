@@ -27,11 +27,10 @@
 
 package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.trees.relaxationHeldKarp.PrimMSTFinder;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
-
-import java.util.Random;
 
 public class PrimOneTreeFinder extends PrimMSTFinder {
 

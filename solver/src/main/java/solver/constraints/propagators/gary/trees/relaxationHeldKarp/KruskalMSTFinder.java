@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.tsp.HeldKarp;
@@ -33,7 +33,7 @@ import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
+import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.Arrays;
 import java.util.BitSet;

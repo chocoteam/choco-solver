@@ -25,59 +25,56 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.variables.graph.graphOperations.dominance;
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
-import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
+import solver.variables.graph.directedGraph.IDirectedGraph;
 
-public abstract class AbstractTreeFinder {
-
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
-
-	protected final static boolean FILTER = true;
-	// INPUT
-	protected UndirectedGraph g;	// graph
-	protected int n;				// number of nodes
-	// OUTPUT
-	protected UndirectedGraph Tree;
-	protected double treeCost;
-	// PROPAGATOR
-	protected HeldKarp propHK;
+/**Class that finds dominators of a given flow graph g(s)
+ * Uses the simple LT algorithm which runs in O(m.log(n))
+ * Fast in practice*/
+public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFinder{
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractTreeFinder(int nbNodes, HeldKarp propagator) {
-		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
-		propHK = propagator;
+	/**Object that finds dominators of the given flow graph g(s)
+	 * It uses the simple LT algorithm which runs in O(m.log(n))*/
+	public SimpleDominatorsFinder(int s, IDirectedGraph g){
+		super(s,g);
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// LINK-EVAL
 	//***********************************************************************************
 
-	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
-
-	public abstract void performPruning(double UB) throws ContradictionException;
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	public UndirectedGraph getMST() {
-		return Tree;
-	}
-	public double getBound() {
-		return treeCost;
+	protected void LINK(int v, int w) {
+		ancestor[w]=v;
 	}
 
-	public double getRepCost(int from, int to){
-		throw new UnsupportedOperationException("not implemented yet");
+	protected int EVAL(int v) {
+		if(ancestor[v] == -1){
+			return v;
+		}else{
+			COMPRESS(v);
+			return label[v];
+		}
+
+	}
+
+	protected void COMPRESS(int v) {
+		int k = v;
+		list.clear();
+		while(ancestor[ancestor[k]]!=-1){
+			list.add(k);
+			k = ancestor[k];
+		}
+		for(k=list.size()-1;k>=0;k--){
+			v = list.get(k);
+			if(semi[label[ancestor[v]]] < semi[label[v]]){
+				label[v] = label[ancestor[v]];
+			}
+			ancestor[v] = ancestor[ancestor[v]];
+		}
 	}
 }

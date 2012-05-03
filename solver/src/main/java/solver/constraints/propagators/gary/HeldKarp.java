@@ -28,47 +28,25 @@
 /**
  * Created by IntelliJ IDEA.
  * User: Jean-Guillaume Fages
- * Date: 30/01/12
- * Time: 17:10
+ * Date: 14/01/12
+ * Time: 01:03
  */
 
-package solver.constraints.propagators.gary.tsp.heaps;
+package solver.constraints.propagators.gary;
 
-/**
- * Same worst case complexity but much better in practice
- * Especially when several nodes have same -infinity value 
- */
-public class FastArrayHeap extends ArrayHeap{
+import gnu.trove.list.array.TIntArrayList;
+import solver.constraints.propagators.gary.IRelaxation;
+import solver.exception.ContradictionException;
+import solver.variables.graph.IGraph;
 
-	int[] best;
-	int bestSize;
-	double bestVal;
+public interface HeldKarp extends IRelaxation {
 
-	public FastArrayHeap(int n){
-		super(n);
-		best = new int[n];
-	}
-
-	@Override
-	public void add(int element, double element_key, int i) {
-		if(isEmpty() || element_key<bestVal){
-			bestVal = element_key;
-			bestSize = 0;
-			best[bestSize++]=element;
-		}else if(element_key==bestVal && element_key<value[element]){
-			best[bestSize++]=element;
-		}
-		super.add(element,element_key,i);
-	}
-	@Override
-	public int pop() {
-		if(bestSize>0){
-			int min = best[bestSize-1];
-			bestSize--;
-			in.clear(min);
-			size--;
-			return min;
-		}
-		return super.pop();
-	}
+	IGraph getMST();
+	boolean isMandatory(int i, int j);
+	TIntArrayList getMandatoryArcsList();
+	void contradiction() throws ContradictionException;
+	void remove(int i, int i1) throws ContradictionException;
+	double getMinArcVal();
+	void waitFirstSolution(boolean b);
+	void enforce(int i, int j)throws ContradictionException;
 }

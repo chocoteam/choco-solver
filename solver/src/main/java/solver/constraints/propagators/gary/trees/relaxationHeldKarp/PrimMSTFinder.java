@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
 
 import solver.constraints.propagators.gary.tsp.HeldKarp;
-import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.heaps.Heap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
@@ -42,7 +42,7 @@ public class PrimMSTFinder extends AbstractTreeFinder {
 	//***********************************************************************************
 
 	protected double[][] costs;
-	protected Heap heap;
+	protected MST_Heap heap;
 	protected BitSet inTree;
 	protected int tSize;
 	protected double minVal;

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed;
+package solver.constraints.propagators.gary.arborescences;
 
 import choco.kernel.ESat;
 import solver.Solver;
@@ -43,16 +43,13 @@ import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarja
 import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
 import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
 
-import java.util.BitSet;
-import java.util.LinkedList;
-
 /**
- * Arborescence constraint (simplification from tree constraint)
+ * AntiArborescence constraint (simplification from tree constraint)
  * based on dominators
  * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
  * but very efficient in practice
  * */
-public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
+public class PropAntiArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -61,35 +58,34 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// flow graph
 	DirectedGraphVar g;
 	// source that reaches other nodes
-	int source;
+	int sink;
 	// number of nodes
 	int n;
 	// dominators finder that contains the dominator tree
 	AbstractLengauerTarjanDominatorsFinder domFinder;
-	INeighbors[] successors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
-	 * Ensures that graph is an arborescence rooted in node source
+ 	 * @PropAnn(tested = {BENCHMARK,CORRECTION})
+	 *
+	 * Ensures that graph is an antiarborescence rooted in node sink
 	 * @param graph
-	 * @param source root of the arborescence
+	 * @param sink root of the antiarborescence
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
+	public PropAntiArborescence(DirectedGraphVar graph, int sink, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
-		this.source = source;
-		successors = new INeighbors[n];
+		this.sink = sink;
 		if(simple){
-			domFinder = new SimpleDominatorsFinder(source, g.getEnvelopGraph());
+			domFinder = new SimpleDominatorsFinder(sink, g.getEnvelopGraph());
 		}else{
-			domFinder = new AlphaDominatorsFinder(source, g.getEnvelopGraph());
+			domFinder = new AlphaDominatorsFinder(sink, g.getEnvelopGraph());
 		}
 	}
 
@@ -97,30 +93,29 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		System.out.println("propagate");
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
 		for(int i=0;i<n;i++){
 			g.enforceNode(i,this);
 			g.removeArc(i,i,this);
-			g.removeArc(i,source,this);
+			g.removeArc(sink,i,this);
 		}
 		structuralPruning();
 	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		structuralPruning();
 	}
 
 	private void structuralPruning() throws ContradictionException {
-		if(domFinder.findDominators()){
+		if(domFinder.findPostDominators()){
 			INeighbors nei;
 			for (int x=0; x<n; x++){
 				nei = g.getEnvelopGraph().getSuccessorsOf(x);
 				for(int y = nei.getFirstElement(); y>=0; y = nei.getNextElement()){
 					//--- STANDART PRUNING
-					if(domFinder.isDomminatedBy(x,y)){
+					if(domFinder.isDomminatedBy(y,x)){
 						g.removeArc(x,y,this);
 					}
 					// ENFORCE ARC-DOMINATORS (redondant)
