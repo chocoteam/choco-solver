@@ -504,8 +504,14 @@ public class PropKhun extends GraphPropagator<Variable> implements IRelaxation{
 		}
 		return lineZero[i] == j;
 	}
-	
-	public double getRepCost(int i, int j){
+
+	@Override
+	public double getReplacementCost(int i, int j){
+		return 0;// do not know how to compute it
+	}
+
+	@Override
+	public double getMarginalCost(int i, int j) {
 		if(j==n){
 			return costs[i][0];
 		}

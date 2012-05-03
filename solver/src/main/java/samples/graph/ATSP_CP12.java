@@ -37,20 +37,19 @@ import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.*;
-import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
+import solver.constraints.propagators.gary.tsp.*;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
-import solver.propagation.generator.PropagationStrategy;
 import solver.propagation.generator.Sort;
 import solver.recorders.fine.FineArcEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -62,7 +61,6 @@ import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
@@ -70,7 +68,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
 import java.util.BitSet;
 import java.util.Random;
@@ -102,8 +99,6 @@ public class ATSP_CP12 {
 	private static INeighbors[] outArcs;
 	private static IDirectedGraph G_R;
 	private static IStateInt[] sccFirst, sccNext;
-	// Tasks data structure
-	private static IntVar[] start, end, duration;
 	// Branching data structure
 	private static IRelaxation relax;
 
@@ -227,7 +222,7 @@ public class ATSP_CP12 {
 			}
 			gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
 			gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-			gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
+			gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
 			gc.addAdHocProp(new PropCyclePathChanneling(graph,undi,gc,solver));
 		}
 		if(config.get(pos)){
@@ -427,55 +422,6 @@ public class ATSP_CP12 {
 				}
 			}
 		}
-	}
-
-	private static void benchTSPChanged() {
-		String dir = "/Users/jfages07/github/In4Ga/ALL_tsp";
-		File folder = new File(dir);
-		String[] list = folder.list();
-		int[][] matrix;
-		main_search = 2;
-		for (String s : list) {
-			if (s.contains(".tsp") && (!s.contains("gz"))){
-				matrix = TSPsymmetric.parseInstance(dir + "/" + s);
-				if(matrix!=null && matrix.length<170){
-					instanceName = s;
-					change(TSPsymmetric.transformMatrix(matrix));
-					bst = false;
-					configParameters(0);
-					solve();
-				}else{
-					System.out.println("CANNOT LOAD");
-				}
-			}
-		}
-	}
-
-	private static void change(int[][] ints) {
-		System.out.println("parsing instance " + instanceName + "...");
-		n = ints.length;
-		Random rd = new Random(seed);
-		double d;
-		distanceMatrix = ints;
-		for (int i=0; i<n; i++) {
-			for(int j=i+1;j<n;j++){
-				d =  distanceMatrix[i][j]/10;
-				distanceMatrix[j][i] = distanceMatrix[i][j]+(int)(d*rd.nextDouble());
-			}
-		}
-		noVal = Integer.MAX_VALUE / 2;
-		int maxVal = 0;
-		for (int i = 0; i < n; i++) {
-			distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-			distanceMatrix[n - 1][i] = noVal;
-			distanceMatrix[i][0] = noVal;
-			for (int j = 0; j < n; j++) {
-				if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-					maxVal = distanceMatrix[i][j];
-				}
-			}
-		}
-		initialUB = optimum = n*maxVal;
 	}
 
 	private static void generateInstance(int size, int maxCost, long seed) {

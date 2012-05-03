@@ -28,7 +28,7 @@
 package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;

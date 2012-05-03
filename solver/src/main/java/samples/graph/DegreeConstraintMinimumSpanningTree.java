@@ -34,17 +34,17 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
-import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
-import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
+import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
+import solver.constraints.propagators.gary.trees.relaxationHeldKarp.PropTreeHeldKarp;
 import solver.exception.ContradictionException;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -64,14 +64,14 @@ public class DegreeConstraintMinimumSpanningTree {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 100000;
+	private static final long TIMELIMIT = 3000;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
 	private static IntVar totalCost;
 	private static Solver solver;
-	private static PropSymmetricHeldKarp mst;
+	private static PropTreeHeldKarp mst;
 	private static int search;
-	private static TSP_heuristics heuristic;
+//	private static TSP_heuristics heuristic;
 
 	//***********************************************************************************
 	// METHODS
@@ -85,15 +85,15 @@ public class DegreeConstraintMinimumSpanningTree {
 		String[] list = folder.list();
 		int[][] matrix;
 		search = 2;
-		heuristic = TSP_heuristics.enf_sparse;
+//		heuristic = TSP_heuristics.enf_sparse;
 		for (String s : list) {
 			if (s.contains("str") && (!s.contains("xxx"))){
 				matrix = parse(dir + "/" + s, "str");
-				if((matrix!=null && matrix.length>=0 && matrix.length<3000)){
+				if((matrix!=null && matrix.length>=0 && matrix.length<100)){
 					setUB(s.split("\\.")[0]);
 					System.out.println("optimum : "+upperBound);
 					solveUndirected(matrix, s);
-					System.exit(0);
+//					System.exit(0);
 				}else{
 					System.out.println("CANNOT LOAD");
 				}
@@ -155,28 +155,6 @@ public class DegreeConstraintMinimumSpanningTree {
 			String line;
 			int[][] dist = new int[n][n];
 			line = buf.readLine();
-			// haut droite
-//			int idxI = 0;
-//			int idxJ = 1;
-//			String[] numbers;
-//			while(line!=null){
-//				line = line.replaceAll(" * ", " ");
-//				numbers = line.split(" ");
-//				int first = 0;
-//				if(numbers[0].equals("")){
-//					first++;
-//				}
-//				for(int i=first;i<numbers.length;i++){
-//					dist[idxI][idxJ] = dist[idxJ][idxI] = Integer.parseInt(numbers[i]);
-//					idxJ++;
-//					if(idxJ==n){
-//						idxI++;
-//						idxJ = idxI+1;
-//					}
-//				}
-//				line = buf.readLine();
-//			}
-			// bas gauche
 			int idxI = 1;
 			int idxJ = 0;
 			String[] numbers;
@@ -251,28 +229,29 @@ public class DegreeConstraintMinimumSpanningTree {
 		}
 		// constraints
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,1));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
-		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
-		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
+		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,1,gc,solver));
+		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
+		gc.addAdHocProp(new PropTreeNoSubtour(undi,gc,solver));
+		gc.addAdHocProp(new PropTreeEvalObj(undi,totalCost,matrix,gc,solver));
+		mst = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, 2, matrix, gc, solver);
 		gc.addAdHocProp(mst);
-//		gc.addAdHocProp(new Prop_LP_GRB(undi,totalCost,matrix,solver,gc));
 		solver.post(gc);
 		// config
-		switch (search){
-			case 0: solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));break;
-			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),StrategyFactory.graphTSP(undi, heuristic, mst)));break;
-			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),StrategyFactory.graphTSP(undi, heuristic, mst)));
-				solver.getSearchLoop().restartAfterEachSolution(true);
-				break;
-			default: throw new UnsupportedOperationException();
-		}
-		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
+		solver.set(StrategyFactory.graphLexico(undi));
+//		switch (search){
+//			case 0: solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));break;
+//			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),StrategyFactory.graphTSP(undi, heuristic, mst)));break;
+//			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),StrategyFactory.graphTSP(undi, heuristic, mst)));
+//				solver.getSearchLoop().restartAfterEachSolution(true);
+//				break;
+//			default: throw new UnsupportedOperationException();
+//		}
+//		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
+		solver.findSolution();
+//		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		checkUndirected(solver, undi, totalCost, matrix);
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
@@ -283,25 +262,25 @@ public class DegreeConstraintMinimumSpanningTree {
 	}
 
 	private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
-		int n = matrix.length;
-		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-			writeTextInto("BUG\n",outFile);
-			throw new UnsupportedOperationException();
-		}
-		if(solver.getMeasures().getSolutionCount() > 0){
-			int sum = 0;
-			for(int i=0;i<n;i++){
-				for(int j=i+1;j<n;j++){
-					if(undi.getEnvelopGraph().edgeExists(i,j)){
-						sum+=matrix[i][j];
-					}
-				}
-			}
-			if(sum!=solver.getSearchLoop().getObjectivemanager().getBestValue()){
-				writeTextInto("BUG\n",outFile);
-				throw new UnsupportedOperationException();
-			}
-		}
+//		int n = matrix.length;
+//		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
+//			writeTextInto("BUG\n",outFile);
+//			throw new UnsupportedOperationException();
+//		}
+//		if(solver.getMeasures().getSolutionCount() > 0){
+//			int sum = 0;
+//			for(int i=0;i<n;i++){
+//				for(int j=i+1;j<n;j++){
+//					if(undi.getEnvelopGraph().edgeExists(i,j)){
+//						sum+=matrix[i][j];
+//					}
+//				}
+//			}
+//			if(sum!=solver.getSearchLoop().getObjectivemanager().getBestValue()){
+//				writeTextInto("BUG\n",outFile);
+//				throw new UnsupportedOperationException();
+//			}
+//		}
 	}
 
 	//***********************************************************************************

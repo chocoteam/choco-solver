@@ -25,31 +25,50 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 30/01/12
+ * Time: 17:10
+ */
 
-import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.HeldKarp;
-import solver.variables.graph.INeighbors;
+package solver.constraints.propagators.gary.tsp.specificHeaps;
 
-public abstract class AbstractBSTFinder extends AbstractMSTFinder {
+/**
+ * Same worst case complexity but much better in practice
+ * Especially when several nodes have same -infinity value 
+ */
+public class FastArrayHeap extends ArrayHeap{
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+	int[] best;
+	int bestSize;
+	double bestVal;
 
-	// REDUCED GRAPH STRUCTURE
-	protected IStateInt nR;
-	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
+	public FastArrayHeap(int n){
+		super(n);
+		best = new int[n];
+	}
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
-
-	public AbstractBSTFinder(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator);
-		this.nR = nR;
-		this.sccOf = sccOf;
-		this.outArcs = outArcs;
+	@Override
+	public void add(int element, double element_key, int i) {
+		if(isEmpty() || element_key<bestVal){
+			bestVal = element_key;
+			bestSize = 0;
+			best[bestSize++]=element;
+		}else if(element_key==bestVal && element_key<value[element]){
+			best[bestSize++]=element;
+		}
+		super.add(element,element_key,i);
+	}
+	@Override
+	public int pop() {
+		if(bestSize>0){
+			int min = best[bestSize-1];
+			bestSize--;
+			in.clear(min);
+			size--;
+			return min;
+		}
+		return super.pop();
 	}
 }

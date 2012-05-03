@@ -34,7 +34,8 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.trees.relaxationHeldKarp.AbstractTreeFinder;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -346,7 +347,12 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	public UndirectedGraph getMST(){
 		return mst;
 	}
-	public double getRepCost(int from, int to){
+	
+	public double getReplacementCost(int from, int to){
+		return HKfilter.getRepCost(from,to);
+	}
+
+	public double getMarginalCost(int from, int to){
 		return HKfilter.getRepCost(from,to);
 	}
 }

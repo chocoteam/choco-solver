@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -228,7 +228,7 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 		return tSize;
 	}
 
-//	public double getRepCost(int from, int to){
+//	public double getReplacementCost(int from, int to){
 //		if(map[from][to]==-1){
 //			System.out.println(from+" : "+to+" / "+ma.contains(from*n+to));
 //			System.out.println(Tree);

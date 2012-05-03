@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;

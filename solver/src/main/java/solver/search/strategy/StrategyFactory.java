@@ -262,7 +262,6 @@ public final class StrategyFactory {
 			if(g.instantiated()){
 				return null;
 			}
-//			System.out.println((Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory())/1000000+" mb");
 			return heuristic.getDecision(g,n,relaxation,pool);
 		}
 	}

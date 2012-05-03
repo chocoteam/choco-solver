@@ -36,7 +36,18 @@ package solver.constraints.propagators.gary;
 
 public interface IRelaxation {
 
+	// true iff arc (i,j) belong to the current solution of the relaxation
 	boolean contains(int i, int j);
 
-	double getRepCost(int i, int j);
+	/**
+	 * cost augmentation induced by the removal of arc (i,j)
+	 * assumes that (i,j) belongs to the current solution of the relaxation
+ 	 */
+	double getReplacementCost(int i, int j);
+
+	/**
+	 * cost augmentation induced by the enforcing of arc (i,j)
+	 * assumes that (i,j) does not belong to the current solution of the relaxation
+ 	 */
+	double getMarginalCost(int i, int j);
 }

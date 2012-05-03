@@ -50,9 +50,10 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
+import java.util.BitSet;
+
 /**
- *
- * Simple NoSubtour of Pesant when undirected graph
+ * Simple NoSubtour applied to (undirected) tree/forest
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
@@ -64,15 +65,19 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	UndirectedGraphVar g;
 	int n;
 	private IntProcedure arcEnforced;
-	private IStateInt[] origin,end,size;
+	private IStateInt[] color,size;
+	// list
+	int[] fifo;
+	int[] mate;
+	BitSet in;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
+	 * Ensures that graph has no cycle
+	 * runs in O(n) per instantiation event
 	 * @param graph
 	 * @param constraint
 	 * @param solver
@@ -82,13 +87,14 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
-		origin = new IStateInt[n];
+		fifo = new int[n];
+		mate = new int[n];
+		in = new BitSet(n);
+		color = new IStateInt[n];
 		size = new IStateInt[n];
-		end = new IStateInt[n];
 		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
+			color[i] = environment.makeInt(i);
 			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
 		}
 	}
 
@@ -98,35 +104,24 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int j;
 		for(int i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
+			color[i].set(i);
 			size[i].set(1);
+			mate[i] = -1;
 		}
 		INeighbors nei;
 		for(int i=0;i<n;i++){
-			nei = g.getKernelGraph().getSuccessorsOf(i);
-			j = nei.getFirstElement();
-			if(j!=-1 && i<j){
-				enforce(i,j);
-			}
-			j = nei.getNextElement();
-			if(j!=-1 && i<j){
-				enforce(i,j);
-			}
-			if(nei.getNextElement()!=-1){
-				contradiction(g,"");
+			nei = g.getKernelGraph().getNeighborsOf(i);
+			for(int j = nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(i<j){
+					enforce(i,j);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);
-			return;
-		}
 		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
 	}
 
@@ -137,81 +132,49 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		if(g.instantiated()){
-			for(int i=0;i<n;i++){
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<2){
-					return ESat.FALSE;
-				}
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>2){
-					return ESat.UNDEFINED;
-				}
-			}
-			boolean connected = ConnectivityFinder.findCCOf(g.getEnvelopGraph()).size()==1;
-			if(connected){
-				return ESat.TRUE;
-			}
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
+		return ESat.UNDEFINED; //TODO
 	}
 
 	private void enforce(int i, int j) throws ContradictionException {
-//		if(end[j].get()==end[i].get() && origin[i].get()==origin[j].get()){
-//			if(size[origin[i].get()].get()==n){
-//				return;
-//			}
-//			contradiction(g,"");
-//		}
-		if(end[i].get() == i && origin[j].get()==j){
-			enforceNormal(i,j);
+		if(size[color[i].get()].get()>size[color[j].get()].get()){
+			enforce(j,i);
 			return;
 		}
-		if(origin[i].get() == i && end[j].get()==j){
-			enforceNormal(j,i);
-			return;
+		if(i==j){
+			throw new UnsupportedOperationException();
 		}
-		if(origin[i].get() == i && origin[j].get()==j){
-			int newOrigin = end[i].get();
-			int newEnd = origin[i].get();
-			origin[i].set(newOrigin);
-			origin[newOrigin].set(newOrigin);
-			end[i].set(newEnd);
-			end[newEnd].set(newEnd);
-			size[newOrigin].set(size[newEnd].get());
-			enforceNormal(i,j);
-			return;
-		}
-		if(end[i].get() == i && end[j].get()==j){
-			int newOrigin = end[j].get();
-			int newEnd = origin[j].get();
-			end[j].set(newEnd);
-			end[newEnd].set(newEnd);
-			origin[j].set(newOrigin);
-			origin[newOrigin].set(newOrigin);
-			size[newOrigin].set(size[newEnd].get());
-			enforceNormal(i,j);
-			return;
-		}
-		contradiction(g,"");//this cas should not happen (except if deg=2 is not propagated yet)
-	}
-
-	private void enforceNormal(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
-		if(size[start].get()>n){
+		int ci = color[i].get();
+		int cj = color[j].get();
+		if( ci==cj){
 			contradiction(g,"");
 		}
-		if(last!=j || start != i){
-			g.removeArc(last,start,this);
-		}
-		if(start==0 || last == n-1){
-			if(size[0].get()+size[origin[n-1].get()].get()<n){
-				g.removeArc(end[0].get(),origin[n-1].get(),this);
+		int idxFirst = 0;
+		int idxLast = 0;
+		in.clear();
+		in.set(i);
+		fifo[idxLast++] = i;
+		int x,ck;
+		mate[i] = j;
+		while(idxFirst<idxLast){
+			x = fifo[idxFirst++];
+			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(x);
+			for(int k=nei.getFirstElement();k>=0;k=nei.getNextElement()){
+				if(k!=mate[x]){
+					ck = color[k].get();
+					if(ck==cj){
+						g.removeArc(x,k,this);
+					}else{
+						if(ck==ci && !in.get(k)){
+							in.set(k);
+							fifo[idxLast++] = k;
+							mate[k] = x;
+						}
+					}
+				}
 			}
+			color[x].set(cj);
 		}
+		size[cj].add(size[ci].get());
 	}
 
 	//***********************************************************************************

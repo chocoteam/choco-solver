@@ -28,12 +28,12 @@
 package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.graphOperations.connectivity.LCAGraphManager;
+import solver.variables.graph.graphOperations.dominance.LCAGraphManager;
 
 import java.util.Arrays;
 import java.util.BitSet;
@@ -403,7 +403,6 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	}
 
 	public double getRepCost(int from, int to){
-//		return costs[map[from][to]]-costs[from*n+to];
 		return repCosts[from][to];
 	}
 

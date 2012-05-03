@@ -28,14 +28,12 @@ package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
-import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
@@ -52,7 +50,6 @@ import java.util.*;
  * Uses Regin algorithm
  * Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) time
  * per arc removed from the support
- * HAS A LAZY FILTERING : the filtering is applied only once per search node in order to speed up the search
  * <p/>
  * Runs incrementally for maintaining a matching
  * <p/>
@@ -76,8 +73,8 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	private StrongConnectivityFinder SCCfinder;
 	// for augmenting matching
 	int[] father;
+	int[] fifo;
 	BitSet in;
-	LinkedList<Integer> list;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -109,7 +106,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 		}
 		father = new int[n2];
 		in = new BitSet(n2);
-		list = new LinkedList<Integer>();
+		fifo = new int[n2];
 		SCCfinder = new StrongConnectivityFinder(digraph);
 	}
 
@@ -186,17 +183,18 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 
 	private int augmentPath_BFS(int root){
 		in.clear();
-		list.clear();
-		list.add(root);
+		int firstIdx = 0;
+		int lastIdx  = 0;
+		fifo[lastIdx++] = root;
 		int x,y;
 		INeighbors succs;
-		while(!list.isEmpty()){
-			x = list.removeFirst();
+		while(firstIdx<lastIdx){
+			x = fifo[firstIdx++];
 			succs = digraph.getSuccessorsOf(x);
 			for(y=succs.getFirstElement();y>=0;y=succs.getNextElement()){
 				if(!in.get(y)){
 					father[y] = x;
-					list.addLast(y);
+					fifo[lastIdx++] = y;
 					in.set(y);
 					if(free.get(y)){
 						return y;

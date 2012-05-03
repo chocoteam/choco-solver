@@ -35,7 +35,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -44,8 +44,6 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
-import java.util.Random;
 
 /**
  * @PropAnn(tested = {BENCHMARK})
@@ -349,7 +347,7 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	@Override
 	public boolean contains(int i, int j) {
 		if(mst==null){
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("no relaxation computed yet");
 //			return true;
 		}
 		return mst.arcExists(i,j);
@@ -369,7 +367,14 @@ public class PropHeldKarp<V extends Variable> extends GraphPropagator<V> impleme
 	public DirectedGraph getMST(){
 		return HKfilter.getMST();
 	}
-	public double getRepCost(int from, int to){
-		return HKfilter.getRepCost(from,to);
+
+	@Override
+	public double getReplacementCost(int from, int to){
+		return HKfilter.getRepCost(from, to);
+	}
+
+	@Override
+	public double getMarginalCost(int from, int to) {
+		return HKfilter.getRepCost(from, to);
 	}
 }

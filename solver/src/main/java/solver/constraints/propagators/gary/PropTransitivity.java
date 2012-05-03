@@ -42,8 +42,6 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**Propagator that ensures that the relation of the graph is transitive
  *
- * TODO Incrementalite ? Pas sur que ce soit utile
- *
  * @author Jean-Guillaume Fages
  */
 public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{

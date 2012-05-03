@@ -25,31 +25,56 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 12/12/11
+ * Time: 16:09
+ */
 
-import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.HeldKarp;
-import solver.variables.graph.INeighbors;
+package solver.constraints.propagators.gary.tsp.specificHeaps;
 
-public abstract class AbstractBSTFinder extends AbstractMSTFinder {
+/**
+ * Heap that is dedicated to the computation of MST
+ * It is not generic
+ */
+public interface MST_Heap {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+	/**
+	 * Add element if not already present in the heap
+	 * Else, decrease key if the new key is lower than the previous one
+	 *
+	 * @param element
+	 * @param element_key
+	 * @param i
+	 */
+	public void add(int element, double element_key, int i);
 
-	// REDUCED GRAPH STRUCTURE
-	protected IStateInt nR;
-	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
+	/**
+	 * Get the min key element
+	 * @return the element with lowest key
+	 */
+	public int pop();
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+	/**
+	 * Flush the heap
+	 */
+	void clear();
 
-	public AbstractBSTFinder(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator);
-		this.nR = nR;
-		this.sccOf = sccOf;
-		this.outArcs = outArcs;
-	}
+	/**
+	 * @return true iff the heap has no element
+	 */
+	boolean isEmpty();
+
+	/**
+	 * Get the mate (used when computing MST) of element to
+	 * @param to
+	 * @return mate[to]
+	 */
+	int getMate(int to);
+
+	/**
+	 * @return the number of elements in the heap
+	 */
+	int size();
 }

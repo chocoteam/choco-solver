@@ -76,7 +76,9 @@ public enum TSP_heuristics {
 	},
 
 	enf_sparse  {
+
 		private int currentNode;
+		
 		private int[] e;
 
 		private int getNextSparseNode(UndirectedGraphVar g, int n) {
@@ -144,6 +146,7 @@ public enum TSP_heuristics {
 			fd.set(g,(currentNode+1)*n+maxE, Assignment.graph_enforcer);
 			return fd;
 		}
+
 		public void init(UndirectedGraphVar g, int n){
 			e = new int[n];
 			currentNode = -1;

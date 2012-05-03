@@ -64,19 +64,20 @@ public class HCPsymmetric {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 100000;
+	private static final long TIMELIMIT = 5000;
 	private static final int MAX_SIZE = 200000;
 	private static String outFile;
 	private static Solver solver;
 	private static boolean alldifferentAC;
+	private static boolean useRestarts;
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		tsplib_bench();
-		kingTour();
+		tsplib_bench();
+//		kingTour();
 	}
 
 	// King Tour
@@ -87,7 +88,7 @@ public class HCPsymmetric {
 //		int size = 50;
 //		int[] sizes = {10,20,50,100,200,500};
 //		for(int size:sizes){
-		for(int size=8; size<500;size+=2){
+		for(int size=90; size<500;size+=2){
 			String s = "king_"+size;
 			System.out.println(s);
 			boolean[][] matrix = generateKingTourInstance(size);
@@ -193,17 +194,13 @@ public class HCPsymmetric {
 		String dir = "/Users/jfages07/Documents/code/ALL_hcp";
 		File folder = new File(dir);
 		String[] list = folder.list();
+		useRestarts = true;
 		for (String s : list) {
 			if (s.contains(".hcp")){
 				boolean[][] matrix = parseInstance(dir + "/" + s);
 				alldifferentAC = false;
 				solveUndirected(matrix,s);
-//				solveUndirected(matrix,s);
-				solveDirected(matrix,s);
-				alldifferentAC = true;
-				solveDirected(matrix,s);
-//				solveDirected(matrix,s);
-//				solveDirected(matrix,s);
+//				alldifferentAC = true;
 //				solveDirected(matrix,s);
 			}
 		}
@@ -228,8 +225,8 @@ public class HCPsymmetric {
 		// constraints
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
 		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,solver,gc,2));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
+		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
+		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
 		if(alldifferentAC){
 			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
 		}
@@ -238,7 +235,9 @@ public class HCPsymmetric {
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-//		solver.getSearchLoop().plugSearchMonitor(new MyMon());
+		if(useRestarts){
+			solver.getSearchLoop().plugSearchMonitor(new MyMon());
+		}
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 //		solver.findAllSolutions();
@@ -292,7 +291,9 @@ public class HCPsymmetric {
 		solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(Sort.build(Primitive.arcs(gc)).clearOut());
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		solver.getSearchLoop().plugSearchMonitor(new MyMon());
+		if(useRestarts){
+			solver.getSearchLoop().plugSearchMonitor(new MyMon());
+		}
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 		solver.findSolution();

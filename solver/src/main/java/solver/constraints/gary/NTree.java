@@ -45,8 +45,6 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
-import java.util.ArrayList;
-import java.util.LinkedList;
 
 /**Constraint for tree partitioning an anti-arborscence
  * In the modelization a root is a loop
@@ -67,6 +65,7 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 
 	DirectedGraphVar g;
 	IntVar nTree;
+	StrongConnectivityFinder SCCfinder;
 	
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -150,23 +149,18 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 	
 	private int calcMinTree() {
 		int n = g.getEnvelopGraph().getNbNodes();
-		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
-		int[] sccOf = new int[n];
-		int sccNum = 0;
-		int node;
-		for (TIntArrayList scc:allSCC){
-			for(int x=0;x<scc.size();x++){
-				sccOf[scc.get(x)] = sccNum;
-			}
-			sccNum++;
+		if(SCCfinder == null){
+			SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
 		}
-		LinkedList<TIntArrayList> sinks = new LinkedList<TIntArrayList>();
-		boolean looksSink = true;
+		int[] sccOf = SCCfinder.getNodesSCC();
+		int node;
+		TIntArrayList sinks = new TIntArrayList();
+		boolean looksSink;
 		INeighbors nei;
-		for (TIntArrayList scc:allSCC){
+		for(int scc=SCCfinder.getNbSCC()-1;scc>=0;scc--){
 			looksSink = true;
-			for(int x=0;x<scc.size();x++){
-				node = scc.get(x);
+			node = SCCfinder.getSCCFirstNode(scc);
+			while(node!=-1){
 				nei = g.getEnvelopGraph().getSuccessorsOf(node);
 				for(int suc=nei.getFirstElement(); suc>=0 && looksSink; suc=nei.getNextElement()){
 					if (sccOf[suc]!=sccOf[node]){
@@ -174,7 +168,9 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 					}
 				}
 				if(!looksSink){
-					x = scc.size();
+					node = -1;
+				}else{
+					node = SCCfinder.getNextNode(node);
 				}
 			}
 			if(looksSink){
@@ -183,6 +179,45 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 		}
 		return sinks.size();
 	}
+
+//	private int calcMinTree() {
+//		int n = g.getEnvelopGraph().getNbNodes();
+//		if(SCCfinder == null){
+//			SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
+//		}
+////		ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+//		int[] sccOf = new int[n];
+//		int sccNum = 0;
+//		int node;
+//		for (TIntArrayList scc:allSCC){
+//			for(int x=0;x<scc.size();x++){
+//				sccOf[scc.get(x)] = sccNum;
+//			}
+//			sccNum++;
+//		}
+//		LinkedList<TIntArrayList> sinks = new LinkedList<TIntArrayList>();
+//		boolean looksSink = true;
+//		INeighbors nei;
+//		for (TIntArrayList scc:allSCC){
+//			looksSink = true;
+//			for(int x=0;x<scc.size();x++){
+//				node = scc.get(x);
+//				nei = g.getEnvelopGraph().getSuccessorsOf(node);
+//				for(int suc=nei.getFirstElement(); suc>=0 && looksSink; suc=nei.getNextElement()){
+//					if (sccOf[suc]!=sccOf[node]){
+//						looksSink = false;
+//					}
+//				}
+//				if(!looksSink){
+//					x = scc.size();
+//				}
+//			}
+//			if(looksSink){
+//				sinks.add(scc);
+//			}
+//		}
+//		return sinks.size();
+//	}
 
     @Override
     public HeuristicVal getIterator(String name, V var) {

@@ -65,7 +65,6 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	// VARIABLES
 	//***********************************************************************************
 
-	public static long duration;
 	private GraphVar g;
 	private IntVar k;
 
@@ -78,7 +77,6 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 		g = graph;
 		this.k = k;
 		initDataStructure();
-		duration = 0;
 	}
 
 	//***********************************************************************************
@@ -179,7 +177,6 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		long time = System.currentTimeMillis();
 		int n = g.getEnvelopGraph().getNbNodes();
 		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
 		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
@@ -268,7 +265,6 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 				}
 			}
 		}
-		duration += (System.currentTimeMillis()-time);
 	}
 
 	//***********************************************************************************

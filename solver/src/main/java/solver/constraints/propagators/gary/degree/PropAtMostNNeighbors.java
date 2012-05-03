@@ -60,7 +60,7 @@ public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAtMostNNeighbors(UndirectedGraphVar graph, Solver solver, Constraint constraint, int nNeigh) {
+	public PropAtMostNNeighbors(UndirectedGraphVar graph,int nNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();

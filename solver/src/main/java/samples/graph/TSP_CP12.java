@@ -31,17 +31,18 @@ import choco.kernel.ResolutionPolicy;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropSumArcCosts;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.constraints.propagators.gary.vrp.PropSumArcCosts;
 import solver.propagation.generator.Primitive;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -65,7 +66,7 @@ public class TSP_CP12 {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 100000;
+	private static final long TIMELIMIT = 1800000;
 	private static final int MAX_SIZE = 600;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
@@ -317,7 +318,8 @@ public class TSP_CP12 {
 	public static void bench() {
 		clearFile(outFile = "tsp.csv");
 		writeTextInto("instance;sols;fails;nodes;time;obj;allDiffAC;search;\n", outFile);
-		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
+		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+//		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
@@ -331,7 +333,7 @@ public class TSP_CP12 {
 //				pursue = true;
 //			}
 //			if(pursue)
-			if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
+			if (s.contains(".tsp") && (!s.contains("a280")) && (!s.contains("gil262")) && (!s.contains("gz")) && (!s.contains("lin"))){
 				matrix = parseInstance(dir + "/" + s);
 				if((matrix!=null && matrix.length>=0 && matrix.length<300)){
 					if(optProofOnly){
@@ -389,14 +391,13 @@ public class TSP_CP12 {
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
 		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
 		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,solver,gc,2));
+		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
 		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
 		if(allDiffAC){
 			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
 		}
 		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
 		gc.addAdHocProp(mst);
-//		gc.addAdHocProp(new Prop_LP_GRB(undi,totalCost,matrix,solver,gc));
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphRandom(undi,seed));

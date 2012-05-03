@@ -29,47 +29,77 @@
  * Created by IntelliJ IDEA.
  * User: Jean-Guillaume Fages
  * Date: 30/01/12
- * Time: 17:10
+ * Time: 17:09
  */
 
-package solver.constraints.propagators.gary.tsp.heaps;
+package solver.constraints.propagators.gary.tsp.specificHeaps;
 
 import java.util.BitSet;
 
 /**
- * Same worst case complexity but much better in practice
- * Especially when several nodes have same -infinity value 
+ * Trivial Heap to use for debugging
+ * worst case running time for O(m) add/decrease key and O(n) pop = O(n*n+m)
  */
-public class FastIntervalBinaryTree extends IntervalBinaryTree{
+public class ArrayHeap implements MST_Heap {
 
-	BitSet best;
-	double bestVal;
+	BitSet in;
+	double[] value;
+	int[] mate;
+	int size;
 
-	public FastIntervalBinaryTree(int n){
-		super(n);
-		best = new BitSet(n);
+	public ArrayHeap(int n){
+		in = new BitSet(n);
+		value = new double[n];
+		mate = new int[n];
+		size = 0;
 	}
 
 	@Override
 	public void add(int element, double element_key, int i) {
-		if(isEmpty() || element_key<bestVal){
-			bestVal = element_key;
-			best.clear();
-			best.set(element);
-		}else if(element_key==bestVal){
-			best.set(element);
+		if(!in.get(element)){
+			in.set(element); size++;
+			value[element] = element_key;
+			mate[element] = i;
+		}else if(element_key<value[element]){
+			value[element] = element_key;
+			mate[element] = i;
 		}
-		super.add(element,element_key,i);
 	}
+
 	@Override
 	public int pop() {
-		if(!best.isEmpty()){
-			int min = best.nextSetBit(0);
-			best.clear(min);
-//			in.clear(min);
-			remove(min);
-			return min;
+		if(isEmpty()){
+			throw new UnsupportedOperationException();
 		}
-		return super.pop();
+		int min = in.nextSetBit(0);
+		for(int i=in.nextSetBit(0);i>=0;i=in.nextSetBit(i+1)){
+			if(value[i]<value[min]){
+				min = i;
+			}
+		}
+		in.clear(min);
+		size--;
+		return min;
+	}
+
+	@Override
+	public void clear() {
+		in.clear();
+		size = 0;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return size==0;
+	}
+
+	@Override
+	public int size() {
+		return size;
+	}
+
+	@Override
+	public int getMate(int to) {
+		return mate[to];
 	}
 }

@@ -27,9 +27,9 @@
 
 package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
-import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.heaps.Heap;
+import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -42,7 +42,7 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	//***********************************************************************************
 
 	double[][] costs;
-	Heap heap;
+	MST_Heap heap;
 	BitSet inTree;
 	int tSize;
 	double minVal;
@@ -166,6 +166,6 @@ public class PrimMSTFinder extends AbstractMSTFinder {
 	}
 
 	public double getRepCost(int from, int to){
-		return costs[from][to];// approximation of course
+		return 0;//costs[from][to];// approximation of course
 	}
 }

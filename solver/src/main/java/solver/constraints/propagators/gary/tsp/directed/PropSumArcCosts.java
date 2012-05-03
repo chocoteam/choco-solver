@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.vrp;
+package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;

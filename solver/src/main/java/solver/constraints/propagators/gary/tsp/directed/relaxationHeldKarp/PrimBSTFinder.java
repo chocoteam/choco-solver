@@ -28,9 +28,9 @@
 package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
 import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
-import solver.constraints.propagators.gary.tsp.heaps.FastArrayHeap;
-import solver.constraints.propagators.gary.tsp.heaps.Heap;
+import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
+import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -43,7 +43,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 	//***********************************************************************************
 
 	double[][] costs;
-	Heap heap;
+	MST_Heap heap;
 	BitSet inTree;
 	private int tSize;
 	private double minVal;
@@ -222,5 +222,9 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 		}else{
 			throw new UnsupportedOperationException("bound computation only, no filtering!");
 		}
+	}
+
+	public double getRepCost(int from, int to){
+		return 0;//costs[from][to];// approximation of course
 	}
 }

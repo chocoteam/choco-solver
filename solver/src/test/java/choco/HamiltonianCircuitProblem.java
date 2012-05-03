@@ -38,8 +38,10 @@ import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.NoSubTours;
+import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.tsp.directed.*;
-import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -101,8 +103,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		Constraint[] cstrs;
 		switch (allDiff){
 			case 0:cstrs = new Constraint[]{gc};break;
-//			case 1:gc.addAdHocProp(new PropAllDiffGraph2(graph,solver,gc));
-//				cstrs = new Constraint[]{gc};break;
+			case 1:
+				gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+				cstrs = new Constraint[]{gc};break;
 			case 2: cstrs = new Constraint[]{gc, integerAllDiff(false)};break;
 			case 3: cstrs = new Constraint[]{gc, integerAllDiff(true)};break;
 			default : throw new UnsupportedOperationException();
@@ -129,7 +132,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
 		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
 		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
-//		gc.addAdHocProp(new PropDegreePatterns(graph,gc,solver));
 	}
 	private Constraint integerAllDiff(boolean bc) {
 		integers = new IntVar[n];
@@ -162,17 +164,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 			return new AllDifferent(integers,solver,AllDifferent.Type.CLIQUE_IN_ONE);
 		}
 	}
-	private void addHK(){
-		int[][] distanceMatrix = new int[n][n];
-		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				distanceMatrix[i][j] = 1;
-			}
-		}
-		IntVar totalCost = VariableFactory.enumerated("cost",n-1,n-1,solver);
-		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0,n-1, totalCost, distanceMatrix,gc,solver);
-		gc.addAdHocProp(propHK_mst);
-	}
 	private void configParameters(int ad, boolean ab, boolean aab, boolean rg) {
 		allDiff  = ad;
 		arbo     = ab;
@@ -204,27 +195,9 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	// TESTS
 	//***********************************************************************************
 
-	@Test(groups = "1m")
-	public static void smalltest() {
-		int[] sizes = new int[]{5,6,7,10,15,20};
-		int[] seeds = new int[]{0,10,42};
-		double[] densities = new double[]{0.1,0.2};
-		boolean[][] matrix;
-		for(int n:sizes){
-			for(double d:densities){
-				for(int s:seeds){
-					System.out.println("n:"+n+" d:"+d+" s:"+s);
-					GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
-					matrix = gg.arcBasedGenerator(d);
-					System.out.println("graph generated");
-					testModels(matrix,s);
-				}
-			}
-		}
-	}
 
 	@Test(groups = "1s")
-	public static void testBug() {
+	public static void test1() {
 		int[] sizes = new int[]{15};
 		int[] seeds = new int[]{42};
 		double[] densities = new double[]{0.2};
@@ -242,8 +215,43 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}
 	}
 
+	@Test(groups = "1s")
+	public static void test2() {
+		int n = 8;
+		boolean[][] matrix = new boolean[n][n];
+		matrix[0][6] = true;
+		matrix[1][0] = true;matrix[1][7] = true;
+		matrix[2][3] = true;matrix[2][5] = true;matrix[2][7] = true;
+		matrix[3][4] = true;matrix[3][5] = true;matrix[3][6] = true;
+		matrix[4][3] = true;matrix[4][5] = true;matrix[4][6] = true;matrix[4][7] = true;
+		matrix[5][0] = true;matrix[5][4] = true;
+		matrix[6][1] = true;matrix[6][4] = true;
+		matrix[7][0] = true;matrix[7][1] = true;matrix[7][2] = true;matrix[7][3] = true;matrix[7][5] = true;
+		long nbSols = referencemodel(matrix);
+		System.out.println(nbSols);
+	}
+
+	@Test(groups = "1m")
+	public static void test3() {
+		int[] sizes = new int[]{5,6,7,10,15,20};
+		int[] seeds = new int[]{0,10,42};
+		double[] densities = new double[]{0.1,0.2};
+		boolean[][] matrix;
+		for(int n:sizes){
+			for(double d:densities){
+				for(int s:seeds){
+					System.out.println("n:"+n+" d:"+d+" s:"+s);
+					GraphGenerator gg = new GraphGenerator(n,s, GraphGenerator.InitialProperty.HamiltonianCircuit);
+					matrix = gg.arcBasedGenerator(d);
+					System.out.println("graph generated");
+					testModels(matrix,s);
+				}
+			}
+		}
+	}
+
 	@Test(groups = "1h")
-	public static void smalltest2() {
+	public static void test4() {
 		int[] sizes = new int[]{10};
 		double[] densities = new double[]{0.1,0.2,0.5,0.8,1};
 		boolean[][] matrix;
@@ -259,22 +267,6 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 				}
 			}
 		}
-	}
-
-	@Test(groups = "1s")
-	public static void lorcaTest() {
-		int n = 8;
-		boolean[][] matrix = new boolean[n][n];
-		matrix[0][6] = true;
-		matrix[1][0] = true;matrix[1][7] = true;
-		matrix[2][3] = true;matrix[2][5] = true;matrix[2][7] = true;
-		matrix[3][4] = true;matrix[3][5] = true;matrix[3][6] = true;
-		matrix[4][3] = true;matrix[4][5] = true;matrix[4][6] = true;matrix[4][7] = true;
-		matrix[5][0] = true;matrix[5][4] = true;
-		matrix[6][1] = true;matrix[6][4] = true;
-		matrix[7][0] = true;matrix[7][1] = true;matrix[7][2] = true;matrix[7][3] = true;matrix[7][5] = true;
-		long nbSols = referencemodel(matrix);
-		System.out.println(nbSols);
 	}
 
 	private static void testModels(boolean[][] m, long seed) {

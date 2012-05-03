@@ -34,7 +34,7 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -45,6 +45,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * DO NOT WORK YET
  * @PropAnn(tested = {BENCHMARK})
  * @param <V>
  */
@@ -68,30 +69,33 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 	public static long nbRem;
 	protected static boolean waitFirstSol;
 	protected int nbSprints = 30;
+	protected int maxDegree;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
+	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int maxDegree, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
 		super((V[]) new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		obj = cost;
 		originalCosts = costMatrix;
 		costs = new double[n][n];
-		totalPenalities = 0;
+//		totalPenalities = 0;
 		penalities = new double[n];
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
+		this.maxDegree = maxDegree;
 	}
 
 	/** ONE TREE based HK */
-	public static PropTreeHeldKarp oneTreeBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropTreeHeldKarp phk = new PropTreeHeldKarp(graph,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalOneTree_GAC(phk.n,phk);
+	public static PropTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropTreeHeldKarp phk = new PropTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
+//		phk.HKfilter = new KruskalOneTree_GAC(phk.n,phk);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
+		phk.HKfilter = phk.HK;
 		return phk;
 	}
 
@@ -116,8 +120,7 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				if(i<j){
-					costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
-					costs[j][i] = costs[i][j];
+					costs[j][i] = costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
 				}
 			}
 		}
@@ -126,19 +129,16 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 	protected void HK_Pascals() throws ContradictionException {
 		double hkb;
 		double alpha = 2;
-//		double beta = 0.95;
 		double beta = 0.5;
-//		if(nbSprints==31){
-//			beta = 0.95;
-//		}
 		double bestHKB;
 		boolean improved;
 		int count = 2;
 		bestHKB = 0;
 		HKfilter.computeMST(costs,g.getEnvelopGraph());
+		mst = HKfilter.getMST();
+		computeTotalPenalties();
 		hkb = HKfilter.getBound()-totalPenalities;
 		bestHKB = hkb;
-		mst = HKfilter.getMST();
 		if(hkb-Math.floor(hkb)<0.001){
 			hkb = Math.floor(hkb);
 		}
@@ -148,12 +148,13 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 			improved = false;
 			for(int i=nbSprints;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
+				mst = HK.getMST();
+				computeTotalPenalties();
 				hkb = HK.getBound()-totalPenalities;
 				if(hkb>bestHKB+1){
 					bestHKB = hkb;
 					improved = true;
 				}
-				mst = HK.getMST();
 				if(hkb-Math.floor(hkb)<0.001){
 					hkb = Math.floor(hkb);
 				}
@@ -164,12 +165,13 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 				updateCostMatrix();
 			}
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
+			mst = HKfilter.getMST();
+			computeTotalPenalties();
 			hkb = HKfilter.getBound()-totalPenalities;
 			if(hkb>bestHKB+1){
 				bestHKB = hkb;
 				improved = true;
 			}
-			mst = HKfilter.getMST();
 			if(hkb-Math.floor(hkb)<0.001){
 				hkb = Math.floor(hkb);
 			}
@@ -187,6 +189,19 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 			alpha *= beta;
 			beta  /= 2;
 		}
+	}
+
+	private void computeTotalPenalties() {
+//		INeighbors nei;
+//		totalPenalities = 0;
+//		for(int i=0;i<n;i++){
+//			nei = mst.getNeighborsOf(i);
+//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//				if(i<j){
+//					totalPenalities += penalities[i]+penalities[j];
+//				}
+//			}
+//		}
 	}
 
 	//***********************************************************************************
@@ -210,14 +225,15 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 	protected void updateStep(double hkb,double alpha) {
 		double nb2viol = 0;
 		double target = obj.getUB();
-//		target = (obj.getUB()+obj.getLB())/2; // TODO recently added
 		if(target-hkb<0){
 			target = hkb+0.1;
 		}
 		int deg;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			nb2viol += (2-deg)*(2-deg);
+			if(deg>maxDegree){
+				nb2viol += (maxDegree-deg)*(maxDegree-deg);
+			}
 		}
 		if(nb2viol == 0){
 			step = 0;
@@ -232,18 +248,27 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 		}
 		double sumPenalities = 0;
 		int deg;
+//		double pen;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			penalities[i] += (deg-2)*step;
+//			if(deg>maxDegree){
+////				penalities[i] = (deg-maxDegree)*step;
+//				penalities[i] += (deg-maxDegree)*step;
+//			}else{
+////				penalities[i] = 0;
+//			}
+			penalities[i] += (deg-maxDegree)*step;
+			if(penalities[i]<0){
+				penalities[i] = 0;
+			}
+//			penalities[i]  = Math.max(0,penalities[i]);
+//			penalities[i] += (deg-2)*step;
 			if(penalities[i]>Double.MAX_VALUE/(n-1) || penalities[i]<-Double.MAX_VALUE/(n-1)){
 				throw new UnsupportedOperationException();
 			}
 			sumPenalities += penalities[i];
 		}
-//		if(mst.getNeighborsOf(0).neighborhoodSize()!=2){
-//			throw new UnsupportedOperationException();
-//		};
-		this.totalPenalities = 2*sumPenalities;
+		this.totalPenalities = sumPenalities*maxDegree;
 	}
 
 	protected void updateCostMatrix() {
@@ -310,6 +335,9 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		for(int i=0;i<n;i++){
+			penalities[i] = 0;
+		}
 		HK_algorithm();
 	}
 	@Override
@@ -322,7 +350,8 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 	}
 
 	public double getMinArcVal() {
-		return -(((double)obj.getUB())+totalPenalities);
+		return Integer.MIN_VALUE;
+//		return -(((double)obj.getUB())+totalPenalities);
 	}
 
 	public TIntArrayList getMandatoryArcsList() {
@@ -343,10 +372,11 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 		}
 		return mst.edgeExists(i,j);
 	}
+
 	public UndirectedGraph getMST(){
 		return mst;
 	}
-	
+
 	public double getReplacementCost(int from, int to){
 		return HKfilter.getRepCost(from,to);
 	}

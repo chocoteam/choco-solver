@@ -53,7 +53,7 @@ public class ConnectivityFinder {
 	 * @param graph
 	 * @return a ConnectivityObject that encapsulates all connected components, articulation points and isthmus of the given graph
 	 */
-	public static ConnectivityObject findAll(IGraph graph){
+	private static ConnectivityObject findAll(IGraph graph){
 		int nb = graph.getNbNodes();
 		ConnectivityObject co = new ConnectivityObject();
 		int[] p = new int[nb];

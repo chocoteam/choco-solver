@@ -55,7 +55,7 @@ public class PropTreeEvalObj<V extends Variable> extends GraphPropagator<V> {
 	protected int n;
 	protected IntVar sum;
 	protected int[][] distMatrix;
-	protected int[] replacementCost;
+	protected int[] lowestUnused;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -67,13 +67,41 @@ public class PropTreeEvalObj<V extends Variable> extends GraphPropagator<V> {
 		sum = obj;
 		n = g.getEnvelopGraph().getNbNodes();
 		distMatrix = costMatrix;
-		replacementCost = new int[n];
+		lowestUnused = new int[n];
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int minSum =0;
+		INeighbors nei;
+		for (int i = 0; i < n; i++) {
+			lowestUnused[i] = 0;
+			nei = g.getEnvelopGraph().getNeighborsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!g.getKernelGraph().arcExists(i,j)){
+					if( lowestUnused[i] > distMatrix[i][j]){
+						lowestUnused[i] = distMatrix[i][j];
+					}
+				}
+			}
+			nei = g.getKernelGraph().getNeighborsOf(i);
+			if(nei.neighborhoodSize()>0){
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					minSum += distMatrix[i][j];
+				}
+			}else{
+				minSum += lowestUnused[i];
+			}
+		}
+		minSum/=2;
+		sum.updateLowerBound(minSum, this);
+		filter(minSum);
+	}
+	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		propagate(0);
@@ -88,30 +116,6 @@ public class PropTreeEvalObj<V extends Variable> extends GraphPropagator<V> {
 	public ESat isEntailed() {
 		return ESat.UNDEFINED;
 	}
-	
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int minSum =0;
-		int maxSum =0;
-		for (int i = 0; i < n; i++) {
-			minSum += findTwoBest(i);
-			maxSum += findTwoWorst(i);
-		}
-		if(maxSum%2!=0){
-			maxSum++;
-		}
-		if(minSum%2!=0){
-			minSum--;
-		}
-		minSum /= 2;
-		maxSum /= 2;
-		if(maxSum<0){
-			maxSum = Integer.MAX_VALUE;
-		}
-		sum.updateLowerBound(minSum, this);
-//		sum.updateUpperBound(maxSum, this);
-		filter(minSum);
-	}
 
 	protected void filter(int minSum) throws ContradictionException {
 		INeighbors succs;
@@ -120,78 +124,11 @@ public class PropTreeEvalObj<V extends Variable> extends GraphPropagator<V> {
 			succs = g.getEnvelopGraph().getSuccessorsOf(i);
 			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 				if(i<j && !g.getKernelGraph().edgeExists(i,j)){
-					if (replacementCost[i]==-1 || replacementCost[j]==-1) {
-						throw new UnsupportedOperationException();
-					}
-					if ((2*distMatrix[i][j]-replacementCost[i]-replacementCost[j])/2 > delta) {
-						g.removeArc(i, j, this);
+					if(distMatrix[i][j]-lowestUnused[i]>delta){
+						g.removeArc(i,j,this);
 					}
 				}
 			}
 		}
 	}
-
-	protected int findTwoBest(int i){
-		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-		if(mc1!=-1){
-			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
-			if(mc2!=-1){
-				replacementCost[i] = -1;
-				return distMatrix[i][mc1] + distMatrix[i][mc2];
-			}
-			int cost = distMatrix[i][getBestNot(i,mc1)];
-			replacementCost[i] = cost;
-			return distMatrix[i][mc1] + cost;
-		}
-		mc1 = getBestNot(i,-2);
-		int cost = distMatrix[i][getBestNot(i,mc1)];
-		replacementCost[i] = cost;
-		return distMatrix[i][mc1]+cost;
-	}
-
-	protected int getBestNot(int i, int not) {
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int cost = -1;
-		int idx = -1;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (idx==-1 || cost>distMatrix[i][j])){
-				idx = j;
-				cost = distMatrix[i][j];
-			}
-		}
-		if(idx==-1){
-			throw new UnsupportedOperationException();
-		}
-		return idx;
-	}
-
-	protected int findTwoWorst(int i){
-		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-		if(mc1!=-1){
-			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
-			if(mc2!=-1){
-				return distMatrix[i][mc1] + distMatrix[i][mc2];
-			}
-			return distMatrix[i][mc1] + distMatrix[i][getWorstNot(i, mc1)];
-		}
-		mc1 = getWorstNot(i, -2);
-		return distMatrix[i][mc1]+distMatrix[i][getWorstNot(i, mc1)];
-	}
-
-	protected int getWorstNot(int i, int not) {
-		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-		int cost = -1;
-		int idx = -1;
-		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-			if(j!=not && (idx==-1 || cost<distMatrix[i][j])){
-				idx = j;
-				cost = distMatrix[i][j];
-			}
-		}
-		if(idx==-1){
-			throw new UnsupportedOperationException();
-		}
-		return idx;
-	}
-
 }

@@ -137,19 +137,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		if(g.instantiated()){
-			for(int i=0;i<n;i++){
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>2){
-					return ESat.UNDEFINED;
-				}
-			}
-			boolean connected = ConnectivityFinder.findCCOf(g.getEnvelopGraph()).size()==1;
-			if(connected){
-				return ESat.TRUE;
-			}
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
+		return ESat.UNDEFINED;//TODO
 	}
 
 	protected void enforce(int i, int j) throws ContradictionException {

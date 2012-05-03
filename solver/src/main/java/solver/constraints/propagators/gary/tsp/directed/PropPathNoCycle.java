@@ -46,12 +46,13 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
 /**
  *
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * Simple nocircuit contraint (from noCycle of Caseaux/Laburthe)
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
 public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator<V> {
@@ -129,18 +130,27 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 
 	@Override
 	public ESat isEntailed() {
-		if(g.instantiated()){
-			int narcs = 0;
-			for(int i=0;i<n;i++){
-				narcs+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
+		}
+		int x;
+		int nb = 0;
+		INeighbors nei;
+		int y = source;
+		while(y!=sink){
+			nb++;
+			x = y;
+			nei = g.getEnvelopGraph().getSuccessorsOf(x);
+			y = nei.getFirstElement();
+			if(nei.neighborhoodSize()!=1 || y==x){
+				return ESat.FALSE;
 			}
-			boolean connected = ConnectivityFinder.findCCOf(g.getEnvelopGraph()).size()==1;
-			if(connected && narcs==n-1){
-				return ESat.TRUE;
-			}
+		}
+		nb++;
+		if(nb!=g.getEnvelopOrder() || g.getEnvelopGraph().getSuccessorsOf(sink).neighborhoodSize()>0){
 			return ESat.FALSE;
 		}
-		return ESat.UNDEFINED;
+		return ESat.TRUE;
 	}
 
 	private void enforce(int i, int j) throws ContradictionException {
@@ -165,8 +175,8 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 			}
 		}
 		if(origin[sink].get()==source && size[source].get()!=n){
-			throw new UnsupportedOperationException("should be already treated");
-//			contradiction(g,"non hamiltonian path");
+//			throw new UnsupportedOperationException("should be already treated");
+			contradiction(g,"non hamiltonian path");
 		}
 	}
 

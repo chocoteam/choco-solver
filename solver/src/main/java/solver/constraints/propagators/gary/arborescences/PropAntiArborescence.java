@@ -39,9 +39,9 @@ import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
 
 /**
  * AntiArborescence constraint (simplification from tree constraint)

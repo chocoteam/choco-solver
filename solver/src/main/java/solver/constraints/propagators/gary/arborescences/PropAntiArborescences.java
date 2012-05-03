@@ -41,13 +41,13 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
 
 /**
  * AntiArborescences constraint (simplification from tree constraint) based on dominators
- * CONSIDERS THAT EACH NODE WITH NO PREDECESSOR IS A ROOT (needs at least one such node)
+ * CONSIDERS THAT EACH NODE WITH NO PREDECESSOR IS A SINK (needs at least one such node)
  * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
  * but very efficient in practice
  * */

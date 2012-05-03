@@ -29,6 +29,7 @@ package solver.constraints.gary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.StrategyFactory;

@@ -39,12 +39,9 @@ import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.AlphaDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
-
-import java.util.BitSet;
-import java.util.LinkedList;
+import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.AlphaDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
 
 /**
  * Arborescence constraint (simplification from tree constraint)
@@ -99,7 +96,6 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		System.out.println("propagate");
 		for(int i=0;i<n;i++){
 			g.enforceNode(i,this);
 			g.removeArc(i,i,this);

@@ -56,7 +56,7 @@ public enum ATSP_heuristics {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
-						repCost = relax.getRepCost(i,j);
+						repCost = relax.getReplacementCost(i, j);
 						if(repCost<0){
 							throw new UnsupportedOperationException();
 						}
@@ -90,7 +90,7 @@ public enum ATSP_heuristics {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if(relax.contains(i, j) && (!g.getKernelGraph().arcExists(i,j))){
-						repCost = relax.getRepCost(i,j);
+						repCost = relax.getReplacementCost(i, j);
 						if(repCost<0){
 							System.out.println(repCost);
 							throw new UnsupportedOperationException();
@@ -126,7 +126,7 @@ public enum ATSP_heuristics {
 				suc = g.getEnvelopGraph().getSuccessorsOf(i);
 				for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 					if((!relax.contains(i, j)) && (!g.getKernelGraph().arcExists(i,j))){
-						repCost = relax.getRepCost(i,j);
+						repCost = relax.getReplacementCost(i, j);
 						if(repCost<0){
 							System.out.println(repCost);
 							throw new UnsupportedOperationException();
@@ -195,7 +195,7 @@ public enum ATSP_heuristics {
 				if(suc.neighborhoodSize()>1){
 					for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 						if(relax.contains(i,j) &&!g.getKernelGraph().arcExists(i,j)){
-							repCostij = relax.getRepCost(i, j);
+							repCostij = relax.getReplacementCost(i, j);
 							sizi = suc.neighborhoodSize()+g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
 							if (sizi == size) {
 								if(repCost<repCostij){

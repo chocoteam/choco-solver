@@ -27,7 +27,7 @@
 
 package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
 
-import solver.constraints.propagators.gary.tsp.HeldKarp;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -76,7 +76,6 @@ public abstract class AbstractMSTFinder {
 	public double getBound() {
 		return treeCost;
 	}
-	public double getRepCost(int from, int to){
-		throw new UnsupportedOperationException("use GAC propagators");
-	}
+
+	public abstract double getRepCost(int from, int to);
 }
