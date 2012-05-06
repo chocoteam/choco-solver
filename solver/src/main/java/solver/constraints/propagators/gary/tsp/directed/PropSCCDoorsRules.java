@@ -35,7 +35,7 @@
 package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -46,6 +46,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -63,7 +64,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 
 	private DirectedGraphVar g;
 	private int n;
-	private IntProcedure arcRemoved;
+	private PairProcedure arcRemoved;
 	private BitSet sccComputed;
 	private TIntArrayList inDoors;
 	private TIntArrayList outDoors;
@@ -103,33 +104,6 @@ public class PropSCCDoorsRules extends GraphPropagator {
 	// METHODS
 	//***********************************************************************************
 
-	public void provideBranchingOpinion(int[][] branchingQuality){
-//		INeighbors succs;
-//		int penalty = 10;
-//		int from,to;
-//		BitSet doors = new BitSet(n);
-//		for (int i = 0; i < nR.get(); i++) {
-//			succs = outArcs[i];
-//			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
-//				from = j/n-1;
-//				to   = j%n;
-//				doors.set(from);
-//				doors.set(to);
-//			}
-//		}
-//		for(int i=0;i<n;i++){
-//			succs = g.getEnvelopGraph().getSuccessorsOf(i);
-//			for(int j=succs.getFirstElement(); j>=0; j=succs.getNextElement()){
-//				if(doors.get(i)){
-//					branchingQuality[i][j] -= penalty;
-//				}
-//				if(doors.get(j)){
-//					branchingQuality[i][j] -= penalty;
-//				}
-//			}
-//		}
-	}
-
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		for(int i=nR.get()-1;i>=0;i--){
@@ -144,7 +118,8 @@ public class PropSCCDoorsRules extends GraphPropagator {
 			return;
 		}
 		sccComputed.clear();
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -221,11 +196,9 @@ public class PropSCCDoorsRules extends GraphPropagator {
 		}
 	}
 
-	private class RemArc implements IntProcedure{
+	private class RemArc implements PairProcedure{
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			int x = sccOf[from].get();
 			int y = sccOf[to].get();
 			if(x!=y){

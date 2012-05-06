@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.gary.GraphConstraint;
@@ -38,6 +39,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 
@@ -56,8 +58,7 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	public static long duration;
 	private Variable[] nodeVars;
 	private IntProcedure nodeEnforced;
-	private IntProcedure arcEnforced;
-	private IntProcedure arcRemoved;
+	private PairProcedure arcEnforced, arcRemoved;
 	private Solver solver;
 	private GraphRelation relation;
 
@@ -115,14 +116,15 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 		long time = System.currentTimeMillis();
 		Variable var = vars[idxVarInProp];
         if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 			if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, var).forEach(arcEnforced, EventType.ENFORCEARC);
+                gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             }
             if((mask & EventType.ENFORCENODE.mask) !=0){
 				eventRecorder.getDeltaMonitor(this, var).forEach(nodeEnforced, EventType.ENFORCENODE);
 			}
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, var).forEach(arcRemoved, EventType.REMOVEARC);
+                gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
             }
 		}
 		else{
@@ -185,11 +187,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 	}
 
 	/** When an edge (x,y), is enforced then the relation xRy must be true */
-	private class EdgeEnf implements IntProcedure {
+	private class EdgeEnf implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			apply(from, to);
 		}
 	}
@@ -227,11 +227,9 @@ public class PropRelation<V extends Variable, G extends GraphVar> extends GraphP
 		}
 	}
 	/** When an edge (x,y), is removed then the non relation x!Ry must be true iff both x and y are in the kernel */
-	private class EdgeRem implements IntProcedure {
+	private class EdgeRem implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if(g.getKernelGraph().getActiveNodes().isActive(from) && g.getKernelGraph().getActiveNodes().isActive(to)){
 				unapply(from, to);
 			}

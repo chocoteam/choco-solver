@@ -70,7 +70,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		}
 		if (envelop.removeArc(x, y)){
 			if (reactOnModification){
-				delta.add((x + 1) * getEnvelopGraph().getNbNodes() + y, IGraphDelta.AR,cause);
+				delta.add(x, IGraphDelta.AR_tail,cause);
+				delta.add(y, IGraphDelta.AR_head,cause);
 			}
 			EventType e = EventType.REMOVEARC;
 			notifyMonitors(e, cause);
@@ -84,7 +85,8 @@ public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
 		if(envelop.arcExists(x, y)){
 			if (kernel.addArc(x, y)){
 				if (reactOnModification){
-					delta.add((x+1)*getEnvelopGraph().getNbNodes()+y,IGraphDelta.AE,cause);
+					delta.add(x,IGraphDelta.AE_tail,cause);
+					delta.add(y,IGraphDelta.AE_head,cause);
 				}
 				EventType e = EventType.ENFORCEARC;
 				notifyMonitors(e, cause);

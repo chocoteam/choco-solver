@@ -37,7 +37,7 @@ package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -46,6 +46,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -61,8 +62,7 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	DirectedGraphVar g;
 	int but,n;
-	private IntProcedure arcEnforced;
-	private IntProcedure arcRemoved;
+	private PairProcedure arcEnforced, arcRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -120,8 +120,9 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -152,19 +153,17 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
+	private class EnfArc implements PairProcedure {
 		private GraphPropagator p;
 
 		private EnfArc(GraphPropagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
+		public void execute(int from, int to) throws ContradictionException {
 			if(from!=but){
-				int to   = i%n;
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				for(i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
+				for(int i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
 					if(i!=to){
 						g.removeArc(from,i,p);
 					}
@@ -173,15 +172,14 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 	}
 
-	private class RemArc implements IntProcedure{
+	private class RemArc implements PairProcedure{
 		private GraphPropagator p;
 
 		private RemArc(GraphPropagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
+		public void execute(int from , int to) throws ContradictionException {
 			if(from!=but){
 				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
 				if (succs.neighborhoodSize()==0){

@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -37,6 +38,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -85,7 +87,8 @@ public class PropAntiSymmetric extends GraphPropagator<DirectedGraphVar>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this, g).forEach(enf, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(enf, EventType.ENFORCEARC);
 	}
 
 	@Override
@@ -116,15 +119,13 @@ public class PropAntiSymmetric extends GraphPropagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	/** Enable to remove the opposite arc */
-	private class EnfProc implements IntProcedure {
+	private class EnfProc implements PairProcedure {
 		private final Propagator p;
 		public EnfProc(Propagator p) {
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if(from!=to){
 				g.removeArc(to, from, p);
 			}

@@ -36,7 +36,7 @@ package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -46,6 +46,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -62,7 +63,7 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 
 	DirectedGraphVar g;
 	int n;
-	private IntProcedure arcEnforced;
+	private PairProcedure arcEnforced;
 	private IStateInt[] origin,end,size;
 	private int source,sink;
 
@@ -81,7 +82,7 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc(this);
+		arcEnforced = new EnfArc();
 		origin = new IStateInt[n];
 		size = new IStateInt[n];
 		end = new IStateInt[n];
@@ -119,7 +120,8 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 		if(ALWAYS_COARSE){
 			propagate(0);return;
 		}
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override
@@ -183,15 +185,10 @@ public class PropPathNoCycle<V extends DirectedGraphVar> extends GraphPropagator
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
-
-		private EnfArc(GraphPropagator p){
-			this.p = p;
-		}
+	private class EnfArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			enforce(i/n-1,i%n);
+		public void execute(int i, int j) throws ContradictionException {
+			enforce(i,j);
 		}
 	}
 }

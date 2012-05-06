@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,6 +41,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -127,11 +129,12 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 		long tps = System.currentTimeMillis();
         Variable var = vars[idxVarInProp];
         if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,graph);
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-                eventRecorder.getDeltaMonitor(this, var).forEach(enf, EventType.ENFORCEARC);
+                gdm.forEachArc(enf, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-                eventRecorder.getDeltaMonitor(this, var).forEach(rem, EventType.REMOVEARC);
+                gdm.forEachArc(rem, EventType.REMOVEARC);
 			}
 		}
 		else{
@@ -236,14 +239,12 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	//***********************************************************************************
 
 	/** When an edge (x,y), is enforced then the relation between x and y is true */
-	private class EnfEdge implements IntProcedure{
+	private class EnfEdge implements PairProcedure{
 		protected Propagator p;
 		protected EnfEdge(Propagator p){
 			this.p = p;
 		}
-		public void execute(int i) throws ContradictionException{
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException{
 			set( from, to);
 		}
 		protected void set(int i, int j) throws ContradictionException{
@@ -263,14 +264,12 @@ public class PropBoolGraphChanneling<V extends Variable> extends GraphPropagator
 	}
 
 	/** When an edge (x,y), is removed then the relation between x and y is false */
-	private class RemEdge implements IntProcedure{
+	private class RemEdge implements PairProcedure{
 		protected Propagator p;
 		protected RemEdge(Propagator p){
 			this.p = p;
 		}
-		public void execute(int i) throws ContradictionException{
-			int from = i/n-1;
-			int to   = i%n;
+		public void execute(int from, int to) throws ContradictionException{
 			set( from, to);
 		}
 		protected void set(int i, int j) throws ContradictionException{

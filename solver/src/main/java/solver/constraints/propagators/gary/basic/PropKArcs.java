@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -39,6 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -57,7 +59,7 @@ public class PropKArcs extends GraphPropagator {
 	protected GraphVar g;
 	protected IntVar k;
 	protected IStateInt nbInKer, nbInEnv;
-	protected IntProcedure arcEnforced,arcRemoved;
+	protected PairProcedure arcEnforced,arcRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -97,11 +99,12 @@ public class PropKArcs extends GraphPropagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 		if ((mask & EventType.ENFORCEARC.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 		}
 		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 		}
 		filter(nbInKer.get(),nbInEnv.get());
 	}
@@ -175,16 +178,16 @@ public class PropKArcs extends GraphPropagator {
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
+	private class EnfArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
+		public void execute(int i, int j) throws ContradictionException {
 			nbInKer.add(1);
 		}
 	}
 
-	private class RemArc implements IntProcedure {
+	private class RemArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
+		public void execute(int i, int j) throws ContradictionException {
 			nbInEnv.add(1);
 		}
 	}

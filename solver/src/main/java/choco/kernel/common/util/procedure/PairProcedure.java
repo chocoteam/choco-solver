@@ -25,31 +25,25 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.directedGraph;
+package choco.kernel.common.util.procedure;
 
-import solver.ICause;
 import solver.exception.ContradictionException;
-import solver.variables.graph.IVariableGraph;
+import java.io.Serializable;
 
-public interface IVariableDirectedGraph extends IVariableGraph{
-
-	/**
-     * Remove arc (x,y) from the mandatory graph 
-     * @param x node's index
-     * @param y node's index
-     * @param cause algorithm which is related to the removal
-     * @return true iff the removal has an effect
-     * @throws ContradictionException 
-     */
-    boolean removeSuccessor(int x, int y, ICause cause) throws ContradictionException;
+/**
+ * <br/>
+ *
+ * @author Jean-Guillaume Fages
+ * @since may 2012
+ */
+public interface PairProcedure extends Serializable {
 
     /**
-     * Enforce arc (x,y) to be in the mandatory graph 
-     * @param x node's index
-     * @param y node's index
-     * @param cause algorithm which is related to the removal
-     * @return true iff (x,y) was not already mandatory subgraph
-     * @throws ContradictionException 
+     * Action to execute in a <code>GraphDelta</code> object, within the <code>forEach</code> method.
+	 * Used to iterate on a set if arcs 
+     * @param i tail of the arc
+	 * @param j arrow of the arc
+     * @throws solver.exception.ContradictionException when a incoherence is encountered
      */
-    boolean enforceSuccessor(int x, int y, ICause cause) throws ContradictionException;
+    void execute(int i, int j) throws ContradictionException;
 }

@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -41,6 +42,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -64,8 +66,7 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     private int[] values;
     private TIntIntHashMap valuesHash;
     private ValRem valRemoved;
-    private IntProcedure arcEnforced;
-    private IntProcedure arcRemoved;
+    private PairProcedure arcEnforced, arcRemoved;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -77,12 +78,11 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
         intVars = vars;
         this.values = v;
         this.valuesHash = vH;
-        int n = values.length;
         // IntVar events
         valRemoved = new ValRem(this);
         // Graph events
-        arcEnforced = new EdgeEnf(this, n);
-        arcRemoved = new EdgeRem(this, n);
+        arcEnforced = new EdgeEnf(this);
+        arcRemoved = new EdgeRem(this);
     }
 
     //***********************************************************************************
@@ -111,11 +111,12 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         Variable variable = vars[idxVarInProp];
         if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+                gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+                gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
             }
         } else {
             if (EventType.anInstantiationEvent(mask)) {
@@ -193,20 +194,16 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     /**
      * When an edge (x,y), x<=y, is enforced than x must be instantiated to y
      */
-    private class EdgeEnf implements IntProcedure {
+    private class EdgeEnf implements PairProcedure {
 
         private Propagator p;
-        private int n;
 
-        private EdgeEnf(Propagator p, int n) {
+        private EdgeEnf(Propagator p) {
             this.p = p;
-            this.n = n;
         }
 
         @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
+        public void execute(int from, int to) throws ContradictionException {
             if (from < to) {
                 intVars[from].instantiateTo(values[to], p);
             } else {
@@ -219,20 +216,16 @@ public class PropIntVarsGraphChanneling<V extends Variable> extends GraphPropaga
     /**
      * When an edge (x,y), x<=y, is removed than a value y must be removed from the domain of x
      */
-    private class EdgeRem implements IntProcedure {
+    private class EdgeRem implements PairProcedure {
 
         private Propagator p;
-        private int n;
 
-        private EdgeRem(Propagator p, int n) {
+        private EdgeRem(Propagator p) {
             this.p = p;
-            this.n = n;
         }
 
         @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
+        public void execute(int from, int to) throws ContradictionException {
             if (from < to) {
                 intVars[from].removeValue(values[to], p);
             } else {

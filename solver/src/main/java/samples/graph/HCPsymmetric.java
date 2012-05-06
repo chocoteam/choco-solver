@@ -76,8 +76,8 @@ public class HCPsymmetric {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		tsplib_bench();
-//		kingTour();
+//		tsplib_bench();
+		kingTour();
 	}
 
 	// King Tour

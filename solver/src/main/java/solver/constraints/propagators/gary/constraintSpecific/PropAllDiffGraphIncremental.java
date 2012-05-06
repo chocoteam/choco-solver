@@ -28,6 +28,7 @@ package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
@@ -35,6 +36,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
@@ -69,7 +71,7 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	private int[] matching;
 	private int[] nodeSCC;
 	private BitSet free;
-	private IntProcedure remProc;
+	private PairProcedure remProc;
 	int matchingCardinality;
 	private StrongConnectivityFinder SCCfinder;
 	// for augmenting matching
@@ -244,7 +246,8 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		free.clear();
-		eventRecorder.getDeltaMonitor(this,g).forEach(remProc, EventType.REMOVEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(remProc, EventType.REMOVEARC);
 		repairMatching();
 		filter();
 	}
@@ -278,10 +281,9 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 		return ESat.TRUE;
 	}
 
-	private class DirectedRemProc implements IntProcedure{
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n+n;
+	private class DirectedRemProc implements PairProcedure{
+		public void execute(int from, int to) throws ContradictionException {
+			to += n;
 			if(digraph.arcExists(to,from)){
 				free.set(to);
 				free.set(from);
@@ -292,10 +294,8 @@ public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
 			}
 		}
 	}
-	private class UndirectedRemProc implements IntProcedure{
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to   = i%n;
+	private class UndirectedRemProc implements PairProcedure{
+		public void execute(int from, int to) throws ContradictionException {
 			check(from,to+n);
 			check(to,from+n);
 		}

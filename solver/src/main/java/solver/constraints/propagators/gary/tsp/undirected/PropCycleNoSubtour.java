@@ -37,6 +37,8 @@ package solver.constraints.propagators.gary.tsp.undirected;
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -46,6 +48,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -62,7 +65,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	protected UndirectedGraphVar g;
 	protected int n;
-	protected IntProcedure arcEnforced;
+	protected PairProcedure arcEnforced;
 	protected IStateInt[] origin,end,size;
 
 	//***********************************************************************************
@@ -126,7 +129,8 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 			propagate(0);
 			return;
 		}
-		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override
@@ -204,10 +208,10 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	// PROCEDURES
 	//***********************************************************************************
 
-	protected  class EnfArc implements IntProcedure {
+	protected  class EnfArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			enforce(i/n-1,i%n);
+		public void execute(int i, int j) throws ContradictionException {
+			enforce(i,j);
 		}
 	}
 }

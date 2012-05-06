@@ -29,6 +29,7 @@ package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
@@ -41,6 +42,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -56,7 +58,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
 	DirectedGraphVar g;
 	IntVar nLoops;
-	IntProcedure removeProc, enforceProc;
+	PairProcedure removeProc, enforceProc;
 	IStateInt nbKerLoop;
 	IStateInt nbEnvLoop;
 	IStateBool active;
@@ -127,11 +129,12 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
         Variable variable = vars[idxVarInProp];
 
         if((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 			if ((mask & EventType.REMOVEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(this, g).forEach(removeProc, EventType.REMOVEARC);
+                gdm.forEachArc(removeProc, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(this, g).forEach(enforceProc, EventType.ENFORCEARC);
+                gdm.forEachArc(enforceProc, EventType.ENFORCEARC);
 			}
 			nLoops.updateUpperBound(nbEnvLoop.get(), this);
 			nLoops.updateLowerBound(nbKerLoop.get(), this);
@@ -194,13 +197,10 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	/**
 	 * Checks if a loop has been removed
 	 */
-	private class RemProc implements IntProcedure {
-
-		public RemProc() {}
-
+	private class RemProc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			if (i/n-1 == i%n){
+		public void execute(int i, int j) throws ContradictionException {
+			if (i==j){
 				nbEnvLoop.add(-1);
 			}
 		}
@@ -209,13 +209,10 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	/**
 	 * Checks if a loop has been enforced
 	 */
-	private class EnfLoop implements IntProcedure {
-
-		public EnfLoop() {}
-
+	private class EnfLoop implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			if (i/n-1 == i%n){
+		public void execute(int i, int j) throws ContradictionException {
+			if (i==j){
 				nbKerLoop.add(1);
 			}
 		}
