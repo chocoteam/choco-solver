@@ -38,7 +38,8 @@ import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.relaxationHeldKarp.PropTreeHeldKarp;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropIterativeMST;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
@@ -80,23 +81,24 @@ public class DegreeConstraintMinimumSpanningTree {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		String instType = "str";
+		String instType = "shrd";
 		clearFile(outFile = "dcmst_"+instType+"test.csv");
 		writeTextInto("instance;sols;fails;nodes;time;obj;search;\n", outFile);
 		String dir = "/Users/jfages07/Documents/tree_partitioning/SHRD-Graphs";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
-		search = 2;
+		int maxDegree = 3;
+		search = 1;
 		for (String s : list) {
-			if (s.contains(instType) && (!s.contains("xxx"))){
+			if (s.contains(instType) && (!s.contains("shxrd150"))){
 				matrix = parse(dir + "/" + s, instType);
-				if((matrix!=null && matrix.length>=0 && matrix.length<100)){
-					setUB(s.split("\\.")[0]);
+				if((matrix!=null && matrix.length>=0 && matrix.length<4000)){
+//					upperBound = 100000;
+					setUB(s.split("\\.")[0],maxDegree);
 					System.out.println("optimum : "+upperBound);
-//					solveTSP(matrix, s);
-					solveDCMST(matrix, s);
-//					System.exit(0);
+//					if(maxDegree==2)solveTSP(matrix, s);
+					solveDCMST(matrix, s, maxDegree);
 				}else{
 					System.out.println("CANNOT LOAD");
 				}
@@ -198,12 +200,16 @@ public class DegreeConstraintMinimumSpanningTree {
 		return null;
 	}
 
-	private static void setUB(String s) {
+	private static void setUB(String s, int maxDegree) {
 		File file = new File("/Users/jfages07/Documents/tree_partitioning/SHRD-Graphs/bestSolutions.txt");
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();
 			while(!line.contains(s)){
+				line = buf.readLine();
+			}
+			while (maxDegree>2){
+				maxDegree--;
 				line = buf.readLine();
 			}
 			line = line.replaceAll(" * ", " ");
@@ -214,7 +220,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		}
 	}
 
-	private static void solveDCMST(int[][] matrix, String instanceName) {
+	private static void solveDCMST(int[][] matrix, String instanceName,int maxDegree) {
 		int n = matrix.length;
 		for(int i=0;i<n;i++){
 			for(int j=0;j<n;j++){
@@ -234,13 +240,13 @@ public class DegreeConstraintMinimumSpanningTree {
 			}
 		}
 		// constraints
-		int maxDegree = 3;
 		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
 		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,1,gc,solver));
 		gc.addAdHocProp(new PropAtMostNNeighbors(undi,maxDegree,gc,solver));
 		gc.addAdHocProp(new PropTreeNoSubtour(undi,gc,solver));
 		gc.addAdHocProp(new PropTreeEvalObj(undi,totalCost,matrix,gc,solver));
 		gc.addAdHocProp(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
+		gc.addAdHocProp(PropIterativeMST.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_MinDeg, null);

@@ -28,13 +28,10 @@ package solver.constraints.gary;
 
 import solver.Solver;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.gary.PropKCC;
+import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.PropKCliques;
 import solver.constraints.propagators.gary.PropTransitivity;
-import solver.constraints.propagators.gary.basic.PropAntiSymmetric;
-import solver.constraints.propagators.gary.basic.PropEachNodeHasLoop;
-import solver.constraints.propagators.gary.basic.PropKLoops;
-import solver.constraints.propagators.gary.basic.PropKNodes;
+import solver.constraints.propagators.gary.basic.*;
 import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
 import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;

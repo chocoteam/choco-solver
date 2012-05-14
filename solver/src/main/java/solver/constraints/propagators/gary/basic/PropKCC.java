@@ -25,98 +25,92 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphOperations.connectivity;
+package solver.constraints.propagators.gary.basic;
 
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.gary.GraphConstraint;
+import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
+import solver.variables.IntVar;
+import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-import gnu.trove.list.array.TIntArrayList;
-
-import java.util.LinkedList;
-
-/**Class which encapsulates Isthmus, Articulation Points (AP) and Connected Components (CC)
+/**Propagator that ensures that the final graph consists in K Connected Components (CC)
+ *
+ * simple checker (runs in linear time)
+ * 
  * @author Jean-Guillaume Fages
  */
-public class ConnectivityObject {
+public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private LinkedList<TIntArrayList> connectedComponents;
-	private TIntArrayList articulationPoints;
-	private TIntArrayList isthmus;
+	private GraphVar g;
+	private IntVar k;
+	private ConnectivityFinder ker_CC_finder, env_CC_finder;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/** Create a connectivity object that will only store CC */
-	public ConnectivityObject() {
-		connectedComponents = new LinkedList<TIntArrayList>();
-		isthmus = new TIntArrayList();
-		articulationPoints = new TIntArrayList();
+	public PropKCC(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
+		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
+		this.g = graph;
+		this.k = k;
+		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
+		ker_CC_finder = new ConnectivityFinder(g.getKernelGraph());
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// PROPAGATIONS
 	//***********************************************************************************
 
-	/**
-	 * create a new empty connected component
-	 */
-	public void newCC() {
-		connectedComponents.addLast(new TIntArrayList());
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		ker_CC_finder.findAllCC();
+		env_CC_finder.findAllCC();
+		int ke = ker_CC_finder.getNBCC();
+		int ee = env_CC_finder.getNBCC();
+		k.updateLowerBound(ke,this);
+		k.updateUpperBound(ee,this);
 	}
 
-	/**Add a node to a connected component
-	 * More precisely to the last created CC
-	 * @param node node to add to the connected component
-	 */
-	public void addCCNode(int node) {
-		connectedComponents.getLast().add(node);
-	}
-
-	/**Add an articulation point
-	 * @param point node which is an articulation point
-	 */
-	public void addArticulationPoint(int point) {
-		articulationPoints.add(point);
-	}
-
-	/**Add an isthmus
-	 * @param arc (x,y) int encoding :  (x+1)*n+y with n the number of nodes of the graph
-	 */
-	public void addIsthmus(int arc) {
-		isthmus.add(arc);
-	}
-
-	public String toString(){
-		String s = "Connectivity object :";
-		s += "\nConnected Components : "+connectedComponents.toString();
-		s += "\nArticulation Points : "+articulationPoints.toString();
-		s += "\nIsthmus : "+isthmus.toString();
-		return s;
+	
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		propagate(0);
+		// todo incremental behavior
 	}
 
 	//***********************************************************************************
-	// ACCESSORS
+	// INFO
 	//***********************************************************************************
 
-	/**Get all connected components.
-	 * @return connectedComponents a list of CC
-	 */
-	public LinkedList<TIntArrayList> getConnectedComponents() {
-		return connectedComponents;
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
 	}
-	/**Get articulation points 
-	 * @return articulationPoints 
-	 */
-	public TIntArrayList getArticulationPoints() {
-		return articulationPoints;
+
+	@Override
+	public ESat isEntailed() {
+		ker_CC_finder.findAllCC();
+		env_CC_finder.findAllCC();
+		int ke = ker_CC_finder.getNBCC();
+		int ee = env_CC_finder.getNBCC();
+		if(k.getLB()>ee || k.getUB()<ke){
+			return ESat.FALSE;
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
-	/**Get isthmus of the graph
-	 * @return isthmus 
-	 */
-	public TIntArrayList getIsthmus() {
-		return isthmus;
-	}
+	
 }

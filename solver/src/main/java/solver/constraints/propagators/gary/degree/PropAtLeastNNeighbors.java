@@ -66,7 +66,6 @@ public class PropAtLeastNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		n_neighbors = nbNeigh;
-		int n = g.getEnvelopGraph().getNbNodes();
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem();
 	}

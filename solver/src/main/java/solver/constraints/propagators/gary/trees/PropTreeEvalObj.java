@@ -91,13 +91,13 @@ public class PropTreeEvalObj<V extends Variable> extends GraphPropagator<V> {
 			nei = g.getKernelGraph().getNeighborsOf(i);
 			if(nei.neighborhoodSize()>0){
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j)
 					minSum += distMatrix[i][j];
 				}
 			}else{
 				minSum += lowestUnused[i];
 			}
 		}
-		minSum/=2;
 		sum.updateLowerBound(minSum, this);
 		filter(minSum);
 	}

@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
+package solver.constraints.propagators.gary.trees;
 
 import gnu.trove.list.array.TIntArrayList;
 import solver.constraints.propagators.gary.HeldKarp;

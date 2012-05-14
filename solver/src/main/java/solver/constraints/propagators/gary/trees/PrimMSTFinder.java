@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
+package solver.constraints.propagators.gary.trees;
 
 import solver.constraints.propagators.gary.HeldKarp;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;

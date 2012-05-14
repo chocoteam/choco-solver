@@ -25,59 +25,84 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.trees.relaxationHeldKarp;
+package solver.constraints.propagators.gary.basic;
 
-import solver.constraints.propagators.gary.HeldKarp;
+import choco.kernel.ESat;
+import solver.Solver;
+import solver.constraints.gary.GraphConstraint;
+import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.variables.graph.GraphType;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
+import solver.variables.EventType;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-public abstract class AbstractTreeFinder {
+/**Propagator that ensures that the final graph consists in K Connected Components (CC)
+ * simple checker (runs in linear time)
+ * already too slow for managing thousands of nodes
+ * 
+ * @author Jean-Guillaume Fages
+ */
+public class PropBiconnected extends GraphPropagator<GraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected final static boolean FILTER = true;
-	// INPUT
-	protected UndirectedGraph g;	// graph
-	protected int n;				// number of nodes
-	// OUTPUT
-	protected UndirectedGraph Tree;
-	protected double treeCost;
-	// PROPAGATOR
-	protected HeldKarp propHK;
+	private GraphVar g;
+	private ConnectivityFinder env_CC_finder;
+
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractTreeFinder(int nbNodes, HeldKarp propagator) {
-		n = nbNodes;
-		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
-		propHK = propagator;
+	public PropBiconnected(GraphVar graph,GraphConstraint constraint, Solver solver) {
+		super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		this.g = graph;
+		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// PROPAGATIONS
 	//***********************************************************************************
 
-	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
-
-	public abstract void performPruning(double UB) throws ContradictionException;
-
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
-
-	public UndirectedGraph getMST() {
-		return Tree;
-	}
-	public double getBound() {
-		return treeCost;
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		if(g.getEnvelopOrder()==g.getKernelOrder() && !env_CC_finder.isBiconnected()){
+			contradiction(g,"");
+		}
 	}
 
-	public double getRepCost(int from, int to){
-		throw new UnsupportedOperationException("not implemented yet");
+	long timestamp = 0;
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		if(timestamp!= AbstractSearchLoop.timeStamp){
+			timestamp = AbstractSearchLoop.timeStamp;
+			propagate(0);
+		}
+		// todo incremental behavior ?
+	}
+
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
+
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVENODE.mask + EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
+	}
+
+	@Override
+	public ESat isEntailed() {
+		if(!env_CC_finder.isBiconnected()){
+			return ESat.FALSE;
+		}
+		if(g.instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
 }
