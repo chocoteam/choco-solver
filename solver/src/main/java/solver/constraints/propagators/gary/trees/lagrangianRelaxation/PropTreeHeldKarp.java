@@ -67,8 +67,7 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 	double totalPenalities;
 	protected UndirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
-		protected AbstractTreeFinder HKfilter, HK;
-//	protected AbstractTreeFinder HK;
+	protected AbstractTreeFinder HKfilter, HK;
 	public static long nbRem;
 	protected static boolean waitFirstSol;
 	protected int nbSprints = 30;
@@ -147,7 +146,7 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		if((int) Math.ceil(hkb)==evalTree(mst))
-		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 		for(int iter=5;iter>0;iter--){
 			for(int i=nbSprints;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
@@ -171,10 +170,10 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
 			obj.updateLowerBound((int)Math.ceil(hkb), this);
 			if((int) Math.ceil(hkb)==evalTree(mst))
-			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+				HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 			if(updateStep(hkb, alpha))return;
 			alpha *= beta;
-//			beta  /= 2;
+			beta  /= 2;
 		}
 	}
 
@@ -194,10 +193,12 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 
 	protected boolean updateStep(double hkb,double alpha) throws ContradictionException {
 		double nb2viol = 0;
-		double target = 1.01*obj.getUB();
+		double target = obj.getUB();
 		if(target-hkb<0){
-//			target = hkb+0.1;
 			throw new UnsupportedOperationException();
+		}
+		if(target-hkb<0.001){
+			target = hkb+0.001;
 		}
 		int deg;
 		boolean found = true;
@@ -213,11 +214,7 @@ public class PropTreeHeldKarp<V extends Variable> extends GraphPropagator<V> imp
 		}else{
 			step = alpha*(target-hkb)/nb2viol;
 		}
-		if(step<0.000001){
-			for(int i=0;i<n;i++){
-				penalities[i] = 0;
-			}
-			totalPenalities = 0;
+		if(step<0.0001){
 			return true;
 		}
 		double maxPen = 2*obj.getUB();

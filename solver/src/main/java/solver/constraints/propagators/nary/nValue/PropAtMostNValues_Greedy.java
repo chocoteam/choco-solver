@@ -27,10 +27,8 @@
 package solver.constraints.propagators.nary.nValue;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -40,11 +38,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.StoredUndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
-
 import java.util.BitSet;
 
 /**
@@ -62,15 +58,12 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 
 	private IntVar nValues;
 	// graph model
-	private int n, n2;
+	private int n;
 	private UndirectedGraph digraph;
-	private TIntIntHashMap map;
-	private int[] value;
 	// required data structure
 	private int[] nbNeighbors;
-	private BitSet in, inMIS;
+	private BitSet in, inMIS, nodes;
 	private TIntArrayList list;
-	private IntProcedure remProc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -90,34 +83,11 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
 		n = vars.length;
 		this.nValues = nValues;
-		map = new TIntIntHashMap();
-		IntVar v;
-		int ub;
-		int idx = n;
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			for (int j = v.getLB(); j <= ub; j = v.nextValue(j)) {
-				if (!map.containsKey(j)) {
-					map.put(j, idx);
-					idx++;
-				}
-			}
-		}
-		n2 = idx;
-		value = new int[n2-n];
-		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-				value[map.get(k)-n] = k;
-			}
-		}
-		digraph = new StoredUndirectedGraph(solver.getEnvironment(), n2, GraphType.LINKED_LIST);
-		remProc = new RemProc();
-		in = new BitSet(n2);
-		inMIS = new BitSet(n2);
-		nbNeighbors = new int[n2];
+		digraph = new StoredUndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST);
+		in = new BitSet(n);
+		inMIS = new BitSet(n);
+		nodes = new BitSet(n);
+		nbNeighbors = new int[n];
 		list = new TIntArrayList();
 	}
 
@@ -126,23 +96,11 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 	//***********************************************************************************
 
 	private void buildDigraph() {
-		for (int i = 0; i < n2; i++) {
+		for (int i = 0; i < n; i++) {
 			digraph.getSuccessorsOf(i).clear();
 			digraph.getPredecessorsOf(i).clear();
 		}
-		int j, k, ub;
-		IntVar v;
-		for (int i = n; i < n2; i++) {
-			digraph.desactivateNode(i);
-		}
 		for (int i = 0; i < n; i++) {
-			v = vars[i];
-			ub = v.getUB();
-			for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-				j = map.get(k);
-				digraph.activateNode(j);
-				digraph.addEdge(i,j);
-			}
 			for (int i2 = i+1; i2 < n; i2++) {
 				if(intersect(i,i2)){
 					digraph.addEdge(i,i2);
@@ -165,25 +123,78 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		}
 		return false;
 	}
-	
+
+	private void prefilter() throws ContradictionException {
+		in.clear();
+		inMIS.clear();
+		for(int i=0;i<n;i++){
+			if(vars[i].instantiated()){
+				inMIS.set(i);
+				in.set(vars[i].getValue());
+			}
+		}
+		int nv = in.cardinality();
+		nValues.updateLowerBound(nv,this);
+		if(nv == nValues.getUB()){ // remove all other values
+			IntVar v;
+			int ub;
+			for(int i=0;i<n;i++){
+				if(!vars[i].instantiated()){
+					v = vars[i];
+					ub = v.getUB();
+					for(int val=v.getLB();val<=ub;val = v.nextValue(val)){
+						if(!in.get(val)){
+							v.removeValue(val,this);
+						}
+					}
+				}
+			}
+			setPassive();
+		}
+		if(nv+1 == nValues.getUB()){ // remove values that cannot be taken by all unfixed variables
+			IntVar v;
+			int ub;
+			nodes.clear();
+			for(int i=inMIS.nextSetBit(0);i>=0;i=inMIS.nextSetBit(i)){
+				v = vars[i];
+				ub = v.getUB();
+				for(int val=v.getLB();val<=ub;val = v.nextValue(val)){
+					if(!in.get(val)){
+						v.removeValue(val,this);
+						boolean remove = false;
+						for(int k=inMIS.nextSetBit(0);k>=0;k=inMIS.nextSetBit(k)){
+							if(!vars[k].contains(val)){
+								remove = true;
+								break;
+							}
+						}
+						if(remove){
+							for(int k=inMIS.nextSetBit(0);k>=0;k=inMIS.nextSetBit(k)){
+								if(vars[k].removeValue(val,this)){
+									nodes.set(k);
+								}
+							}
+						}
+					}
+				}
+			}
+			for(int i=in.nextSetBit(0);i>=0;i=in.nextSetBit(i+1)){
+				propagate(null,i,0);
+			}
+		}
+	}
+
 	private int greedySearch(){
 		// prepare data structures
-		for (int i = 0; i < n2; i++) {
+		for (int i = 0; i < n; i++) {
 			nbNeighbors[i] = 0;
 		}
 		in.clear();
 		inMIS.clear();
-		IntVar v;
 		int j;
 		for(int i=0;i<n;i++){
 			in.set(i);
-			v = vars[i];
-			if(v.instantiated()){
-				j = map.get(v.getLB());
-				in.set(j);
-				nbNeighbors[j]++;
-			}
-			nbNeighbors[i] = v.getDomainSize();
+			nbNeighbors[i] = vars[i].getDomainSize();
 		}
 		INeighbors nei;
 		list.clear();
@@ -219,10 +230,10 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 	}
 
 	private void filter() throws ContradictionException {
-		IActiveNodes nodes = digraph.getActiveNodes();
 		INeighbors nei;
+		in.clear();
 		int mate;
-		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+		for(int i=0;i<n;i++){
 			if(!inMIS.get(i)){
 				mate = -1;
 				nei = digraph.getNeighborsOf(i);
@@ -241,33 +252,40 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 				}
 			}
 		}
+		for(int i=in.nextSetBit(0);i>=0;i=in.nextSetBit(i+1)){
+			propagate(null,i,0);
+		}
 	}
 
 	private void enforce(int i, int j) throws ContradictionException {
 		if(i>j){
 			enforce(j,i);
 		}else{
-			if(j>=n){	//vars[i] = value[j]
-				vars[i].instantiateTo(value[j-n],this);
-			}else{		//vars[i] = vars[j]
-				IntVar x = vars[i];
-				IntVar y = vars[j];
-				x.updateUpperBound(y.getUB(),this);
-				y.updateUpperBound(x.getUB(),this);
-				x.updateLowerBound(y.getLB(),this);
-				y.updateLowerBound(x.getLB(),this);
-				int ub = x.getUB();
-				for(int val=x.getLB();val<=ub;val=x.nextValue(val)){
-					if(!y.contains(val)){
-						x.removeValue(val,this);
-					}
+			IntVar x = vars[i];
+			IntVar y = vars[j];
+			boolean bx = false;
+			boolean by = false;
+			bx |= x.updateUpperBound(y.getUB(),this);
+			by |= y.updateUpperBound(x.getUB(),this);
+			bx |= x.updateLowerBound(y.getLB(),this);
+			by |= y.updateLowerBound(x.getLB(),this);
+			int ub = x.getUB();
+			for(int val=x.getLB();val<=ub;val=x.nextValue(val)){
+				if(!y.contains(val)){
+					bx |= x.removeValue(val,this);
 				}
-				ub = y.getUB();
-				for(int val=y.getLB();val<=ub;val=y.nextValue(val)){
-					if(!x.contains(val)){
-						y.removeValue(val,this);
-					}
+			}
+			ub = y.getUB();
+			for(int val=y.getLB();val<=ub;val=y.nextValue(val)){
+				if(!x.contains(val)){
+					by |= y.removeValue(val,this);
 				}
+			}
+			if(bx){
+				in.set(i);
+			}
+			if(by){
+				in.set(j);
 			}
 		}
 	}
@@ -281,36 +299,25 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		if((evtmask &= EventType.FULL_PROPAGATION.mask)!=0){
 			buildDigraph();
 		}
-		if(digraph.getActiveNodes().neighborhoodSize()<=nValues.getLB()){
-			setPassive();
-		}else{
-			int min = greedySearch();
-			nValues.updateLowerBound(min, this);
-			if(min == nValues.getUB()){
-				filter();
-			}
+		prefilter();
+		int min = greedySearch();
+		nValues.updateLowerBound(min, this);
+		if(min == nValues.getUB()){
+			filter();
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if(idxVarInProp<n){
-			eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(remProc, EventType.REMOVE);
 			INeighbors nei = digraph.getNeighborsOf(idxVarInProp);
 			for(int v=nei.getFirstElement();v>=0;v=nei.getNextElement()){
-				if(v<n && !intersect(idxVarInProp,v)){
+				if(!intersect(idxVarInProp,v)){
 					digraph.removeEdge(idxVarInProp,v);
 				}
 			}
 		}
 		forcePropagate(EventType.CUSTOM_PROPAGATION);
-//		if (nbPendingER == 0) {
-//			int card = repairMatching();
-//			nValues.updateUpperBound(card,this);
-//			if(nValues.getLB()==card){
-//				filter();
-//			}
-//		}
 	}
 
 	//***********************************************************************************
@@ -350,19 +357,5 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 			return ESat.FALSE;
 		}
 		return ESat.UNDEFINED;
-	}
-
-	//***********************************************************************************
-	// PROCEDURE
-	//***********************************************************************************
-
-	private class RemProc implements IntProcedure {
-		public void execute(int i) throws ContradictionException {
-			int j = map.get(i);
-			digraph.removeEdge(i,j);
-			if(digraph.getNeighborsOf(j).isEmpty()){
-				digraph.desactivateNode(j);
-			}
-		}
 	}
 }

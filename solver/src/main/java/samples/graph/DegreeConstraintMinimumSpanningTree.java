@@ -82,14 +82,14 @@ public class DegreeConstraintMinimumSpanningTree {
 
 	public static void main(String[] args) {
 		String instType = "shrd";
-		clearFile(outFile = "dcmst_"+instType+"test.csv");
+		int maxDegree = 2;
+		search = 2;
+		clearFile(outFile = "dcmst_"+instType+"_d"+maxDegree+"_s"+search+".csv");
 		writeTextInto("instance;sols;fails;nodes;time;obj;search;\n", outFile);
 		String dir = "/Users/jfages07/Documents/tree_partitioning/SHRD-Graphs";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
-		int maxDegree = 3;
-		search = 1;
 		for (String s : list) {
 			if (s.contains(instType) && (!s.contains("shxrd150"))){
 				matrix = parse(dir + "/" + s, instType);
