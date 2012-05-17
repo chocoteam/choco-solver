@@ -33,8 +33,6 @@ import solver.variables.Variable;
 
 public abstract class GraphPropagator<V extends Variable> extends Propagator<V> {
 
-	public final static boolean ALWAYS_COARSE = false;
-	
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************

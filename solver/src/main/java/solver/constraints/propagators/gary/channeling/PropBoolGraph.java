@@ -25,65 +25,62 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.basic;
+package solver.constraints.propagators.gary.channeling;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.AbstractSearchLoop;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-/**Propagator that ensures that the final graph consists in K Connected Components (CC)
- * simple checker (runs in linear time)
- * already too slow for managing thousands of nodes
+/**Propagator channeling between arcs of a graph and a boolean matrix
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropBiconnected extends GraphPropagator<GraphVar>{
+public class PropBoolGraph extends GraphPropagator<BoolVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
-	private ConnectivityFinder env_CC_finder;
-
+	protected GraphVar graph;
+	protected BoolVar[][] relations;
+	protected int n;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropBiconnected(GraphVar graph, Constraint constraint, Solver solver) {
-		super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		this.g = graph;
-		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
+	public PropBoolGraph(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+		super(ArrayUtils.flatten(rel), solver, cstr, PropagatorPriority.QUADRATIC);
+		this.graph = graph;
+		relations = rel;
+		n = rel.length;
 	}
 
 	//***********************************************************************************
 	// PROPAGATIONS
 	//***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		if(g.getEnvelopOrder()==g.getKernelOrder() && !env_CC_finder.isBiconnected()){
-			contradiction(g,"");
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+		for(int i=0; i<n; i++){
+			for(int j = 0; j<n; j++){
+				updateGraph(i,j);
+			}
 		}
 	}
 
-	long timestamp = 0;
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(timestamp!= AbstractSearchLoop.timeStamp){
-			timestamp = AbstractSearchLoop.timeStamp;
-			propagate(0);
-		}
-		// todo incremental behavior ?
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		updateGraph(idxVarInProp/n,idxVarInProp%n);
 	}
 
 	//***********************************************************************************
@@ -92,17 +89,39 @@ public class PropBiconnected extends GraphPropagator<GraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask + EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
+		return EventType.INT_ALL_MASK();
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(!env_CC_finder.isBiconnected()){
-			return ESat.FALSE;
+		for(int i=0; i<n; i++){
+			for(int j = 0; j<n; j++){
+				if(relations[i][j].instantiated()){
+					if(relations[i][j].getValue()==1 && !graph.getEnvelopGraph().arcExists(i,j)){
+						return ESat.FALSE;
+					}
+				}else{
+					return ESat.UNDEFINED;
+				}
+			}
 		}
-		if(g.instantiated()){
-			return ESat.TRUE;
+		if(!graph.instantiated()){
+			return ESat.UNDEFINED;
 		}
-		return ESat.UNDEFINED;
+		return ESat.TRUE;
+	}
+
+	//***********************************************************************************
+	// REACT ON BOOL MODIFICATION
+	//***********************************************************************************
+
+	private void updateGraph(int i, int j) throws ContradictionException {
+		if(relations[i][j].instantiated()){
+			if(relations[i][j].getLB()==0){
+				graph.removeArc(i,j,this);
+			}else{
+				graph.enforceArc(i,j,this);
+			}
+		}
 	}
 }

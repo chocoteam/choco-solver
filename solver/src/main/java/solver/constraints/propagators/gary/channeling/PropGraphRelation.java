@@ -25,44 +25,49 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.basic;
+package solver.constraints.propagators.gary.channeling;
 
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
+import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
 
-/**Propagator that ensures that the final graph consists in K Connected Components (CC)
- * simple checker (runs in linear time)
- * already too slow for managing thousands of nodes
- * 
+/**Propagator channeling a graph and an array of variables through a Relation object
+ *
  * @author Jean-Guillaume Fages
  */
-public class PropBiconnected extends GraphPropagator<GraphVar>{
+public class PropGraphRelation<G extends GraphVar> extends GraphPropagator<G> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
-	private ConnectivityFinder env_CC_finder;
-
+	private G g;
+	private int n;
+	private Variable[] nodeVars;
+	private Solver solver;
+	private GraphRelation relation;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	public PropBiconnected(GraphVar graph, Constraint constraint, Solver solver) {
-		super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropGraphRelation(Variable[] vars, G graph, Solver solver, Constraint cons, GraphRelation relation) {
+		super((G[]) new GraphVar[]{graph}, solver, cons, PropagatorPriority.QUADRATIC);
 		this.g = graph;
-		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
+		this.nodeVars = vars;
+		this.n = nodeVars.length;
+		this.relation = relation;
+		this.solver = solver;
 	}
 
 	//***********************************************************************************
@@ -71,19 +76,14 @@ public class PropBiconnected extends GraphPropagator<GraphVar>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		if(g.getEnvelopOrder()==g.getKernelOrder() && !env_CC_finder.isBiconnected()){
-			contradiction(g,"");
+		for(int i=0; i<n; i++){
+			checkVar(i);
 		}
 	}
 
-	long timestamp = 0;
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(timestamp!= AbstractSearchLoop.timeStamp){
-			timestamp = AbstractSearchLoop.timeStamp;
-			propagate(0);
-		}
-		// todo incremental behavior ?
+		propagate(0);
 	}
 
 	//***********************************************************************************
@@ -92,17 +92,41 @@ public class PropBiconnected extends GraphPropagator<GraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask + EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
+		return EventType.ENFORCEARC.mask  + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		if(!env_CC_finder.isBiconnected()){
-			return ESat.FALSE;
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
 		}
-		if(g.instantiated()){
-			return ESat.TRUE;
+		for(int i=0;i<n;i++){
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(relation.isEntail(i,j)==ESat.FALSE){
+					return ESat.FALSE;
+				}
+			}
 		}
-		return ESat.UNDEFINED;
+		return ESat.TRUE;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private void checkVar(int i) throws ContradictionException {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for(int j=0; j<n; j++){
+			if(g.getKernelGraph().arcExists(i, j)){
+				relation.applyTrue(i,j, solver, this);
+			}else{
+				if(!g.getEnvelopGraph().arcExists(i, j)){
+					if(ker.isActive(i) && ker.isActive(j)){
+						relation.applyFalse(i,j, solver, this);
+					}
+				}
+			}
+		}
 	}
 }

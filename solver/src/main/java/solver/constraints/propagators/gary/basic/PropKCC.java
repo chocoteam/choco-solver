@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -60,7 +60,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
+	public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
 		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
 		this.k = k;

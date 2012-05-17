@@ -36,9 +36,7 @@ package solver.constraints.propagators.gary.tsp.undirected;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -125,10 +123,6 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);
-			return;
-		}
 		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 	}

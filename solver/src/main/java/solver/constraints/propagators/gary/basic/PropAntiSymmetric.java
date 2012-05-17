@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -62,7 +61,7 @@ public class PropAntiSymmetric extends GraphPropagator<DirectedGraphVar>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAntiSymmetric(DirectedGraphVar graph,Constraint constraint,Solver solver) {
+	public PropAntiSymmetric(DirectedGraphVar graph, Constraint constraint,Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
 		enf = new EnfProc(this);

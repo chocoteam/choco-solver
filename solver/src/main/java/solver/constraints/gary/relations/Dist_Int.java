@@ -29,7 +29,6 @@ package solver.constraints.gary.relations;
 import choco.kernel.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 
@@ -104,8 +103,8 @@ public class Dist_Int extends GraphRelation<IntVar> {
 		return true;
 	}
 	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.REFLEXIVITY};
-	}
+//	@Override
+//	public GraphProperty[] getGraphProperties() {
+//		return new GraphProperty[]{GraphProperty.REFLEXIVITY};
+//	}
 }

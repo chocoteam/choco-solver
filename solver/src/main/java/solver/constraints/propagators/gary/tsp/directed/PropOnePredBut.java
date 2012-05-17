@@ -116,9 +116,6 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
 		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.forEachArc(arcRemoved, EventType.REMOVEARC);

@@ -36,7 +36,6 @@ package solver.constraints.propagators.gary.tsp;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -128,9 +127,6 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
 		if(idxVarInProp==0){
 			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,dir);
 			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);

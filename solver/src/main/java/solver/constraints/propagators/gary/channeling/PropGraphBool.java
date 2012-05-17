@@ -1,4 +1,3 @@
-
 /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
@@ -26,16 +25,8 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 03/10/11
- * Time: 19:56
- */
+package solver.constraints.propagators.gary.channeling;
 
-package solver.constraints.propagators.gary.tsp.directed;
-
-import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
@@ -45,71 +36,53 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.INeighbors;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.GraphVar;
 
-/**
- * Each node but "but" has only one successor
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
+/**Propagator channeling between arcs of a graph and a boolean matrix
+ *
+ * @author Jean-Guillaume Fages
+ */
+public class PropGraphBool extends GraphPropagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	DirectedGraphVar g;
-	int but,n;
-	private PairProcedure arcEnforced, arcRemoved;
+	protected GraphVar graph;
+	protected BoolVar[][] relations;
+	protected PairProcedure enf, rem;
+	protected int n;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	/** All nodes of the graph but "but" have only one successor
-	 * @param graph
-	 * @param but the node which is not concerned by the constraint
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropOneSuccBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
-		g = graph;
-		this.n = g.getEnvelopGraph().getNbNodes();
-		this.but = but;
-		arcEnforced = new EnfArc(this);
-		arcRemoved  = new RemArc(this);
+	public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+		super(new GraphVar[]{graph}, solver, cstr, PropagatorPriority.QUADRATIC);
+		this.graph = graph;
+		relations = rel;
+		n = rel.length;
+		enf = new EnfArc(this);
+		rem = new RemArc(this);
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// PROPAGATIONS
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		INeighbors succs;
-		int next;
-		for(int i=0;i<n;i++){
-			if(i!=but){
-				succs = g.getEnvelopGraph().getSuccessorsOf(i);
-				next = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-				if (succs.neighborhoodSize()==0){
-					this.contradiction(g,i+" has no successor");
+		for(int i=0; i<n; i++){
+			graph.enforceNode(i,this);
+			for(int j = 0; j<n; j++){
+				if(!graph.getEnvelopGraph().arcExists(i, j)){
+					relations[i][j].setToFalse(this, false);
 				}
-				else if (succs.neighborhoodSize()==1){
-					g.enforceArc(i,succs.getFirstElement(),this);
-				}
-				else if(next!=-1){
-					if(g.getKernelGraph().getSuccessorsOf(i).getNextElement()!=-1){
-						contradiction(g,"too many successors");
-					}
-					for(int j=succs.getFirstElement();j>=0;j=succs.getNextElement()){
-						if(j!=next){
-							g.removeArc(i,j,this);
-						}
-					}
+				if(graph.getKernelGraph().arcExists(i, j)){
+					relations[i][j].setToTrue(this, false);
 				}
 			}
 		}
@@ -117,10 +90,18 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
-		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,graph);
+		if((mask & EventType.ENFORCEARC.mask) !=0){
+			gdm.forEachArc(enf, EventType.ENFORCEARC);
+		}
+		if((mask & EventType.REMOVEARC.mask)!=0){
+			gdm.forEachArc(rem, EventType.REMOVEARC);
+		}
 	}
+
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
@@ -129,62 +110,52 @@ public class PropOneSuccBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	@Override
 	public ESat isEntailed() {
-		boolean done = true;
-		for(int i=0;i<n;i++){
-			if(i!=but){
-				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()<1 || g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()>1){
-					return ESat.FALSE;
-				}
-				if(g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()!=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()){
-					done = false;
-				}
-			}
+		if(!graph.instantiated()){
+			return ESat.UNDEFINED;
 		}
-		if(done){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
-
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
-	private class EnfArc implements PairProcedure {
-		private GraphPropagator p;
-
-		private EnfArc(GraphPropagator p){
-			this.p = p;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(from!=but){
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				for(int i=succs.getFirstElement(); i>=0; i = succs.getNextElement()){
-					if(i!=to){
-						g.removeArc(from,i,p);
+		for(int i=0; i<n; i++){
+			for(int j = 0; j<n; j++){
+				if(relations[i][j].instantiated()){
+					if(graph.getEnvelopGraph().arcExists(i,j)!=(relations[i][j].getValue()==1)){
+						return ESat.FALSE;
 					}
+				}else{
+					return ESat.UNDEFINED;
 				}
+			}
+		}
+		return ESat.TRUE;
+	}
+
+
+	//***********************************************************************************
+	// REACT ON GRAPH MODIFICATION
+	//***********************************************************************************
+
+	/** When an edge (x,y), is enforced then the relation between x and y is true */
+	private class EnfArc implements PairProcedure{
+		protected Propagator p;
+		protected EnfArc(Propagator p){
+			this.p = p;
+		}
+		public void execute(int i, int j) throws ContradictionException{
+			relations[i][j].setToTrue(p, false);
+			if(!graph.isDirected()){
+				relations[j][i].setToTrue(p, false);
 			}
 		}
 	}
 
+	/** When an edge (x,y), is removed then the relation between x and y is false */
 	private class RemArc implements PairProcedure{
-		private GraphPropagator p;
-
-		private RemArc(GraphPropagator p){
+		protected Propagator p;
+		protected RemArc(Propagator p){
 			this.p = p;
 		}
-		@Override
-		public void execute(int from , int to) throws ContradictionException {
-			if(from!=but){
-				INeighbors succs = g.getEnvelopGraph().getSuccessorsOf(from);
-				if (succs.neighborhoodSize()==0){
-					p.contradiction(g,from+" has no successor");
-				}
-				if (succs.neighborhoodSize()==1){
-					g.enforceArc(from,succs.getFirstElement(),p);
-				}
+		public void execute(int i, int j) throws ContradictionException{
+			relations[i][j].setToFalse(p, false);
+			if(!graph.isDirected()){
+				relations[j][i].setToFalse(p, false);
 			}
 		}
 	}

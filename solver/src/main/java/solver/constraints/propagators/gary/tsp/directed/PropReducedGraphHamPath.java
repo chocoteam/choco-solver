@@ -40,7 +40,6 @@ import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
-import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -229,10 +228,6 @@ public class PropReducedGraphHamPath extends GraphPropagator<DirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);
-			return;
-		}
 		sccComputed.clear();
 		if((mask & EventType.REMOVEARC.mask)!=0){
 			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,G);

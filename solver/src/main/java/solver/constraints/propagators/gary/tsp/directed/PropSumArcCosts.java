@@ -154,7 +154,7 @@ public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true || ALWAYS_COARSE){
+		if(true){//TODO incremental behavior
 			propagate(0);return;
 		}
 		toCompute.clear();

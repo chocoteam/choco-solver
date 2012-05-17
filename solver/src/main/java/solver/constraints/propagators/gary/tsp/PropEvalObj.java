@@ -28,7 +28,6 @@
 package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
@@ -140,9 +139,6 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
 		toCompute.clear();
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];

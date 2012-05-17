@@ -172,7 +172,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
 //      if (env.getWorldIndex() == rootWorldIndex) {
         if (env.getWorldIndex() <= searchWorldIndex && decision==null){//BEWARE JG patch temporaire
             // The entire tree search has been explored, the search cannot be followed
-			System.out.println("world index "+env.getWorldIndex());
+//			System.out.println("world index "+env.getWorldIndex());
             interrupt();
         } else {
             jumpTo--;
