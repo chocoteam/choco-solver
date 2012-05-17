@@ -27,114 +27,54 @@
 package solver.constraints.gary;
 
 import solver.Solver;
-import solver.constraints.gary.relations.GraphRelation;
-import solver.constraints.gary.relations.GraphRelationFactory;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.PropKCliques;
 import solver.constraints.propagators.gary.PropTransitivity;
+import solver.constraints.propagators.gary.constraintSpecific.PropNLoopsTree;
+import solver.constraints.propagators.gary.constraintSpecific.PropNTree;
+import solver.constraints.propagators.gary.degree.PropAtLeastNSuccessors;
+import solver.constraints.propagators.gary.degree.PropAtMostNSuccessors;
 import solver.variables.IntVar;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-/**Predefined graph constraints
+/**
+ * Some usual graph constraints
  * @author Jean-Guillaume Fages
  *
  */
 public class GraphConstraintFactory {
 
-	// SAFE
+	/** Create a generic empty constraint
+	 * @param solver
+	 * @return a generic empty constraint
+	 */
+	public static Constraint makeConstraint(Solver solver) {
+		return new Constraint(solver);
+	}
 
-	public static GraphConstraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
-		GraphConstraint gc = makeConstraint(graph,solver);
-		gc.addAdHocProp(new PropTransitivity(graph,solver, gc));
-		gc.addAdHocProp(new PropKCliques(graph,solver, gc, nCliques));
+	public static Constraint nCliques(UndirectedGraphVar graph, IntVar nCliques, Solver solver) {
+		Constraint gc = makeConstraint(solver);
+		gc.addPropagators(new PropTransitivity(graph, solver, gc));
+		gc.addPropagators(new PropKCliques(graph, solver, gc, nCliques));
 		return gc;
 	}
 
-
-	// UNSAFE
-
-	/** Anti arborescence partitioning constraint
+	/** Anti arborescence partitioning constraint (CP'11)
 	 * also known as tree constraint
-	 * GAC in (almost) linear time : O(alpha.m) 
+	 * GAC in (almost) linear time : O(alpha.m)
 	 * roots are loops
-	 * @param vars successor variables
-	 * @param NVar number of anti arborescences
+	 * @param graph
+	 * @param n number of anti arborescences
 	 * @param solver
 	 * @return tree constraint
 	 */
-	public static GraphConstraint nTrees(IntVar[] vars, IntVar NVar, Solver solver) {
-		GraphRelation relation = GraphRelationFactory.indexOf(vars);
-		GraphConstraint tree = makeConstraint(vars, relation, solver);
-		tree.addProperty(GraphProperty.K_ANTI_ARBORESCENCES, NVar);
+	public static Constraint nTrees(DirectedGraphVar graph, IntVar n, Solver solver) {
+		Constraint tree = makeConstraint(solver);
+		tree.addPropagators(new PropAtMostNSuccessors(graph, 1, tree, solver));
+		tree.addPropagators(new PropAtLeastNSuccessors(graph,1, tree, solver));
+		tree.addPropagators(new PropNLoopsTree(graph, n, solver, tree));
+		tree.addPropagators(new PropNTree(graph,n,solver,tree));
 		return tree;
-	}
-	
-	/**There will be exactly NVal distinct values in the collection of variables (integers,vectors,tasks,sets...) vars 
-	 * It is generic!
-	 * @param vars variables (nodes in the graph), they must have the same type
-	 * @param NVal number of distinct values
-	 * @param solver 
-	 * @return a generic nValue constraint NOT RESTRICTED TO INTEGERS
-	 */
-	public static GraphConstraint nValues(Variable[] vars, IntVar NVal, Solver solver) {
-		GraphRelation relation = GraphRelationFactory.equivalence(vars);
-		GraphConstraint nEq = makeConstraint(vars, relation, solver);
-		nEq.addProperty(GraphProperty.K_CLIQUES, NVal);
-		return nEq;
-	}
-	
-	/**There will be exactly NVal distinct integer values in the collection of integer variables vars 
-	 * @param vars variables (nodes in the graph)
-	 * @param NInt number of distinct integer values
-	 * @param solver
-	 * @return classical nValues constraint (for integers)
-	 */
-	public static GraphConstraint nIntegers(IntVar[] vars, IntVar NInt, Solver solver) {
-		return nValues(vars, NInt, solver); // TODO find and add 1-dim properties
-	}
-	
-	/**There will be exactly NVal distinct vectors in the collection of vector variables vars 
-	 * @param vars variables (nodes in the graph)
-	 * @param NVect number of distinct vectors
-	 * @param solver
-	 * @return nVectors constraint
-	 */
-	public static GraphConstraint nVectors(MetaVariable[] vars, IntVar NVect, Solver solver) {
-		return nValues(vars, NVect, solver);
-	}
-	
-	/**There will be exactly NVar integer variables that take value in the collection values
-	 * @param vars integer variables (nodes in the graph)
-	 * @param NVar number of variables that take value in values
-	 * @param values collection of values
-	 * @param solver
-	 * @return among constraint for integer variables
-	 */
-	public static GraphConstraint among(IntVar[] vars, IntVar NVar, int[] values, Solver solver) {
-		GraphRelation relation = GraphRelationFactory.member(vars, values);
-		GraphConstraint among = makeConstraint(vars, relation, solver);
-		among.addProperty(GraphProperty.K_NODES, NVar);
-		return among;
-	}
-	
-	/** Create a generic graph constraint
-	 * @param vars variables represented by nodes
-	 * @param relation meaning of an arc/edge
-	 * @param solver
-	 * @return a generic graph constraint
-	 */
-	public static GraphConstraint makeConstraint(Variable[] vars, GraphRelation relation, Solver solver) {
-		return new GraphConstraint (vars, solver, relation);
-	}
-
-	/** Create a generic graph constraint
-	 * @param g graph variable
-	 * @param solver
-	 * @return a generic graph constraint
-	 */
-	public static GraphConstraint makeConstraint(GraphVar g, Solver solver) {
-		return new GraphConstraint (g, solver);
 	}
 }

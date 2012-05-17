@@ -29,6 +29,7 @@ package solver.constraints.gary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
@@ -52,12 +53,12 @@ public class ArborescenceTest {
 				g.getEnvelopGraph().addArc(i, j);
 			}
 		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
+		Constraint gc = GraphConstraintFactory.makeConstraint(s);
+		gc.addPropagators(new PropOnePredBut(g,0,gc,s));
 		if(naive){
-			gc.addAdHocProp(new PropArborescence_NaiveForm(g,0,gc,s));
+			gc.addPropagators(new PropArborescence_NaiveForm(g,0,gc,s));
 		}else{
-			gc.addAdHocProp(new PropArborescence(g,0,gc,s,simple));
+			gc.addPropagators(new PropArborescence(g,0,gc,s,simple));
 		}
 		AbstractStrategy strategy = StrategyFactory.graphRandom(g,seed);
 		s.post(gc);

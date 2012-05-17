@@ -30,6 +30,7 @@ package solver.constraints.gary;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -59,8 +60,7 @@ public class NTreeTest {
 			}
 		}
 		IntVar nTree = VariableFactory.bounded("NTREE ", tmin, tmax, s);
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addProperty(GraphProperty.K_ANTI_ARBORESCENCES,nTree);
+		Constraint gc = GraphConstraintFactory.nTrees(g,nTree,s);
 		AbstractStrategy strategy = StrategyFactory.graphRandom(g,seed);
 
 		s.post(gc);

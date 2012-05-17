@@ -53,7 +53,7 @@ import solver.variables.view.Views;
 public class CostasArrays extends AbstractProblem {
 
 	@Option(name = "-o", usage = "Costas array size.", required = false)
-	private static int n = 14;  // should be <15 to be solve quickly
+	private static int n = 14;  // should be <15 to be solved quickly
 
 	IntVar[] vars,vectors;
 

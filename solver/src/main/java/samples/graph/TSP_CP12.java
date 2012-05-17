@@ -29,7 +29,7 @@ package samples.graph;
 
 import choco.kernel.ResolutionPolicy;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
@@ -387,16 +387,16 @@ public class TSP_CP12 {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
 		if(allDiffAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(undi, n, solver, gc));
 		}
 		mst = PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver);
-		gc.addAdHocProp(mst);
+		gc.addPropagators(mst);
 		solver.post(gc);
 		// config
 //		solver.set(StrategyFactory.graphRandom(undi,seed));
@@ -460,15 +460,15 @@ public class TSP_CP12 {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(dir,solver);
-		gc.addAdHocProp(new PropOneSuccBut(dir, n - 1, gc, solver));
-		gc.addAdHocProp(new PropOnePredBut(dir, 0, gc, solver));
-		gc.addAdHocProp(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
-		gc.addAdHocProp(new PropSumArcCosts(dir, totalCost, matrix, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(dir, n - 1, gc, solver));
+		gc.addPropagators(new PropOnePredBut(dir, 0, gc, solver));
+		gc.addPropagators(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
+		gc.addPropagators(new PropSumArcCosts(dir, totalCost, matrix, gc, solver));
 		if(allDiffAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
 		}
-		gc.addAdHocProp(PropHeldKarp.mstBasedRelaxation(dir,0,n-1,totalCost,matrix,gc,solver));
+		gc.addPropagators(PropHeldKarp.mstBasedRelaxation(dir, 0, n - 1, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphATSP(dir, ATSP_heuristics.enf_sparse, mst));

@@ -28,7 +28,7 @@
 package samples.graph;
 
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
@@ -223,12 +223,12 @@ public class HCPsymmetric {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
 		if(alldifferentAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(undi, n, solver, gc));
 		}
 		solver.post(gc);
 		// config
@@ -279,12 +279,12 @@ public class HCPsymmetric {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(dir,solver);
-		gc.addAdHocProp(new PropOneSuccBut(dir, n - 1, gc, solver));
-		gc.addAdHocProp(new PropOnePredBut(dir, 0, gc, solver));
-		gc.addAdHocProp(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(dir, n - 1, gc, solver));
+		gc.addPropagators(new PropOnePredBut(dir, 0, gc, solver));
+		gc.addPropagators(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
 		if(alldifferentAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
 		}
 		solver.post(gc);
 		// config

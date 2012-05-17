@@ -299,7 +299,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		if((evtmask &= EventType.FULL_PROPAGATION.mask)!=0){
 			buildDigraph();
 		}
-		prefilter();
+//		prefilter(); //bug?
 		int min = greedySearch();
 		nValues.updateLowerBound(min, this);
 		if(min == nValues.getUB()){

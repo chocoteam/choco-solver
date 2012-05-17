@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.graph.GraphGenerator;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
@@ -91,10 +91,10 @@ public class HamiltonianPathTest {
 		}catch(Exception e){
 			e.printStackTrace();System.exit(0);
 		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addPropagators(new PropOnePredBut(graph,0,gc,solver));
+		gc.addPropagators(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		solver.post(gc);
 		
 		// configure solver

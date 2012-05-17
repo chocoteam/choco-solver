@@ -28,10 +28,9 @@
 package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,7 +52,6 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	private V g;
-	private int n;
 	private PairProcedure arcEnforced;
 	private PairProcedure arcRemoved;
 
@@ -61,10 +59,9 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropTransitivity(V graph, Solver solver, GraphConstraint constraint) {
+	public PropTransitivity(V graph, Solver solver, Constraint constraint) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-		n = graph.getEnvelopGraph().getNbNodes();
 		if( graph instanceof DirectedGraphVar){
 			arcEnforced = new EnfArcDig(this,g);
 			arcRemoved  = new RemArcDig(this,g);

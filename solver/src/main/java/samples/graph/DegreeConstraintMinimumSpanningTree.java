@@ -32,7 +32,7 @@ import choco.kernel.common.util.PoolManager;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
@@ -240,13 +240,13 @@ public class DegreeConstraintMinimumSpanningTree {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,1,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,maxDegree,gc,solver));
-		gc.addAdHocProp(new PropTreeNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropTreeEvalObj(undi,totalCost,matrix,gc,solver));
-		gc.addAdHocProp(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
-		gc.addAdHocProp(PropIterativeMST.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropAtLeastNNeighbors(undi, 1, gc, solver));
+		gc.addPropagators(new PropAtMostNNeighbors(undi, maxDegree, gc, solver));
+		gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, matrix, gc, solver));
+		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
+		gc.addPropagators(PropIterativeMST.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_MinDeg, null);
@@ -293,12 +293,12 @@ public class DegreeConstraintMinimumSpanningTree {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropCycleEvalObj(undi,totalCost,matrix,gc,solver));
-		gc.addAdHocProp(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropCycleEvalObj(undi, totalCost, matrix, gc, solver));
+		gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse, null);
