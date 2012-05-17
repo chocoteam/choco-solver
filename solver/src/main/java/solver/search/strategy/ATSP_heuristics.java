@@ -39,6 +39,7 @@ import solver.ICause;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.exception.ContradictionException;
 import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.variables.graph.GraphVar;
@@ -72,7 +73,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_enforcer);
+			fd.setArc(g, from, to, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 	},
@@ -110,7 +111,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_remover);
+			fd.setArc(g,from, to, GraphAssignment.graph_remover);
 			return fd;
 		}
 	},
@@ -146,7 +147,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_remover);
+			fd.setArc(g,from, to, GraphAssignment.graph_remover);
 			return fd;
 		}
 	},
@@ -177,7 +178,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_enforcer);
+			fd.setArc(g,from, to, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 	},
@@ -218,7 +219,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_enforcer);
+			fd.setArc(g,from, to, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 	},
@@ -228,44 +229,6 @@ public enum ATSP_heuristics {
 	sparse  {
 		private int currentNode;
 		private int[] e;
-		private Assignment<GraphVar> graph_sparse = new Assignment<GraphVar>() {
-			@Override
-			public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
-				int n = var.getEnvelopGraph().getNbNodes();
-				if (value>=n){
-					int node = value/n-1;
-					int highestIdx = value%n;
-					INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(j>highestIdx){
-							var.removeArc(node,j,cause);
-						}
-					}
-				}else{
-					throw new UnsupportedOperationException();
-				}
-			}
-			@Override
-			public void unapply(GraphVar var, int value, ICause cause) throws ContradictionException {
-				int n = var.getEnvelopGraph().getNbNodes();
-				if (value>=n){
-					int node = value/n-1;
-					int highestIdx = value%n;
-					INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(j<=highestIdx){
-							var.removeArc(node,j,cause);
-						}
-					}
-				}else{
-					throw new UnsupportedOperationException();
-				}
-			}
-			@Override
-			public String toString() {
-				return "unapply graph bound";
-			}
-		};
 
 		private int getNextSparseNode(GraphVar g, int n) {
 			INeighbors nei;
@@ -323,7 +286,7 @@ public enum ATSP_heuristics {
 							if(fd==null){
 								fd = new GraphDecision(pool);
 							}
-							fd.set(g,(currentNode+1)*n+j, graph_sparse);
+							fd.setArc(g,currentNode,j, GraphAssignment.graph_split);
 							return fd;
 						}
 					}
@@ -334,7 +297,7 @@ public enum ATSP_heuristics {
 				if(fd==null){
 					fd = new GraphDecision(pool);
 				}
-				fd.set(g,(currentNode+1)*n+nei.getFirstElement(), Assignment.graph_enforcer);
+			fd.setArc(g,currentNode, nei.getFirstElement(), GraphAssignment.graph_enforcer);
 				return fd;
 			}
 		}
@@ -408,7 +371,7 @@ public enum ATSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(currentNode+1)*n+maxE, Assignment.graph_enforcer);
+			fd.setArc(g,currentNode, maxE, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 		public void init(GraphVar g, int n){

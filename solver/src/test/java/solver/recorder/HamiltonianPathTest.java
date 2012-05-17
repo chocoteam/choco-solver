@@ -125,13 +125,14 @@ public class HamiltonianPathTest {
 
 	// constructive heuristic, can be useful to debug
 	private static class ConstructorHeur extends ArcStrategy {
-		int source;
+		int source,n;
 		public ConstructorHeur(GraphVar graphVar, int s) {
 			super(graphVar);
 			source = s;
+			n = graphVar.getEnvelopGraph().getNbNodes();
 		}
 		@Override
-		public int nextArc() {
+		public boolean computeNextArc() {
 			int x = source;
 			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
 			int nb = 1;
@@ -145,14 +146,18 @@ public class HamiltonianPathTest {
 				if(x!=n-1 || nb!=n){
 					for(int i=0;i<n;i++){
 						if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
-							return (i+1)*n+g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
+							this.from = i;
+							this.to = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
+							return true;
 						}
 					}
 					throw new UnsupportedOperationException();
 				}
-				return -1;
+				return false;
 			}
-			return (x+1)*n+y;
+			this.from = x;
+			this.to   = y;
+			return true;
 		}
 	}
 }

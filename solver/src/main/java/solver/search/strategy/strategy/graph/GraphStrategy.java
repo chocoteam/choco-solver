@@ -29,6 +29,7 @@ package solver.search.strategy.strategy.graph;
 
 import choco.kernel.common.util.PoolManager;
 import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.selectors.graph.arcs.LexArc;
@@ -53,35 +54,9 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 	protected PoolManager<GraphDecision> pool;
 
 	public enum NodeArcPriority{
-		NODES_THEN_ARCS{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				int fromTo = gs.nextNode();
-				if(fromTo==-1){
-					fromTo = gs.nextArc();
-				}
-				return fromTo;
-			}
-		},
-		ARCS{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				return gs.nextArc();
-			}
-		},
-		RANDOM{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				Random rd = new Random();
-				if(rd.nextBoolean()){
-					return NODES_THEN_ARCS.getNext(gs);
-				}else{
-					return ARCS.getNext(gs);
-				}
-			}
-		};
-
-		protected abstract int getNext(GraphStrategy gs);
+		NODES_THEN_ARCS,
+		ARCS,
+		RANDOM;
 	}
 
 	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as, NodeArcPriority priority) {
@@ -102,15 +77,29 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
 	@Override
 	public Decision getDecision() {
-		int fromTo = priority.getNext(this);
-		if(fromTo == -1){
+		if(g.instantiated()){
 			return null;
 		}
 		GraphDecision dec = pool.getE();
 		if(dec == null){
 			dec = new GraphDecision(pool);
 		}
-		dec.set(g, fromTo, Assignment.graph_enforcer);
+		switch (priority){
+			case NODES_THEN_ARCS:
+				int node = nextNode();
+				if(node!=-1){
+					dec.setNode(g,node, GraphAssignment.graph_enforcer);
+				}else{
+					dec.setArc(g,arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
+				}
+				break;
+//			case RANDOM:
+//				throw new UnsupportedOperationException("not implemented yet");
+			case ARCS:
+			default:
+				dec.setArc(g,arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
+				break;
+		}
 		return dec;
 	}
 
@@ -118,7 +107,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 		return nodeStrategy.nextNode();
 	}
 
-	public int nextArc(){
-		return arcStrategy.nextArc();
+	public boolean nextArc(){
+		return arcStrategy.computeNextArc();
 	}
 }

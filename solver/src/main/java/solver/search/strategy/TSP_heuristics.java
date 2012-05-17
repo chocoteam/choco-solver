@@ -37,6 +37,7 @@ package solver.search.strategy;
 import choco.kernel.common.util.PoolManager;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.variables.graph.INeighbors;
@@ -70,7 +71,7 @@ public enum TSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(from+1)*n+to, Assignment.graph_enforcer);
+			fd.setArc(g,from, to, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 	},
@@ -143,7 +144,7 @@ public enum TSP_heuristics {
 			if(fd==null){
 				fd = new GraphDecision(pool);
 			}
-			fd.set(g,(currentNode+1)*n+maxE, Assignment.graph_enforcer);
+			fd.setArc(g,currentNode, maxE, GraphAssignment.graph_enforcer);
 			return fd;
 		}
 
