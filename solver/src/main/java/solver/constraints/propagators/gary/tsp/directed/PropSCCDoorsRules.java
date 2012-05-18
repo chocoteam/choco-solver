@@ -40,12 +40,11 @@ import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.Variable;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -55,7 +54,7 @@ import java.util.BitSet;
 /**
  * @PropAnn(tested = {BENCHMARK})
  */
-public class PropSCCDoorsRules extends GraphPropagator {
+public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -78,7 +77,7 @@ public class PropSCCDoorsRules extends GraphPropagator {
 	public PropSCCDoorsRules(DirectedGraphVar graph, Constraint constraint, Solver solver,
 							 IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs,
 							 IDirectedGraph rg) {
-		super(new Variable[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcRemoved  = new RemArc();

@@ -39,7 +39,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,7 +52,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 /**
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
+public class PropCyclePathChanneling extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES

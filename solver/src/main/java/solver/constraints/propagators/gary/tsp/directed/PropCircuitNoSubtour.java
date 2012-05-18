@@ -40,7 +40,6 @@ import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -54,7 +53,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -76,8 +75,8 @@ public class PropCircuitNoSubtour<V extends DirectedGraphVar> extends GraphPropa
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();

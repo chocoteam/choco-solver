@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.relations.GraphRelation;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -45,7 +45,7 @@ import solver.variables.graph.INeighbors;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropGraphRelation<G extends GraphVar> extends GraphPropagator<G> {
+public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
 
 	//***********************************************************************************
 	// VARIABLES

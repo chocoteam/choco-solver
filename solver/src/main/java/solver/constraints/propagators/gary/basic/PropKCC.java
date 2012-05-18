@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -46,7 +46,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropKCC<V extends Variable> extends GraphPropagator<V>{
+public class PropKCC extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -61,7 +61,7 @@ public class PropKCC<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
+		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
 		this.k = k;
 		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());

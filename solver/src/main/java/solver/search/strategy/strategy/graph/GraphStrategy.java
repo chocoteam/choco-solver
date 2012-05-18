@@ -28,7 +28,6 @@
 package solver.search.strategy.strategy.graph;
 
 import choco.kernel.common.util.PoolManager;
-import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -90,13 +89,15 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 				if(node!=-1){
 					dec.setNode(g,node, GraphAssignment.graph_enforcer);
 				}else{
-					dec.setArc(g,arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
+					nextArc();
+					dec.setArc(g, arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
 				}
 				break;
 //			case RANDOM:
 //				throw new UnsupportedOperationException("not implemented yet");
 			case ARCS:
 			default:
+				nextArc();
 				dec.setArc(g,arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
 				break;
 		}

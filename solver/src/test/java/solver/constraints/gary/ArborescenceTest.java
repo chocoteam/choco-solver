@@ -88,7 +88,7 @@ public class ArborescenceTest {
 		}
 	}
 
-	@Test(groups = "10S")
+	@Test(groups = "10s")
 	public static void bigTrees() {
 		for(int s=0;s<3;s++){
 			int n = 60;

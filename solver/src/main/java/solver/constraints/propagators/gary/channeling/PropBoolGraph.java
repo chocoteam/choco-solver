@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -43,7 +43,7 @@ import solver.variables.graph.GraphVar;
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropBoolGraph extends GraphPropagator<BoolVar> {
+public class PropBoolGraph extends Propagator<BoolVar> {
 
 	//***********************************************************************************
 	// VARIABLES

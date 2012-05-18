@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -45,7 +45,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
+public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -111,9 +111,9 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	// --- Arc enforcings
 	// undirected case
 	private class EnfArcUndig implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private EnfArcUndig(GraphPropagator p){
+		private EnfArcUndig(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -141,10 +141,10 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	}
 	// directed case
 	private class EnfArcDig implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 		private DirectedGraphVar g;
 
-		private EnfArcDig(GraphPropagator p, V g){
+		private EnfArcDig(Propagator p, V g){
 			this.p = p;
 			this.g = (DirectedGraphVar) g;
 		}
@@ -170,9 +170,9 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	// --- Arc removals
 	// undirected case
 	private class RemArcUndig implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private RemArcUndig(GraphPropagator p){
+		private RemArcUndig(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -193,10 +193,10 @@ public class PropTransitivity<V extends GraphVar> extends GraphPropagator<V>{
 	}
 	// directed case
 	private class RemArcDig implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 		private DirectedGraphVar g;
 
-		private RemArcDig(GraphPropagator p, V g){
+		private RemArcDig(Propagator p, V g){
 			this.p = p;
 			this.g = (DirectedGraphVar) g;
 		}

@@ -32,7 +32,7 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -47,7 +47,7 @@ import solver.variables.graph.INeighbors;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
+public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -57,7 +57,6 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 	private IntProcedure enfNode;
 	private PairProcedure remArc;
 	private INeighbors concernedNodes;
-	private int n;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -69,7 +68,6 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 		this.enfNode = new NodeEnf(this);
 		this.remArc = new ArcRem(this);
 		this.concernedNodes = concernedNodes;
-		this.n = g.getEnvelopGraph().getNbNodes();
 	}
 
 	public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {

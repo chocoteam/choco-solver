@@ -40,7 +40,6 @@ import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -55,7 +54,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  * Simple NoSubtour of Pesant when undirected graph
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
+public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -77,7 +76,7 @@ public class PropCycleNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropCycleNoSubtour(UndirectedGraphVar graph, Constraint<UndirectedGraphVar, Propagator<UndirectedGraphVar>> constraint, Solver solver) {
+	public PropCycleNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();

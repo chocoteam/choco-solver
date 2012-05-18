@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -47,7 +46,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Except for loops => (x,x) is allowed
  * @author Jean-Guillaume Fages
  */
-public class PropAntiSymmetric extends GraphPropagator<DirectedGraphVar>{
+public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES

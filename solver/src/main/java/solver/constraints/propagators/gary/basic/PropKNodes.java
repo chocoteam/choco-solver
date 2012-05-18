@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -43,7 +43,7 @@ import solver.variables.graph.IActiveNodes;
 /**Propagator that ensures that K nodes belong to the final graph
  * @author Jean-Guillaume Fages
  */
-public class PropKNodes extends GraphPropagator{
+public class PropKNodes extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES

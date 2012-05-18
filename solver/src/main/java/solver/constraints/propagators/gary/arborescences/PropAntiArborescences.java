@@ -30,7 +30,6 @@ package solver.constraints.propagators.gary.arborescences;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -51,7 +50,7 @@ import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
  * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
  * but very efficient in practice
  * */
-public class PropAntiArborescences<V extends GraphVar> extends GraphPropagator<V>{
+public class PropAntiArborescences extends Propagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -69,8 +68,8 @@ public class PropAntiArborescences<V extends GraphVar> extends GraphPropagator<V
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropAntiArborescences(DirectedGraphVar graph, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+	public PropAntiArborescences(DirectedGraphVar graph, Constraint constraint, Solver solver, boolean simple) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		connectedGraph = new DirectedGraph(n+1, GraphType.LINKED_LIST);

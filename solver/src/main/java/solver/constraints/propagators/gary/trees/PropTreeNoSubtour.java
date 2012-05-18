@@ -40,7 +40,6 @@ import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -56,7 +55,7 @@ import java.util.BitSet;
  * Simple NoSubtour applied to (undirected) tree/forest
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
+public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -82,7 +81,7 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint<UndirectedGraphVar, Propagator<UndirectedGraphVar>> constraint, Solver solver) {
+	public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();

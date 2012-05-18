@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -46,7 +46,7 @@ import java.util.BitSet;
 /**Propagator that ensures that the final graph consists in K cliques
  * @author Jean-Guillaume Fages
  */
-public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
+public class PropKCliques extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -64,7 +64,7 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 	//***********************************************************************************
 
 	public PropKCliques(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
+		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
 		n = g.getEnvelopGraph().getNbNodes();

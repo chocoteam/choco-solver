@@ -39,7 +39,7 @@ import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -52,7 +52,6 @@ import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
-
 import java.util.BitSet;
 
 /**
@@ -64,7 +63,7 @@ import java.util.BitSet;
  *  User: Jean-Guillaume Fages
  *  Date: 17/11/2011
  * */
-public class PropReducedGraphHamPath extends GraphPropagator<DirectedGraphVar> {
+public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -298,10 +297,10 @@ public class PropReducedGraphHamPath extends GraphPropagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	private class RemArc implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 		private BitSet restriction;
 
-		private RemArc(GraphPropagator p){
+		private RemArc(Propagator p){
 			this.p = p;
 			this.restriction = new BitSet(n);
 		}

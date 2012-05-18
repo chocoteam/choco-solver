@@ -30,7 +30,6 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -46,7 +45,7 @@ import solver.variables.graph.IActiveNodes;
  * @author Jean-Guillaume Fages
  *
  */
-public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
+public class PropKLoops extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -59,8 +58,8 @@ public class PropKLoops<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKLoops(GraphVar graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
+	public PropKLoops(GraphVar graph, Solver sol, Constraint constraint, IntVar k) {
+		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
 		this.k = k;
 	}

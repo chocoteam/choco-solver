@@ -32,7 +32,7 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -47,7 +47,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtLeastNNeighbors extends GraphPropagator<UndirectedGraphVar>{
+public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES

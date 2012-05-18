@@ -39,7 +39,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -53,7 +52,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Each node but "but" has only one predecessor
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -73,8 +72,8 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint constraint, Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.but = but;
@@ -150,9 +149,9 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	//***********************************************************************************
 
 	private class EnfArc implements PairProcedure {
-		private GraphPropagator p;
+		private Propagator p;
 
-		private EnfArc(GraphPropagator p){
+		private EnfArc(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -169,9 +168,9 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	}
 
 	private class RemArc implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private RemArc(GraphPropagator p){
+		private RemArc(Propagator p){
 			this.p = p;
 		}
 		@Override

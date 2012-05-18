@@ -40,7 +40,7 @@ import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -51,7 +51,7 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-public class PropIntVarChanneling extends GraphPropagator {
+public class PropIntVarChanneling extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -172,9 +172,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 	//***********************************************************************************
 
 	private class ValRem implements IntProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private ValRem(GraphPropagator p){
+		private ValRem(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -184,9 +184,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 	}
 
 	private class EnfArc implements PairProcedure {
-		private GraphPropagator p;
+		private Propagator p;
 
-		private EnfArc(GraphPropagator p){
+		private EnfArc(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -196,9 +196,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 	}
 
 	private class RemArcAC implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private RemArcAC(GraphPropagator p){
+		private RemArcAC(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -208,9 +208,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 	}
 
 	private class RemArcBC implements PairProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private RemArcBC(GraphPropagator p){
+		private RemArcBC(Propagator p){
 			this.p = p;
 		}
 		@Override

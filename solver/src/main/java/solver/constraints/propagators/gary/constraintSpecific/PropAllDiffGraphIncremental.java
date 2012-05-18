@@ -27,11 +27,10 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -59,7 +58,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAllDiffGraphIncremental extends GraphPropagator<GraphVar> {
+public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES

@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.HeldKarp;
@@ -46,10 +45,10 @@ import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
+ * TSP Lagrangian relaxation
  * @PropAnn(tested = {BENCHMARK})
- * @param <V>
  */
-public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V> implements HeldKarp {
+public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -75,8 +74,8 @@ public class PropSymmetricHeldKarp<V extends Variable> extends GraphPropagator<V
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropSymmetricHeldKarp(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
+	protected PropSymmetricHeldKarp(UndirectedGraphVar graph, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		obj = cost;

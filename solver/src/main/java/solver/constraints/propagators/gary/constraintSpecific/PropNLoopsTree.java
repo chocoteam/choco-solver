@@ -28,13 +28,11 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -50,7 +48,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Ensures that each node in the kernel has exactly NLOOPS loops
  *
  */
-public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
+public class PropNLoopsTree extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -68,8 +66,8 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
+	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint constraint) {
+		super(new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		nLoops = nL;

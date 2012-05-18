@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -45,7 +44,7 @@ import solver.variables.graph.GraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropGraphBool extends GraphPropagator<GraphVar> {
+public class PropGraphBool extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES

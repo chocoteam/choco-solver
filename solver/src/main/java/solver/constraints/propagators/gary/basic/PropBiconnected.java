@@ -30,7 +30,7 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -45,7 +45,7 @@ import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
  * 
  * @author Jean-Guillaume Fages
  */
-public class PropBiconnected extends GraphPropagator<GraphVar>{
+public class PropBiconnected extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
