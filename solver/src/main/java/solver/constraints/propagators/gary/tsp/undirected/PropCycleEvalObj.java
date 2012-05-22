@@ -120,7 +120,8 @@ public class PropCycleEvalObj extends Propagator {
 			for (int j = succs.getFirstElement(); j >= 0; j = succs.getNextElement()) {
 				if(i<j && !g.getKernelGraph().edgeExists(i,j)){
 					if (replacementCost[i]==-1 || replacementCost[j]==-1) {
-						throw new UnsupportedOperationException();
+//						throw new UnsupportedOperationException();
+						g.removeArc(i,j,this);
 					}
 					if ((2*distMatrix[i][j]-replacementCost[i]-replacementCost[j])/2 > delta) {
 						g.removeArc(i, j, this);
@@ -130,7 +131,7 @@ public class PropCycleEvalObj extends Propagator {
 		}
 	}
 
-	protected int findTwoBest(int i){
+	protected int findTwoBest(int i) throws ContradictionException {
 		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 		if(mc1!=-1){
 			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
@@ -148,7 +149,7 @@ public class PropCycleEvalObj extends Propagator {
 		return distMatrix[i][mc1]+cost;
 	}
 
-	protected int getBestNot(int i, int not) {
+	protected int getBestNot(int i, int not) throws ContradictionException {
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int cost = -1;
 		int idx = -1;
@@ -159,12 +160,13 @@ public class PropCycleEvalObj extends Propagator {
 			}
 		}
 		if(idx==-1){
-			throw new UnsupportedOperationException();
+//			throw new UnsupportedOperationException();
+			contradiction(g,"");
 		}
 		return idx;
 	}
 
-	protected int findTwoWorst(int i){
+	protected int findTwoWorst(int i) throws ContradictionException {
 		int mc1 = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
 		if(mc1!=-1){
 			int mc2 = g.getKernelGraph().getSuccessorsOf(i).getNextElement();
@@ -177,7 +179,7 @@ public class PropCycleEvalObj extends Propagator {
 		return distMatrix[i][mc1]+distMatrix[i][getWorstNot(i, mc1)];
 	}
 
-	protected int getWorstNot(int i, int not) {
+	protected int getWorstNot(int i, int not) throws ContradictionException {
 		INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 		int cost = -1;
 		int idx = -1;
@@ -188,7 +190,8 @@ public class PropCycleEvalObj extends Propagator {
 			}
 		}
 		if(idx==-1){
-			throw new UnsupportedOperationException();
+//			throw new UnsupportedOperationException();
+			contradiction(g,"");
 		}
 		return idx;
 	}
