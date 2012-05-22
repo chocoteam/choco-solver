@@ -110,7 +110,7 @@ public abstract class AbstractBenchProbas {
             if (isProba && cstrs[i] instanceof AllDifferent) {
                 IntConstraint icstr = (AllDifferent) cstrs[i];
                 IntVar[] myvars = icstr.getVariables();
-                ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars, seed);
+                ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars, seed, solver.getSearchLoop());
                 sm.add(condition);
             }
             coarses_.add(new PCoarse(cstrs[i]));

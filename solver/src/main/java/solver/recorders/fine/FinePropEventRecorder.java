@@ -128,10 +128,10 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                     }
                     // 2. clear the structure if necessary
                     if (LAZY) {
-                        if (timestamps[idx] - AbstractSearchLoop.timeStamp != 0) {
+                        if (timestamps[idx] - loop.timeStamp != 0) {
                             deltamon[idx].clear();
                             this.evtmasks[idx] = 0;
-                            timestamps[idx] = AbstractSearchLoop.timeStamp;
+                            timestamps[idx] = loop.timeStamp;
                         }
                     }
                     // 3. record the event and values removed
@@ -172,7 +172,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                 variables[varIdx[i]].getDelta().lazyClear(); // to prevent from unfreezing delta no yet lazy cleared
                 this.evtmasks[i] = 0;
                 this.deltamon[i].unfreeze();
-                this.timestamps[i] = AbstractSearchLoop.timeStamp;
+                this.timestamps[i] = loop.timeStamp;
             }
         }
         if (enqueued) {

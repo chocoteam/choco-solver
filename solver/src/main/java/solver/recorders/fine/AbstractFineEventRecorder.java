@@ -31,6 +31,7 @@ import solver.constraints.propagators.Propagator;
 import solver.propagation.IScheduler;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
@@ -49,6 +50,8 @@ import solver.variables.delta.IDeltaMonitor;
 public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder<V>, IVariableMonitor<V>,
         IActivable<Propagator<V>> {
 
+	protected final AbstractSearchLoop loop;
+
     protected static final int VINDEX = 0;
     protected static final int PINDEX = 0;
 
@@ -65,6 +68,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
         measures = solver.getMeasures();
         enqueued = false;
         schedulerIdx = -1;
+		loop = solver.getSearchLoop();
     }
 
     @Override

@@ -45,10 +45,12 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     protected final TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
     protected final TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
     protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
+	protected final AbstractSearchLoop loop;
 
 
-    public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars, int seed) {
+    public CondAllDiffBCProba(IEnvironment environment, IntVar[] vars, int seed, AbstractSearchLoop loop) {
         this.seed = seed;
+		this.loop = loop;
         this.rand = new Random();
         this.rem_proc = new RemProc(this);
         this.environment = environment;
@@ -128,9 +130,9 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         ////////////////////// Sauce a Charles pour utiliser le delta domaine de var
         IDeltaMonitor dm = deltamon.get(var.getId());
         long t = timestamps.get(vid);
-        if (t - AbstractSearchLoop.timeStamp != 0) {
+        if (t - loop.timeStamp != 0) {
             deltamon.get(vid).clear();
-            timestamps.adjustValue(vid, AbstractSearchLoop.timeStamp - t);
+            timestamps.adjustValue(vid, loop.timeStamp - t);
         }
         dm.freeze();
         /////////////////////// afficher le delta

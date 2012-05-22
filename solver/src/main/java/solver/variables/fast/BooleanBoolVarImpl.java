@@ -360,7 +360,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new OneValueDelta();
+            delta = new OneValueDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
