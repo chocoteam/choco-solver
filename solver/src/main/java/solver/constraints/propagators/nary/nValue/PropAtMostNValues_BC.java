@@ -31,13 +31,12 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-
 import java.util.BitSet;
 
 /**
@@ -52,7 +51,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNValues_BC extends GraphPropagator<IntVar> {
+public class PropAtMostNValues_BC extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES

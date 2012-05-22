@@ -36,20 +36,22 @@ package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-public class PropIntVarChanneling extends GraphPropagator {
+public class PropIntVarChanneling extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -59,8 +61,7 @@ public class PropIntVarChanneling extends GraphPropagator {
 	int n;
 	IntVar[] intVars;
 	private int varIdx;
-	private IntProcedure arcEnforced;
-	private IntProcedure arcRemoved;
+	private PairProcedure arcEnforced, arcRemoved;
 	private IntProcedure valRemoved;
 
 	//***********************************************************************************
@@ -124,11 +125,12 @@ public class PropIntVarChanneling extends GraphPropagator {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if((vars[idxVarInProp].getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 			if((mask & EventType.ENFORCEARC.mask) !=0){
-				eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
-				eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 			}
 		}else{
 			varIdx = idxVarInProp;
@@ -170,9 +172,9 @@ public class PropIntVarChanneling extends GraphPropagator {
 	//***********************************************************************************
 
 	private class ValRem implements IntProcedure{
-		private GraphPropagator p;
+		private Propagator p;
 
-		private ValRem(GraphPropagator p){
+		private ValRem(Propagator p){
 			this.p = p;
 		}
 		@Override
@@ -181,40 +183,38 @@ public class PropIntVarChanneling extends GraphPropagator {
 		}
 	}
 
-	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
+	private class EnfArc implements PairProcedure {
+		private Propagator p;
 
-		private EnfArc(GraphPropagator p){
+		private EnfArc(Propagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].instantiateTo(i%n,p);
+		public void execute(int from, int to) throws ContradictionException {
+			intVars[from].instantiateTo(to,p);
 		}
 	}
 
-	private class RemArcAC implements IntProcedure{
-		private GraphPropagator p;
+	private class RemArcAC implements PairProcedure{
+		private Propagator p;
 
-		private RemArcAC(GraphPropagator p){
+		private RemArcAC(Propagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			intVars[i/n-1].removeValue(i%n,p);
+		public void execute(int from, int to) throws ContradictionException {
+			intVars[from].removeValue(to,p);
 		}
 	}
 
-	private class RemArcBC implements IntProcedure{
-		private GraphPropagator p;
+	private class RemArcBC implements PairProcedure{
+		private Propagator p;
 
-		private RemArcBC(GraphPropagator p){
+		private RemArcBC(Propagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n-1;
-			int to = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if(to==intVars[from].getLB()){
 				while(to<n && !g.getEnvelopGraph().arcExists(from,to)){
 					to++;

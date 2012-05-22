@@ -28,12 +28,11 @@
 package solver.constraints.propagators.gary.constraintSpecific;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateBool;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,6 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
 /**
@@ -48,7 +48,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Ensures that each node in the kernel has exactly NLOOPS loops
  *
  */
-public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
+public class PropNLoopsTree extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -56,7 +56,7 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 
 	DirectedGraphVar g;
 	IntVar nLoops;
-	IntProcedure removeProc, enforceProc;
+	PairProcedure removeProc, enforceProc;
 	IStateInt nbKerLoop;
 	IStateInt nbEnvLoop;
 	IStateBool active;
@@ -66,8 +66,8 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint<V, Propagator<V>> constraint) {
-		super((V[]) new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
+	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint constraint) {
+		super(new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		nLoops = nL;
@@ -127,11 +127,12 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
         Variable variable = vars[idxVarInProp];
 
         if((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
 			if ((mask & EventType.REMOVEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(this, g).forEach(removeProc, EventType.REMOVEARC);
+                gdm.forEachArc(removeProc, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
-                eventRecorder.getDeltaMonitor(this, g).forEach(enforceProc, EventType.ENFORCEARC);
+                gdm.forEachArc(enforceProc, EventType.ENFORCEARC);
 			}
 			nLoops.updateUpperBound(nbEnvLoop.get(), this);
 			nLoops.updateLowerBound(nbKerLoop.get(), this);
@@ -194,13 +195,10 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	/**
 	 * Checks if a loop has been removed
 	 */
-	private class RemProc implements IntProcedure {
-
-		public RemProc() {}
-
+	private class RemProc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			if (i/n-1 == i%n){
+		public void execute(int i, int j) throws ContradictionException {
+			if (i==j){
 				nbEnvLoop.add(-1);
 			}
 		}
@@ -209,13 +207,10 @@ public class PropNLoopsTree<V extends Variable> extends GraphPropagator<V>{
 	/**
 	 * Checks if a loop has been enforced
 	 */
-	private class EnfLoop implements IntProcedure {
-
-		public EnfLoop() {}
-
+	private class EnfLoop implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			if (i/n-1 == i%n){
+		public void execute(int i, int j) throws ContradictionException {
+			if (i==j){
 				nbKerLoop.add(1);
 			}
 		}

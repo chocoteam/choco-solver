@@ -62,8 +62,8 @@ public class MetaVarConstraint<V extends Variable> extends Constraint<V, Propaga
 		return isEntailed();
 	}
 
-	@Override
-	public HeuristicVal getIterator(String name, V var) {
-		throw new UnsupportedOperationException("MetaVarConstraint does not provide such a service");
-	}
+//	@Override
+//	public HeuristicVal getIterator(String name, V var) {
+//		throw new UnsupportedOperationException("MetaVarConstraint does not provide such a service");
+//	}
 }

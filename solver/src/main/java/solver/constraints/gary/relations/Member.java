@@ -29,10 +29,8 @@ package solver.constraints.gary.relations;
 import choco.kernel.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
-
 import java.util.BitSet;
 
 public class Member extends GraphRelation<IntVar> {
@@ -127,10 +125,5 @@ public class Member extends GraphRelation<IntVar> {
 	@Override
 	public boolean isDirected() {
 		return false;
-	}
-	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{};
 	}
 }

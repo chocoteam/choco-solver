@@ -28,14 +28,15 @@
 package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -45,14 +46,14 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
+public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private UndirectedGraphVar g;
-	private IntProcedure enf_proc;
+	private PairProcedure enf_proc;
 	private int[] n_neighbors;
 
 	//***********************************************************************************
@@ -67,15 +68,14 @@ public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 		for(int i=0;i<n;i++){
 			n_neighbors[i] = nNeigh;
 		}
-		enf_proc = new ArcEnf(n);
+		enf_proc = new ArcEnf();
 	}
 
 	public PropAtMostNNeighbors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		int n = g.getEnvelopGraph().getNbNodes();
 		n_neighbors = nbNeigh;
-		enf_proc = new ArcEnf(n);
+		enf_proc = new ArcEnf();
 	}
 
 	//***********************************************************************************
@@ -93,7 +93,8 @@ public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(enf_proc, EventType.ENFORCEARC);
 	}
 
 	//***********************************************************************************
@@ -144,15 +145,11 @@ public class PropAtMostNNeighbors extends GraphPropagator<UndirectedGraphVar>{
 		}
 	}
 	
-	private class ArcEnf implements IntProcedure{
-		private int n;
-		ArcEnf(int n){
-			this.n = n;
-		}
+	private class ArcEnf implements PairProcedure{
 		@Override
-		public void execute(int i) throws ContradictionException {
-			checkNode(i/n-1);
-			checkNode(i%n);
+		public void execute(int i, int j) throws ContradictionException {
+			checkNode(i);
+			checkNode(j);
 		}
 	}
 }

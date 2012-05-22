@@ -35,19 +35,20 @@
 package solver.constraints.propagators.gary.tsp.directed.position;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -57,7 +58,7 @@ import java.util.BitSet;
 /**
  * @PropAnn(tested = {BENCHMARK})
  */
-public class PropPosInTourGraphReactor extends GraphPropagator {
+public class PropPosInTourGraphReactor extends Propagator {
 
     //***********************************************************************************
     // VARIABLES
@@ -66,8 +67,7 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
     DirectedGraphVar g;
     int n;
     IntVar[] intVars;
-    private IntProcedure arcEnforced;
-    private IntProcedure arcRemoved;
+    private PairProcedure arcEnforced, arcRemoved;
     IStateInt nR;
     IStateInt[] sccOf;
     INeighbors[] outArcs;
@@ -88,8 +88,8 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
         g = graph;
         this.intVars = intVars;
         this.n = g.getEnvelopGraph().getNbNodes();
-        arcEnforced = new EnfArc(this);
-        arcRemoved = new RemArc(this);
+        arcEnforced = new EnfArc();
+        arcRemoved = new RemArc();
         done = new BitSet(n);
     }
 
@@ -129,8 +129,9 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-            eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-            eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+            gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+            gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
@@ -378,29 +379,17 @@ public class PropPosInTourGraphReactor extends GraphPropagator {
         }
     }
 
-    private class EnfArc implements IntProcedure {
-        private GraphPropagator p;
-
-        private EnfArc(GraphPropagator p) {
-            this.p = p;
-        }
-
+    private class EnfArc implements PairProcedure {
         @Override
-        public void execute(int i) throws ContradictionException {
-            enfArc(i / n - 1, i % n);
+        public void execute(int i, int j) throws ContradictionException {
+            enfArc(i,j);
         }
     }
 
-    private class RemArc implements IntProcedure {
-        private GraphPropagator p;
-
-        private RemArc(GraphPropagator p) {
-            this.p = p;
-        }
-
+    private class RemArc implements PairProcedure {
         @Override
-        public void execute(int i) throws ContradictionException {
-            remArc(i / n - 1, i % n);
+        public void execute(int i, int j) throws ContradictionException {
+            remArc(i,j);
         }
     }
 }

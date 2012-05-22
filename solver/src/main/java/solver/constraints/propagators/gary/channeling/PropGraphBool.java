@@ -25,140 +25,137 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 03/10/11
- * Time: 19:56
- */
+package solver.constraints.propagators.gary.channeling;
 
-package solver.constraints.propagators.gary.tsp.directed;
-
-import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.graph.GraphVar;
 
-/**
+/**Propagator channeling between arcs of a graph and a boolean matrix
  *
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
+ * @author Jean-Guillaume Fages
+ */
+public class PropGraphBool extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	DirectedGraphVar g;
-	int n;
-	private PairProcedure arcEnforced;
-	private IStateInt[] origin,end,size;
+	protected GraphVar graph;
+	protected BoolVar[][] relations;
+	protected PairProcedure enf, rem;
+	protected int n;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
-	 * @param graph
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
-		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc();
-		origin = new IStateInt[n];
-		size = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
-		}
+	public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
+		super(new GraphVar[]{graph}, solver, cstr, PropagatorPriority.QUADRATIC);
+		this.graph = graph;
+		relations = rel;
+		n = rel.length;
+		enf = new EnfArc(this);
+		rem = new RemArc(this);
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// PROPAGATIONS
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int i,j;
-		for(i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
-			size[i].set(1);
-		}
-		for(i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-			if(j!=-1){
-				enforce(i,j);
+		for(int i=0; i<n; i++){
+			graph.enforceNode(i,this);
+			for(int j = 0; j<n; j++){
+				if(!graph.getEnvelopGraph().arcExists(i, j)){
+					relations[i][j].setToFalse(this, false);
+				}
+				if(graph.getKernelGraph().arcExists(i, j)){
+					relations[i][j].setToTrue(this, false);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
-		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,graph);
+		if((mask & EventType.ENFORCEARC.mask) !=0){
+			gdm.forEachArc(enf, EventType.ENFORCEARC);
+		}
+		if((mask & EventType.REMOVEARC.mask)!=0){
+			gdm.forEachArc(rem, EventType.REMOVEARC);
+		}
 	}
+
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask ;
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
-
-	private void enforce(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		if(origin[j].get()!=j){
-			contradiction(g,"");
+		if(!graph.instantiated()){
+			return ESat.UNDEFINED;
 		}
-		if(end[i].get()!=i){
-			contradiction(g,"");
-		}
-		if(i==last && j==start){
-			if(size[start].get()!=n){
-				contradiction(g,"");
+		for(int i=0; i<n; i++){
+			for(int j = 0; j<n; j++){
+				if(relations[i][j].instantiated()){
+					if(graph.getEnvelopGraph().arcExists(i,j)!=(relations[i][j].getValue()==1)){
+						return ESat.FALSE;
+					}
+				}else{
+					return ESat.UNDEFINED;
+				}
 			}
-			return;
 		}
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
-		if(size[start].get()!=n){
-			g.removeArc(last,start,this);
-		}else{
-			g.enforceArc(last,start,this);
+		return ESat.TRUE;
+	}
+
+
+	//***********************************************************************************
+	// REACT ON GRAPH MODIFICATION
+	//***********************************************************************************
+
+	/** When an edge (x,y), is enforced then the relation between x and y is true */
+	private class EnfArc implements PairProcedure{
+		protected Propagator p;
+		protected EnfArc(Propagator p){
+			this.p = p;
+		}
+		public void execute(int i, int j) throws ContradictionException{
+			relations[i][j].setToTrue(p, false);
+			if(!graph.isDirected()){
+				relations[j][i].setToTrue(p, false);
+			}
 		}
 	}
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
-
-	private class EnfArc implements PairProcedure {
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			enforce(i,j);
+	/** When an edge (x,y), is removed then the relation between x and y is false */
+	private class RemArc implements PairProcedure{
+		protected Propagator p;
+		protected RemArc(Propagator p){
+			this.p = p;
+		}
+		public void execute(int i, int j) throws ContradictionException{
+			relations[i][j].setToFalse(p, false);
+			if(!graph.isDirected()){
+				relations[j][i].setToFalse(p, false);
+			}
 		}
 	}
 }

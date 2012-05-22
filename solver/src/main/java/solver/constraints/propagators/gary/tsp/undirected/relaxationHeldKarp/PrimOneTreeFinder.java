@@ -28,7 +28,7 @@
 package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
 
 import solver.constraints.propagators.gary.HeldKarp;
-import solver.constraints.propagators.gary.trees.relaxationHeldKarp.PrimMSTFinder;
+import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 

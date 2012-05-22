@@ -36,15 +36,15 @@ package solver.constraints.propagators.gary.tsp;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -52,7 +52,7 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 /**
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
+public class PropCyclePathChanneling extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -62,7 +62,7 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 	DirectedGraphVar dir;
 	int nUndir;
 	int nDir;
-	private IntProcedure arcEnforced,edgeEnforced,arcRemoved,edgeRemoved;
+	private PairProcedure arcEnforced,edgeEnforced,arcRemoved,edgeRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -126,15 +126,14 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
 		if(idxVarInProp==0){
-			eventRecorder.getDeltaMonitor(this,dir).forEach(arcEnforced, EventType.ENFORCEARC);
-			eventRecorder.getDeltaMonitor(this,dir).forEach(arcRemoved, EventType.REMOVEARC);
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,dir);
+			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 		}else{
-			eventRecorder.getDeltaMonitor(this,undir).forEach(edgeEnforced, EventType.ENFORCEARC);
-			eventRecorder.getDeltaMonitor(this,undir).forEach(edgeRemoved, EventType.REMOVEARC);
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,undir);
+			gdm.forEachArc(edgeEnforced, EventType.ENFORCEARC);
+			gdm.forEachArc(edgeRemoved, EventType.REMOVEARC);
 		}
 	}
 
@@ -152,15 +151,13 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfEdge implements IntProcedure {
+	private class EnfEdge implements PairProcedure {
 		Propagator p;
 		private EnfEdge(Propagator prop){
 			p = prop;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/nUndir-1;
-			int to = i%nUndir;
+		public void execute(int from, int to) throws ContradictionException {
 			if(to==0){
 				to = from;
 				from = 0;
@@ -190,15 +187,13 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 		}
 	}
 
-	private class EnfArc implements IntProcedure {
+	private class EnfArc implements PairProcedure {
 		Propagator p;
 		private EnfArc(Propagator prop){
 			p = prop;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/nDir-1;
-			int to = i%nDir;
+		public void execute(int from, int to) throws ContradictionException {
 			if(from==nUndir || to==0){
 				throw new UnsupportedOperationException();
 			}
@@ -215,15 +210,13 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 		}
 	}
 
-	private class RemEdge implements IntProcedure {
+	private class RemEdge implements PairProcedure {
 		Propagator p;
 		private RemEdge(Propagator prop){
 			p = prop;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/nUndir-1;
-			int to = i%nUndir;
+		public void execute(int from, int to) throws ContradictionException {
 			if(to==0){
 				to = from;
 				from = 0;
@@ -238,15 +231,13 @@ public class PropCyclePathChanneling extends GraphPropagator<GraphVar> {
 		}
 	}
 	
-	private class RemArc implements IntProcedure {
+	private class RemArc implements PairProcedure {
 		Propagator p;
 		private RemArc(Propagator prop){
 			p = prop;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/nDir-1;
-			int to = i%nDir;
+		public void execute(int from, int to) throws ContradictionException {
 			if(from==nUndir || to==0){
 				throw new UnsupportedOperationException();
 			}

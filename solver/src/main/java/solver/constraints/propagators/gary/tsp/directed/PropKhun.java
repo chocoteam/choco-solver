@@ -29,7 +29,7 @@ package solver.constraints.propagators.gary.tsp.directed;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.exception.ContradictionException;
@@ -42,10 +42,9 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
-
 import java.util.BitSet;
 
-public class PropKhun extends GraphPropagator<Variable> implements IRelaxation{
+public class PropKhun extends Propagator implements IRelaxation{
 
 	DirectedGraphVar g;
 	IntVar obj;

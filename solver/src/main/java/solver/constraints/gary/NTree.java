@@ -219,8 +219,8 @@ public class NTree<V extends Variable> extends Constraint<V, Propagator<V>>{
 //		return sinks.size();
 //	}
 
-    @Override
-    public HeuristicVal getIterator(String name, V var) {
-        throw new UnsupportedOperationException("NTree does not provide such a service");
-    }
+//    @Override
+//    public HeuristicVal getIterator(String name, V var) {
+//        throw new UnsupportedOperationException("NTree does not provide such a service");
+//    }
 }

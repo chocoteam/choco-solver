@@ -34,7 +34,7 @@ import choco.kernel.memory.IStateInt;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IRelaxation;
@@ -93,7 +93,7 @@ public class ATSP_CP12 {
 	// model
 	private static DirectedGraphVar graph;
 	private static IntVar totalCost;
-	private static GraphConstraint gc;
+	private static Constraint gc;
 	// RG data structure
 	private static IStateInt nR;
 	private static IStateInt[] sccOf;
@@ -164,7 +164,7 @@ public class ATSP_CP12 {
 			e.printStackTrace();
 			System.exit(0);
 		}
-		gc = GraphConstraintFactory.makeConstraint(graph, solver);
+		gc = GraphConstraintFactory.makeConstraint(solver);
 	}
 
 	public static void addPropagators() {
@@ -182,18 +182,18 @@ public class ATSP_CP12 {
 //		gc.addAdHocProp(new PropAtMostNPredecessors(graph,preds,gc,solver));
 //		gc.addAdHocProp(new PropAtLeastNPredecessors(graph,preds,gc,solver));
 
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1, gc, solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,  0, gc, solver));
+		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
+		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
 		
-		gc.addAdHocProp(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-		gc.addAdHocProp(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
+		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
+		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
 		}
 		// STRUCTURAL FILTERING
 		if (config.get(arbo)) {
-			gc.addAdHocProp(new PropArborescence(graph, 0, gc, solver, true));
-			gc.addAdHocProp(new PropAntiArborescence(graph, n - 1, gc, solver, true));
+			gc.addPropagators(new PropArborescence(graph, 0, gc, solver, true));
+			gc.addPropagators(new PropAntiArborescence(graph, n - 1, gc, solver, true));
 		}
 		if (config.get(rg)) {
 			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
@@ -203,9 +203,9 @@ public class ATSP_CP12 {
 			G_R = RP.getReducedGraph();
 			sccFirst = RP.getSCCFirst();
 			sccNext = RP.getSCCNext();
-			gc.addAdHocProp(RP);
+			gc.addPropagators(RP);
 			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
-			gc.addAdHocProp(SCCP);
+			gc.addPropagators(SCCP);
 		}
 		if(config.get(undirectedMate)){
 			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
@@ -221,10 +221,10 @@ public class ATSP_CP12 {
 					}
 				}
 			}
-			gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-			gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-			gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
-			gc.addAdHocProp(new PropCyclePathChanneling(graph,undi,gc,solver));
+			gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+			gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
+			gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
+			gc.addPropagators(new PropCyclePathChanneling(graph, undi, gc, solver));
 		}
 		if(config.get(pos)){
 			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
@@ -234,32 +234,32 @@ public class ATSP_CP12 {
 			}catch(Exception e){
 				e.printStackTrace();System.exit(0);
 			}
-			gc.addAdHocProp(new PropPosInTour(pos,graph,gc,solver));
+			gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
 			if(config.get(rg)){
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver,nR,sccOf,outArcs,G_R));
+				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
 			}else{
-				gc.addAdHocProp(new PropPosInTourGraphReactor(pos,graph,gc,solver));
+				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
 			}
 			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
 		}
 		// COST BASED FILTERING
 		if(instanceName.contains("rbg")){
 			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
-			gc.addAdHocProp(map);
+			gc.addPropagators(map);
 			relax = map;
 		}else{
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
 				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addAdHocProp(propHK_bst);
+				gc.addPropagators(propHK_bst);
 				relax = propHK_bst;
 			}
 			else{// MST-based HK
 				System.out.println("MST");
 				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
 				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addAdHocProp(propHK_mst);
+				gc.addPropagators(propHK_mst);
 				relax = propHK_mst;
 			}
 		}

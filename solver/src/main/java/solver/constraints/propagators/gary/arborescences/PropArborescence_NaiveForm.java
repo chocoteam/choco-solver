@@ -30,18 +30,15 @@ package solver.constraints.propagators.gary.arborescences;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
 import java.util.BitSet;
 import java.util.LinkedList;
 
@@ -49,7 +46,7 @@ import java.util.LinkedList;
  * Arborescence constraint (simplification from tree constraint)
  * Use naive implementation in O(n.m) for testing
  * */
-public class PropArborescence_NaiveForm<V extends GraphVar> extends GraphPropagator<V>{
+public class PropArborescence_NaiveForm extends Propagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -73,8 +70,8 @@ public class PropArborescence_NaiveForm<V extends GraphVar> extends GraphPropaga
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropArborescence_NaiveForm(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+	public PropArborescence_NaiveForm(DirectedGraphVar graph, int source, Constraint constraint, Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;

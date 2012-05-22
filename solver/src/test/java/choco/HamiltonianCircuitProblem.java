@@ -34,7 +34,6 @@ import samples.graph.GraphGenerator;
 import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.NoSubTours;
 import solver.constraints.nary.alldifferent.AllDifferent;
@@ -65,7 +64,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	private DirectedGraphVar graph;
 	private IntVar[] integers;
 	private boolean[][] adjacencyMatrix;
-	private GraphConstraint gc;
+	private Constraint gc;
 	// model parameters
 	private int allDiff;
 	private long seed;
@@ -92,19 +91,19 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 	public void buildModel() {
 		basicModel();
 		if(arbo){
-			gc.addAdHocProp(new PropArborescence(graph,0,gc,solver,true));
+			gc.addPropagators(new PropArborescence(graph,0,gc,solver,true));
 		}
 		if(antiArbo){
-			gc.addAdHocProp(new PropAntiArborescence(graph,n-1,gc,solver,true));
+			gc.addPropagators(new PropAntiArborescence(graph,n-1,gc,solver,true));
 		}
 		if(rg){
-			gc.addAdHocProp(new PropReducedGraphHamPath(graph, gc, solver));
+			gc.addPropagators(new PropReducedGraphHamPath(graph, gc, solver));
 		}
 		Constraint[] cstrs;
 		switch (allDiff){
 			case 0:cstrs = new Constraint[]{gc};break;
 			case 1:
-				gc.addAdHocProp(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
+				gc.addPropagators(new PropAllDiffGraphIncremental(graph,n-1,solver,gc));
 				cstrs = new Constraint[]{gc};break;
 			case 2: cstrs = new Constraint[]{gc, integerAllDiff(false)};break;
 			case 3: cstrs = new Constraint[]{gc, integerAllDiff(true)};break;
@@ -128,10 +127,10 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}catch(Exception e){
 			e.printStackTrace();System.exit(0);
 		}
-		gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
+		gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addPropagators(new PropOnePredBut(graph,0,gc,solver));
+		gc.addPropagators(new PropPathNoCycle(graph,0,n-1, gc, solver));
 	}
 	private Constraint integerAllDiff(boolean bc) {
 		integers = new IntVar[n];
@@ -157,7 +156,7 @@ public class HamiltonianCircuitProblem extends AbstractProblem{
 		}catch(Exception e){
 			e.printStackTrace();System.exit(0);
 		}
-		gc.addAdHocProp(new PropIntVarChanneling(integers,graph,gc,solver));
+		gc.addPropagators(new PropIntVarChanneling(integers,graph,gc,solver));
 		if(bc){
 			return new AllDifferent(integers,solver,AllDifferent.Type.BC);
 		}else{

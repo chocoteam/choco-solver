@@ -29,13 +29,15 @@ package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -45,16 +47,16 @@ import solver.variables.graph.INeighbors;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
+public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private GraphVar g;
-	private IntProcedure enfNode, remArc;
+	private IntProcedure enfNode;
+	private PairProcedure remArc;
 	private INeighbors concernedNodes;
-	private int n;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -66,7 +68,6 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 		this.enfNode = new NodeEnf(this);
 		this.remArc = new ArcRem(this);
 		this.concernedNodes = concernedNodes;
-		this.n = g.getEnvelopGraph().getNbNodes();
 	}
 
 	public PropEachNodeHasLoop(GraphVar graph, Solver sol, Constraint constraint) {
@@ -96,7 +97,8 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(remArc, EventType.REMOVEARC);
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+			gdm.forEachArc(remArc, EventType.REMOVEARC);
 		}
 		if ((mask & EventType.ENFORCENODE.mask) != 0) {
 			eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
@@ -143,17 +145,15 @@ public class PropEachNodeHasLoop extends GraphPropagator<GraphVar> {
 		}
 	}
 
-	private class ArcRem implements IntProcedure {
+	private class ArcRem implements PairProcedure {
 		private PropEachNodeHasLoop p;
 		private ArcRem(PropEachNodeHasLoop p) {
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i/n - 1;
-			int to = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if (from == to && concernedNodes.contain(to)) {
-				g.removeNode(i, p);
+				g.removeNode(from, p);
 			}
 		}
 	}

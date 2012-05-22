@@ -28,14 +28,15 @@
 package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -45,31 +46,19 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtMostNSuccessors extends GraphPropagator<DirectedGraphVar>{
+public class PropAtMostNSuccessors extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private DirectedGraphVar g;
-	private IntProcedure enf_proc;
+	private PairProcedure enf_proc;
 	private int[] n_Succs;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
-
-	@Deprecated
-	public PropAtMostNSuccessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbSuccs) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
-		g = graph;
-		int n = g.getEnvelopGraph().getNbNodes();
-		n_Succs = new int[n];
-		for(int i=0;i<n;i++){
-			n_Succs[i] = nbSuccs;
-		}
-		enf_proc = new ArcEnf(n);
-	}
 
 	public PropAtMostNSuccessors(DirectedGraphVar graph, int nbSuccs, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
@@ -79,15 +68,14 @@ public class PropAtMostNSuccessors extends GraphPropagator<DirectedGraphVar>{
 		for(int i=0;i<n;i++){
 			n_Succs[i] = nbSuccs;
 		}
-		enf_proc = new ArcEnf(n);
+		enf_proc = new ArcEnf();
 	}
 
 	public PropAtMostNSuccessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-		int n = g.getEnvelopGraph().getNbNodes();
 		n_Succs = nbSuccs;
-		enf_proc = new ArcEnf(n);
+		enf_proc = new ArcEnf();
 	}
 
 	//***********************************************************************************
@@ -105,7 +93,8 @@ public class PropAtMostNSuccessors extends GraphPropagator<DirectedGraphVar>{
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this, g).forEach(enf_proc, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(enf_proc, EventType.ENFORCEARC);
 	}
 
 	//***********************************************************************************
@@ -156,14 +145,10 @@ public class PropAtMostNSuccessors extends GraphPropagator<DirectedGraphVar>{
 		}
 	}
 	
-	private class ArcEnf implements IntProcedure{
-		private int n;
-		ArcEnf(int n){
-			this.n = n;
-		}
+	private class ArcEnf implements PairProcedure{
 		@Override
-		public void execute(int i) throws ContradictionException {
-			checkNode(i/n-1);
+		public void execute(int i, int j) throws ContradictionException {
+			checkNode(i);
 		}
 	}
 }

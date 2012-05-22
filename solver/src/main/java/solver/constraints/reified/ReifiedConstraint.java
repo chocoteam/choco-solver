@@ -96,8 +96,8 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         return vars[0].toString() + "<=>" + cons.toString() + " (" + oppcons.toString() + ")";
     }
 
-    @Override
-    public HeuristicVal getIterator(String name, Variable var) {
-        throw new UnsupportedOperationException("ReifiedConstraint does not provide such a service");
-    }
+//    @Override
+//    public HeuristicVal getIterator(String name, Variable var) {
+//        throw new UnsupportedOperationException("ReifiedConstraint does not provide such a service");
+//    }
 }

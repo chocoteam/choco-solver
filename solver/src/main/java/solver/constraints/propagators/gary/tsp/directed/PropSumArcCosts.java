@@ -34,7 +34,6 @@ import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -50,7 +49,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * - For minimization problem
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
+public class PropSumArcCosts extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -79,14 +78,14 @@ public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
 	 * @param constraint
 	 * @param solver
 	 */
-	public PropSumArcCosts(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropSumArcCosts(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+		super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		sum = obj;
 		n = g.getEnvelopGraph().getNbNodes();
 		distMatrix = costMatrix;
-		arcEnforced = new EnfArc(this);
-		arcRemoved = new RemArc(this);
+		arcEnforced = new EnfArc();
+		arcRemoved = new RemArc();
 		minSum = environment.makeInt(0);
 		maxSum = environment.makeInt(0);
 		toCompute = new TIntArrayList();
@@ -154,7 +153,7 @@ public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true || ALWAYS_COARSE){
+		if(true){//TODO incremental behavior
 			propagate(0);return;
 		}
 		toCompute.clear();
@@ -223,11 +222,6 @@ public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
 	//***********************************************************************************
 
 	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
-
-		private EnfArc(GraphPropagator p) {
-			this.p = p;
-		}
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i / n - 1;
@@ -240,11 +234,6 @@ public class PropSumArcCosts<V extends Variable> extends GraphPropagator<V> {
 	}
 
 	private class RemArc implements IntProcedure {
-		private GraphPropagator p;
-
-		private RemArc(GraphPropagator p) {
-			this.p = p;
-		}
 		@Override
 		public void execute(int i) throws ContradictionException {
 			int from = i / n - 1;

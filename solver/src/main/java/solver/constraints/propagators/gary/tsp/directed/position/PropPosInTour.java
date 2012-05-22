@@ -37,7 +37,7 @@ package solver.constraints.propagators.gary.tsp.directed.position;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -49,7 +49,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
 /**
  * @PropAnn(tested = {BENCHMARK})
  */
-public class PropPosInTour extends GraphPropagator {
+public class PropPosInTour extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES

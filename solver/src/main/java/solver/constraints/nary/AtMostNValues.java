@@ -53,15 +53,6 @@ public class AtMostNValues extends IntConstraint<IntVar> {
 				cons.setPropagators(new PropAtMostNValues_BC(vars,nValues,cons,sol));
 			}
 		},
-//		BC_wr { //TODO
-//			@Override
-//			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {
-//				for(IntVar v:vars){
-//					assert v.hasEnumeratedDomain();
-//				}
-//				throw new UnsupportedOperationException("not implemented yet");
-//			}
-//		},
 		Greedy {
 			@Override
 			public void addPropagators(IntVar[] vars, IntVar nValues,IntConstraint cons, Solver sol) {

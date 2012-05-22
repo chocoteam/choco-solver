@@ -25,94 +25,59 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.directedGraph;
+package solver.constraints.propagators.gary.trees;
 
-import solver.ICause;
-import solver.Solver;
+import solver.constraints.propagators.gary.HeldKarp;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-import solver.variables.delta.IGraphDelta;
 import solver.variables.graph.GraphType;
-import solver.variables.graph.GraphVar;
+import solver.variables.graph.undirectedGraph.UndirectedGraph;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau, Jean-Guillaume Fages
- * Date: 7 févr. 2011
- */
-public class DirectedGraphVar extends GraphVar<StoredDirectedGraph> {
+public abstract class AbstractTreeFinder {
 
-	////////////////////////////////// GRAPH PART ///////////////////////////////////////
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
+
+	protected final static boolean FILTER = false;
+	// INPUT
+	protected UndirectedGraph g;	// graph
+	protected int n;				// number of nodes
+	// OUTPUT
+	protected UndirectedGraph Tree;
+	protected double treeCost;
+	// PROPAGATOR
+	protected HeldKarp propHK;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DirectedGraphVar(Solver solver, int nbNodes, GraphType typeEnv, GraphType typeKer) {
-		super(solver);
-		envelop = new StoredDirectedGraph(environment, nbNodes, typeEnv);
-		kernel = new StoredDirectedGraph(environment, nbNodes, typeKer);
-		kernel.getActiveNodes().clear();
+	public AbstractTreeFinder(int nbNodes, HeldKarp propagator) {
+		n = nbNodes;
+		Tree = new UndirectedGraph(n,GraphType.LINKED_LIST);
+		propHK = propagator;
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	@Override
-	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
-		if(kernel.arcExists(x, y)){
-			this.contradiction(cause, EventType.REMOVEARC, "remove mandatory arc "+x+"->"+y);
-			return false;
-		}
-		if (envelop.removeArc(x, y)){
-			if (reactOnModification){
-				delta.add(x, IGraphDelta.AR_tail,cause);
-				delta.add(y, IGraphDelta.AR_head,cause);
-			}
-			EventType e = EventType.REMOVEARC;
-			notifyMonitors(e, cause);
-			return true;
-		}return false;
-	}
-	@Override
-	public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
-		enforceNode(x, cause);
-		enforceNode(y, cause);
-		if(envelop.arcExists(x, y)){
-			if (kernel.addArc(x, y)){
-				if (reactOnModification){
-					delta.add(x,IGraphDelta.AE_tail,cause);
-					delta.add(y,IGraphDelta.AE_head,cause);
-				}
-				EventType e = EventType.ENFORCEARC;
-				notifyMonitors(e, cause);
-				return true;
-			}return false;
-		}
-		this.contradiction(cause, EventType.ENFORCEARC, "enforce arc which is not in the domain");
-		return false;
-	}
+	public abstract void computeMST(double[][] costMatrix, UndirectedGraph graph) throws ContradictionException;
+
+	public abstract void performPruning(double UB) throws ContradictionException;
 
 	//***********************************************************************************
 	// ACCESSORS
 	//***********************************************************************************
 
-	@Override
-	public StoredDirectedGraph getKernelGraph() {
-		return kernel;
+	public UndirectedGraph getMST() {
+		return Tree;
+	}
+	public double getBound() {
+		return treeCost;
 	}
 
-	@Override
-	public StoredDirectedGraph getEnvelopGraph() {
-		return envelop;
-	}
-
-	@Override
-	public boolean isDirected(){
-		return true;
+	public double getRepCost(int from, int to){
+		throw new UnsupportedOperationException("not implemented yet");
 	}
 }

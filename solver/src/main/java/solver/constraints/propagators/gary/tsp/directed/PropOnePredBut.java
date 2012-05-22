@@ -36,15 +36,15 @@ package solver.constraints.propagators.gary.tsp.directed;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -52,7 +52,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * Each node but "but" has only one predecessor
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<V> {
+public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -60,8 +60,7 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
 	DirectedGraphVar g;
 	int but,n;
-	private IntProcedure arcEnforced;
-	private IntProcedure arcRemoved;
+	private PairProcedure arcEnforced, arcRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -73,8 +72,8 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint<V, Propagator<V>> constraint, Solver solver) {
-		super((V[]) new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
+	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint constraint, Solver solver) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.but = but;
@@ -116,11 +115,9 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
-		eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-        eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+        gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 	}
 
 	@Override
@@ -151,19 +148,17 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
-		private GraphPropagator p;
+	private class EnfArc implements PairProcedure {
+		private Propagator p;
 
-		private EnfArc(GraphPropagator p){
+		private EnfArc(Propagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int to = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if(to!=but){
-				int from = i/n-1;
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
-				for(i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
+				for(int i=preds.getFirstElement(); i>=0; i = preds.getNextElement()){
 					if(i!=from){
 						g.removeArc(i,to,p);
 					}
@@ -172,15 +167,14 @@ public class PropOnePredBut<V extends DirectedGraphVar> extends GraphPropagator<
 		}
 	}
 
-	private class RemArc implements IntProcedure{
-		private GraphPropagator p;
+	private class RemArc implements PairProcedure{
+		private Propagator p;
 
-		private RemArc(GraphPropagator p){
+		private RemArc(Propagator p){
 			this.p = p;
 		}
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int to = i%n;
+		public void execute(int from, int to) throws ContradictionException {
 			if(to!=but){
 				INeighbors preds = g.getEnvelopGraph().getPredecessorsOf(to);
 				if (preds.neighborhoodSize()==0){

@@ -28,12 +28,8 @@
 package samples.graph;
 
 import samples.AbstractProblem;
-import solver.Cause;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.gary.GraphProperty;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -41,7 +37,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-
 import java.io.FileWriter;
 import java.util.BitSet;
 
@@ -79,22 +74,18 @@ public class Tree extends AbstractProblem{
 
 	@Override
 	public void buildModel() {
-		IntVar[] vars = VariableFactory.enumeratedArray("v", n, 0, n-1, solver);
+		g = new DirectedGraphVar(solver,n,gtype,GraphType.LINKED_LIST);
 		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);
 		try{
 		for(int i=0; i<n; i++){
 			for(int j=0; j<n ;j++){
-				if(!data[i].get(j)){
-					vars[i].removeValue(j, Cause.Null);
+				if(data[i].get(j)){
+					g.getEnvelopGraph().addArc(i,j);
 				}
 			}
 		}
 		}catch(Exception e){}
-		GraphConstraint gc = GraphConstraintFactory.nTrees(vars, nTree, solver);
-		gc.addProperty(GraphProperty.K_NODES, VariableFactory.bounded("n", n,n, solver));
-		g = (DirectedGraphVar) gc.getGraph();
-		Constraint[] cstrs = new Constraint[]{gc};
-		solver.post(cstrs);
+		solver.post(GraphConstraintFactory.nTrees(g, nTree, solver));
 	}
 
 	@Override

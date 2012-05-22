@@ -33,16 +33,22 @@ public abstract class ArcStrategy<G extends GraphVar> {
 
 	protected G g;
 	protected IActiveNodes envNodes;
-	protected IActiveNodes kerNodes;
-	protected int n;
+
+	protected int from,to;
 
 	
 	public ArcStrategy (G g){
 		this.g = g;
 		this.envNodes = g.getEnvelopGraph().getActiveNodes();
-		this.kerNodes = g.getKernelGraph().getActiveNodes();
-		this.n = g.getEnvelopGraph().getNbNodes();
 	}
 	
-	public abstract int nextArc();
+	public abstract boolean computeNextArc();
+
+	public int getFrom(){
+		return from;
+	}
+
+	public int getTo(){
+		return to;
+	}
 }

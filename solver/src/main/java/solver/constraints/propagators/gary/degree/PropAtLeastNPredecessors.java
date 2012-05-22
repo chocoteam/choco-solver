@@ -29,13 +29,15 @@ package solver.constraints.propagators.gary.degree;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -45,7 +47,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
+public class PropAtLeastNPredecessors extends Propagator<DirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -53,7 +55,8 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	private DirectedGraphVar g;
 	private int[] n_preds;
-	private IntProcedure enf_nodes_proc,rem_arc_proc;
+	private IntProcedure enf_nodes_proc;
+	private PairProcedure rem_arc_proc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -65,7 +68,7 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 		n_preds = nbPreds;
 		int n = g.getEnvelopGraph().getNbNodes();
 		enf_nodes_proc = new NodeEnf();
-		rem_arc_proc = new ArcRem(n);
+		rem_arc_proc = new ArcRem();
 	}
 
 	public PropAtLeastNPredecessors(DirectedGraphVar graph, int nbPreds, Constraint constraint, Solver solver) {
@@ -77,20 +80,7 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 			n_preds[i] = nbPreds;
 		}
 		enf_nodes_proc = new NodeEnf();
-		rem_arc_proc = new ArcRem(n);
-	}
-
-	@Deprecated
-	public PropAtLeastNPredecessors(DirectedGraphVar graph, Solver solver, Constraint constraint, int nbPreds) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
-		g = graph;
-		int n = g.getEnvelopGraph().getNbNodes();
-		n_preds = new int[n];
-		for(int i=0;i<n;i++){
-			n_preds[i] = nbPreds;
-		}
-		enf_nodes_proc = new NodeEnf();
-		rem_arc_proc = new ArcRem(n);
+		rem_arc_proc = new ArcRem();
 	}
 
 	//***********************************************************************************
@@ -111,12 +101,11 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-//		if((mask & EventType.REMOVEARC.mask) != 0){
-			eventRecorder.getDeltaMonitor(this, g).forEach(rem_arc_proc, EventType.REMOVEARC);
-//		}
-//		if((mask & EventType.ENFORCENODE.mask) != 0){
-			eventRecorder.getDeltaMonitor(this, g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
-//		}
+		if((mask & EventType.REMOVEARC.mask) != 0){
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+			gdm.forEachArc(rem_arc_proc, EventType.REMOVEARC);
+		}
+		eventRecorder.getDeltaMonitor(this, g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
 	}
 
 	//***********************************************************************************
@@ -125,8 +114,7 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-//		return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
-		return EventType.ENFORCEARC.mask+EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
+		return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
 	}
 
 	@Override
@@ -193,14 +181,10 @@ public class PropAtLeastNPredecessors extends GraphPropagator<DirectedGraphVar>{
 		}
 	}
 
-	private class ArcRem implements IntProcedure{
-		private int n;
-		ArcRem(int n){
-			this.n = n;
-		}
+	private class ArcRem implements PairProcedure{
 		@Override
-		public void execute(int i) throws ContradictionException {
-			checkNode(i%n);
+		public void execute(int i, int j) throws ContradictionException {
+			checkNode(j);
 		}
 	}
 }

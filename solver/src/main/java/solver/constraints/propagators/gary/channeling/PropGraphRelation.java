@@ -25,140 +25,108 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 03/10/11
- * Time: 19:56
- */
+package solver.constraints.propagators.gary.channeling;
 
-package solver.constraints.propagators.gary.tsp.directed;
-
-import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.PairProcedure;
-import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.graph.directedGraph.DirectedGraphVar;
+import solver.variables.Variable;
+import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
 
-/**
+/**Propagator channeling a graph and an array of variables through a Relation object
  *
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
- * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
+ * @author Jean-Guillaume Fages
+ */
+public class PropGraphRelation<G extends GraphVar> extends Propagator<G> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	DirectedGraphVar g;
-	int n;
-	private PairProcedure arcEnforced;
-	private IStateInt[] origin,end,size;
+	private G g;
+	private int n;
+	private Variable[] nodeVars;
+	private Solver solver;
+	private GraphRelation relation;
 
 	//***********************************************************************************
-	// CONSTRUCTORS
+	// CONSTRUCTOR
 	//***********************************************************************************
 
-	/**
-	 * Ensures that graph has no circuit, with Caseaux/Laburthe/Pesant algorithm
-	 * runs in O(1) per instantiation event
-	 * @param graph
-	 * @param constraint
-	 * @param solver
-	 * */
-	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
-		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
-		g = graph;
-		this.n = g.getEnvelopGraph().getNbNodes();
-		arcEnforced = new EnfArc();
-		origin = new IStateInt[n];
-		size = new IStateInt[n];
-		end = new IStateInt[n];
-		for(int i=0;i<n;i++){
-			origin[i] = environment.makeInt(i);
-			size[i] = environment.makeInt(1);
-			end[i] = environment.makeInt(i);
-		}
+	public PropGraphRelation(Variable[] vars, G graph, Solver solver, Constraint cons, GraphRelation relation) {
+		super((G[]) new GraphVar[]{graph}, solver, cons, PropagatorPriority.QUADRATIC);
+		this.g = graph;
+		this.nodeVars = vars;
+		this.n = nodeVars.length;
+		this.relation = relation;
+		this.solver = solver;
 	}
 
 	//***********************************************************************************
-	// METHODS
+	// PROPAGATIONS
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int i,j;
-		for(i=0;i<n;i++){
-			end[i].set(i);
-			origin[i].set(i);
-			size[i].set(1);
-		}
-		for(i=0;i<n;i++){
-			j = g.getKernelGraph().getSuccessorsOf(i).getFirstElement();
-			if(j!=-1){
-				enforce(i,j);
-			}
+		for(int i=0; i<n; i++){
+			checkVar(i);
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
-		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+		propagate(0);
 	}
+
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask ;
+		return EventType.ENFORCEARC.mask  + EventType.ENFORCENODE.mask + EventType.REMOVEARC.mask + EventType.META.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
-
-	private void enforce(int i, int j) throws ContradictionException {
-		int last = end[j].get();
-		int start = origin[i].get();
-		if(origin[j].get()!=j){
-			contradiction(g,"");
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
 		}
-		if(end[i].get()!=i){
-			contradiction(g,"");
-		}
-		if(i==last && j==start){
-			if(size[start].get()!=n){
-				contradiction(g,"");
+		for(int i=0;i<n;i++){
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(relation.isEntail(i,j)==ESat.FALSE){
+					return ESat.FALSE;
+				}
 			}
-			return;
 		}
-		origin[last].set(start);
-		end[start].set(last);
-		size[start].add(size[j].get());
-		if(size[start].get()!=n){
-			g.removeArc(last,start,this);
-		}else{
-			g.enforceArc(last,start,this);
-		}
+		return ESat.TRUE;
 	}
 
 	//***********************************************************************************
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements PairProcedure {
-		@Override
-		public void execute(int i, int j) throws ContradictionException {
-			enforce(i,j);
+	private void checkVar(int i) throws ContradictionException {
+		IActiveNodes ker = g.getKernelGraph().getActiveNodes();
+		for(int j=0; j<n; j++){
+			if(g.getKernelGraph().arcExists(i, j)){
+				relation.applyTrue(i,j, solver, this);
+			}else{
+				if(!g.getEnvelopGraph().arcExists(i, j)){
+					if(ker.isActive(i) && ker.isActive(j)){
+						relation.applyFalse(i,j, solver, this);
+					}
+				}
+			}
 		}
 	}
 }

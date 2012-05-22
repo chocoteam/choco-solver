@@ -30,13 +30,11 @@ package solver.constraints.propagators.gary.arborescences;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
@@ -49,7 +47,7 @@ import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
  * Uses simple LT algorithm which runs in O(m.log(n)) worst case time
  * but very efficient in practice
  * */
-public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
+public class PropArborescence extends Propagator<DirectedGraphVar>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -77,8 +75,8 @@ public class PropArborescence<V extends GraphVar> extends GraphPropagator<V>{
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropArborescence(DirectedGraphVar graph, int source, Constraint<V, Propagator<V>> constraint, Solver solver, boolean simple) {
-		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
+	public PropArborescence(DirectedGraphVar graph, int source, Constraint constraint, Solver solver, boolean simple) {
+		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.QUADRATIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
 		this.source = source;

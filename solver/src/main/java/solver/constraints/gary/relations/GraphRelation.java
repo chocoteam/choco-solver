@@ -29,8 +29,6 @@ package solver.constraints.gary.relations;
 import choco.kernel.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
-import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.variables.Variable;
 import solver.variables.graph.GraphType;
@@ -74,77 +72,53 @@ public abstract class GraphRelation<V extends Variable> {
 	 */
 	public abstract void applyFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException;
 	
-
-	/** say !(xRy) AND !(yRx)
-	 * TO USE ONLY WHEN A DIRECTED META RELATION COMPOSED OF AT LEAST ONE UNDIRECTED RELATION IS USED
-	 * Apply the filtering defined by !(xRy) so it apply the filtering of the opposite relation : x(!R)y
-	 *
-     * @param x index of node/var
-     * @param y index of node/var
-     * @param solver
-     * @param cause
-     * @throws ContradictionException
-	 */
-	public void applySymmetricFalse(int x, int y, Solver solver, ICause cause) throws ContradictionException {
-		applyFalse(x, y, solver, cause);
-	}
-
 	/**
 	 * @return true iff the relation is not symmetric : the corresponding graph should be directed. 
 	 * false <=> R is symmetric <=> undirected graph
 	 */
 	public abstract boolean isDirected();
 
-	/**
-	 * @return Graph properties due to the relation itself
-	 * Should not include properties ensured by the generation of the graph!
-	 */
-	public abstract GraphProperty[] getGraphProperties();
-	
-	/**
-	 * @return the artity of the relation (binary by default but can be unary)
-	 */
-	public PropagatorPriority getPriority(){ 
-		return PropagatorPriority.BINARY;   // by default but can be unary if only loops are enabled
-	}
-	
-	/**create the initial graph representing the relation between input variables 
-	 * @param inputVars
+	/**create the initial graph representing the relation between input variables
 	 * @param solver
 	 * @return the initial relational graph 
 	 */
-	public GraphVar generateInitialGraph(Variable[] inputVars, Solver solver){
+	public GraphVar generateInitialGraph(Solver solver){
+		return generateInitialGraph(GraphType.LINKED_LIST,solver);
+	}
+
+	/**create the initial graph representing the relation between input variables
+	 * @param envelopeGraphType
+	 * @param solver
+	 * @return the initial relational graph
+	 */
+	public GraphVar generateInitialGraph(GraphType envelopeGraphType, Solver solver){
 		int n = vars.length;
 		if (isDirected()){
-			DirectedGraphVar g = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+			DirectedGraphVar g = new DirectedGraphVar(solver, n, envelopeGraphType, GraphType.LINKED_LIST);
 			for(int i=0;i<n;i++){
 				for(int j=0;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){
 						g.getEnvelopGraph().addArc(i, j);
+						if(isEntail(i,j) == ESat.TRUE){
+							g.getKernelGraph().addArc(i, j);
+						}
 					}
 				}
 			}
 			return g;
 		}else{
-			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
+			UndirectedGraphVar g = new UndirectedGraphVar(solver, n, envelopeGraphType, GraphType.LINKED_LIST);
 			for(int i=0;i<n;i++){
 				for(int j=i;j<n;j++){
 					if(isEntail(i,j) != ESat.FALSE){
 						g.getEnvelopGraph().addEdge(i, j);
+						if(isEntail(i,j) == ESat.TRUE){
+							g.getKernelGraph().addEdge(i, j);
+						}
 					}
 				}
 			}
 			return g;
 		}
-	}
-	
-	protected ESat and(ESat e1, ESat e2){
-		if(e1 == ESat.FALSE || e2 == ESat.FALSE){
-			return ESat.FALSE;
-		}
-		if(e1 == ESat.TRUE && e2 == ESat.TRUE){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
 	}
 }

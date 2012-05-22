@@ -36,16 +36,16 @@ package solver.constraints.propagators.gary.trees;
 
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -55,7 +55,7 @@ import java.util.BitSet;
  * Simple NoSubtour applied to (undirected) tree/forest
  * */
 @PropAnn(tested=PropAnn.Status.BENCHMARK)
-public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
+public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -63,7 +63,7 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	UndirectedGraphVar g;
 	int n;
-	private IntProcedure arcEnforced;
+	private PairProcedure arcEnforced;
 	private IStateInt[] color,size;
 	// list
 	int[] fifo;
@@ -81,7 +81,7 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	 * @param constraint
 	 * @param solver
 	 * */
-	public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint<UndirectedGraphVar, Propagator<UndirectedGraphVar>> constraint, Solver solver) {
+	public PropTreeNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.n = g.getEnvelopGraph().getNbNodes();
@@ -121,7 +121,8 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		eventRecorder.getDeltaMonitor(this,g).forEach(arcEnforced, EventType.ENFORCEARC);
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 	}
 
 	@Override
@@ -180,10 +181,10 @@ public class PropTreeNoSubtour extends GraphPropagator<UndirectedGraphVar> {
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
+	private class EnfArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			enforce(i/n-1,i%n);
+		public void execute(int i, int j) throws ContradictionException {
+			enforce(i,j);
 		}
 	}
 }

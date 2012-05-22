@@ -24,39 +24,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.gary.relations;
 
-import choco.kernel.ESat;
-import solver.constraints.gary.GraphProperty;
-import solver.variables.CustomerVisitVariable;
-import solver.variables.IntVar;
+package choco.kernel.common.util.procedure;
 
-public class CustomerVisitRelation extends MetaRelation {
+import solver.exception.ContradictionException;
+import java.io.Serializable;
 
-	protected CustomerVisitRelation(CustomerVisitVariable[] vars, int[][] distancesMatrix) {
-		super(vars);
-		if(dim!=2)throw new UnsupportedOperationException("error in the modelization");
-		int n = vars.length;
-		IntVar[] trucks = new IntVar[n];
-		IntVar[] times = new IntVar[n];
-		for(int i= 0; i<n ; i++){
-			trucks[i] = vars[i].getTruck();
-			times[i] = vars[i].getTime();
-		}
-		unidimRelation[0] = new SameTruck(trucks);
-//		unidimRelation[1] = GraphRelationFactory.distanceEq(times, distancesMatrix);
-		unidimRelation[1] = GraphRelationFactory.distanceLeq(times, distancesMatrix);
-	}
-	
-//	@Override
-//	public ESat isEntail(int var1, int var2) {
-//		ESat sat = super.isEntail(var1, var2);
-//		return and(sat, ESat.UNDEFINED);
-//	}
-	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{};
-	}
+/**
+ * <br/>
+ *
+ * @author Jean-Guillaume Fages
+ * @since may 2012
+ */
+public interface PairProcedure extends Serializable {
 
+    /**
+     * Action to execute in a <code>GraphDelta</code> object, within the <code>forEach</code> method.
+	 * Used to iterate on a set if arcs 
+     * @param i tail of the arc
+	 * @param j arrow of the arc
+     * @throws solver.exception.ContradictionException when a incoherence is encountered
+     */
+    void execute(int i, int j) throws ContradictionException;
 }

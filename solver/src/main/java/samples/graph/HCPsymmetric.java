@@ -28,7 +28,7 @@
 package samples.graph;
 
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.constraintSpecific.PropAllDiffGraphIncremental;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
@@ -51,7 +51,6 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
 import java.util.BitSet;
 
@@ -76,8 +75,8 @@ public class HCPsymmetric {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-		tsplib_bench();
-//		kingTour();
+//		tsplib_bench();
+		kingTour();
 	}
 
 	// King Tour
@@ -223,12 +222,12 @@ public class HCPsymmetric {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(undi,solver);
-		gc.addAdHocProp(new PropCycleNoSubtour(undi,gc,solver));
-		gc.addAdHocProp(new PropAtLeastNNeighbors(undi,2,gc,solver));
-		gc.addAdHocProp(new PropAtMostNNeighbors(undi,2,gc,solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
+		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
+		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
 		if(alldifferentAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(undi,n,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(undi, n, solver, gc));
 		}
 		solver.post(gc);
 		// config
@@ -279,12 +278,12 @@ public class HCPsymmetric {
 			}
 		}
 		// constraints
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(dir,solver);
-		gc.addAdHocProp(new PropOneSuccBut(dir, n - 1, gc, solver));
-		gc.addAdHocProp(new PropOnePredBut(dir, 0, gc, solver));
-		gc.addAdHocProp(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(dir, n - 1, gc, solver));
+		gc.addPropagators(new PropOnePredBut(dir, 0, gc, solver));
+		gc.addPropagators(new PropPathNoCycle(dir, 0, n - 1, gc, solver));
 		if(alldifferentAC){
-			gc.addAdHocProp(new PropAllDiffGraphIncremental(dir,n-1,solver,gc));
+			gc.addPropagators(new PropAllDiffGraphIncremental(dir, n - 1, solver, gc));
 		}
 		solver.post(gc);
 		// config
@@ -377,9 +376,11 @@ public class HCPsymmetric {
 	private static class MaxRegretMinCost extends ArcStrategy {
 		int[][] dist;
 		int offSet;
+		int n;
 
 		public MaxRegretMinCost(GraphVar graphVar, int[][] costMatrix) {
 			super(graphVar);
+			n = graphVar.getEnvelopGraph().getNbNodes();
 			dist = costMatrix;
 			if(graphVar.isDirected()){
 				offSet = 1;
@@ -389,7 +390,7 @@ public class HCPsymmetric {
 		}
 
 		@Override
-		public int nextArc() {
+		public boolean computeNextArc() {
 			INeighbors suc;
 			int from;
 			if(g.isDirected()){
@@ -401,7 +402,7 @@ public class HCPsymmetric {
 				if(!g.instantiated()){
 					throw new UnsupportedOperationException();
 				}
-				return -1;
+				return false;
 			}
 			int val;
 			int to = -1;
@@ -420,7 +421,9 @@ public class HCPsymmetric {
 				throw new UnsupportedOperationException("error in branching");
 			}
 //			System.out.println("from "+from+" to "+to+" cost "+dist[from][to]);
-			return (from+1)*n+to;
+			this.from = from;
+			this.to = to;
+			return true;
 		}
 		public int nextFromDir() {
 			INeighbors suc;
@@ -506,12 +509,15 @@ public class HCPsymmetric {
 	}
 
 	private static class MinNeigh extends ArcStrategy {
+		int n;
+		
 		public MinNeigh(GraphVar graphVar) {
 			super(graphVar);
+			n = graphVar.getEnvelopGraph().getNbNodes();
 		}
 
 		@Override
-		public int nextArc() {
+		public boolean computeNextArc() {
 			INeighbors suc;
 			int from = -1;
 			int size = n + 1;
@@ -525,12 +531,14 @@ public class HCPsymmetric {
 			}
 			if (from == -1) {
 				System.out.println("over");
-				return -1;
+				return false;
 			}
 			suc = g.getEnvelopGraph().getSuccessorsOf(from);
 			for (int j = suc.getFirstElement(); j >= 0; j = suc.getNextElement()) {
 				if(!g.getKernelGraph().arcExists(from,j)){
-					return (from+1)*n+j;
+					this.from = from;
+					this.to = j;
+					return true;
 				}
 			}
 			throw new UnsupportedOperationException();
@@ -539,14 +547,16 @@ public class HCPsymmetric {
 
 	private static class ConstructorHeur extends ArcStrategy {
 		BitSet seen;
+		int n;
 		int[][] matrix;
 		public ConstructorHeur(GraphVar graphVar, int[][] m) {
 			super(graphVar);
+			n = graphVar.getEnvelopGraph().getNbNodes();
 			seen = new BitSet(n);
 			matrix = m;
 		}
 		@Override
-		public int nextArc() {
+		public boolean computeNextArc() {
 			seen.clear();
 			int x = 0;
 			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
@@ -560,19 +570,12 @@ public class HCPsymmetric {
 				}
 			}
 			if(y!=-1 && seen.get(y)){
-//				if(g.instantiated()){
-//				System.out.println("over");
-				return -1;
-//				}else{
-//					throw new UnsupportedOperationException();
-//				}
+				return false;
 			}
 			int minSuc = -1;
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
 			if(nei.neighborhoodSize()-g.getKernelGraph().getSuccessorsOf(x).neighborhoodSize()<=0){
-//				System.out.println("over");
-				return -1;
-//				throw new UnsupportedOperationException();
+				return false;
 			}
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!seen.get(j)){
@@ -590,7 +593,9 @@ public class HCPsymmetric {
 //			System.out.println(nei);
 //			System.out.println("from "+x+" to "+minSuc+" cost "+matrix[x][minSuc]);
 //			System.exit(0);
-			return (x+1)*n+minSuc;
+			this.from = x;
+			this.to   = minSuc;
+			return true;
 //			y = g.getEnvelopGraph().getSuccessorsOf(x).getFirstElement();
 //			if(y==-1){
 //				throw new UnsupportedOperationException();

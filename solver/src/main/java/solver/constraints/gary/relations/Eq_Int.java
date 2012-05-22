@@ -29,7 +29,6 @@ package solver.constraints.gary.relations;
 import choco.kernel.ESat;
 import solver.ICause;
 import solver.Solver;
-import solver.constraints.gary.GraphProperty;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -115,9 +114,8 @@ public class Eq_Int extends GraphRelation<IntVar> {
 	public boolean isDirected() {
 		return false;
 	}
-	
-	@Override
-	public GraphProperty[] getGraphProperties() {
-		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};
-	}
+//	@Override
+//	public GraphProperty[] getGraphProperties() {
+//		return new GraphProperty[]{GraphProperty.REFLEXIVITY, GraphProperty.TRANSITIVITY, GraphProperty.SYMMETRY};
+//	}
 }

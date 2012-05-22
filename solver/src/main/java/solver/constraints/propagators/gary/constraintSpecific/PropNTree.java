@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -46,7 +45,7 @@ import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFin
 import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
 
-public class PropNTree<V extends Variable> extends GraphPropagator<V> {
+public class PropNTree extends Propagator {
 
     //***********************************************************************************
     // VARIABLES
@@ -63,8 +62,8 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
     //***********************************************************************************
 
     public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
-                     Constraint<V, Propagator<V>> constraint) {
-        super((V[]) new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
+                     Constraint constraint) {
+        super(new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
         g = graph;
         nTree = nT;
 		SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
