@@ -30,6 +30,7 @@ package solver.variables.domain;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.Delta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -58,7 +59,10 @@ public final class IntervalIntDomain implements IIntDomain {
 
     IntDelta delta = NoDelta.singleton;
 
-    public IntervalIntDomain(int a, int b, IEnvironment environment) {
+	private final AbstractSearchLoop loop;
+
+    public IntervalIntDomain(int a, int b, IEnvironment environment, AbstractSearchLoop loop) {
+		this.loop = loop;
         lowerbound = environment.makeInt(a);
         upperbound = environment.makeInt(b);
         size = environment.makeInt(b - a + 1);
@@ -236,7 +240,7 @@ public final class IntervalIntDomain implements IIntDomain {
     public void recordRemoveValues() {
         //nothing to do, interval domain does not react on value removals
 //      TODO:  LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
-        delta = new Delta();
+        delta = new Delta(loop);
     }
 
     /**

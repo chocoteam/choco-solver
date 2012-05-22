@@ -28,6 +28,7 @@
 package solver.variables.delta;
 
 import solver.ICause;
+import solver.search.loop.AbstractSearchLoop;
 
 import java.io.Serializable;
 

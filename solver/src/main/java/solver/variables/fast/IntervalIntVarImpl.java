@@ -419,7 +419,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new Delta();
+            delta = new Delta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }

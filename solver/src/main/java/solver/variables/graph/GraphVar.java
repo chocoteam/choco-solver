@@ -193,7 +193,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		super.analyseAndAdapt(mask);
 		if (!reactOnModification) {
 			reactOnModification = true;
-			delta = new GraphDelta();
+			delta = new GraphDelta(solver.getSearchLoop());
 		}
 	}
 

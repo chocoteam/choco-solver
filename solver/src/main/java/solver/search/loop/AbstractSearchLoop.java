@@ -80,7 +80,8 @@ import java.util.Properties;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
-    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
+//    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
+	public int timeStamp;
 
     static final int INIT = 0;
     static final int INITIAL_PROPAGATION = 1;
