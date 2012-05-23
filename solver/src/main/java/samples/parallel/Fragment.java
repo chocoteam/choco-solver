@@ -30,7 +30,6 @@ import choco.kernel.common.util.PoolManager;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
@@ -38,8 +37,6 @@ import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -90,6 +87,7 @@ public class Fragment {
 		fragToReal = frag;
 		ub = 0;
 		for(int i=0;i<n-1;i++){
+			outputFragment[i] = fragToReal[i];
 			for(int j=i+1;j<n-1;j++){
 				distMatrix[j][i] = distMatrix[i][j] = bigMatrix[fragToReal[i]][fragToReal[j]];
 			}
@@ -98,7 +96,6 @@ public class Fragment {
 			}
 		}
 		outputCost = ub;
-		outputFragment = fragToReal;
 	}
 
 	//***********************************************************************************
@@ -106,10 +103,9 @@ public class Fragment {
 	//***********************************************************************************
 
 	public void solve(){
-		System.out.println("SOLVE THREAD");
-		Solver solver = new Solver();
+		final Solver solver = new Solver();
 		// variables
-		IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
+		final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
 		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
@@ -122,7 +118,7 @@ public class Fragment {
 		undi.getKernelGraph().addEdge(0,n-1);
 		undi.getKernelGraph().addEdge(n-2,n-1);
 		// constraints
-		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		final Constraint gc = GraphConstraintFactory.makeConstraint(solver);
 		gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
 		gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
 		gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
@@ -130,8 +126,8 @@ public class Fragment {
 		gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, distMatrix, gc, solver));
 		solver.post(gc);
 		// config
-//		solver.set(new FragSearch(undi));
-		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
+		solver.set(new FragSearch(undi));
+//		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
 		solver.set(new Sort(new PArc(gc)).clearOut());
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		// resolution
@@ -139,7 +135,7 @@ public class Fragment {
 //		outputCost = totalCost.getValue();
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE,totalCost);
 		//output
-		if(!undi.instantiated()){
+		if(solver.getMeasures().getSolutionCount()==0||!undi.instantiated()){
 			throw new UnsupportedOperationException("SOL#"+solver.getMeasures().getSolutionCount());
 		}
 		outputCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
@@ -166,7 +162,7 @@ public class Fragment {
 		if(outputFragment[0]!=fragToReal[0] || outputFragment[n-2]!=fragToReal[n-2]){
 			throw new UnsupportedOperationException();
 		}
-		Main.jobFinished();
+		Parallelized_LNS.jobFinished();
 	}
 
 	public void lazyStart() {

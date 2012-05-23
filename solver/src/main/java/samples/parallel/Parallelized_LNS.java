@@ -79,10 +79,13 @@ public class Parallelized_LNS {
 
 	public static void main(String[] args) {
 		// set input
-		if(args.length<2 || !args[0].equals("-dir")){
-			throw new UnsupportedOperationException("please insert first the input directory using the command -dir");
+		if(args.length<4 || !(args[0].equals("-dir")&&args[2].equals("-optFile"))){
+			throw new UnsupportedOperationException("please insert first the input directory " +
+					"using the command -dir and second the path of the file containing optimum values" +
+					"using command -optFile");
 		}
 		String dir = args[1]; // "/Users/jfages07/github/In4Ga/benchRousseau";
+		String optFile = args[3]; // "/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		// set output
@@ -97,8 +100,8 @@ public class Parallelized_LNS {
 				distMatrix = Parser.parseInstance(dir + "/" + s);
 				if(distMatrix!=null){
 					n = distMatrix.length;
-					if(n>=60 && n<1500){
-						optimum = Parser.getOpt(s.split("\\.")[0]);
+					if(n>=100 && n<500){
+						optimum = Parser.getOpt(s.split("\\.")[0],optFile);
 						System.out.println("optimum : " + optimum);
 						checkMatrix();
 						initLNS();

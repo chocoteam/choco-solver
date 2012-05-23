@@ -40,9 +40,10 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 	// VARIABLES
 	//***********************************************************************************
 
+	protected S[] slaves;
 	private int nbWorkingSlaves;
 	private Thread mainThread;
-	protected S[] slaves;
+	private boolean wait;
 
 	public AbstractParallelMaster(){
 		mainThread = Thread.currentThread();
@@ -60,8 +61,10 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 		for(int i=0;i<slaves.length;i++){
 			slaves[i].solveSubProblemInParallel();
 		}
+		wait = true;
 		try {
-			mainThread.suspend();
+			while(wait)
+				mainThread.sleep(20);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -74,7 +77,7 @@ public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 	public synchronized void wishGranted() {
 		nbWorkingSlaves--;
 		if(nbWorkingSlaves == 0){
-			mainThread.resume();
+			wait = false;
 		}
 	}
 }

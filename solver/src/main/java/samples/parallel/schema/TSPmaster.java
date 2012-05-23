@@ -49,7 +49,7 @@ import java.io.File;
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class TSPmaster extends AbstractParallelMaster<SubTSP>{
+public class TSPmaster extends AbstractParallelMaster<TSPslave>{
 
 	//***********************************************************************************
 	// VARIABLES
@@ -83,6 +83,7 @@ public class TSPmaster extends AbstractParallelMaster<SubTSP>{
 		Parser.clearFile(outFile);
 		Parser.writeTextInto("instance;sols;fails;nodes;time;obj;search;\n", outFile);
 		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+		String optFile = "/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv";
 //		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
 		File folder = new File(dir);
 		String[] list = folder.list();
@@ -95,7 +96,7 @@ public class TSPmaster extends AbstractParallelMaster<SubTSP>{
 					if(n>=10 && n<40){
 						System.gc();
 						System.out.println("\n SOLVING INSTANCE "+s+"\n");
-						int optimum = Parser.getOpt(s.split("\\.")[0]);
+						int optimum = Parser.getOpt(s.split("\\.")[0],optFile);
 						TSPmaster master = new TSPmaster(distMatrix,optimum);
 						System.out.println("optimum : " + optimum);
 						master.checkMatrix();
@@ -208,11 +209,11 @@ public class TSPmaster extends AbstractParallelMaster<SubTSP>{
 
 	private void initLNS() {
 		int nb = n/SIZE;
-		slaves = new SubTSP[nb];
+		slaves = new TSPslave[nb];
 		for(int i=0;i<nb-1;i++){
-			slaves[i] = new SubTSP(this,i,SIZE);
+			slaves[i] = new TSPslave(this,i,SIZE);
 		}
-		slaves[nb-1] = new SubTSP(this,nb-1,SIZE+n%SIZE);
+		slaves[nb-1] = new TSPslave(this,nb-1,SIZE+n%SIZE);
 	}
 
 	private void LNS() {
