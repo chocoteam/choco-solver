@@ -296,16 +296,16 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}
 		nb /= 2;
-		System.out.println(nb+" edges");
-		System.out.println(obj);
+//		System.out.println(nb+" edges");
+//		System.out.println(obj);
 		HK_algorithm();
 		int nb2 = 0;
 		for(int i=0;i<n;i++){
 			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 		}nb2 /= 2;
-		System.out.println("current lower bound : "+obj.getLB());
-		System.out.println("initial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)");
-		System.out.println(nb2+" edges");
+//		System.out.println("current lower bound : "+obj.getLB());
+//		System.out.println("initial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)");
+//		System.out.println(nb2+" edges");
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package samples.parallel; /**
+package samples.parallel.schema; /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
  *  Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,6 @@ import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.Sort;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -55,13 +53,12 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
  * Time: 14:27
  */
 
-public class Fragment {
+public class TSPslave extends AbstractParallelSlave {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-//	private static final int TIMELIMIT = 10000;
 	//model
 	private int[] fragToReal,outputFragment;
 	private int[][] distMatrix;
@@ -71,8 +68,8 @@ public class Fragment {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public Fragment(int size){
-		super();
+	public TSPslave(AbstractParallelMaster master, int id, int size){
+		super(master,id);
 		n = size+1;
 		distMatrix = new int[n][n];
 		fragToReal = new int[n-1];
@@ -102,7 +99,8 @@ public class Fragment {
 	// METHODS
 	//***********************************************************************************
 
-	public void solve(){
+	@Override
+	public void solveSubProblem() {
 		final Solver solver = new Solver();
 		// variables
 		final IntVar totalCost = VariableFactory.bounded("obj", 0, ub, solver);
@@ -128,7 +126,7 @@ public class Fragment {
 		// config
 		solver.set(new FragSearch(undi));
 //		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+//		solver.set(new Sort(new PArc(gc)).clearOut());
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		// resolution
 //		solver.findSolution();
@@ -162,16 +160,6 @@ public class Fragment {
 		if(outputFragment[0]!=fragToReal[0] || outputFragment[n-2]!=fragToReal[n-2]){
 			throw new UnsupportedOperationException();
 		}
-		Parallelized_LNS.jobFinished();
-	}
-
-	public void lazyStart() {
-		Thread t = new Thread(new Runnable() {
-			public void run() {
-				solve();
-			}
-		});
-		t.start();
 	}
 
 	//***********************************************************************************

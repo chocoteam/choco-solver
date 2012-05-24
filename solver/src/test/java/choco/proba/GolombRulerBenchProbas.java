@@ -24,7 +24,7 @@ import java.util.Collection;
 public class GolombRulerBenchProbas extends AbstractBenchProbas {
 
     // TODO : size 26 max
-    public static int[] length = new int[] {
+    public final static int[] length = new int[] {
         0,1,3,6,11,17,25,34,44,55,72,85,106,127,151,177,199,216,246,283,333,356,372,425,480,492
     };
 
