@@ -101,6 +101,7 @@ public class Parallelized_LNS {
 				if(distMatrix!=null){
 					n = distMatrix.length;
 					if(n>=100 && n<500){
+						SIZE = n/10;
 						optimum = Parser.getOpt(s.split("\\.")[0],optFile);
 						System.out.println("optimum : " + optimum);
 						checkMatrix();
@@ -169,7 +170,7 @@ public class Parallelized_LNS {
 		INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(x);
 		int y = nei.getFirstElement();
 		int tmp;
-		String s = "";
+//		String s = "";
 		for(int i=0;i<n;i++){
 			bestSolution[i] = x;
 			tmp = x;
@@ -179,9 +180,9 @@ public class Parallelized_LNS {
 			if(y==tmp){
 				y = nei.getNextElement();
 			}
-			s += bestSolution[i]+", ";
+//			s += bestSolution[i]+", ";
 		}
-		System.out.println(s);
+//		System.out.println(s);
 	}
 
 	private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
@@ -221,15 +222,16 @@ public class Parallelized_LNS {
 		computeFirstSolution();
 		long timeInst = System.currentTimeMillis();
 		System.out.println("start LNS...");
-		int step = SIZE/3;
-		boolean impr = true;
-		while(impr){
-			impr = false;
-			for(int off = step;off<n;off += step){
-				slideSolution(step);
-				impr |= LNS_one_run();
-			}
-		}
+		LNS_one_run();
+//		int step = SIZE/3;
+//		boolean impr = true;
+//		while(impr){
+//			impr = false;
+//			for(int off = step;off<n;off += step){
+//				slideSolution(step);
+//				impr |= LNS_one_run();
+//			}
+//		}
 		System.out.println("end LNS... duration = "+(System.currentTimeMillis()-timeInst)+" ms");
 		String out = instanceName+";"+(System.currentTimeMillis()-timeInst)+";"+bestCost+";"+optimum+";";
 		if(parallel){

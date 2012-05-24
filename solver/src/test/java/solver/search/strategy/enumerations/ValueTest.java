@@ -68,15 +68,17 @@ public class ValueTest {
     private static final int SIZE = 8;
     public final static int NB_SOL[] = {0, 0, 0, 0, 2, 10, 4, 40, 92, 352, 724, 2680, 14200, 73712, 365596};
 
-    private static Solver solver;
-    private static IntVar[] vars;
+//    static fields removed to enable parallelism
+//    private static Solver solver;
+//    private static IntVar[] vars;
 
-    private static void build(int n, int type) {
-        solver = new Solver();
+	// BEWARE tous les tests utilisent build(SIZE,1)
+    private static Object[] build(int n, int type) {
+        Solver solver = new Solver();
 
         int[][] domains = DomainBuilder.buildFullDomains(n, 1, n);
 
-        vars = new IntVar[n];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, domains[i], solver);
 
@@ -104,6 +106,7 @@ public class ValueTest {
 
         solver.post(cstrs);
         solver.set(strategy);
+		return new Object[]{solver,vars};
     }
 
 
@@ -112,7 +115,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test401() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -132,7 +138,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test402() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -151,7 +160,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test403() {
-        build(SIZE, 1);
+		Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -173,7 +185,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test404() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -192,7 +207,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test405() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -214,7 +232,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test406() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -235,7 +256,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test407() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -256,7 +280,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test408() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -277,7 +304,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test409() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -298,7 +328,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test410() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -322,7 +355,10 @@ public class ValueTest {
      */
     @Test(groups = "1s")
     public void test411() {
-        build(SIZE, 1);
+        Object[] o = build(SIZE, 1);
+
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
