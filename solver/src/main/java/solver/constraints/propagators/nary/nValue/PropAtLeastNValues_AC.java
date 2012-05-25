@@ -38,8 +38,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -70,7 +69,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	private int[] nodeSCC;
 	private BitSet free;
 	private UnaryIntProcedure remProc;
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 	private StrongConnectivityFinder SCCfinder;
 	// for augmenting matching (BFS)
 	private int[] father;
@@ -96,9 +95,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	 */
 	public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
-		this.idms = new IDeltaMonitor[this.vars.length];
+		this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++){
-            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = this.vars[i].monitorDelta(this);
         }
         n = vars.length;
 		this.nValues = nValues;

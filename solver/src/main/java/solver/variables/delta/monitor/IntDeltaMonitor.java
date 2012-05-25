@@ -32,7 +32,7 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 
 /**
@@ -41,7 +41,7 @@ import solver.variables.delta.IntDelta;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
+public class IntDeltaMonitor implements IIntDeltaMonitor {
 
     protected final IntDelta delta;
     protected int first, last, frozenFirst, frozenLast;

@@ -38,8 +38,7 @@ import solver.exception.SolverException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * <br/>
@@ -60,17 +59,17 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     protected final RemProc remproc;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     public PropDistanceXYC(IntVar[] vars, int operator, int cste, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.BINARY, false);
         if (operator == EQ) {
-            this.idms = new IDeltaMonitor[this.vars.length];
+            this.idms = new IIntDeltaMonitor[this.vars.length];
             for (int i = 0; i < this.vars.length; i++){
-                idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+                idms[i] = this.vars[i].monitorDelta(this);
             }
         } else {
-            this.idms = new IDeltaMonitor[0];
+            this.idms = new IIntDeltaMonitor[0];
         }
         this.operator = operator;
         this.cste = cste;

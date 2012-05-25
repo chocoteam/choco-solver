@@ -37,7 +37,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -67,7 +66,7 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 	public PropAtLeastNNeighbors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_neighbors = nbNeigh;
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem();

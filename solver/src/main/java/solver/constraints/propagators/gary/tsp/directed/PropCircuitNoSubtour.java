@@ -45,7 +45,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -80,7 +79,7 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
 	public PropCircuitNoSubtour(DirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
 		origin = new IStateInt[n];

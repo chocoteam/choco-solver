@@ -37,7 +37,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
@@ -67,7 +66,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
 		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
 		this.g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.enfNode = new NodeEnf(this);
 		this.remArc = new ArcRem(this);
 		this.concernedNodes = concernedNodes;

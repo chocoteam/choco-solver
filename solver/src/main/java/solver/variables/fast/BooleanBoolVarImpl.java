@@ -44,9 +44,11 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
+import solver.variables.delta.monitor.OneIntDeltaMonitor;
 import solver.variables.view.IntView;
 
 /**
@@ -55,7 +57,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView, BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, BoolVar> implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -357,12 +359,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+        if (!reactOnRemoval) {
             delta = new OneValueDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
+        return new OneIntDeltaMonitor(delta, propagator);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

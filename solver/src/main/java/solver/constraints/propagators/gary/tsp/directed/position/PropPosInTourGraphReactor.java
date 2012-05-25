@@ -48,8 +48,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -66,7 +65,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     //***********************************************************************************
 
     DirectedGraphVar g;
-    GraphDeltaMonitor gdm;
+    IGraphDeltaMonitor gdm;
     int n;
     IntVar[] intVars;
     private PairProcedure arcEnforced, arcRemoved;
@@ -88,7 +87,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
         super(ArrayUtils.append(new Variable[]{graph}, intVars), solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = g.monitorDelta(this);
         this.intVars = intVars;
         this.n = g.getEnvelopGraph().getNbNodes();
         arcEnforced = new EnfArc();

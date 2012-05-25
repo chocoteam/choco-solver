@@ -46,7 +46,7 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDelta;
-import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.lang.reflect.Field;
 
@@ -66,7 +66,7 @@ public class FinePropEventRecorderTest {
 
     CoarseEventRecorder cer = null;
     IDelta d1, d2, d3 = null;
-    IDeltaMonitor id1, id2, id3;
+    IIntDeltaMonitor id1, id2, id3;
     Propagator p1;
     FinePropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
@@ -83,8 +83,8 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(1).times(2);
         iv1.addMonitor(anyObject(IVariableMonitor.class));
         d1 = EasyMock.createMock(IDelta.class);
-        id1 = EasyMock.createMock(IDeltaMonitor.class);
-        expect(d1.createDeltaMonitor(p1)).andReturn(id1);
+        id1 = EasyMock.createMock(IIntDeltaMonitor.class);
+        expect(iv1.monitorDelta(p1)).andReturn(id1);
         iv1.getDelta();
         expectLastCall().andReturn(d1);
         // VAR 2
@@ -93,8 +93,8 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(2);
         iv2.addMonitor(anyObject(IVariableMonitor.class));
         d2 = EasyMock.createMock(IDelta.class);
-        id2 = EasyMock.createMock(IDeltaMonitor.class);
-        expect(d2.createDeltaMonitor(p1)).andReturn(id2);
+        id2 = EasyMock.createMock(IIntDeltaMonitor.class);
+        expect(iv1.monitorDelta(p1)).andReturn(id2);
         iv2.getDelta();
         expectLastCall().andReturn(d2);
         // VAR 3
@@ -103,8 +103,8 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(3);
         iv3.addMonitor(anyObject(IVariableMonitor.class));
         d3 = EasyMock.createMock(IDelta.class);
-        id3 = EasyMock.createMock(IDeltaMonitor.class);
-        expect(d3.createDeltaMonitor(p1)).andReturn(id3);
+        id3 = EasyMock.createMock(IIntDeltaMonitor.class);
+        expect(iv1.monitorDelta(p1)).andReturn(id3);
         iv3.getDelta();
         expectLastCall().andReturn(d3);
         cer = createMock(CoarseEventRecorder.class);

@@ -30,7 +30,6 @@ package solver.variables.delta;
 import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
 
 public class GraphDelta implements IGraphDelta {
 
@@ -53,11 +52,6 @@ public class GraphDelta implements IGraphDelta {
 			deltaOfType[i] = new Delta(loop);
 		}
 		timestamp = loop.timeStamp;
-    }
-
-    @Override
-    public IDeltaMonitor<GraphDelta> createDeltaMonitor(ICause propagator) {
-        return new GraphDeltaMonitor(this,propagator);
     }
 
     //***********************************************************************************

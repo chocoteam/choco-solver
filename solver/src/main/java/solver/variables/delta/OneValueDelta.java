@@ -30,7 +30,6 @@ package solver.variables.delta;
 import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.OneIntDeltaMonitor;
 
 /**
  * <br/>
@@ -56,11 +55,6 @@ public final class OneValueDelta implements IntDelta {
             set = false;
             timestamp = loop.timeStamp;
         }
-    }
-
-    @Override
-    public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-        return new OneIntDeltaMonitor(this, propagator);
     }
 
     @Override

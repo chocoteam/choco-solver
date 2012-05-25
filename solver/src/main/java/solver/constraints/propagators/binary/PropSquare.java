@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * Enforces X = Y^2
@@ -50,14 +49,14 @@ import solver.variables.delta.IntDelta;
 public class PropSquare extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     public PropSquare(IntVar X, IntVar Y, Solver solver,
                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
-        this.idms = new IDeltaMonitor[vars.length];
+        this.idms = new IIntDeltaMonitor[vars.length];
         for(int i = 0; i < vars.length;i++){
-            idms[i] = vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = vars[i].monitorDelta(this);
         }
         rem_proc = new RemProc(this);
     }

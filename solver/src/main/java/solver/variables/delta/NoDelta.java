@@ -40,11 +40,6 @@ public enum NoDelta implements IntDelta {
     singleton;
 
     @Override
-    public IDeltaMonitor createDeltaMonitor(ICause propagator) {
-        return IDeltaMonitor.Default.NONE;
-    }
-
-    @Override
     public void add(int value, ICause cause) {
     }
 

@@ -36,7 +36,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -65,7 +64,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 	public PropAntiSymmetric(DirectedGraphVar graph, Constraint constraint,Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		enf = new EnfProc(this);
 		n = g.getEnvelopGraph().getNbNodes();
 	}

@@ -35,7 +35,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.GraphVar;
@@ -98,7 +97,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         n = graph.getEnvelopGraph().getNbNodes();
         n2 = 2 * n;
         g = graph;
-        gdm = (GraphDeltaMonitor) g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
         this.matchingCardinality = matchingCardinality;
         matching = new int[n2];
         nodeSCC = new int[n2];

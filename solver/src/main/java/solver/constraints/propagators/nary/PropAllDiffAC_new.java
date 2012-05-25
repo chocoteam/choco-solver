@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -78,7 +77,7 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
     private TIntIntHashMap map;
     int[] fifo;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -95,9 +94,9 @@ public class PropAllDiffAC_new extends Propagator<IntVar> {
     public PropAllDiffAC_new(IntVar[] vars, Constraint constraint, Solver sol) {
         super(vars, sol, constraint, PropagatorPriority.QUADRATIC, true);
         n = vars.length;
-        this.idms = new IDeltaMonitor[vars.length];
+        this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++){
-            idms[i] = vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = vars[i].monitorDelta(this);
         }
         map = new TIntIntHashMap();
         IntVar v;

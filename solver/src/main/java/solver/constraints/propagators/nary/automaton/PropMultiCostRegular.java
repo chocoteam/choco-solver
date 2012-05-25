@@ -56,8 +56,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -207,7 +206,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     Solver solver;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
     protected final RemProc rem_proc;
 
 
@@ -226,9 +225,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         super(ArrayUtils.<IntVar>append(vars, counterVars), solver, constraint, PropagatorPriority.CUBIC, false);
         this.solver = solver;
         this.vs = vars;
-        this.idms = new IDeltaMonitor[this.vars.length];
+        this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++){
-            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = this.vars[i].monitorDelta(this);
         }
         this.offset = vars.length;
         this.z = counterVars;

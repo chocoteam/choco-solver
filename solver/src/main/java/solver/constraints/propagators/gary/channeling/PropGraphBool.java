@@ -37,7 +37,6 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 
@@ -64,7 +63,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
 	public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
 		super(new GraphVar[]{graph}, solver, cstr, PropagatorPriority.QUADRATIC);
 		this.graph = graph;
-        gdm = (GraphDeltaMonitor)graph.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) graph.monitorDelta(this);
 		relations = rel;
 		n = rel.length;
 		enf = new EnfArc(this);

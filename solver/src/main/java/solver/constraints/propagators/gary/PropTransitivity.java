@@ -36,7 +36,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
@@ -64,7 +63,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 	public PropTransitivity(V graph, Solver solver, Constraint constraint) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		if( graph instanceof DirectedGraphVar){
 			arcEnforced = new EnfArcDig(this,g);
 			arcRemoved  = new RemArcDig(this,g);

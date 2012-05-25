@@ -43,8 +43,7 @@ import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * X = Y
@@ -60,7 +59,7 @@ public final class PropEqualXY extends Propagator<IntVar> {
     IntVar x;
     IntVar y;
 
-    IDeltaMonitor<IntDelta>[] idms;
+    IIntDeltaMonitor[] idms;
 
     protected final RemProc rem_proc;
 
@@ -69,9 +68,9 @@ public final class PropEqualXY extends Propagator<IntVar> {
         super(ArrayUtils.toArray(x, y), solver, constraint, PropagatorPriority.BINARY, true);
         this.x = x;
         this.y = y;
-        idms = new IDeltaMonitor[2];
-        idms[0] = x.getDelta().createDeltaMonitor(this);
-        idms[1] = y.getDelta().createDeltaMonitor(this);
+        idms = new IIntDeltaMonitor[2];
+        idms[0] = x.monitorDelta(this);
+        idms[1] = y.monitorDelta(this);
         rem_proc = new RemProc(this);
     }
 

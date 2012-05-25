@@ -44,7 +44,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -75,8 +74,8 @@ public class PropCyclePathChanneling extends Propagator<GraphVar> {
         super(new GraphVar[]{dir, undir}, solver, constraint, PropagatorPriority.LINEAR);
         this.dir = dir;
         this.undir = undir;
-        undirdm = (GraphDeltaMonitor) undir.getDelta().<GraphDelta>createDeltaMonitor(this);
-        dirdm = (GraphDeltaMonitor) dir.getDelta().<GraphDelta>createDeltaMonitor(this);
+        undirdm = (GraphDeltaMonitor) undir.monitorDelta(this);
+        dirdm = (GraphDeltaMonitor) dir.monitorDelta(this);
         nDir = dir.getEnvelopGraph().getNbNodes();
         nUndir = undir.getEnvelopGraph().getNbNodes();
         if (nDir != nUndir + 1) {

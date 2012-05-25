@@ -39,8 +39,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * A class implementing the constraint VALUE = TABLE[INDEX],
@@ -59,14 +58,16 @@ public class PropElementV extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     public PropElementV(IntVar value, IntVar[] values, IntVar index, int offset,
                         Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(ArrayUtils.append(values, new IntVar[]{index, value}),
                 solver, constraint, PropagatorPriority.QUADRATIC, true);
-        this.idms = new IDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++) idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         this.offset = offset;
         valueUpdateNeeded = environment.makeBool(true);
         indexUpdateNeeded = environment.makeBool(true);

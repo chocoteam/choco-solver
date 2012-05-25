@@ -39,7 +39,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
@@ -69,7 +68,7 @@ public class PropKArcs extends Propagator {
 	public PropKArcs(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
 		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.k = k;
 		nbInEnv = environment.makeInt();
 		nbInKer = environment.makeInt();

@@ -37,8 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -93,7 +92,7 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     protected IntProcedure rem_proc;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     static IntVar[] makeVarTable(IntVar[] vars, IntVar[] card) {
         if (card != null) {
@@ -113,9 +112,9 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         this.range = lastCardValue - firstCardValue + 1;
         int n = vars.length;
         this.nbVars = n;
-        this.idms = new IDeltaMonitor[n];
+        this.idms = new IIntDeltaMonitor[n];
         for (int i = 0; i < n; i++){
-            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = this.vars[i].monitorDelta(this);
         }
         treelinks = new int[2 * n + 2];
         d = new int[2 * n + 2];

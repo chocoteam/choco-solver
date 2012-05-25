@@ -39,6 +39,8 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.view.IView;
 
 
@@ -47,7 +49,8 @@ import solver.variables.view.IView;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IView, GraphVar<E>> implements Variable<IGraphDelta, IView>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
+        implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************
@@ -188,14 +191,14 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		return getName();
 	}
 
-	@Override
-	public void analyseAndAdapt(int mask) {
-		super.analyseAndAdapt(mask);
-		if (!reactOnModification) {
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        if (!reactOnModification) {
 			reactOnModification = true;
 			delta = new GraphDelta(solver.getSearchLoop());
 		}
-	}
+        return new GraphDeltaMonitor(delta, propagator);
+    }
 
 	public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
 		if ((modificationEvents & event.mask) != 0) {

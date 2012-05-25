@@ -39,6 +39,7 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.IActivable;
 import solver.variables.delta.IDelta;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -47,7 +48,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, W extends IView> extends IActivable<IVariableMonitor>, Identity, Serializable {
+public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView> extends IActivable<IVariableMonitor>, Identity, Serializable {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -142,7 +143,18 @@ public interface Variable<D extends IDelta, W extends IView> extends IActivable<
 
     Explanation explain(VariableState what, int val);
 
+    /**
+     * Return the delta domain of this
+     * @return
+     */
     D getDelta();
+
+    /**
+     * Allow to monitor removed values of <code>this</code>.
+     * @param propagator the cause that requires to monitor delta
+     * @return a delta monitor
+     */
+    DM monitorDelta(ICause propagator);
 
     /**
      * Link the propagator to this

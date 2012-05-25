@@ -37,6 +37,7 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.recorders.list.VariableMonitorListBuilder;
 import solver.variables.delta.IDelta;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -51,7 +52,8 @@ import java.util.Arrays;
  * @since 30 june 2011
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  */
-public abstract class AbstractVariable<D extends IDelta, W extends IView, V extends Variable<D, W>> implements Serializable {
+public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView, V extends Variable<D,DM, W>>
+        implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public static final String

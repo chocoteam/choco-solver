@@ -45,8 +45,10 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.Delta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.view.IntView;
 
 /**
@@ -55,7 +57,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, IntVar> implements IntVar {
+public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -491,13 +493,14 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
 
+
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+    public IntDeltaMonitor monitorDelta(ICause propagator) {
+        if (!reactOnRemoval) {
             delta = new Delta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
+        return new IntDeltaMonitor(delta, propagator);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

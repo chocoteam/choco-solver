@@ -40,8 +40,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -71,7 +70,7 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private IStateInt[] occs;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     protected final RemProc rem_proc;
 
@@ -80,9 +79,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
     public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
-        this.idms = new IDeltaMonitor[vars.length];
+        this.idms = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++){
-            idms[i] = vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = vars[i].monitorDelta(this);
         }
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);

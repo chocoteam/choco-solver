@@ -41,7 +41,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -84,7 +83,7 @@ public class PropSumArcCosts extends Propagator {
 	public PropSumArcCosts(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		sum = obj;
 		n = g.getEnvelopGraph().getNbNodes();
 		distMatrix = costMatrix;

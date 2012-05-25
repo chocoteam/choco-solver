@@ -44,7 +44,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
@@ -97,7 +96,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 	public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		G = graph;
-        gdm = (GraphDeltaMonitor)G.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) G.monitorDelta(this);
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
 		G_R = new StoredDirectedGraph(environment, n, GraphType.DOUBLE_LINKED_LIST);

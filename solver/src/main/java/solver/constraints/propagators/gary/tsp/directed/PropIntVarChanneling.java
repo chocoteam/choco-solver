@@ -47,9 +47,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -64,7 +62,7 @@ public class PropIntVarChanneling extends Propagator {
     GraphDeltaMonitor gdm;
 	int n;
 	IntVar[] intVars;
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 	private int varIdx;
 	private PairProcedure arcEnforced, arcRemoved;
 	private IntProcedure valRemoved;
@@ -84,11 +82,11 @@ public class PropIntVarChanneling extends Propagator {
 	public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(intVars,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.intVars = intVars;
-        this.idms = new IDeltaMonitor[vars.length];
-        for(int i = 0; i < vars.length;i++){
-            idms[i] = vars[i].getDelta().createDeltaMonitor(this);
+        this.idms = new IIntDeltaMonitor[vars.length];
+        for(int i = 0; i < intVars.length;i++){
+            idms[i] = intVars[i].monitorDelta(this);
         }
 		this.n = g.getEnvelopGraph().getNbNodes();
 		valRemoved  = new ValRem(this);

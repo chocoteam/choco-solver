@@ -39,8 +39,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
@@ -73,14 +72,14 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
-    protected final IDeltaMonitor<IntDelta>[] idms;
+    protected final IIntDeltaMonitor[] idms;
 
     public PropDomainChanneling(BoolVar[] bs, IntVar x, Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
-        this.idms = new IDeltaMonitor[this.vars.length];
+        this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++){
-            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+            idms[i] = this.vars[i].monitorDelta(this);
         }
         this.dsize = bs.length;
         oldinf = environment.makeInt();

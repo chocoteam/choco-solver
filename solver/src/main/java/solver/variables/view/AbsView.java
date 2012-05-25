@@ -39,10 +39,8 @@ import solver.explanations.VariableState;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.monitor.IntDeltaMonitor;
-import solver.variables.delta.view.ViewDelta;
 
 
 /**
@@ -66,40 +64,30 @@ public final class AbsView extends IntView {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.analyseAndAdapt(mask);
-            delta = new ViewDelta(var.getDelta()) {
-                @Override
-                public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-                    return new IntDeltaMonitor(this, propagator) {
-                        @Override
-                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                            if (EventType.isRemove(eventType.mask)) {
-                                for (int i = frozenFirst; i < frozenLast; i++) {
-                                    if (propagator != delta.getCause(i)) {
-                                        int v = delta.get(i);
-                                        if (!var.contains(-v)) {
-                                            boolean found = false;
-                                            for (int j = i + 1; !found && j < frozenLast; j++) {
-                                                if (delta.get(j) == -v) {
-                                                    found = true;
-                                                }
-                                            }
-                                            if (!found) {
-                                                proc.execute(Math.abs(v));
-                                            }
-                                        }
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+            return new IntDeltaMonitor(var.getDelta(), propagator) {
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                if (EventType.isRemove(eventType.mask)) {
+                    for (int i = frozenFirst; i < frozenLast; i++) {
+                        if (propagator != delta.getCause(i)) {
+                            int v = delta.get(i);
+                            if (!var.contains(-v)) {
+                                boolean found = false;
+                                for (int j = i + 1; !found && j < frozenLast; j++) {
+                                    if (delta.get(j) == -v) {
+                                        found = true;
                                     }
+                                }
+                                if (!found) {
+                                    proc.execute(Math.abs(v));
                                 }
                             }
                         }
-                    };
+                    }
                 }
-            };
-            reactOnRemoval = true;
-        }
+            }
+        };
     }
 
     @Override

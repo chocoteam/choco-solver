@@ -30,7 +30,6 @@ package solver.variables.delta;
 import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.IntDeltaMonitor;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -51,11 +50,6 @@ public final class Delta implements IntDelta {
         rem = new int[SIZE];
         causes = new ICause[SIZE];
         this.loop = loop;
-    }
-
-    @Override
-    public IntDeltaMonitor createDeltaMonitor(ICause propagator) {
-        return new IntDeltaMonitor(this, propagator);
     }
 
     private void ensureCapacity() {

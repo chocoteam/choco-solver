@@ -40,7 +40,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -71,7 +70,7 @@ public class PropNLoopsTree extends Propagator{
 	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint constraint) {
 		super(new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
-        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n = g.getEnvelopGraph().getNbNodes();
 		nLoops = nL;
 		removeProc = new RemProc();
