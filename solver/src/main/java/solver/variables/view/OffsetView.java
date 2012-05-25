@@ -67,6 +67,7 @@ public final class OffsetView extends IntView {
 
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        var.createDelta();
         return new IntDeltaMonitor(var.getDelta(), propagator) {
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {

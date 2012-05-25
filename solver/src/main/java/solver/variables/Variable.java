@@ -150,6 +150,12 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
     D getDelta();
 
     /**
+     * Create a delta, if necessary, in order to observe removed values of a this.
+     * If the delta already exists, has no effect.
+     */
+    void createDelta();
+
+    /**
      * Allow to monitor removed values of <code>this</code>.
      * @param propagator the cause that requires to monitor delta
      * @return a delta monitor

@@ -192,11 +192,16 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 	}
 
     @Override
-    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+    public void createDelta() {
         if (!reactOnModification) {
 			reactOnModification = true;
 			delta = new GraphDelta(solver.getSearchLoop());
 		}
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
         return new GraphDeltaMonitor(delta, propagator);
     }
 

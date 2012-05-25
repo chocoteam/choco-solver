@@ -120,6 +120,10 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
         return delta;
     }
 
+    @Override
+    public void createDelta() {
+        var.createDelta();
+    }
 
     @Override
     public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {

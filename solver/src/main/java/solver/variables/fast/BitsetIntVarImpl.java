@@ -495,11 +495,16 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
 
     @Override
-    public IntDeltaMonitor monitorDelta(ICause propagator) {
+    public void createDelta() {
         if (!reactOnRemoval) {
             delta = new Delta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public IntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
         return new IntDeltaMonitor(delta, propagator);
     }
 

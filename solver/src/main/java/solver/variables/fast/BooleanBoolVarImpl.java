@@ -359,11 +359,16 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+    public void createDelta() {
         if (!reactOnRemoval) {
             delta = new OneValueDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
         return new OneIntDeltaMonitor(delta, propagator);
     }
 

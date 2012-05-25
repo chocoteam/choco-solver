@@ -307,6 +307,10 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public void createDelta() {
+    }
+
+    @Override
     public void unlink(Propagator propagator) {
     }
 

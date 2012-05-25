@@ -417,12 +417,18 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
 
+
     @Override
-    public IntDeltaMonitor monitorDelta(ICause propagator) {
+    public void createDelta() {
         if (!reactOnRemoval) {
             delta = new Delta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public IntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
         return new IntDeltaMonitor(delta, propagator);
     }
 

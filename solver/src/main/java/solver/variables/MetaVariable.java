@@ -30,6 +30,7 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.IDeltaMonitor;
@@ -65,6 +66,11 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
             records.forEach(afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+    }
+
+    @Override
+    public void createDelta() {
+        throw new SolverException("No delta available");
     }
 
     @Override

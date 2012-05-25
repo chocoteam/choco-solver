@@ -65,7 +65,8 @@ public final class AbsView extends IntView {
 
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
-            return new IntDeltaMonitor(var.getDelta(), propagator) {
+        var.createDelta();
+        return new IntDeltaMonitor(var.getDelta(), propagator) {
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
                 if (EventType.isRemove(eventType.mask)) {
