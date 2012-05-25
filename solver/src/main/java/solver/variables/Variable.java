@@ -169,7 +169,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      *
      * @param mask
      */
-    void analyseAndAdapt(int mask);
+    void recordMask(int mask);
 
     /**
      * Remove a propagator from the list of propagator of <code>this</code>.

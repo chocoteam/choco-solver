@@ -155,7 +155,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         pindices[pIdx++] = idxInProp;
     }
 
-    public void analyseAndAdapt(int mask) {
+    public void recordMask(int mask) {
         modificationEvents |= mask;
     }
 

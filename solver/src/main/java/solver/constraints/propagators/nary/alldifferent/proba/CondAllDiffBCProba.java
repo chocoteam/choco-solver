@@ -60,7 +60,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         this.idxVs = new TIntIntHashMap(vars.length, (float) 0.5, -2, -2);
         this.timestamps = new TIntLongHashMap(vars.length, (float) 0.5, -2, -2);
         for (IntVar v : vars) {
-            v.analyseAndAdapt(EventType.REMOVE.mask); // to be sure delta is created and maintained
+            v.recordMask(EventType.REMOVE.mask); // to be sure delta is created and maintained
             int vid = v.getId();
             deltamon.put(vid, v.monitorDelta(Cause.Null));
             v.addMonitor(this); // attach this as a variable monitor

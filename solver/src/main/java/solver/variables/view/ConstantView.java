@@ -298,7 +298,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
+    public void recordMask(int mask) {
     }
 
     @Override

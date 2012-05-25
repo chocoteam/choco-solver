@@ -77,9 +77,9 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
     }
 
     @Override
-    public final void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        var.analyseAndAdapt(mask);
+    public final void recordMask(int mask) {
+        super.recordMask(mask);
+        var.recordMask(mask);
     }
 
     @Override
