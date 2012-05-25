@@ -27,7 +27,7 @@
 package solver.constraints.propagators.nary.alldifferent;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -37,6 +37,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -69,12 +71,12 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     private int[] matching;
     private int[] nodeSCC;
     private BitSet free;
-    private IntProcedure remProc;
+    private UnaryIntProcedure remProc;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 	private StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
-    private int idxVarInProp;
     private TIntIntHashMap map;
     int[] fifo;
 
@@ -92,6 +94,10 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      */
     public PropAllDiffAC(IntVar[] vars, Constraint constraint, Solver sol) {
         super(vars, sol, constraint, PropagatorPriority.QUADRATIC, true);
+        this.idms = new IDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        }
         n = vars.length;
         map = new TIntIntHashMap();
         IntVar v;
@@ -301,21 +307,22 @@ public class PropAllDiffAC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        this.idxVarInProp = idxVarInProp;
-        eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(remProc, EventType.REMOVE);
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        idms[varIdx].freeze();
+        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
         if ((mask & EventType.INSTANTIATE.mask) != 0) {
-            int val = vars[idxVarInProp].getValue();
+            int val = vars[varIdx].getValue();
             int j = map.get(val);
             INeighbors nei = digraph.getPredecessorsOf(j);
             for (int i = nei.getFirstElement(); i >= 0; i = nei.getNextElement()) {
-                if (i != idxVarInProp) {
+                if (i != varIdx) {
                     digraph.removeEdge(i, j);
                     vars[i].removeValue(val, this);
                 }
             }
             int i = digraph.getSuccessorsOf(j).getFirstElement();
-            if (i != -1 && i != idxVarInProp) {
+            if (i != -1 && i != varIdx) {
                 digraph.removeEdge(i, j);
                 vars[i].removeValue(val, this);
             }
@@ -352,9 +359,17 @@ public class PropAllDiffAC extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private class DirectedRemProc implements IntProcedure {
+    private class DirectedRemProc implements UnaryIntProcedure<Integer> {
+        int idx;
+
         public void execute(int i) throws ContradictionException {
-            digraph.removeEdge(idxVarInProp, map.get(i));
+            digraph.removeEdge(idx, map.get(i));
+        }
+
+        @Override
+        public UnaryIntProcedure set(Integer idx) {
+            this.idx = idx;
+            return this;
         }
     }
 }

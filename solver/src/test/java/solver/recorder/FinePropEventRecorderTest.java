@@ -267,14 +267,6 @@ public class FinePropEventRecorderTest {
     }
 
     @Test
-    public void testdelta() throws ContradictionException {
-        expect(iv1.getId()).andReturn(1);
-        replay(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
-        Assert.assertEquals(per.getDeltaMonitor(p1, iv1), id1);
-        verify(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
-    }
-
-    @Test
     public void testvirtExec() throws ContradictionException {
         p1.incNbRecorderEnqued();
         iv1.getDelta();

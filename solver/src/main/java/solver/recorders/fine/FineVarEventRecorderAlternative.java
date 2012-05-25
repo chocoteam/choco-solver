@@ -34,11 +34,8 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDelta;
-import solver.variables.delta.IDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -48,6 +45,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove timestamp and deltamonitoring
  * @since 24/02/12
  */
 public class FineVarEventRecorderAlternative<V extends Variable> extends AbstractFineEventRecorder<V> {
@@ -59,8 +57,6 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
     protected final TIntIntHashMap p2i; // hashmap to retrieve the position of a propagator in propagators thanks to its pid
     protected final IStateBitSet pactive; // active propagators
     protected final int[] idxVinPs; // index of the variable within the propagator -- immutable
-    protected final IDeltaMonitor[] deltamon; // delta monitoring -- can be NONE
-    protected final long[] timestamps; // a timestamp lazy clear the event structures
     protected final int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
 
 
@@ -73,19 +69,14 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
         int n = propagators.length;
         p2i = new TIntIntHashMap(n);
 
-        this.deltamon = new IDeltaMonitor[n];
-        this.timestamps = new long[n];
-        Arrays.fill(timestamps, -1);
         this.evtmasks = new int[n];
         this.idxVinPs = idxVinP.clone();
         pactive = solver.getEnvironment().makeBitSet(n);
 
-        IDelta delta = variable.getDelta();
         for (int i = 0; i < n; i++) {
             Propagator propagator = propagators[i];
             propagator.addRecorder(this);
             p2i.put(propagator.getId(), i);
-            deltamon[i] = delta.createDeltaMonitor(propagator);
         }
         throw new SolverException("Do not handle indices correctly!");
 
@@ -101,12 +92,10 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
             if (evtmask_ > 0) {
 //                  LoggerFactory.getLogger("solver").info(">> {}", this.toString());
                 // for concurrent modification..
-                deltamon[idx].freeze();
                 evtmasks[idx] = 0; // and clean up mask
                 assert (propagator.isActive()) : this + " is not active";
                 propagator.fineERcalls++;
                 propagator.propagate(this, idxVinPs[idx], evtmask_);
-                deltamon[idx].unfreeze();
             }
         }
         return true;
@@ -132,15 +121,7 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
                     if (EventType.anInstantiationEvent(evt.mask)) {
                         propagator.decArity();
                     }
-                    // 2. clear the structure if necessary
-                    if (LAZY) {
-                        if (timestamps[idx] - loop.timeStamp != 0) {
-                            deltamon[idx].clear();
-                            this.evtmasks[idx] = 0;
-                            timestamps[idx] = loop.timeStamp;
-                        }
-                    }
-                    // 3. record the event and values removed
+                    // 2. record the event and values removed
                     if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
                         evtmasks[idx] |= evt.strengthened_mask;
                     }
@@ -180,7 +161,6 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
         for (int i = pactive.nextSetBit(0); i > -1; i = pactive.nextSetBit(i + 1)) {
             int idx = p2i.get(propagators[i].getId());
             this.evtmasks[idx] = 0;
-            this.deltamon[idx].clear();
         }
     }
 
@@ -214,7 +194,6 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
     public void desactivate(Propagator<V> element) {
         int idx = p2i.get(element.getId());
         this.evtmasks[idx] = 0;
-        this.deltamon[idx].clear();
         pactive.clear(idx);
 
         int i = 0;
@@ -228,19 +207,9 @@ public class FineVarEventRecorderAlternative<V extends Variable> extends Abstrac
     }
 
     @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return deltamon[p2i.get(propagator.getId())];
-    }
-
-    @Override
     public void virtuallyExecuted(Propagator propagator) {
-        if (LAZY) {
-            variable.getDelta().lazyClear();
-        }
         int idx = p2i.get(propagator.getId());
         this.evtmasks[idx] = 0;
-        this.deltamon[idx].unfreeze();
-        this.timestamps[idx] = loop.timeStamp;
 
         //TODO: to remove when active propagators will be managed smartly
         boolean canDeque = true;

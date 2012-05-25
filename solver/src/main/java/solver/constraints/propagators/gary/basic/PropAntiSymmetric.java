@@ -36,6 +36,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -53,6 +54,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	EnfProc enf;
 	int n;
 
@@ -63,6 +65,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 	public PropAntiSymmetric(DirectedGraphVar graph, Constraint constraint,Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
 		enf = new EnfProc(this);
 		n = g.getEnvelopGraph().getNbNodes();
 	}
@@ -85,8 +88,9 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(enf, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

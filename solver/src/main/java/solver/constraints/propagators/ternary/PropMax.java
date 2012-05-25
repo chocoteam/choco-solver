@@ -37,6 +37,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 
 /**
  * X = MAX(Y,Z)
@@ -49,10 +51,15 @@ public class PropMax extends Propagator<IntVar> {
 
     IntVar MAX, v1, v2;
     protected final RemProc rem_proc;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 
     public PropMax(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
         super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
+        this.idms = new IDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        }
         this.MAX = X;
         this.v1 = Y;
         this.v2 = Z;
@@ -149,7 +156,9 @@ public class PropMax extends Propagator<IntVar> {
             filter(false, true);
         }
         if (EventType.isRemove(mask)) {
-            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
     }
 
@@ -183,7 +192,7 @@ public class PropMax extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return MAX.toString()+".MAX("+v1.toString()+","+v2.toString()+")";
+        return MAX.toString() + ".MAX(" + v1.toString() + "," + v2.toString() + ")";
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

@@ -109,4 +109,14 @@ public class GraphDelta implements IGraphDelta {
 	public ICause getCause(int index, int type) {
 		return deltaOfType[type].getCause(index);
 	}
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
+    }
 }

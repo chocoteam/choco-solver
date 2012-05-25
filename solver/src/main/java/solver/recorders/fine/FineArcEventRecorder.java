@@ -31,10 +31,8 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 /**
  * A specialized fine event recorder associated with one variable and one propagator.
@@ -45,26 +43,19 @@ import solver.variables.delta.IDeltaMonitor;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove timestamp and deltamonitoring
  * @since 01/12/11
  */
 public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V> {
 
     protected int idxVinP; // index of the variable within the propagator -- immutable
 
-    protected final IDeltaMonitor deltamon; // delta monitoring -- can be NONE
-    protected long timestamp = 0; // a timestamp lazy clear the event structures
     protected int evtmask; // reference to events occuring -- inclusive OR over event mask
 
 
     public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver) {
         super(variable, propagator, solver);
         this.idxVinP = idxVinP;
-        this.deltamon = variable.getDelta().createDeltaMonitor(propagator);
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return deltamon;
     }
 
     @Override
@@ -72,13 +63,10 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
         if (evtmask > 0) {
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
             int evtmask_ = evtmask;
-            // for concurrent modification..
-            deltamon.freeze();
             this.evtmask = 0; // and clean up mask
             propagators[PINDEX].fineERcalls++;
             assert (propagators[PINDEX].isActive()) : this + " is not active";
             propagators[PINDEX].propagate(this, idxVinP, evtmask_);
-            deltamon.unfreeze();
         }
         return true;
     }
@@ -90,28 +78,21 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
         if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
             if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP)) != 0) {
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
-                // 1. clear the structure if necessary
-                if (LAZY) {
-                    if (timestamp - loop.timeStamp != 0) {
-                        this.evtmask = 0;
-                        deltamon.clear();
-                        timestamp = loop.timeStamp;
-                    }
-                }
-                // 2. if instantiation, then decrement arity of the propagator
+                // 1. if instantiation, then decrement arity of the propagator
                 if (EventType.anInstantiationEvent(evt.mask)) {
                     propagators[PINDEX].decArity();
                 }
-                // 3. record the event and values removed
-                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmask |= evt.strengthened_mask;
-                }
+                // 2. schedule this
                 if (!enqueued) {
-                    // 4. schedule this
+                    assert evtmask == 0 : "evt mask has not been cleared correctly";
                     scheduler.schedule(this);
                 } else if (scheduler.needUpdate()) {
-                    // 5. inform the scheduler of update if necessary
+                    // 3. inform the scheduler of update if necessary
                     scheduler.update(this);
+                }
+                // 4. record the event and values removed
+                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                    evtmask |= evt.strengthened_mask;
                 }
             }
         }
@@ -120,11 +101,6 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     public void virtuallyExecuted(Propagator propagator) {
         assert this.propagators[PINDEX] == propagator : "wrong propagator";
         this.evtmask = 0;
-        if (LAZY) {
-            variables[VINDEX].getDelta().lazyClear();
-            timestamp = loop.timeStamp;
-        }
-        deltamon.unfreeze();
         if (enqueued) {
             scheduler.remove(this);
         }
@@ -133,14 +109,12 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     @Override
     public void flush() {
         this.evtmask = 0;
-        deltamon.clear();
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
         variables[VINDEX].desactivate(this);
         this.evtmask = 0;
-        deltamon.clear();
     }
 
     @Override

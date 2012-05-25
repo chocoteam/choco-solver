@@ -30,6 +30,7 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IntDelta;
@@ -44,19 +45,25 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
 
     protected final IntDelta delta;
     protected int first, last, frozenFirst, frozenLast;
-	protected ICause propagator;
+    protected ICause propagator;
+
+    int timestamp = -1;
+    final AbstractSearchLoop loop;
 
     public IntDeltaMonitor(IntDelta delta, ICause propagator) {
         this.delta = delta;
+        loop = delta.getSearchLoop();
         this.first = 0;
         this.last = 0;
         this.frozenFirst = 0;
         this.frozenLast = 0;
-		this.propagator = propagator;
+        this.propagator = propagator;
     }
 
     @Override
     public void freeze() {
+        assert delta.timeStamped():"delta is not timestamped";
+        lazyClear();
         this.frozenFirst = first; // freeze indices
         this.frozenLast = last = delta.size();
     }
@@ -65,6 +72,13 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     public void unfreeze() {
         //propagator is idempotent
         this.first = this.last = delta.size();
+    }
+
+    public void lazyClear() {
+        if (timestamp - loop.timeStamp != 0) {
+            clear();
+            timestamp = loop.timeStamp;
+        }
     }
 
     @Override
@@ -76,17 +90,17 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
         if (EventType.isRemove(eventType.mask)) {
             for (int i = frozenFirst; i < frozenLast; i++) {
-				if(propagator == Cause.Null || propagator!=delta.getCause(i)){
-                	proc.execute(delta.get(i));
-				}
+                if (propagator == Cause.Null || propagator != delta.getCause(i)) {
+                    proc.execute(delta.get(i));
+                }
             }
-        }else{
-			throw new UnsupportedOperationException();
-		}
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
     public String toString() {
-        return String.format("(%d,%d) => (%d,%d) :: %d",first, last, frozenFirst, frozenLast, delta.size());
+        return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
     }
 }

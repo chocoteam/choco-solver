@@ -42,14 +42,14 @@ public final class OneValueDelta implements IntDelta {
 
 
     int value;
-	ICause cause;
+    ICause cause;
     boolean set;
     int timestamp = -1;
-	final AbstractSearchLoop loop;
+    final AbstractSearchLoop loop;
 
-	public OneValueDelta(AbstractSearchLoop loop){
-		this.loop = loop;
-	}
+    public OneValueDelta(AbstractSearchLoop loop) {
+        this.loop = loop;
+    }
 
     public void lazyClear() {
         if (timestamp - loop.timeStamp != 0) {
@@ -60,16 +60,16 @@ public final class OneValueDelta implements IntDelta {
 
     @Override
     public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-        return new OneIntDeltaMonitor(this,propagator);
+        return new OneIntDeltaMonitor(this, propagator);
     }
 
     @Override
     public void add(int value, ICause cause) {
-		if(IEventRecorder.LAZY){
-       		lazyClear();
-		}
+        if (IEventRecorder.LAZY) {
+            lazyClear();
+        }
         this.value = value;
-		this.cause = cause;
+        this.cause = cause;
         set = true;
     }
 
@@ -82,7 +82,7 @@ public final class OneValueDelta implements IntDelta {
         }
     }
 
-	@Override
+    @Override
     public ICause getCause(int idx) {
         if (idx < 1) {
             return cause;
@@ -96,8 +96,19 @@ public final class OneValueDelta implements IntDelta {
         return set ? 1 : 0;
     }
 
-	@Override
+    @Override
     public void clear() {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
+    }
+
 }

@@ -42,6 +42,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -56,9 +58,14 @@ public class PropRegular extends Propagator<IntVar> {
     final TIntStack temp = new TIntArrayStack();
 
     protected final RemProc rem_proc;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 
     public PropRegular(IntVar[] vars, IAutomaton automaton, StoredDirectedMultiGraph graph, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        this.idms = new IDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
         this.graph = graph;
@@ -90,9 +97,11 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp,
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx,
                           int mask) throws ContradictionException {
-        eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+        idms[varIdx].freeze();
+        idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
     }
 
     @Override

@@ -318,15 +318,6 @@ public class FineVarEventRecorderTest {
     }
 
     @Test
-    public void testdelta() throws ContradictionException {
-        p1.getId();
-        expectLastCall().andReturn(1);
-        replay(p1);
-        Assert.assertEquals(ver.getDeltaMonitor(p1, iv1), id1);
-        verify(p1);
-    }
-
-    @Test
     public void testvirtExec() throws ContradictionException {
         // scenario :
         // p1, p2, p3 are active

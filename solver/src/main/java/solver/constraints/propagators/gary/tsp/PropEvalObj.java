@@ -40,6 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -57,6 +58,7 @@ public class PropEvalObj extends Propagator {
     //***********************************************************************************
 
     DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
     int n;
     IntVar sum;
     int[][] distMatrix;
@@ -83,6 +85,7 @@ public class PropEvalObj extends Propagator {
     public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
         super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();
         distMatrix = costMatrix;
@@ -142,13 +145,14 @@ public class PropEvalObj extends Propagator {
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];
         if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+			gdm.freeze();
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
                 gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
                 gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
             }
+            gdm.unfreeze();
             for (int i = toCompute.size() - 1; i >= 0; i--) {
                 findMin(toCompute.get(i));
             }

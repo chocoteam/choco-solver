@@ -48,6 +48,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -65,6 +66,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     //***********************************************************************************
 
     DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
     int n;
     IntVar[] intVars;
     private PairProcedure arcEnforced, arcRemoved;
@@ -86,6 +88,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
         super(ArrayUtils.append(new Variable[]{graph}, intVars), solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
         this.intVars = intVars;
         this.n = g.getEnvelopGraph().getNbNodes();
         arcEnforced = new EnfArc();
@@ -129,9 +132,10 @@ public class PropPosInTourGraphReactor extends Propagator {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+            gdm.freeze();
             gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            gdm.unfreeze();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
@@ -382,14 +386,14 @@ public class PropPosInTourGraphReactor extends Propagator {
     private class EnfArc implements PairProcedure {
         @Override
         public void execute(int i, int j) throws ContradictionException {
-            enfArc(i,j);
+            enfArc(i, j);
         }
     }
 
     private class RemArc implements PairProcedure {
         @Override
         public void execute(int i, int j) throws ContradictionException {
-            remArc(i,j);
+            remArc(i, j);
         }
     }
 }

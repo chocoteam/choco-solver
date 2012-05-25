@@ -37,6 +37,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -54,6 +55,7 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 	//***********************************************************************************
 
 	private UndirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	private int[] n_neighbors;
 	private IntProcedure enf_nodes_proc;
 	private PairProcedure rem_arc_proc;
@@ -65,6 +67,7 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 	public PropAtLeastNNeighbors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
 		n_neighbors = nbNeigh;
 		enf_nodes_proc = new NodeEnf();
 		rem_arc_proc = new ArcRem();
@@ -101,13 +104,14 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if((mask & EventType.REMOVEARC.mask) != 0){
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
+        if((mask & EventType.REMOVEARC.mask) != 0){
 			gdm.forEachArc(rem_arc_proc, EventType.REMOVEARC);
 		}
 		if((mask & EventType.ENFORCENODE.mask) != 0){
-			eventRecorder.getDeltaMonitor(this, g).forEach(enf_nodes_proc, EventType.ENFORCENODE);
+			gdm.forEachNode(enf_nodes_proc, EventType.ENFORCENODE);
 		}
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

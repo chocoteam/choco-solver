@@ -27,7 +27,7 @@
 package solver.constraints.propagators.nary.nValue;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -38,6 +38,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -67,12 +69,12 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	private int[] matching;
 	private int[] nodeSCC;
 	private BitSet free;
-	private IntProcedure remProc;
+	private UnaryIntProcedure remProc;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 	private StrongConnectivityFinder SCCfinder;
 	// for augmenting matching (BFS)
 	private int[] father;
 	private BitSet in;
-	private int idxVarInProp;
 	private TIntIntHashMap map;
 	int[] fifo;
 
@@ -94,7 +96,11 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	 */
 	public PropAtLeastNValues_AC(IntVar[] vars, IntVar nValues, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
-		n = vars.length;
+		this.idms = new IDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        }
+        n = vars.length;
 		this.nValues = nValues;
 		map = new TIntIntHashMap();
 		IntVar v;
@@ -271,9 +277,10 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 	}
 
 	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		this.idxVarInProp = idxVarInProp;
-		eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(remProc, EventType.REMOVE);
+	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+		idms[varIdx].freeze();
+        idms[varIdx].forEach(remProc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
 		if (nbPendingER == 0) {
 			free.clear();
 			for (int i = 0; i < n; i++) {
@@ -333,9 +340,18 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 		return ESat.UNDEFINED;
 	}
 
-	private class DirectedRemProc implements IntProcedure {
+	private class DirectedRemProc implements UnaryIntProcedure<Integer> {
+
+        int idx;
+
 		public void execute(int i) throws ContradictionException {
-			digraph.removeEdge(idxVarInProp, map.get(i));
+			digraph.removeEdge(idx, map.get(i));
 		}
-	}
+
+        @Override
+        public UnaryIntProcedure set(Integer integer) {
+            this.idx = integer;
+            return this;
+        }
+    }
 }

@@ -44,6 +44,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 
 /**
  * <br/>
@@ -66,11 +68,16 @@ public class PropCostRegular extends Propagator<IntVar> {
     final Solver solver;
 
     protected final RemProc rem_proc;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 
 
     public PropCostRegular(IntVar[] vars, ICostAutomaton cautomaton, StoredValuedDirectedMultiGraph graph,
                            Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.CUBIC, false);
+        this.idms = new IDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].getDelta().createDeltaMonitor(this);
+        }
         this.zIdx = vars.length - 1;
         this.solver = solver;
         this.rem_proc = new RemProc(this);
@@ -113,12 +120,14 @@ public class PropCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         checkWorld();
-        if (idxVarInProp == zIdx) { // z only deals with bound events
+        if (varIdx == zIdx) { // z only deals with bound events
             boundChange.set(true);
         } else { // other variables only deals with removal events
-            eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }

@@ -34,7 +34,6 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -44,6 +43,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove deltamonitoring
  * @since 24/01/12
  */
 public class PropEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
@@ -128,11 +128,6 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     @Override
     public void flush() {
         // void
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

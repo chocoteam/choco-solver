@@ -35,7 +35,6 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 /**
  * An abstract class for fine event recorder.
@@ -80,15 +79,6 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     public final Propagator<V>[] getPropagators() {
         return propagators;
     }
-
-    /**
-     * Return the delta monitor declared in <code>this</code> the variable given in parameter
-     *
-     * @param propagator
-     * @param variable   a variable
-     * @return its deltamonitor in <code>this</code>
-     */
-    public abstract IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable);
 
     @Override
     public boolean enqueued() {

@@ -37,6 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 
@@ -51,6 +52,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
 	//***********************************************************************************
 
 	protected GraphVar graph;
+    GraphDeltaMonitor gdm;
 	protected BoolVar[][] relations;
 	protected PairProcedure enf, rem;
 	protected int n;
@@ -62,6 +64,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
 	public PropGraphBool(GraphVar graph, BoolVar[][] rel, Solver solver, Constraint cstr) {
 		super(new GraphVar[]{graph}, solver, cstr, PropagatorPriority.QUADRATIC);
 		this.graph = graph;
+        gdm = (GraphDeltaMonitor)graph.getDelta().<GraphDelta>createDeltaMonitor(this);
 		relations = rel;
 		n = rel.length;
 		enf = new EnfArc(this);
@@ -89,13 +92,14 @@ public class PropGraphBool extends Propagator<GraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,graph);
+		gdm.freeze();
 		if((mask & EventType.ENFORCEARC.mask) !=0){
 			gdm.forEachArc(enf, EventType.ENFORCEARC);
 		}
 		if((mask & EventType.REMOVEARC.mask)!=0){
 			gdm.forEachArc(rem, EventType.REMOVEARC);
 		}
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

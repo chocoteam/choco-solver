@@ -47,6 +47,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.GraphDelta;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -58,8 +61,10 @@ public class PropIntVarChanneling extends Propagator {
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	int n;
 	IntVar[] intVars;
+    protected final IDeltaMonitor<IntDelta>[] idms;
 	private int varIdx;
 	private PairProcedure arcEnforced, arcRemoved;
 	private IntProcedure valRemoved;
@@ -79,7 +84,12 @@ public class PropIntVarChanneling extends Propagator {
 	public PropIntVarChanneling(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(ArrayUtils.append(intVars,new Variable[]{graph}), solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
 		this.intVars = intVars;
+        this.idms = new IDeltaMonitor[vars.length];
+        for(int i = 0; i < vars.length;i++){
+            idms[i] = vars[i].getDelta().createDeltaMonitor(this);
+        }
 		this.n = g.getEnvelopGraph().getNbNodes();
 		valRemoved  = new ValRem(this);
 		arcEnforced = new EnfArc(this);
@@ -125,20 +135,23 @@ public class PropIntVarChanneling extends Propagator {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		if((vars[idxVarInProp].getTypeAndKind() & Variable.GRAPH)!=0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+			gdm.freeze();
 			if((mask & EventType.ENFORCEARC.mask) !=0){
 				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 			}
 			if((mask & EventType.REMOVEARC.mask)!=0){
 				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 			}
+            gdm.unfreeze();
 		}else{
 			varIdx = idxVarInProp;
 			int val = intVars[varIdx].getLB();
 			if((mask & EventType.INSTANTIATE.mask)!=0 && val<n){
 				g.enforceArc(varIdx,val,this);
 			}
-			eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(valRemoved, EventType.REMOVE);
+            idms[varIdx].freeze();
+			idms[idxVarInProp].forEach(valRemoved, EventType.REMOVE);
+            idms[varIdx].unfreeze();
 		}
 	}
 

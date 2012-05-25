@@ -45,6 +45,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
@@ -61,6 +62,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 	//***********************************************************************************
 
 	protected UndirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	protected int n;
 	protected PairProcedure arcEnforced;
 	protected IStateInt[] origin,end,size;
@@ -79,6 +81,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 	public PropCycleNoSubtour(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
 		origin = new IStateInt[n];
@@ -122,8 +125,9 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

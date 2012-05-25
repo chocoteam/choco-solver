@@ -38,22 +38,42 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 18 oct. 2010
  */
-public interface IDelta extends Serializable{
+public interface IDelta extends Serializable {
 
     /**
      * Returns the number of element
+     *
      * @return number of element
      */
     int size();
 
     /**
      * Create and return a dedicated monitor for this.
-	 * @param propagator of the monitor
+     *
+     * @param propagator of the monitor
      * @return a monitor
      */
-    <D extends IDelta>IDeltaMonitor<D> createDeltaMonitor(ICause propagator);
+    <D extends IDelta> IDeltaMonitor<D> createDeltaMonitor(ICause propagator);
 
-	void clear();
+    /**
+     * Clear the delta
+     */
+    void clear();
 
+    /**
+     * Lazy clear the delta, on world change
+     */
     void lazyClear();
+
+    /**
+     * Return the associate search loop
+     * @return associate search loop
+     */
+    AbstractSearchLoop getSearchLoop();
+
+    /**
+     * Check wether the delta is up-to-date with the search loop
+     * @return
+     */
+    boolean timeStamped();
 }

@@ -28,6 +28,7 @@
 package solver.variables.delta;
 
 import solver.ICause;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>
@@ -55,6 +56,15 @@ public enum NoDelta implements IntDelta {
     public void lazyClear() {
     }
 
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return null;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return false;
+    }
 
     @Override
     public int get(int idx) {

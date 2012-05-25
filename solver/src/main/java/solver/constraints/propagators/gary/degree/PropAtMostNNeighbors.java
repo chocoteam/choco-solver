@@ -36,6 +36,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
@@ -53,6 +54,7 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 	//***********************************************************************************
 
 	private UndirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	private PairProcedure enf_proc;
 	private int[] n_neighbors;
 
@@ -63,6 +65,7 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 	public PropAtMostNNeighbors(UndirectedGraphVar graph,int nNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor)g.getDelta().<GraphDelta>createDeltaMonitor(this);
 		int n = g.getEnvelopGraph().getNbNodes();
 		n_neighbors = new int[n];
 		for(int i=0;i<n;i++){
@@ -93,8 +96,9 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(enf_proc, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

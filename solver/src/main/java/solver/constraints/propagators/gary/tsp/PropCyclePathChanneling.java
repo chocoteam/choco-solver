@@ -44,6 +44,7 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.delta.GraphDelta;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
@@ -51,218 +52,232 @@ import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 /**
  * */
-@PropAnn(tested=PropAnn.Status.BENCHMARK)
+@PropAnn(tested = PropAnn.Status.BENCHMARK)
 public class PropCyclePathChanneling extends Propagator<GraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	UndirectedGraphVar undir;
-	DirectedGraphVar dir;
-	int nUndir;
-	int nDir;
-	private PairProcedure arcEnforced,edgeEnforced,arcRemoved,edgeRemoved;
+    UndirectedGraphVar undir;
+    GraphDeltaMonitor undirdm;
+    DirectedGraphVar dir;
+    GraphDeltaMonitor dirdm;
+    int nUndir;
+    int nDir;
+    private PairProcedure arcEnforced, edgeEnforced, arcRemoved, edgeRemoved;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropCyclePathChanneling(DirectedGraphVar dir, UndirectedGraphVar undir, Constraint<GraphVar, Propagator<GraphVar>> constraint, Solver solver) {
-		super(new GraphVar[]{dir,undir}, solver, constraint, PropagatorPriority.LINEAR);
-		this.dir = dir;
-		this.undir = undir;
-		nDir = dir.getEnvelopGraph().getNbNodes();
-		nUndir = undir.getEnvelopGraph().getNbNodes();
-		if(nDir!=nUndir+1){
-			throw new UnsupportedOperationException();
-		}
-		arcEnforced = new EnfArc(this);
-		edgeEnforced = new EnfEdge(this);
-		arcRemoved = new RemArc(this);
-		edgeRemoved = new RemEdge(this);
-	}
+    public PropCyclePathChanneling(DirectedGraphVar dir, UndirectedGraphVar undir, Constraint<GraphVar, Propagator<GraphVar>> constraint, Solver solver) {
+        super(new GraphVar[]{dir, undir}, solver, constraint, PropagatorPriority.LINEAR);
+        this.dir = dir;
+        this.undir = undir;
+        undirdm = (GraphDeltaMonitor) undir.getDelta().<GraphDelta>createDeltaMonitor(this);
+        dirdm = (GraphDeltaMonitor) dir.getDelta().<GraphDelta>createDeltaMonitor(this);
+        nDir = dir.getEnvelopGraph().getNbNodes();
+        nUndir = undir.getEnvelopGraph().getNbNodes();
+        if (nDir != nUndir + 1) {
+            throw new UnsupportedOperationException();
+        }
+        arcEnforced = new EnfArc(this);
+        edgeEnforced = new EnfEdge(this);
+        arcRemoved = new RemArc(this);
+        edgeRemoved = new RemEdge(this);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		for(int i=0;i<nUndir;i++){
-			if(undir.getKernelGraph().getNeighborsOf(i).neighborhoodSize()>0){
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        for (int i = 0; i < nUndir; i++) {
+            if (undir.getKernelGraph().getNeighborsOf(i).neighborhoodSize() > 0) {
 //				throw new UnsupportedOperationException("not implemented yet");
-				
-			}
-			for(int j=1;j<nUndir;j++){
-				if(!undir.getEnvelopGraph().edgeExists(i,j)){
-					dir.removeArc(i,j,this);
-					if(i==0){
-						dir.removeArc(j,nUndir,this);
-					}else{
-						dir.removeArc(j,i,this);
-					}
-				}
-				if(!dir.getEnvelopGraph().arcExists(i,j)){
-					if(i==0){
-						if(!dir.getEnvelopGraph().arcExists(j,nUndir)){
-							undir.removeArc(i,j,this);
-						}
-					}else{
-						if(!dir.getEnvelopGraph().arcExists(j,i)){
-							undir.removeArc(i,j,this);
-						}
-					}
-				}
-				if(dir.getKernelGraph().arcExists(i,j)){
-					undir.enforceArc(i,j,this);
-				}
-			}
-			if(dir.getKernelGraph().arcExists(i,nUndir)){
-				undir.enforceArc(i,0,this);
-			}
-		}
-	}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp==0){
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,dir);
-			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
-			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
-		}else{
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,undir);
-			gdm.forEachArc(edgeEnforced, EventType.ENFORCEARC);
-			gdm.forEachArc(edgeRemoved, EventType.REMOVEARC);
-		}
-	}
+            }
+            for (int j = 1; j < nUndir; j++) {
+                if (!undir.getEnvelopGraph().edgeExists(i, j)) {
+                    dir.removeArc(i, j, this);
+                    if (i == 0) {
+                        dir.removeArc(j, nUndir, this);
+                    } else {
+                        dir.removeArc(j, i, this);
+                    }
+                }
+                if (!dir.getEnvelopGraph().arcExists(i, j)) {
+                    if (i == 0) {
+                        if (!dir.getEnvelopGraph().arcExists(j, nUndir)) {
+                            undir.removeArc(i, j, this);
+                        }
+                    } else {
+                        if (!dir.getEnvelopGraph().arcExists(j, i)) {
+                            undir.removeArc(i, j, this);
+                        }
+                    }
+                }
+                if (dir.getKernelGraph().arcExists(i, j)) {
+                    undir.enforceArc(i, j, this);
+                }
+            }
+            if (dir.getKernelGraph().arcExists(i, nUndir)) {
+                undir.enforceArc(i, 0, this);
+            }
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.ENFORCEARC.mask + EventType.REMOVEARC.mask;
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp == 0) {
+            dirdm.freeze();
+            dirdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+            dirdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            dirdm.unfreeze();
+        } else {
+            undirdm.freeze();
+            undirdm.forEachArc(edgeEnforced, EventType.ENFORCEARC);
+            undirdm.forEachArc(edgeRemoved, EventType.REMOVEARC);
+            undirdm.unfreeze();
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.ENFORCEARC.mask + EventType.REMOVEARC.mask;
+    }
 
-	//***********************************************************************************
-	// PROCEDURES
-	//***********************************************************************************
+    @Override
+    public ESat isEntailed() {
+        return ESat.UNDEFINED;
+    }
 
-	private class EnfEdge implements PairProcedure {
-		Propagator p;
-		private EnfEdge(Propagator prop){
-			p = prop;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(to==0){
-				to = from;
-				from = 0;
-			}
-			if(from>to){
-				int k = from;
-				from = to;
-				to = k;
-			}
-			if(from==0){
-				if(dir.getEnvelopGraph().arcExists(0,to)){
-					if(!dir.getEnvelopGraph().arcExists(to,nUndir)){
-						dir.enforceArc(from,to,p);
-					}
-				}else{
-					dir.enforceArc(to,nUndir,p);
-				}
-			}else{
-				if(dir.getEnvelopGraph().arcExists(from,to)){
-					if(!dir.getEnvelopGraph().arcExists(to,from)){
-						dir.enforceArc(from,to,p);
-					}
-				}else{
-					dir.enforceArc(to,from,p);
-				}
-			}
-		}
-	}
+    //***********************************************************************************
+    // PROCEDURES
+    //***********************************************************************************
 
-	private class EnfArc implements PairProcedure {
-		Propagator p;
-		private EnfArc(Propagator prop){
-			p = prop;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(from==nUndir || to==0){
-				throw new UnsupportedOperationException();
-			}
-			if(from>to){
-				int k = from;
-				from = to;
-				to = k;
-			}
-			if(to==nUndir){
-				undir.enforceArc(from,0,p);
-			}else{
-				undir.enforceArc(from,to,p);
-			}
-		}
-	}
+    private class EnfEdge implements PairProcedure {
+        Propagator p;
 
-	private class RemEdge implements PairProcedure {
-		Propagator p;
-		private RemEdge(Propagator prop){
-			p = prop;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(to==0){
-				to = from;
-				from = 0;
-			}
-			if(from==0){
-				dir.removeArc(0,to,p);
-				dir.removeArc(to,nUndir,p);
-			}else{
-				dir.removeArc(from,to,p);
-				dir.removeArc(to,from,p);
-			}
-		}
-	}
-	
-	private class RemArc implements PairProcedure {
-		Propagator p;
-		private RemArc(Propagator prop){
-			p = prop;
-		}
-		@Override
-		public void execute(int from, int to) throws ContradictionException {
-			if(from==nUndir || to==0){
-				throw new UnsupportedOperationException();
-			}
-			if(from==0){
-				if(!dir.getEnvelopGraph().arcExists(to,nUndir)){
-					undir.removeArc(from,to,p);
-				}
-				if(undir.getKernelGraph().arcExists(from,to)){
-					dir.enforceArc(to,nUndir,p);
-				}
-			}else if(to==nUndir){
-				if(!dir.getEnvelopGraph().arcExists(0,from)){
-					undir.removeArc(from,0,p);
-				}
-				if(undir.getKernelGraph().arcExists(from,0)){
-					dir.enforceArc(0,from,p);
-				}
-			}else{
-				if(!dir.getEnvelopGraph().arcExists(to,from)){
-					undir.removeArc(from,to,p);
-				}
-				if(undir.getKernelGraph().arcExists(from,to)){
-					dir.enforceArc(to,from,p);
-				}
-			}
-		}
-	}
+        private EnfEdge(Propagator prop) {
+            p = prop;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (to == 0) {
+                to = from;
+                from = 0;
+            }
+            if (from > to) {
+                int k = from;
+                from = to;
+                to = k;
+            }
+            if (from == 0) {
+                if (dir.getEnvelopGraph().arcExists(0, to)) {
+                    if (!dir.getEnvelopGraph().arcExists(to, nUndir)) {
+                        dir.enforceArc(from, to, p);
+                    }
+                } else {
+                    dir.enforceArc(to, nUndir, p);
+                }
+            } else {
+                if (dir.getEnvelopGraph().arcExists(from, to)) {
+                    if (!dir.getEnvelopGraph().arcExists(to, from)) {
+                        dir.enforceArc(from, to, p);
+                    }
+                } else {
+                    dir.enforceArc(to, from, p);
+                }
+            }
+        }
+    }
+
+    private class EnfArc implements PairProcedure {
+        Propagator p;
+
+        private EnfArc(Propagator prop) {
+            p = prop;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (from == nUndir || to == 0) {
+                throw new UnsupportedOperationException();
+            }
+            if (from > to) {
+                int k = from;
+                from = to;
+                to = k;
+            }
+            if (to == nUndir) {
+                undir.enforceArc(from, 0, p);
+            } else {
+                undir.enforceArc(from, to, p);
+            }
+        }
+    }
+
+    private class RemEdge implements PairProcedure {
+        Propagator p;
+
+        private RemEdge(Propagator prop) {
+            p = prop;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (to == 0) {
+                to = from;
+                from = 0;
+            }
+            if (from == 0) {
+                dir.removeArc(0, to, p);
+                dir.removeArc(to, nUndir, p);
+            } else {
+                dir.removeArc(from, to, p);
+                dir.removeArc(to, from, p);
+            }
+        }
+    }
+
+    private class RemArc implements PairProcedure {
+        Propagator p;
+
+        private RemArc(Propagator prop) {
+            p = prop;
+        }
+
+        @Override
+        public void execute(int from, int to) throws ContradictionException {
+            if (from == nUndir || to == 0) {
+                throw new UnsupportedOperationException();
+            }
+            if (from == 0) {
+                if (!dir.getEnvelopGraph().arcExists(to, nUndir)) {
+                    undir.removeArc(from, to, p);
+                }
+                if (undir.getKernelGraph().arcExists(from, to)) {
+                    dir.enforceArc(to, nUndir, p);
+                }
+            } else if (to == nUndir) {
+                if (!dir.getEnvelopGraph().arcExists(0, from)) {
+                    undir.removeArc(from, 0, p);
+                }
+                if (undir.getKernelGraph().arcExists(from, 0)) {
+                    dir.enforceArc(0, from, p);
+                }
+            } else {
+                if (!dir.getEnvelopGraph().arcExists(to, from)) {
+                    undir.removeArc(from, to, p);
+                }
+                if (undir.getKernelGraph().arcExists(from, to)) {
+                    dir.enforceArc(to, from, p);
+                }
+            }
+        }
+    }
 }
