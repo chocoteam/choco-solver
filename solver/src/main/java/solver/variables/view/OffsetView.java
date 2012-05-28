@@ -98,10 +98,10 @@ public final class OffsetView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
-        if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, cause);
-            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
-        } else {
+//        if (value == inf && value == sup) {
+//            solver.getExplainer().removeValue(this, value, cause);
+//            this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+//        } else {
             if (inf <= value && value <= sup) {
                 EventType e = EventType.REMOVE;
 
@@ -125,11 +125,11 @@ public final class OffsetView extends IntView {
                         }
                     }
                     this.notifyMonitors(e, cause);
-                    solver.getExplainer().removeValue(this, value, cause);
+//                    solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 
@@ -151,24 +151,13 @@ public final class OffsetView extends IntView {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        solver.getExplainer().instantiateTo(this, value, cause);
-        if (this.instantiated()) {
-            if (value != this.getValue()) {
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
-            }
-            return false;
-        } else if (contains(value)) {
-            EventType e = EventType.INSTANTIATE;
 
-            boolean done = var.instantiateTo(value - cste, this);
-            if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
-                return true;
-            }
-
-        } else {
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+        boolean done = var.instantiateTo(value - cste, this);
+        if (done) {
+            notifyMonitors(EventType.INSTANTIATE, cause);
+            return true;
         }
+
         return false;
     }
 
@@ -177,10 +166,11 @@ public final class OffsetView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
-            if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, cause);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-            } else {
+//            if (this.getUB() < value) {
+//                var.updateLowerBound(value - cste, cause);
+//                solver.getExplainer().updateLowerBound(this, old, value, cause);
+//                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+//            } else {
                 EventType e = EventType.INCLOW;
                 boolean done = var.updateLowerBound(value - cste, this);
                 if (instantiated()) {
@@ -191,11 +181,11 @@ public final class OffsetView extends IntView {
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 
@@ -205,10 +195,10 @@ public final class OffsetView extends IntView {
         ICause antipromo = cause;
         int old = this.getUB();
         if (old > value) {
-            if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-            } else {
+//            if (this.getLB() > value) {
+//                solver.getExplainer().updateUpperBound(this, old - cste, value - cste, antipromo);
+//                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+//            } else {
                 EventType e = EventType.DECUPP;
                 boolean done = var.updateUpperBound(value - cste, cause);
                 if (instantiated()) {
@@ -219,11 +209,11 @@ public final class OffsetView extends IntView {
                 }
                 if (done) {
                     this.notifyMonitors(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+//                    solver.getExplainer().updateLowerBound(this, old - cste, value - cste, antipromo);
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 

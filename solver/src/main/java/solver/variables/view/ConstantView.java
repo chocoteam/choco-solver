@@ -157,6 +157,11 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public void wipeOut(@NotNull ICause cause) throws  ContradictionException {
+        removeValue(constante, cause);
+    }
+
+    @Override
     public boolean contains(int value) {
         return constante == value;
     }

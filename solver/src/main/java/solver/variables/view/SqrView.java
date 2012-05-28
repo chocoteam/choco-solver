@@ -36,7 +36,6 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IDeltaMonitor;
@@ -177,10 +176,11 @@ public final class SqrView extends IntView {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        if (value < 0) {
-            //TODO: explication?
-            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
-        }
+// <nju> useless ... done below
+//        if (value < 0) {
+//            //TODO: explication?
+//            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
+//        }
         int v = floor_sqrt(value);
         if (v * v == value) { // is a perfect square ?
             boolean done = var.updateLowerBound(-v, this);
@@ -195,8 +195,9 @@ public final class SqrView extends IntView {
             }
             return done;
         } else { //otherwise, impossible value for instantiation
-            //TODO: explication?
-            this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
+            wipeOut(cause);
+            // <nju> need to delegate to var
+           // this.contradiction(cause, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
         }
 
         return false;
@@ -227,8 +228,7 @@ public final class SqrView extends IntView {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
-            //TODO: explication?
-            this.contradiction(cause, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
+            wipeOut(cause);
         }
         int floorV = floor_sqrt(value);
         boolean done = var.updateLowerBound(-floorV, this);

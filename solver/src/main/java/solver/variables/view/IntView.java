@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
@@ -165,5 +166,10 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
     @Override
     public long getFails() {
         return 0;
+    }
+
+    @Override
+    public void wipeOut(@NotNull ICause cause) throws  ContradictionException{
+        var.wipeOut(cause);
     }
 }

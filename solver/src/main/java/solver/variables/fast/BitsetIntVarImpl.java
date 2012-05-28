@@ -392,6 +392,11 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         return false;
     }
 
+    @Override
+    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+        removeInterval(this.getLB(), this.getUB(), cause) ;
+    }
+
     public boolean instantiated() {
         return SIZE.get() == 1;
     }
