@@ -51,9 +51,13 @@ public class PertReified extends Pert {
     List<Propagator> reifieds;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("PertReified");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
         reifieds = new ArrayList<Propagator>();

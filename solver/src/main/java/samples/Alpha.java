@@ -50,8 +50,12 @@ public class Alpha extends AbstractProblem {
     IntVar[] letters;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Alpha");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         letters = new IntVar[26];
         for (int i = 0; i < 26; i++) {
             letters[i] = VariableFactory.bounded("" + (char) (97 + i), 1, 26, solver);

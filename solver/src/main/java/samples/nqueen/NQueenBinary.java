@@ -27,7 +27,6 @@
 
 package samples.nqueen;
 
-import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.search.strategy.StrategyFactory;
@@ -49,7 +48,6 @@ public class NQueenBinary extends AbstractNQueen {
     @Override
     public void buildModel() {
         set = new HashSet<Constraint>();
-        solver = new Solver();
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);

@@ -54,8 +54,12 @@ public class Ordering extends AbstractProblem {
     Constraint[] cstrs;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Ordering " + n);
+    }
+
+    @Override
+    public void buildModel() {
         vars = VariableFactory.boundedArray("v", n, 1, n, solver);
         cstrs = new Constraint[n - 1];
         for (int i = 0; i < n - 1; i++) {

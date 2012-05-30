@@ -48,8 +48,12 @@ public class BigLeq extends AbstractProblem {
     IntVar[] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("BigLeq");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
 
         for (int i = 0; i < m - 1; i++) {

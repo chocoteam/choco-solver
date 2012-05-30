@@ -80,6 +80,11 @@ public class BIBD extends AbstractProblem {
     BoolVar[][] vars, _vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("BIBD");
+    }
+
+    @Override
     public void buildModel() {
         if (b == -1) {
             b = (v * (v - 1) * l) / (k * (k - 1));
@@ -87,8 +92,6 @@ public class BIBD extends AbstractProblem {
         if (r == -1) {
             r = (l * (v - 1)) / (k - 1);
         }
-
-        solver = new Solver();
         vars = new BoolVar[v][b];
         _vars = new BoolVar[b][v];
         for (int i = 0; i < v; i++) {

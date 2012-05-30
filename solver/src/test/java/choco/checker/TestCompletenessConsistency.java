@@ -27,16 +27,8 @@
 
 package choco.checker;
 
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.search.loop.SearchLoops;
-import solver.variables.EventType;
-
-import java.io.IOException;
 
 import static choco.checker.ConsistencyChecker.checkConsistency;
 
@@ -46,19 +38,14 @@ import static choco.checker.ConsistencyChecker.checkConsistency;
  */
 public class TestCompletenessConsistency {
 
-    private int slType; // search loop type default value
+    private SearchLoops slType; // search loop type default value
 
     public TestCompletenessConsistency() {
-        this.slType = 0;
+        this.slType = SearchLoops.BINARY;
     }
 
-    public TestCompletenessConsistency(int peType) {
+    public TestCompletenessConsistency(SearchLoops peType) {
         this.slType = peType;
-    }
-
-    @BeforeTest(alwaysRun = true)
-    private void beforeTest() {
-        SearchLoops._DEFAULT = slType;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

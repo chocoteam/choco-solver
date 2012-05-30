@@ -85,6 +85,10 @@ public class RLFAP extends AbstractProblem {
     int[] freqs;
     int[] rank;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("RLFAP " + dir);
+    }
 
     @Override
     public void buildModel() {
@@ -94,7 +98,6 @@ public class RLFAP extends AbstractProblem {
 
         TIntHashSet values = new TIntHashSet();
 
-        solver = new Solver("RLFAP " + dir);
         vars = new IntVar[_var.length];
 
         vars = new IntVar[_var[_var.length - 1][0]];
