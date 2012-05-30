@@ -31,7 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -57,8 +57,12 @@ public class Sudoku extends AbstractProblem {
     IntVar[][] rows, cols, carres;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Sudoku");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
 
         rows = new IntVar[n][n];
         cols = new IntVar[n][n];

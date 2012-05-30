@@ -31,7 +31,7 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ternary.MaxXYZ;
+import solver.constraints.ternary.Max;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -50,6 +50,6 @@ public class IntMaxBuilder implements IBuilder {
         for (int i = 0; i < vars.length; i++) {
             vars[i] = exps.get(i).intVarValue(solver);
         }
-        return new MaxXYZ(vars[2], vars[0], vars[1], solver);
+        return new Max(vars[2], vars[0], vars[1], solver);
     }
 }

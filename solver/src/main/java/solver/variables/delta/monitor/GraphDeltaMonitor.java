@@ -26,6 +26,7 @@
  */
 package solver.variables.delta.monitor;
 
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
@@ -59,17 +60,20 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
 	@Override
 	public void freeze() {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			this.frozenFirst[i] = first[i]; // freeze indices
 			this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
 		}
+		this.frozenFirst[3] = first[3]; // freeze indices
+		this.first[3] = this.frozenLast[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
 	}
 
 	@Override
 	public void unfreeze() {
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 3; i++) {
 			this.first[i] = last[i] = delta.getSize(i);
 		}
+		this.first[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
 	}
 
 	@Override
@@ -79,42 +83,86 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 		}
 	}
 
-	@Override
+//	@Override
+//	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
+//		int type;
+//		switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
+//			case REMOVENODE:
+//				type = IGraphDelta.NR;
+//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+//					if(delta.getCause(i,type)!=propagator){
+//						proc.execute(delta.get(i, type));
+//					}
+//				}
+//				break;
+//			case ENFORCENODE:
+//				type = IGraphDelta.NE;
+//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+//					if(delta.getCause(i,type)!=propagator){
+//						proc.execute(delta.get(i, type));
+//					}
+//				}
+//				break;
+//			case REMOVEARC:
+//				type = IGraphDelta.AR;
+//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+//					if(delta.getCause(i,type)!=propagator){
+//						proc.execute(delta.get(i, type));
+//					}
+//				}
+//				break;
+//			case ENFORCEARC:
+//				type = IGraphDelta.AE;
+//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+//					if(delta.getCause(i,type)!=propagator){
+//						proc.execute(delta.get(i, type));
+//					}
+//				}
+//				break;
+//		}
+//	}
+
+	@Deprecated
 	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
+		forEachNode(proc,evt);
+	}
+
+	public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {
 		int type;
-		switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
-			case REMOVENODE:
-				type = IGraphDelta.NR;
-				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					if(delta.getCause(i,type)!=propagator){
-						proc.execute(delta.get(i, type));
-					}
+		if(evt==EventType.REMOVENODE){
+			type = IGraphDelta.NR;
+			for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+				if(delta.getCause(i,type)!=propagator){
+					proc.execute(delta.get(i, type));
 				}
-				break;
-			case ENFORCENODE:
-				type = IGraphDelta.NE;
-				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					if(delta.getCause(i,type)!=propagator){
-						proc.execute(delta.get(i, type));
-					}
+			}
+		}else if(evt==EventType.ENFORCENODE){
+			type = IGraphDelta.NE;
+			for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
+				if(delta.getCause(i,type)!=propagator){
+					proc.execute(delta.get(i, type));
 				}
-				break;
-			case REMOVEARC:
-				type = IGraphDelta.AR;
-				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					if(delta.getCause(i,type)!=propagator){
-						proc.execute(delta.get(i, type));
-					}
+			}
+		}else{
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException {
+		if(evt==EventType.REMOVEARC){
+			for (int i = frozenFirst[2]; i < frozenLast[2]; i++) {
+				if(delta.getCause(i,IGraphDelta.AR_tail)!=propagator){
+					proc.execute(delta.get(i, IGraphDelta.AR_tail),delta.get(i, IGraphDelta.AR_head));
 				}
-				break;
-			case ENFORCEARC:
-				type = IGraphDelta.AE;
-				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-					if(delta.getCause(i,type)!=propagator){
-						proc.execute(delta.get(i, type));
-					}
+			}
+		}else if(evt==EventType.ENFORCEARC){
+			for (int i = frozenFirst[3]; i < frozenLast[3]; i++) {
+				if(delta.getCause(i,IGraphDelta.AE_tail)!=propagator){
+					proc.execute(delta.get(i, IGraphDelta.AE_tail),delta.get(i, IGraphDelta.AE_head));
 				}
-				break;
+			}
+		}else{
+			throw new UnsupportedOperationException();
 		}
 	}
 }

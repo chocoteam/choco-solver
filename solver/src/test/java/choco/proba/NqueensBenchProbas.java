@@ -2,13 +2,11 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 
 /**
@@ -18,17 +16,21 @@ import java.io.IOException;
  */
 public class NqueensBenchProbas extends AbstractBenchProbas {
 
-    public NqueensBenchProbas(boolean mode, int n, AllDifferent.Type type, int frequency, boolean active,
-                              CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) throws IOException {
-        super(new Solver(), mode, n, type, frequency, active, dist, out, seed);
+    public NqueensBenchProbas(int n, AllDifferent.Type type, int nbTests, int seed, boolean isProba) throws IOException {
+        super(new Solver(), n, type, nbTests, seed, isProba);
     }
 
+    /*@Override
+    void solveProcess() {
+        this.solver.findAllSolutions();
+    }//*/
+
     @Override
-    void buildProblem(int size) {
+    void buildProblem(int size, boolean proba) {
         this.vars = new IntVar[size];
         IntVar[] diag1 = new IntVar[size];
         IntVar[] diag2 = new IntVar[size];
-        this.allVars = new IntVar[3*size];
+        this.allVars = new IntVar[3 * size];
         int k = 0;
         for (int i = 0; i < size; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, size, solver);
@@ -42,9 +44,6 @@ public class NqueensBenchProbas extends AbstractBenchProbas {
         AllDifferent alldiffdiag1 = new AllDifferent(diag1, solver, type);
         AllDifferent alldiffdiag2 = new AllDifferent(diag2, solver, type);
         this.cstrs = new Constraint[]{alldiff, alldiffdiag1, alldiffdiag2};
-        this.allDiffs = new AllDifferent[]{alldiff, alldiffdiag1, alldiffdiag2};
-        this.nbAllDiff = 3;
-        this.allDiffVars = new IntVar[][]{this.vars,diag1,diag2};
     }
 
 }

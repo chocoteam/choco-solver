@@ -29,12 +29,17 @@ package solver.constraints.gary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.propagators.gary.tsp.PropReducedGraphHamPath;
-import solver.constraints.propagators.gary.tsp.*;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropReducedGraphHamPath;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -51,17 +56,17 @@ public class PathTest {
 				g.getEnvelopGraph().addArc(i, j);
 			}
 		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
-		gc.addAdHocProp(new PropOneSuccBut(g,n-1,gc,s));
+		Constraint gc = GraphConstraintFactory.makeConstraint(s);
+		gc.addPropagators(new PropOnePredBut(g,0,gc,s));
+		gc.addPropagators(new PropOneSuccBut(g,n-1,gc,s));
 		if(path){
-			gc.addAdHocProp(new PropPathNoCycle(g,0,n-1,gc,s));
+			gc.addPropagators(new PropPathNoCycle(g,0,n-1,gc,s));
 		}
 		if(arbo){
-			gc.addAdHocProp(new PropArborescence(g,0,gc,s,true));
+			gc.addPropagators(new PropArborescence(g,0,gc,s,true));
 		}
 		if(RG){
-			gc.addAdHocProp(new PropReducedGraphHamPath(g,gc,s));
+			gc.addPropagators(new PropReducedGraphHamPath(g,gc,s));
 		}
 		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
 		s.post(gc);
@@ -90,8 +95,9 @@ public class PathTest {
 		if(graphTypeEnv==GraphType.MATRIX){
 			assertTrue(path.getMeasures().getFailCount()   >= arbo.getMeasures().getFailCount());
 			assertTrue(arbo.getMeasures().getFailCount()   >= arboRG.getMeasures().getFailCount());
-			assertEquals(pathArbo.getMeasures().getFailCount(), arbo.getMeasures().getFailCount());
-			assertEquals(arboRG.getMeasures().getFailCount(), pathArboRG.getMeasures().getFailCount());
+//			not true anymore because path has been upgraded to reinforce filtering
+//			assertEquals(pathArbo.getMeasures().getFailCount(), arbo.getMeasures().getFailCount());
+//			assertEquals(arboRG.getMeasures().getFailCount(), pathArboRG.getMeasures().getFailCount());
 		}
 	}
 

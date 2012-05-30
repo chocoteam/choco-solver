@@ -176,7 +176,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
@@ -360,7 +360,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
     public void analyseAndAdapt(int mask) {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            delta = new OneValueDelta();
+            delta = new OneValueDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
@@ -402,7 +402,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

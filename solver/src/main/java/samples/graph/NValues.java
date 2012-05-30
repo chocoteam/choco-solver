@@ -28,97 +28,88 @@ package samples.graph;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.gary.GraphConstraint;
-import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.gary.GraphProperty;
+import solver.constraints.nary.AtMostNValues;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
-public class NValues extends AbstractProblem{
+public class NValues extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n;
-	private int k;
-	private IntVar[] vars;
-	private UndirectedGraphVar g;
+    private int n;
+    private int k;
+    private IntVar[] vars;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	
-	public NValues(int n, int k) {
-		this.n = n;
-		this.k = k;
-		System.out.println(n+" : "+k);
-	}
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    public NValues(int n, int k) {
+        this.n = n;
+        this.k = k;
+        System.out.println(n + " : " + k);
+    }
 
-	@Override
-	public void buildModel() { 
-		solver = new Solver();
-		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
-		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2}, solver);
-		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
-		vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
-		vars[3] = VariableFactory.enumerated("vars_3", new int[]{2,3}, solver);
-		IntVar nv = VariableFactory.enumerated("n", 4,4, solver);
-		IntVar nVal = VariableFactory.bounded("N_CC", k,k, solver);
-		GraphConstraint gc = GraphConstraintFactory.nIntegers(vars, nVal, solver);
-		g = (UndirectedGraphVar) gc.getGraph();
-		gc.addProperty(GraphProperty.K_NODES, nv);
-		Constraint[] cstrs = new Constraint[]{gc};
-		solver.post(cstrs);
-	}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void configureSearch() {
-		AbstractStrategy strategy = StrategyFactory.graphLexico(g);
-		solver.set(strategy);
-	}
+
+    @Override
+    public void createSolver() {
+        solver = new Solver();
+    }
+
+    @Override
+    public void buildModel() {
+        vars = VariableFactory.enumeratedArray("vars", n, 0, n - 1, solver);
+        vars[0] = VariableFactory.enumerated("vars_0", new int[]{2}, solver);
+        vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
+        vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
+        vars[3] = VariableFactory.enumerated("vars_3", new int[]{2, 3}, solver);
+        IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
+        solver.post(new AtMostNValues(vars, nVal, solver, AtMostNValues.Algo.Greedy));
+    }
+
+    @Override
+    public void configureSearch() {
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+    }
 
     @Override
     public void configureEngine() {
     }
 
     @Override
-	public void solve() {
-		SearchMonitorFactory.log(solver, false, false);
-		Boolean status = solver.findSolution();
-	}
+    public void solve() {
+        SearchMonitorFactory.log(solver, false, false);
+        solver.findAllSolutions();
+//		solver.findSolution();
+    }
 
-	@Override
-	public void prettyOut() {
-		System.out.println(solver.getMeasures().getSolutionCount()+" sols");
-		System.out.println(solver.getMeasures().getFailCount()+" fails");
-		System.out.println(solver.getMeasures().getTimeCount()+" ms");
-		for(int i=0;i<n;i++){
-			System.out.println(vars[i]);
-		}
-		System.out.println(g.instantiated());
-		System.out.println("env"+g.getEnvelopGraph());
-		System.out.println("ker "+g.getKernelGraph());
-	}
+    @Override
+    public void prettyOut() {
+        System.out.println(solver.getMeasures().getSolutionCount() + " sols");
+        System.out.println(solver.getMeasures().getFailCount() + " fails");
+        System.out.println(solver.getMeasures().getTimeCount() + " ms");
+        for (int i = 0; i < n; i++) {
+            System.out.println(vars[i]);
+        }
+    }
 
-	//***********************************************************************************
-	// MAIN
-	//***********************************************************************************
+    //***********************************************************************************
+    // MAIN
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		int n = 10;
-		int k = 3;
-		NValues nc = new NValues(n,k);
-		nc.execute();
-	}
+    public static void main(String[] args) {
+        int n = 10;
+        int k = 3;
+        NValues nc = new NValues(n, k);
+        nc.execute();
+    }
 }

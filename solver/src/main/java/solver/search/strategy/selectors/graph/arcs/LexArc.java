@@ -37,7 +37,7 @@ public class LexArc extends ArcStrategy<GraphVar>{
 	}
 	
 	@Override
-	public int nextArc() {
+	public boolean computeNextArc() {
 		INeighbors envSuc, kerSuc;
 		for (int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
 			envSuc = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -45,11 +45,14 @@ public class LexArc extends ArcStrategy<GraphVar>{
 			if(envSuc.neighborhoodSize() != kerSuc.neighborhoodSize()){
 				for(int j=envSuc.getFirstElement(); j>=0; j=envSuc.getNextElement()){
 					if(!kerSuc.contain(j)){
-						return (i+1)*n+j;
+						this.from = i;
+						this.to   = j;
+						return true;
 					}
 				}
 			}
 		}
-		return -1;
+		this.from = this.to = -1;
+		return false;
 	}
 }

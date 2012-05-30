@@ -71,8 +71,12 @@ public class Eq20 extends AbstractProblem {
     IntVar[] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Eq20");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = VariableFactory.boundedArray("v", n, 0, 10, solver);
         for (int i = 0; i < coeffs.length; i++) {
             solver.post(Sum.eq(vars, Arrays.copyOfRange(coeffs[i], 1, n + 1), coeffs[i][0], solver));

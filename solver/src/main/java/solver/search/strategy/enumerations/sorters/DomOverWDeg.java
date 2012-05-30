@@ -73,11 +73,12 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
         int w2 = weight(o2);
         int s1 = o1.getDomainSize();
         int s2 = o2.getDomainSize();
-        int d1 = o1.nbMonitors();
-        int d2 = o2.nbMonitors();
+        int d1 = o1.getPropagators().length;
+        int d2 = o2.getPropagators().length;
         return (s1 * w2 * d2) - (s2 * w1 * d1);
     }
 
+    @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     @Override
     public void onContradiction(ContradictionException cex) {
         if (propEngine.getContradictionException().c != null) {

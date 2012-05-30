@@ -29,13 +29,15 @@ package solver.constraints.gary;
 
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.propagators.gary.tsp.PropArborescence;
-import solver.constraints.propagators.gary.tsp.PropArborescenceNM;
-import solver.constraints.propagators.gary.tsp.PropOnePredBut;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.gary.arborescences.PropArborescence;
+import solver.constraints.propagators.gary.arborescences.PropArborescence_NaiveForm;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import static org.testng.Assert.assertEquals;
 
 public class ArborescenceTest {
@@ -51,12 +53,12 @@ public class ArborescenceTest {
 				g.getEnvelopGraph().addArc(i, j);
 			}
 		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(g,s);
-		gc.addAdHocProp(new PropOnePredBut(g,0,gc,s));
+		Constraint gc = GraphConstraintFactory.makeConstraint(s);
+		gc.addPropagators(new PropOnePredBut(g,0,gc,s));
 		if(naive){
-			gc.addAdHocProp(new PropArborescenceNM(g,0,gc,s));
+			gc.addPropagators(new PropArborescence_NaiveForm(g,0,gc,s));
 		}else{
-			gc.addAdHocProp(new PropArborescence(g,0,gc,s,simple));
+			gc.addPropagators(new PropArborescence(g,0,gc,s,simple));
 		}
 		AbstractStrategy strategy = StrategyFactory.graphRandom(g,seed);
 		s.post(gc);
@@ -86,7 +88,7 @@ public class ArborescenceTest {
 		}
 	}
 
-	@Test(groups = "10S")
+	@Test(groups = "10s")
 	public static void bigTrees() {
 		for(int s=0;s<3;s++){
 			int n = 60;

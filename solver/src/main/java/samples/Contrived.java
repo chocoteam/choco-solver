@@ -31,7 +31,7 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.Queue;
@@ -66,12 +66,16 @@ public class Contrived extends AbstractProblem {
     IntVar[] v, w;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Contrived");
+    }
+
+    @Override
     public void buildModel() {
         l = Math.max(4, l);
         if (d == 0) {
             d = l + 1;
         }
-        solver = new Solver();
         v = VariableFactory.boundedArray("v", 5, 1, 50, solver);
         w = VariableFactory.boundedArray("v", l, 1, d, solver);
 

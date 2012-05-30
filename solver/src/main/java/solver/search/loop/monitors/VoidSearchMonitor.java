@@ -36,7 +36,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 05/10/11
  */
-public class VoidSearchMonitor {
+public class VoidSearchMonitor implements ISearchMonitor{
 
     public void beforeInitialize() {
     }

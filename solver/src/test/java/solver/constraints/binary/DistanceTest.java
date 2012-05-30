@@ -32,6 +32,7 @@ import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.exception.ContradictionException;
@@ -58,7 +59,7 @@ public class DistanceTest {
                 Solver solver = new Solver();
                 IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
                 IntVar Y = VariableFactory.enumerated("Y", 1, 10, solver);
-                IntVar Z = Views.abs(Views.sum(X, Views.minus(Y)));
+                IntVar Z = Views.abs(Sum.var(X, Views.minus(Y)));
                 solver.post(ConstraintFactory.eq(Z, 5, solver));
                 solver.set(StrategyFactory.random(new IntVar[]{X, Y}, solver.getEnvironment(), i));
                 solver.findAllSolutions();

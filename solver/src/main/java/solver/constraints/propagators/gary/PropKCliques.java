@@ -28,9 +28,10 @@
 package solver.constraints.propagators.gary;
 
 import choco.kernel.ESat;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
-import solver.constraints.propagators.GraphPropagator;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -45,64 +46,150 @@ import java.util.BitSet;
 /**Propagator that ensures that the final graph consists in K cliques
  * @author Jean-Guillaume Fages
  */
-public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
+public class PropKCliques extends Propagator{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	public static long duration;
 	private GraphVar g;
 	private IntVar k;
+	int n;
+	BitSet in;
+	BitSet inMIS;
+	int[] nbNeighbors;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCliques(GraphVar graph, Solver solver, GraphConstraint constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);//
+	public PropKCliques(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
+		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
+		n = g.getEnvelopGraph().getNbNodes();
+		in = new BitSet(n);
+		inMIS = new BitSet(n);
+		nbNeighbors = new int[n];
 	}
 
 	//***********************************************************************************
-	// PROPAGATIONS
+	// FILTERING
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		filter();
-		duration = 0;
+//		int min = simpleSearch();
+		int min = efficientSearch();
+		k.updateLowerBound(min, this);
+		if(min == k.getUB()){
+			filter();
+		}
 	}
 
-	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		long time = System.currentTimeMillis();
-		filter();
-		duration += (System.currentTimeMillis()-time);
+		propagate(0);
 	}
-	
-	private void filter() throws ContradictionException{
-		float n = g.getEnvelopGraph().getNbNodes();
-		BitSet iter = new BitSet((int)n);
+
+	private void filter() throws ContradictionException {
+		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+		INeighbors nei;
+		int mate;
+		for(int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			if(!inMIS.get(i)){
+				mate = -1;
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(inMIS.get(j)){
+						if(mate == -1){
+							mate = j;
+						}else{
+							mate = -2;
+							break;
+						}
+					}
+				}
+				if(mate>=0){
+					g.enforceArc(i,mate,this);
+				}
+			}
+		}
+	}
+
+	private int simpleSearch(){
+		in.clear();
+		inMIS.clear();
+		int nb = 0;
 		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
 		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
-				iter.set(i);
+			in.set(i);
+			nb++;
 		}
 		int idx = -1;
 		INeighbors nei;
 		int min = 0;
-		while (iter.cardinality()>0){
-			idx = iter.nextSetBit(idx+1);
+		while (nb>0){
+			idx = in.nextSetBit(idx+1);
 			nei = g.getEnvelopGraph().getNeighborsOf(idx);
-			iter.clear(idx);
+			in.clear(idx);
+			inMIS.set(idx);
+			nb--;
 			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
-				iter.clear(j);
+				if(in.get(j)){
+					in.clear(j);
+					nb--;
+				}
 			}
 			min ++;
 		}
-		k.updateLowerBound(min, this);
+		return min;
+	}
+
+	private int efficientSearch(){
+		in.clear();
+		inMIS.clear();
+		int nb = 0;
+		IActiveNodes nodes = g.getKernelGraph().getActiveNodes();
+		for (int i=nodes.getFirstElement();i>=0;i=nodes.getNextElement()){
+			in.set(i);
+			nbNeighbors[i] = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+			nb++;
+		}
+		int idx;
+		INeighbors nei;
+		TIntArrayList list = new TIntArrayList();
+		int min = 0;
+		while (nb>0){
+			idx = in.nextSetBit(0);
+			for(int i=in.nextSetBit(idx+1);i>=0;i=in.nextSetBit(i+1)){
+				if(nbNeighbors[i]<nbNeighbors[idx]){
+					idx = i;
+				}
+			}
+			nei = g.getEnvelopGraph().getNeighborsOf(idx);
+			in.clear(idx);
+			inMIS.set(idx);
+			nb--;
+			for(int j=nei.getFirstElement(); j>=0; j = nei.getNextElement()){
+				if(in.get(j)){
+					in.clear(j);
+					nb--;
+					list.add(j);
+				}
+			}
+			for(int i=list.size()-1;i>=0;i--){
+				nei = g.getEnvelopGraph().getNeighborsOf(list.get(i));
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//					if(in.get(j)){
+						nbNeighbors[j]--;
+//					}
+				}
+			}
+			list.clear();
+			min ++;
+		}
+		return min;
 	}
 
 	//***********************************************************************************
@@ -111,12 +198,13 @@ public class PropKCliques<V extends Variable> extends GraphPropagator<V>{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask
+				+ EventType.DECUPP.mask + EventType.INCLOW.mask + EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
+		//TODO
 		return ESat.UNDEFINED;
 	}
-		
 }

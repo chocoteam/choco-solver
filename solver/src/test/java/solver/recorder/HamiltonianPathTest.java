@@ -31,11 +31,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.graph.GraphGenerator;
 import solver.Solver;
-import solver.constraints.gary.GraphConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
-import solver.constraints.propagators.gary.tsp.PropOnePredBut;
-import solver.constraints.propagators.gary.tsp.PropOneSuccBut;
-import solver.constraints.propagators.gary.tsp.PropPathNoCycle;
+import solver.constraints.propagators.gary.tsp.directed.PropOnePredBut;
+import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
+import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -91,10 +91,10 @@ public class HamiltonianPathTest {
 		}catch(Exception e){
 			e.printStackTrace();System.exit(0);
 		}
-		GraphConstraint gc = GraphConstraintFactory.makeConstraint(graph, solver);
-		gc.addAdHocProp(new PropOneSuccBut(graph,n-1,gc,solver));
-		gc.addAdHocProp(new PropOnePredBut(graph,0,gc,solver));
-		gc.addAdHocProp(new PropPathNoCycle(graph,0,n-1, gc, solver));
+		Constraint gc = GraphConstraintFactory.makeConstraint(solver);
+		gc.addPropagators(new PropOneSuccBut(graph,n-1,gc,solver));
+		gc.addPropagators(new PropOnePredBut(graph,0,gc,solver));
+		gc.addPropagators(new PropPathNoCycle(graph,0,n-1, gc, solver));
 		solver.post(gc);
 		
 		// configure solver
@@ -125,13 +125,14 @@ public class HamiltonianPathTest {
 
 	// constructive heuristic, can be useful to debug
 	private static class ConstructorHeur extends ArcStrategy {
-		int source;
+		int source,n;
 		public ConstructorHeur(GraphVar graphVar, int s) {
 			super(graphVar);
 			source = s;
+			n = graphVar.getEnvelopGraph().getNbNodes();
 		}
 		@Override
-		public int nextArc() {
+		public boolean computeNextArc() {
 			int x = source;
 			int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
 			int nb = 1;
@@ -145,14 +146,18 @@ public class HamiltonianPathTest {
 				if(x!=n-1 || nb!=n){
 					for(int i=0;i<n;i++){
 						if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()>1){
-							return (i+1)*n+g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
+							this.from = i;
+							this.to = g.getEnvelopGraph().getSuccessorsOf(i).getFirstElement();
+							return true;
 						}
 					}
 					throw new UnsupportedOperationException();
 				}
-				return -1;
+				return false;
 			}
-			return (x+1)*n+y;
+			this.from = x;
+			this.to   = y;
+			return true;
 		}
 	}
 }

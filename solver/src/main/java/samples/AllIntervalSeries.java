@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
 import solver.propagation.generator.*;
@@ -61,7 +62,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 5;
+    private int m = 1000;
 
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
     private boolean use_views = false;
@@ -73,9 +74,12 @@ public class AllIntervalSeries extends AbstractProblem {
     Constraint[] OTHERS;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
+        solver = new Solver("AllIntervalSeries");
+    }
 
-        solver = new Solver();
+    @Override
+    public void buildModel() {
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
         dist = new IntVar[m - 1];
 
@@ -87,7 +91,7 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         } else {
             for (int i = 0; i < m - 1; i++) {
-                dist[i] = Views.abs(Views.sum(vars[i + 1], Views.minus(vars[i])));
+                dist[i] = Views.abs(Sum.var(vars[i + 1], Views.minus(vars[i])));
                 solver.post(new Member(dist[i], 1, m - 1, solver));
             }
         }
@@ -137,6 +141,6 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new AllIntervalSeries().execute(args);
+        for (int i = 0; i < 10; i++)new AllIntervalSeries().execute(args);
     }
 }

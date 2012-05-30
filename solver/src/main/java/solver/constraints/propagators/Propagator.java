@@ -159,6 +159,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         lastER = 0;
         ID = solver.nextId();
     }
+	protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
+        this(vars,solver,constraint,priority,true);
+    }
 
     @Override
     public int getId() {

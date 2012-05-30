@@ -27,10 +27,9 @@
 
 package samples.nqueen;
 
-import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.InverseChanneling;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -44,8 +43,6 @@ public class NQueenDualGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];

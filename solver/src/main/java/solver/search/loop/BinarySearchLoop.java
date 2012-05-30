@@ -111,9 +111,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed. \n" +
-                    "Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+//            throw new SolverException("The search cannot be resumed. \n" +
+//                    "Be sure you are respecting one of these call configurations :\n " +
+//                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
         previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);
@@ -142,7 +142,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         downBranch();
     }
 
-    private void downBranch() {
+    protected void downBranch() {
         env.worldPush();
         try {
             decision.buildNext();
@@ -169,8 +169,10 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void upBranch() {
         env.worldPop();
-        if (env.getWorldIndex() == rootWorldIndex) {
+//      if (env.getWorldIndex() == rootWorldIndex) {
+        if (env.getWorldIndex() <= searchWorldIndex && decision==null){//BEWARE JG patch temporaire
             // The entire tree search has been explored, the search cannot be followed
+//			System.out.println("world index "+env.getWorldIndex());
             interrupt();
         } else {
             jumpTo--;
@@ -188,7 +190,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
      * {@inheritDoc}
      */
     @Override
-    public final void restartSearch() {
+    public void restartSearch() {
         restaureRootNode();
         solver.getEnvironment().worldPush(); //issue#55
         try {

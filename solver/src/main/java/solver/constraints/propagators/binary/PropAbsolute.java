@@ -93,7 +93,7 @@ public class PropAbsolute extends Propagator<IntVar> {
 //            if (EventType.isRemove(mask) && EventType.isRemove(getPropagationConditions(idxVarInProp))) {
             // this led to a nasty bug due to event promotion
 
-            if (EventType.isInstantiate(mask) || EventType.isBound(mask))  {
+            if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
                 updateLowerBoundofX();
                 updateUpperBoundofX();
                 updateHolesinX();
@@ -213,7 +213,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
             }
             vars[1].removeInterval(left, right, this);
-        }else{
+        } else {
             int value = vars[1].getLB();
             int nlb = value - 1;
             while (nlb == value - 1) {
@@ -237,10 +237,8 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
-        if (!vars[0].contains(-remVal)) {
         vars[1].removeValue(remVal, this);
         vars[1].removeValue(-remVal, this);
-    }
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

@@ -66,15 +66,6 @@ public abstract class MetaRelation extends GraphRelation<MetaVariable> {
 	@Override
 	public void applyFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
 		for(int i=0; i<dim; i++){
-			if (unidimRelation[i].isDirected() || !isDirected()){
-				unidimRelation[i].applyFalse(var1, var2, solver, cause);
-			}
-		}
-	}
-	
-	@Override
-	public void applySymmetricFalse(int var1, int var2, Solver solver, ICause cause) throws ContradictionException {
-		for(int i=0; i<dim; i++){
 			unidimRelation[i].applyFalse(var1, var2, solver, cause);
 		}
 	}
@@ -87,5 +78,15 @@ public abstract class MetaRelation extends GraphRelation<MetaVariable> {
 			}
 		}
 		return false;
+	}
+
+	protected ESat and(ESat e1, ESat e2){
+		if(e1 == ESat.FALSE || e2 == ESat.FALSE){
+			return ESat.FALSE;
+		}
+		if(e1 == ESat.TRUE && e2 == ESat.TRUE){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
 }

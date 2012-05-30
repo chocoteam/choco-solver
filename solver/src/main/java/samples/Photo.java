@@ -31,8 +31,8 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -62,8 +62,12 @@ public class Photo extends AbstractProblem {
     IntVar violations;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Photo");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         positions = VariableFactory.boundedArray("pos", data.people(), 0, data.people() - 1, solver);
         violations = VariableFactory.bounded("viol", 0, data.preferences().length, solver);
 
@@ -72,7 +76,7 @@ public class Photo extends AbstractProblem {
         for (int i = 0; i < data.prefPerPeople(); i++) {
             int pa = data.preferences()[(2 * i)];
             int pb = data.preferences()[2 * i + 1];
-            dist[i] = Views.abs(Views.sum(positions[pa], Views.minus(positions[pb])));
+            dist[i] = Views.abs(Sum.var(positions[pa], Views.minus(positions[pb])));
             solver.post(new ReifiedConstraint(
                     viols[i],
                     Sum.geq(new IntVar[]{dist[i]}, 2, solver),

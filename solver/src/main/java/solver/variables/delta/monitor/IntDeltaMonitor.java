@@ -27,6 +27,7 @@
 package solver.variables.delta.monitor;
 
 import choco.kernel.common.util.procedure.IntProcedure;
+import solver.Cause;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
@@ -75,12 +76,17 @@ public class IntDeltaMonitor implements IDeltaMonitor<IntDelta> {
     public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
         if (EventType.isRemove(eventType.mask)) {
             for (int i = frozenFirst; i < frozenLast; i++) {
-				if(propagator!=delta.getCause(i)){
+				if(propagator == Cause.Null || propagator!=delta.getCause(i)){
                 	proc.execute(delta.get(i));
 				}
             }
         }else{
 			throw new UnsupportedOperationException();
 		}
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%d,%d) => (%d,%d) :: %d",first, last, frozenFirst, frozenLast, delta.size());
     }
 }

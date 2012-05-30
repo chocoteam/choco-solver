@@ -32,7 +32,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
@@ -66,12 +65,11 @@ public class BottleneckTest {
                 nexts[i] = VariableFactory.enumerated("n_" + i, 0, 200, solver);
                 exps[i] = VariableFactory.enumerated("e_" + i, 0, 200, solver);
                 bws[i] = VariableFactory.enumerated("b_" + i, 0, 2000, solver);
-                lcstrs.add(ConstraintFactory.scalar(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1},
-                        IntLinComb.Operator.EQ, 0, solver));
+                lcstrs.add(Sum.eq(new IntVar[]{bws[i], exps[i], nexts[i]}, new int[]{1, 1, -1}, 0, solver));
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-            lcstrs.add(ConstraintFactory.sum(bws, IntLinComb.Operator.EQ, sum, 1, solver));
+            lcstrs.add(Sum.eq(bws, sum, solver));
 
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});
@@ -111,7 +109,7 @@ public class BottleneckTest {
             }
 
             IntVar sum = VariableFactory.bounded("sum", 0, 2000 * n, solver);
-            lcstrs.add(ConstraintFactory.sum(bws, IntLinComb.Operator.EQ, sum, 1, solver));
+            lcstrs.add(Sum.eq(bws, sum, solver));
 
             Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
             IntVar[] allvars = ArrayUtils.append(nexts, exps, bws, new IntVar[]{sum});

@@ -92,10 +92,10 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
                 // 1. clear the structure if necessary
                 if (LAZY) {
-                    if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+                    if (timestamp - loop.timeStamp != 0) {
                         this.evtmask = 0;
                         deltamon.clear();
-                        timestamp = AbstractSearchLoop.timeStamp;
+                        timestamp = loop.timeStamp;
                     }
                 }
                 // 2. if instantiation, then decrement arity of the propagator
@@ -122,7 +122,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
         this.evtmask = 0;
         if (LAZY) {
             variables[VINDEX].getDelta().lazyClear();
-            timestamp = AbstractSearchLoop.timeStamp;
+            timestamp = loop.timeStamp;
         }
         deltamon.unfreeze();
         if (enqueued) {

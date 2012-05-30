@@ -31,7 +31,10 @@ import solver.variables.graph.GraphTools;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphStructure.adjacencyList.*;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_Array;
+import solver.variables.graph.graphStructure.adjacencyList.ArraySwapList_HashMap;
+import solver.variables.graph.graphStructure.adjacencyList.IntDoubleLinkedList;
+import solver.variables.graph.graphStructure.adjacencyList.IntLinkedList;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
 import solver.variables.graph.graphStructure.nodes.ActiveNodes;
 
@@ -215,18 +218,21 @@ public class DirectedGraph implements IDirectedGraph {
 		if(x==y){
 			return addArc(x, y);
 		}
-		boolean b = addArc(x, y) || addArc(y, x);
+		boolean b = addArc(x, y);
+		b |= addArc(y, x);
 		return b;
 	}
 
 	@Override
 	public boolean removeEdge(int x, int y) {
-		return removeArc(x, y) || removeArc(y, x);
+		boolean b = removeArc(x, y) || removeArc(y, x);
+		return b;
 	}
 
 	@Override
 	public boolean edgeExists(int x, int y) {
-		return arcExists(x, y) || arcExists(y, x);
+		boolean b = arcExists(x, y) || arcExists(y, x);
+		return b;
 	}
 
 	@Override
@@ -254,9 +260,9 @@ public class DirectedGraph implements IDirectedGraph {
 
 	@Override
 	public boolean addArc(int from, int to) {
-//		System.out.println(from+" - "+to);
-//		System.out.println(successors[from]+" mm "+predecessors[to]);
-//		System.out.println(successors[from].contain(to)+" and "+predecessors[to].contain(from));
+//		TODO
+//		activateNode(from);
+//		activateNode(to);
 		if ((!successors[from].contain(to)) && (!predecessors[to].contain(from))){
 			successors[from].add(to);
 			predecessors[to].add(from);

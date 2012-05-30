@@ -39,16 +39,18 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * and execute a <code>Procedure</code> for each value stored.
  */
 public final class Delta implements IntDelta {
-    private static final int SIZE  =16;
+    private static final int SIZE  =32;
 
 	int[] rem;
 	ICause[] causes;
 	int last;
     int timestamp = -1;
+	final AbstractSearchLoop loop;
 
-    public Delta() {
+    public Delta(AbstractSearchLoop loop) {
         rem = new int[SIZE];
         causes = new ICause[SIZE];
+		this.loop = loop;
     }
 
     @Override
@@ -68,7 +70,7 @@ public final class Delta implements IntDelta {
     }
 
     public void lazyClear() {
-        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+        if (timestamp - loop.timeStamp != 0) {
             clear();
         }
     }
@@ -109,6 +111,6 @@ public final class Delta implements IntDelta {
 	@Override
     public void clear() {
         last = 0;
-		timestamp = AbstractSearchLoop.timeStamp;
+		timestamp = loop.timeStamp;
     }
 }

@@ -59,6 +59,10 @@ public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Prop
         return isSatisfied(tuple);
     }
 
+    @Override
+    public I[] getVariables() {
+        return vars;
+    }
 
     /**
      * Test if the <code>tuple</code> satisfies this <code>Constraint</code> object.
@@ -69,7 +73,7 @@ public abstract class IntConstraint<I extends IntVar> extends Constraint<I, Prop
      */
     public abstract ESat isSatisfied(int[] tuple);
 
-    @Override
+//    @Override
     public HeuristicVal getIterator(String name, I var) {
         if (name.equals(VAL_DEFAULT)) {
             return HeuristicValFactory.fastenumVal(var);

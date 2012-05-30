@@ -143,7 +143,7 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

@@ -27,10 +27,12 @@
 
 package solver.search.strategy.decision.graph;
 
+import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.variables.EventType;
 import solver.variables.graph.GraphVar;
@@ -41,18 +43,30 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	int branch;
-	Assignment<GraphVar> assignment;
-	int fromTo;
-	GraphVar g;
+	private int branch;
+	protected GraphAssignment assignment;
+	protected int from,to;
+	protected GraphVar g;
+	protected final PoolManager<GraphDecision> poolManager;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 	
-    public GraphDecision(GraphVar variable, int fromTo, Assignment<GraphVar> graph_ass) {
+	public GraphDecision(PoolManager<GraphDecision> poolManager) {
+		this.poolManager = poolManager;
+	}
+	public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
 		g = variable;
-		this.fromTo = fromTo;
+		this.from = node;
+		this.to = -1;
+		assignment = graph_ass;
+		branch = 0;
+	}
+	public void setArc(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
+		g = variable;
+		this.from = from;
+		this.to = to;
 		assignment = graph_ass;
 		branch = 0;
 	}
@@ -74,21 +88,32 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 	@Override
 	public void apply() throws ContradictionException {
 		 if (branch == 1) {
-			 assignment.apply(g, fromTo, this);
+			 if(to==-1){
+				 assignment.apply(g, from, this);
+			 }else{
+				 assignment.apply(g, from, to, this);
+			 }
 	     } else if (branch == 2) {
-	    	 assignment.unapply(g, fromTo, this);
+			 if(to==-1){
+				 assignment.unapply(g, from, this);
+			 }else{
+				 assignment.unapply(g, from, to, this);
+			 }
 	     }
 	}
 
 	@Override
 	public void free() {
-		// TODO
         previous = null;
+        poolManager.returnE(this);
 	}
 
 	@Override
 	public String toString() {
-		return fromTo+"";
+		if(to==-1){
+			return " node "+from+assignment.toString();
+		}
+		return " arc ("+from+","+to+")"+assignment.toString();
 	}
 
 	@Override
@@ -106,12 +131,6 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 		return EventType.VOID.mask;
 	}
 
-	@Override
-	@Deprecated
-	public void set(GraphVar var, int value, Assignment<GraphVar> assignment) {
-		throw new UnsupportedOperationException();		
-	}
-
     @Override
     public Deduction getNegativeDeduction() {
         throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
@@ -121,4 +140,10 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     public Deduction getPositiveDeduction() {
         throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
     }
+
+	@Override
+	@Deprecated
+	public void set(GraphVar var, int value, Assignment<GraphVar> graphVarAssignment) {
+		throw new UnsupportedOperationException();
+	}
 }

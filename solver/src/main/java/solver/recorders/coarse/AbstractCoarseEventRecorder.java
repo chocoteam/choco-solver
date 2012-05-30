@@ -27,11 +27,13 @@
 package solver.recorders.coarse;
 
 import choco.kernel.common.util.procedure.UnaryProcedure;
+import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IScheduler;
 import solver.recorders.IEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -46,8 +48,9 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Vari
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued; // to check wether this is enqueud or not.
+	protected final AbstractSearchLoop loop;
 
-    protected static final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
+    protected final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
 
         Propagator coarseProp;
 
@@ -63,8 +66,9 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Vari
         }
     };
 
-    protected AbstractCoarseEventRecorder() {
+    protected AbstractCoarseEventRecorder(AbstractSearchLoop loop) {
         this.enqueued = false;
+		this.loop = loop;
     }
 
     public abstract void update(EventType e);

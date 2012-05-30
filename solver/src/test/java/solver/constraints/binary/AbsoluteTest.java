@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
@@ -105,11 +105,11 @@ public class AbsoluteTest {
 
         solver.post(ConstraintFactory.geq(X, 0, solver));
         solver.post(new ReifiedConstraint(b1,
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, IntLinComb.Operator.EQ, 0, solver),
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, IntLinComb.Operator.NEQ, 0, solver), solver));
+                Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
+                Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));
         solver.post(new ReifiedConstraint(b2,
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, IntLinComb.Operator.EQ, 0, solver),
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, IntLinComb.Operator.NEQ, 0, solver), solver));
+                Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver),
+                Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), solver));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(new ConjunctiveNormalForm(root, solver));
         solver.set(StrategyFactory.random(ArrayUtils.toArray(X, Y), solver.getEnvironment()));
@@ -126,11 +126,11 @@ public class AbsoluteTest {
 
         solver.post(ConstraintFactory.geq(X, 0, solver));
         solver.post(new ReifiedConstraint(b1,
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, IntLinComb.Operator.EQ, 0, solver),
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, -1}, IntLinComb.Operator.NEQ, 0, solver), solver));
+                Sum.eq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver),
+                Sum.neq(new IntVar[]{X, Y}, new int[]{1, -1}, 0, solver), solver));
         solver.post(new ReifiedConstraint(b2,
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, IntLinComb.Operator.EQ, 0, solver),
-                ConstraintFactory.scalar(new IntVar[]{X, Y}, new int[]{1, 1}, IntLinComb.Operator.NEQ, 0, solver), solver));
+                Sum.eq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver),
+                Sum.neq(new IntVar[]{X, Y}, new int[]{1, 1}, 0, solver), solver));
         ALogicTree root = Node.or(Literal.pos(b1), Literal.pos(b2));
         solver.post(new ConjunctiveNormalForm(root, solver));
         solver.set(StrategyFactory.presetI(ArrayUtils.toArray(X, Y), solver.getEnvironment()));

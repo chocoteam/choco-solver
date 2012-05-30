@@ -31,7 +31,6 @@ import choco.kernel.ESat;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -42,14 +41,11 @@ import solver.variables.Variable;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.graphOperations.connectivity.AbstractLengauerTarjanDominatorsFinder;
-import solver.variables.graph.graphOperations.connectivity.SimpleDominatorsFinder;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
+import solver.variables.graph.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
+import solver.variables.graph.graphOperations.dominance.SimpleDominatorsFinder;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-
-public class PropNTree<V extends Variable> extends GraphPropagator<V> {
+public class PropNTree extends Propagator {
 
     //***********************************************************************************
     // VARIABLES
@@ -58,18 +54,20 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
     DirectedGraphVar g;
     IntVar nTree;
     int minTree = 0;
-    private LinkedList<TIntArrayList> sinks;
-    private LinkedList<TIntArrayList> nonSinks;
+    private TIntArrayList nonSinks;
+	private StrongConnectivityFinder SCCfinder;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
     public PropNTree(DirectedGraphVar graph, IntVar nT, Solver solver,
-                     Constraint<V, Propagator<V>> constraint) {
-        super((V[]) new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
+                     Constraint constraint) {
+        super(new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
         g = graph;
         nTree = nT;
+		SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
+		nonSinks = new TIntArrayList();
     }
 
     //***********************************************************************************
@@ -174,39 +172,33 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
     private void minTreePruning() throws ContradictionException {
         nTree.updateLowerBound(minTree, this);
         if (nTree.getUB() == minTree) {
-            int node;
-            for (TIntArrayList scc : nonSinks) {
-                for (int x = 0; x < scc.size(); x++) {
-                    node = scc.get(x);
-                    if (g.getEnvelopGraph().arcExists(node, node)) {
+            int node,scc;
+            for (int k=nonSinks.size()-1;k>=0;k--) {
+				scc = nonSinks.get(k);
+				node = SCCfinder.getSCCFirstNode(scc);
+				while(node!=-1){
+					if (g.getEnvelopGraph().arcExists(node, node)) {
                         g.removeArc(node, node, this);
                     }
-                }
+					node = SCCfinder.getNextNode(node);
+				}
             }
         }
     }
 
     private void computeSinks() {
-        int n = g.getEnvelopGraph().getNbNodes();
-        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
-        int[] sccOf = new int[n];
-        int sccNum = 0;
-        int node;
-        for (TIntArrayList scc : allSCC) {
-            for (int x = 0; x < scc.size(); x++) {
-                sccOf[scc.get(x)] = sccNum;
-            }
-            sccNum++;
-        }
-        sinks = new LinkedList<TIntArrayList>();
-        nonSinks = new LinkedList<TIntArrayList>();
-        boolean looksSink = true;
+		SCCfinder.findAllSCC();
+        int[] sccOf = SCCfinder.getNodesSCC();
+        nonSinks.clear();
+        boolean looksSink;
         INeighbors nei;
-        for (TIntArrayList scc : allSCC) {
+        int node;
+		int nbSinks = 0;
+		for(int i=SCCfinder.getNbSCC()-1;i>=0;i--){
             looksSink = true;
             boolean inKer = false;
-            for (int x = 0; x < scc.size(); x++) {
-                node = scc.get(x);
+			node = SCCfinder.getSCCFirstNode(i);
+			while(node!=-1){
                 if (g.getKernelGraph().getActiveNodes().isActive(node)) {
                     inKer = true;
                 }
@@ -214,20 +206,66 @@ public class PropNTree<V extends Variable> extends GraphPropagator<V> {
                 for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
                     if (sccOf[suc] != sccOf[node]) {
                         looksSink = false;
+						break;
                     }
                 }
                 if (!looksSink) {
-                    x = scc.size();
-                }
+                    node = -1;
+                }else{
+					node = SCCfinder.getNextNode(node);
+				}
             }
             if (looksSink && inKer) {
-                sinks.add(scc);
+				nbSinks++;
             } else {
-                nonSinks.add(scc);
+                nonSinks.add(i);
             }
         }
-        minTree = sinks.size();
+        minTree = nbSinks;
     }
+
+//	private void computeSinks() {
+//        int n = g.getEnvelopGraph().getNbNodes();
+//        ArrayList<TIntArrayList> allSCC = StrongConnectivityFinder.findAllSCCOf(g.getEnvelopGraph());
+//        int[] sccOf = new int[n];
+//        int sccNum = 0;
+//        int node;
+//        for (TIntArrayList scc : allSCC) {
+//            for (int x = 0; x < scc.size(); x++) {
+//                sccOf[scc.get(x)] = sccNum;
+//            }
+//            sccNum++;
+//        }
+//        sinks = new LinkedList<TIntArrayList>();
+//        nonSinks = new LinkedList<TIntArrayList>();
+//        boolean looksSink = true;
+//        INeighbors nei;
+//        for (TIntArrayList scc : allSCC) {
+//            looksSink = true;
+//            boolean inKer = false;
+//            for (int x = 0; x < scc.size(); x++) {
+//                node = scc.get(x);
+//                if (g.getKernelGraph().getActiveNodes().isActive(node)) {
+//                    inKer = true;
+//                }
+//                nei = g.getEnvelopGraph().getSuccessorsOf(node);
+//                for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
+//                    if (sccOf[suc] != sccOf[node]) {
+//                        looksSink = false;
+//                    }
+//                }
+//                if (!looksSink) {
+//                    x = scc.size();
+//                }
+//            }
+//            if (looksSink && inKer) {
+//                sinks.add(scc);
+//            } else {
+//                nonSinks.add(scc);
+//            }
+//        }
+//        minTree = sinks.size();
+//    }
 
     @Override
     public int getPropagationConditions(int vIdx) {

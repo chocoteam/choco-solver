@@ -27,11 +27,11 @@
 
 package solver.constraints.propagators.gary.basic;
 
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -39,91 +39,155 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
+import solver.variables.graph.IActiveNodes;
+import solver.variables.graph.INeighbors;
 
 /**
- * Propagator that ensures that K arcs belong to the final graph
+ * Propagator that ensures that K arcs/edges belong to the final graph
  *
  * @author Jean-Guillaume Fages
  */
-public abstract class PropKArcs<V extends Variable, G extends GraphVar> extends GraphPropagator<V> {
+public class PropKArcs extends Propagator {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    protected G g;
-    protected IntVar k;
-    protected IStateInt nbInKer, nbInEnv;
-    protected int n;
-    protected IntProcedure arcEnforced;
-    protected IntProcedure arcRemoved;
+	protected GraphVar g;
+	protected IntVar k;
+	protected IStateInt nbInKer, nbInEnv;
+	protected PairProcedure arcEnforced,arcRemoved;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    public PropKArcs(G graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
+	public PropKArcs(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
+		super((Variable[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
 		this.k = k;
-		n = g.getEnvelopGraph().getNbNodes();
 		nbInEnv = environment.makeInt();
 		nbInKer = environment.makeInt();
 		arcEnforced = new EnfArc();
 		arcRemoved  = new RemArc();
 	}
 
-    //***********************************************************************************
-    // PROPAGATIONS
-    //***********************************************************************************
+	//***********************************************************************************
+	// PROPAGATIONS
+	//***********************************************************************************
 
-    @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        Variable var = vars[idxVarInProp];
-        if ((var.getTypeAndKind() & Variable.GRAPH)!=0) {
-            if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
-            }
-            if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
-            }
-            k.updateLowerBound(nbInKer.get(), this);
-            k.updateUpperBound(nbInEnv.get(), this);
-        }
-    }
+	@Override
+	public void propagate(int evtmask) throws ContradictionException {
+		int nbK = 0;
+		int nbE = 0;
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+			nbE += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+			nbK += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+		}
+		if(!g.isDirected()){
+			nbK/=2;
+			nbE/=2;
+		}
+		nbInKer.set(nbK);
+		nbInEnv.set(nbE);
+		filter(nbK, nbE);
+	}
 
-    //***********************************************************************************
-    // INFO
-    //***********************************************************************************
+	@Override
+	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		if ((mask & EventType.ENFORCEARC.mask) != 0) {
+			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+		}
+		if ((mask & EventType.REMOVEARC.mask) != 0) {
+			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+		}
+		filter(nbInKer.get(),nbInEnv.get());
+	}
 
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask + EventType.INSTANTIATE.mask;
-    }
+	private void filter(int nbK, int nbE) throws ContradictionException {
+		k.updateLowerBound(nbK, this);
+		k.updateUpperBound(nbE, this);
+		if(nbK!=nbE && k.instantiated()){
+			INeighbors nei;
+			IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+			if(k.getValue()==nbE){
+				for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						g.enforceArc(i,j,this);
+					}
+				}
+				nbInKer.set(nbE);
+				setPassive();
+			}
+			if(k.getValue()==nbK){
+				INeighbors neiKer;
+				for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
+					neiKer = g.getKernelGraph().getSuccessorsOf(i);
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!neiKer.contain(j)){
+							g.removeArc(i,j,this);
+						}
+					}
+				}
+				nbInEnv.set(nbK);
+				setPassive();
+			}
+		}
+	}
 
-    //***********************************************************************************
-    // PROCEDURES
-    //***********************************************************************************
+	//***********************************************************************************
+	// INFO
+	//***********************************************************************************
 
-    private class EnfArc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
-            if (from == to) {
-                nbInKer.set(nbInKer.get() + 1);
-            }
-        }
-    }
-    private class RemArc implements IntProcedure {
-        @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
-            if (from == to) {
-                nbInEnv.set(nbInEnv.get() - 1);
-            }
-        }
-    }
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
+				+ EventType.INCLOW.mask + EventType.DECUPP.mask + EventType.INSTANTIATE.mask;
+	}
+
+	@Override
+	public ESat isEntailed() {
+		int nbK = 0;
+		int nbE = 0;
+		IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
+		for(int i=env.getFirstElement();i>=0;i=env.getNextElement()){
+			nbE += g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+			nbK += g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+		}
+		if(!g.isDirected()){
+			nbK/=2;
+			nbE/=2;
+		}
+		if(nbK>k.getUB() || nbE<k.getLB()){
+			return ESat.FALSE;
+		}
+		if(k.instantiated() && g.instantiated()){
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
+	}
+
+	//***********************************************************************************
+	// PROCEDURES
+	//***********************************************************************************
+
+	private class EnfArc implements PairProcedure {
+		@Override
+		public void execute(int i, int j) throws ContradictionException {
+			nbInKer.add(1);
+		}
+	}
+
+	private class RemArc implements PairProcedure {
+		@Override
+		public void execute(int i, int j) throws ContradictionException {
+			nbInEnv.add(1);
+		}
+	}
 }

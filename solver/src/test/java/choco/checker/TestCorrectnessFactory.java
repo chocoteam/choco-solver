@@ -28,6 +28,7 @@
 package choco.checker;
 
 import org.testng.annotations.Factory;
+import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,16 +41,12 @@ import java.util.List;
  */
 public class TestCorrectnessFactory {
 
-    private int[] searchloop = {0, 1};   // simple binary, advanced binary
-
-
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
 
-        for (int sl = 0; sl < searchloop.length; sl++) {
-            int _searchloop = searchloop[sl];
-            lresult.add(new TestCorrectness(_searchloop));
+        for (SearchLoops sl : SearchLoops.values()) {
+            lresult.add(new TestCorrectness(sl));
         }
         return lresult.toArray();
     }

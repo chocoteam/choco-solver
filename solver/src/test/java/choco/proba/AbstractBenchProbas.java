@@ -2,226 +2,263 @@ package choco.proba;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.nary.PropAllDiffBC;
-import solver.constraints.propagators.nary.PropCliqueNeq;
-import solver.recorders.conditions.CondAllDiffBCProba;
+import solver.constraints.IntConstraint;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
+import solver.propagation.generator.PArc;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.Queue;
+import solver.recorders.conditions.ICondition;
+import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
  * User: xavier lorca
  */
 public abstract class AbstractBenchProbas {
-    public static int TIMELIMIT = 20000;
-
-    BufferedWriter out;
-
-    int frequency; // only for the case of a CondAllDiffBCFreq case
+    public static final String sep = ";";
+    public static int TIMELIMIT = 60000;
     int seed;
-    boolean active; // true iff the probability is effectively applied
-
-    boolean mode; // true iff we search for all the solutions
     int size;
     Solver solver;
     IntVar[] allVars; // all the vairables of the problem
     IntVar[] vars; // decision variables for the problem
     Constraint[] cstrs; // all the cstrs involved in the problem (including alldiff)
-    int nbAllDiff; // number of alldiff cstrs
     AllDifferent.Type type;
-    AllDifferent[] allDiffs; // all the alldiff cstrs involved in the problem
-    IntVar[][] allDiffVars; // variables related to each alldiff cstrs : allDiffVars[i] are the variables of the cstr allDiffs[i]
-    CondAllDiffBCProba.Distribution dist; // kind of distribution considered for the probability
+    boolean isProba;
 
-    // output data
-    private int nbTests; // number of tests executed
-    private long nbSolutions;
-    private long nbNodes;
-    private long nbBcks;
-    private long nbHeavyPropag;
-    private long nbLigthPropag;
-    private float time;
+    // Data
+    public Data data;
+    int nbTests;
 
-    // output averages
-    private long avgSolutions;
-    private long avgNodes;
-    private long avgBcks;
-    private long avgHeavyPropag;
-    private long avgLigthPropag;
-    private long avgTime;
-
-    AbstractBenchProbas(Solver solver, boolean mode, int size, AllDifferent.Type type, int frequency,
-                        boolean active, CondAllDiffBCProba.Distribution dist, BufferedWriter out, int seed) {
+    AbstractBenchProbas(Solver solver, int size, AllDifferent.Type type, int nbTests, int seed, boolean isProba) {
         this.solver = solver;
         this.type = type;
-        this.mode = mode;
-        this.out = out;
         this.seed = seed;
-        this.frequency = frequency;
-        this.active = active;
-        this.dist = dist;
         this.size = size;
+        this.isProba = isProba;
+        this.nbTests = nbTests;
+        this.data = new Data(solver, this, nbTests);
     }
 
-    abstract void buildProblem(int size);
+    abstract void buildProblem(int size, boolean proba);
 
-    void restartProblem(int size, int seed) {
+    public String executionLoop() {
+        for (int i = 0; i < nbTests; i++) {
+            if (i > 0) {
+                restartProblem(seed + i);
+                data.solver = solver;
+            }
+            execute();
+            data.recordResults(i);
+        }
+        return data.getResults();
+    }
+
+    public String[] getDetails() {
+        return data.details;
+    }
+
+    private void restartProblem(int seed) {
         this.solver = new Solver();
         this.seed = seed;
-        this.size = size;
+        data.hasEncounteredLimit = false;
     }
 
-    void recordResults() throws IOException {
-        IMeasures mes = this.solver.getMeasures();
-        this.nbSolutions = mes.getSolutionCount();
-        this.nbNodes = mes.getNodeCount();
-        this.nbBcks = mes.getBackTrackCount();
-        this.nbHeavyPropag = mes.getPropagationsCount();
-        this.nbLigthPropag = mes.getEventsCount();
-        if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
-            this.time = mes.getTimeCount();
-        } else {
-            this.time = 0;
-        }
-        this.incrAverage();
-        this.writeResults();
-    }
-
-    void recordAverage() throws IOException {
-        String s = "";
-        s += ((double) this.avgSolutions / this.nbTests) + "\t";
-        s += ((double) this.avgNodes / this.nbTests) + "\t";
-        s += ((double) this.avgBcks / this.nbTests) + "\t";
-        s += ((double) this.avgHeavyPropag / this.nbTests) + "\t";
-        s += ((double) this.avgLigthPropag / this.nbTests) + "\t";
-        s += ((double) this.avgTime / this.nbTests) + "\t";
-        s += "-" + "\t";
-        this.out.write(s);
-        this.out.flush();
-    }
-
-    private void incrAverage() {
-        this.avgSolutions += this.nbSolutions;
-        this.avgNodes += this.nbNodes;
-        this.avgBcks += this.nbBcks;
-        this.avgHeavyPropag += this.nbHeavyPropag;
-        this.avgLigthPropag += this.nbLigthPropag;
-        this.avgTime += this.time;
-        this.nbTests++;
-    }
-
-    private void writeResults() throws IOException {
-        String s = "";
-        s += this.nbSolutions + "\t";
-        s += this.nbNodes + "\t";
-        s += this.nbBcks + "\t";
-        s += this.nbHeavyPropag + "\t";
-        s += this.nbLigthPropag + "\t";
-        if (this.time == 0) {
-            s += "NaN" + "\t";
-        } else {
-            s += this.time + "\t";
-        }
-        s += "-" + "\t";
-        this.out.write(s);
-        this.out.flush();
-    }
-
-    void execute() throws IOException {
-        this.buildProblem(size);
+    private void execute() {
+        //SearchMonitorFactory.log(solver, false, false);
+        this.buildProblem(size, false);
         this.solver.post(this.cstrs);
-
-        // 1. placer les propagateurs dans diffŽrentes listes
-        ArrayList<PropAllDiffBC> hall = new ArrayList<PropAllDiffBC>();
-        ArrayList<PropCliqueNeq> clique = new ArrayList<PropCliqueNeq>();
-        ArrayList<Propagator> others = new ArrayList<Propagator>();
-
-        Constraint[] constraints = solver.getCstrs();
-        for (int i = 0; i < constraints.length; i++) {
-            Propagator<IntVar>[] props = constraints[i].propagators;
-            for (Propagator<IntVar> p : props) {
-                if (p instanceof PropAllDiffBC) {
-                    hall.add((PropAllDiffBC) p);
-                } else if (p instanceof PropCliqueNeq) {
-                    clique.add((PropCliqueNeq) p);
-                } else {
-                    others.add(p);
-                }
-            }
-        }
-
-        /*Primitive[] primitives = null;
-        if (this.frequency >= 0) {
-            ICondition condition = null;
-            primitives = new Primitive[hall.size() * 2];
-            if (this.frequency == 0) {
-                for (int i = 0; i < hall.size(); i++) {
-                    PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
-                    condition = new CondAllDiffBCProba(this.solver.getEnvironment(), prop.getVars(), this.active, this.dist);
-                    primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.coarses(prop);
-                }
-            } else {
-                for (int i = 0; i < hall.size(); i++) {
-                    PropProbaAllDiffBC prop = (PropProbaAllDiffBC) hall.get(i);
-                    condition = new CondAllDiffBCFreq(this.solver.getEnvironment(), prop.getVars(), this.frequency);
-                    primitives[i] = Primitive.arcs(condition, prop);
-                    primitives[i + hall.size()] = Primitive.coarses(prop);
-                }
-            }
-        }*/
-
-        /*Propagator[] _cliques = clique.toArray(new Propagator[clique.size()]);
-        PropagationStrategy qneq = Queue.build(Sort.build(Primitive.arcs(_cliques)), Primitive.coarses(_cliques));
-
-        Propagator[] _others = others.toArray(new Propagator[others.size()]);
-        PropagationStrategy qothers = Queue.build(Primitive.arcs(_others), Primitive.coarses(_others));
-
-        PropagationStrategy qadbc = null;
-        if (primitives == null) {
-            Propagator[] _hall = hall.toArray(new Propagator[hall.size()]);
-            qadbc = Queue.build(Primitive.arcs(_hall), Primitive.coarses(_hall)).pickOne();
-        } else {
-            if (primitives.length > 0) {  // patch Xavier
-                qadbc = Queue.build(primitives).pickOne();
-            }
-        }
-        if (qadbc != null) {   // patch Xavier
-            solver.set(
-                    Sort.build(
-                            qneq.clearOut(),
-                            qothers.clearOut(),
-                            qadbc.pickOne()
-                    ).clearOut()
-            );
-        } else {   // patch Xavier
-            solver.set(
-                    Sort.build(
-                            qneq.clearOut(),
-                            qothers.clearOut()
-                    ).clearOut()
-            );
-        }*/
-
         this.solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-        this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
-        //System.out.println(this.solver);
-        //solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
-        // SearchMonitorFactory.log(solver, true, true);
-        if (this.mode) {
-            //System.out.println("\t find all solutions");
-            this.solver.findAllSolutions();
-        } else {
-            //System.out.println("\t find first solution");
-            this.solver.findSolution();
+        this.configSearchStrategy();
+        this.configPropStrategy();
+        this.solveProcess();
+    }
+
+    void solveProcess() {
+        //SearchMonitorFactory.prop_count(solver);
+        //SearchMonitorFactory.log(solver, false, false);
+        this.solver.findSolution();
+    }
+
+    void configSearchStrategy() {
+        //this.solver.set(StrategyFactory.random(this.vars, this.solver.getEnvironment(), this.seed));
+        //this.solver.set(StrategyFactory.domwdegMindom(this.vars, this.solver));
+        this.solver.set(StrategyFactory.minDomMinVal(this.vars, this.solver.getEnvironment()));
+    }
+
+    private void configPropStrategy() {
+        Constraint[] cstrs = solver.getCstrs();
+        Queue arcs = new Queue(new PArc(cstrs));
+        Queue coarses;
+//        if (!isProba) {
+//            coarses = Queue.build(Primitive.coarses(cstrs));
+//        } else {
+        ActivateCond sm = new ActivateCond();
+        solver.getSearchLoop().plugSearchMonitor(sm);
+        List<PCoarse> coarses_ = new ArrayList<PCoarse>();
+        for (int i = 0; i < cstrs.length; i++) {
+            if (isProba && cstrs[i] instanceof AllDifferent) {
+                IntConstraint icstr = (AllDifferent) cstrs[i];
+                IntVar[] myvars = icstr.getVariables();
+                ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars, seed, solver.getSearchLoop());
+                sm.add(condition);
+            }
+            coarses_.add(new PCoarse(cstrs[i]));
         }
+        coarses = new Queue(coarses_.toArray(new PCoarse[coarses_.size()]));
+//        }
+        solver.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut());
+    }//*/
+
+    public String toString() {
+        if (!isProba) {
+            return "" + type;
+        } else {
+            return "" + type + "-prob";
+        }
+    }
+
+    private static class ActivateCond extends VoidSearchMonitor implements ISearchMonitor {
+
+        List<ICondition> conds = new ArrayList<ICondition>();
+
+        public void add(ICondition cond) {
+            conds.add(cond);
+        }
+
+        @Override
+        public void afterInitialize() {
+            for (ICondition cond : conds) {
+                cond.activate();
+            }
+        }
+    }
+
+    private class Data {
+
+        Solver solver;
+        AbstractBenchProbas pb;
+
+        // output data
+        private int nbTests; // number of tests executed
+        private long[] nbSolutions;
+        private long[] nbNodes;
+        private long[] nbFails;
+        private long[] nbFinePropag;
+        private long[] nbPropag; // number of propagation for the meta-propagator of alldiff
+        private double[] ratioPropagByNodes;
+        private double[] initTime;
+        private double[] firstPropag;
+        private double[] time;
+
+        // output averages
+        private double avgSolutions;
+        private double avgNodes;
+        private double avgFails;
+        private double avgFinePropag;
+        private double avgPropag;
+        private double avgRatio;
+        private double avgInitTime;
+        private double avgFirstPropag;
+        private double avgTime;
+
+        private boolean hasEncounteredLimit;
+
+        private String[] details;
+
+        private Data(Solver solver, AbstractBenchProbas pb, int nbTests) {
+            this.solver = solver;
+            this.pb = pb;
+            this.nbTests = nbTests;
+            this.nbSolutions = new long[nbTests];
+            this.nbNodes = new long[nbTests];
+            this.nbFails = new long[nbTests];
+            this.nbFinePropag = new long[nbTests];
+            this.nbPropag = new long[nbTests];
+            this.ratioPropagByNodes = new double[nbTests];
+            this.initTime = new double[nbTests];
+            this.time = new double[nbTests];
+            this.firstPropag = new double[nbTests];
+            this.hasEncounteredLimit = false;
+        }
+
+        public void recordResults(int it) {
+            IMeasures mes = this.solver.getMeasures();
+            //this.nbSolutions = mes.getObjectiveValue();//mes.getSolutionCount();
+            this.nbSolutions[it] = mes.getSolutionCount();
+            this.nbNodes[it] = mes.getNodeCount();
+            this.nbFails[it] = mes.getFailCount();
+            this.nbFinePropag[it] = mes.getEventsCount();
+            this.nbPropag[it] = mes.getPropagationsCount(); //+ mes.getEventsCount();  => on compte juste les propag lourdes
+            if (this.nbNodes[it] > 0) {
+                this.ratioPropagByNodes[it] = ((double) this.nbPropag[it]) / this.nbNodes[it];
+            } else {
+                this.ratioPropagByNodes[it] = this.nbPropag[it]; // on a que le noeud root
+            }
+
+            if (this.solver.getMeasures().getTimeCount() < TIMELIMIT) {
+                this.time[it] = mes.getTimeCount();//-mes.getInitialisationTimeCount();
+            } else {
+                this.hasEncounteredLimit = true;
+                this.time[it] = 0;
+            }
+            this.initTime[it] = mes.getInitialisationTimeCount();
+            this.firstPropag[it] = mes.getInitialPropagationTimeCount();
+        }
+
+        private void recordAverage() {
+            long sumSolutions = 0;
+            long sumNodes = 0;
+            long sumFails = 0;
+            long sumFinePropag = 0;
+            long sumPropag = 0;
+            double sumRatio = 0;
+            double sumTime = 0;
+            double sumInitTime = 0;
+            double sumInitPropag = 0;
+            for (int i = 0; i < nbTests; i++) {
+                sumSolutions += nbSolutions[i];
+                sumNodes += nbNodes[i];
+                sumFails += nbFails[i];
+                sumFinePropag += nbFinePropag[i];
+                sumPropag += nbPropag[i];
+                sumRatio += ratioPropagByNodes[i];
+                sumTime += time[i];
+                sumInitTime += initTime[i];
+                sumInitPropag += firstPropag[i];
+            }
+            this.avgSolutions = (double) sumSolutions / nbTests;
+            this.avgNodes = (double) sumNodes / nbTests;
+            this.avgFails = (double) sumFails / nbTests;
+            this.avgFinePropag = (double) sumFinePropag / nbTests;
+            this.avgPropag = (double) sumPropag / nbTests;
+            this.avgRatio = sumRatio / nbTests;
+            if (hasEncounteredLimit) {
+                this.avgTime = -1;
+            } else {
+                this.avgTime = sumTime / nbTests;
+            }
+            this.avgInitTime = sumInitTime / nbTests;
+            this.avgFirstPropag = sumInitPropag / nbTests;
+        }
+
+        public String getResults() {
+            this.recordAverage();
+            details = new String[nbTests];
+            for (int i = 0; i < nbTests; i++) {
+                details[i] = nbSolutions[i] + sep + nbNodes[i] + sep + nbFails[i] + sep + nbFinePropag[i] + sep + nbPropag[i] + sep + ratioPropagByNodes[i] + sep + initTime[i] + sep + firstPropag[i] + sep + time[i] + sep;
+            }
+            return avgSolutions + sep + avgNodes + sep + avgFails + sep + avgFinePropag + sep + avgPropag + sep + avgRatio + sep + avgInitTime + sep + avgFirstPropag + sep + avgTime + sep;
+        }
+
     }
 
 

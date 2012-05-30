@@ -34,8 +34,8 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.exception.ContradictionException;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
@@ -80,7 +80,7 @@ import java.util.Random;
  */
 public class VarValTest {
 
-    private static final int SIZE = 11;
+    private final static int SIZE = 11;
     public final static int NB_SOL[] = {0, 0, 0, 0, 2, 10, 4, 40, 92, 352, 724, 2680, 14200, 73712, 365596};
 
 //    @Test(groups = {"1s"})
@@ -117,16 +117,13 @@ public class VarValTest {
 //        }
 //    }
 
-    private static Solver solver;
-    private static IntVar[] vars;
-    private static Constraint[] cstrs;
 
-    private static void build(int n) {
-        solver = new Solver();
+    private static Object[] build(int n) {
+        Solver solver = new Solver();
 
         int[][] domains = DomainBuilder.buildFullDomains(n, 1, n);
 
-        vars = new IntVar[n];
+        IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, domains[i], solver);
 
@@ -141,12 +138,13 @@ public class VarValTest {
                 lcstrs.add(ConstraintFactory.neq(vars[i], vars[j], k, solver));
             }
         }
-        cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+        Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
+		solver.post(cstrs);
+		return new Object[]{solver,vars};
     }
 
 
-    private static void feed(AbstractSorter<IntVar> varComp, int type) {
-
+    private static void feed(AbstractSorter<IntVar> varComp, int type, Solver solver, IntVar[] vars) {
         AbstractStrategy strategy;
         switch (type) {
             default:
@@ -155,8 +153,6 @@ public class VarValTest {
                         ValidatorFactory.instanciated, solver.getEnvironment());
                 break;
         }
-
-        solver.post(cstrs);
         solver.set(strategy);
     }
 
@@ -166,7 +162,10 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test401() {
-        build(SIZE);
+
+		Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // Heuristic val
         for (IntVar var : vars) {
@@ -176,7 +175,7 @@ public class VarValTest {
         }
 
         // Heuristic var
-        feed(SorterFactory.random(), 1);
+        feed(SorterFactory.random(), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -188,7 +187,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test402() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // Heuristic val
         for (IntVar var : vars) {
@@ -197,7 +198,7 @@ public class VarValTest {
             );
         }
 
-        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(vars)), 1);
+        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(vars)), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -209,7 +210,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test403() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // Heuristic val
         for (IntVar var : vars) {
@@ -218,7 +221,7 @@ public class VarValTest {
             );
         }
 
-        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random()), 1);
+        feed(new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random()), 1, solver, vars);
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
         Assert.assertEquals(solver.getMeasures().getSolutionCount(), NB_SOL[SIZE]);
@@ -229,7 +232,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test404() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -239,7 +244,8 @@ public class VarValTest {
         }
 
         feed(new Seq<IntVar>(SorterFactory.minDomain(),
-                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.inputOrder(vars))), 1);
+                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.inputOrder(vars))), 1,
+				solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -251,7 +257,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test405() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -260,7 +268,8 @@ public class VarValTest {
             );
         }
         feed(new Seq<IntVar>(SorterFactory.minDomain(),
-                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.random())), 1);
+                new Seq<IntVar>(SorterFactory.mostConstrained(), SorterFactory.random())), 1,
+				solver,vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -272,7 +281,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test406() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -286,7 +297,8 @@ public class VarValTest {
         }
 
         feed(new Seq<IntVar>(new Incr<IntVar>(Middle.<IntVar>build(vars)),
-                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random())), 1);
+                new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.random())), 1,
+				solver,vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -299,7 +311,9 @@ public class VarValTest {
      */
     @Test(expectedExceptions = AssertionError.class, groups = "1s")
     public void test407() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -311,7 +325,7 @@ public class VarValTest {
             );
         }
 
-        feed(SorterFactory.inputOrder(vars), 1);
+        feed(SorterFactory.inputOrder(vars), 1,solver,vars);
 
         solver.findAllSolutions();
     }
@@ -321,7 +335,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test4081() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -337,7 +353,7 @@ public class VarValTest {
             );
         }
 
-        feed(SorterFactory.inputOrder(vars), 1);
+        feed(SorterFactory.inputOrder(vars), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -349,7 +365,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test4082() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -364,7 +382,7 @@ public class VarValTest {
             );
         }
 
-        feed(SorterFactory.inputOrder(vars), 1);
+        feed(SorterFactory.inputOrder(vars), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -376,7 +394,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test4083() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -392,7 +412,7 @@ public class VarValTest {
                                     Action.first_selection)));
         }
 
-        feed(SorterFactory.inputOrder(vars), 1);
+        feed(SorterFactory.inputOrder(vars), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);
@@ -404,7 +424,9 @@ public class VarValTest {
      */
     @Test(groups = "1s")
     public void test4084() {
-        build(SIZE);
+        Object[] o = build(SIZE);
+		Solver solver = (Solver) o[0];
+		IntVar[] vars = (IntVar[]) o[1];
 
         // HeuristicVal
         for (IntVar var : vars) {
@@ -420,7 +442,7 @@ public class VarValTest {
                                     Action.first_selection)));
         }
 
-        feed(SorterFactory.inputOrder(vars), 1);
+        feed(SorterFactory.inputOrder(vars), 1, solver, vars);
 
         Boolean result = solver.findAllSolutions();
         Assert.assertEquals(result, Boolean.TRUE);

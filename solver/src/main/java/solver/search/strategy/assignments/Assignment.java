@@ -31,8 +31,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
-
 import java.io.Serializable;
 
 /**
@@ -121,59 +119,4 @@ public abstract class Assignment<V extends Variable> implements Serializable{
             return " >= ";
         }
     };
-
-    public static Assignment<GraphVar> graph_enforcer = new Assignment<GraphVar>() {
-
-    	@Override
-        public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
-            int n = var.getEnvelopGraph().getNbNodes();
-            if (value>=n){
-            	int from = value/n-1;
-            	int to   = value%n;
-//            	System.out.println("enf "+value + " : "+from +" : "+to);
-            	var.enforceArc(from, to, cause);
-            }else{
-//            	System.out.println("enf "+value);
-            	var.enforceNode(value, cause);
-            }
-        }
-
-        @Override
-        public void unapply(GraphVar var, int value, ICause cause) throws ContradictionException {
-        	int n = var.getEnvelopGraph().getNbNodes();
-            if (value>=n){
-            	int from = value/n-1;
-            	int to   = value%n;
-            	var.removeArc(from, to, cause);
-            }else{
-//            	System.out.println("rem "+value);
-            	var.removeNode(value, cause);
-            }
-        }
-        
-        @Override
-        public String toString() {
-            return " enforcing ";
-        }
-    };
-    
-    public static Assignment<GraphVar> graph_remover = new Assignment<GraphVar>() {
-
-    	@Override
-        public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
-    		graph_enforcer.unapply(var, value, cause);
-        }
-
-        @Override
-        public void unapply(GraphVar var, int value, ICause cause) throws ContradictionException {
-        	graph_enforcer.apply(var, value, cause);
-        }
-
-        @Override
-        public String toString() {
-            return " removal ";
-        }
-    };
-
-
 }

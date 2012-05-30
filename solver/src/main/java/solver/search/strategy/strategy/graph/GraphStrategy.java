@@ -27,14 +27,16 @@
 
 package solver.search.strategy.strategy.graph;
 
-import java.util.Random;
+import choco.kernel.common.util.PoolManager;
+import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.selectors.graph.arcs.LexArc;
 import solver.search.strategy.selectors.graph.nodes.LexNode;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.assignments.Assignment;
 import solver.variables.graph.GraphVar;
+
+import java.util.Random;
 
 /**
  * <br/>
@@ -48,37 +50,12 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 	protected NodeStrategy nodeStrategy;
 	protected ArcStrategy arcStrategy;
 	protected NodeArcPriority priority;
+	protected PoolManager<GraphDecision> pool;
 
 	public enum NodeArcPriority{
-		NODES_THEN_ARCS{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				int fromTo = gs.nextNode();
-				if(fromTo==-1){
-					fromTo = gs.nextArc();
-				}
-				return fromTo;
-			}
-		},
-		ARCS{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				return gs.nextArc();
-			}
-		},
-		RANDOM{
-			@Override
-			protected int getNext(GraphStrategy gs){
-				Random rd = new Random();
-				if(rd.nextBoolean()){
-					return NODES_THEN_ARCS.getNext(gs);
-				}else{
-					return ARCS.getNext(gs);
-				}
-			}
-		};
-
-		protected abstract int getNext(GraphStrategy gs);
+		NODES_THEN_ARCS,
+		ARCS,
+		RANDOM;
 	}
 
 	public GraphStrategy(GraphVar g, NodeStrategy ns, ArcStrategy as, NodeArcPriority priority) {
@@ -87,6 +64,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 		this.nodeStrategy = ns;
 		this.arcStrategy  = as;
 		this.priority 	  = priority;
+		pool = new PoolManager<GraphDecision>();
 	}
 
 	public GraphStrategy(GraphVar g) {
@@ -98,18 +76,39 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
 	@Override
 	public Decision getDecision() {
-		int fromTo = priority.getNext(this);
-		if(fromTo == -1){
+		if(g.instantiated()){
 			return null;
 		}
-		return new GraphDecision(g, fromTo, Assignment.graph_enforcer);
+		GraphDecision dec = pool.getE();
+		if(dec == null){
+			dec = new GraphDecision(pool);
+		}
+		switch (priority){
+			case NODES_THEN_ARCS:
+				int node = nextNode();
+				if(node!=-1){
+					dec.setNode(g,node, GraphAssignment.graph_enforcer);
+				}else{
+					nextArc();
+					dec.setArc(g, arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
+				}
+				break;
+//			case RANDOM:
+//				throw new UnsupportedOperationException("not implemented yet");
+			case ARCS:
+			default:
+				nextArc();
+				dec.setArc(g,arcStrategy.getFrom(), arcStrategy.getTo(), GraphAssignment.graph_enforcer);
+				break;
+		}
+		return dec;
 	}
 
 	public int nextNode(){
 		return nodeStrategy.nextNode();
 	}
 
-	public int nextArc(){
-		return arcStrategy.nextArc();
+	public boolean nextArc(){
+		return arcStrategy.computeNextArc();
 	}
 }

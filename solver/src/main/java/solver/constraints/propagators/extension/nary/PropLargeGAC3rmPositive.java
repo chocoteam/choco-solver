@@ -131,18 +131,52 @@ public class PropLargeGAC3rmPositive extends Propagator<IntVar> {
         filter(vIdx);
     }
 
-    @Override
+    /*@Override
     public ESat isEntailed() {
-//        if (isCompletelyInstantiated()) {
-//            int[] tuple = new int[vars.length];
-//            for (int i = 0; i < vars.length; i++) {
-//                tuple[i] = vars[i].getValue();
-//            }
-//            return ESat.eval(relation.isConsistent(tuple));
-//        }
-//        return ESat.UNDEFINED;
-        return ESat.TRUE;
-    }
+        if (isCompletelyInstantiated()) {
+            int[] tuple = new int[vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                tuple[i] = vars[i].getValue();
+            }
+            return ESat.eval(relation.isConsistent(tuple));
+        }
+        return ESat.UNDEFINED;
+    }*/
+    @Override
+   public ESat isEntailed() {
+       if (isCompletelyInstantiated()) {
+           int[] tuple = new int[vars.length];
+           for (int i = 0; i < vars.length; i++) {
+               tuple[i] = vars[i].getValue();
+           }
+
+           int minListIdx = -1;
+           int minSize = Integer.MAX_VALUE;
+           for (int i = 0; i < tuple.length; i++) {
+               if (tab[i][tuple[i] - offsets[i]].length < minSize) {
+                   minSize = tab[i][tuple[i] - offsets[i]].length;
+                   minListIdx = i;
+               }
+           }
+           int currentIdxSupport;
+           int[] currentSupport;
+           int nva = tuple[minListIdx] - relation.getRelationOffset(minListIdx);
+           for (int i = 0; i < tab[minListIdx][nva].length; i++) {
+               currentIdxSupport = tab[minListIdx][nva][i];
+               currentSupport = relation.getTuple(currentIdxSupport);
+               boolean isValid = true;
+               for (int j = 0; isValid && j < tuple.length; j++) {
+                   if (tuple[j] != currentSupport[j]) {
+                       isValid = false;
+                   }
+               }
+               if (isValid) return ESat.TRUE;
+           }
+           return ESat.FALSE;
+
+       }
+       return ESat.UNDEFINED;
+   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

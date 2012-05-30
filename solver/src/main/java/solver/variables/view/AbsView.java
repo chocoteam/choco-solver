@@ -39,6 +39,8 @@ import solver.explanations.VariableState;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IntDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.delta.view.ViewDelta;
 
@@ -68,30 +70,34 @@ public final class AbsView extends IntView {
         super.analyseAndAdapt(mask);
         if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
             var.analyseAndAdapt(mask);
-            delta = new ViewDelta(new IntDeltaMonitor(var.getDelta(), this) {
-
+            delta = new ViewDelta(var.getDelta()) {
                 @Override
-                public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                    if (EventType.isRemove(eventType.mask)) {
-                        for (int i = frozenFirst; i < frozenLast; i++) {
-                            if (propagator != delta.getCause(i)) {
-                                int v = delta.get(i);
-                                if (!var.contains(-v)) {
-                                    boolean found = false;
-                                    for (int j = i + 1; !found && j < frozenLast; j++) {
-                                        if (delta.get(j) == -v) {
-                                            found = true;
+                public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
+                    return new IntDeltaMonitor(this, propagator) {
+                        @Override
+                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                            if (EventType.isRemove(eventType.mask)) {
+                                for (int i = frozenFirst; i < frozenLast; i++) {
+                                    if (propagator != delta.getCause(i)) {
+                                        int v = delta.get(i);
+                                        if (!var.contains(-v)) {
+                                            boolean found = false;
+                                            for (int j = i + 1; !found && j < frozenLast; j++) {
+                                                if (delta.get(j) == -v) {
+                                                    found = true;
+                                                }
+                                            }
+                                            if (!found) {
+                                                proc.execute(Math.abs(v));
+                                            }
                                         }
-                                    }
-                                    if (!found) {
-                                        proc.execute(Math.abs(v));
                                     }
                                 }
                             }
                         }
-                    }
+                    };
                 }
-            });
+            };
             reactOnRemoval = true;
         }
     }
@@ -110,7 +116,7 @@ public final class AbsView extends IntView {
 
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
+//        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         if (value < 0) {
             return false;
         }
@@ -154,7 +160,7 @@ public final class AbsView extends IntView {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
+//        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
@@ -178,7 +184,7 @@ public final class AbsView extends IntView {
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
+//        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         if (value <= 0) {
             return false;
         }
@@ -198,7 +204,7 @@ public final class AbsView extends IntView {
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
+//        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         if (value < 0) {
             //TODO: explication?
             this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
@@ -225,8 +231,11 @@ public final class AbsView extends IntView {
 
     @Override
     public boolean instantiatedTo(int value) {
-        return var.instantiatedTo(value) || var.instantiatedTo(-value) ||
-                (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug
+        if (var.contains(value) || var.contains(-value)) {
+            return var.instantiated() ||
+                    (var.getDomainSize() == 2 && Math.abs(var.getLB()) == var.getUB());          //<nj> fixed ABS bug
+        }
+        return false;
     }
 
     @Override

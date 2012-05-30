@@ -34,8 +34,8 @@ import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -101,7 +101,7 @@ public class ReifiedTest {
         lcstrs.add(new ReifiedConstraint(b, new Member(y, new int[]{1, 1}, s), new NotMember(y, new int[]{1, 1}, s), s));
         lcstrs.add(new ReifiedConstraint(c, new Member(z, new int[]{1, 1}, s), new NotMember(z, new int[]{1, 1}, s), s));
 
-        lcstrs.add(ConstraintFactory.sum(new IntVar[]{a, b, c}, IntLinComb.Operator.LEQ, 1, s));
+        lcstrs.add(Sum.leq(new IntVar[]{a, b, c}, 1, s));
 
         Constraint[] cstrs = lcstrs.toArray(new Constraint[lcstrs.size()]);
 
@@ -221,7 +221,7 @@ public class ReifiedTest {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                s2.post(ConstraintFactory.sum(ai, IntLinComb.Operator.LEQ, q - p + 1, s2));
+                s2.post(Sum.leq(ai, q - p + 1, s2));
             }
         }
 

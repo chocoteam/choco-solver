@@ -65,6 +65,7 @@ public class LargeCSP extends IntConstraint<IntVar> {
 
     @Override
     public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(relation.isConsistent(tuple));
+        //return ESat.eval(relation.isConsistent(tuple));
+        return propagators[0].isEntailed();
     }
 }

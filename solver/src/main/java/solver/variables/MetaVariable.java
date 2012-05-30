@@ -95,7 +95,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
 
     @Override
     public void contradiction(ICause cause, EventType event, String message) throws ContradictionException {
-        records.forEach(onContradiction.set(this, event, cause));
+//        records.forEach(onContradiction.set(this, event, cause));
         solver.getEngine().fails(cause, this, message);
     }
 

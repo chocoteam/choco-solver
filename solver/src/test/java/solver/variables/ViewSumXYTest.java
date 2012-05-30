@@ -33,7 +33,6 @@ import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
-import solver.variables.view.Views;
 
 import java.util.Random;
 
@@ -52,7 +51,7 @@ public class ViewSumXYTest {
 
         IntVar X = VariableFactory.enumerated("X", 1, 10, solver);
         IntVar Y = VariableFactory.enumerated("Y", 3, 8, solver);
-        IntVar Z = Views.sum(X, Y);
+        IntVar Z = Sum.var(X, Y);
 
         try {
             solver.propagate();
@@ -127,7 +126,7 @@ public class ViewSumXYTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.bounded("x", 1, 5, solver);
                 xs[1] = VariableFactory.bounded("y", 1, 5, solver);
-                IntVar sum = Views.sum(xs[0], xs[1]);
+                IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
             }
@@ -157,7 +156,7 @@ public class ViewSumXYTest {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = VariableFactory.enumerated("x", 1, 5, solver);
                 xs[1] = VariableFactory.enumerated("y", 1, 5, solver);
-                IntVar sum = Views.sum(xs[0], xs[1]);
+                IntVar sum = Sum.var(xs[0], xs[1]);
 //                SearchMonitorFactory.log(solver, true, true);
                 solver.set(StrategyFactory.random(xs, solver.getEnvironment(), seed));
             }

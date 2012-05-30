@@ -32,8 +32,8 @@ import org.kohsuke.args4j.Option;
 import samples.AbstractProblem;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -76,9 +76,13 @@ public class Pert extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Pert");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
 

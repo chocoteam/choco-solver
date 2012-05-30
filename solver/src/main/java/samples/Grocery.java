@@ -63,8 +63,12 @@ public class Grocery extends AbstractProblem {
     Constraint[] LEQ, TMP;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Grocery");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = VariableFactory.enumeratedArray("item", 4, 0, 711, solver);
         solver.post(Sum.eq(vars, 711, solver));
 

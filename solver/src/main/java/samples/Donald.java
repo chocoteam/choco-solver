@@ -29,8 +29,8 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -56,8 +56,12 @@ public class Donald extends AbstractProblem {
     IntVar[] letters;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Donald");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         d = VariableFactory.bounded("d", 1, 9, solver);
         o = VariableFactory.bounded("o", 0, 9, solver);
         n = VariableFactory.bounded("n", 0, 9, solver);

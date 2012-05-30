@@ -49,6 +49,7 @@ import java.util.Arrays;
  *
  * @author Jean-Guillaume Fages
  * @since 30 june 2011
+ * @revision CPRU: remove effectless procedures (before + on contradiction)
  */
 public abstract class AbstractVariable<D extends IDelta, W extends IView, V extends Variable<D, W>> implements Serializable {
 
@@ -83,9 +84,9 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     protected int modificationEvents;
 
-    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+//    protected final OnBeforeProc beforeModification = new OnBeforeProc();
     protected final OnAfterProc afterModification = new OnAfterProc();
-    protected final OnContradiction onContradiction = new OnContradiction();
+//    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -267,12 +268,12 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
         }
     }
 
-    protected static class OnBeforeProc extends Monitoring {
+    /*protected static class OnBeforeProc extends Monitoring {
         @Override
         public void execute(IVariableMonitor monitor) throws ContradictionException {
             monitor.beforeUpdate(var, evt, cause);
         }
-    }
+    }*/
 
     protected static class OnAfterProc extends Monitoring {
         @Override
@@ -281,11 +282,11 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
         }
     }
 
-    protected static class OnContradiction extends Monitoring {
+    /*protected static class OnContradiction extends Monitoring {
         @Override
         public void execute(IVariableMonitor monitor) throws ContradictionException {
             monitor.contradict(var, evt, cause);
         }
-    }
+    }*/
 
 }

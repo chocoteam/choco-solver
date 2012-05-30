@@ -34,9 +34,9 @@ import solver.constraints.binary.Absolute;
 import solver.constraints.binary.EqualXY_C;
 import solver.constraints.binary.EqualX_YC;
 import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
-import solver.constraints.ternary.MaxXYZ;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.ternary.Max;
 import solver.constraints.ternary.Times;
 import solver.exception.ContradictionException;
 import solver.search.strategy.StrategyFactory;
@@ -96,7 +96,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.sum(x, y);
+                IntVar z = Sum.var(x, y);
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
 
             }
@@ -122,7 +122,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.bounded("x", 0, 2, solver);
                 IntVar y = VariableFactory.bounded("y", 0, 2, solver);
-                IntVar z = Views.sum(x, y);
+                IntVar z = Sum.var(x, y);
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
 
             }
@@ -140,14 +140,14 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, ref);
                 IntVar z = VariableFactory.bounded("z", 0, 2, ref);
-                ref.post(new MaxXYZ(z, x, y, ref));
+                ref.post(new Max(z, x, y, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, y, z}, ref.getEnvironment(), seed));
 
             }
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.max(x, y);
+                IntVar z = Max.var(x, y);
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
 
             }
@@ -263,7 +263,7 @@ public class ViewsTest {
                 IntVar[] x = VariableFactory.enumeratedArray("x", n, 0, 2, solver);
                 IntVar[] y = new IntVar[seed];
                 for (int i = 0; i < seed; i++) {
-                    y[i] = Views.sum(x[i], x[i + seed]);
+                    y[i] = Sum.var(x[i], x[i + seed]);
                 }
                 solver.post(Sum.eq(y, n, solver));
 
@@ -306,13 +306,13 @@ public class ViewsTest {
             IntVar y = VariableFactory.enumerated("y", -999, 999, ref);
             IntVar z = VariableFactory.enumerated("z", -9999, 9999, ref);
             ref.post(Sum.eq(new IntVar[]{z, x}, new int[]{1, 1}, 180, ref));
-            ref.post(new MaxXYZ(y, Views.fixed(0, ref), z, ref));
+            ref.post(new Max(y, Views.fixed(0, ref), z, ref));
         }
         {
             IntVar x = VariableFactory.enumerated("x", 160, 187, solver);
             IntVar y = VariableFactory.enumerated("y", -999, 999, solver);
             IntVar z = Views.offset(Views.minus(x), 180);
-            solver.post(new MaxXYZ(y, Views.fixed(0, solver), z, solver));
+            solver.post(new Max(y, Views.fixed(0, solver), z, solver));
 
             check(ref, solver, 0, false, true);
         }
@@ -336,7 +336,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.sum(x, Views.minus(y));
+                IntVar z = Sum.var(x, Views.minus(y));
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
 
             }
@@ -362,7 +362,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.abs(Views.sum(x, Views.minus(y)));
+                IntVar z = Views.abs(Sum.var(x, Views.minus(y)));
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
             }
             check(ref, solver, seed, true, true);
@@ -388,7 +388,7 @@ public class ViewsTest {
             {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, solver);
                 IntVar y = VariableFactory.enumerated("y", 0, 2, solver);
-                IntVar z = Views.abs(Views.sum(x, Views.minus(y)));
+                IntVar z = Views.abs(Sum.var(x, Views.minus(y)));
                 solver.post(new AllDifferent(new IntVar[]{x, y, z}, solver));
                 solver.set(StrategyFactory.random(new IntVar[]{x, y, z}, solver.getEnvironment(), seed));
             }
@@ -421,7 +421,7 @@ public class ViewsTest {
                 IntVar[] x = VariableFactory.enumeratedArray("x", k, 0, k - 1, solver);
                 IntVar[] t = new IntVar[k - 1];
                 for (int i = 0; i < k - 1; i++) {
-                    t[i] = Views.abs(Views.sum(x[i + 1], Views.minus(x[i])));
+                    t[i] = Views.abs(Sum.var(x[i + 1], Views.minus(x[i])));
                 }
                 solver.post(new AllDifferent(x, solver));
                 solver.post(new AllDifferent(t, solver));

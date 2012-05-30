@@ -45,12 +45,16 @@ public final class OneValueDelta implements IntDelta {
 	ICause cause;
     boolean set;
     int timestamp = -1;
+	final AbstractSearchLoop loop;
 
+	public OneValueDelta(AbstractSearchLoop loop){
+		this.loop = loop;
+	}
 
     public void lazyClear() {
-        if (timestamp - AbstractSearchLoop.timeStamp != 0) {
+        if (timestamp - loop.timeStamp != 0) {
             set = false;
-            timestamp = AbstractSearchLoop.timeStamp;
+            timestamp = loop.timeStamp;
         }
     }
 

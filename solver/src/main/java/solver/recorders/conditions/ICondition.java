@@ -62,6 +62,8 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
      */
     ICondition next();
 
+    void activate();
+
     /**
      * Link the <code>recorder</code> to the condition
      *
@@ -69,23 +71,4 @@ public interface ICondition<R extends IEventRecorder> extends Serializable {
      */
     public void linkRecorder(R recorder);
 
-    public static enum Default implements ICondition<IEventRecorder> {
-        NO_CONDITION;
-
-        @Override
-        public boolean validateScheduling(IEventRecorder recorder, Propagator propagator, EventType event) {
-            return false;
-        }
-
-        @Override
-        public ICondition next() {
-            return NO_CONDITION;
-        }
-
-        @Override
-        public void linkRecorder(IEventRecorder recorder) {
-        }
-
-
-    }
 }

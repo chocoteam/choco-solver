@@ -31,14 +31,13 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
 import java.util.List;
 
-import static solver.constraints.ConstraintFactory.scalar;
 
 /**
  * <br/>
@@ -56,8 +55,8 @@ public class IntLinLeReifBuilder implements IBuilder {
         BoolVar r = exps.get(3).boolVarValue(solver);
 
         return new ReifiedConstraint(r,
-                scalar(bs, as, IntLinComb.Operator.LEQ, c, solver),
-                scalar(bs, as, IntLinComb.Operator.GEQ, c + 1, solver),
+                Sum.leq(bs, as, c, solver),
+                Sum.leq(bs, as, c + 1, solver),
                 solver);
     }
 }

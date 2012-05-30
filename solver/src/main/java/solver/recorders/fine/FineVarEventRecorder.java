@@ -160,10 +160,10 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
                         }
                         // 2. clear the structure if necessary
                         if (LAZY) {
-                            if (timestamps[idx] - AbstractSearchLoop.timeStamp != 0) {
+                            if (timestamps[idx] - loop.timeStamp != 0) {
                                 deltamon[idx].clear();
                                 this.evtmasks[idx] = 0;
-                                timestamps[idx] = AbstractSearchLoop.timeStamp;
+                                timestamps[idx] = loop.timeStamp;
                             }
                         }
                         // 3. record the event and values removed
@@ -219,7 +219,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         int idx = p2i.get(propagator.getId());
         this.evtmasks[idx] = 0;
         this.deltamon[idx].unfreeze();
-        this.timestamps[idx] = AbstractSearchLoop.timeStamp;
+        this.timestamps[idx] = loop.timeStamp;
 
         //TODO: to remove when active propagators will be managed smartly
         boolean canDeque = true;

@@ -28,12 +28,11 @@
 package solver.constraints.propagators.gary.tsp;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -41,6 +40,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
@@ -50,7 +50,7 @@ import solver.variables.graph.directedGraph.DirectedGraphVar;
  * BEWARE - Assume that the last node has no successor
  * - For minimization problem
  * */
-public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
+public class PropEvalObj extends Propagator {
 
     //***********************************************************************************
     // VARIABLES
@@ -61,7 +61,7 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     IntVar sum;
     int[][] distMatrix;
     IStateInt[] minCostSucc;
-    IntProcedure arcEnforced, arcRemoved;
+    PairProcedure arcEnforced, arcRemoved;
     IStateInt minSum;
     TIntArrayList toCompute;
 
@@ -80,14 +80,14 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
      * @param constraint
      * @param solver
      */
-    public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint<V, Propagator<V>> constraint, Solver solver) {
-        super((V[]) new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
+    public PropEvalObj(DirectedGraphVar graph, IntVar obj, int[][] costMatrix, Constraint constraint, Solver solver) {
+        super(new Variable[]{graph, obj}, solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
         sum = obj;
         n = g.getEnvelopGraph().getNbNodes();
         distMatrix = costMatrix;
-        arcEnforced = new EnfArc(this);
-        arcRemoved = new RemArc(this);
+        arcEnforced = new EnfArc();
+        arcRemoved = new RemArc();
         minSum = environment.makeInt(0);
         toCompute = new TIntArrayList();
         minCostSucc = new IStateInt[n];
@@ -138,18 +138,16 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if(ALWAYS_COARSE){
-			propagate(0);return;
-		}
 		toCompute.clear();
         int oldMin = minSum.get();
         Variable variable = vars[idxVarInProp];
         if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
+			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
             if ((mask & EventType.ENFORCEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcEnforced, EventType.ENFORCEARC);
+                gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             }
             if ((mask & EventType.REMOVEARC.mask) != 0) {
-                eventRecorder.getDeltaMonitor(this, g).forEach(arcRemoved, EventType.REMOVEARC);
+                gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
             }
             for (int i = toCompute.size() - 1; i >= 0; i--) {
                 findMin(toCompute.get(i));
@@ -205,16 +203,9 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
     // PROCEDURES
     //***********************************************************************************
 
-    private class EnfArc implements IntProcedure {
-        private GraphPropagator p;
-
-        private EnfArc(GraphPropagator p) {
-            this.p = p;
-        }
+    private class EnfArc implements PairProcedure {
         @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
+        public void execute(int from, int to) throws ContradictionException {
             if (to != minCostSucc[from].get()) {
                 minSum.add(distMatrix[from][to] - distMatrix[from][minCostSucc[from].get()]);
                 minCostSucc[from].set(to);
@@ -222,16 +213,9 @@ public class PropEvalObj<V extends Variable> extends GraphPropagator<V> {
         }
     }
 
-    private class RemArc implements IntProcedure {
-        private GraphPropagator p;
-
-        private RemArc(GraphPropagator p) {
-            this.p = p;
-        }
+    private class RemArc implements PairProcedure {
         @Override
-        public void execute(int i) throws ContradictionException {
-            int from = i / n - 1;
-            int to = i % n;
+        public void execute(int from, int to) throws ContradictionException {
             if (to == minCostSucc[from].get()) {
                 toCompute.add(from);
             }

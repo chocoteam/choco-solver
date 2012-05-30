@@ -70,7 +70,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	}
         if (envelop.removeEdge(x, y)){
         	if (reactOnModification){
-        		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y, IGraphDelta.AR,cause);
+        		delta.add(x, IGraphDelta.AR_tail,cause);
+        		delta.add(y, IGraphDelta.AR_head,cause);
         	}
         	EventType e = EventType.REMOVEARC;
         	notifyMonitors(e, cause);
@@ -83,7 +84,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
     	if(envelop.edgeExists(x, y)){
         	if (kernel.addEdge(x, y)){
         		if (reactOnModification){
-            		delta.add((x+1)*getEnvelopGraph().getNbNodes()+y,IGraphDelta.AE,cause);
+            		delta.add(x,IGraphDelta.AE_tail,cause);
+            		delta.add(y,IGraphDelta.AE_head,cause);
             	}
             	EventType e = EventType.ENFORCEARC;
             	notifyMonitors(e, cause);
@@ -110,6 +112,6 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	
 	@Override
 	public boolean isDirected(){
-		return true;
+		return false;
 	}
 }

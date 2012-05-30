@@ -32,8 +32,8 @@ import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
@@ -65,8 +65,12 @@ public class MagicSquare extends AbstractProblem {
     IntVar[] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Magic square");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver("Magic Square "+n);
         int ms = n * (n * n + 1) / 2;
 
         IntVar[][] matrix = new IntVar[n][n];

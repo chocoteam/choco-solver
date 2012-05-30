@@ -30,8 +30,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.IntLinComb;
+import solver.constraints.nary.Sum;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -56,10 +55,14 @@ public class DecomposedAllDifferent extends AbstractProblem {
     IntVar[] X;
     BoolVar[] B;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("Decomp allDiff");
+    }
+
 
     @Override
     public void buildModel() {
-        solver = new Solver("Decomp allDiff " + m);
         int i = m;
         X = VariableFactory.enumeratedArray("v", m, 0, m, solver);
         int[] union = new int[m];
@@ -115,7 +118,7 @@ public class DecomposedAllDifferent extends AbstractProblem {
                 for (int j = 0; j < i; j++) {
                     ai = apmA.get(p - l).get(q - p).toArray(new BoolVar[apmA.get(p - l).get(q - p).size()]);
                 }
-                solver.post(ConstraintFactory.sum(ai, IntLinComb.Operator.LEQ, q - p + 1, solver));
+                solver.post(Sum.leq(ai, q - p + 1, solver));
             }
         }
         B = listA.toArray(new BoolVar[listA.size()]);

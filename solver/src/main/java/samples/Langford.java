@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.AllDifferent;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
@@ -76,8 +76,12 @@ public class Langford extends AbstractProblem {
     Constraint alldiff;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Langford number");
+    }
+
+    @Override
+    public void buildModel() {
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);

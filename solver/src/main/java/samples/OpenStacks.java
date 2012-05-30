@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.Element;
-import solver.constraints.nary.AllDifferent;
 import solver.constraints.nary.MaxOfAList;
 import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
@@ -91,10 +91,13 @@ public class OpenStacks extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Open stacks");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver("Open stacks");
-
         scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
         solver.post(new AllDifferent(scheds, solver));
         o = new IntVar[nc][np + 1];

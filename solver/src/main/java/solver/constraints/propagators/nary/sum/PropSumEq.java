@@ -38,7 +38,7 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * A propagator for SUM(x_i) <= b
+ * A propagator for SUM(x_i) = b
  * <br/>
  * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
  * W. Harvey and J. Schimpf
@@ -46,8 +46,8 @@ import solver.variables.IntVar;
  * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
  *
  * @author Charles Prud'homme
- * @since 18/03/11
  * @revision 04/03/12 use I in filterOn{G,L}eg
+ * @since 18/03/11
  */
 public class PropSumEq extends Propagator<IntVar> {
 
@@ -122,6 +122,7 @@ public class PropSumEq extends Propagator<IntVar> {
     }
 
 
+    @SuppressWarnings({"NullableProblems"})
     boolean filterOnLeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
@@ -148,6 +149,7 @@ public class PropSumEq extends Propagator<IntVar> {
         return anychange;
     }
 
+    @SuppressWarnings({"NullableProblems"})
     boolean filterOnGeq() throws ContradictionException {
         boolean doIt;
         boolean anychange = false;
@@ -183,6 +185,9 @@ public class PropSumEq extends Propagator<IntVar> {
         } else if (EventType.isDecupp(mask)) {
             filter(false, 1);
         }
+//        if (getNbPendingER() == 0){
+//            filter(true, 2);
+//        }
     }
 
     @Override

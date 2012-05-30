@@ -49,8 +49,12 @@ public class ExplainedOCProblem extends AbstractProblem {
     int vals = n-1;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver();
+    }
+
+    @Override
+    public void buildModel() {
         vars = VariableFactory.enumeratedArray("x", 2*n, 1, vals, solver);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n ; j++)

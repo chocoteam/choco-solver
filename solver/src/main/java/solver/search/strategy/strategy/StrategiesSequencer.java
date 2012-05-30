@@ -27,6 +27,7 @@
 
 package solver.search.strategy.strategy;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.search.strategy.decision.Decision;
@@ -54,8 +55,17 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
 
     IStateInt size;
 
+    private static Variable[] make(AbstractStrategy... strategies) {
+        Variable[] vars = new Variable[0];
+        for (int i = 0; i < strategies.length; i++) {
+            vars = ArrayUtils.append(vars, strategies[i].vars);
+        }
+        return vars;
+    }
+
+
     public StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies) {
-        super(new Variable[0]);
+        super(make(strategies));
         index = environment.makeInt();
         this.strategies = strategies;
         size = environment.makeInt(strategies.length);

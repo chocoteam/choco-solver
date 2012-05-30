@@ -40,21 +40,23 @@ public class GraphDelta implements IGraphDelta {
 
 	private IntDelta[] deltaOfType;
 	private long timestamp;
+	private final AbstractSearchLoop loop;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public GraphDelta() {
-		deltaOfType = new IntDelta[4];
-		for(int i=0;i<4;i++){
-			deltaOfType[i] = new Delta();
+    public GraphDelta(AbstractSearchLoop loop) {
+		deltaOfType = new IntDelta[NB];
+		this.loop = loop;
+		for(int i=0;i<NB;i++){
+			deltaOfType[i] = new Delta(loop);
 		}
-		timestamp = AbstractSearchLoop.timeStamp;
+		timestamp = loop.timeStamp;
     }
 
     @Override
-    public GraphDeltaMonitor createDeltaMonitor(ICause propagator) {
+    public IDeltaMonitor<GraphDelta> createDeltaMonitor(ICause propagator) {
         return new GraphDeltaMonitor(this,propagator);
     }
 
@@ -73,10 +75,10 @@ public class GraphDelta implements IGraphDelta {
 
 	@Override
     public void clear() {
-		for(int i=0;i<4;i++){
+		for(int i=0;i<NB;i++){
 			deltaOfType[i].clear();
 		}
-		timestamp = AbstractSearchLoop.timeStamp;
+		timestamp = loop.timeStamp;
     }
 
 	@Override
@@ -93,7 +95,7 @@ public class GraphDelta implements IGraphDelta {
 	}
 
 	public void lazyClear() {
-		if(timestamp!=AbstractSearchLoop.timeStamp){
+		if(timestamp!=loop.timeStamp){
 			clear();
 		}
 	}

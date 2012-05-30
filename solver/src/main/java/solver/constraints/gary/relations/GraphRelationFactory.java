@@ -78,9 +78,6 @@ public class GraphRelationFactory {
 		return new IndexOf(vars);
 	}
 	
-	public static GraphRelation customerVisit(CustomerVisitVariable[] vars, int[][] distancesMatrix){
-		return new CustomerVisitRelation(vars, distancesMatrix);
-	}
 	public static GraphRelation distanceEq(IntVar[] vars, int[][] distancesMatrix){
 		return new Dist_Int(vars, distancesMatrix);
 	}

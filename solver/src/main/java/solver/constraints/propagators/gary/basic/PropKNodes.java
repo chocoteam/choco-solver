@@ -30,25 +30,20 @@ package solver.constraints.propagators.gary.basic;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.GraphPropagator;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
 import solver.variables.graph.IActiveNodes;
 
 /**Propagator that ensures that K nodes belong to the final graph
- * 
- * BEWARE : in theory a Minimum Hitting set problem should be solved to evaluate the lower bound of k
- * As it is NP Hard nothing is done yet. It may be good to have a greedy approach...?
- * 
  * @author Jean-Guillaume Fages
- *
  */
-public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
+public class PropKNodes extends Propagator {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -61,13 +56,10 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKNodes(V graph, Solver sol, Constraint<V, Propagator<V>> constraint, IntVar k) {
-		super((V[]) new GraphVar[]{graph}, sol, constraint, PropagatorPriority.LINEAR);
-		g = graph;
+	public PropKNodes(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
+		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
+		this.g = graph;
 		this.k = k;
-		if(k.getLB()<=0){
-			throw new UnsupportedOperationException("K must be > 0");
-		}
 	}
 
 	//***********************************************************************************
@@ -76,56 +68,36 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		k.updateLowerBound(g.getKernelOrder(), this);
-		k.updateUpperBound(g.getEnvelopOrder(), this);
-		if(k.instantiated()){
-			if(g.getEnvelopOrder()==g.getKernelOrder()){
-				setPassive();
-			}else{
-				if(g.getEnvelopOrder()==k.getValue()){
-					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this);
-					}
-					setPassive();
-				}else if(g.getKernelOrder()==k.getValue()){
-					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-							g.removeNode(node, this);
-						}
-					}
-					setPassive();
+		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
+		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
+		k.updateLowerBound(ker,this);
+		k.updateUpperBound(env,this);
+		if(ker==env){
+			setPassive();
+		}else if (k.instantiated()){
+			int v = k.getValue();
+			IActiveNodes envNodes = g.getEnvelopGraph().getActiveNodes();
+			if(v == env){
+				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+					g.enforceNode(i,this);
 				}
+				setPassive();
+			}
+			else if(v == ker){
+				IActiveNodes kerNodes = g.getKernelGraph().getActiveNodes();
+				for(int i=envNodes.getFirstElement();i>=0;i=envNodes.getNextElement()){
+					if(!kerNodes.isActive(i)){
+						g.removeNode(i, this);
+					}
+				}
+				setPassive();
 			}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		k.updateLowerBound(g.getKernelOrder(), this);
-		k.updateUpperBound(g.getEnvelopOrder(), this);
-		if(k.instantiated()){
-			if(g.getEnvelopOrder()==g.getKernelOrder()){
-				setPassive();
-			}else{
-				if(g.getEnvelopOrder()==k.getValue()){
-					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						g.enforceNode(node, this);
-					}
-					setPassive();
-				}else if(g.getKernelOrder()==k.getValue()){
-					IActiveNodes env = g.getEnvelopGraph().getActiveNodes();
-					for (int node = env.getFirstElement(); node>=0; node = env.getNextElement()) {
-						if(!g.getKernelGraph().getActiveNodes().isActive(node)){
-							g.removeNode(node, this);
-						}
-					}
-					setPassive();
-				}
-			}
-		}
+		propagate(0);
 	}
 
 	//***********************************************************************************
@@ -139,21 +111,14 @@ public class PropKNodes<V extends GraphVar> extends GraphPropagator<V>{
 
 	@Override
 	public ESat isEntailed() {
-		if(g.getKernelOrder()>k.getUB()){
+		int env = g.getEnvelopGraph().getActiveNodes().neighborhoodSize();
+		int ker = g.getKernelGraph().getActiveNodes().neighborhoodSize();
+		if(env<k.getLB() || ker>k.getUB()){
 			return ESat.FALSE;
 		}
-		if(g.getEnvelopOrder()<k.getLB()){
-			return ESat.FALSE;
+		if(env==ker){
+			return ESat.TRUE;
 		}
-		if(g.getEnvelopOrder() == g.getKernelOrder() && (g.getEnvelopOrder() != k.getValue() && k.instantiated())){
-			return ESat.FALSE;
-		}
-		if(g.getEnvelopOrder() != g.getKernelOrder()){
-			return ESat.UNDEFINED;
-		}
-		if(!k.instantiated()){
-			return ESat.UNDEFINED;
-		}
-		return ESat.TRUE;
+		return ESat.UNDEFINED;
 	}
 }
