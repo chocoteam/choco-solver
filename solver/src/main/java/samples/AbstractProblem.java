@@ -81,6 +81,8 @@ public abstract class AbstractProblem {
         return solver;
     }
 
+    public abstract void createSolver();
+
     public abstract void buildModel();
 
     public abstract void configureSearch();
@@ -114,6 +116,7 @@ public abstract class AbstractProblem {
         if (this.readArgs(args)) {
             Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
+            this.createSolver();
             this.buildModel();
             this.configureSearch();
 

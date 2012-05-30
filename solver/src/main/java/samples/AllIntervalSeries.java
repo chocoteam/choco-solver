@@ -62,7 +62,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 5;
+    private int m = 1000;
 
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
     private boolean use_views = false;
@@ -74,9 +74,12 @@ public class AllIntervalSeries extends AbstractProblem {
     Constraint[] OTHERS;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
+        solver = new Solver("AllIntervalSeries");
+    }
 
-        solver = new Solver();
+    @Override
+    public void buildModel() {
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
         dist = new IntVar[m - 1];
 
@@ -138,6 +141,6 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new AllIntervalSeries().execute(args);
+        for (int i = 0; i < 10; i++)new AllIntervalSeries().execute(args);
     }
 }

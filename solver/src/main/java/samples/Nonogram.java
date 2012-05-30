@@ -67,11 +67,14 @@ public class Nonogram extends AbstractProblem {
     BoolVar[][] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Nonogram");
+    }
+
+    @Override
     public void buildModel() {
         int nR = data.getR().length;
         int nC = data.getC().length;
-
-        solver = new Solver();
         vars = new BoolVar[nR][nC];
         for (int i = 0; i < nR; i++) {
             for (int j = 0; j < nC; j++) {

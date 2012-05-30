@@ -27,7 +27,6 @@
 
 package samples.nqueen;
 
-import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.NotEqualX_YC;
 import solver.variables.IntVar;
@@ -43,8 +42,6 @@ public class NQueenLinearBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
             vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);

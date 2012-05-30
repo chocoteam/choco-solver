@@ -65,8 +65,12 @@ public class MagicSquare extends AbstractProblem {
     IntVar[] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Magic square");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver("Magic Square "+n);
         int ms = n * (n * n + 1) / 2;
 
         IntVar[][] matrix = new IntVar[n][n];

@@ -27,7 +27,6 @@
 
 package samples.nqueen;
 
-import solver.Solver;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -44,8 +43,6 @@ public class NQueenGlobal extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         IntVar[] diag1 = new IntVar[n];
         IntVar[] diag2 = new IntVar[n];

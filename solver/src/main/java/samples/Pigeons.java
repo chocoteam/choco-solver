@@ -48,8 +48,12 @@ public class Pigeons extends AbstractProblem {
     IntVar[] vars;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Pigeons");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = VariableFactory.enumeratedArray("p", n + 1, 1, n, solver);
 
         for (int i = 0; i < n; i++) {

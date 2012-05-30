@@ -27,7 +27,6 @@
 
 package samples.nqueen;
 
-import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.InverseChanneling;
 import solver.variables.IntVar;
@@ -43,8 +42,6 @@ public class NQueenDualBinary extends AbstractNQueen {
 
     @Override
     public void buildModel() {
-        solver = new Solver();
-
         vars = new IntVar[n];
         IntVar[] dualvars = new IntVar[n];
 

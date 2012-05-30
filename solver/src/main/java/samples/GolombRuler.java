@@ -81,9 +81,12 @@ public class GolombRuler extends AbstractProblem {
     Constraint[] distances;
 
     @Override
-    public void buildModel() {
-        solver = new Solver("Golomb Ruler " + m);
+    public void createSolver() {
+        solver = new Solver("Golomb Ruler");
+    }
 
+    @Override
+    public void buildModel() {
         ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));

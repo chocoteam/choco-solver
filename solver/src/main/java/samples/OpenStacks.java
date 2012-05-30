@@ -91,10 +91,13 @@ public class OpenStacks extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Open stacks");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver("Open stacks");
-
         scheds = VariableFactory.enumeratedArray("s", np, 0, np - 1, solver);
         solver.post(new AllDifferent(scheds, solver));
         o = new IntVar[nc][np + 1];

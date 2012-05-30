@@ -72,7 +72,7 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class Partition extends AbstractProblem {
     @Option(name = "-n", usage = "Partition size.", required = false)
-    int N = 2 * 24;
+    int N = 2 * 8;
 
     IntVar[] vars;
     IntVar[] Ovars;
@@ -80,9 +80,13 @@ public class Partition extends AbstractProblem {
     Constraint[] heavy = new Constraint[3];
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Partition "+N);
+    }
+
+    @Override
     public void buildModel() {
         int size = this.N / 2;
-        solver = new Solver();
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
         y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
