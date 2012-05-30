@@ -26,7 +26,12 @@
  */
 package samples;
 
+import choco.kernel.memory.Environments;
 import org.testng.annotations.Factory;
+import solver.ISolverProperties;
+import solver.explanations.ExplanationFactory;
+import solver.propagation.PropagationStrategies;
+import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,20 +49,49 @@ public class AllTestFactory {
     };
 
     String[][] arguments = new String[][]{
-            {"-0", "50"}
+            {"-o", "5"}
     };
 
-    long[][] statistics = new long[][]{
-            {1, 2}
+    long[] nbSol = new long[]{
+            2,
     };
+
+    Environments[] envFact = new Environments[]{
+            Environments.TRAIL,
+            Environments.COPY,
+            Environments.BUFFER,
+            Environments.BUFFER_UNSAFE
+    };
+
+    ExplanationFactory[] expFact = new ExplanationFactory[]{
+            ExplanationFactory.NONE,
+            ExplanationFactory.FLATTEN,
+            ExplanationFactory.RECORDER,
+            ExplanationFactory.TRACEFLATTEN,
+            ExplanationFactory.TRACERECORDER
+    };
+
+    SearchLoops[] slFact = new SearchLoops[]{
+            SearchLoops.BINARY,
+            //SearchLoops.ADVANCED_BINARY,
+            //SearchLoops.BINARY_WITH_RECOMPUTATION
+    };
+
 
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
 
-        for (int s = 0; s < problems.length; s++) {
-            lresult.add(new AllTest(problems[s], arguments[s], statistics[s]));
-        }
+        PropagationStrategies[] pol = PropagationStrategies.values();
+
+        for (int p = 0; p < problems.length; p++)
+            for (ExplanationFactory x : expFact)
+                for (SearchLoops sl : slFact) {
+                    ISolverProperties pr = new AllSolverProp(sl, x);
+                    for (Environments e : envFact)
+                        for (PropagationStrategies st : pol)
+                            lresult.add(new AllTest(problems[p], arguments[p], e.make(), pr, st, nbSol[p]));
+                }
         return lresult.toArray();
     }
 }

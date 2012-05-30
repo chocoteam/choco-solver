@@ -24,31 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.kernel.memory;
 
-package choco.checker;
-
-import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
-
-import java.util.ArrayList;
-import java.util.List;
+import choco.kernel.memory.buffer.EnvironmentBuffering;
+import choco.kernel.memory.copy.EnvironmentCopying;
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @since 28/05/12
  */
-public class TestCorrectnessFactory {
+public enum Environments {
 
-    @Factory
-    public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
-
-        for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCorrectness(sl));
+    TRAIL() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentTrailing();
         }
-        return lresult.toArray();
-    }
+    },
+    COPY() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentCopying();
+        }
+    },
+    BUFFER() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentBuffering(false);
+        }
+    },
+    BUFFER_UNSAFE() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentBuffering(true);
+        }
+    },
+    DEFAULT() {
+        @Override
+        public IEnvironment make() {
+            return TRAIL.make();
+        }
+    };
 
+    public abstract IEnvironment make();
 }

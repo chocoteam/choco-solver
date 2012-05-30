@@ -24,31 +24,37 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package choco.checker;
-
-import org.testng.annotations.Factory;
+import solver.ISolverProperties;
+import solver.Solver;
+import solver.explanations.ExplanationFactory;
 import solver.search.loop.SearchLoops;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @since 29/05/12
  */
-public class TestCorrectnessFactory {
+public class AllSolverProp implements ISolverProperties {
 
-    @Factory
-    public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
+    SearchLoops slIdx;
+    ExplanationFactory expIdx;
 
-        for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCorrectness(sl));
-        }
-        return lresult.toArray();
+    public AllSolverProp(SearchLoops slIdx, ExplanationFactory expIdx) {
+        this.slIdx = slIdx;
+        this.expIdx = expIdx;
     }
 
+    @Override
+    public void loadPropertiesIn(Solver solver) {
+        slIdx.make(solver);
+        expIdx.make(solver);
+    }
+
+    @Override
+    public String toString() {
+        return slIdx +" & "+ expIdx;
+    }
 }

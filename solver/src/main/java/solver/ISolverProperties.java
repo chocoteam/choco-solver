@@ -24,31 +24,21 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package choco.checker;
-
-import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
-
-import java.util.ArrayList;
-import java.util.List;
+package solver;
 
 /**
+ * An interface to define properties of a solver
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @since 29/05/12
  */
-public class TestCorrectnessFactory {
+public interface ISolverProperties {
 
-    @Factory
-    public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
-
-        for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCorrectness(sl));
-        }
-        return lresult.toArray();
-    }
+    /**
+     * Load properties define in this into a given solver
+     * @param solver a solver
+     */
+    void loadPropertiesIn(Solver solver);
 
 }

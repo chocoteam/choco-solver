@@ -30,13 +30,11 @@ package samples.nqueen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.propagation.PropagationStrategies;
-import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -73,11 +71,6 @@ public class NQueenTest {
         this.piType = piType;
         this.slType = slType;
         this.size = size;
-    }
-
-    @BeforeTest(alwaysRun = true)
-    private void beforeTest() {
-        SearchLoops._DEFAULT = slType;
     }
 
     private String parameters() {

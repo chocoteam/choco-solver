@@ -165,12 +165,15 @@ public final class SearchMonitorList implements ISearchMonitor {
     }
 
     public void add(ISearchMonitor sm) {
-        if (size >= searchMonitors.length) {
-            ISearchMonitor[] tmp = searchMonitors;
-            searchMonitors = new ISearchMonitor[tmp.length * 2];
-            System.arraycopy(tmp, 0, searchMonitors, 0, tmp.length);
+        if (sm != null) {
+            if (size >= searchMonitors.length) {
+                ISearchMonitor[] tmp = searchMonitors;
+                searchMonitors = new ISearchMonitor[tmp.length * 2];
+                System.arraycopy(tmp, 0, searchMonitors, 0, tmp.length);
+            }
+            searchMonitors[size++] = sm;
         }
-        searchMonitors[size++] = sm;
+
     }
 
 }
