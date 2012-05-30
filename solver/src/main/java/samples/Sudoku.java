@@ -57,8 +57,12 @@ public class Sudoku extends AbstractProblem {
     IntVar[][] rows, cols, carres;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Sudoku");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
 
         rows = new IntVar[n][n];
         cols = new IntVar[n][n];

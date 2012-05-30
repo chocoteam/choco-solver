@@ -116,11 +116,14 @@ public class AirPlaneLanding extends AbstractProblem {
 
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Air plane landing");
+    }
+
+    @Override
     public void buildModel() {
         data = parse(mData.source());
         n = data.length;
-
-        solver = new Solver("Air plane landing");
         planes = new IntVar[n];
         tardiness = new IntVar[n];
         earliness = new IntVar[n];

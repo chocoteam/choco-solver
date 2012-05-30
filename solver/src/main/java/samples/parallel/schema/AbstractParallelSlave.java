@@ -25,50 +25,60 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nqueen;
-
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 31/03/11
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 22/05/12
+ * Time: 17:54
  */
-public class NQueenDualBinary extends AbstractNQueen {
 
-    @Override
-    public void buildModel() {
-        vars = new IntVar[n];
-        IntVar[] dualvars = new IntVar[n];
+package samples.parallel.schema;
 
-        for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            dualvars[i] = VariableFactory.enumerated("QD_" + i, 1, n, solver);
-        }
+/**Slave born to be mastered and solve sub-problems in parallel
+ * @author Jean-Guillaume Fages
+ */
+public abstract class AbstractParallelSlave {
 
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
-            }
-        }
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
-            }
-        }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
-    }
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
+	private AbstractParallelMaster master;
+	public final int id;
 
-    public static void main(String[] args) {
-        new NQueenDualBinary().execute("12");
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
+
+	/**
+	 * Create a slave born to be mastered and solve sub-problems in parallel
+	 * @param master
+	 * @param id slave unique name
+	 */
+	public AbstractParallelSlave(AbstractParallelMaster master, int id){
+		this.master = master;
+		this.id = id;
+	}
+
+	//***********************************************************************************
+	// SUB-PROBLEM SOLVING
+	//***********************************************************************************
+
+	/**
+	 * Creates a new thread to solve the sub-problem
+	 */
+	public void solveSubProblemInParallel() {
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				solveSubProblem();
+				master.wishGranted();
+			}
+		});
+		t.start();
+	}
+
+	/**
+	 * Model and solve the subproblem
+	 */
+	public abstract void solveSubProblem();
 }

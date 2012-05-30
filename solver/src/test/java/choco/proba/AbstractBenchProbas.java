@@ -57,8 +57,6 @@ public abstract class AbstractBenchProbas {
                 data.solver = solver;
             }
             execute();
-            //System.out.println("custom: "+PropAllDiffAC_new.nbCustom);
-            //System.out.println("full: "+PropAllDiffAC_new.nbFull);
             data.recordResults(i);
         }
         return data.getResults();

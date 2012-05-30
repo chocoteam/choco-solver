@@ -76,8 +76,12 @@ public class Langford extends AbstractProblem {
     Constraint alldiff;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Langford number");
+    }
+
+    @Override
+    public void buildModel() {
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);

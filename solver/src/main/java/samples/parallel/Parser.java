@@ -262,8 +262,8 @@ public class Parser {
 	// OPTIMUM VALUE
 	//***********************************************************************************
 
-	public static int getOpt(String s) {
-		File file = new File("/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv");
+	public static int getOpt(String s, String optFile) {
+		File file = new File(optFile);
 		try {
 			BufferedReader buf = new BufferedReader(new FileReader(file));
 			String line = buf.readLine();

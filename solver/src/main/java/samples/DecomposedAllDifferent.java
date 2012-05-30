@@ -55,10 +55,14 @@ public class DecomposedAllDifferent extends AbstractProblem {
     IntVar[] X;
     BoolVar[] B;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("Decomp allDiff");
+    }
+
 
     @Override
     public void buildModel() {
-        solver = new Solver("Decomp allDiff " + m);
         int i = m;
         X = VariableFactory.enumeratedArray("v", m, 0, m, solver);
         int[] union = new int[m];

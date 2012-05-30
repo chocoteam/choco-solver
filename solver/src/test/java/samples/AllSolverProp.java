@@ -24,51 +24,37 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package samples.nqueen;
-
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import solver.ISolverProperties;
+import solver.Solver;
+import solver.explanations.ExplanationFactory;
+import solver.search.loop.SearchLoops;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 29/05/12
  */
-public class NQueenDualBinary extends AbstractNQueen {
+public class AllSolverProp implements ISolverProperties {
 
-    @Override
-    public void buildModel() {
-        vars = new IntVar[n];
-        IntVar[] dualvars = new IntVar[n];
+    SearchLoops slIdx;
+    ExplanationFactory expIdx;
 
-        for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            dualvars[i] = VariableFactory.enumerated("QD_" + i, 1, n, solver);
-        }
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
-            }
-        }
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
-            }
-        }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
+    public AllSolverProp(SearchLoops slIdx, ExplanationFactory expIdx) {
+        this.slIdx = slIdx;
+        this.expIdx = expIdx;
     }
 
+    @Override
+    public void loadPropertiesIn(Solver solver) {
+        slIdx.make(solver);
+        expIdx.make(solver);
+    }
 
-    public static void main(String[] args) {
-        new NQueenDualBinary().execute("12");
+    @Override
+    public String toString() {
+        return slIdx +" & "+ expIdx;
     }
 }

@@ -43,16 +43,21 @@ import solver.variables.VariableFactory;
  */
 public class ExplainedSimpleProblem extends AbstractProblem {
 
-    IntVar[] vars ;
+    IntVar[] vars;
     int n = 4;
-    int vals = n+1;
+    int vals = n + 1;
+
+    @Override
+    public void createSolver() {
+        solver = new Solver();
+    }
+
 
     @Override
     public void buildModel() {
-        solver = new Solver();
         vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
-        for (int i = 0; i < vars.length - 1 ; i++)   {
-            solver.post(new GreaterOrEqualX_YC(vars[i], vars[i+1], 1, solver));
+        for (int i = 0; i < vars.length - 1; i++) {
+            solver.post(new GreaterOrEqualX_YC(vars[i], vars[i + 1], 1, solver));
         }
     }
 
@@ -92,7 +97,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
         }
     }
 
-     public static void main(String[] args) {
+    public static void main(String[] args) {
         new ExplainedSimpleProblem().execute(args);
     }
 }

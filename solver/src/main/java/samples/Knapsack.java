@@ -88,10 +88,14 @@ public class Knapsack extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Knapsack");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
         int nos = energies.length;
-        solver = new Solver();
 
         objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {

@@ -328,8 +328,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return Constraint
      */
     @Override
-    public final Constraint getConstraint
-    () {
+    public final Constraint getConstraint() {
         return constraint;
     }
 

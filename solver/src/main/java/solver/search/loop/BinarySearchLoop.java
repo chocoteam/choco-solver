@@ -111,9 +111,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed. \n" +
-                    "Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+//            throw new SolverException("The search cannot be resumed. \n" +
+//                    "Be sure you are respecting one of these call configurations :\n " +
+//                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
         previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);

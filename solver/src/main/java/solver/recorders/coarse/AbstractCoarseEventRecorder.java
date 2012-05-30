@@ -49,7 +49,7 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Vari
     protected boolean enqueued; // to check wether this is enqueud or not.
 	protected final AbstractSearchLoop loop;
 
-    protected static final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
+    protected final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
 
         Propagator coarseProp;
 

@@ -1,4 +1,4 @@
-package samples.parallel;
+package samples.parallel.schema;
 /**
  *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
  *  All rights reserved.
@@ -26,6 +26,7 @@ package samples.parallel;
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import samples.parallel.Parser;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
@@ -43,77 +44,83 @@ import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.File;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class Main {
+public class TSPmaster extends AbstractParallelMaster<TSPslave>{
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	// general
-	private static final long TIMELIMIT = 5000;
 	private static String outFile;
 	// instance
-	private static int optimum;
-	private static int[][] distMatrix;
-	private static int n;
+	private int optimum;
+	private int[][] distMatrix;
+	private int n;
 	// LNS
-	private static int[] bestSolution;
-	private static int bestCost;
-	private static int SIZE = 20;
-	private static Fragment[] fragments;
-	private static int nbDone;
-	private static Thread mainThread;
+	private int[] bestSolution;
+	private int bestCost;
+	private int SIZE = 10;
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
+	public TSPmaster(int[][] distMatrix, int opt){
+		super();
+		this.optimum = opt;
+		this.distMatrix = distMatrix;
+		this.n = distMatrix.length;
+		this.SIZE = n/2;
+	}
+
 	public static void main(String[] args) {
-		mainThread = Thread.currentThread();
 		outFile = "tsp_lns.csv";
 		Parser.clearFile(outFile);
 		Parser.writeTextInto("instance;sols;fails;nodes;time;obj;search;\n", outFile);
 		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
+		String optFile = "/Users/jfages07/github/In4Ga/ALL_tsp/bestSols.csv";
 //		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
 		File folder = new File(dir);
 		String[] list = folder.list();
-		int[][] matrix;
+		long time = System.currentTimeMillis();
 		for (String s : list) {
 			if (s.contains(".tsp") && (!s.contains("a280")) && (!s.contains("gz")) && (!s.contains("lin"))){
-				distMatrix = Parser.parseInstance(dir + "/" + s);
+				int[][] distMatrix = Parser.parseInstance(dir + "/" + s);
 				if(distMatrix!=null){
-					n = distMatrix.length;
-					if(n>=100 && n<300){
-						optimum = Parser.getOpt(s.split("\\.")[0]);
+					int n = distMatrix.length;
+					if(n>=10 && n<40){
+						System.gc();
+						System.out.println("\n SOLVING INSTANCE "+s+"\n");
+						int optimum = Parser.getOpt(s.split("\\.")[0],optFile);
+						TSPmaster master = new TSPmaster(distMatrix,optimum);
 						System.out.println("optimum : " + optimum);
-						checkMatrix();
-						initLNS();
-						computeFirstSolution();
-						long time = System.currentTimeMillis();
+						master.checkMatrix();
+						master.initLNS();
+						master.computeFirstSolution();
+						long timeInst = System.currentTimeMillis();
 						System.out.println("start LNS...");
-						LNS();
+						master.LNS();
 						System.out.println("end LNS...");
-						System.out.println("time : "+(System.currentTimeMillis()-time)+" ms");
-						System.exit(0);
+						System.out.println("time : " + (System.currentTimeMillis() - timeInst) + " ms");
 					}
 				}else{
 					System.out.println("CANNOT LOAD");
 				}
 			}
 		}
+		System.out.println("time : " + (System.currentTimeMillis() - time) + " ms");
 	}
 
 	//***********************************************************************************
 	// INITIALIZATION
 	//***********************************************************************************
 
-	private static void checkMatrix() {
+	private void checkMatrix() {
 		for(int i=0;i<n;i++){
 			for(int j=0;j<n;j++){
 				if(distMatrix[i][j] != distMatrix[j][i]){
@@ -125,7 +132,7 @@ public class Main {
 		}
 	}
 
-	private static void computeFirstSolution() {
+	private void computeFirstSolution() {
 		Solver solver = new Solver();
 		// variables
 		int max = 100*optimum;
@@ -147,7 +154,6 @@ public class Main {
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi, null, new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS));
 		solver.set(new Sort(new PArc(gc)).clearOut());
-		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		// resolution
 		solver.findSolution();
 		checkUndirected(solver, undi, totalCost, distMatrix);
@@ -178,8 +184,8 @@ public class Main {
 		System.out.println(s);
 	}
 
-	private static void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
-		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
+	private void checkUndirected(Solver solver, UndirectedGraphVar undi, IntVar totalCost, int[][] matrix) {
+		if (solver.getMeasures().getSolutionCount() == 0) {
 			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount() > 0){
@@ -201,16 +207,16 @@ public class Main {
 	// RESOLUTION
 	//***********************************************************************************
 
-	private static void initLNS() {
+	private void initLNS() {
 		int nb = n/SIZE;
-		fragments = new Fragment[nb];
+		slaves = new TSPslave[nb];
 		for(int i=0;i<nb-1;i++){
-			fragments[i] = new Fragment(SIZE);
+			slaves[i] = new TSPslave(this,i,SIZE);
 		}
-		fragments[nb-1] = new Fragment(SIZE+n%SIZE);
+		slaves[nb-1] = new TSPslave(this,nb-1,SIZE+n%SIZE);
 	}
 
-	private static void LNS() {
+	private void LNS() {
 		int step = SIZE/3;
 		boolean impr = true;
 		while(impr){
@@ -222,39 +228,31 @@ public class Main {
 		}
 	}
 
-	private static boolean LNS_one_run() {
+	private boolean LNS_one_run() {
 		int idx = 0;
-		int nb = fragments.length;
+		int nb = slaves.length;
 		int linkCost = distMatrix[bestSolution[n-1]][bestSolution[0]];
 		for(int i=0;i<nb;i++){
-			int[] fr = fragments[i].getInputFragment();
+			int[] fr = slaves[i].getInputFragment();
 			for(int j=0;j<fr.length;j++){
 				fr[j] = bestSolution[idx++];
 			}
-			fragments[i].set(fr,distMatrix);
+			slaves[i].set(fr,distMatrix);
 			if(idx<n){
 				linkCost+=distMatrix[bestSolution[idx-1]][bestSolution[idx]];
 			}
 		}
 		if(idx!=n)throw new UnsupportedOperationException();
-		idx = 0;
 		// solve
-		nbDone = 0;
-		for(int i=0;i<nb;i++){
-			fragments[i].solve();
-//			fragments[i].lazyStart();
-		}
-//		try {
-//			mainThread.interrupt();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			System.exit(0);
-//		}
+		distributedSlavery();
+		// regroup
 		int obj = linkCost;
 		System.out.println("link : "+linkCost);
+		idx = 0;
 		for(int i=0;i<nb;i++){
-			obj += fragments[i].getOutputCost();
-			int[] fr = fragments[i].getOutputFragment();
+			obj += slaves[i].getOutputCost();
+			System.out.println("frcost "+slaves[i].getOutputCost());
+			int[] fr = slaves[i].getOutputFragment();
 			for(int j=0;j<fr.length;j++){
 				bestSolution[idx++] = fr[j];
 			}
@@ -267,17 +265,11 @@ public class Main {
 		}
 		boolean improved = obj<bestCost;
 		bestCost = obj;
+		checkCost();
 		return improved;
 	}
 
-	public static synchronized void jobFinished(){
-		nbDone++;
-//		if(nbDone==fragments.length){
-//			mainThread.resume();
-//		}
-	}
-
-	private static void slideSolution(int offSet){
+	private void slideSolution(int offSet){
 		checkCost();
 		int[] ns = new int[n];
 		for(int i=0;i<n;i++){
@@ -291,7 +283,7 @@ public class Main {
 		checkCost();
 	}
 
-	private static void checkCost(){
+	private void checkCost(){
 		int obj = distMatrix[bestSolution[n-1]][bestSolution[0]];
 		for(int i=0;i<n-1;i++){
 			obj += distMatrix[bestSolution[i]][bestSolution[i+1]];
@@ -305,7 +297,7 @@ public class Main {
 	// BRANCHING
 	//***********************************************************************************
 
-	private static class MinCost extends ArcStrategy<UndirectedGraphVar> {
+	private class MinCost extends ArcStrategy<UndirectedGraphVar> {
 		public MinCost(UndirectedGraphVar undirectedGraphVar) {
 			super(undirectedGraphVar);
 		}

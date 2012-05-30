@@ -17,8 +17,8 @@ import static choco.proba.AbstractBenchProbas.sep;
  */
 public class TestProbaBAllDiff {
 
-    public static int seed = 1986;
-    public static int it;
+    public final static int seed = 1986;
+//    public static int it; BEWARE it should not be static
 
     public static void main(String[] args) throws IOException {
 
@@ -26,8 +26,8 @@ public class TestProbaBAllDiff {
         //TestProbaBAllDiff.debugAlone(results);
         //TestProbaBAllDiff.debugFull(results);
 
-        it = 5;
-        TestProbaBAllDiff.graceFulGraphsTest(13,results);
+    	int  it = 5;
+        TestProbaBAllDiff.graceFulGraphsTest(13,results, it);
         /*TestProbaBAllDiff.gc();
         TestProbaBAllDiff.nQueensTest(300, results); // tres bon en solve => pas de fails
         TestProbaBAllDiff.gc();
@@ -57,8 +57,8 @@ public class TestProbaBAllDiff {
     }
 
     public static void debugFull(BufferedWriter results) throws IOException {
-        it = 1;
-        TestProbaBAllDiff.graceFulGraphsTest(13,results);
+        int it = 1;
+        TestProbaBAllDiff.graceFulGraphsTest(13,results, it);
         TestProbaBAllDiff.gc();
         /*TestProbaBAllDiff.nQueensTest(80, results); // tres bon en solve => pas de fails
         TestProbaBAllDiff.gc();
@@ -77,7 +77,7 @@ public class TestProbaBAllDiff {
         TestProbaBAllDiff.gc(); // */
     }
 
-    public static void debugAlone(BufferedWriter results) throws IOException {
+    public static void debugAlone(BufferedWriter results, int it) throws IOException {
         int size = 10;
         String name = "debug";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("debug", ".csv")));
@@ -86,11 +86,11 @@ public class TestProbaBAllDiff {
         OneAllDiffBenchProbas probaGAC = new OneAllDiffBenchProbas(size, AllDifferent.Type.AC, it, seed, true);
         //OneAllDiffBenchProbas probaBC = new OneAllDiffBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, /*bounded, probaBC,*/ probaGAC};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void graceFulGraphsTest(int size, BufferedWriter results) throws IOException {
+    public static void graceFulGraphsTest(int size, BufferedWriter results, int it) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("graceFulGraphs", ".csv")));
         int max = (size*(size-1))/2;
         //for (int nbEgdes = size-1; nbEgdes <= (size*(size-1))/2; nbEgdes++) {
@@ -99,12 +99,12 @@ public class TestProbaBAllDiff {
             GracefulGraphBenchProbas gac = new GracefulGraphBenchProbas(size, nbEgdes, AllDifferent.Type.AC, it, seed, false);
             GracefulGraphBenchProbas probaGAC = new GracefulGraphBenchProbas(size, nbEgdes, AllDifferent.Type.AC, it, seed, true);
             AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, probaGAC};
-            launchEval(name, size, problems, out, results);
+            launchEval(name, size, problems, out, results, it);
         //}
         out.close();
     }
 
-    public static void nQueensTest(int size, BufferedWriter results) throws IOException {
+    public static void nQueensTest(int size, BufferedWriter results, int it) throws IOException {
         String name = "nQueens";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("nQueens", ".csv")));
         NqueensBenchProbas gac = new NqueensBenchProbas(size, AllDifferent.Type.AC, it, seed, false);
@@ -113,11 +113,11 @@ public class TestProbaBAllDiff {
         NqueensBenchProbas probaGAC = new NqueensBenchProbas(size, AllDifferent.Type.AC, it, seed, true);
         //NqueensBenchProbas probaBC = new NqueensBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac,/* bounded, clique,*/ probaGAC/*, probaBC*/};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void allIntervalSeriesTest(int size, BufferedWriter results) throws IOException {
+    public static void allIntervalSeriesTest(int size, BufferedWriter results, int it) throws IOException {
         String name = "allIntervalSeries";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("allIntervalSeries", ".csv")));
         AllIntervalSeriesBenchProbas gac = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.AC, it, seed, false);
@@ -126,11 +126,11 @@ public class TestProbaBAllDiff {
         AllIntervalSeriesBenchProbas probaGAC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.AC, it, seed, true);
         //AllIntervalSeriesBenchProbas probaBC = new AllIntervalSeriesBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, /*bounded, clique,*/ probaGAC/*, probaBC*/};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void magicSquareTest(int size, BufferedWriter results) throws IOException {
+    public static void magicSquareTest(int size, BufferedWriter results, int it) throws IOException {
         String name = "magicSquare";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("magicSquare", ".csv")));
         MagicSquareBenchProbas gac = new MagicSquareBenchProbas(size, AllDifferent.Type.AC, it, seed, false);
@@ -139,11 +139,11 @@ public class TestProbaBAllDiff {
         MagicSquareBenchProbas probaGAC = new MagicSquareBenchProbas(size, AllDifferent.Type.AC, it, seed, true);
         //MagicSquareBenchProbas probaBC = new MagicSquareBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac,/* bounded, clique,*/ probaGAC/*, probaBC*/};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void hamiltonianCycleTest(int size, BufferedWriter results) throws IOException {
+    public static void hamiltonianCycleTest(int size, BufferedWriter results, int it) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("hamiltonianCycle", ".csv")));
         for (int i = 10; i < 40; i = i + 10) {
             HamiltonianCycleBenchProbas.GenerateStrat strat = HamiltonianCycleBenchProbas.GenerateStrat.NEIGHBOR;
@@ -155,12 +155,12 @@ public class TestProbaBAllDiff {
             HamiltonianCycleBenchProbas probaGAC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.AC, it, seed, neighbors, strat, true);
             //HamiltonianCycleBenchProbas probaBC = new HamiltonianCycleBenchProbas(size, AllDifferent.Type.BC, it, seed, neighbors, strat, true);
             AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac,/* bounded, clique,*/ probaGAC/*, probaBC*/};
-            launchEval(name, size, problems, out, results);
+            launchEval(name, size, problems, out, results,it);
         }
         out.close();
     }
 
-    public static void partitionTest(int size, BufferedWriter results) throws IOException {
+    public static void partitionTest(int size, BufferedWriter results, int it) throws IOException {
         String name = "partition";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("partition", ".csv")));
         PartitionBenchProbas gac = new PartitionBenchProbas(size, AllDifferent.Type.AC, it, seed, false);
@@ -169,22 +169,22 @@ public class TestProbaBAllDiff {
         PartitionBenchProbas probaGAC = new PartitionBenchProbas(size, AllDifferent.Type.AC, it, seed, true);
         //PartitionBenchProbas probaBC = new PartitionBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac,/* bounded, clique,*/ probaGAC/*, probaBC*/};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void golombRulerTest(int size, BufferedWriter results) throws IOException {
+    public static void golombRulerTest(int size, BufferedWriter results, int it) throws IOException {
         String name = "golombRuler";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("golombRuler", ".csv")));
         GolombRulerBenchProbas bounded = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, it, seed, false);
         //GolombRulerBenchProbas clique = new GolombRulerBenchProbas(size, AllDifferent.Type.NEQS, it, seed, false);
         GolombRulerBenchProbas probaBC = new GolombRulerBenchProbas(size, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{bounded/*, clique*/, probaBC};
-        launchEval(name, size, problems, out, results);
+        launchEval(name, size, problems, out, results, it);
         out.close();
     }
 
-    public static void langfordTest(int k, int n, BufferedWriter results) throws IOException {
+    public static void langfordTest(int k, int n, BufferedWriter results, int it) throws IOException {
         String name = "langford";
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("langford", ".csv")));
         LangfordBenchProbas gac = new LangfordBenchProbas(k, n, AllDifferent.Type.AC, it, seed, false);
@@ -193,11 +193,11 @@ public class TestProbaBAllDiff {
         LangfordBenchProbas probaGAC = new LangfordBenchProbas(k, n, AllDifferent.Type.AC, it, seed, true);
         //LangfordBenchProbas probaBC = new LangfordBenchProbas(k, n, AllDifferent.Type.BC, it, seed, true);
         AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac,/* bounded, clique,*/ probaGAC/*, probaBC*/};
-        launchEval(name, k * n, problems, out, results);
+        launchEval(name, k * n, problems, out, results, it);
         out.close();
     }
 
-    public static void sortingChordsTest(int nbchords, BufferedWriter results) throws IOException {
+    public static void sortingChordsTest(int nbchords, BufferedWriter results, int it) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(fileIt("sortingChords", ".csv")));
         for (int j = 4; j < 20; j = j + 2) {
             String name = "sortingChords-" + nbchords + "-" + j;
@@ -207,14 +207,14 @@ public class TestProbaBAllDiff {
             SortingChordsBenchProbas probaGAC = new SortingChordsBenchProbas(nbchords, j, AllDifferent.Type.AC, it, seed, true);
             //SortingChordsBenchProbas probaBC = new SortingChordsBenchProbas(nbchords, j, AllDifferent.Type.BC, it, seed, true);
             AbstractBenchProbas[] problems = new AbstractBenchProbas[]{gac, /*bounded, clique,*/ probaGAC/*, probaBC*/};
-            launchEval(name, nbchords, problems, out, results);
+            launchEval(name, nbchords, problems, out, results, it);
         }
         out.close();
     }
 
 
     private static void launchEval(String name, int size, AbstractBenchProbas[] problems,
-                                   BufferedWriter out, BufferedWriter results) throws IOException {
+                                   BufferedWriter out, BufferedWriter results, int it) throws IOException {
         String entete = sep+"-"+sep;
         for (AbstractBenchProbas pb : problems) {
             String type = pb.toString();

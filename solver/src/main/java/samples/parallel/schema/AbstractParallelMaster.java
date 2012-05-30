@@ -25,50 +25,59 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package samples.nqueen;
-
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-
 /**
- * <br/>
- *
- * @author Charles Prud'homme
- * @since 31/03/11
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 22/05/12
+ * Time: 17:54
  */
-public class NQueenDualBinary extends AbstractNQueen {
 
-    @Override
-    public void buildModel() {
-        vars = new IntVar[n];
-        IntVar[] dualvars = new IntVar[n];
+package samples.parallel.schema;
 
-        for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            dualvars[i] = VariableFactory.enumerated("QD_" + i, 1, n, solver);
-        }
+public class AbstractParallelMaster<S extends AbstractParallelSlave> {
 
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
-            }
-        }
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
-            }
-        }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
-    }
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
+	protected S[] slaves;
+	private int nbWorkingSlaves;
+	private Thread mainThread;
+	private boolean wait;
 
-    public static void main(String[] args) {
-        new NQueenDualBinary().execute("12");
-    }
+	public AbstractParallelMaster(){
+		mainThread = Thread.currentThread();
+	}
+
+	//***********************************************************************************
+	// DISTRIBUTED METHODS
+	//***********************************************************************************
+
+	/**
+	 * Make the slaves work in parallel
+	 */
+	public void distributedSlavery() {
+		nbWorkingSlaves = slaves.length;
+		for(int i=0;i<slaves.length;i++){
+			slaves[i].solveSubProblemInParallel();
+		}
+		wait = true;
+		try {
+			while(wait)
+				mainThread.sleep(20);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+
+	/**
+	 * A slave notify the master that he fulfilled his task
+	 */
+	public synchronized void wishGranted() {
+		nbWorkingSlaves--;
+		if(nbWorkingSlaves == 0){
+			wait = false;
+		}
+	}
 }

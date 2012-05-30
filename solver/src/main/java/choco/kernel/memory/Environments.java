@@ -24,51 +24,54 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.kernel.memory;
 
-package samples.nqueen;
-
-import solver.constraints.ConstraintFactory;
-import solver.constraints.nary.InverseChanneling;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
+import choco.kernel.memory.buffer.EnvironmentBuffering;
+import choco.kernel.memory.copy.EnvironmentCopying;
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 31/03/11
+ * @since 28/05/12
  */
-public class NQueenDualBinary extends AbstractNQueen {
+public enum Environments {
 
-    @Override
-    public void buildModel() {
-        vars = new IntVar[n];
-        IntVar[] dualvars = new IntVar[n];
-
-        for (int i = 0; i < n; i++) {
-            vars[i] = VariableFactory.enumerated("Q_" + i, 1, n, solver);
-            dualvars[i] = VariableFactory.enumerated("QD_" + i, 1, n, solver);
+    TRAIL() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentTrailing();
         }
-
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(vars[i], vars[j], k, solver));
-            }
+    },
+    COPY() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentCopying();
         }
-        for (int i = 0; i < n - 1; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int k = j - i;
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], -k, solver));
-                solver.post(ConstraintFactory.neq(dualvars[i], dualvars[j], k, solver));
-            }
+    },
+    BUFFER() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentBuffering(false);
         }
-        solver.post(new InverseChanneling(vars, dualvars, solver));
-    }
+    },
+    BUFFER_UNSAFE() {
+        @Override
+        public IEnvironment make() {
+            return
+                    new EnvironmentBuffering(true);
+        }
+    },
+    DEFAULT() {
+        @Override
+        public IEnvironment make() {
+            return TRAIL.make();
+        }
+    };
 
-
-    public static void main(String[] args) {
-        new NQueenDualBinary().execute("12");
-    }
+    public abstract IEnvironment make();
 }
