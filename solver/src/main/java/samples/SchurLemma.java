@@ -60,8 +60,12 @@ public class SchurLemma extends AbstractProblem {
     BoolVar[][] M;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver();
+    }
+
+    @Override
+    public void buildModel() {
 
         M = VariableFactory.boolMatrix("b", n, k, solver); // M_ij is true iff ball i is in box j
 

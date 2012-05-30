@@ -93,11 +93,14 @@ public class WarehouseLocation extends AbstractProblem {
         }
     }
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("WarehouseLocation");
+    }
 
     @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
         suppliers = VariableFactory.enumeratedArray("sup", nS, 0, nWH - 1, solver);
         open = VariableFactory.boolArray("o", nWH, solver);
         costPerStore = VariableFactory.boundedArray("cPs", nS, 0, 9999, solver);

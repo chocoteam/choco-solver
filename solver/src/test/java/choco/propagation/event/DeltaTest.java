@@ -31,7 +31,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.search.loop.SearchLoops;
 import solver.variables.delta.Delta;
 
 /**

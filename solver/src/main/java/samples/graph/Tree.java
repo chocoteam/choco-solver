@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
+
 import java.io.FileWriter;
 import java.util.BitSet;
 
@@ -62,7 +63,6 @@ public class Tree extends AbstractProblem{
 	//***********************************************************************************
 
 	public Tree(BitSet[] input, int nbSuccsPerNodes) {
-		solver = new Solver();
 		data = input;
 		n = data.length;
 		d = nbSuccsPerNodes;
@@ -72,7 +72,13 @@ public class Tree extends AbstractProblem{
 	// METHODS
 	//***********************************************************************************
 
-	@Override
+
+    @Override
+    public void createSolver() {
+        solver = new Solver();
+    }
+
+    @Override
 	public void buildModel() {
 		g = new DirectedGraphVar(solver,n,gtype,GraphType.LINKED_LIST);
 		nTree = VariableFactory.enumerated("NTREE ", 1,1, solver);

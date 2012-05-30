@@ -76,9 +76,13 @@ public class Pert extends AbstractProblem {
     }
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Pert");
+    }
+
+    @Override
     public void buildModel() {
         setUp();
-        solver = new Solver();
 
         vars = VariableFactory.boundedArray("task", n, 0, horizon, solver);
 

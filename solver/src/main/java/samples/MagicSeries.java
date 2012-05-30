@@ -53,14 +53,18 @@ import solver.variables.VariableFactory;
 public class MagicSeries extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 400;
+    int n = 1000;
     IntVar[] vars;
 
     Constraint[] counts;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Magic series");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = new IntVar[n];
 
         vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);

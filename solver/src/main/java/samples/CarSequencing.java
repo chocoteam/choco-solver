@@ -78,10 +78,14 @@ public class CarSequencing extends AbstractProblem {
 
 
     @Override
+    public void createSolver() {
+        solver = new Solver("CarSequencing");
+    }
+
+    @Override
     public void buildModel() {
         parse(data.source());
         prepare();
-        solver = new Solver();
         int max = nClasses - 1;
         cars = VariableFactory.enumeratedArray("cars", nCars, 0, max, solver);
 
