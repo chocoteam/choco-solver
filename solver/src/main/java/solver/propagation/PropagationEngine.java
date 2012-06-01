@@ -91,7 +91,9 @@ public class PropagationEngine implements IPropagationEngine {
                     throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
                 }
             }
-            // 2. schedule constraints for initial propagation
+            initialized = true;
+        }
+        // 2. schedule constraints for initial propagation
             Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] propagators = constraints[c].propagators;
@@ -99,9 +101,6 @@ public class PropagationEngine implements IPropagationEngine {
                     propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
                 }
             }
-
-        }
-        initialized = true;
     }
 
     public void prepareWM(Solver solver) {
