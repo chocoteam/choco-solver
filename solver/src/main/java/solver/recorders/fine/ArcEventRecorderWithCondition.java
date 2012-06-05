@@ -29,6 +29,7 @@ package solver.recorders.fine;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.propagation.IPropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -54,8 +55,8 @@ public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventR
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
-                                         ICondition condition, Solver solver) {
-        super(variable, propagator, solver);
+                                         ICondition condition, Solver solver,IPropagationEngine engine) {
+        super(variable, propagator, solver, engine);
         this.idxVinP = idxInProp;
         this.condition = condition;
         condition.linkRecorder(this);

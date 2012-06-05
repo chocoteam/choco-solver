@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.objects.IList;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Identity;
@@ -37,7 +36,6 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.IActivable;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -47,7 +45,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, W extends IView> extends IActivable<IVariableMonitor>, Identity, Serializable {
+public interface Variable<D extends IDelta, W extends IView> extends Identity,Serializable {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -116,10 +114,6 @@ public interface Variable<D extends IDelta, W extends IView> extends IActivable<
     //todo : to complete
     void removeMonitor(IVariableMonitor monitor);
 
-    <V extends Variable> IList<V, IVariableMonitor<V>> getMonitors();
-
-    int nbMonitors();
-
     void subscribeView(W view);
 
     /**
@@ -176,10 +170,11 @@ public interface Variable<D extends IDelta, W extends IView> extends IActivable<
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs during notification
      */
-    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
-
+    void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException;
 
     void notifyViews(EventType event, @NotNull ICause cause) throws ContradictionException;
+
+    void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException;
 
     /**
      * Throws a contradiction exception based on <cause, message>
@@ -201,7 +196,7 @@ public interface Variable<D extends IDelta, W extends IView> extends IActivable<
      * Return a MASK composed of 2 main information: TYPE and KIND.
      * <br/>TYPE is defined in the 3 first bits : VAR ( 1 << 0), CSTE (1 << 1) or VIEW (1 << 2)
      * <br/>KIND is defined on the other bits : INT (1 << 3), BOOL (INT + 1 << 4), GRAPH (1 << 5) or META (1 << 6)
-     *
+     * <p/>
      * <p/>
      * To get the TYPE of a variable: </br>
      * <pre>
@@ -218,7 +213,6 @@ public interface Variable<D extends IDelta, W extends IView> extends IActivable<
      *     boolean isVar = (var.getTypeAndKind() & Variable.VAR) !=0;
      *     boolean isInt = (var.getTypeAndKind() & Variable.INT) !=0;
      * </pre>
-     *
      *
      * @return an int representing the type and kind of the variable
      */

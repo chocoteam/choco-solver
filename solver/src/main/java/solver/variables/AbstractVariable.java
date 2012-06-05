@@ -27,7 +27,6 @@
 
 package solver.variables;
 
-import choco.kernel.common.util.objects.IList;
 import choco.kernel.common.util.procedure.TernaryProcedure;
 import solver.Cause;
 import solver.ICause;
@@ -35,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.recorders.list.VariableMonitorListBuilder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.delta.IDelta;
 import solver.variables.view.IView;
 
@@ -48,8 +47,8 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Jean-Guillaume Fages
- * @since 30 june 2011
  * @revision CPRU: remove effectless procedures (before + on contradiction)
+ * @since 30 june 2011
  */
 public abstract class AbstractVariable<D extends IDelta, W extends IView, V extends Variable<D, W>> implements Serializable {
 
@@ -72,8 +71,6 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     protected final String name;
 
-    protected IList<V, IVariableMonitor<V>> records; // List of variable monitors
-
     protected Propagator[] propagators; // one propagator can appear more than one time
     protected int[] pindices;    // but it indices must be different
     protected int pIdx;
@@ -81,10 +78,12 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
     protected W[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
+    protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
+    protected int mIdx; // index of the last view not null in views -- not backtrable
 
     protected int modificationEvents;
 
-//    protected final OnBeforeProc beforeModification = new OnBeforeProc();
+    //    protected final OnBeforeProc beforeModification = new OnBeforeProc();
     protected final OnAfterProc afterModification = new OnAfterProc();
 //    protected final OnContradiction onContradiction = new OnContradiction();
 
@@ -98,6 +97,7 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
         this.name = name;
         this.solver = solver;
         views = (W[]) new IView[2];
+        monitors = (IVariableMonitor<V>[]) new IVariableMonitor[2];
         propagators = new Propagator[8];
         pindices = new int[8];
         ID = solver.nextId();
@@ -105,10 +105,6 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     public int getId() {
         return ID;
-    }
-
-    protected void makeList(V variable) {
-        this.records = VariableMonitorListBuilder.preset(variable, solver.getEnvironment());
     }
 
     /**
@@ -185,14 +181,6 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
         return pindices;
     }
 
-    public void activate(IVariableMonitor monitor) {
-        records.setActive(monitor);
-    }
-
-    public void desactivate(IVariableMonitor monitor) {
-        records.setPassive(monitor);
-    }
-
     public String getName() {
         return this.name;
     }
@@ -216,11 +204,16 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
     }
 
     public void addMonitor(IVariableMonitor monitor) {
-        records.add(monitor, false);
+        if (mIdx == monitors.length) {
+            IVariableMonitor<V>[] tmp = monitors;
+            monitors = (IVariableMonitor<V>[]) new IView[tmp.length * 3 / 2 + 1];
+            System.arraycopy(tmp, 0, monitors, 0, vIdx);
+        }
+        monitors[mIdx++] = monitor;
     }
 
     public void removeMonitor(IVariableMonitor monitor) {
-        records.remove(monitor);
+        throw new UnsupportedOperationException("not yet implemented");
     }
 
     public void subscribeView(W view) {
@@ -232,16 +225,8 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
         views[vIdx++] = view;
     }
 
-    public IList getMonitors() {
-        return records;
-    }
-
     public int nbConstraints() {
-        return records.size();
-    }
-
-    public int nbMonitors() {
-        return records.cardinality();
+        throw new UnsupportedOperationException();
     }
 
     public Solver getSolver() {
@@ -254,7 +239,7 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    protected static abstract class Monitoring implements TernaryProcedure<IVariableMonitor, Variable, EventType, ICause> {
+    protected static abstract class Monitoring implements TernaryProcedure<AbstractFineEventRecorder, Variable, EventType, ICause> {
         Variable var;
         EventType evt;
         ICause cause;
@@ -277,7 +262,7 @@ public abstract class AbstractVariable<D extends IDelta, W extends IView, V exte
 
     protected static class OnAfterProc extends Monitoring {
         @Override
-        public void execute(IVariableMonitor monitor) throws ContradictionException {
+        public void execute(AbstractFineEventRecorder monitor) throws ContradictionException {
             monitor.afterUpdate(var, evt, cause);
         }
     }

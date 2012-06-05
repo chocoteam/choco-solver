@@ -26,28 +26,13 @@
  */
 package solver.recorder;
 
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
-import org.easymock.internal.Invocation;
-import org.easymock.internal.LastControl;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.propagation.IScheduler;
-import solver.recorders.fine.FineVarEventRecorder;
 import solver.recorders.fine.VarEventRecorder;
-import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
-
-import java.lang.reflect.Field;
-
-import static org.easymock.EasyMock.*;
 
 
 /**
@@ -68,7 +53,7 @@ public class FineVarEventRecorderTest {
     IScheduler s1 = null;
 
 
-    @BeforeMethod
+    /*@BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
         // delta
@@ -210,7 +195,7 @@ public class FineVarEventRecorderTest {
         p3.decArity();
         id3.clear();
         replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-        ver.afterUpdate(iv1, EventType.INSTANTIATE, p2);
+        ver.onUpdate(iv1, EventType.INSTANTIATE, p2);
         verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
         reset(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
         // <--END PREPARING-->
@@ -281,7 +266,7 @@ public class FineVarEventRecorderTest {
         s1.schedule(ver);
         replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
 
-        ver.afterUpdate(iv1, EventType.INSTANTIATE, p1);
+        ver.onUpdate(iv1, EventType.INSTANTIATE, p1);
 
         verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
         int[] masks = get("evtmasks", FineVarEventRecorder.class, ver);
@@ -362,7 +347,7 @@ public class FineVarEventRecorderTest {
         ver.virtuallyExecuted(p3);
 
         verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-    }
+    }*/
 
 
 }

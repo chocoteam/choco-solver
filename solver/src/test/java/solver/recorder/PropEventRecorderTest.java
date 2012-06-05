@@ -26,26 +26,12 @@
  */
 package solver.recorder;
 
-import org.easymock.EasyMock;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-import solver.Cause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
 import solver.propagation.IScheduler;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.PropEventRecorder;
-import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
-
-import java.lang.reflect.Field;
-
-import static org.easymock.EasyMock.*;
 
 
 /**
@@ -65,7 +51,7 @@ public class PropEventRecorderTest {
     IScheduler s1 = null;
 
 
-    @BeforeMethod
+    /*@BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
         p1 = EasyMock.createMock(Propagator.class);
@@ -177,7 +163,7 @@ public class PropEventRecorderTest {
         p1.decArity();
         replay(iv1, iv2, iv3, cer, p1, s1);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
+        per.onUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, cer, p1);
     }
 
@@ -196,7 +182,7 @@ public class PropEventRecorderTest {
         per.virtuallyExecuted(p1);
         verify(iv1, iv2, iv3, cer, p1);
 
-    }
+    }*/
 
 
 }

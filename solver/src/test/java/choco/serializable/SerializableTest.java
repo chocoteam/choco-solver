@@ -27,6 +27,7 @@
 
 package choco.serializable;
 
+import choco.kernel.memory.trailing.EnvironmentTrailing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import samples.nqueen.NQueenBinary;
@@ -98,7 +99,7 @@ public class SerializableTest {
 
     @Test(groups = {"1s"})
     public void testEngine() {
-        IPropagationEngine eng = new PropagationEngine();
+        IPropagationEngine eng = new PropagationEngine(new EnvironmentTrailing());
         File file = null;
         try {
             file = write(eng);

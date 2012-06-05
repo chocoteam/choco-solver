@@ -67,7 +67,6 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		super("G", solver);
 		solver.associates(this);
 		this.environment = solver.getEnvironment();
-		this.makeList(this);
 	}
 
 	//***********************************************************************************
@@ -110,7 +109,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 				delta.add(x,IGraphDelta.NR,cause);
 			}
 			EventType e = EventType.REMOVENODE;
-			notifyMonitors(e, cause);
+			notifyPropagators(e, cause);
 			return true;
 		}
 		return false;
@@ -124,7 +123,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 					delta.add(x,IGraphDelta.NE,cause);
 				}
 				EventType e = EventType.ENFORCENODE;
-				notifyMonitors(e, cause);
+				notifyPropagators(e, cause);
 				return true;
 			}
 			return false;
@@ -197,11 +196,19 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		}
 	}
 
-	public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+	public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
 		if ((modificationEvents & event.mask) != 0) {
-			records.forEach(afterModification.set(this, event, cause));
+			//records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
 		}
 		notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
 	}
 
 	@Override

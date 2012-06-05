@@ -124,7 +124,7 @@ public final class OffsetView extends IntView {
                             cause = Cause.Null;
                         }
                     }
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
@@ -142,7 +142,7 @@ public final class OffsetView extends IntView {
         } else {
             boolean done = var.removeInterval(from - cste, to - cste, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -162,7 +162,7 @@ public final class OffsetView extends IntView {
 
             boolean done = var.instantiateTo(value - cste, this);
             if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
                 return true;
             }
 
@@ -190,7 +190,7 @@ public final class OffsetView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -218,7 +218,7 @@ public final class OffsetView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                     return true;
                 }

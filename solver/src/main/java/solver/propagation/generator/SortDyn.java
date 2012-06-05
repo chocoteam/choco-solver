@@ -26,7 +26,6 @@
  */
 package solver.propagation.generator;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.generator.sorter.evaluator.IEvaluator;
@@ -49,16 +48,11 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     protected IHeap toPropagate;
     protected S lastPopped;
 
-    protected S[] elements;
     protected boolean init = false;
 
     @SuppressWarnings({"unchecked"})
     public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
-        this.elements = (S[]) new ISchedulable[0];
-        for (int i = 0; i < generators.length; i++) {
-            Generator gen = generators[i];
-            elements = ArrayUtils.append(elements, (S[]) gen.getElements());
-        }
+        super(generators);
         this.evaluator = evaluator;
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);

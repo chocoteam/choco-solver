@@ -74,7 +74,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
         		delta.add(y, IGraphDelta.AR_head,cause);
         	}
         	EventType e = EventType.REMOVEARC;
-        	notifyMonitors(e, cause);
+        	notifyPropagators(e, cause);
         	return true;
         }return false;
     }
@@ -88,7 +88,7 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
             		delta.add(y,IGraphDelta.AE_head,cause);
             	}
             	EventType e = EventType.ENFORCEARC;
-            	notifyMonitors(e, cause);
+            	notifyPropagators(e, cause);
             	return true;
         	}return false;
     	}

@@ -33,6 +33,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.objective.MaxObjectiveManager;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -107,7 +109,8 @@ public class PertTest {
         long node = sol.getMeasures().getNodeCount();
         for (int t = 0; t < PropagationStrategies.values().length; t++) {
             sol = modeler();
-            PropagationStrategies.values()[t].make(sol);
+            IPropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
+            PropagationStrategies.values()[t].make(sol, pengine);
             sol.findAllSolutions();
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
             Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

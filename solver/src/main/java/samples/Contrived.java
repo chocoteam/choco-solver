@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.EqualX_YC;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.Queue;
@@ -98,10 +100,11 @@ public class Contrived extends AbstractProblem {
     @Override
     public void configureEngine() {
         // <2012-03-02:cp> works fine
-        Sort first = new Sort(new PArc(v[3], v[4]));
-        Queue then = new Queue(new PArc(ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
-        Queue coarses = new Queue(new PCoarse(solver.getCstrs()));
-        solver.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut());
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        Sort first = new Sort(new PArc(propagationEngine, v[3], v[4]));
+        Queue then = new Queue(new PArc(propagationEngine, ArrayUtils.append(Arrays.copyOfRange(v, 0, 3), w)));
+        Queue coarses = new Queue(new PCoarse(propagationEngine, solver.getCstrs()));
+        solver.set(propagationEngine.set(new Queue(first.clearOut(), then.clearOut(), coarses.clearOut()).clearOut()));
     }
 
     @Override

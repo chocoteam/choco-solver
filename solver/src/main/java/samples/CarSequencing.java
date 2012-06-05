@@ -31,6 +31,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.PVar;
 import solver.propagation.generator.Sort;
@@ -136,9 +138,10 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        solver.set(new Sort(
-                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
-                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()))));
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        solver.set(propagationEngine.set(new Sort(
+                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(propagationEngine, solver.getVars())),
+                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs())))));
 
     }
 

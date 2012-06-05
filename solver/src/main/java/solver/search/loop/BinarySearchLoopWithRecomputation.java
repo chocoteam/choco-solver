@@ -77,10 +77,10 @@ public class BinarySearchLoopWithRecomputation extends BinarySearchLoop {
             objectivemanager.apply(decision);
             objectivemanager.postDynamicCut();
 
-            propEngine.propagate();
+            solver.getEngine().propagate();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flush();
+            solver.getEngine().flush();
             moveTo(UP_BRANCH);
             jumpTo = 1;
             smList.onContradiction(e);
@@ -131,11 +131,11 @@ public class BinarySearchLoopWithRecomputation extends BinarySearchLoop {
 //            objectivemanager.postDynamicCut();
             for (; i > 0; ) {
                 tmp_decs[--i].apply();
-                propEngine.propagate(); // required to ensure correctness of search decision
+                solver.getEngine().propagate(); // required to ensure correctness of search decision
             }
-            propEngine.propagate(); // required to ensure correctness of search decision
+            solver.getEngine().propagate(); // required to ensure correctness of search decision
         } catch (ContradictionException e) {
-            propEngine.flush();
+            solver.getEngine().flush();
             // this must not fail, it has been applied before
 //            throw new SolverException("Unexpected contradiction during recomputation");
             while (decision != tmp_decs[i]) {

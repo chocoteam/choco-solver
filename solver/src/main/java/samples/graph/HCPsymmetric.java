@@ -38,6 +38,8 @@ import solver.constraints.propagators.gary.tsp.directed.PropOneSuccBut;
 import solver.constraints.propagators.gary.tsp.directed.PropPathNoCycle;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.ISearchMonitor;
@@ -51,6 +53,7 @@ import solver.variables.graph.GraphVar;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.*;
 import java.util.BitSet;
 
@@ -232,7 +235,9 @@ public class HCPsymmetric {
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi,null,new MinNeigh(undi), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		if(useRestarts){
 			solver.getSearchLoop().plugSearchMonitor(new MyMon());
@@ -288,7 +293,8 @@ public class HCPsymmetric {
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(dir, null, new MinNeigh(dir), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		if(useRestarts){
 			solver.getSearchLoop().plugSearchMonitor(new MyMon());

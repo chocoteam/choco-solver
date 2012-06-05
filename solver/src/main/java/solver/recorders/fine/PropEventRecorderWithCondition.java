@@ -30,6 +30,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.propagation.IPropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -55,8 +56,8 @@ public class PropEventRecorderWithCondition<V extends Variable> extends PropEven
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public PropEventRecorderWithCondition(V[] variables, Propagator<V> propagator, int[] idxVinPs,
-                                          ICondition condition, Solver solver) {
-        super(variables, propagator, solver);
+                                          ICondition condition, Solver solver,IPropagationEngine engine) {
+        super(variables, propagator, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);
 

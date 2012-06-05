@@ -53,20 +53,21 @@ public class PVar implements Generator<AbstractFineEventRecorder> {
 
     final List<AbstractFineEventRecorder> eventRecorders;
 
-    public PVar(Variable... variables) {
-        this(variables, PArc.NOV);
+    public PVar(IPropagationEngine pengine, Variable... variables) {
+        this(pengine, variables, PArc.NOV);
     }
 
-    public PVar(Variable[] variables, Predicate[] validations) {
+    public PVar(IPropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
         super();
-        Solver solver = variables[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int i = 0; i < variables.length; i++) {
-            Variable var = getVar(variables[i]); // deal with view
-            if (validations.length == 0 || validate(var, validations)) {
-                make(var, validations, propagationEngine, solver);
+        if (variables.length > 0) {
+            Solver solver = variables[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int i = 0; i < variables.length; i++) {
+                Variable var = getVar(variables[i]); // deal with view
+                if (validations.length == 0 || validate(var, validations)) {
+                    make(var, validations, propagationEngine, solver);
+                }
             }
         }
     }
@@ -90,13 +91,17 @@ public class PVar implements Generator<AbstractFineEventRecorder> {
             }
         }
         if (i > 0) {
+            AbstractFineEventRecorder er = null;
             if (i == 1) { // in that case, there is only one propagator, an Arc is a better alternative
-                eventRecorders.add(new FineArcEventRecorder(var, propagators[0], pindices[0], solver));
+                er = new FineArcEventRecorder(var, propagators[0], pindices[0], solver, propagationEngine);
             } else if (i < nbp) { // if some propagators has been removed -- connectected previously
-                eventRecorders.add(new FineVarEventRecorder(var, Arrays.copyOfRange(propagators, 0, i), Arrays.copyOfRange(pindices, 0, i), solver));
+                er = new FineVarEventRecorder(var, Arrays.copyOfRange(propagators, 0, i),
+                        Arrays.copyOfRange(pindices, 0, i), solver, propagationEngine);
             } else {
-                eventRecorders.add(new FineVarEventRecorder(var, propagators, pindices, solver));
+                er = new FineVarEventRecorder(var, propagators, pindices, solver, propagationEngine);
             }
+            eventRecorders.add(er);
+            propagationEngine.addEventRecorder(er);
         }
         IView[] views = var.getViews();
         for (int j = 0; j < views.length; j++) {

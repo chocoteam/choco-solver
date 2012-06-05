@@ -37,6 +37,8 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.Max;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.PVar;
 import solver.propagation.generator.Sort;
@@ -221,10 +223,10 @@ public class AirPlaneLanding extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
-        solver.set(new Sort(
-                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
-                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()))));
-
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        solver.set(pengine.set(new Sort(
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars())),
+                new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine, solver.getCstrs())))));
     }
 
     @Override

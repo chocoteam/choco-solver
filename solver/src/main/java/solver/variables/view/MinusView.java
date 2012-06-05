@@ -117,7 +117,7 @@ public class MinusView extends IntView {
                     if (this.instantiated()) {
                         e = EventType.INSTANTIATE;
                     }
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().removeValue(this, value, cause);
                     return true;
                 }
@@ -135,7 +135,7 @@ public class MinusView extends IntView {
         } else {
             boolean done = var.removeInterval(-to, -from, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -153,7 +153,7 @@ public class MinusView extends IntView {
         } else if (contains(value)) {
             boolean done = var.instantiateTo(-value, this);
             if (done) {
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
                 return true;
             }
         } else {
@@ -180,7 +180,7 @@ public class MinusView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -207,7 +207,7 @@ public class MinusView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
                     solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -402,6 +402,6 @@ public class MinusView extends IntView {
         } else if (evt == EventType.DECUPP) {
             evt = EventType.INCLOW;
         }
-        notifyMonitors(evt, cause);
+        notifyPropagators(evt, cause);
     }
 }

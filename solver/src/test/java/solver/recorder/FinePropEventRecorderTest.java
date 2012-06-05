@@ -26,31 +26,14 @@
  */
 package solver.recorder;
 
-import org.easymock.EasyMock;
-import org.easymock.IAnswer;
-import org.easymock.internal.Invocation;
-import org.easymock.internal.LastControl;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-import solver.Cause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.FinePropEventRecorder;
-import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDelta;
 import solver.variables.delta.IDeltaMonitor;
-
-import java.lang.reflect.Field;
-
-import static org.easymock.EasyMock.*;
 
 
 /**
@@ -72,7 +55,7 @@ public class FinePropEventRecorderTest {
     IScheduler s1 = null;
 
 
-    @BeforeMethod
+    /*@BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
         p1 = EasyMock.createMock(Propagator.class);
@@ -207,8 +190,8 @@ public class FinePropEventRecorderTest {
         s1.schedule(EasyMock.<ISchedulable>anyObject());
         replay(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
-        per.afterUpdate(iv3, EventType.INSTANTIATE, Cause.Null);
+        per.onUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
+        per.onUpdate(iv3, EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
 
         reset(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
@@ -251,7 +234,7 @@ public class FinePropEventRecorderTest {
         s1.schedule(EasyMock.<ISchedulable>anyObject());
         replay(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
+        per.onUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
     }
 
@@ -296,7 +279,7 @@ public class FinePropEventRecorderTest {
         per.virtuallyExecuted(p1);
         verify(iv1, iv2, iv3, cer, d1, d2, d3, p1, id1, id2, id3);
 
-    }
+    }*/
 
 
 }

@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.reified.PropReified;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.BoolVar;
 import solver.variables.Variable;
 
@@ -75,7 +74,11 @@ public class ReifiedConstraint extends Constraint<Variable, Propagator<Variable>
         super(extractVariable(bVar, constraint, oppositeConstraint), solver);
         cons = constraint;
         oppcons = oppositeConstraint;
-        setPropagators(new PropReified(vars, constraint, oppositeConstraint, solver, this));
+        Propagator[] left = cons.propagators.clone();
+        Propagator[] right = oppositeConstraint.propagators.clone();
+        setPropagators(new PropReified(vars, left, right, solver, this));
+//        addPropagators(left);
+//        addPropagators(right);
     }
 
     @Override

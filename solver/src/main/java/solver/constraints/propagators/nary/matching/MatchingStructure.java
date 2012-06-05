@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
@@ -73,7 +72,7 @@ public class MatchingStructure implements Serializable {
     protected boolean[][] componentOrder; // componentOrder[i,j]=true <=> there exists an edge in the SCC graph from
     // component i to component j
 
-    protected final IPropagationEngine engine;
+    protected final Solver solver;
 
     /**
      * Constructor
@@ -86,7 +85,7 @@ public class MatchingStructure implements Serializable {
     public MatchingStructure(IntVar[] vars, int nbLeft, int nbRight, Solver solver) {
         this.nbLeftVertices = nbLeft;
         this.nbRightVertices = nbRight;
-        this.engine = solver.getEngine();
+        this.solver = solver;
         this.nbVertices = this.nbLeftVertices + this.nbRightVertices + 1;
 
         this.matchingSize = solver.getEnvironment().makeInt(0);
@@ -500,7 +499,7 @@ public class MatchingStructure implements Serializable {
             updateMatching = false;
             if (this.matchingSize.get() < this.nbLeftVertices) {
                 if (!this.augmentFlow()) {
-                    engine.fails(propagator, null, "matching size < " + this.nbLeftVertices);
+                    solver.getEngine().fails(propagator, null, "matching size < " + this.nbLeftVertices);
                 }
             }
             refreshSCC();

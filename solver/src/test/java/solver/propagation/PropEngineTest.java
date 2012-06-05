@@ -24,50 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package solver.propagation;
 
-import choco.kernel.ESat;
+import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
+import solver.constraints.ConstraintFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 01/06/12
  */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
+public class PropEngineTest {
 
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
+    @Test
+    public void test1(){
+        Solver solver = new Solver("t1");
+        IntVar x = VariableFactory.bounded("X", 1, 3, solver);
+        IntVar y = VariableFactory.bounded("Y", 1, 3, solver);
+        solver.post(ConstraintFactory.geq(x, y, solver));
+        solver.post(ConstraintFactory.leq(x, 2, solver));
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
+        solver.findSolution();
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyPropagators(EventType.META, this);
-	}
-
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+    }
 }

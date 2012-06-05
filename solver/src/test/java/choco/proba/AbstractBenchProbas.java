@@ -5,6 +5,8 @@ import solver.constraints.Constraint;
 import solver.constraints.IntConstraint;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.nary.alldifferent.proba.CondAllDiffBCProba;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.Queue;
@@ -95,8 +97,9 @@ public abstract class AbstractBenchProbas {
     }
 
     private void configPropStrategy() {
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
         Constraint[] cstrs = solver.getCstrs();
-        Queue arcs = new Queue(new PArc(cstrs));
+        Queue arcs = new Queue(new PArc(propagationEngine, cstrs));
         Queue coarses;
 //        if (!isProba) {
 //            coarses = Queue.build(Primitive.coarses(cstrs));
@@ -111,11 +114,11 @@ public abstract class AbstractBenchProbas {
                 ICondition condition = new CondAllDiffBCProba(solver.getEnvironment(), myvars, seed, solver.getSearchLoop());
                 sm.add(condition);
             }
-            coarses_.add(new PCoarse(cstrs[i]));
+            coarses_.add(new PCoarse(propagationEngine, cstrs[i]));
         }
         coarses = new Queue(coarses_.toArray(new PCoarse[coarses_.size()]));
 //        }
-        solver.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut());
+        solver.set(propagationEngine.set(new Queue(arcs.clearOut(), coarses.pickOne()).clearOut()));
     }//*/
 
     public String toString() {

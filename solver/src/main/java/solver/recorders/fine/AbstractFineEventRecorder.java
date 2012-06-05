@@ -26,14 +26,17 @@
  */
 package solver.recorders.fine;
 
+import choco.kernel.common.Indexable;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.recorders.IActivable;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
-import solver.variables.IVariableMonitor;
+import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.IDeltaMonitor;
 
@@ -47,14 +50,14 @@ import solver.variables.delta.IDeltaMonitor;
  * @author Charles Prud'homme
  * @since 01/12/11
  */
-public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder<V>, IVariableMonitor<V>,
-        IActivable<Propagator<V>> {
+public abstract class AbstractFineEventRecorder<V extends Variable> implements IEventRecorder<V>,
+        IActivable<Propagator<V>>, Indexable<V> {
 
-	protected final AbstractSearchLoop loop;
+    protected final AbstractSearchLoop loop;
+    protected final IPropagationEngine engine;
 
     protected static final int VINDEX = 0;
     protected static final int PINDEX = 0;
-
 
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
@@ -64,11 +67,12 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     protected V[] variables; // BEWARE -- must be initialized at the end of the constructor
     protected Propagator<V>[] propagators; // BEWARE -- must be initialized at the end of the constructor
 
-    protected AbstractFineEventRecorder(Solver solver) {
+    protected AbstractFineEventRecorder(Solver solver, IPropagationEngine engine) {
         measures = solver.getMeasures();
         enqueued = false;
         schedulerIdx = -1;
-		loop = solver.getSearchLoop();
+        loop = solver.getSearchLoop();
+        this.engine = engine;
     }
 
     @Override
@@ -116,6 +120,9 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
         this.schedulerIdx = sIdx;
     }
 
+
+    public abstract void afterUpdate(V var, EventType evt, ICause cause);
+
     /**
      * Set the event recorder in the same state as the one after its execution.
      * It is dequed, mask is void and delta monitor is unfreeze.
@@ -123,4 +130,12 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
      * @param propagator the propagator executed in the coarse recorder
      */
     public abstract void virtuallyExecuted(Propagator propagator);
+
+    @Override
+    public void activate(Propagator<V> element) {
+    }
+
+    @Override
+    public void desactivate(Propagator<V> element) {
+    }
 }

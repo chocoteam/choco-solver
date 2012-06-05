@@ -27,6 +27,7 @@
 
 package solver.variables.view;
 
+import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
@@ -70,7 +71,6 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
         this.var = var;
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
-        makeList(this);
         this.var.subscribeView(this);
     }
 
@@ -114,16 +114,24 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
 
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
     }
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyMonitors(evt, cause);
+        notifyPropagators(evt, cause);
     }
 
     @Override

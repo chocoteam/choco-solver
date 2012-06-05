@@ -52,40 +52,42 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
 
     final List<AbstractFineEventRecorder> eventRecorders;
 
-    public PCons(Constraint... constraints) {
-        this(constraints, PArc.NOV);
+    public PCons(IPropagationEngine propagationEngine, Constraint... constraints) {
+        this(propagationEngine, constraints, PArc.NOV);
     }
 
-    public PCons(Propagator... propagators) {
-        this(propagators, PArc.NOV);
+    public PCons(IPropagationEngine propagationEngine, Propagator... propagators) {
+        this(propagationEngine, propagators, PArc.NOV);
     }
 
-    public PCons(Constraint[] constraints, Predicate[] validations) {
+    public PCons(IPropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
         super();
-        Solver solver = constraints[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int i = 0; i < constraints.length; i++) {
-            Propagator[] propagators = constraints[i].propagators;
-            for (int j = 0; j < propagators.length; j++) {
-                Propagator propagator = propagators[j];
-                if (validations.length == 0 || validate(propagator, validations)) {
-                    make(propagator, validations, propagationEngine, solver);
+        if (constraints.length > 0) {
+            Solver solver = constraints[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int i = 0; i < constraints.length; i++) {
+                Propagator[] propagators = constraints[i].propagators;
+                for (int j = 0; j < propagators.length; j++) {
+                    Propagator propagator = propagators[j];
+                    if (validations.length == 0 || validate(propagator, validations)) {
+                        make(propagator, validations, propagationEngine, solver);
+                    }
                 }
             }
         }
     }
 
-    public PCons(Propagator[] propagators, Predicate[] validations) {
+    public PCons(IPropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
         super();
-        Solver solver = propagators[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int j = 0; j < propagators.length; j++) {
-            Propagator propagator = propagators[j];
-            make(propagator, validations, propagationEngine, solver);
+        if (propagators.length > 0) {
+            Solver solver = propagators[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                make(propagator, validations, propagationEngine, solver);
+            }
         }
     }
 
@@ -106,13 +108,17 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
                 }
             }
         }
+        AbstractFineEventRecorder er = null;
         if (i == 1) { // in that case, there is only one variable, an Arc is a better alternative
-            eventRecorders.add(new FineArcEventRecorder(variables[0], prop, pindices[0], solver));
+            er = new FineArcEventRecorder(variables[0], prop, pindices[0], solver, propagationEngine);
         } else if (i < nbv) { // if some variables has been removed -- connectected previously
-            eventRecorders.add(new FinePropEventRecorder(Arrays.copyOfRange(variables, 0, i), prop, Arrays.copyOfRange(pindices, 0, i), solver));
+            er = new FinePropEventRecorder(Arrays.copyOfRange(variables, 0, i), prop,
+                    Arrays.copyOfRange(pindices, 0, i), solver, propagationEngine);
         } else {
-            eventRecorders.add(new FinePropEventRecorder(variables, prop, pindices, solver));
+            er = new FinePropEventRecorder(variables, prop, pindices, solver, propagationEngine);
         }
+        eventRecorders.add(er);
+        propagationEngine.addEventRecorder(er);
     }
 
     @Override

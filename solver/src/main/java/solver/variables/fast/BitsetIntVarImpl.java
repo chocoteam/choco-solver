@@ -95,7 +95,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         this.UB = env.makeInt(capacity - 1);
         this.SIZE = env.makeInt(sortedValues.length);
         LENGTH = capacity;
-        this.makeList(this);
     }
 
     public BitsetIntVarImpl(String name, int offset, IStateBitSet values, Solver solver) {
@@ -109,7 +108,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         this.UB = env.makeInt(values.prevSetBit(values.size()));
         this.SIZE = env.makeInt(cardinality);
         LENGTH = this.UB.get();
-        this.makeList(this);
     }
 
     public BitsetIntVarImpl(String name, int min, int max, Solver solver) {
@@ -126,7 +124,6 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         this.UB = env.makeInt(max - min);
         this.SIZE = env.makeInt(capacity);
         LENGTH = capacity;
-        this.makeList(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +195,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
                     cause = Cause.Null;
                 }
             }
-            this.notifyMonitors(e, cause);
+            this.notifyPropagators(e, cause);
             solver.getExplainer().removeValue(this, value, antipromo);
         }
         return change;
@@ -268,7 +265,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
             if (VALUES.isEmpty()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_EMPTY);
             }
-            this.notifyMonitors(EventType.INSTANTIATE, cause);
+            this.notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -326,7 +323,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
@@ -384,7 +381,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
                     }
                 }
                 assert (change);
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
@@ -500,11 +497,20 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IntView, 
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

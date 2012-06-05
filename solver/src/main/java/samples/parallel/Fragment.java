@@ -35,6 +35,8 @@ import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.strategy.assignments.GraphAssignment;
@@ -128,7 +130,8 @@ public class Fragment {
 		// config
 		solver.set(new FragSearch(undi));
 //		solver.set(StrategyFactory.graphTSP(undi,TSP_heuristics.enf_sparse,null));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 //		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		// resolution
 //		solver.findSolution();

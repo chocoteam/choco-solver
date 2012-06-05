@@ -55,54 +55,57 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
 
     static final Predicate[] NOV = new Predicate[0];
 
-    public PArc(Variable... variables) {
-        this(variables, NOV);
+    public PArc(IPropagationEngine propagationEngine, Variable... variables) {
+        this(propagationEngine, variables, NOV);
     }
 
-    public PArc(Constraint... constraints) {
-        this(constraints, NOV);
+    public PArc(IPropagationEngine propagationEngine, Constraint... constraints) {
+        this(propagationEngine, constraints, NOV);
     }
 
-    public PArc(Propagator... propagators) {
-        this(propagators, NOV);
+    public PArc(IPropagationEngine propagationEngine, Propagator... propagators) {
+        this(propagationEngine, propagators, NOV);
     }
 
-    public PArc(Variable[] variables, Predicate[] validations) {
+    public PArc(IPropagationEngine propagationEngine, Variable[] variables, Predicate[] validations) {
         super();
-        Solver solver = variables[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int i = 0; i < variables.length; i++) {
-            Variable var = getVar(variables[i]); // deal with view
-            make(var, validations, propagationEngine, solver);
-        }
-    }
-
-    public PArc(Constraint[] constraints, Predicate[] validations) {
-        super();
-        Solver solver = constraints[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
-        eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int i = 0; i < constraints.length; i++) {
-            Propagator[] propagators = constraints[i].propagators;
-            for (int j = 0; j < propagators.length; j++) {
-                Propagator propagator = propagators[j];
-                make(propagator, validations, propagationEngine, solver);
+        if (variables.length > 0) {
+            Solver solver = variables[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int i = 0; i < variables.length; i++) {
+                Variable var = getVar(variables[i]); // deal with view
+                make(var, validations, propagationEngine, solver);
             }
         }
     }
 
-    public PArc(Propagator[] propagators, Predicate[] validations) {
+    public PArc(IPropagationEngine propagationEngine, Constraint[] constraints, Predicate[] validations) {
         super();
-        Solver solver = propagators[0].getSolver();
-        IPropagationEngine propagationEngine = solver.getEngine();
-        propagationEngine.prepareWM(solver);
         eventRecorders = new ArrayList<AbstractFineEventRecorder>();
-        for (int j = 0; j < propagators.length; j++) {
-            Propagator propagator = propagators[j];
-            make(propagator, validations, propagationEngine, solver);
+        if (constraints.length > 0) {
+            Solver solver = constraints[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int i = 0; i < constraints.length; i++) {
+                Propagator[] propagators = constraints[i].propagators;
+                for (int j = 0; j < propagators.length; j++) {
+                    Propagator propagator = propagators[j];
+                    make(propagator, validations, propagationEngine, solver);
+                }
+            }
+        }
+    }
+
+    public PArc(IPropagationEngine propagationEngine, Propagator[] propagators, Predicate[] validations) {
+        super();
+        eventRecorders = new ArrayList<AbstractFineEventRecorder>();
+        if (propagators.length > 0) {
+            Solver solver = propagators[0].getSolver();
+            propagationEngine.prepareWM(solver);
+            for (int j = 0; j < propagators.length; j++) {
+                Propagator propagator = propagators[j];
+                make(propagator, validations, propagationEngine, solver);
+            }
         }
     }
 
@@ -119,7 +122,9 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
                 if (propagationEngine.isMarked(vidx, pidx, pos)) {
                     if (validations.length == 0 || validate(prop, validations)) {
                         propagationEngine.clearWatermark(vidx, pidx, pos);
-                        eventRecorders.add(new FineArcEventRecorder(var, prop, pos, solver));
+                        FineArcEventRecorder er = new FineArcEventRecorder(var, prop, pos, solver, propagationEngine);
+                        eventRecorders.add(er);
+                        propagationEngine.addEventRecorder(er);
 
                     }
                 }
@@ -141,8 +146,9 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
                 if (propagationEngine.isMarked(vidx, pidx, j)) {
                     if (validations.length == 0 || validate(prop, validations)) {
                         propagationEngine.clearWatermark(vidx, pidx, j);
-                        eventRecorders.add(new FineArcEventRecorder(var, prop, j, solver));
-
+                        FineArcEventRecorder er = new FineArcEventRecorder(var, prop, j, solver, propagationEngine);
+                        eventRecorders.add(er);
+                        propagationEngine.addEventRecorder(er);
                     }
                 }
             }

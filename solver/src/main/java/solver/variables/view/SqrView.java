@@ -150,7 +150,7 @@ public final class SqrView extends IntView {
                 }
             }
             if (done) {
-                notifyMonitors(evt, cause);
+                notifyPropagators(evt, cause);
             }
         }
         return false;
@@ -168,7 +168,7 @@ public final class SqrView extends IntView {
             boolean done = var.removeInterval(-to, -from, cause);
             done |= var.removeInterval(from, to, cause);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -191,7 +191,7 @@ public final class SqrView extends IntView {
                 evt = EventType.INSTANTIATE;
             }
             if (done) {
-                notifyMonitors(evt, cause);
+                notifyPropagators(evt, cause);
             }
             return done;
         } else { //otherwise, impossible value for instantiation
@@ -218,7 +218,7 @@ public final class SqrView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -241,7 +241,7 @@ public final class SqrView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -773,12 +773,12 @@ public final class SqrView extends IntView {
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
             } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyMonitors(EventType.BOUND, cause);
+                notifyPropagators(EventType.BOUND, cause);
             }
         } else {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
     }
 }
