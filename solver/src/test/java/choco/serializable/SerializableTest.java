@@ -164,6 +164,7 @@ public class SerializableTest {
     public void testNQueen() {
         NQueenBinary pb = new NQueenBinary();
         pb.readArgs("-q", "8");
+        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
 
