@@ -77,6 +77,7 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
 		int n = g.getEnvelopGraph().getNbNodes();
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_succs = new int[n];
 		for(int i=0;i<n;i++){
 			n_succs[i] = nbSuccs;

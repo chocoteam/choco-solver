@@ -75,6 +75,7 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 	public PropAtLeastNNeighbors(UndirectedGraphVar graph, int nbNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		int n = g.getEnvelopGraph().getNbNodes();
 		n_neighbors = new int[n];
 		for(int i=0;i<n;i++){

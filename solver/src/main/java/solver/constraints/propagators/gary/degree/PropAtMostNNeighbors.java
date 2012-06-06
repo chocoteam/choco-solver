@@ -76,6 +76,7 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 	public PropAtMostNNeighbors(UndirectedGraphVar graph, int[] nbNeigh, Constraint constraint, Solver solver) {
 		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_neighbors = nbNeigh;
 		enf_proc = new ArcEnf();
 	}

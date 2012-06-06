@@ -76,6 +76,7 @@ public class PropAtLeastNPredecessors extends Propagator<DirectedGraphVar> {
 	public PropAtLeastNPredecessors(DirectedGraphVar graph, int nbPreds, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		int n = g.getEnvelopGraph().getNbNodes();
 		n_preds = new int[n];
 		for(int i=0;i<n;i++){

@@ -76,6 +76,7 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbPreds, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_Preds = nbPreds;
 		enf_proc = new ArcEnf();
 	}

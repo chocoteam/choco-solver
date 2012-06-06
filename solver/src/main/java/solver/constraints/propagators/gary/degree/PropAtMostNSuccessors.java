@@ -76,6 +76,7 @@ public class PropAtMostNSuccessors extends Propagator<DirectedGraphVar> {
 	public PropAtMostNSuccessors(DirectedGraphVar graph, int[] nbSuccs, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_Succs = nbSuccs;
 		enf_proc = new ArcEnf();
 	}
