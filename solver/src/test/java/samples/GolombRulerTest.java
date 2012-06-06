@@ -51,6 +51,7 @@ public class GolombRulerTest {
     protected Solver modeler(int m) {
         GolombRuler pb = new GolombRuler();
         pb.readArgs("-m", Integer.toString(m));
+        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
         return pb.getSolver();

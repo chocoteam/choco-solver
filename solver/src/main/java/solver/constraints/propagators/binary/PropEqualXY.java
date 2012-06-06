@@ -43,6 +43,7 @@ import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * X = Y
@@ -52,28 +53,33 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-@PropAnn(tested=PropAnn.Status.CORRECTION)
+@PropAnn(tested = PropAnn.Status.CORRECTION)
 public final class PropEqualXY extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
 
+    IIntDeltaMonitor[] idms;
+
     protected final RemProc rem_proc;
 
     @SuppressWarnings({"unchecked"})
-    public PropEqualXY(IntVar x, IntVar y , Solver solver, IntConstraint constraint) {
+    public PropEqualXY(IntVar x, IntVar y, Solver solver, IntConstraint constraint) {
         super(ArrayUtils.toArray(x, y), solver, constraint, PropagatorPriority.BINARY, true);
         this.x = x;
         this.y = y;
+        idms = new IIntDeltaMonitor[2];
+        idms[0] = x.monitorDelta(this);
+        idms[1] = y.monitorDelta(this);
         rem_proc = new RemProc(this);
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-		int et = EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
-		if(vars[vIdx].hasEnumeratedDomain()){
-			et+=EventType.REMOVE.mask;
-		}
+        int et = EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
+        if (vars[vIdx].hasEnumeratedDomain()) {
+            et += EventType.REMOVE.mask;
+        }
         return et;
     }
 
@@ -114,7 +120,7 @@ public final class PropEqualXY extends Propagator<IntVar> {
                 }
             }
         }
-        if(x.instantiated() && y.instantiated()){
+        if (x.instantiated() && y.instantiated()) {
             // no more test should be done on the value,
             // filtering algo ensures that both are assigned to the same value
             setPassive();
@@ -123,7 +129,7 @@ public final class PropEqualXY extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx,int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
             setPassive();
@@ -135,7 +141,10 @@ public final class PropEqualXY extends Propagator<IntVar> {
                 this.awakeOnUpp(varIdx);
             }
             if (EventType.isRemove(mask)) {
-                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].freeze();
+                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].unfreeze();
+//                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
             }
         }
     }
@@ -208,28 +217,25 @@ public final class PropEqualXY extends Propagator<IntVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-   //     return super.explain(d);
+        //     return super.explain(d);
 
         if (d.getVar() == x) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add (y.explain(VariableState.REM,((ValueRemoval) d).getVal()));
-            }
-            else {
+                explanation.add(y.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+            } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
             return explanation;
         } else if (d.getVar() == y) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add (x.explain(VariableState.REM,((ValueRemoval) d).getVal()));
-            }
-            else {
+                explanation.add(x.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+            } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
             return explanation;
-        }
-        else {
+        } else {
             return super.explain(d);
         }
 

@@ -38,6 +38,7 @@ import solver.exception.SolverException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * <br/>
@@ -58,9 +59,18 @@ public class PropDistanceXYC extends Propagator<IntVar> {
 
     protected final RemProc remproc;
 
+    protected final IIntDeltaMonitor[] idms;
 
     public PropDistanceXYC(IntVar[] vars, int operator, int cste, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.BINARY, false);
+        if (operator == EQ) {
+            this.idms = new IIntDeltaMonitor[this.vars.length];
+            for (int i = 0; i < this.vars.length; i++){
+                idms[i] = this.vars[i].monitorDelta(this);
+            }
+        } else {
+            this.idms = new IIntDeltaMonitor[0];
+        }
         this.operator = operator;
         this.cste = cste;
         this.remproc = new RemProc(this);
@@ -113,21 +123,23 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
-        int idx2 = idx == 0 ? 1 : 0;
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        int idx2 = varIdx == 0 ? 1 : 0;
         switch (operator) {
             case EQ:
                 if (EventType.isInstantiate(mask)) {
-                    filterOnInst(vars[idx2], vars[idx].getValue());
+                    filterOnInst(vars[idx2], vars[varIdx].getValue());
                 } else {
-                    if (EventType.isRemove(mask) && vars[idx].hasEnumeratedDomain()) {
-                        eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(remproc.set(idx), EventType.REMOVE);
+                    if (EventType.isRemove(mask) && vars[varIdx].hasEnumeratedDomain()) {
+                        idms[varIdx].freeze();
+                        idms[varIdx].forEach(remproc.set(varIdx), EventType.REMOVE);
+                        idms[varIdx].unfreeze();
                     }
                     if (EventType.isInclow(mask)) {
-                        filterOnInf(vars[idx], vars[idx2]);
+                        filterOnInf(vars[varIdx], vars[idx2]);
                     }
                     if (EventType.isDecupp(mask)) {
-                        filterOnSup(vars[idx], vars[idx2]);
+                        filterOnSup(vars[varIdx], vars[idx2]);
                     }
                 }
                 break;
@@ -136,16 +148,16 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 break;
             case GT:
                 if (EventType.isInstantiate(mask)) {
-                    filterGTonVar(vars[idx], vars[idx2]);
+                    filterGTonVar(vars[varIdx], vars[idx2]);
                 } else if (EventType.isBound(mask)) {
-                    filterGTonVar(vars[idx], vars[idx2]);
+                    filterGTonVar(vars[varIdx], vars[idx2]);
                 }
                 break;
             case LT:
                 if (EventType.isInstantiate(mask)) {
-                    filterLTonVar(vars[idx], vars[idx2]);
+                    filterLTonVar(vars[varIdx], vars[idx2]);
                 } else if (EventType.isBound(mask)) {
-                    filterLTonVar(vars[idx], vars[idx2]);
+                    filterLTonVar(vars[varIdx], vars[idx2]);
                 }
                 break;
         }

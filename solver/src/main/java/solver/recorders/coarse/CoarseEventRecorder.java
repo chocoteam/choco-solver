@@ -37,12 +37,11 @@ import solver.variables.EventType;
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 05/12/11
  * @revision 04/03/12 restore enque test
+ * @revision 05/24/12 remove timestamp
+ * @since 05/12/11
  */
 public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
-
-    int timestamp; // timestamp of the last clear call -- for lazy clear
 
     protected final Propagator propagator;
 
@@ -51,7 +50,6 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
     public CoarseEventRecorder(Propagator propagator, Solver solver,IPropagationEngine engine) {
         super(solver, engine);
         this.propagator = propagator;
-        this.evtmask = EventType.FULL_PROPAGATION.mask; // initialize with full propagation event
     }
 
     @Override
@@ -62,23 +60,18 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
     public void update(EventType e) {
         if ((e.mask & propagator.getPropagationConditions()) != 0) {
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
-            // 1. clear the structure if necessar
-            if (LAZY) {
-                if (timestamp - loop.timeStamp != 0) {
-                    this.evtmask = 0;
-                    timestamp = loop.timeStamp;
-                }
+            // 1. store information concerning event
+            if (!enqueued) {
+                // 2. schedule this
+                assert evtmask == 0 : "evt mask has not been cleared correctly :"+propagator.toString();
+                scheduler.schedule(this);
+            } else if (scheduler.needUpdate()) {
+                // 3. inform scheduler if required
+                scheduler.update(this);
             }
-            // 2. store information concerning event
+            // 4. record the event received
             if ((e.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
                 evtmask |= e.strengthened_mask;
-            }
-            if(!enqueued){
-                // 3. schedule this
-                scheduler.schedule(this);
-            }else if(scheduler.needUpdate()){
-                // 4. inform scheduler if required
-                scheduler.update(this);
             }
         }
     }

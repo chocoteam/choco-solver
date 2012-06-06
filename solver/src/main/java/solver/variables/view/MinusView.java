@@ -37,10 +37,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
-import solver.variables.delta.view.ViewDelta;
 
 /**
  * View for -V, where V is a IntVar or view
@@ -63,29 +62,23 @@ public class MinusView extends IntView {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.analyseAndAdapt(mask);
-            delta = new ViewDelta(var.getDelta()) {
-                @Override
-                public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-                    return new IntDeltaMonitor(this, propagator) {
-                        @Override
-                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                            if (EventType.isRemove(eventType.mask)) {
-                                for (int i = frozenFirst; i < frozenLast; i++) {
-                                    if (propagator != delta.getCause(i)) {
-                                        proc.execute(-delta.get(i));
-                                    }
-                                }
-                            }
-                        }
-                    };
-                }
-            };
-            reactOnRemoval = true;
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        var.createDelta();
+        if(var.getDelta() == NoDelta.singleton){
+            return IIntDeltaMonitor.Default.NONE;
         }
+        return new IntDeltaMonitor(var.getDelta(), propagator) {
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                if (EventType.isRemove(eventType.mask)) {
+                    for (int i = frozenFirst; i < frozenLast; i++) {
+                        if (propagator != delta.getCause(i)) {
+                            proc.execute(-delta.get(i));
+                        }
+                    }
+                }
+            }
+        };
     }
 
     @Override

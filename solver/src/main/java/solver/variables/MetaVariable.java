@@ -30,12 +30,15 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.view.IView;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IView, MetaVariable<V>> implements Variable<NoDelta, IView> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>,IView, MetaVariable<V>>
+        implements Variable<NoDelta, IDeltaMonitor<NoDelta>, IView> {
 
     protected V[] components;
     protected int dim;
@@ -70,6 +73,16 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event, cause);
         }
+    }
+
+    @Override
+    public void createDelta() {
+        throw new SolverException("No delta available");
+    }
+
+    @Override
+    public IDeltaMonitor monitorDelta(ICause propagator) {
+        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

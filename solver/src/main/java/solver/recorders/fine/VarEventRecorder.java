@@ -37,7 +37,6 @@ import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -47,6 +46,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove timestamp and deltamonitoring
  * @since 24/01/12
  */
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
@@ -201,11 +201,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     void _desactivateP(int i) {
         // void
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

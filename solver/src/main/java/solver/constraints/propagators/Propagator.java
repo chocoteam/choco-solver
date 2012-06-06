@@ -136,7 +136,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
             vars[v].link(this, v);
-            vars[v].analyseAndAdapt(getPropagationConditions(v));
+            vars[v].recordMask(getPropagationConditions(v));
             if (!vars[v].instantiated()) {
                 nbNi++;
             }

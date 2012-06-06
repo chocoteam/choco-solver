@@ -27,7 +27,6 @@
 package solver.recorders.coarse;
 
 import choco.kernel.common.util.procedure.UnaryProcedure;
-import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;

@@ -37,6 +37,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.IDelta;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.view.IView;
 
 import java.io.Serializable;
@@ -45,7 +46,7 @@ import java.io.Serializable;
  * Created by IntelliJ IDEA.
  * User: xlorca
  */
-public interface Variable<D extends IDelta, W extends IView> extends Identity,Serializable {
+public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView> extends Identity, Serializable {
 
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
@@ -136,7 +137,24 @@ public interface Variable<D extends IDelta, W extends IView> extends Identity,Se
 
     Explanation explain(VariableState what, int val);
 
+    /**
+     * Return the delta domain of this
+     * @return
+     */
     D getDelta();
+
+    /**
+     * Create a delta, if necessary, in order to observe removed values of a this.
+     * If the delta already exists, has no effect.
+     */
+    void createDelta();
+
+    /**
+     * Allow to monitor removed values of <code>this</code>.
+     * @param propagator the cause that requires to monitor delta
+     * @return a delta monitor
+     */
+    DM monitorDelta(ICause propagator);
 
     /**
      * Link the propagator to this
@@ -151,7 +169,7 @@ public interface Variable<D extends IDelta, W extends IView> extends Identity,Se
      *
      * @param mask
      */
-    void analyseAndAdapt(int mask);
+    void recordMask(int mask);
 
     /**
      * Remove a propagator from the list of propagator of <code>this</code>.

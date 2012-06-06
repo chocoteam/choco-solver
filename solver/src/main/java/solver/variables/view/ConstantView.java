@@ -44,6 +44,7 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
@@ -276,7 +277,16 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
+    public void recordMask(int mask) {
+    }
+
+    @Override
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        return IIntDeltaMonitor.Default.NONE;
+    }
+
+    @Override
+    public void createDelta() {
     }
 
     @Override
