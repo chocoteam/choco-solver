@@ -32,7 +32,6 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.generator.PropagationStrategy;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -64,6 +63,11 @@ public interface IPropagationEngine extends Serializable {
     void init(Solver solver);
 
     /**
+     * Skip the completness check -- the strategy can then be incomplete
+     */
+    void skipCompletnessCheck();
+
+    /**
      * Skip initial propagation.
      * DO not post coarse event recorder
      */
@@ -81,7 +85,7 @@ public interface IPropagationEngine extends Serializable {
      * @param propagationStrategy a group
      * @return this
      */
-    IPropagationEngine set(PropagationStrategy propagationStrategy);
+    IPropagationEngine set(IPropagationStrategy propagationStrategy);
 
     /**
      * Reach a fixpoint

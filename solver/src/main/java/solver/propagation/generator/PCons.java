@@ -125,4 +125,9 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
     public AbstractFineEventRecorder[] getElements() {
         return eventRecorders.toArray(new AbstractFineEventRecorder[eventRecorders.size()]);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return eventRecorders.isEmpty();
+    }
 }

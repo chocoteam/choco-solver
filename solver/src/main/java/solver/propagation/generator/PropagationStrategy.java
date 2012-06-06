@@ -29,10 +29,9 @@ package solver.propagation.generator;
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.propagation.IPropagationStrategy;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
-
-import java.io.Serializable;
 
 /**
  * An abstract class for DSL to define a propagation strategy.
@@ -47,7 +46,7 @@ import java.io.Serializable;
  * @revision 04/03/12 add update feature
  * @since 15/12/11
  */
-public abstract class PropagationStrategy<E extends ISchedulable> implements Generator<E>, IScheduler<E>, ISchedulable, Serializable {
+public abstract class PropagationStrategy<E extends ISchedulable> implements IPropagationStrategy<E> {
 
     static enum P {
         pickOne, sweepUp, clearOut, loopOut
@@ -66,6 +65,10 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
             Generator gen = generators[i];
             elements = ArrayUtils.append(elements, (E[]) gen.getElements());
         }
+    }
+
+    protected PropagationStrategy(E... schedulables) {
+        this.elements = schedulables;
     }
 
 
@@ -145,8 +148,6 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
     public void update(E element) {
         // empty
     }
-
-    public abstract boolean isEmpty();
 
     public abstract int size();
 

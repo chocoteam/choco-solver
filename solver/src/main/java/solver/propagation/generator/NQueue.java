@@ -68,6 +68,24 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         notEmpty = new BitSet(size);
     }
 
+    public NQueue(IEvaluator<S> evaluator, int min, int max, S... schedulables) {
+        super(schedulables);
+        int nbe = 0;
+        for (int e = 0; e < elements.length; e++) {
+            elements[e].setScheduler(this, e);
+            nbe++;
+        }
+        this.evaluator = evaluator;
+        this.offset = min;
+        this.size = max - min + 1;
+        toPropagate = new FixSizeCircularQueue[size];
+        for (int i = 0; i < size; i++) {
+            toPropagate[i] = new FixSizeCircularQueue<S>(nbe);
+        }
+        notEmpty = new BitSet(size);
+    }
+
+
     @Override
     public S[] getElements() {
         return (S[]) new ISchedulable[]{this};

@@ -33,6 +33,8 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.recorders.coarse.CoarseEventRecorder;
+import solver.recorders.fine.FinePropEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -193,9 +195,42 @@ public enum PropagationStrategies {
             pengine.set(new Sort(real_q.toArray(new PropagationStrategy[real_q.size()])).clearOut());
         }
     },
-    DEFAULT() {
+    GECODE() {
         @Override
         public void make(Solver solver, IPropagationEngine pengine) {
+            Constraint[] constraints = solver.getCstrs();
+            int nbP = 0;
+            for (int i = 0; i < constraints.length; i++) {
+                nbP += constraints[i].propagators.length;
+            }
+            FinePropEventRecorder[] per = new FinePropEventRecorder[nbP];
+            CoarseEventRecorder[] cer = new CoarseEventRecorder[nbP];
+            for (int i = 0, k = 0; i < constraints.length; i++) {
+                Propagator[] propagators = constraints[i].propagators;
+                for (int j = 0; j < propagators.length; j++, k++) {
+                    int nbv = propagators[j].getNbVars();
+                    int[] pindices = new int[nbv];
+                    for (int jj = 0; jj < nbv; jj++) {
+                        pindices[jj] = jj;
+                    }
+                    per[k] = new FinePropEventRecorder(propagators[j].getVars(), propagators[j], pindices, solver, pengine);
+                    pengine.addEventRecorder(per[k]);
+                    cer[k] = new CoarseEventRecorder(propagators[j], solver, pengine);
+                    pengine.addEventRecorder(cer[k]);
+                }
+            }
+            NQueue<FinePropEventRecorder> f7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, per);
+            NQueue<CoarseEventRecorder> c7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, cer);
+            pengine.set(new Sort(f7.clearOut(), c7.pickOne()));
+            pengine.skipCompletnessCheck();
+        }
+    },
+    DEFAULT() {
+        @Override
+        public void make
+                (Solver
+                         solver, IPropagationEngine
+                        pengine) {
             TWO_QUEUES_WITH_ARCS.make(solver, pengine);
         }
     };

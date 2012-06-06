@@ -63,7 +63,7 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected final ContradictionException exception;
 
-    protected PropagationStrategy propagationStrategy;
+    protected IPropagationStrategy propagationStrategy;
 
     protected IWaterMarking watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
 
@@ -101,7 +101,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public IPropagationEngine set(PropagationStrategy propagationStrategy) {
+    public IPropagationEngine set(IPropagationStrategy propagationStrategy) {
         this.propagationStrategy = propagationStrategy;
         return this;
     }
@@ -139,6 +139,11 @@ public class PropagationEngine implements IPropagationEngine {
                 }
             }
         }
+    }
+
+    @Override
+    public void skipCompletnessCheck() {
+        initialized = true;
     }
 
     @Override

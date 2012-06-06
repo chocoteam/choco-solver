@@ -107,4 +107,9 @@ public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
     public AbstractCoarseEventRecorder[] getElements() {
         return eventRecorders.toArray(new AbstractCoarseEventRecorder[eventRecorders.size()]);
     }
+
+    @Override
+    public boolean isEmpty() {
+        return eventRecorders.isEmpty();
+    }
 }

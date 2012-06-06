@@ -24,24 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.propagation.generator;
+package solver.propagation;
 
-import solver.propagation.ISchedulable;
+import solver.propagation.generator.Generator;
 
 import java.io.Serializable;
 
 /**
- * An abstract class to help defining a propagation strategy,
- * based on the DSL.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 15/12/11
+ * @since 06/06/12
  */
-public interface Generator<S extends ISchedulable> extends Serializable{
-
-    S[] getElements();
-
-    boolean isEmpty();
-
+public interface IPropagationStrategy<E extends ISchedulable> extends Generator<E>, IScheduler<E>, ISchedulable, Serializable {
 }
