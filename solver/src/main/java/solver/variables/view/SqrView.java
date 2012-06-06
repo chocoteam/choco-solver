@@ -40,6 +40,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
 
 
@@ -65,6 +66,9 @@ public final class SqrView extends IntView {
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
+        if(var.getDelta() == NoDelta.singleton){
+            return IIntDeltaMonitor.Default.NONE;
+        }
         return new IntDeltaMonitor(var.getDelta(), propagator) {
             @Override
             public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
