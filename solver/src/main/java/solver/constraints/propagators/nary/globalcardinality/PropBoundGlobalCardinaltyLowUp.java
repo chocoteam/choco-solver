@@ -100,27 +100,29 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            int val = vars[idx].getValue();
+            int val = vars[varIdx].getValue();
             // if a value has been instantiated to its max number of occurrences
             // remove it from all variables
             val_minOcc[val - offset].add(1);
             filterBCOnInst(val);
         } else {
             if (EventType.isInclow(mask)) {
-                if (!vars[idx].hasEnumeratedDomain()) {
-                    filterBCOnInf(idx);
+                if (!vars[varIdx].hasEnumeratedDomain()) {
+                    filterBCOnInf(varIdx);
                 }
             }
             if (EventType.isDecupp(mask)) {
-                if (!vars[idx].hasEnumeratedDomain()) {
-                    filterBCOnSup(idx);
+                if (!vars[varIdx].hasEnumeratedDomain()) {
+                    filterBCOnSup(varIdx);
                 }
             }
             if (EventType.isRemove(mask)) {
-                if (idx < nbVars) {
-                    eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(rem_proc, EventType.REMOVE);
+                if (varIdx < nbVars) {
+                    idms[varIdx].freeze();
+                    idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+                    idms[varIdx].unfreeze();
                 }
             }
         }

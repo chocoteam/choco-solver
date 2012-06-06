@@ -43,7 +43,7 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.delta.IDelta;
-import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.lang.reflect.Field;
 
@@ -62,7 +62,7 @@ public class FineVarEventRecorderTest {
     IntVar iv1 = null;
 
     IDelta d1 = null;
-    IDeltaMonitor id1, id2, id3, id4, id5;
+    IIntDeltaMonitor id1, id2, id3, id4, id5;
     Propagator p1, p2, p3, p4, p5;
     VarEventRecorder<IntVar> ver = null;
     IScheduler s1 = null;
@@ -83,40 +83,40 @@ public class FineVarEventRecorderTest {
         p1 = createMock(Propagator.class);
         expect(p1.getId()).andReturn(1).times(2);
         p1.addRecorder(anyObject(FineVarEventRecorder.class));
-        id1 = createMock(IDeltaMonitor.class);
-        d1.createDeltaMonitor(p1);
+        id1 = createMock(IIntDeltaMonitor.class);
+        iv1.monitorDelta(p1);
         expectLastCall().andReturn(id1);
         // snd propagator
         p2 = createMock(Propagator.class);
         p2.getId();
         expectLastCall().andReturn(2);
         p2.addRecorder(anyObject(FineVarEventRecorder.class));
-        id2 = createMock(IDeltaMonitor.class);
-        d1.createDeltaMonitor(p2);
+        id2 = createMock(IIntDeltaMonitor.class);
+        iv1.monitorDelta(p2);
         expectLastCall().andReturn(id2);
         // third propagator
         p3 = createMock(Propagator.class);
         p3.getId();
         expectLastCall().andReturn(3);
         p3.addRecorder(anyObject(FineVarEventRecorder.class));
-        id3 = createMock(IDeltaMonitor.class);
-        d1.createDeltaMonitor(p3);
+        id3 = createMock(IIntDeltaMonitor.class);
+        iv1.monitorDelta(p3);
         expectLastCall().andReturn(id3);
         // fourth propagator
         p4 = createMock(Propagator.class);
         p4.getId();
         expectLastCall().andReturn(4);
         p4.addRecorder(anyObject(FineVarEventRecorder.class));
-        id4 = createMock(IDeltaMonitor.class);
-        d1.createDeltaMonitor(p4);
+        id4 = createMock(IIntDeltaMonitor.class);
+        iv1.monitorDelta(p4);
         expectLastCall().andReturn(id4);
         // fifth propagator
         p5 = createMock(Propagator.class);
         p5.getId();
         expectLastCall().andReturn(5);
         p5.addRecorder(anyObject(FineVarEventRecorder.class));
-        id5 = createMock(IDeltaMonitor.class);
-        d1.createDeltaMonitor(p5);
+        id5 = createMock(IIntDeltaMonitor.class);
+        iv1.monitorDelta(p5);
         expectLastCall().andReturn(id5);
 
         replay(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
@@ -315,15 +315,6 @@ public class FineVarEventRecorderTest {
         Assert.assertEquals(masks[2], 0);
         Assert.assertEquals(masks[3], 1);
         Assert.assertEquals(masks[4], 1);
-    }
-
-    @Test
-    public void testdelta() throws ContradictionException {
-        p1.getId();
-        expectLastCall().andReturn(1);
-        replay(p1);
-        Assert.assertEquals(ver.getDeltaMonitor(p1, iv1), id1);
-        verify(p1);
     }
 
     @Test

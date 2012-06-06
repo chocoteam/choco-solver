@@ -18,7 +18,7 @@ import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -42,7 +42,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     int seed;
 
     protected final RemProc rem_proc;
-    protected final TIntObjectHashMap<IDeltaMonitor> deltamon; // delta monitoring -- can be NONE
+    protected final TIntObjectHashMap<IIntDeltaMonitor> deltamon; // delta monitoring -- can be NONE
     protected final TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
     protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
 	protected final AbstractSearchLoop loop;
@@ -56,13 +56,13 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         this.environment = environment;
         this.vars = vars;
         this.nbNotInstVar = environment.makeInt(vars.length);
-        this.deltamon = new TIntObjectHashMap<IDeltaMonitor>(vars.length);
+        this.deltamon = new TIntObjectHashMap<IIntDeltaMonitor>(vars.length);
         this.idxVs = new TIntIntHashMap(vars.length, (float) 0.5, -2, -2);
         this.timestamps = new TIntLongHashMap(vars.length, (float) 0.5, -2, -2);
         for (IntVar v : vars) {
-            v.analyseAndAdapt(EventType.REMOVE.mask); // to be sure delta is created and maintained
+            v.recordMask(EventType.REMOVE.mask); // to be sure delta is created and maintained
             int vid = v.getId();
-            deltamon.put(vid, v.getDelta().createDeltaMonitor(Cause.Null));
+            deltamon.put(vid, v.monitorDelta(Cause.Null));
             v.addMonitor(this); // attach this as a variable monitor
             timestamps.put(vid, -1);
 
@@ -128,7 +128,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
 //            System.out.println(vs);
 //        }
         ////////////////////// Sauce a Charles pour utiliser le delta domaine de var
-        IDeltaMonitor dm = deltamon.get(var.getId());
+        IIntDeltaMonitor dm = deltamon.get(var.getId());
         long t = timestamps.get(vid);
         if (t - loop.timeStamp != 0) {
             deltamon.get(vid).clear();

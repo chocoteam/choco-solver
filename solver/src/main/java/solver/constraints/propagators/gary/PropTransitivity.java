@@ -52,6 +52,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 	//***********************************************************************************
 
 	private V g;
+    GraphDeltaMonitor gdm;
 	private PairProcedure arcEnforced;
 	private PairProcedure arcRemoved;
 
@@ -62,6 +63,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 	public PropTransitivity(V graph, Solver solver, Constraint constraint) {
 		super((V[]) new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		if( graph instanceof DirectedGraphVar){
 			arcEnforced = new EnfArcDig(this,g);
 			arcRemoved  = new RemArcDig(this,g);
@@ -82,13 +84,14 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		if ((mask & EventType.ENFORCEARC.mask) != 0) {
 			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 		}
 		if ((mask & EventType.REMOVEARC.mask) != 0) {
 			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 		}
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

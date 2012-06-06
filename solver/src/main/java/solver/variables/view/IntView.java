@@ -40,6 +40,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -55,7 +56,8 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntView> implements IView<IntDelta, IntView>, IntVar {
+public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, IntView>
+        implements IView<IntDelta, IIntDeltaMonitor, IntView>, IntVar {
 
     protected final IntVar var;
 
@@ -72,6 +74,12 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
         this.reactOnRemoval = false;
         makeList(this);
         this.var.subscribeView(this);
+    }
+
+    @Override
+    public final void recordMask(int mask) {
+        super.recordMask(mask);
+        var.recordMask(mask);
     }
 
     @Override
@@ -112,6 +120,10 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
         return delta;
     }
 
+    @Override
+    public void createDelta() {
+        var.createDelta();
+    }
 
     @Override
     public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {

@@ -24,37 +24,44 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.monitor;
+package solver.variables.delta;
 
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/12/11
+ * @since 25/05/12
  */
-public abstract class ViewDeltaMonitor implements IDeltaMonitor<IntDelta> {
+public interface IGraphDeltaMonitor extends IDeltaMonitor<IGraphDelta>{
 
-    final IDeltaMonitor<IntDelta> original;
+    void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException;
 
-    public ViewDeltaMonitor(IDeltaMonitor<IntDelta> original) {
-        this.original = original;
-    }
+    void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException;
 
-    @Override
-    public final void freeze() {
-        original.freeze();
-    }
+    public static enum Default implements IGraphDeltaMonitor {
+		NONE() {
+            @Override
+            public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {
+            }
 
-    @Override
-    public final void unfreeze() {
-        original.unfreeze();
-    }
+            @Override
+            public void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException {
+            }
 
-    @Override
-    public final void clear() {
-        original.clear();
-    }
+            @Override
+			public void freeze() {}
+
+			@Override
+			public void unfreeze() {
+			}
+			@Override
+			public void clear() {
+			}
+		}
+	}
 }

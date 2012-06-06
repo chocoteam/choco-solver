@@ -49,6 +49,7 @@ public class MagicSquareTest {
     protected Solver modeler(int n) {
         MagicSquare pb = new MagicSquare();
         pb.readArgs("-n", Integer.toString(n));
+        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
         return pb.getSolver();

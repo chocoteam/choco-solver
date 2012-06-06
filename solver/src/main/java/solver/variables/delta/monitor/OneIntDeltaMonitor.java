@@ -30,9 +30,8 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.EventType;
-import solver.variables.delta.IDeltaMonitor;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
-import solver.variables.delta.OneValueDelta;
 
 /**
  * <br/>
@@ -40,13 +39,13 @@ import solver.variables.delta.OneValueDelta;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class OneIntDeltaMonitor implements IDeltaMonitor<IntDelta> {
+public class OneIntDeltaMonitor implements IIntDeltaMonitor {
 
-    protected final OneValueDelta delta;
+    protected final IntDelta delta;
     protected boolean used;
 	protected ICause propagator;
 
-    public OneIntDeltaMonitor(OneValueDelta delta, ICause propagator) {
+    public OneIntDeltaMonitor(IntDelta delta, ICause propagator) {
         this.delta = delta;
         used = false;
 		this.propagator = propagator;

@@ -28,6 +28,7 @@
 package solver.variables.delta;
 
 import solver.ICause;
+import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>
@@ -37,11 +38,6 @@ import solver.ICause;
  */
 public enum NoDelta implements IntDelta {
     singleton;
-
-    @Override
-    public IDeltaMonitor createDeltaMonitor(ICause propagator) {
-        return IDeltaMonitor.Default.NONE;
-    }
 
     @Override
     public void add(int value, ICause cause) {
@@ -55,6 +51,15 @@ public enum NoDelta implements IntDelta {
     public void lazyClear() {
     }
 
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return null;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return false;
+    }
 
     @Override
     public int get(int idx) {

@@ -33,7 +33,6 @@ import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 /**
  * <br/>
@@ -94,11 +93,6 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void flush() {
         // can be void
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

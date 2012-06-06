@@ -24,47 +24,38 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.variables.delta;
 
-import solver.search.loop.AbstractSearchLoop;
-
-import java.io.Serializable;
+import choco.kernel.common.util.procedure.IntProcedure;
+import solver.exception.ContradictionException;
+import solver.variables.EventType;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18 oct. 2010
+ * @since 25/05/12
  */
-public interface IDelta extends Serializable {
+public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta>{
 
-    /**
-     * Returns the number of element
-     *
-     * @return number of element
-     */
-    int size();
+    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
 
-    /**
-     * Clear the delta
-     */
-    void clear();
+    public static enum Default implements IIntDeltaMonitor {
+		NONE() {
 
-    /**
-     * Lazy clear the delta, on world change
-     */
-    void lazyClear();
+			@Override
+			public void freeze() {}
 
-    /**
-     * Return the associate search loop
-     * @return associate search loop
-     */
-    AbstractSearchLoop getSearchLoop();
+			@Override
+			public void unfreeze() {
+			}
+			@Override
+			public void clear() {
+			}
 
-    /**
-     * Check wether the delta is up-to-date with the search loop
-     * @return
-     */
-    boolean timeStamped();
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+            }
+        }
+	}
 }

@@ -51,7 +51,8 @@ public class KnapsackTest {
 	public Solver modelIt(String data, int n) throws IOException {
 		Knapsack pb = new Knapsack();
 		pb.readArgs("-d", data, "-n", ""+n);
-		pb.buildModel();
+		pb.createSolver();
+        pb.buildModel();
 		pb.configureSearch();
 //        power = pb.power;
 		return pb.getSolver();

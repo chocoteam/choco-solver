@@ -37,6 +37,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -91,6 +92,8 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
 
     protected IntProcedure rem_proc;
 
+    protected final IIntDeltaMonitor[] idms;
+
     static IntVar[] makeVarTable(IntVar[] vars, IntVar[] card) {
         if (card != null) {
             IntVar[] allvars = new IntVar[vars.length + card.length];
@@ -109,6 +112,10 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
         this.range = lastCardValue - firstCardValue + 1;
         int n = vars.length;
         this.nbVars = n;
+        this.idms = new IIntDeltaMonitor[n];
+        for (int i = 0; i < n; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         treelinks = new int[2 * n + 2];
         d = new int[2 * n + 2];
         h = new int[2 * n + 2];
@@ -234,40 +241,42 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            int val = vars[idx].getValue();
+            int val = vars[varIdx].getValue();
             forcePropagate(EventType.CUSTOM_PROPAGATION);
             // if a value has been instantiated to its max number of occurrences
             // remove it from all variables
-            if (idx < nbVars) {
+            if (varIdx < nbVars) {
                 //update lower bounds of cardinalities
                 val_minOcc[val - offset].add(1);
                 card[val - offset].updateLowerBound(val_minOcc[val - offset].get(), this);
                 filterBCOnInst(val);
             } else {
-                filterBCOnInst(idx - nbVars + offset);
+                filterBCOnInst(varIdx - nbVars + offset);
             }
         } else {
             if (EventType.isInclow(mask)) {
                 forcePropagate(EventType.CUSTOM_PROPAGATION);
-                if (idx < nbVars) {
-                    if (!vars[idx].hasEnumeratedDomain()) {
-                        filterBCOnInf(idx);
+                if (varIdx < nbVars) {
+                    if (!vars[varIdx].hasEnumeratedDomain()) {
+                        filterBCOnInf(varIdx);
                     }
                 }
             }
             if (EventType.isDecupp(mask)) {
                 forcePropagate(EventType.CUSTOM_PROPAGATION);
-                if (idx < nbVars) {
-                    if (!vars[idx].hasEnumeratedDomain()) {
-                        filterBCOnSup(idx);
+                if (varIdx < nbVars) {
+                    if (!vars[varIdx].hasEnumeratedDomain()) {
+                        filterBCOnSup(varIdx);
                     }
                 }
             }
         }
-        if (idx < nbVars) {
-            eventRecorder.getDeltaMonitor(this, vars[idx]).forEach(rem_proc, EventType.REMOVE);
+        if (varIdx < nbVars) {
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
     }
 

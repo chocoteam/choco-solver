@@ -56,6 +56,7 @@ public class PropKArcs extends Propagator {
 	//***********************************************************************************
 
 	protected GraphVar g;
+    GraphDeltaMonitor gdm;
 	protected IntVar k;
 	protected IStateInt nbInKer, nbInEnv;
 	protected PairProcedure arcEnforced,arcRemoved;
@@ -65,8 +66,9 @@ public class PropKArcs extends Propagator {
 	//***********************************************************************************
 
 	public PropKArcs(GraphVar graph, IntVar k, Constraint constraint, Solver sol) {
-		super((Variable[]) new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
+		super(new Variable[]{graph,k}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.k = k;
 		nbInEnv = environment.makeInt();
 		nbInKer = environment.makeInt();
@@ -98,13 +100,14 @@ public class PropKArcs extends Propagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		if ((mask & EventType.ENFORCEARC.mask) != 0) {
 			gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 		}
 		if ((mask & EventType.REMOVEARC.mask) != 0) {
 			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 		}
+        gdm.unfreeze();
 		filter(nbInKer.get(),nbInEnv.get());
 	}
 

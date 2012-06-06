@@ -55,6 +55,7 @@ public class PropNLoopsTree extends Propagator{
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	IntVar nLoops;
 	PairProcedure removeProc, enforceProc;
 	IStateInt nbKerLoop;
@@ -69,6 +70,7 @@ public class PropNLoopsTree extends Propagator{
 	public PropNLoopsTree(DirectedGraphVar graph, IntVar nL, Solver sol, Constraint constraint) {
 		super(new Variable[]{graph,nL}, sol, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n = g.getEnvelopGraph().getNbNodes();
 		nLoops = nL;
 		removeProc = new RemProc();
@@ -127,13 +129,14 @@ public class PropNLoopsTree extends Propagator{
         Variable variable = vars[idxVarInProp];
 
         if((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+			gdm.freeze();
 			if ((mask & EventType.REMOVEARC.mask) != 0){
                 gdm.forEachArc(removeProc, EventType.REMOVEARC);
 			}
 			if ((mask & EventType.ENFORCEARC.mask) != 0){
                 gdm.forEachArc(enforceProc, EventType.ENFORCEARC);
 			}
+            gdm.unfreeze();
 			nLoops.updateUpperBound(nbEnvLoop.get(), this);
 			nLoops.updateLowerBound(nbKerLoop.get(), this);
 		}
