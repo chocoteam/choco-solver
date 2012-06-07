@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -53,8 +54,8 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     protected int evtmask; // reference to events occuring -- inclusive OR over event mask
 
 
-    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver) {
-        super(variable, propagator, solver);
+    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver,IPropagationEngine engine) {
+        super(variable, propagator, solver, engine);
         this.idxVinP = idxVinP;
     }
 
@@ -113,7 +114,6 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
 
     @Override
     public void desactivate(Propagator<V> element) {
-        variables[VINDEX].desactivate(this);
         this.evtmask = 0;
     }
 

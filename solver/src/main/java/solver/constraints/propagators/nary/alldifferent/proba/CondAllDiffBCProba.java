@@ -79,9 +79,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     }
 
     public void activate() {
-        for (int i = 0; i < vars.length; i++) {
-            vars[i].activate(this);
-        }
         init();
     }
 
@@ -120,7 +117,7 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     }// */
 
     @Override
-    public final void afterUpdate(IntVar var, EventType evt, ICause cause) {
+    public final void onUpdate(IntVar var, EventType evt, ICause cause) {
         int vid = var.getId();
 //        ShowDelta delta = new ShowDelta();
 //        System.out.printf("\n\nCND : %s (%d) on %s cause: %s\n", var, vid, evt, cause);
@@ -182,21 +179,13 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
     }
 
     @Override
-    public int getIdxInV(IntVar variable) {
+    public int getIdx(IntVar variable) {
         return idxVs.get(variable.getId());
     }
 
     @Override
-    public void setIdxInV(IntVar variable, int idx) {
+    public void setIdx(IntVar variable, int idx) {
         idxVs.put(variable.getId(), idx);
-    }
-
-    @Override
-    public void beforeUpdate(IntVar var, EventType evt, ICause cause) {
-    }
-
-    @Override
-    public void contradict(IntVar var, EventType evt, ICause cause) {
     }
 
     public boolean test() {

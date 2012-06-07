@@ -27,12 +27,12 @@
 
 package choco.kernel.common.util.objects;
 
+import choco.kernel.common.Indexable;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
-import solver.variables.IVariableMonitor;
-import solver.variables.Variable;
+import solver.recorders.fine.AbstractFineEventRecorder;
 
 /**
  * [<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -40,7 +40,8 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class BacktrackableArrayList<V extends Variable, E extends IVariableMonitor<V>> implements IList<V, E> {
+public final class BacktrackableArrayList<V, E extends Indexable<V>>
+        implements IList<E> {
 
     protected E[] elements;
     protected int size;
@@ -51,8 +52,12 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
     protected final V parent;
 
     public BacktrackableArrayList(V variable, IEnvironment environment) {
+        this(variable, environment, 16);
+    }
+
+    public BacktrackableArrayList(V variable, IEnvironment environment, int size) {
         this.parent = variable;
-        elements = (E[]) new IVariableMonitor[16];
+        elements = (E[]) new AbstractFineEventRecorder[size];
         size = 0;
         firstActive = environment.makeInt();
         firstPassive = environment.makeInt();
@@ -61,14 +66,14 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
     @Override
     public void setActive(E element) {
         int first = this.firstActive.get();
-        int i = element.getIdxInV(parent);
+        int i = element.getIdx(parent);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = elements[--first];
             elements[first] = elements[i];
-            elements[first].setIdxInV(parent, first);
+            elements[first].setIdx(parent, first);
             elements[i] = tmp1;
-            elements[i].setIdxInV(parent, i);
+            elements[i].setIdx(parent, i);
             firstActive.add(-1);
         }
     }
@@ -76,14 +81,14 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
     @Override
     public void setPassive(E element) {
         int last = this.firstPassive.get();
-        int i = element.getIdxInV(parent);
+        int i = element.getIdx(parent);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = elements[--last];
             elements[last] = elements[i];
-            elements[last].setIdxInV(parent, last);
+            elements[last].setIdx(parent, last);
             elements[i] = tmp1;
-            elements[i].setIdxInV(parent, i);
+            elements[i].setIdx(parent, i);
             firstPassive.add(-1);
         }
     }
@@ -96,11 +101,11 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
         }
         if (size == elements.length - 1) {
             E[] tmp = elements;
-            elements = (E[]) new IVariableMonitor[size * 3 / 2 + 1];
+            elements = (E[]) new AbstractFineEventRecorder[size * 3 / 2 + 1];
             System.arraycopy(tmp, 0, elements, 0, size);
         }
         elements[size] = element;
-        element.setIdxInV(parent, size++);
+        element.setIdx(parent, size++);
         this.firstActive.add(1);
         this.firstPassive.add(1);
     }
@@ -114,7 +119,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends IVariabl
         System.arraycopy(elements, i + 1, elements, i, size - i - 1);
         size--;
         for (int j = i; j < size; j++) {
-            elements[j].setIdxInV(parent, j);
+            elements[j].setIdx(parent, j);
         }
         assert (this.firstPassive.getEnvironment().getWorldIndex() == 0);
         if (i < firstActive.get()) {

@@ -54,11 +54,11 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void initialPropagation() {
         this.env.worldPush();
         try {
-            propEngine.propagate();
+            solver.getEngine().propagate();
         } catch (ContradictionException e) {
             this.env.worldPop();
             solver.setFeasible(Boolean.FALSE);
-            propEngine.flush();
+            solver.getEngine().flush();
             interrupt();
         }
         this.searchWorldIndex = env.getWorldIndex();
@@ -149,10 +149,10 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             objectivemanager.apply(decision);
             objectivemanager.postDynamicCut();
 
-            propEngine.propagate();
+            solver.getEngine().propagate();
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flush();
+            solver.getEngine().flush();
             moveTo(UP_BRANCH);
             jumpTo = 1;
             smList.onContradiction(e);
@@ -195,7 +195,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         solver.getEnvironment().worldPush(); //issue#55
         try {
             objectivemanager.postDynamicCut();
-            propEngine.propagate();
+            solver.getEngine().propagate();
             nextState = OPEN_NODE;
         } catch (ContradictionException e) {
             interrupt();

@@ -47,8 +47,7 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         super(name, sol);
         components = vars;
         dim = vars.length;
-        this.makeList(this);
-        solver.associates(this);
+		solver.associates(this);
     }
 
     @Override
@@ -61,11 +60,19 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         return true;
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
     }
 
     @Override

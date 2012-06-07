@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -56,8 +57,8 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     protected int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
     private boolean flag_swap_during_execution = false; // a flag to capture propagator swapping during its execution
 
-    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver) {
-        super(variable, solver, props.length);
+    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver,IPropagationEngine engine) {
+        super(variable, solver, engine, props.length);
         int n = props.length;
         // CREATE EMPTY STRUCTURE
         this.idxVinPs = new int[n][];
@@ -68,7 +69,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
             int idx = p2i.get(pid);
             if (idx == -1) { // first occurrence of the variable
                 this.propagators[k] = propagator;
-                propagator.addRecorder(this);
                 p2i.put(pid, k);
                 propIdx[k] = k;
                 idxVinPs[k] = new int[]{idxVinP[i]};

@@ -35,6 +35,8 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -115,9 +117,10 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(vars), new PArc(dist), new PCons(ALLDIFF));
-        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(propagationEngine, vars), new PArc(propagationEngine, dist), new PCons(propagationEngine, ALLDIFF));
+        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
+        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
     }
 
     @Override
@@ -141,6 +144,6 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++)new AllIntervalSeries().execute(args);
+        for (int i = 0; i < 10; i++) new AllIntervalSeries().execute(args);
     }
 }

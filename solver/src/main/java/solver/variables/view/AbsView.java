@@ -130,7 +130,7 @@ public final class AbsView extends IntView {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -145,7 +145,7 @@ public final class AbsView extends IntView {
             boolean done = var.removeInterval(-to, -from, this);
             done |= var.removeInterval(from, to, this);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -170,7 +170,7 @@ public final class AbsView extends IntView {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -190,7 +190,7 @@ public final class AbsView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -212,7 +212,7 @@ public final class AbsView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -703,12 +703,12 @@ public final class AbsView extends IntView {
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
             } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyMonitors(EventType.BOUND, cause);
+                notifyPropagators(EventType.BOUND, cause);
             }
         } else {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
     }
 }

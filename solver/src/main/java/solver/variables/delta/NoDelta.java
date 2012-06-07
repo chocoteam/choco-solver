@@ -28,6 +28,7 @@
 package solver.variables.delta;
 
 import solver.ICause;
+import solver.exception.SolverException;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -53,12 +54,12 @@ public enum NoDelta implements IntDelta {
 
     @Override
     public AbstractSearchLoop getSearchLoop() {
-        return null;
+        throw new SolverException("NoDelta#getSearchLoop(): fordidden call!");
     }
 
     @Override
     public boolean timeStamped() {
-        return false;
+        throw new SolverException("NoDelta#timeStamped(): fordidden call!");
     }
 
     @Override

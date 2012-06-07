@@ -24,50 +24,17 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package solver.propagation;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
+import solver.propagation.generator.Generator;
 
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
+import java.io.Serializable;
+
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 06/06/12
  */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
-
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
-
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
-
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {}
-
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyPropagators(EventType.META, this);
-	}
-
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
-			}
-		}
-		return ESat.TRUE;
-	}
+public interface IPropagationStrategy<E extends ISchedulable> extends Generator<E>, IScheduler<E>, ISchedulable, Serializable {
 }

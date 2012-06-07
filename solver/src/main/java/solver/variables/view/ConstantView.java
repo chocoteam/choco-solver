@@ -29,7 +29,6 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
@@ -226,16 +225,6 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void activate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
-    public void desactivate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
     public boolean instantiated() {
         return true;
     }
@@ -253,11 +242,6 @@ public class ConstantView implements IntVar {
     @Override
     public void removeMonitor(IVariableMonitor monitor) {
         //useless
-    }
-
-    @Override
-    public IList getMonitors() {
-        return null;
     }
 
     @Override
@@ -282,11 +266,6 @@ public class ConstantView implements IntVar {
             explanation.add(solver.getExplainer().explain(this, constante));
         }
         return explanation;
-    }
-
-    @Override
-    public int nbMonitors() {
-        return 0;
     }
 
     @Override
@@ -315,8 +294,12 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         //void
+    }
+
+    @Override
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
     }
 
     @Override

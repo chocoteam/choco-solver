@@ -42,7 +42,6 @@ import solver.objective.MinObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.propagation.generator.PropagationStrategy;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
@@ -143,7 +142,6 @@ public class Solver implements Serializable {
         this.cstrs = new Constraint[32];
         cIdx = 0;
         this.environment = environment;
-        this.engine = new PropagationEngine();
         this.measures = new MeasuresRecorder(this);
         solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
@@ -173,8 +171,6 @@ public class Solver implements Serializable {
 
     public void setSearch(AbstractSearchLoop searchLoop) {
         this.search = searchLoop;
-        this.search.setPropEngine(engine);
-
     }
 
     public void set(AbstractStrategy strategies) {
@@ -182,13 +178,13 @@ public class Solver implements Serializable {
     }
 
     /**
-     * Set a propagation strategy to the propagation engine attached in <code>this</code>.
+     * Attach a propagation engine <code>this</code>.
      * It overrides the previously defined one, if any.
      *
-     * @param propagationStrategy a propagation strategy
+     * @param propagationEngine a propagation strategy
      */
-    public void set(PropagationStrategy propagationStrategy) {
-        this.engine.set(propagationStrategy);
+    public void set(IPropagationEngine propagationEngine) {
+        this.engine = propagationEngine;
     }
 
     /**
@@ -345,9 +341,10 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
-        if (!engine.hasStrategy()) {
-            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.DEFAULT.make(this));
+        if (engine == null) {
+            IPropagationEngine engine = new PropagationEngine(environment);
+            PropagationStrategies.DEFAULT.make(this, engine);
+            this.set(engine);
         }
         if (search.getStrategy() == null) {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
@@ -359,9 +356,10 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (!engine.hasStrategy()) {
-            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.DEFAULT.make(this));
+        if (engine == null) {
+            IPropagationEngine engine = new PropagationEngine(environment);
+            PropagationStrategies.DEFAULT.make(this, engine);
+            this.set(engine);
         }
         if (!engine.initialized()) {
             engine.init(this);

@@ -46,14 +46,11 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
 
     @SuppressWarnings({"unchecked"})
     public Queue(Generator<S>... generators) {
+        super(generators);
         int nbe = 0;
-        for (int i = 0; i < generators.length; i++) {
-            Generator gen = generators[i];
-            S[] elts = (S[]) gen.getElements();
-            for (int e = 0; e < elts.length; e++) {
-                elts[e].setScheduler(this, 0);
-                nbe++;
-            }
+        for (int e = 0; e < elements.length; e++) {
+            elements[e].setScheduler(this, e);
+            nbe++;
         }
         toPropagate = new FixSizeCircularQueue<S>(nbe);
     }

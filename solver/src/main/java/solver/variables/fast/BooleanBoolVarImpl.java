@@ -98,7 +98,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = solver.getEnvironment().getNextOffset();
         mValue = 0;
-        this.makeList(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,7 +193,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
                 return true;
             } else {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -372,13 +371,21 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         return new OneIntDeltaMonitor(delta, propagator);
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
     }
 
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
+    }
     /**
      * {@inheritDoc}
      *

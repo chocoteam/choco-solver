@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.propagation.IPropagationEngine;
 import solver.recorders.conditions.ICondition;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -55,8 +56,8 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public VarEventRecorderWithCondition(V variable, Propagator<V>[] propagators, int[] idxVinP,
-                                         ICondition condition, Solver solver) {
-        super(variable, propagators, solver);
+                                         ICondition condition, Solver solver,IPropagationEngine engine) {
+        super(variable, propagators, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);
         this.idxVinPs = idxVinP.clone();

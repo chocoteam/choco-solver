@@ -42,4 +42,6 @@ public interface Generator<S extends ISchedulable> extends Serializable{
 
     S[] getElements();
 
+    boolean isEmpty();
+
 }

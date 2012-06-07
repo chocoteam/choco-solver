@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 
 /**
@@ -46,11 +47,9 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
     int evtmask; // reference to events occuring -- inclusive OR over event mask
 
-    public CoarseEventRecorder(Propagator propagator, Solver solver) {
-        super(solver.getSearchLoop());
+    public CoarseEventRecorder(Propagator propagator, Solver solver,IPropagationEngine engine) {
+        super(solver, engine);
         this.propagator = propagator;
-        this.evtmask = 0;
-        propagator.addRecorder(this);
     }
 
     @Override
@@ -95,7 +94,7 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             propagator.propagate(_evt);
         }
         // unfreeze (and eventually unschedule) every fine event attached to this propagator
-        propagator.forEachFineEvent(virtExec.set(propagator));
+        engine.onPropagatorExecution(propagator);
         return true;
     }
 

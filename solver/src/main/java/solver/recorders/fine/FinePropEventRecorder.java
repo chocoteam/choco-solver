@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -50,8 +51,8 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     // BEWARE a variable can occur more than one time in a propagator !!
     protected int[][] idxVinP; //; // index of each variable within P -- immutable
 
-    public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver) {
-        super(variables, propagator, solver, variables.length);
+    public FinePropEventRecorder(V[] variables, Propagator<V> propagator, int[] idxVinPs, Solver solver, IPropagationEngine engine) {
+        super(variables, propagator, solver, engine, variables.length);
         int n = variables.length;
         this.idxVinP = new int[n][];
         int k = 0; // count the number of unique variable
@@ -63,7 +64,6 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
                 this.variables[k] = variable;
                 v2i.put(vid, k);
                 varIdx[k] = k;
-                variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
                 idxVinP[k] = new int[]{idxVinPs[i]};
                 k++;
             } else { // snd or more occurrence of the variable
@@ -147,7 +147,6 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     @Override
     public void desactivate(Propagator<V> element) {
         for (int i = 0; i < nbUVar; i++) {
-            variables[varIdx[i]].desactivate(this);
             this.evtmasks[i] = 0;
         }
     }
