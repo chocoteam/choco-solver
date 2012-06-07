@@ -31,20 +31,18 @@ import choco.kernel.ResolutionPolicy;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
+import solver.Cause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.ternary.Max;
-import solver.propagation.IPropagationEngine;
-import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.SortDyn;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.exception.ContradictionException;
+import solver.search.limits.LimitBox;
+import solver.search.loop.monitors.Abstract_LNS_SearchMonitor;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.restart.RestartFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.BoolVar;
@@ -92,7 +90,7 @@ public class AirPlaneLanding extends AbstractProblem {
 
 
     @Option(name = "-d", usage = "Airplan landing Data.", required = false)
-    Data mData = Data.airland1;
+    Data mData = Data.airland2;
 
     //DATA
     private int[][] data;
@@ -201,7 +199,7 @@ public class AirPlaneLanding extends AbstractProblem {
         });
 //        solver.set(StrategyFactory.domwdegMindom(planes, solver));
         solver.set(new StrategiesSequencer(solver.getEnvironment(),
-                StrategyFactory.inputOrderMinVal(bVars, solver.getEnvironment()),
+                StrategyFactory.random(bVars, solver.getEnvironment()),
                 StrategyFactory.inputOrderMinVal(planes, solver.getEnvironment())
         ));
 
@@ -223,14 +221,50 @@ public class AirPlaneLanding extends AbstractProblem {
                         ),
                         Policy.FIXPOINT
                 ));*/
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        solver.set(pengine.set(new Sort(
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars())),
-                new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine, solver.getCstrs())))));
+        /*solver.set(new Sort(
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars())),
+                new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()))));
+        */
+        SearchMonitorFactory.restart(solver, RestartFactory.geometrical(200, 1.2), LimitBox.failLimit(solver, 100), 100);
+        if (true) {
+            solver.getSearchLoop().plugSearchMonitor(new Abstract_LNS_SearchMonitor(solver, false) {
+
+                private int coeff = 10;
+
+                private int bestCost = objective.getUB() + 1;
+
+                @Override
+                protected boolean isSearchComplete() {
+                    return coeff == 1;
+                }
+
+                @Override
+                protected void recordSolution() {
+                    if ((objective.getValue() > bestCost)) {
+                        throw new UnsupportedOperationException();
+                    }
+                    bestCost = objective.getValue();
+                    System.out.println("new objective : " + bestCost);
+                }
+
+                @Override
+                protected void fixSomeVariables() throws ContradictionException {
+                    objective.updateUpperBound(bestCost/coeff -1, Cause.Null);
+                }
+
+                @Override
+                protected void restrictLess() {
+                    coeff /= 2;
+                }
+            });
+        }else{
+            SearchMonitorFactory.log(solver, true, false);
+        }
     }
 
     @Override
     public void solve() {
+        //solver.getSearchLoop().getLimitsBox().setTimeLimit(20000);
         solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
     }
 

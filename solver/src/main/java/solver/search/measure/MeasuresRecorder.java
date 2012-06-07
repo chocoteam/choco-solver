@@ -85,6 +85,15 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         backtrackCount = 0;
         restartCount = 0;
         failCount = 0;
+        solutionCount = 0;
+        objectiveIntValue = Integer.MAX_VALUE;
+        hasObjective = false;
+        readingTimeCount = 0;
+        initialisationTimeCount = 0;
+        initialPropagationTimeCount = 0;
+        propagationCount = 0;
+        eventCount = 0;
+        cstrs = null;
     }
 
 
@@ -365,7 +374,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
                 solver.getCstrs().length,
 //                solver.getEngine().getNbRequests()
                 0
-                ));
+        ));
 
         return st.toString();
     }

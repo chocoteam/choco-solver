@@ -24,35 +24,84 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.strategy.decision;
 
-package solver.search.loop;
-
-import solver.search.loop.monitors.ISearchMonitor;
-
-import java.io.Serializable;
+import com.sun.istack.internal.Nullable;
+import solver.constraints.Constraint;
+import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 6 oct. 2010
+ * @since 01/06/12
  */
-public interface ISearchLoop extends Serializable {
+public enum RootDecision implements Decision{
+    ME;
 
-    /**
-     * Solves the problem states by the solver.
-     *
-     * @return a Boolean indicating wether the problem is satisfiable, not satisfiable or unknown
-     */
-    Boolean launch();
+    @Override
+    public boolean hasNext() {
+        return false;
+    }
 
-    Boolean resume();
+    @Override
+    public void buildNext() {}
 
-    void reset();
+    @Override
+    public void apply() throws ContradictionException {
+    }
 
-    /**
-     * Branch a search monitor
-     * @param sm
-     */
-    void plugSearchMonitor(ISearchMonitor sm);
+    @Override
+    public void setPrevious(Decision decision) {
+    }
+
+    @Override
+    public Decision getPrevious() {
+        return null;
+    }
+
+    @Override
+    public void free() {
+    }
+
+    @Override
+    public Deduction getNegativeDeduction() {
+        return null;
+    }
+
+    @Override
+    public Deduction getPositiveDeduction() {
+        return null;
+    }
+
+    @Override
+    public Constraint getConstraint() {
+        return null;
+    }
+
+    @Override
+    public Explanation explain(@Nullable Deduction d) {
+        return null;
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
+    public void incFail() {
+    }
+
+    @Override
+    public long getFails() {
+        return 0;
+    }
 }

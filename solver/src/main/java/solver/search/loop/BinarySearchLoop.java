@@ -32,6 +32,7 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -61,6 +62,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             solver.getEngine().flush();
             interrupt();
         }
+        this.env.worldPush(); // push another wolrd to recorver the state after initial propagation
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         strategy.init();
@@ -78,7 +80,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void openNode() {
         Decision tmp = decision;
         decision = strategy.getDecision();
-        if (decision != null) {
+        if (decision != null) { // null means there is no more decision
             decision.setPrevious(tmp);
             moveTo(DOWN_LEFT_BRANCH);
         } else {
@@ -111,9 +113,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
-//            throw new SolverException("The search cannot be resumed. \n" +
-//                    "Be sure you are respecting one of these call configurations :\n " +
-//                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+            throw new SolverException("The search cannot be resumed. \n" +
+                    "Be sure you are respecting one of these call configurations :\n " +
+                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
         previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);
@@ -169,10 +171,9 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     @Override
     protected void upBranch() {
         env.worldPop();
-//      if (env.getWorldIndex() == rootWorldIndex) {
-        if (env.getWorldIndex() <= searchWorldIndex && decision==null){//BEWARE JG patch temporaire
+        //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
+        if (decision == RootDecision.ME) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
-//			System.out.println("world index "+env.getWorldIndex());
             interrupt();
         } else {
             jumpTo--;
