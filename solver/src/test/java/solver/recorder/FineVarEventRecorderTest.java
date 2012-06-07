@@ -26,13 +26,24 @@
  */
 package solver.recorder;
 
+import org.easymock.EasyMock;
+import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
+import solver.propagation.PropagationEngine;
+import solver.recorders.fine.FineVarEventRecorder;
 import solver.recorders.fine.VarEventRecorder;
+import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDelta;
-import solver.variables.delta.IIntDeltaMonitor;
+
+import java.lang.reflect.Field;
+
+import static org.easymock.EasyMock.*;
 
 
 /**
@@ -45,73 +56,47 @@ public class FineVarEventRecorderTest {
 
     Solver solver = null;
     IntVar iv1 = null;
-
-    IDelta d1 = null;
-    IIntDeltaMonitor id1, id2, id3, id4, id5;
     Propagator p1, p2, p3, p4, p5;
     VarEventRecorder<IntVar> ver = null;
     IScheduler s1 = null;
+    IPropagationEngine engine;
 
 
-    /*@BeforeMethod
+    @BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
-        // delta
-        d1 = createMock(IDelta.class);
+        engine = new PropagationEngine(solver.getEnvironment());
         // int var
         iv1 = createMock(IntVar.class);
-        iv1.getDelta();
-        expectLastCall().andReturn(d1);
-        iv1.addMonitor(anyObject(FineVarEventRecorder.class));
-
+        expect(iv1.getId()).andReturn(0).times(1);
         // first proapagator
         p1 = createMock(Propagator.class);
-        expect(p1.getId()).andReturn(1).times(2);
-        p1.addRecorder(anyObject(FineVarEventRecorder.class));
-        id1 = createMock(IIntDeltaMonitor.class);
-        iv1.monitorDelta(p1);
-        expectLastCall().andReturn(id1);
+        expect(p1.getId()).andReturn(1).times(3);
         // snd propagator
         p2 = createMock(Propagator.class);
         p2.getId();
-        expectLastCall().andReturn(2);
-        p2.addRecorder(anyObject(FineVarEventRecorder.class));
-        id2 = createMock(IIntDeltaMonitor.class);
-        iv1.monitorDelta(p2);
-        expectLastCall().andReturn(id2);
+        expectLastCall().andReturn(2).times(2);
         // third propagator
         p3 = createMock(Propagator.class);
         p3.getId();
-        expectLastCall().andReturn(3);
-        p3.addRecorder(anyObject(FineVarEventRecorder.class));
-        id3 = createMock(IIntDeltaMonitor.class);
-        iv1.monitorDelta(p3);
-        expectLastCall().andReturn(id3);
+        expectLastCall().andReturn(3).times(2);
         // fourth propagator
         p4 = createMock(Propagator.class);
         p4.getId();
-        expectLastCall().andReturn(4);
-        p4.addRecorder(anyObject(FineVarEventRecorder.class));
-        id4 = createMock(IIntDeltaMonitor.class);
-        iv1.monitorDelta(p4);
-        expectLastCall().andReturn(id4);
+        expectLastCall().andReturn(4).times(2);
         // fifth propagator
         p5 = createMock(Propagator.class);
         p5.getId();
-        expectLastCall().andReturn(5);
-        p5.addRecorder(anyObject(FineVarEventRecorder.class));
-        id5 = createMock(IIntDeltaMonitor.class);
-        iv1.monitorDelta(p5);
-        expectLastCall().andReturn(id5);
+        expectLastCall().andReturn(5).times(2);
+        
+        replay(iv1, p1, p2, p3, p4, p5);
 
-        replay(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        ver = new FineVarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p1, p2, p3, p4, p5},
+                new int[]{0, 5, 1, 0, 2, 1}, solver, engine);
+         engine.addEventRecorder(ver);
+        verify(iv1, p1, p2, p3, p4, p5);
+        reset(iv1, p1, p2, p3, p4, p5);
 
-        ver = new FineVarEventRecorder<IntVar>(iv1, new Propagator[]{p1, p1, p2, p3, p4, p5}, new int[]{0, 5, 1, 0, 2, 1}, solver);
-
-        verify(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-        reset(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-
-        iv1.activate(anyObject(IVariableMonitor.class));
         p1.getId();
         expectLastCall().andReturn(1);
         p2.getId();
@@ -120,8 +105,7 @@ public class FineVarEventRecorderTest {
         expectLastCall().andReturn(3);
         p4.getId();
         expectLastCall().andReturn(4).times(2);
-        id4.clear();
-        replay(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(iv1, p1, p2, p3, p4, p5);
 
         ver.activate(p1);
         ver.activate(p2);
@@ -132,7 +116,7 @@ public class FineVarEventRecorderTest {
         s1 = EasyMock.createMock(IScheduler.class);
         ver.setScheduler(s1, 0);
 
-        resetToDefault(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        resetToDefault(iv1, p1, p2, p3, p4, p5);
     }
 
     private <E, T> E get(String name, Class clazz, T inst) {
@@ -166,7 +150,7 @@ public class FineVarEventRecorderTest {
     public void testbasics() {
         Assert.assertEquals(ver.getVariables(), new IntVar[]{iv1});
         Assert.assertEquals(ver.getPropagators(), new Propagator[]{p1, p2, p3, p4, p5});
-        Assert.assertEquals(ver.getIdxInV(iv1), 0);
+        Assert.assertEquals(ver.getIdx(iv1), 0);
     }
 
     @Test
@@ -187,39 +171,24 @@ public class FineVarEventRecorderTest {
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p1.decArity();
         expectLastCall().times(2);
-        id1.clear();
         p3.getId();
         expectLastCall().andReturn(3);
         p3.getPropagationConditions(0);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p3.decArity();
-        id3.clear();
-        replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-        ver.onUpdate(iv1, EventType.INSTANTIATE, p2);
-        verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-        reset(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(p1, p2, p3, p4, p5);
+        ver.afterUpdate(iv1, EventType.INSTANTIATE, p2);
+        verify(p1, p2, p3, p4, p5);
+        reset(p1, p2, p3, p4, p5);
         // <--END PREPARING-->
 
         // PROPAGATOR 1
         p1.getId();
-        expectLastCall().andReturn(1).times(2);
+        expectLastCall().andReturn(1);
         p1.isActive();
         expectLastCall().andReturn(true);
         p1.propagate(ver, 0, EventType.INSTANTIATE.getStrengthenedMask());
-        expectLastCall().andAnswer(new IAnswer<Object>() {
-            public Object answer() throws Throwable {
-                Invocation inv = LastControl.getCurrentInvocation();
-                ((FineVarEventRecorder) inv.getArguments()[0]).desactivate(
-                        (Propagator) LastControl.getCurrentInvocation().getMock());
-                return null;
-            }
-        });
-        p1.isPassive();
-        expectLastCall().andReturn(true);
-        // DELTA MONITOR 1
-        id1.freeze();
-        id1.clear();
-        id1.unfreeze();
+        p1.propagate(ver, 5, EventType.INSTANTIATE.getStrengthenedMask());
         // PROPAGATOR 2
         p2.getId();
         expectLastCall().andReturn(2);
@@ -229,17 +198,13 @@ public class FineVarEventRecorderTest {
         p3.isActive();
         expectLastCall().andReturn(true);
         p3.propagate(ver, 0, EventType.INSTANTIATE.getStrengthenedMask());
-        // DELTA MONITOR 1
-        id3.freeze();
-        id3.unfreeze();
 
-
-        replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(p1, p2, p3, p4, p5);
 
         // RUN METHOD
         ver.execute();
 
-        verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        verify(p1, p2, p3, p4, p5);
 
     }
 
@@ -256,19 +221,17 @@ public class FineVarEventRecorderTest {
         p2.getPropagationConditions(1);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p2.decArity();
-        id2.clear();
         p3.getId();
         expectLastCall().andReturn(3);
         p3.getPropagationConditions(0);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p3.decArity();
-        id3.clear();
         s1.schedule(ver);
-        replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(p1, p2, p3, p4, p5);
 
-        ver.onUpdate(iv1, EventType.INSTANTIATE, p1);
+        ver.afterUpdate(iv1, EventType.INSTANTIATE, p1);
 
-        verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        verify(p1, p2, p3, p4, p5);
         int[] masks = get("evtmasks", FineVarEventRecorder.class, ver);
         Assert.assertEquals(masks[0], EventType.VOID.mask);
         Assert.assertEquals(masks[1], EventType.INSTANTIATE.getStrengthenedMask());
@@ -284,16 +247,13 @@ public class FineVarEventRecorderTest {
 
         p1.getId();
         expectLastCall().andReturn(1);
-        id1.clear();
         p2.getId();
         expectLastCall().andReturn(2);
-        id2.clear();
         p3.getId();
         expectLastCall().andReturn(3);
-        id3.clear();
-        replay(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(p1, p2, p3, p4, p5);
         ver.flush();
-        verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        verify(p1, p2, p3, p4, p5);
         masks = get("evtmasks", FineVarEventRecorder.class, ver);
         Assert.assertEquals(masks[0], 0);
         Assert.assertEquals(masks[1], 0);
@@ -310,24 +270,18 @@ public class FineVarEventRecorderTest {
         // p5 is not yet active
         // p1, p2 then p3 are virtually executed
         // RESULTS : ver is removed from scheduler
-        iv1.getDelta();
-        expectLastCall().andReturn(d1).times(3);
-        d1.lazyClear();
-        expectLastCall().times(3);
         p1.incNbRecorderEnqued();
         p1.getId();
         expectLastCall().andReturn(1).times(1);
-        id1.unfreeze();
         p2.incNbRecorderEnqued();
         p2.getId();
         expectLastCall().andReturn(2).times(1);
-        id2.unfreeze();
         p3.incNbRecorderEnqued();
         p3.getId();
         expectLastCall().andReturn(3).times(1);
-        id3.unfreeze();
+        p5.incNbRecorderEnqued();
 
-        replay(iv1, d1, p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
+        replay(iv1, p1, p2, p3, p4, p5);
 
         ver.enqueue();
         int[] masks = {1, 1, 1, 1, 1};
@@ -337,8 +291,8 @@ public class FineVarEventRecorderTest {
         ver.virtuallyExecuted(p2);
         ver.virtuallyExecuted(p3);
 
-        verify(p1, p2, p3, p4, p5, id1, id2, id3, id4, id5);
-    }*/
+        verify(p1, p2, p3, p4, p5);
+    }
 
 
 }
