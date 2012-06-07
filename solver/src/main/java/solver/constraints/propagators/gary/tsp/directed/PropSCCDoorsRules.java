@@ -49,6 +49,7 @@ import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
+
 import java.util.BitSet;
 
 /**
@@ -61,6 +62,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	private DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	private int n;
 	private PairProcedure arcRemoved;
 	private BitSet sccComputed;
@@ -79,6 +81,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 							 IDirectedGraph rg) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcRemoved  = new RemArc();
 		this.nR = nR;
@@ -112,8 +115,9 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		sccComputed.clear();
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

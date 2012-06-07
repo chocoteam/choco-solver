@@ -39,6 +39,8 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.delta.IGraphDeltaMonitor;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.view.IView;
 
 
@@ -47,7 +49,8 @@ import solver.variables.view.IView;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IView, GraphVar<E>> implements Variable<IGraphDelta, IView>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
+        implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************
@@ -67,7 +70,6 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		super("G", solver);
 		solver.associates(this);
 		this.environment = solver.getEnvironment();
-		this.makeList(this);
 	}
 
 	//***********************************************************************************
@@ -110,7 +112,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 				delta.add(x,IGraphDelta.NR,cause);
 			}
 			EventType e = EventType.REMOVENODE;
-			notifyMonitors(e, cause);
+			notifyPropagators(e, cause);
 			return true;
 		}
 		return false;
@@ -124,7 +126,7 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 					delta.add(x,IGraphDelta.NE,cause);
 				}
 				EventType e = EventType.ENFORCENODE;
-				notifyMonitors(e, cause);
+				notifyPropagators(e, cause);
 				return true;
 			}
 			return false;
@@ -188,20 +190,33 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 		return getName();
 	}
 
-	@Override
-	public void analyseAndAdapt(int mask) {
-		super.analyseAndAdapt(mask);
-		if (!reactOnModification) {
+    @Override
+    public void createDelta() {
+        if (!reactOnModification) {
 			reactOnModification = true;
 			delta = new GraphDelta(solver.getSearchLoop());
 		}
-	}
+    }
 
-	public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new GraphDeltaMonitor(delta, propagator);
+    }
+
+	public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
 		if ((modificationEvents & event.mask) != 0) {
-			records.forEach(afterModification.set(this, event, cause));
+			//records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
 		}
 		notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
 	}
 
 	@Override

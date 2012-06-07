@@ -46,8 +46,10 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.Delta;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
+import solver.variables.delta.monitor.IntDeltaMonitor;
 import solver.variables.view.IntView;
 
 /**
@@ -56,7 +58,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView, IntVar> implements IntVar {
+public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, IntVar> implements IntVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -81,7 +83,6 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
         this.LB = env.makeInt(min);
         this.UB = env.makeInt(max);
         this.SIZE = env.makeInt(max - min + 1);
-        this.makeList(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +154,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
                 solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
@@ -217,7 +218,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
             this.UB.set(value);
             this.SIZE.set(1);
 
-            this.notifyMonitors(e, cause);
+            this.notifyPropagators(e, cause);
             return true;
         } else {
             this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -266,7 +267,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 
                 solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
@@ -318,7 +319,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
                         cause = Cause.Null;
                     }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
                 solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
@@ -415,20 +416,34 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IntView
     ///// methode liees au fait qu'une variable est observable /////
     ////////////////////////////////////////////////////////////////
 
+
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+    public void createDelta() {
+        if (!reactOnRemoval) {
             delta = new Delta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    @Override
+    public IntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new IntDeltaMonitor(delta, propagator);
+    }
+
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

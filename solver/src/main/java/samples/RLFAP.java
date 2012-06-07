@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.nary.Count;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -174,10 +176,11 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        solver.set(new Sort(
-                new Queue(new PCoarse(solver.getCstrs())),
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
-        ));
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        solver.set(pengine.set(new Sort(
+                new Queue(new PCoarse(pengine, solver.getCstrs())),
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()))
+        )));
     }
 
     @Override

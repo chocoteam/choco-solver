@@ -24,50 +24,38 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package solver.variables.delta;
 
-import choco.kernel.ESat;
-import solver.Solver;
-import solver.constraints.Constraint;
+import choco.kernel.common.util.procedure.IntProcedure;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.MetaVariable;
-import solver.variables.Variable;
 
-/**When a variable of vars is modified then the metavariable (to which it should belong) is notified
- * @author Jean-Guillaume Fages
+/**
+ * <br/>
  *
+ * @author Charles Prud'homme
+ * @since 25/05/12
  */
-public class MetaVarPropagator extends Propagator {
-	
-	MetaVariable meta;
+public interface IIntDeltaMonitor extends IDeltaMonitor<IntDelta>{
 
-	public MetaVarPropagator(Variable[] vars, MetaVariable meta, Solver solver, Constraint constraint) {
-		super(vars, solver, constraint, PropagatorPriority.UNARY, true);
-		this.meta = meta;
-	}
+    void forEach(IntProcedure proc, EventType eventType) throws ContradictionException;
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK(); //TODO if components are not IntVar : add events
-	}
+    public static enum Default implements IIntDeltaMonitor {
+		NONE() {
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {}
+			@Override
+			public void freeze() {}
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyPropagators(EventType.META, this);
-	}
-
-	@Override
-	public ESat isEntailed() {
-		for(int i=0;i<vars.length; i++){
-			if(!vars[i].instantiated()){
-				return ESat.UNDEFINED;
+			@Override
+			public void unfreeze() {
 			}
-		}
-		return ESat.TRUE;
+			@Override
+			public void clear() {
+			}
+
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+            }
+        }
 	}
 }

@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
 import solver.objective.NoObjectiveManager;
-import solver.propagation.IPropagationEngine;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -102,9 +101,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
     int stateAfterSolution = UP_BRANCH;
 
-    /* Reference to the propagation pilot */
-    protected IPropagationEngine propEngine;
-
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
 
@@ -172,10 +168,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         searchWorldIndex = -1;
         previousSolutionCount = 0;
         this.measures.reset();
-    }
-
-    public void setPropEngine(IPropagationEngine propEngine) {
-        this.propEngine = propEngine;
     }
 
     protected void loadProperties(Properties properties) {
@@ -274,7 +266,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        propEngine.init(solver);
+        solver.getEngine().init(solver);
         this.nextState = INITIAL_PROPAGATION;
     }
 

@@ -36,12 +36,10 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
-import solver.propagation.IPropagationEngine;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
 import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.metrics.Belong;
 import solver.search.strategy.enumerations.sorters.metrics.IMetric;
-import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -97,13 +95,10 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
 	protected int staticPropagationPriority;
 
-	protected final IPropagationEngine engine;
-
 	public Constraint(V[] vars, Solver solver) {
 		this.vars = vars.clone();
 		this.solver = solver;
 		this.lastPropagatorActive = solver.getEnvironment().makeInt();
-		this.engine = solver.getEngine();
 	}
 
 
@@ -111,7 +106,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	public Constraint(Solver solver) {
 		this.solver = solver;
 		this.lastPropagatorActive = solver.getEnvironment().makeInt();
-		this.engine = solver.getEngine();
 	}
 
 	public V[] getVariables() {
@@ -284,6 +278,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 * @throws ContradictionException expected behavior
 	 */
 	protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
-		engine.fails(cause, variable, message);
+		solver.getEngine().fails(cause, variable, message);
 	}
 }

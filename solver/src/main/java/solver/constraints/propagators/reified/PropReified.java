@@ -34,11 +34,13 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.coarse.CoarseEventRecorder;
+import solver.exception.SolverException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
+
+import java.lang.reflect.Field;
 
 /**
  * <br/>
@@ -57,50 +59,64 @@ public class PropReified extends Propagator<Variable> {
 
     protected final IStateInt lastActiveR, lastActiveL;
 
-    private static PropagatorPriority extractPriority(Constraint cons, Constraint oppCons) {
+    private static PropagatorPriority extractPriority(Propagator[] cons, Propagator[] oppCons) {
         int pc = 0;
         int poc = 0;
-        for (int i = 0; i < cons.propagators.length; i++) {
-            pc = Math.max(pc, cons.propagators[i].getPriority().priority);
+        for (int i = 0; i < cons.length; i++) {
+            pc = Math.max(pc, cons[i].getPriority().priority);
         }
-        for (int i = 0; i < cons.propagators.length; i++) {
-            poc = Math.max(poc, oppCons.propagators[i].getPriority().priority);
+        for (int i = 0; i < oppCons.length; i++) {
+            poc = Math.max(poc, oppCons[i].getPriority().priority);
         }
         return PropagatorPriority.get(Math.max(pc, poc));
 
     }
 
     public PropReified(Variable[] vars,
-                       Constraint cons,
-                       Constraint oppCons,
+                       Propagator[] cons,
+                       Propagator[] oppCons,
                        Solver solver,
                        Constraint<Variable, Propagator<Variable>> owner) {
         super(vars, solver, owner, extractPriority(cons, oppCons), false);
         this.bVar = (BoolVar) vars[0];
-        left = cons.propagators.clone();
-        right = oppCons.propagators.clone();
+        left = cons;
+        right = oppCons;
+        Field state = null;
 
-        lastActiveL = environment.makeInt(left.length);
-        lastActiveR = environment.makeInt(right.length);
-
+        try {
+            state = Propagator.class.getDeclaredField("state");
+            state.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        if(state == null){
+            throw new SolverException("");
+        }
         for (int i = 0; i < left.length; i++) {
             // disconnect propagator from variable
             for (int j = 0; j < left[i].getNbVars(); j++) {
                 left[i].getVar(j).unlink(left[i]);
+
             }
-            // force creation of coarse recorder
-            left[i].addRecorder(new CoarseEventRecorder(left[i], solver));
-            left[i].setActive();
+            try {
+                ((IStateInt)state.get(left[i])).set(ACTIVE);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
         for (int i = 0; i < right.length; i++) {
             // disconnect propagator from variable
             for (int j = 0; j < right[i].getNbVars(); j++) {
                 right[i].getVar(j).unlink(right[i]);
             }
-            // force creation of coarse recorder
-            right[i].addRecorder(new CoarseEventRecorder(right[i], solver));
-            right[i].setActive();
+            try {
+                ((IStateInt)state.get(right[i])).set(ACTIVE);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
         }
+        lastActiveL = environment.makeInt(left.length);
+        lastActiveR = environment.makeInt(right.length);
     }
 
     @Override

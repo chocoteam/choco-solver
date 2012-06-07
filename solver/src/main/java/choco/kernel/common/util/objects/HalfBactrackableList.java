@@ -26,12 +26,12 @@
  */
 package choco.kernel.common.util.objects;
 
+import choco.kernel.common.Indexable;
 import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.exception.ContradictionException;
-import solver.variables.IVariableMonitor;
-import solver.variables.Variable;
+import solver.recorders.fine.AbstractFineEventRecorder;
 
 /**
  * STATIC.......[<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -41,11 +41,13 @@ import solver.variables.Variable;
  *
  * @author Charles Prud'homme
  * @since 14/11/11
+ * @deprecated 2 x slower than the BacktrableList
  */
-public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor<V>> implements IList<V, E> {
+@Deprecated
+public class HalfBactrackableList<K, E extends Indexable<K>> implements IList<E> {
 
     private static final int OFFSET = 100000;
-    private static final int SIZE = 8;
+    private static final int SIZE = 16;
 
 
     protected int sIdx;  // index of static objects
@@ -57,9 +59,9 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
     protected int world; // world of first adding in dynamic structure
     protected E[] sElements, dElements; // null at creation
 
-    protected final V parent;
+    protected final K parent;
 
-    public HalfBactrackableList(V variable, IEnvironment environment) {
+    public HalfBactrackableList(K variable, IEnvironment environment) {
         this.parent = variable;
         sIdx = 0;
         dIdx = environment.makeInt();
@@ -79,7 +81,7 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
     }
 
     public void setActive(E element) {
-        if (element.getIdxInV(parent) < OFFSET) {
+        if (element.getIdx(parent) < OFFSET) {
             sActivate(element);
         } else {
             dActivate(element);
@@ -87,7 +89,7 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
     }
 
     public void setPassive(E element) {
-        if (element.getIdxInV(parent) < OFFSET) {
+        if (element.getIdx(parent) < OFFSET) {
             sPassivate(element);
         } else {
             dPassivate(element);
@@ -95,7 +97,7 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
     }
 
     public void remove(E element) {
-        if (element.getIdxInV(parent) < OFFSET) {
+        if (element.getIdx(parent) < OFFSET) {
             sRemove(element);
         } else {
             dRemove(element);
@@ -139,14 +141,14 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
 
     private void sAdd(E element) {
         if (sElements == null) {
-            sElements = (E[]) new IVariableMonitor[SIZE];
+            sElements = (E[]) new AbstractFineEventRecorder[SIZE];
         }
         if (sElements.length <= sIdx) {
             E[] tmp = sElements;
-            sElements = (E[]) new IVariableMonitor[3 / 2 * sElements.length + 1];
+            sElements = (E[]) new AbstractFineEventRecorder[3 / 2 * sElements.length + 1];
             System.arraycopy(tmp, 0, sElements, 0, sIdx);
         }
-        element.setIdxInV(parent, sIdx);
+        element.setIdx(parent, sIdx);
         sElements[sIdx++] = element;
         this.sFirstActive.add(1);
         this.sFirstPassive.add(1);
@@ -154,16 +156,16 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
 
     private void dAdd(E element) {
         if (dElements == null) {
-            dElements = (E[]) new IVariableMonitor[SIZE];
+            dElements = (E[]) new AbstractFineEventRecorder[SIZE];
             world = dIdx.getEnvironment().getWorldIndex();
         }
         int idx = dIdx.get();
         if (dElements.length <= idx) {
             E[] tmp = dElements;
-            dElements = (E[]) new IVariableMonitor[3 / 2 * dElements.length + 1];
+            dElements = (E[]) new AbstractFineEventRecorder[3 / 2 * dElements.length + 1];
             System.arraycopy(tmp, 0, dElements, 0, idx);
         }
-        element.setIdxInV(parent, idx + OFFSET);
+        element.setIdx(parent, idx + OFFSET);
         dElements[idx++] = element;
         dIdx.add(1);
         this.dFirstActive.add(1);
@@ -172,14 +174,14 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
 
     private void sActivate(E element) {
         int first = this.sFirstActive.get();
-        int i = element.getIdxInV(parent);
+        int i = element.getIdx(parent);
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = sElements[--first];
             sElements[first] = sElements[i];
-            sElements[first].setIdxInV(parent, first);
+            sElements[first].setIdx(parent, first);
             sElements[i] = tmp1;
-            sElements[i].setIdxInV(parent, i);
+            sElements[i].setIdx(parent, i);
             sFirstActive.add(-1);
         }
     }
@@ -187,28 +189,28 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
 
     private void dActivate(E element) {
         int first = this.dFirstActive.get();
-        int i = element.getIdxInV(parent) - OFFSET;
+        int i = element.getIdx(parent) - OFFSET;
         if (first > i) {
             // swap element at pos "first" with element at pos "i"
             E tmp1 = dElements[--first];
             dElements[first] = dElements[i];
-            dElements[first].setIdxInV(parent, first + OFFSET);
+            dElements[first].setIdx(parent, first + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIdxInV(parent, i + OFFSET);
+            dElements[i].setIdx(parent, i + OFFSET);
             dFirstActive.add(-1);
         }
     }
 
     private void sPassivate(E element) {
         int last = this.sFirstPassive.get();
-        int i = element.getIdxInV(parent);
+        int i = element.getIdx(parent);
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = sElements[--last];
             sElements[last] = sElements[i];
-            sElements[last].setIdxInV(parent, last);
+            sElements[last].setIdx(parent, last);
             sElements[i] = tmp1;
-            sElements[i].setIdxInV(parent, i);
+            sElements[i].setIdx(parent, i);
             sFirstPassive.add(-1);
         }
 
@@ -216,26 +218,26 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
 
     public void dPassivate(E element) {
         int last = this.dFirstPassive.get();
-        int i = element.getIdxInV(parent) - OFFSET;
+        int i = element.getIdx(parent) - OFFSET;
         if (last > i) {
             // swap element at pos "last" with element at pos "i"
             E tmp1 = dElements[--last];
             dElements[last] = dElements[i];
-            dElements[last].setIdxInV(parent, last + OFFSET);
+            dElements[last].setIdx(parent, last + OFFSET);
             dElements[i] = tmp1;
-            dElements[i].setIdxInV(parent, i + OFFSET);
+            dElements[i].setIdx(parent, i + OFFSET);
             dFirstPassive.add(-1);
         }
     }
 
     private void sRemove(E e) {
-        int i = e.getIdxInV(parent);
+        int i = e.getIdx(parent);
         E[] tmp = sElements;
-        sElements = (E[]) new IVariableMonitor[tmp.length - 1];
+        sElements = (E[]) new AbstractFineEventRecorder[tmp.length - 1];
         System.arraycopy(tmp, 0, sElements, 0, i);
         System.arraycopy(tmp, i + 1, sElements, i, tmp.length - i - 1);
         for (int j = i; j < sElements.length; j++) {
-            sElements[j].setIdxInV(parent, j);
+            sElements[j].setIdx(parent, j);
         }
         if (i < sFirstActive.get()) {
             this.sFirstActive.add(-1);
@@ -244,13 +246,13 @@ public class HalfBactrackableList<V extends Variable, E extends IVariableMonitor
     }
 
     private void dRemove(E e) {
-        int i = e.getIdxInV(parent) - OFFSET;
+        int i = e.getIdx(parent) - OFFSET;
         E[] tmp = dElements;
-        dElements = (E[]) new IVariableMonitor[tmp.length - 1];
+        dElements = (E[]) new AbstractFineEventRecorder[tmp.length - 1];
         System.arraycopy(tmp, 0, dElements, 0, i);
         System.arraycopy(tmp, i + 1, dElements, i, tmp.length - i - 1);
         for (int j = i; j < dElements.length; j++) {
-            dElements[j].setIdxInV(parent, j + OFFSET);
+            dElements[j].setIdx(parent, j + OFFSET);
         }
         assert (this.dFirstPassive.getEnvironment().getWorldIndex() == world);
         if (i < dFirstActive.get()) {

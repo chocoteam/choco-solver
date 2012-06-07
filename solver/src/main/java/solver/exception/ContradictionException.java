@@ -28,6 +28,7 @@
 package solver.exception;
 
 import com.sun.istack.internal.NotNull;
+import org.slf4j.LoggerFactory;
 import solver.Cause;
 import solver.ICause;
 import solver.variables.Variable;
@@ -51,6 +52,8 @@ public final class ContradictionException extends Exception {
 
     private static final long serialVersionUID = 2L;
 
+    public static final boolean DEBUG_CONTRADICTION = false;
+
     @NotNull
     public ICause c = Cause.Null;
     public Variable v = null;
@@ -71,6 +74,7 @@ public final class ContradictionException extends Exception {
         this.c = c;
         this.v = v;
         this.s = s;
+        if (DEBUG_CONTRADICTION) LoggerFactory.getLogger("solver").info("\t!! {}", this.toString());
         return this;
     }
 

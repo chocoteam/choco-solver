@@ -39,6 +39,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
@@ -71,9 +72,15 @@ public class PropDomainChanneling extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
+    protected final IIntDeltaMonitor[] idms;
+
     public PropDomainChanneling(BoolVar[] bs, IntVar x, Solver solver,
                                 Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.append(bs, new IntVar[]{x}), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         this.dsize = bs.length;
         oldinf = environment.makeInt();
         oldsup = environment.makeInt();
@@ -128,12 +135,12 @@ public class PropDomainChanneling extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             //val = the current value
-            final int val = vars[idxVarInProp].getValue();
+            final int val = vars[varIdx].getValue();
 
-            if (idxVarInProp == dsize) {
+            if (varIdx == dsize) {
                 //We instantiate the assignment var
                 //val = index to keep
                 vars[val].instantiateTo(1, this);
@@ -142,11 +149,11 @@ public class PropDomainChanneling extends Propagator<IntVar> {
                 //We instantiate a boolean var
                 if (val == 1) {
                     //We report the instantiation to the associated assignment var
-                    vars[dsize].instantiateTo(idxVarInProp, this);
+                    vars[dsize].instantiateTo(varIdx, this);
                     //Next line should be useless ?
-                    clearBooleanExcept(idxVarInProp);
+                    clearBooleanExcept(varIdx);
                 } else {
-                    vars[dsize].removeValue(idxVarInProp, this);
+                    vars[dsize].removeValue(varIdx, this);
                     if (vars[dsize].instantiated()) {
                         vars[vars[dsize].getValue()].instantiateTo(1, this);
                     }
@@ -154,15 +161,17 @@ public class PropDomainChanneling extends Propagator<IntVar> {
             }
         } else {
             if (EventType.isInclow(mask)) {
-                clearBoolean(oldinf.get(), vars[idxVarInProp].getLB());
-                oldinf.set(vars[idxVarInProp].getLB());
+                clearBoolean(oldinf.get(), vars[varIdx].getLB());
+                oldinf.set(vars[varIdx].getLB());
             }
             if (EventType.isDecupp(mask)) {
-                clearBoolean(vars[idxVarInProp].getUB() + 1, oldsup.get() + 1);
-                oldsup.set(vars[idxVarInProp].getUB());
+                clearBoolean(vars[varIdx].getUB() + 1, oldsup.get() + 1);
+                oldsup.set(vars[varIdx].getUB());
             }
             if (EventType.isRemove(mask)) {
-                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc, EventType.REMOVE);
+                idms[varIdx].freeze();
+                idms[varIdx].forEach(rem_proc, EventType.REMOVE);
+                idms[varIdx].unfreeze();
             }
         }
 

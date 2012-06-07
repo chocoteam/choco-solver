@@ -74,11 +74,11 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                         previous.apply();
                         previous = previous.getPrevious();
                     }
-                    propEngine.propagate();
+                    solver.getEngine().propagate();
                 }
                 recordSolution();
             } catch (ContradictionException e) {
-                propEngine.flush();
+                solver.getEngine().flush();
                 moveTo(UP_BRANCH);
                 jumpTo = 1;
                 smList.onContradiction(e);
@@ -105,11 +105,11 @@ public class AdvancedBinarySearchLoop extends BinarySearchLoop {
                 prev.apply();
                 prev = prev.getPrevious();
             }
-            propEngine.propagate();
+            solver.getEngine().propagate();
             nbPrevisouDecisions.set(0);
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
-            propEngine.flush();
+            solver.getEngine().flush();
             nbPrevisouDecisions.add(1);
             moveTo(UP_BRANCH);
             jumpTo = 1;

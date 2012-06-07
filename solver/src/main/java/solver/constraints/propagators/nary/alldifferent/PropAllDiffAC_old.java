@@ -38,6 +38,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,6 +49,7 @@ public class PropAllDiffAC_old extends Propagator<IntVar> {
 
     //IntVar var;
     //int idxVar; // index of var in struct
+    protected final IIntDeltaMonitor[] idms;
     public MatchingStructure struct;
     protected final RemProc rem_proc;
     protected final Solver solver;
@@ -59,6 +61,10 @@ public class PropAllDiffAC_old extends Propagator<IntVar> {
         //this.var = var;
         //this.idxVar = idxVar;
         this.solver = solver;
+        this.idms = new IIntDeltaMonitor[vars.length];
+        for (int i = 0; i < vars.length; i++){
+            idms[i] = vars[i].monitorDelta(this);
+        }
         rem_proc = new RemProc(this);
     }
 
@@ -114,7 +120,9 @@ public class PropAllDiffAC_old extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             struct.updateMatchingOnInstantiation(varIdx, var.getValue(), this);
         } else {
-            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }

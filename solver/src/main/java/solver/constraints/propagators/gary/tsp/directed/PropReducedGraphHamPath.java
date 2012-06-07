@@ -52,6 +52,7 @@ import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
+
 import java.util.BitSet;
 
 /**
@@ -71,6 +72,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 
 	private int n; 					// number of nodes in G
 	private DirectedGraphVar G;					// the graph variable
+    GraphDeltaMonitor gdm;
 	private IStateInt[] sccOf;		// SCC of each node
 	private IStateInt[] sccFirst,sccNext; // nodes of each scc
 	private INeighbors[] mates;		// arcs of G that fit with outgoing arcs of a node in G_R
@@ -94,6 +96,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 	public PropReducedGraphHamPath(DirectedGraphVar graph, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		G = graph;
+        gdm = (GraphDeltaMonitor) G.monitorDelta(this);
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
 		G_R = new StoredDirectedGraph(environment, n, GraphType.DOUBLE_LINKED_LIST);
@@ -229,8 +232,9 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		sccComputed.clear();
 		if((mask & EventType.REMOVEARC.mask)!=0){
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,G);
+			gdm.freeze();
 			gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            gdm.unfreeze();
 		}
 		int to,x;
 		for(int i=0;i<n;i++){

@@ -26,10 +26,15 @@
  */
 package solver.propagation;
 
+import choco.kernel.common.util.procedure.Procedure;
+import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.generator.PropagationStrategy;
+import solver.recorders.coarse.AbstractCoarseEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.io.Serializable;
@@ -42,13 +47,6 @@ import java.io.Serializable;
  * @since 05/12/11
  */
 public interface IPropagationEngine extends Serializable {
-
-    /**
-     * Return <code>true</code> if a strategy has been defined and attached to <code>this</code>.
-     *
-     * @return <code>true</code> if a strategy has been defined and attached to <code>this</code>
-     */
-    boolean hasStrategy();
 
     /**
      * Is <code>this</code> initialized ?
@@ -65,12 +63,29 @@ public interface IPropagationEngine extends Serializable {
     void init(Solver solver);
 
     /**
+     * Skip the completness check -- the strategy can then be incomplete
+     */
+    void skipCompletnessCheck();
+
+    /**
+     * Skip initial propagation.
+     * DO not post coarse event recorder
+     */
+    void skipInitialPropagation();
+
+    /**
+     * Schedule constraints for coarse propagation
+     */
+    void forceInitialPropagation();
+
+    /**
      * Attach a strategy to <code>this</code>.
      * Override previously defined one.
      *
      * @param propagationStrategy a group
+     * @return this
      */
-    void set(PropagationStrategy propagationStrategy);
+    IPropagationEngine set(IPropagationStrategy propagationStrategy);
 
     /**
      * Reach a fixpoint
@@ -96,4 +111,44 @@ public interface IPropagationEngine extends Serializable {
 
     boolean isMarked(int id1, int id2, int id3);
 
+    //********************************//
+    //      SERVICES FOR UPDATING     //
+    //********************************//
+
+    /**
+     * Take into account the modification of a variable
+     *
+     * @param variable  modified variable
+     * @param procedure procedure to apply
+     * @throws ContradictionException
+     */
+    void onVariableUpdate(Variable variable, Procedure procedure) throws ContradictionException;
+
+    void onPropagatorExecution(Propagator propagator);
+
+    /**
+     * Take into account the requirement of propagator execution
+     *
+     * @param propagator propagator to schedule
+     * @param event      event attached
+     */
+    void schedulePropagator(@NotNull Propagator propagator, EventType event);
+
+    /**
+     * Set the propagator as activated within the propagation engine
+     *
+     * @param propagator propagator to activate
+     */
+    void activatePropagator(Propagator propagator);
+
+    /**
+     * Set the propagator as inactivated within the propagation engine
+     *
+     * @param propagator propagator to desactivate
+     */
+    void desactivatePropagator(Propagator propagator);
+
+    void addEventRecorder(AbstractFineEventRecorder fer);
+
+    void addEventRecorder(AbstractCoarseEventRecorder er);
 }

@@ -43,6 +43,7 @@ public class LimitsTest {
     protected static Solver modelit() {
         NQueenBinary pb =new NQueenBinary();
         pb.readArgs("-q", "12");
+        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
         return pb.getSolver();

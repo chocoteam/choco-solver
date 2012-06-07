@@ -61,7 +61,7 @@ public class AllTest {
         this(new AllIntervalSeries(), new String[]{"-o", "5"},
                 Environments.TRAIL.make(),
                 new AllSolverProp(
-                        SearchLoops.BINARY_WITH_RECOMPUTATION,
+                        SearchLoops.BINARY,
                         ExplanationFactory.NONE),
                 PropagationStrategies.ONE_QUEUE_WITH_ARCS, 2);
     }
