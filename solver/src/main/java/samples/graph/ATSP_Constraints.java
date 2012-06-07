@@ -31,6 +31,7 @@ import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.PoolManager;
 import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Cause;
 import solver.ICause;
 import solver.Solver;
@@ -59,6 +60,8 @@ import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.graph.ArcStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -69,8 +72,7 @@ import solver.variables.graph.directedGraph.IDirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.*;
-import java.util.BitSet;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
@@ -83,7 +85,7 @@ public class ATSP_Constraints {
 
 	private static final long TIMELIMIT = 60000;
 	private static String outFile = "atsp.csv";
-	private static int seed = 0;
+	private static long seed = 0;
 	// instance
 	private static String instanceName;
 	private static int[][] distanceMatrix;
@@ -135,8 +137,8 @@ public class ATSP_Constraints {
 
 	public static void solve() {
 		createModel();
-		addPropagatorsAfterGlowStyle();
-//		addPropagators();
+//		addPropagatorsAfterGlowStyle();
+		addPropagators();
 		configureAndSolve();
 	}
 
@@ -186,7 +188,7 @@ public class ATSP_Constraints {
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 //		if(config.get(allDiff)){
-			gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
+		gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
 //		}
 		// STRUCTURAL FILTERING
 		if (config.get(arbo)) {
@@ -246,7 +248,7 @@ public class ATSP_Constraints {
 			gc.addPropagators(map);
 			relax = map;
 		}else{
-			if(config.get(rg) && bst){// BST-based HK
+			if(config.get(rg) && bst){ // BST-based HK
 				System.out.println("BST");
 				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
@@ -261,82 +263,14 @@ public class ATSP_Constraints {
 				relax = propHK_mst;
 			}
 		}
-		solver.post(gc);
-	}
-
-	public static void addPropagatorsAfterGlowStyle() {
-		// BASIC MODEL
-		int[] succs = new int[n];
-		int[] preds = new int[n];
-		for(int i=0;i<n;i++){
-			succs[i] = preds[i] = 1;
-		}
-		succs[n-1] = preds[0] = 0;
-		gc.addPropagators(new PropAtMostNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtLeastNSuccessors(graph,succs,gc,solver));
-		gc.addPropagators(new PropAtMostNPredecessors(graph,preds,gc,solver));
-		gc.addPropagators(new PropAtLeastNPredecessors(graph,preds,gc,solver));
-		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
-
-		if (config.get(rg)) {
-			PropReducedGraphHamPath RP = new PropReducedGraphHamPath(graph, gc, solver);
-			nR = RP.getNSCC();
-			sccOf = RP.getSCCOF();
-			outArcs = RP.getOutArcs();
-			G_R = RP.getReducedGraph();
-			sccFirst = RP.getSCCFirst();
-			sccNext = RP.getSCCNext();
-			gc.addPropagators(RP);
-			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
-			gc.addPropagators(SCCP);
-		}
-		// COST BASED FILTERING
-//		if(instanceName.contains("rbg")){
-//			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
-//			gc.addPropagators(map);
-//			relax = map;
-//		}else{
-			if(config.get(rg) && bst){// BST-based HK
-				System.out.println("BST");
-				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
-				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addPropagators(propHK_bst);
-				relax = propHK_bst;
-			}
-			else{// MST-based HK
-				System.out.println("MST");
-				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addPropagators(propHK_mst);
-				relax = propHK_mst;
-			}
-//		}
-		gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
-		// IMPLIED STRUCTURE BASED FILTERING
-		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
-//		// STRUCTURAL FILTERING
-//		if(config.get(pos)){
-//			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
-//			try{
-//				pos[0].instantiateTo(0, Cause.Null);
-//				pos[n-1].instantiateTo(n - 1, Cause.Null);
-//			}catch(Exception e){
-//				e.printStackTrace();System.exit(0);
-//			}
-//			gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
-//			if(config.get(rg)){
-//				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
-//			}else{
-//				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
-//			}
-//			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
-//		}
 		solver.post(gc);
 	}
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
-		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
+//		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
+
+		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null, new OrderedArcs(graph, seed), GraphStrategy.NodeArcPriority.ARCS);
 
 //		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
 		solver.set(mainStrat);
@@ -389,7 +323,7 @@ public class ATSP_Constraints {
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost + ";"+searchMode[main_search]+";"+configst+"\n";
+				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost + ";"+searchMode[main_search]+";"+seed+";"+configst+"\n";
 		writeTextInto(txt, outFile);
 	}
 
@@ -400,7 +334,7 @@ public class ATSP_Constraints {
 	public static void main(String[] args) {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
-		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;search;seed;arbo;rg;undi;pos;adAC;bst;\n", outFile);
 		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
@@ -410,30 +344,33 @@ public class ATSP_Constraints {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		File folder = new File(dir);
 		String[] list = folder.list();
-		heuristic = ATSP_heuristics.enf_MinDeg;
+//		heuristic = ATSP_heuristics.rem_MaxRepCost;
 		main_search = 0;
 		configParameters(0);
 		for (String s : list) {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
-				if(n>0 && n<170){// || s.contains("p43.atsp")){
-					bst = false;
-					configParameters(0);
-					solve();
-//					configParameters((1<<arbo));
-//					solve();
+				if(n>50 && n<170 && !s.contains("p43.atsp")){
+					for(int k=0;k<100;k++){
+						seed = System.currentTimeMillis();
+						bst = false;
+						configParameters(0);
+						solve();
+						configParameters((1<<arbo));
+						solve();
 //					configParameters((1<<pos));
 //					solve();
-//					configParameters((1<<rg));
-//					solve();
-					bst = true;
-//					configParameters((1<<rg));
-//					solve();
+						configParameters((1<<rg));
+						solve();
+						bst = true;
+						configParameters((1<<rg));
+						solve();
+					}
 //					configParameters((1<<rg)+(1<<pos));
 //					solve();
-					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
-					solve();
+//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+//					solve();
 				}
 			}
 		}
@@ -750,4 +687,38 @@ public class ATSP_Constraints {
 		}
 	}
 
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	private static class OrderedArcs extends ArcStrategy<GraphVar> {
+
+		private ArrayList<Integer> arcs;
+
+		public OrderedArcs (GraphVar g, long seed){
+			super(g);
+			arcs = new ArrayList<Integer>(n*n);
+			for(int i=0;i<n;i++){
+				for(int j=0;j<n;j++){
+					arcs.add(i*n+j);
+				}
+			}
+			Collections.shuffle(arcs, new Random(seed));
+		}
+
+		@Override
+		public boolean computeNextArc() {
+			int i,j;
+			for(int a:arcs){
+				i = a/n;
+				j = a%n;
+				if(g.getEnvelopGraph().arcExists(i,j) && !g.getKernelGraph().arcExists(i,j)){
+					this.from = i;
+					this.to   = j;
+					return true;
+				}
+			}
+			this.from = this.to = -1;
+			return false;
+		}
+	}
 }
