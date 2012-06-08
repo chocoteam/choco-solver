@@ -141,6 +141,12 @@ public class SolverTest {
                     case 5:
                         conf(s, OPT);
                         break;
+                    case 6:
+                        conf(s, ALL, NEXT);
+                        break;
+                    case 7:
+                        conf(s, OPT, NEXT);
+                        break;
                     default:
                         alive = false;
 
@@ -177,24 +183,18 @@ public class SolverTest {
                         conf(s, ALL, ONE);
                         break;
                     case 6:
-                        conf(s, ALL, NEXT);
-                        break;
-                    case 7:
                         conf(s, ALL, ALL);
                         break;
-                    case 8:
+                    case 7:
                         conf(s, ALL, OPT);
                         break;
-                    case 9:
+                    case 8:
                         conf(s, OPT, ONE);
                         break;
-                    case 10:
-                        conf(s, OPT, NEXT);
-                        break;
-                    case 11:
+                    case 9:
                         conf(s, OPT, ALL);
                         break;
-                    case 12:
+                    case 10:
                         conf(s, OPT, OPT);
                         break;
                     default:

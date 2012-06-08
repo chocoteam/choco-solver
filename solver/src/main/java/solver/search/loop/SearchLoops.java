@@ -35,35 +35,33 @@ import solver.Solver;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-public class SearchLoops {
+public enum SearchLoops {
 
-    public static int _DEFAULT = 0; // 1: AdvancedBinarySearchLoop, other : BinarySearchLoop
-
-    protected SearchLoops() {
-    }
-
-    public static AbstractSearchLoop preset(Solver solver) {
-        switch (_DEFAULT) {
-            case 1:
-                return advancedBinarySearchLoop(solver);
-            case 2:
-                return binarySearchLoopWithRecomputation(solver);
-            default:
-                return binarySearchLoop(solver);
+    BINARY() {
+        @Override
+        public void make(Solver solver) {
+            solver.setSearch(new BinarySearchLoop(solver));
         }
-    }
+    },
+    /*ADVANCED_BINARY() {
+        @Override
+        public void make(Solver solver) {
+            solver.setSearch(new AdvancedBinarySearchLoop(solver));
+        }
+    },*/
+    /*BINARY_WITH_RECOMPUTATION() {
+        @Override
+        public void make(Solver solver) {
+            solver.setSearch(new BinarySearchLoopWithRecomputation(solver));
+        }
+    },*/
+    DEFAULT() {
+        @Override
+        public void make(Solver solver) {
+            BINARY.make(solver);
+        }
+    };
 
-
-    public static AbstractSearchLoop binarySearchLoop(Solver solver) {
-        return new BinarySearchLoop(solver);
-    }
-
-    public static AbstractSearchLoop binarySearchLoopWithRecomputation(Solver solver) {
-        return new BinarySearchLoopWithRecomputation(solver);
-    }
-
-    public static AbstractSearchLoop advancedBinarySearchLoop(Solver solver) {
-        return new AdvancedBinarySearchLoop(solver);
-    }
+    public abstract void make(Solver solver);
 
 }

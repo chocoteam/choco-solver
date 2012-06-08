@@ -35,12 +35,12 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
-import solver.recorders.IEventRecorder;
+import solver.propagation.PropagationEngine;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.PropEventRecorder;
 import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
 import java.lang.reflect.Field;
@@ -63,41 +63,44 @@ public class PropEventRecorderTest {
     Propagator p1;
     PropEventRecorder<IntVar> per = null;
     IScheduler s1 = null;
+    IPropagationEngine engine;
 
 
     @BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
+        engine = new PropagationEngine(solver.getEnvironment());
+        solver.set(engine);
+
         p1 = EasyMock.createMock(Propagator.class);
-        p1.addRecorder(EasyMock.<IEventRecorder>anyObject());
+        expect(p1.getId()).andReturn(0).times(2);
         // VAR 1
         iv1 = EasyMock.createMock(IntVar.class);
         iv1.getId();
-        expectLastCall().andReturn(1).times(2);
-        iv1.addMonitor(anyObject(IVariableMonitor.class));
+        expectLastCall().andReturn(1).times(4);
         // VAR 2
         iv2 = EasyMock.createMock(IntVar.class);
         iv2.getId();
-        expectLastCall().andReturn(2);
-        iv2.addMonitor(anyObject(IVariableMonitor.class));
+        expectLastCall().andReturn(2).times(3);
         // VAR 3
         iv3 = EasyMock.createMock(IntVar.class);
         iv3.getId();
-        expectLastCall().andReturn(3);
-        iv3.addMonitor(anyObject(IVariableMonitor.class));
+        expectLastCall().andReturn(3).times(3);
         cer = createMock(CoarseEventRecorder.class);
 
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
-        per = new PropEventRecorder<IntVar>(new IntVar[]{iv1, iv2, iv3, iv1}, p1, solver);
-
-        verify(iv1, iv2, iv3, cer, p1);
-        reset(iv1, iv2, iv3, cer, p1);
+        per = new PropEventRecorder<IntVar>(new IntVar[]{iv1, iv2, iv3, iv1}, p1, solver, engine);
+        engine.addEventRecorder(per);
+        cer = new CoarseEventRecorder(p1, solver, engine);
+        engine.addEventRecorder(cer);
+        verify(iv1, iv2, iv3, p1);
+        reset(iv1, iv2, iv3, p1);
 
         s1 = EasyMock.createMock(IScheduler.class);
         per.setScheduler(s1, 0);
 
-        reset(iv1, iv2, iv3, cer, p1);
+        reset(iv1, iv2, iv3, p1);
     }
 
     private <E, T> E get(String name, Class clazz, T inst) {
@@ -129,7 +132,7 @@ public class PropEventRecorderTest {
 
     @Test
     public void testbasics() {
-        Assert.assertEquals(per.getVariables(), new IntVar[]{iv1, iv2, iv3, iv1});
+        Assert.assertEquals(per.getVariables(), new IntVar[]{iv1, iv2, iv3});
         Assert.assertEquals(per.getPropagators(), new Propagator[]{p1});
         iv1.getId();
         expectLastCall().andReturn(1);
@@ -137,30 +140,24 @@ public class PropEventRecorderTest {
         expectLastCall().andReturn(1);
         iv3.getId();
         expectLastCall().andReturn(1);
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
 
-        Assert.assertEquals(per.getIdxInV(iv1), 0);
-        Assert.assertEquals(per.getIdxInV(iv2), 0);
-        Assert.assertEquals(per.getIdxInV(iv3), 0);
+        Assert.assertEquals(per.getIdx(iv1), 0);
+        Assert.assertEquals(per.getIdx(iv2), 0);
+        Assert.assertEquals(per.getIdx(iv3), 0);
 
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testactivate() throws ContradictionException {
-        iv1.activate(anyObject(IVariableMonitor.class));
-        iv2.activate(anyObject(IVariableMonitor.class));
-        iv3.activate(anyObject(IVariableMonitor.class));
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.activate(p1);
     }
 
     @Test
     public void testdesactivate() throws ContradictionException {
-        iv1.desactivate(anyObject(IVariableMonitor.class));
-        iv2.desactivate(anyObject(IVariableMonitor.class));
-        iv3.desactivate(anyObject(IVariableMonitor.class));
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.desactivate(p1);
     }
 
@@ -172,29 +169,31 @@ public class PropEventRecorderTest {
 
     @Test
     public void testafterupdate() throws ContradictionException {
-        set("coarseER", Propagator.class, p1, cer);
-        p1.forcePropagate(EventType.FULL_PROPAGATION);
+        set("solver", Propagator.class, p1, solver);
+        expect(p1.getId()).andReturn(0);
+        p1.getPropagationConditions();
+        expectLastCall().andReturn(EventType.FULL_PROPAGATION.mask);
         p1.decArity();
-        replay(iv1, iv2, iv3, cer, p1, s1);
+        replay(iv1, iv2, iv3, p1, s1);
 
         per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testflush() throws ContradictionException {
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.flush();
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
     }
 
     @Test
     public void testvirtExec() throws ContradictionException {
         p1.incNbRecorderEnqued();
-        replay(iv1, iv2, iv3, cer, p1);
+        replay(iv1, iv2, iv3, p1);
         per.enqueue();
         per.virtuallyExecuted(p1);
-        verify(iv1, iv2, iv3, cer, p1);
+        verify(iv1, iv2, iv3, p1);
 
     }
 

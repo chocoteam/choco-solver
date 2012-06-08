@@ -59,6 +59,7 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	int but,n;
 	private PairProcedure arcEnforced, arcRemoved;
 
@@ -75,6 +76,7 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 	public PropOnePredBut(DirectedGraphVar graph, int but, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		this.but = but;
 		arcEnforced = new EnfArc(this);
@@ -115,9 +117,10 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
         gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

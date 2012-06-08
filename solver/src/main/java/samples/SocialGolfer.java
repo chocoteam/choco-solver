@@ -78,8 +78,12 @@ public class SocialGolfer extends AbstractProblem {
     BoolVar[][][] P, M;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Social golfer "+g+"-"+w+"-"+s);
+    }
+
+    @Override
+    public void buildModel() {
         int p = g * s;  // number of players
 
         P = new BoolVar[p][g][w];

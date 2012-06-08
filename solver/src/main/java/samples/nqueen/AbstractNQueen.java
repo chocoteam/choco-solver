@@ -31,6 +31,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import samples.AbstractProblem;
+import solver.Solver;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 
@@ -49,6 +50,11 @@ public abstract class AbstractNQueen extends AbstractProblem {
     @Option(name = "-q", usage = "Number of queens.", required = false)
     int n = 12;
     IntVar[] vars;
+
+    @Override
+    public void createSolver() {
+        solver = new Solver("NQueen");
+    }
 
     @Override
     public void configureSearch() {

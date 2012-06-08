@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -81,6 +83,8 @@ public abstract class AbstractProblem {
         return solver;
     }
 
+    public abstract void createSolver();
+
     public abstract void buildModel();
 
     public abstract void configureSearch();
@@ -114,6 +118,7 @@ public abstract class AbstractProblem {
         if (this.readArgs(args)) {
             Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
+            this.createSolver();
             this.buildModel();
             this.configureSearch();
 
@@ -123,7 +128,9 @@ public abstract class AbstractProblem {
                     configureEngine();
                     break;
                 default:
-                    solver.set(policy.make(solver));
+                    IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+                    policy.make(solver, pengine);
+                    solver.set(pengine);
                     break;
             }
 

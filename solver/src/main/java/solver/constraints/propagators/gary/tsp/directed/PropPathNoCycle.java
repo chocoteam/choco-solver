@@ -61,6 +61,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	int n;
 	private PairProcedure arcEnforced;
 	private IStateInt[] origin,end,size;
@@ -80,6 +81,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 	public PropPathNoCycle(DirectedGraphVar graph, int source, int sink, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.n = g.getEnvelopGraph().getNbNodes();
 		arcEnforced = new EnfArc();
 		origin = new IStateInt[n];
@@ -116,8 +118,9 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

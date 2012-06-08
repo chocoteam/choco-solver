@@ -34,6 +34,8 @@ import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.unary.Member;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
 import solver.propagation.generator.PCons;
@@ -72,7 +74,7 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class Partition extends AbstractProblem {
     @Option(name = "-n", usage = "Partition size.", required = false)
-    int N = 2 * 24;
+    int N = 2 * 8;
 
     IntVar[] vars;
     IntVar[] Ovars;
@@ -80,9 +82,13 @@ public class Partition extends AbstractProblem {
     Constraint[] heavy = new Constraint[3];
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Partition " + N);
+    }
+
+    @Override
     public void buildModel() {
         int size = this.N / 2;
-        solver = new Solver();
         IntVar[] x, y;
         x = VariableFactory.enumeratedArray("x", size, 1, 2 * size, solver);
         y = VariableFactory.enumeratedArray("y", size, 1, 2 * size, solver);
@@ -151,15 +157,16 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureEngine() {
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
         Sort ad1 = new Sort(
                 new Seq(
                         new Increasing(EvtRecEvaluators.MinArityC),
                         new Increasing(EvtRecEvaluators.MinDomSize)
                 ),
-                new PArc(vars, new Predicate[]{new NotInCstrSet(heavy)}));
-        Sort ad2 = new Sort(new PCons(heavy));
-        Sort coar = new Sort(new PCoarse(heavy[2]));
-        solver.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut());
+                new PArc(propagationEngine, vars, new Predicate[]{new NotInCstrSet(heavy)}));
+        Sort ad2 = new Sort(new PCons(propagationEngine, heavy));
+        Sort coar = new Sort(new PCoarse(propagationEngine, heavy[2]));
+        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut()));
     }
 
     @Override

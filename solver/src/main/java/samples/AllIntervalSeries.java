@@ -35,6 +35,8 @@ import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.DistanceXYZ;
 import solver.constraints.unary.Member;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -62,7 +64,7 @@ import solver.variables.view.Views;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 5;
+    private int m = 1000;
 
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
     private boolean use_views = false;
@@ -74,9 +76,12 @@ public class AllIntervalSeries extends AbstractProblem {
     Constraint[] OTHERS;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
+        solver = new Solver("AllIntervalSeries");
+    }
 
-        solver = new Solver();
+    @Override
+    public void buildModel() {
         vars = VariableFactory.enumeratedArray("v", m, 0, m - 1, solver);
         dist = new IntVar[m - 1];
 
@@ -112,9 +117,10 @@ public class AllIntervalSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(vars), new PArc(dist), new PCons(ALLDIFF));
-        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(propagationEngine, vars), new PArc(propagationEngine, dist), new PCons(propagationEngine, ALLDIFF));
+        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
+        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
     }
 
     @Override
@@ -138,6 +144,6 @@ public class AllIntervalSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new AllIntervalSeries().execute(args);
+        for (int i = 0; i < 10; i++) new AllIntervalSeries().execute(args);
     }
 }

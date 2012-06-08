@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.binary.DistanceXYC;
 import solver.constraints.nary.Count;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.Queue;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -85,6 +87,10 @@ public class RLFAP extends AbstractProblem {
     int[] freqs;
     int[] rank;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("RLFAP " + dir);
+    }
 
     @Override
     public void buildModel() {
@@ -94,7 +100,6 @@ public class RLFAP extends AbstractProblem {
 
         TIntHashSet values = new TIntHashSet();
 
-        solver = new Solver("RLFAP " + dir);
         vars = new IntVar[_var.length];
 
         vars = new IntVar[_var[_var.length - 1][0]];
@@ -171,10 +176,11 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        solver.set(new Sort(
-                new Queue(new PCoarse(solver.getCstrs())),
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(solver.getVars()))
-        ));
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        solver.set(pengine.set(new Sort(
+                new Queue(new PCoarse(pengine, solver.getCstrs())),
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()))
+        )));
     }
 
     @Override

@@ -53,6 +53,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 	//***********************************************************************************
 
 	DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	EnfProc enf;
 	int n;
 
@@ -63,6 +64,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 	public PropAntiSymmetric(DirectedGraphVar graph, Constraint constraint,Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.UNARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		enf = new EnfProc(this);
 		n = g.getEnvelopGraph().getNbNodes();
 	}
@@ -85,8 +87,9 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(enf, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	@Override

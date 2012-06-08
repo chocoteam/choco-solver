@@ -34,76 +34,82 @@ import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
-public class NValues extends AbstractProblem{
+public class NValues extends AbstractProblem {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n;
-	private int k;
-	private IntVar[] vars;
+    private int n;
+    private int k;
+    private IntVar[] vars;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	
-	public NValues(int n, int k) {
-		this.n = n;
-		this.k = k;
-		System.out.println(n+" : "+k);
-	}
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    public NValues(int n, int k) {
+        this.n = n;
+        this.k = k;
+        System.out.println(n + " : " + k);
+    }
 
-	@Override
-	public void buildModel() { 
-		solver = new Solver();
-		vars = VariableFactory.enumeratedArray("vars", n, 0, n-1, solver);
-		vars[0] = VariableFactory.enumerated("vars_0", new int[]{2}, solver);
-		vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
-		vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
-		vars[3] = VariableFactory.enumerated("vars_3", new int[]{2,3}, solver);
-		IntVar nVal = VariableFactory.bounded("N_CC", k,k, solver);
-		solver.post(new AtMostNValues(vars,nVal,solver, AtMostNValues.Algo.Greedy));
-	}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void configureSearch() {
-		solver.set(StrategyFactory.minDomMinVal(vars,solver.getEnvironment()));
-	}
 
     @Override
-    public void configureEngine() {}
+    public void createSolver() {
+        solver = new Solver();
+    }
 
     @Override
-	public void solve() {
-		SearchMonitorFactory.log(solver, false, false);
-		solver.findAllSolutions();
+    public void buildModel() {
+        vars = VariableFactory.enumeratedArray("vars", n, 0, n - 1, solver);
+        vars[0] = VariableFactory.enumerated("vars_0", new int[]{2}, solver);
+        vars[1] = VariableFactory.enumerated("vars_1", new int[]{3}, solver);
+        vars[2] = VariableFactory.enumerated("vars_2", new int[]{2}, solver);
+        vars[3] = VariableFactory.enumerated("vars_3", new int[]{2, 3}, solver);
+        IntVar nVal = VariableFactory.bounded("N_CC", k, k, solver);
+        solver.post(new AtMostNValues(vars, nVal, solver, AtMostNValues.Algo.Greedy));
+    }
+
+    @Override
+    public void configureSearch() {
+        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
+    }
+
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
+    public void solve() {
+        SearchMonitorFactory.log(solver, false, false);
+        solver.findAllSolutions();
 //		solver.findSolution();
-	}
+    }
 
-	@Override
-	public void prettyOut() {
-		System.out.println(solver.getMeasures().getSolutionCount()+" sols");
-		System.out.println(solver.getMeasures().getFailCount()+" fails");
-		System.out.println(solver.getMeasures().getTimeCount()+" ms");
-		for(int i=0;i<n;i++){
-			System.out.println(vars[i]);
-		}
-	}
+    @Override
+    public void prettyOut() {
+        System.out.println(solver.getMeasures().getSolutionCount() + " sols");
+        System.out.println(solver.getMeasures().getFailCount() + " fails");
+        System.out.println(solver.getMeasures().getTimeCount() + " ms");
+        for (int i = 0; i < n; i++) {
+            System.out.println(vars[i]);
+        }
+    }
 
-	//***********************************************************************************
-	// MAIN
-	//***********************************************************************************
+    //***********************************************************************************
+    // MAIN
+    //***********************************************************************************
 
-	public static void main(String[] args) {
-		int n = 10;
-		int k = 3;
-		NValues nc = new NValues(n,k);
-		nc.execute();
-	}
+    public static void main(String[] args) {
+        int n = 10;
+        int k = 3;
+        NValues nc = new NValues(n, k);
+        nc.execute();
+    }
 }

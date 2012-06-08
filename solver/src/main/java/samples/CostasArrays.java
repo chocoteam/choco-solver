@@ -57,9 +57,13 @@ public class CostasArrays extends AbstractProblem {
 
 	IntVar[] vars,vectors;
 
+    @Override
+    public void createSolver() {
+        solver = new Solver("CostasArrays");
+    }
+
 	@Override
 	public void buildModel() {
-		solver = new Solver();
 		vars = VariableFactory.enumeratedArray("v", n, 0, n - 1, solver);
 		vectors = new IntVar[n*n-n];
 		int idx = 0;

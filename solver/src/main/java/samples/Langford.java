@@ -32,6 +32,8 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.strategy.StrategyFactory;
@@ -76,8 +78,12 @@ public class Langford extends AbstractProblem {
     Constraint alldiff;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Langford number");
+    }
+
+    @Override
+    public void buildModel() {
         // position of the colors
         // position[i], position[i+k], position[i+2*k]... occurrence of the same color
         position = VariableFactory.enumeratedArray("p", n * k, 0, k * n - 1, solver);
@@ -103,9 +109,10 @@ public class Langford extends AbstractProblem {
         /*Generator g1 = new PVar(position, new Predicate[]{new InCstrSet(lights)});
         Generator g2 = new PCons(alldiff);
         solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
-        solver.set(new Sort(
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PArc(solver.getVars())),
-                new Queue(new PCoarse(solver.getCstrs()))
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        solver.set(propagationEngine.set(new Sort(
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PArc(propagationEngine, solver.getVars())),
+                new Queue(new PCoarse(propagationEngine, solver.getCstrs())))
         ));
     }
 

@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.variables.IntVar;
 
 import java.io.Serializable;
@@ -78,7 +77,7 @@ public class FlowStructure implements Serializable {
     protected boolean compatibleFlow;
     protected IStateBool compatibleSupport;
 
-    protected final IPropagationEngine engine;
+    protected final Solver solver;
 
     /**
      * Constructor
@@ -91,9 +90,8 @@ public class FlowStructure implements Serializable {
     public FlowStructure(IntVar[] vars, int nbLeft, int nbRight, int[] low, int[] up, Solver solver) {
         this.nbLeftVertices = nbLeft;
         this.nbRightVertices = nbRight;
-        this.engine = solver.getEngine();
         this.nbVertices = this.nbLeftVertices + this.nbRightVertices + 1;
-
+        this.solver = solver;
         this.matchingSize = solver.getEnvironment().makeInt(0);
         this.queue = new IntQueue(this.nbVertices - 1);
         this.left2rightArc = new int[this.nbLeftVertices];
@@ -614,7 +612,7 @@ public class FlowStructure implements Serializable {
             updateMatching = false;
             if (this.matchingSize.get() < this.nbLeftVertices) {
                 if (!this.augmentFlow()) {
-                    engine.fails(propagator, null, "matching size < " + this.nbLeftVertices);
+                    solver.getEngine().fails(propagator, null, "matching size < " + this.nbLeftVertices);
                 }
             }
             refreshSCC();
@@ -632,7 +630,7 @@ public class FlowStructure implements Serializable {
         for (int j = 0; j < nbRightVertices; j++) {
             if (this.flow.get(j) > this.getMaxFlow(j)
                     || this.flow.get(j) < this.getMinFlow(j)) {
-                engine.fails(propagator, null, "inconsistent");
+                solver.getEngine().fails(propagator, null, "inconsistent");
             }
         }
     }

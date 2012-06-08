@@ -26,24 +26,11 @@
  */
 package solver.recorder;
 
-import choco.kernel.memory.IStateInt;
-import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.exception.SolverException;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.CoarseEventRecorder;
 import solver.recorders.fine.VarEventRecorder;
-import solver.variables.EventType;
-import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
-
-import java.lang.reflect.Field;
-
-import static org.easymock.EasyMock.*;
 
 
 /**
@@ -64,7 +51,7 @@ public class VarEventRecorderTest {
     VarEventRecorder<IntVar> ver = null;
 
 
-    @BeforeMethod
+   /* @BeforeMethod
     public void setUp() throws Exception {
         solver = new Solver();
         iv1 = createMock(IntVar.class);
@@ -211,7 +198,7 @@ public class VarEventRecorderTest {
         p2.forcePropagate(EventType.FULL_PROPAGATION);
         replay(iv1, cer, p1, p2, p3);
 
-        ver.afterUpdate(iv1, EventType.INSTANTIATE, p1);
+        ver.onUpdate(iv1, EventType.INSTANTIATE, p1);
 
         verify(iv1, cer, p1, p2, p3);
     }
@@ -282,6 +269,6 @@ public class VarEventRecorderTest {
 
         verify(iv1, cer, p1, p2, p3);
     }
-
+*/
 
 }

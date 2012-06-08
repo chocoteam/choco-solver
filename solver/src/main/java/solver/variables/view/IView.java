@@ -31,6 +31,7 @@ import solver.exception.ContradictionException;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.delta.IDelta;
+import solver.variables.delta.IDeltaMonitor;
 
 /**
  * <br/>
@@ -38,7 +39,7 @@ import solver.variables.delta.IDelta;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView<D extends IDelta, W extends IView> extends ICause, Variable<D, W> {
+public interface IView<D extends IDelta, DM extends IDeltaMonitor<D>, W extends IView> extends ICause, Variable<D, DM, W> {
 
     /**
      * Return the basis variable

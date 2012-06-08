@@ -27,6 +27,7 @@
 package solver.variables.delta.view;
 
 import solver.ICause;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.delta.IntDelta;
 
 /**
@@ -78,5 +79,15 @@ public abstract class ViewDelta implements IntDelta {
     @Override
     public void lazyClear() {
         delta.lazyClear();
+    }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return delta.getSearchLoop();
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return delta.timeStamped();
     }
 }

@@ -34,6 +34,8 @@ import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.strategy.StrategyFactory;
@@ -44,6 +46,7 @@ import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+
 import java.io.File;
 
 /**
@@ -153,7 +156,8 @@ public class TSPmaster extends AbstractParallelMaster<TSPslave>{
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphStrategy(undi, null, new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		// resolution
 		solver.findSolution();
 		checkUndirected(solver, undi, totalCost, distMatrix);

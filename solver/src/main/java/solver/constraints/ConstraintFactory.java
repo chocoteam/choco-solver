@@ -35,6 +35,7 @@ import solver.constraints.unary.EqualXC;
 import solver.constraints.unary.NotEqualXC;
 import solver.constraints.unary.Relation;
 import solver.variables.IntVar;
+import solver.variables.view.Views;
 
 /**
  * A factory to simplify creation of <code>Constraint</code> objects, waiting for a model package.
@@ -154,6 +155,18 @@ public class ConstraintFactory {
      * <br/>Based on <code>Sum</code> constraint.
      *
      * @param x      a <code>IntVar</code> object
+     * @param c      a constant
+     * @param solver
+     */
+    public static Constraint lt(IntVar x, int c, Solver solver) {
+        return new GreaterOrEqualX_YC(Views.fixed(c, solver), x, 1, solver);
+    }
+
+    /**
+     * Create a <b>X < Y</b> constraint.
+     * <br/>Based on <code>Sum</code> constraint.
+     *
+     * @param x      a <code>IntVar</code> object
      * @param y      a <code>IntVar</code> object
      * @param solver
      */
@@ -183,6 +196,18 @@ public class ConstraintFactory {
      */
     public static Constraint geq(IntVar x, int c, Solver solver) {
         return new Relation(x, Relation.R.GQ, c, solver);
+    }
+
+    /**
+     * Create a <b>X > Y</b> constraint.
+     * <br/>Based on <code>Sum</code> constraint.
+     *
+     * @param x      a <code>IntVar</code> object
+     * @param c      a constant
+     * @param solver
+     */
+    public static Constraint gt(IntVar x, int c, Solver solver) {
+        return new GreaterOrEqualX_YC(x, Views.fixed(c, solver), 1, solver);
     }
 
     /**

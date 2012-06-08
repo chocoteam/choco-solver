@@ -62,8 +62,12 @@ public class Photo extends AbstractProblem {
     IntVar violations;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Photo");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         positions = VariableFactory.boundedArray("pos", data.people(), 0, data.people() - 1, solver);
         violations = VariableFactory.bounded("viol", 0, data.preferences().length, solver);
 

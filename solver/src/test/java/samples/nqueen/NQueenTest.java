@@ -30,13 +30,13 @@ package samples.nqueen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.search.loop.SearchLoops;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -75,11 +75,6 @@ public class NQueenTest {
         this.size = size;
     }
 
-    @BeforeTest(alwaysRun = true)
-    private void beforeTest() {
-        SearchLoops._DEFAULT = slType;
-    }
-
     private String parameters() {
         StringBuilder st = new StringBuilder();
         st.append("(s:").append(size);
@@ -96,6 +91,7 @@ public class NQueenTest {
 
     protected Solver modeler(AbstractNQueen nq, int size) {
         nq.readArgs("-q", Integer.toString(size));
+        nq.createSolver();
         nq.buildModel();
         nq.configureSearch();
         return nq.getSolver();
@@ -162,7 +158,8 @@ public class NQueenTest {
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
-                PropagationStrategies.values()[t].make(sol);
+                IPropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
+                PropagationStrategies.values()[t].make(sol, pengine);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
@@ -181,8 +178,9 @@ public class NQueenTest {
             long node = sol.getMeasures().getNodeCount();
             for (int t = 0; t < PropagationStrategies.values().length; t++) {
                 sol = modeler(new NQueenBinary(), j);
+                IPropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
                 // default group
-                PropagationStrategies.values()[t].make(sol);
+                PropagationStrategies.values()[t].make(sol, pengine);
                 sol.findAllSolutions();
                 Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
                 Assert.assertEquals(sol.getMeasures().getNodeCount(), node);

@@ -49,6 +49,8 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -234,8 +236,8 @@ public class Robustness {
 //		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null, new OrderedArcs(graph, seed), GraphStrategy.NodeArcPriority.ARCS);
 //		solver.set(mainStrat);
 		solver.set(StrategyFactory.graphLexico(graph));
-		PArc allArcs = new PArc(gc);
-		solver.set(new Sort(allArcs).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE

@@ -32,11 +32,10 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.Sum;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PVar;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationStrategies;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -53,14 +52,18 @@ import solver.variables.VariableFactory;
 public class MagicSeries extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 400;
+    int n = 500;
     IntVar[] vars;
 
     Constraint[] counts;
 
     @Override
+    public void createSolver() {
+        solver = new Solver("Magic series");
+    }
+
+    @Override
     public void buildModel() {
-        solver = new Solver();
         vars = new IntVar[n];
 
         vars = VariableFactory.boundedArray("var", n, 0, n - 1, solver);
@@ -88,9 +91,25 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        Sort s1 = new Sort( new PVar(solver.getVars()));
-        Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(s1, s2));
+        /*IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        Sort s1 = new Sort( new PVar(pengine, solver.getVars()));
+        Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine, solver.getCstrs()));
+        solver.set(pengine.set(new Sort(s1, s2)));*/
+
+        final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs());
+        PropagationStrategies.PRIORITY_QUEUES_WITH_PROPS.make(solver, engine);
+        solver.set(engine);
+        final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment());
+        PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, engine2);
+        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+            @Override
+            public void afterInitialPropagation() {
+
+                solver.set(engine2);
+                engine2.skipInitialPropagation();
+                engine2.init(solver);
+            }
+        });
     }
 
     @Override
@@ -118,6 +137,6 @@ public class MagicSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new MagicSeries().execute(args);
+        for (int i = 0; i < 10; i++) new MagicSeries().execute("-log", "QUIET");
     }
 }

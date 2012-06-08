@@ -32,7 +32,6 @@ import solver.Solver;
 import solver.exception.SolverException;
 import solver.objective.IObjectiveManager;
 import solver.objective.NoObjectiveManager;
-import solver.propagation.IPropagationEngine;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorList;
@@ -40,6 +39,7 @@ import solver.search.measure.IMeasures;
 import solver.search.solution.ISolutionPool;
 import solver.search.solution.SolutionPoolFactory;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.RootDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.Variable;
 
@@ -80,8 +80,8 @@ import java.util.Properties;
  */
 public abstract class AbstractSearchLoop implements ISearchLoop {
 
-//    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
-	public int timeStamp;
+    //    public static int timeStamp; // keep an int, that's faster than a long, and the domain of definition is large enough
+    public int timeStamp;
 
     static final int INIT = 0;
     static final int INITIAL_PROPAGATION = 1;
@@ -101,9 +101,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
     int stateAfterSolution = UP_BRANCH;
 
-    /* Reference to the propagation pilot */
-    protected IPropagationEngine propEngine;
-
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
 
@@ -112,7 +109,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* initila world index, before initial propagation (can be different from 0) */
     int rootWorldIndex;
 
-    /* world index just after initial propagation (commonly rootWorldIndex + 1) */
+    /* world index just after initial propagation (commonly rootWorldIndex + 2) */
     int searchWorldIndex;
 
     /* store the next state of the search loop.
@@ -149,7 +146,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IObjectiveManager objectivemanager = NoObjectiveManager.get();
 
     private boolean alive;
-    public Decision decision;
+    public Decision decision = RootDecision.ME;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
@@ -161,10 +158,16 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         this.nextState = INIT;
         this.limitsfactory = new LimitBox(this);
         loadProperties(solver.properties);
+        rootWorldIndex = -1;
     }
 
-    public void setPropEngine(IPropagationEngine propEngine) {
-        this.propEngine = propEngine;
+    public void reset() {
+        this.nextState = INIT;
+        restaureRootNode();
+        rootWorldIndex = -1;
+        searchWorldIndex = -1;
+        previousSolutionCount = 0;
+        this.measures.reset();
     }
 
     protected void loadProperties(Properties properties) {
@@ -263,7 +266,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public void initialize() {
         this.rootWorldIndex = env.getWorldIndex();
         previousSolutionCount = 0;
-        propEngine.init(solver);
+        solver.getEngine().init(solver);
         this.nextState = INITIAL_PROPAGATION;
     }
 
@@ -319,10 +322,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     }
 
     public void restaureRootNode() {
-        env.worldPopUntil(searchWorldIndex);
+        env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
         timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
-        while (decision != null) {
+        while (decision != RootDecision.ME) {
             tmp = decision;
             decision = tmp.getPrevious();
             tmp.free();

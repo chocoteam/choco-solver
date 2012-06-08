@@ -1,10 +1,9 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="Propagation" verbose="1" >
-  <test name="NQueen" >
+  <test name="All" >
     <classes>
-        <class name="samples.nqueen.NQueenTestFactory" />
-        <class name="choco.propagation.proba.nqueen.NQueenTestFactory" />
+        <class name="samples.AllTestFactory" />
     </classes>
   </test>
 </suite>

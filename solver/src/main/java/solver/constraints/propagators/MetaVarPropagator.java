@@ -26,6 +26,7 @@
  */
 package solver.constraints.propagators;
 
+import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
@@ -33,7 +34,6 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.MetaVariable;
 import solver.variables.Variable;
-import choco.kernel.ESat;
 
 /**When a variable of vars is modified then the metavariable (to which it should belong) is notified
  * @author Jean-Guillaume Fages
@@ -58,7 +58,7 @@ public class MetaVarPropagator extends Propagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		meta.notifyMonitors(EventType.META, this);
+		meta.notifyPropagators(EventType.META, this);
 	}
 
 	@Override

@@ -27,7 +27,6 @@
 
 package choco.checker;
 
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import solver.search.loop.SearchLoops;
 
@@ -39,19 +38,14 @@ import solver.search.loop.SearchLoops;
  * @since 15/02/11
  */
 public class TestCorrectness {
-    private int slType; // search loop type default value
+    private SearchLoops slType; // search loop type default value
 
     public TestCorrectness() {
-        this.slType = 0;
+        this.slType = SearchLoops.BINARY;
     }
 
-    public TestCorrectness(int slType) {
+    public TestCorrectness(SearchLoops sl) {
         this.slType = slType;
-    }
-
-    @BeforeTest(alwaysRun = true)
-    private void beforeTest() {
-        SearchLoops._DEFAULT = slType;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

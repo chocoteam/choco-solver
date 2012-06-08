@@ -28,6 +28,7 @@
 package choco.checker;
 
 import org.testng.annotations.Factory;
+import solver.search.loop.SearchLoops;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,17 +41,12 @@ import java.util.List;
  */
 public class TestCompletenessConsistencyFactory {
 
-    int[] propagation = {
-            0, 1, 2     // ConstraintEngine, VariableEngine, PropagatorEngine
-    };
-
 
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
-        for (int pe = 0; pe < propagation.length; pe++) {
-            int _propagation = propagation[pe];
-            lresult.add(new TestCompletenessConsistency(_propagation));
+        for (SearchLoops sl : SearchLoops.values()) {
+            lresult.add(new TestCompletenessConsistency(sl));
         }
         return lresult.toArray();
     }

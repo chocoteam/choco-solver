@@ -27,11 +27,11 @@
 
 package solver.recorders.list;
 
+import choco.kernel.common.Indexable;
+import choco.kernel.common.util.objects.BacktrackableArrayList;
 import choco.kernel.common.util.objects.HalfBactrackableList;
 import choco.kernel.common.util.objects.IList;
-import choco.kernel.common.util.objects.BacktrackableArrayList;
 import choco.kernel.memory.IEnvironment;
-import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
 
 /**
@@ -55,7 +55,7 @@ public class VariableMonitorListBuilder {
      * @param <M>         type of element, should extends IVariableMonitor
      * @return a implementation of IList
      */
-    public static <V extends Variable, M extends IVariableMonitor<V>> IList<V, M> preset(V variable, IEnvironment environment) {
+    public static <V extends Variable, M extends Indexable<V>> IList<M> preset(V variable, IEnvironment environment) {
         switch (_DEFAULT) {
             case 1:
                 return halfBacktracakbleList(variable, environment);
@@ -64,11 +64,11 @@ public class VariableMonitorListBuilder {
         }
     }
 
-    public static <V extends Variable, M extends IVariableMonitor<V>> IList<V, M> arraylist(V variable, IEnvironment environment) {
+    public static <V extends Variable, M extends Indexable<V>> IList<M> arraylist(V variable, IEnvironment environment) {
         return new BacktrackableArrayList<V, M>(variable, environment);
     }
 
-    public static <V extends Variable, M extends IVariableMonitor<V>> IList<V, M> halfBacktracakbleList(V variable, IEnvironment environment) {
+    public static <V extends Variable, M extends Indexable<V>> IList<M> halfBacktracakbleList(V variable, IEnvironment environment) {
         return new HalfBactrackableList<V, M>(variable, environment);
     }
 }

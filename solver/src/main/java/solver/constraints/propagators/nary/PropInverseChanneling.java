@@ -38,6 +38,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * (X[i] = j' + Ox && j = j' + Ox) <=> (Y[j] = i' + Oy[j]  && i = i' + Oy[j])
@@ -60,9 +61,15 @@ public class PropInverseChanneling extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
+    protected final IIntDeltaMonitor[] idms;
+
     @SuppressWarnings({"unchecked"})
     public PropInverseChanneling(IntVar[] X, IntVar[] Y, int Ox, int Oy, Solver solver, IntConstraint constraint) {
         super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.CUBIC, false);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         this.X = X;
         this.Y = Y;
         nbX = X.length;
@@ -127,7 +134,9 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         } else {
-            eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         }
     }
 

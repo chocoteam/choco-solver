@@ -36,6 +36,8 @@ import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.unary.Relation;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Generator;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.PCoarse;
@@ -81,9 +83,12 @@ public class GolombRuler extends AbstractProblem {
     Constraint[] distances;
 
     @Override
-    public void buildModel() {
-        solver = new Solver("Golomb Ruler " + m);
+    public void createSolver() {
+        solver = new Solver("Golomb Ruler");
+    }
 
+    @Override
+    public void buildModel() {
         ticks = VariableFactory.enumeratedArray("a", m, 0, ((m < 31) ? (1 << (m + 1)) - 1 : 9999), solver);
 
         solver.post(ConstraintFactory.eq(ticks[0], 0, solver));
@@ -131,19 +136,20 @@ public class GolombRuler extends AbstractProblem {
         Predicate[] pdist = new Predicate[]{new InCstrSet(distances)};
         Predicate[] palld = new Predicate[]{new InCstrSet(alldiff)};
         List<Generator> gen = new ArrayList();
-        gen.add(new PArc(new IntVar[]{ticks[0]}, plex));
-        gen.add(new PArc(new IntVar[]{ticks[0]}, pdist));
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, plex));
+        gen.add(new PArc(propagationEngine, new IntVar[]{ticks[0]}, pdist));
         for (int i = 1; i < m; i++) {
-            gen.add(new PArc(new IntVar[]{ticks[i]}, plex));
-            gen.add(new PArc(new IntVar[]{ticks[i]}, pdist));
+            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, plex));
+            gen.add(new PArc(propagationEngine, new IntVar[]{ticks[i]}, pdist));
             for (int j = 0; j < i; j++) {
-                gen.add(new PArc(new IntVar[]{m_diffs[j][i]}, pdist));
-                gen.add(new PArc(new IntVar[]{m_diffs[j][i]}, palld));
+                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, pdist));
+                gen.add(new PArc(propagationEngine, new IntVar[]{m_diffs[j][i]}, palld));
             }
         }
         Sort sort = new Sort(gen.toArray(new Generator[gen.size()]));
-        Sort _coar = new Sort(new Decreasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(sort.clearOut(), _coar.pickOne()));
+        Sort _coar = new Sort(new Decreasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
+        solver.set(propagationEngine.set(new Sort(sort.clearOut(), _coar.pickOne())));
     }
 
     @Override

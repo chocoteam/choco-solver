@@ -59,8 +59,12 @@ public class OrthoLatinSquare extends AbstractProblem {
     Constraint[] ALLDIFFS;
 
     @Override
-    public void buildModel() {
+    public void createSolver() {
         solver = new Solver("Ortho Latin square " + m);
+    }
+
+    @Override
+    public void buildModel() {
         int mm = m * m;
         square1 = VariableFactory.boundedArray("s1", mm, 1, m, solver);
         square2 = VariableFactory.boundedArray("s2", mm, 1, m, solver);

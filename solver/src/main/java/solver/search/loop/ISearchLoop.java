@@ -48,6 +48,8 @@ public interface ISearchLoop extends Serializable {
 
     Boolean resume();
 
+    void reset();
+
     /**
      * Branch a search monitor
      * @param sm

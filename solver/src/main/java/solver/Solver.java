@@ -29,10 +29,8 @@ package solver;
 
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.memory.Environments;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.buffer.EnvironmentBuffering;
-import choco.kernel.memory.copy.EnvironmentCopying;
-import choco.kernel.memory.trailing.EnvironmentTrailing;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.slf4j.LoggerFactory;
 import solver.constraints.Constraint;
@@ -44,9 +42,7 @@ import solver.objective.MinObjectiveManager;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.propagation.generator.PropagationStrategy;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.SearchLoops;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
 import solver.search.strategy.StrategyFactory;
@@ -84,9 +80,6 @@ public class Solver implements Serializable {
 
     private static final long serialVersionUID = 3L;
 
-    // 1 :copying, 2: buffering, 3: buffering unsafe,other: trailing
-    public static int _DEFAULT_ENV = 0;
-
     /**
      * Properties of the solver
      */
@@ -110,7 +103,7 @@ public class Solver implements Serializable {
     /**
      * Environment, based of the search tree (trailing or copying)
      */
-    IEnvironment environment;
+    final IEnvironment environment;
 
     /**
      * Search loop of the solver
@@ -141,39 +134,30 @@ public class Solver implements Serializable {
 
     protected int id = 1;
 
-    public Solver() {
-        this(Reflection.getCallerClass(2).getSimpleName());
-    }
-
-
-    public Solver(String name) {
+    public Solver(IEnvironment environment, String name, ISolverProperties solverProperties) {
         loadProperties();
         this.name = name;
         this.vars = new Variable[32];
         vIdx = 0;
         this.cstrs = new Constraint[32];
         cIdx = 0;
-        switch (_DEFAULT_ENV) {
-            case 1:
-                this.environment = new EnvironmentCopying();
-                break;
-            case 2:
-                this.environment = new EnvironmentBuffering(false);
-                break;
-            case 3:
-                this.environment = new EnvironmentBuffering(true);
-                break;
-            default:
-                this.environment = new EnvironmentTrailing();
-        }
-        this.measures = new MeasuresRecorder(this); // required for event recorder
+        this.environment = environment;
+        this.measures = new MeasuresRecorder(this);
+        solverProperties.loadPropertiesIn(this);
         this.creationTime -= System.nanoTime();
-        this.search = SearchLoops.preset(this);
-        this.engine = new PropagationEngine();
-        this.search.setPropEngine(engine);
-        this.setExplainer(new ExplanationEngine(this));
         this.cachedConstants = new TIntObjectHashMap<ConstantView>(16, 1.5f, Integer.MAX_VALUE);
     }
+
+    public Solver() {
+        this(Environments.DEFAULT.make(),
+                Reflection.getCallerClass(2).getSimpleName(),
+                SolverProperties.DEFAULT);
+    }
+
+    public Solver(String name) {
+        this(Environments.DEFAULT.make(), name, SolverProperties.DEFAULT);
+    }
+
 
     private void loadProperties() {
         try {
@@ -185,19 +169,22 @@ public class Solver implements Serializable {
         }
     }
 
+    public void setSearch(AbstractSearchLoop searchLoop) {
+        this.search = searchLoop;
+    }
 
     public void set(AbstractStrategy strategies) {
         this.search.set(strategies);
     }
 
     /**
-     * Set a propagation strategy to the propagation engine attached in <code>this</code>.
+     * Attach a propagation engine <code>this</code>.
      * It overrides the previously defined one, if any.
      *
-     * @param propagationStrategy a propagation strategy
+     * @param propagationEngine a propagation strategy
      */
-    public void set(PropagationStrategy propagationStrategy) {
-        this.engine.set(propagationStrategy);
+    public void set(IPropagationEngine propagationEngine) {
+        this.engine = propagationEngine;
     }
 
     /**
@@ -335,7 +322,7 @@ public class Solver implements Serializable {
 //            LoggerFactory.getLogger("solver").warn("Solver: capacity of solution pool is set to 1.");
             search.setSolutionPoolCapacity(1);
         }
-        if(objective == null){
+        if (objective == null) {
             throw new SolverException("No objective variable has been defined");
         }
         switch (policy) {
@@ -354,9 +341,10 @@ public class Solver implements Serializable {
     }
 
     public Boolean solve() {
-        if (!engine.hasStrategy()) {
-            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.DEFAULT.make(this));
+        if (engine == null) {
+            IPropagationEngine engine = new PropagationEngine(environment);
+            PropagationStrategies.DEFAULT.make(this, engine);
+            this.set(engine);
         }
         if (search.getStrategy() == null) {
             LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
@@ -368,9 +356,10 @@ public class Solver implements Serializable {
     }
 
     public void propagate() throws ContradictionException {
-        if (!engine.hasStrategy()) {
-            LoggerFactory.getLogger("solver").info("Set default propagation strategy: oq_a + arc");
-            set(PropagationStrategies.DEFAULT.make(this));
+        if (engine == null) {
+            IPropagationEngine engine = new PropagationEngine(environment);
+            PropagationStrategies.DEFAULT.make(this, engine);
+            this.set(engine);
         }
         if (!engine.initialized()) {
             engine.init(this);

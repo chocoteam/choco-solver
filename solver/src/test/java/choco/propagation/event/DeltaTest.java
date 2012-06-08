@@ -31,7 +31,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.search.loop.SearchLoops;
+import solver.constraints.binary.EqualX_YC;
+import solver.exception.ContradictionException;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.delta.Delta;
 
 /**
@@ -43,13 +46,31 @@ import solver.variables.delta.Delta;
 public class DeltaTest {
 
     @Test(groups = "1s")
-    public void testAdd(){
-		Solver sol = new Solver();
+    public void testAdd() {
+        Solver sol = new Solver();
         Delta d = new Delta(sol.getSearchLoop());
-        for(int i = 1; i < 40; i++){
+        for (int i = 1; i < 40; i++) {
             d.add(i, Cause.Null);
             Assert.assertEquals(d.size(), i);
         }
+    }
+
+    @Test(groups = "1s")
+    public void testEq() throws ContradictionException {
+        Solver solver = new Solver();
+        IntVar x = VariableFactory.enumerated("X", 1, 6, solver);
+        IntVar y = VariableFactory.enumerated("Y", 1, 6, solver);
+
+        solver.post(new EqualX_YC(x, y, 0, solver));
+
+        solver.propagate();
+
+        x.removeValue(4, Cause.Null);
+
+        solver.propagate();
+
+        Assert.assertFalse(y.contains(4));
+
     }
 
 }

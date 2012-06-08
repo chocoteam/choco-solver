@@ -26,8 +26,20 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.Environments;
+import choco.kernel.memory.IEnvironment;
 import junit.framework.Assert;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
+import solver.ISolverProperties;
+import solver.Solver;
+import solver.explanations.ExplanationFactory;
+import solver.propagation.PropagationStrategies;
+import solver.search.loop.SearchLoops;
+import solver.search.loop.monitors.SearchMonitorFactory;
+
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -39,29 +51,58 @@ public class AllTest {
 
     AbstractProblem prob;
     String[] args;
-    long[] stats;
+    long nbSol;
+    IEnvironment environment;
+    ISolverProperties properties;
+    PropagationStrategies strat;
+
 
     public AllTest() {
-        this(new AllIntervalSeries(), new String[]{"-o", "50"}, new long[]{1,2});
+        this(new AllIntervalSeries(), new String[]{"-o", "5"},
+                Environments.TRAIL.make(),
+                new AllSolverProp(
+                        SearchLoops.BINARY,
+                        ExplanationFactory.NONE),
+                PropagationStrategies.ONE_QUEUE_WITH_ARCS, 2);
     }
 
-    public AllTest(AbstractProblem prob, String[] arguments, long[] statistics) {
+    public AllTest(AbstractProblem prob, String[] arguments,
+                   IEnvironment env,
+                   ISolverProperties properties,
+                   PropagationStrategies strat,
+                   long nbSol) {
         this.prob = prob;
         this.args = arguments;
-        this.stats = statistics;
+        args = ArrayUtils.append(args, new String[]{"-policy", strat.name()});
+        this.environment = env;
+        this.properties = properties;
+        this.strat = strat;
+        this.nbSol = nbSol;
+        //prob.solver.
     }
 
     @Test(groups = "1m")
     public void mainTest() {
+        LoggerFactory.getLogger("test").info(this.toString());
         prob.readArgs(args);
+        prob.solver = new Solver(environment, prob.getClass().getSimpleName(), properties); // required for testing, to pass properties
         prob.buildModel();
         prob.configureSearch();
         prob.configureEngine();
         prob.overrideExplanation();
-        prob.solve();
+        SearchMonitorFactory.log(prob.solver, true, true);
+        prob.solver.findAllSolutions();
 
-        Assert.assertEquals("incorrect nb solutions", stats[0], prob.getSolver().getMeasures().getSolutionCount());
-        Assert.assertEquals("incorrect nb nodes", stats[1], prob.getSolver().getMeasures().getNodeCount());
+        Assert.assertEquals("incorrect nb solutions", nbSol, prob.getSolver().getMeasures().getSolutionCount());
+    }
 
+    @Override
+    public String toString() {
+        StringBuilder st = new StringBuilder();
+        st.append(prob.getClass().getSimpleName()).append(" ");
+        st.append(Arrays.toString(args)).append(" ");
+        st.append(environment.getClass().getSimpleName()).append(" ");
+        st.append(properties).append(" ");
+        return st.toString();
     }
 }

@@ -43,6 +43,7 @@ public class PartitionTest {
         Partition pb;
         pb = new Partition();
         pb.readArgs("-n", Integer.toString(size));
+        pb.createSolver();
         pb.buildModel();
         pb.configureSearch();
         return pb.getSolver();
@@ -52,7 +53,7 @@ public class PartitionTest {
     public void test4to14() {
         int[] size = {8, 12, 16, 20, 24, 28};
         int[] sols = {1, 1, 7, 24, 296, 1443};
-        int[] nodes = {3, 22, 189, 1739, 17892, 189963};
+        int[] nodes = {3, 22, 189, 1739, 17889, 189944};
 
         for (int i = 0; i < size.length; i++) {
             Solver sol = modeler(size[i]);

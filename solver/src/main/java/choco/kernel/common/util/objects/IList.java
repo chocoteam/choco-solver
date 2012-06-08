@@ -27,10 +27,9 @@
 
 package choco.kernel.common.util.objects;
 
+import choco.kernel.common.Indexable;
 import choco.kernel.common.util.procedure.Procedure;
 import solver.exception.ContradictionException;
-import solver.variables.IVariableMonitor;
-import solver.variables.Variable;
 
 import java.io.Serializable;
 
@@ -44,7 +43,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public interface IList<V extends Variable, E extends IVariableMonitor<V>> extends Serializable {
+public interface IList<E extends Indexable> extends Serializable {
 
     /**
      * Add a new <code>element</code>

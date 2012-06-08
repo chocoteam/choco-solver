@@ -24,60 +24,29 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package choco.kernel.common;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 06/06/12
- * Time: 15:39
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 01/06/12
  */
+public interface Indexable<K> {
 
-package samples.graph;
+    /**
+     * Return the index of <code>this</code> in <code>variable</code>
+     *
+     * @param key the key element, must be a known <code>this</code>
+     * @return index index of <code>this</code> in <code>variable</code> list of event recorder
+     */
+    int getIdx(K key);
 
-import solver.Solver;
-import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.search.loop.monitors.SearchMonitorFactory;
-import solver.search.loop.monitors.VoidSearchMonitor;
-import solver.variables.IntVar;
-import solver.variables.VariableFactory;
-
-public class TestAD {
-
-	public static void main(String[] args){
-
-		System.out.println("Hello World");
-
-		Solver solver = new Solver();
-		final IntVar[] vars = new IntVar[5];
-		vars[0] = VariableFactory.bounded("v0",4,5,solver);
-		vars[1] = VariableFactory.bounded("v1",2,6,solver);
-		vars[2] = VariableFactory.bounded("v2",7,7,solver);
-		vars[3] = VariableFactory.bounded("v3",6,6,solver);
-		vars[4] = VariableFactory.bounded("v4",4,5,solver);
-
-		for(int i=0;i<5;i++){
-			System.out.println(vars[i]);
-		}
-
-		solver.post(new AllDifferent(vars,solver,AllDifferent.Type.AC));
-		solver.getSearchLoop().getLimitsBox().setNodeLimit(2);
-		SearchMonitorFactory.log(solver, true, false);
-		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
-			public void afterInitialPropagation() {
-				System.out.println("youhou");
-				for(int i=0;i<5;i++){
-					System.out.println(vars[i]);
-				}
-				System.exit(0);
-			}
-		});
-		solver.findSolution();
-
-		System.out.println("finish");
-		for(int i=0;i<5;i++){
-			System.out.println(vars[i]);
-		}
-
-	}
-
+    /**
+     * Return the index of <code>this</code> in <code>variable</code>
+     *
+     * @param key a key element, must be a known <code>this</code>
+     * @param idx     index of <code>this</code> in <code>variable</code> list of event recorder
+     */
+     void setIdx(K key, int idx);
 }

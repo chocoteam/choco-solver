@@ -50,6 +50,8 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -284,8 +286,8 @@ public class ATSP_Constraints {
 //			default: throw new UnsupportedOperationException();
 //		}
 
-		PArc allArcs = new PArc(gc);
-		solver.set(new Sort(allArcs).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {

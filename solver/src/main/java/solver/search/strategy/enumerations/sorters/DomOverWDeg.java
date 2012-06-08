@@ -26,10 +26,10 @@
  */
 package solver.search.strategy.enumerations.sorters;
 
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.variables.IntVar;
 
@@ -45,10 +45,10 @@ import solver.variables.IntVar;
  */
 public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
 
-    final IPropagationEngine propEngine;
+    final Solver solver;
 
-    protected DomOverWDeg(IPropagationEngine propEngine) {
-        this.propEngine = propEngine;
+    protected DomOverWDeg(Solver solver) {
+        this.solver = solver;
     }
 
     private int weight(IntVar v) {
@@ -81,8 +81,8 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
     @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
     @Override
     public void onContradiction(ContradictionException cex) {
-        if (propEngine.getContradictionException().c != null) {
-            propEngine.getContradictionException().c.incFail();
+        if (solver.getEngine().getContradictionException().c != null) {
+            solver.getEngine().getContradictionException().c.incFail();
         }
     }
 

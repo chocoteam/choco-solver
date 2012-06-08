@@ -26,7 +26,6 @@
  */
 package solver.propagation.generator;
 
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.recorders.IEventRecorder;
@@ -48,7 +47,6 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     protected Comparator<S> comparator;
     protected S lastPopped;
 
-    protected S[] elements;
     protected BitSet toPropagate;
     protected boolean init = false;
 
@@ -58,11 +56,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
 
     @SuppressWarnings({"unchecked"})
     public Sort(Comparator<S> comparator, Generator<S>... generators) {
-        this.elements = (S[]) new ISchedulable[0];
-        for (int i = 0; i < generators.length; i++) {
-            Generator gen = generators[i];
-            elements = ArrayUtils.append(elements, (S[]) gen.getElements());
-        }
+        super(generators);
         this.comparator = comparator;
         if (comparator != null) {
             Arrays.sort(elements, comparator);
