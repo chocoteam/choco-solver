@@ -255,7 +255,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
 
     @Override
     public void beforeInitialize() {
-        reset();
+//        reset();
         startingMemory = memoryUsedInMB();
         startingTime = System.nanoTime();
     }
