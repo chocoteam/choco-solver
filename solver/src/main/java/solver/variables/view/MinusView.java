@@ -86,36 +86,36 @@ public class MinusView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.REMOVE, cause));
         int inf = getLB();
         int sup = getUB();
-        if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, cause);
-            this.contradiction(this, EventType.REMOVE, MSG_REMOVE);
-        } else {
-            if (inf <= value && value <= sup) {
-                EventType e = EventType.REMOVE;
+//        if (value == inf && value == sup) {
+//            solver.getExplainer().removeValue(this, value, cause);
+//            this.contradiction(this, EventType.REMOVE, MSG_REMOVE);
+//        } else {
+        if (inf <= value && value <= sup) {
+            EventType e = EventType.REMOVE;
 
-                boolean done = var.removeValue(-value, this);
+            boolean done = var.removeValue(-value, this);
 
-                if (value == inf) {
-                    e = EventType.INCLOW;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                } else if (value == sup) {
-                    e = EventType.DECUPP;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
+            if (value == inf) {
+                e = EventType.INCLOW;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
-                if (done) {
-                    if (this.instantiated()) {
-                        e = EventType.INSTANTIATE;
-                    }
-                    this.notifyPropagators(e, cause);
-                    solver.getExplainer().removeValue(this, value, cause);
-                    return true;
+            } else if (value == sup) {
+                e = EventType.DECUPP;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            if (done) {
+                if (this.instantiated()) {
+                    e = EventType.INSTANTIATE;
+                }
+                this.notifyMonitors(e, cause);
+//                    solver.getExplainer().removeValue(this, value, cause);
+                return true;
+            }
         }
+//        }
         return false;
     }
 
@@ -137,20 +137,10 @@ public class MinusView extends IntView {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        solver.getExplainer().instantiateTo(this, value, cause);
-        if (this.instantiated()) {
-            if (value != this.getValue()) {
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
-            }
-            return false;
-        } else if (contains(value)) {
-            boolean done = var.instantiateTo(-value, this);
-            if (done) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
-                return true;
-            }
-        } else {
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+        boolean done = var.instantiateTo(-value, this);
+        if (done) {
+            notifyMonitors(EventType.INSTANTIATE, cause);
+            return true;
         }
         return false;
     }
@@ -160,25 +150,25 @@ public class MinusView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
-            if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, cause);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-            } else {
-                EventType e = EventType.INCLOW;
-                boolean done = var.updateUpperBound(-value, this);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                }
-                if (done) {
-                    this.notifyPropagators(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
-                    return true;
+//            if (this.getUB() < value) {
+//                solver.getExplainer().updateLowerBound(this, -old, -value, cause);
+//                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+//            } else {
+            EventType e = EventType.INCLOW;
+            boolean done = var.updateUpperBound(-value, this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            if (done) {
+                this.notifyMonitors(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, -old, -value, cause);
+                return true;
+            }
         }
+//        }
         return false;
     }
 
@@ -187,25 +177,25 @@ public class MinusView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
         int old = this.getUB();
         if (old > value) {
-            if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, cause);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-            } else {
-                EventType e = EventType.DECUPP;
-                boolean done = var.updateLowerBound(-value, this);
-                if (instantiated()) {
-                    e = EventType.INSTANTIATE;
-                    if (cause.reactOnPromotion()) {
-                        cause = Cause.Null;
-                    }
-                }
-                if (done) {
-                    this.notifyPropagators(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
-                    return true;
+//            if (this.getLB() > value) {
+//                solver.getExplainer().updateUpperBound(this, old, value, cause);
+//                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+//            } else {
+            EventType e = EventType.DECUPP;
+            boolean done = var.updateLowerBound(-value, this);
+            if (instantiated()) {
+                e = EventType.INSTANTIATE;
+                if (cause.reactOnPromotion()) {
+                    cause = Cause.Null;
                 }
             }
+            if (done) {
+                this.notifyMonitors(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                return true;
+            }
         }
+//        }
         return false;
     }
 

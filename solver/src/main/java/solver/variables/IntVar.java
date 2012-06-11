@@ -149,6 +149,8 @@ public interface IntVar extends Variable<IntDelta, IIntDeltaMonitor, IntView> {
      */
     boolean updateUpperBound(int value, @NotNull ICause cause) throws ContradictionException;
 
+    void wipeOut(@NotNull ICause cause) throws ContradictionException;
+
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>
      *

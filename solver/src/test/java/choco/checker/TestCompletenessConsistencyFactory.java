@@ -45,7 +45,7 @@ public class TestCompletenessConsistencyFactory {
     @Factory
     public Object[] createInstances() {
         List<Object> lresult = new ArrayList<Object>(12);
-        for (SearchLoops sl : SearchLoops.values()) {
+      for (SearchLoops sl : SearchLoops.values()) {
             lresult.add(new TestCompletenessConsistency(sl));
         }
         return lresult.toArray();

@@ -51,7 +51,6 @@ import java.util.Random;
  */
 public class EqualXYCExplTest {
 
-
     public void model(int seed, int nbvars) {
 
         Random r = new Random(seed);
@@ -62,7 +61,7 @@ public class EqualXYCExplTest {
 
         Solver ref = new Solver();
         Solver sol = new Solver();
-        sol.set(ExplanationFactory.engineFactory(sol));
+        sol.set(ExplanationFactory.engineFactory(sol, true, false));
 
         IntVar[] varsr = new IntVar[nbvars];
         IntVar[] indicesr = new IntVar[nbvars];
@@ -107,6 +106,7 @@ public class EqualXYCExplTest {
 
     @Test (groups="10s")
     public void test1() {
+        model(125, 4);
         model(125, 10);
         model(153, 15);
         model(1234, 12);
