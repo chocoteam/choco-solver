@@ -158,7 +158,10 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public void activate(Propagator<V> element) {
         int firstA = firstAP.get();
-        // swap the propagator to the active part (between firstAP and firstPP)
+        if (firstA == propagators.length) { // if this is the first propagator activated
+            engine.activateFineEventRecorder(this);
+        }
+        // then, swap the propagator to the active part (between firstAP and firstPP)
         int id = p2i.get(element.getId());
         int i = 0;
         // find the idx of the propagator within the array
@@ -189,6 +192,10 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         // 2. swap it with the last active
         swapP(i, last - 1); //swap it with the last active
         firstPP.add(-1); // decrease pointer to last active
+        if (last == 1) { // if it was the last active propagator, desactivate this
+            engine.desactivateFineEventRecorder(this);
+            flush();
+        }
     }
 
     protected void swapP(int i, int j) {
