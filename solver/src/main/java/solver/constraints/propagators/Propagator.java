@@ -343,14 +343,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         arity.add(-1);
     }
 
-    public void incFail() {
-        fails++;
-    }
-
-    public long getFails() {
-        return fails;
-    }
-
     /**
      * Throws a contradiction exception based on <variable, message>
      *

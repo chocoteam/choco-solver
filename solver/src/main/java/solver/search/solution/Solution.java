@@ -152,15 +152,6 @@ public class Solution implements ICause {
     }
 
     @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
-    }
-
-    @Override
     public String toString() {
         return "Solution";
     }

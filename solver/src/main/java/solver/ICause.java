@@ -79,15 +79,4 @@ public interface ICause extends Serializable {
      */
     int getPropagationConditions(int vIdx);
 
-    /**
-     * Updates the number of time <code>this</code> has failed
-     */
-    public void incFail();
-
-    /**
-     * Returns the number time <code>this</code> has failed.
-     * @return number of fails
-     */
-    public long getFails();
-
 }
