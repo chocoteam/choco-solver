@@ -30,6 +30,7 @@ package solver.constraints.propagators.gary.tsp.directed;
 import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -62,7 +63,7 @@ public class PropSumArcCosts extends Propagator {
 	IntVar sum;
 	int[][] distMatrix;
 	IStateInt[] minCostSucc,maxCostSucc;
-	IntProcedure arcEnforced, arcRemoved;
+	PairProcedure arcEnforced, arcRemoved;
 	IStateInt minSum;
 	IStateInt maxSum;
 	TIntArrayList toCompute;
@@ -156,19 +157,16 @@ public class PropSumArcCosts extends Propagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(true){//TODO incremental behavior
-			propagate(0);return;
-		}
 		toCompute.clear();
 		int oldMin = minSum.get();
 		Variable variable = vars[idxVarInProp];
 		if ((variable.getTypeAndKind() & Variable.GRAPH)!=0) {
-            gdm.freeze();
+			gdm.freeze();
 			if ((mask & EventType.ENFORCEARC.mask) != 0) {
-				gdm.forEachNode(arcEnforced, EventType.ENFORCEARC);
+				gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
 			}
 			if ((mask & EventType.REMOVEARC.mask) != 0) {
-				gdm.forEachNode(arcRemoved, EventType.REMOVEARC);
+				gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
 			}
             gdm.unfreeze();
 			for (int i = toCompute.size() - 1; i >= 0; i--) {
@@ -226,11 +224,9 @@ public class PropSumArcCosts extends Propagator {
 	// PROCEDURES
 	//***********************************************************************************
 
-	private class EnfArc implements IntProcedure {
+	private class EnfArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i / n - 1;
-			int to = i % n;
+		public void execute(int from, int to) throws ContradictionException {
 			if (to != minCostSucc[from].get()) {
 				minSum.add(distMatrix[from][to] - distMatrix[from][minCostSucc[from].get()]);
 				minCostSucc[from].set(to);
@@ -238,11 +234,9 @@ public class PropSumArcCosts extends Propagator {
 		}
 	}
 
-	private class RemArc implements IntProcedure {
+	private class RemArc implements PairProcedure {
 		@Override
-		public void execute(int i) throws ContradictionException {
-			int from = i / n - 1;
-			int to = i % n;
+		public void execute(int from, int to) throws ContradictionException {
 			if (to == minCostSucc[from].get()) {
 				toCompute.add(from);
 			}

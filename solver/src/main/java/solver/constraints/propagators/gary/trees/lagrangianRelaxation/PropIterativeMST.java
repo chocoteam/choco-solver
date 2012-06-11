@@ -134,7 +134,7 @@ public class PropIterativeMST extends Propagator implements HeldKarp {
 		hkb = HKfilter.getBound()-totalPenalities;
 		if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
 		obj.updateLowerBound((int) Math.ceil(hkb), this);
-		if((int) Math.ceil(hkb)==evalTree(mst))
+//		if((int) Math.ceil(hkb)==evalTree(mst))
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 		for(int iter=5;iter>0;iter--){
 			for(int i=nbSprints;i>0;i--){
@@ -154,25 +154,25 @@ public class PropIterativeMST extends Propagator implements HeldKarp {
 				hkb = Math.floor(hkb);
 			}
 			obj.updateLowerBound((int) Math.ceil(hkb), this);
-			if((int) Math.ceil(hkb)==evalTree(mst))
+//			if((int) Math.ceil(hkb)==evalTree(mst))
 			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 			if(updateHKPenalities())return;
 		}
 	}
 
-	private int evalTree(UndirectedGraph mst) {
-		int c = 0;
-		INeighbors nei;
-		for(int i=0;i<n;i++){
-			nei = mst.getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				if(i<j){
-					c+= originalCosts[i][j];
-				}
-			}
-		}
-		return c;
-	}
+//	private int evalTree(UndirectedGraph mst) {
+//		int c = 0;
+//		INeighbors nei;
+//		for(int i=0;i<n;i++){
+//			nei = mst.getSuccessorsOf(i);
+//			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
+//				if(i<j){
+//					c+= originalCosts[i][j];
+//				}
+//			}
+//		}
+//		return c;
+//	}
 
 	protected boolean updateHKPenalities() throws ContradictionException {
 		int deg,envDeg;
