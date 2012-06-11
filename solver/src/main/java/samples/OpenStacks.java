@@ -39,6 +39,8 @@ import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.reified.ReifiedConstraint;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
@@ -156,10 +158,12 @@ public class OpenStacks extends AbstractProblem {
                     new SortDyn(EvtRecEvaluators.MaxArityV, SortDyn.Op.MAX, new PVar(solver.getVars())),
                     new Queue(new PCoarse(solver.getCstrs()))));
         } else*/ {
-            solver.set(new Sort(
-                    new Queue(new PArc(scheds)),
-                    new Queue(new PVar(solver.getVars())),
-                    new Queue(new PCoarse(solver.getCstrs()))));
+            IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+            pengine.set(new Sort(
+                    new Queue(new PArc(pengine, scheds)),
+                    new Queue(new PVar(pengine, solver.getVars())),
+                    new Queue(new PCoarse(pengine, solver.getCstrs()))));
+            solver.set(pengine);
         }
     }
 

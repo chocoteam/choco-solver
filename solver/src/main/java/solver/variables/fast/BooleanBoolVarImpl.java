@@ -44,9 +44,11 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 import solver.variables.delta.OneValueDelta;
+import solver.variables.delta.monitor.OneIntDeltaMonitor;
 import solver.variables.view.IntView;
 
 /**
@@ -55,7 +57,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView, BoolVar> implements BoolVar {
+public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, BoolVar> implements BoolVar {
 
     private static final long serialVersionUID = 1L;
 
@@ -96,7 +98,6 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
         notInstanciated = solver.getEnvironment().getSharedBipartiteSetForBooleanVars();
         this.offset = solver.getEnvironment().getNextOffset();
         mValue = 0;
-        this.makeList(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,7 +193,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
                     delta.add(1 - value, cause);
                 }
                 mValue = value;
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
                 return true;
             } else {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
@@ -363,21 +364,34 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IntView
     ////////////////////////////////////////////////////////////////
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
+    public void createDelta() {
+        if (!reactOnRemoval) {
             delta = new OneValueDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
-        if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
-        }
-        notifyViews(event, cause);
+    @Override
+    public OneIntDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new OneIntDeltaMonitor(delta, propagator);
     }
 
+
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+        if ((modificationEvents & event.mask) != 0) {
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
+        }
+        notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
+    }
     /**
      * {@inheritDoc}
      *

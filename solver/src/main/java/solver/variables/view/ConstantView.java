@@ -29,7 +29,6 @@ package solver.variables.view;
 
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
-import choco.kernel.common.util.objects.IList;
 import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
@@ -45,6 +44,7 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.domain.CsteDomain;
 import solver.variables.domain.IIntDomain;
@@ -230,16 +230,6 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void activate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
-    public void desactivate(IVariableMonitor monitor) {
-        //useless
-    }
-
-    @Override
     public boolean instantiated() {
         return true;
     }
@@ -257,11 +247,6 @@ public class ConstantView implements IntVar {
     @Override
     public void removeMonitor(IVariableMonitor monitor) {
         //useless
-    }
-
-    @Override
-    public IList getMonitors() {
-        return null;
     }
 
     @Override
@@ -289,11 +274,6 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public int nbMonitors() {
-        return 0;
-    }
-
-    @Override
     public void subscribeView(IntView view) {
     }
 
@@ -302,7 +282,16 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
+    public void recordMask(int mask) {
+    }
+
+    @Override
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        return IIntDeltaMonitor.Default.NONE;
+    }
+
+    @Override
+    public void createDelta() {
     }
 
     @Override
@@ -310,8 +299,12 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         //void
+    }
+
+    @Override
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
     }
 
     @Override

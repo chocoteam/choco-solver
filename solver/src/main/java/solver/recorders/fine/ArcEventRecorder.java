@@ -31,9 +31,9 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 /**
  * <br/>
@@ -45,10 +45,8 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     protected int idxV; // index of this within the variable structure -- mutable
 
-    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver) {
-        super(solver);
-        variable.addMonitor(this);
-        propagator.addRecorder(this);
+    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver,IPropagationEngine engine) {
+        super(solver, engine);
         // BEWARE : required by AbstractFineEventRecorder
         this.variables = (V[]) new Variable[]{variable};
         this.propagators = new Propagator[]{propagator};
@@ -57,10 +55,6 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public boolean execute() throws ContradictionException {
         throw new SolverException("PropEventRecorder#execute() is empty and should not be called (nor scheduled)!");
-    }
-
-    @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
     }
 
     @Override
@@ -78,16 +72,12 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-    }
-
-    @Override
-    public int getIdxInV(V variable) {
+    public int getIdx(V variable) {
         return idxV;
     }
 
     @Override
-    public void setIdxInV(V variable, int idx) {
+    public void setIdx(V variable, int idx) {
         this.idxV = idx;
     }
 
@@ -97,27 +87,12 @@ public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
-    }
-
-    @Override
     public void virtuallyExecuted(Propagator propagator) {
     }
 
     @Override
     public String toString() {
         return "<< " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + " >>";
-    }
-
-    @Override
-    public void activate(Propagator<V> element) {
-        variables[VINDEX].activate(this);
-    }
-
-    @Override
-    public void desactivate(Propagator<V> element) {
-        variables[VINDEX].desactivate(this);
     }
 
     @Override

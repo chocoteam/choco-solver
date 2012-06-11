@@ -42,6 +42,8 @@ import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropH
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleEvalObj;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp.PropSymmetricHeldKarp;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -407,7 +409,8 @@ public class TSP_CP12 {
 			throw new UnsupportedOperationException("not implemented");
 		}
 		solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
@@ -472,7 +475,8 @@ public class TSP_CP12 {
 		solver.post(gc);
 		// config
 		solver.set(StrategyFactory.graphATSP(dir, ATSP_heuristics.enf_sparse, mst));
-		solver.set(new Sort(new PArc(gc)).clearOut());
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution

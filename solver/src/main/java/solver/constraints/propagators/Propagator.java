@@ -28,7 +28,6 @@
 package solver.constraints.propagators;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.Nullable;
@@ -42,8 +41,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.IEventRecorder;
-import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -96,15 +93,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected V[] vars;
 
     /**
-     * List of records of <code>this</code>
-     */
-    protected AbstractFineEventRecorder[] fineER;
-
-    protected int lastER;
-
-    protected AbstractCoarseEventRecorder coarseER;
-
-    /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
      */
@@ -148,19 +136,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
             vars[v].link(this, v);
-            vars[v].analyseAndAdapt(getPropagationConditions(v));
+            vars[v].recordMask(getPropagationConditions(v));
             if (!vars[v].instantiated()) {
                 nbNi++;
             }
         }
         arity = environment.makeInt(nbNi);
         fails = 0;
-        fineER = new AbstractFineEventRecorder[vars.length];
-        lastER = 0;
         ID = solver.nextId();
     }
-	protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
-        this(vars,solver,constraint,priority,true);
+
+    protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
+        this(vars, solver, constraint, priority, true);
     }
 
     @Override
@@ -222,29 +209,21 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param evt event type
      */
     public final void forcePropagate(EventType evt) {
-        coarseER.update(evt);
+        //coarseER.update(evt);
+        solver.getEngine().schedulePropagator(this, evt);
     }
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state.set(ACTIVE);
-        //then notify the linked variables
-        for (int i = 0; i < lastER; i++) {
-            fineER[i].activate(this);
-        }
+        solver.getEngine().activatePropagator(this);
     }
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
         state.set(PASSIVE);
-        //then notify the linked variables
-        for (int i = 0; i < lastER; i++) {
-            fineER[i].desactivate(this);
-        }
-        if (coarseER.enqueued()) {
-            coarseER.getScheduler().remove(coarseER);
-        }
+        solver.getEngine().desactivatePropagator(this);
     }
 
     public boolean isStateLess() {
@@ -290,46 +269,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars.length;
     }
 
-    public int nbRecorders() {
-        return lastER;
-    }
-
-    public void forEachFineEvent(Procedure<AbstractFineEventRecorder<V>> procedure) throws ContradictionException {
-        for (int i = 0; i < lastER; i++) { // could be improved by storing active fine ER
-            procedure.execute(fineER[i]);
-        }
-    }
-
-    public IEventRecorder getRecorder(int i) {
-        if (i >= 0 && i < lastER) {
-            return fineER[i];
-        } else if (i == -1) {
-            return coarseER;
-        }
-        throw new IndexOutOfBoundsException();
-    }
-
-    public void addRecorder(IEventRecorder recorder) {
-        if (recorder instanceof AbstractFineEventRecorder) {
-            if (lastER >= fineER.length) {
-                AbstractFineEventRecorder[] tmp = fineER;
-                fineER = new AbstractFineEventRecorder[tmp.length * 3 / 2 + 1];
-                System.arraycopy(tmp, 0, fineER, 0, tmp.length);
-            }
-            fineER[lastER++] = (AbstractFineEventRecorder) recorder;
-        } else {
-            coarseER = (AbstractCoarseEventRecorder) recorder;
-        }
-    }
-
     /**
      * Returns the constraint including this propagator
      *
      * @return Constraint
      */
     @Override
-    public final Constraint getConstraint
-    () {
+    public final Constraint getConstraint() {
         return constraint;
     }
 
@@ -395,14 +341,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void decArity() {
 //        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
         arity.add(-1);
-    }
-
-    public void incFail() {
-        fails++;
-    }
-
-    public long getFails() {
-        return fails;
     }
 
     /**

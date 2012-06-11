@@ -49,12 +49,12 @@ public enum SearchLoops {
             solver.setSearch(new AdvancedBinarySearchLoop(solver));
         }
     },*/
-    BINARY_WITH_RECOMPUTATION() {
+    /*BINARY_WITH_RECOMPUTATION() {
         @Override
         public void make(Solver solver) {
             solver.setSearch(new BinarySearchLoopWithRecomputation(solver));
         }
-    },
+    },*/
     DEFAULT() {
         @Override
         public void make(Solver solver) {

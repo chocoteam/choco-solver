@@ -30,12 +30,15 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 import solver.variables.view.IView;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IView, MetaVariable<V>> implements Variable<NoDelta, IView> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>,IView, MetaVariable<V>>
+        implements Variable<NoDelta, IDeltaMonitor<NoDelta>, IView> {
 
     protected V[] components;
     protected int dim;
@@ -44,7 +47,6 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         super(name, sol);
         components = vars;
         dim = vars.length;
-        this.makeList(this);
 		solver.associates(this);
     }
 
@@ -58,11 +60,29 @@ public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, 
         return true;
     }
 
-    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
+    }
+
+    @Override
+    public void createDelta() {
+        throw new SolverException("No delta available");
+    }
+
+    @Override
+    public IDeltaMonitor monitorDelta(ICause propagator) {
+        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

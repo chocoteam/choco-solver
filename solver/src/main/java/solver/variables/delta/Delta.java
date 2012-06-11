@@ -30,7 +30,6 @@ package solver.variables.delta;
 import solver.ICause;
 import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.monitor.IntDeltaMonitor;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -39,33 +38,28 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * and execute a <code>Procedure</code> for each value stored.
  */
 public final class Delta implements IntDelta {
-    private static final int SIZE  =32;
+    private static final int SIZE = 32;
 
-	int[] rem;
-	ICause[] causes;
-	int last;
+    int[] rem;
+    ICause[] causes;
+    int last;
     int timestamp = -1;
-	final AbstractSearchLoop loop;
+    final AbstractSearchLoop loop;
 
     public Delta(AbstractSearchLoop loop) {
         rem = new int[SIZE];
         causes = new ICause[SIZE];
-		this.loop = loop;
+        this.loop = loop;
     }
 
-    @Override
-    public IntDeltaMonitor createDeltaMonitor(ICause propagator) {
-        return new IntDeltaMonitor(this,propagator);
-    }
-
-	private void ensureCapacity() {
+    private void ensureCapacity() {
         if (last >= rem.length) {
             int[] tmp = new int[last * 3 / 2 + 1];
-			ICause[] tmpc = new ICause[last * 3 / 2 + 1];
-			System.arraycopy(rem, 0, tmp, 0, last);
-			System.arraycopy(causes, 0, tmpc, 0, last);
-			rem = tmp;
-			causes = tmpc;
+            ICause[] tmpc = new ICause[last * 3 / 2 + 1];
+            System.arraycopy(rem, 0, tmp, 0, last);
+            System.arraycopy(causes, 0, tmpc, 0, last);
+            rem = tmp;
+            causes = tmpc;
         }
     }
 
@@ -82,9 +76,9 @@ public final class Delta implements IntDelta {
      * @param cause of the removal
      */
     public void add(int value, ICause cause) {
-		if(IEventRecorder.LAZY){
-       		lazyClear();
-		}
+        if (IEventRecorder.LAZY) {
+            lazyClear();
+        }
         ensureCapacity();
         causes[last] = cause;
         rem[last++] = value;
@@ -95,7 +89,7 @@ public final class Delta implements IntDelta {
         return rem[idx];
     }
 
-	@Override
+    @Override
     public ICause getCause(int idx) {
         return causes[idx];
     }
@@ -108,9 +102,19 @@ public final class Delta implements IntDelta {
         return last;
     }
 
-	@Override
+    @Override
     public void clear() {
         last = 0;
-		timestamp = loop.timeStamp;
+        timestamp = loop.timeStamp;
+    }
+
+    @Override
+    public boolean timeStamped() {
+        return timestamp == loop.timeStamp;
+    }
+
+    @Override
+    public AbstractSearchLoop getSearchLoop() {
+        return loop;
     }
 }

@@ -24,37 +24,32 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables.delta.monitor;
+package solver.propagation;
 
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import org.testng.annotations.Test;
+import solver.Solver;
+import solver.constraints.ConstraintFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 12/12/11
+ * @since 01/06/12
  */
-public abstract class ViewDeltaMonitor implements IDeltaMonitor<IntDelta> {
+public class PropEngineTest {
 
-    final IDeltaMonitor<IntDelta> original;
+    @Test
+    public void test1(){
+        Solver solver = new Solver("t1");
+        IntVar x = VariableFactory.bounded("X", 1, 3, solver);
+        IntVar y = VariableFactory.bounded("Y", 1, 3, solver);
+        solver.post(ConstraintFactory.geq(x, y, solver));
+        solver.post(ConstraintFactory.leq(x, 2, solver));
 
-    public ViewDeltaMonitor(IDeltaMonitor<IntDelta> original) {
-        this.original = original;
-    }
+        solver.findSolution();
 
-    @Override
-    public final void freeze() {
-        original.freeze();
-    }
 
-    @Override
-    public final void unfreeze() {
-        original.unfreeze();
-    }
-
-    @Override
-    public final void clear() {
-        original.clear();
     }
 }

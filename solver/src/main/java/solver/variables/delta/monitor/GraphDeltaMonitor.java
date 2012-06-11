@@ -26,14 +26,14 @@
  */
 package solver.variables.delta.monitor;
 
-import choco.kernel.common.util.procedure.PairProcedure;
 import choco.kernel.common.util.procedure.IntProcedure;
+import choco.kernel.common.util.procedure.PairProcedure;
 import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.search.loop.AbstractSearchLoop;
 import solver.variables.EventType;
-import solver.variables.delta.GraphDelta;
-import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.IGraphDelta;
+import solver.variables.delta.IGraphDeltaMonitor;
 
 /**
  * <br/>
@@ -41,16 +41,20 @@ import solver.variables.delta.IGraphDelta;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
+public class GraphDeltaMonitor implements IGraphDeltaMonitor {
 
-	protected final GraphDelta delta;
+	protected final IGraphDelta delta;
 
 	protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
 	protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
 	protected ICause propagator;
 
-	public GraphDeltaMonitor(GraphDelta delta, ICause propagator) {
+    int timestamp = -1;
+    final AbstractSearchLoop loop;
+
+	public GraphDeltaMonitor(IGraphDelta delta, ICause propagator) {
 		this.delta = delta;
+        loop = delta.getSearchLoop();
 		this.first = new int[4];
 		this.last = new int[4];
 		this.frozenFirst = new int[4];
@@ -60,6 +64,8 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 
 	@Override
 	public void freeze() {
+        assert delta.timeStamped():"delta is not timestamped";
+        lazyClear();
 		for (int i = 0; i < 3; i++) {
 			this.frozenFirst[i] = first[i]; // freeze indices
 			this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
@@ -75,6 +81,13 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 		}
 		this.first[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
 	}
+
+    public void lazyClear() {
+        if (timestamp - loop.timeStamp != 0) {
+            clear();
+            timestamp = loop.timeStamp;
+        }
+    }
 
 	@Override
 	public void clear() {
@@ -127,6 +140,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 		forEachNode(proc,evt);
 	}
 
+    @Override
 	public void forEachNode(IntProcedure proc, EventType evt) throws ContradictionException {
 		int type;
 		if(evt==EventType.REMOVENODE){
@@ -148,6 +162,7 @@ public class GraphDeltaMonitor implements IDeltaMonitor<GraphDelta> {
 		}
 	}
 
+    @Override
 	public void forEachArc(PairProcedure proc, EventType evt) throws ContradictionException {
 		if(evt==EventType.REMOVEARC){
 			for (int i = frozenFirst[2]; i < frozenLast[2]; i++) {

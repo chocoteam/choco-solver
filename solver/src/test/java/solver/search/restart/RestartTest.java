@@ -44,6 +44,7 @@ public class RestartTest {
     static Solver buildQ(int n) {
         NQueenBinary nq = new NQueenBinary();
         nq.readArgs("-q", "" + n);
+        nq.createSolver();
         nq.buildModel();
         nq.configureSearch();
         return nq.getSolver();

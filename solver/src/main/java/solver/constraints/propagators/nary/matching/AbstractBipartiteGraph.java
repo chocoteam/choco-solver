@@ -40,6 +40,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.text.MessageFormat;
 
@@ -84,14 +85,16 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
 
+    protected final IIntDeltaMonitor[] idms;
+
     /**
      * Constructor
      *
-     * @param vars        the graph, a left vextex per vars, a right vertex per domain value
-     * @param nbLeft      number of left nodes, = vars.length
-     * @param nbRight     number of right nodes, domain values of vars
+     * @param vars       the graph, a left vextex per vars, a right vertex per domain value
+     * @param nbLeft     number of left nodes, = vars.length
+     * @param nbRight    number of right nodes, domain values of vars
      * @param solver
-     * @param constraint  the constraint associated with
+     * @param constraint the constraint associated with
      * @param priority
      * @param promote
      */
@@ -99,6 +102,10 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
     public AbstractBipartiteGraph(IntVar[] vars, int nbLeft, int nbRight, Solver solver,
                                   IntConstraint constraint, PropagatorPriority priority, boolean promote) {
         super(vars, solver, constraint, priority, promote);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         init(nbLeft, nbRight, solver.getEnvironment());
         rem_proc = new RemProc(this);
     }
@@ -613,6 +620,9 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
 //        this.reinit();
         this.removeUselessEdges(constraint);
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i].unfreeze();
+        }
     }
 
     @Override
@@ -621,7 +631,9 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
         if (EventType.isInstantiate(mask)) {
             this.awakeOnInst(varIdx);
         }
-        eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].freeze();
+        idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+        idms[varIdx].unfreeze();
     }
 
 

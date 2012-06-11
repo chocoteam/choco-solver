@@ -34,9 +34,9 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -46,6 +46,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove timestamp and deltamonitoring
  * @since 24/01/12
  */
 public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
@@ -56,17 +57,16 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     protected IStateInt firstAP; // index of the first active propagator in propIdx
     protected IStateInt firstPP; // index of the first passive propagator in propIdx
 
-    VarEventRecorder(V variable, Solver solver, int n) {
-        super(solver);
+    VarEventRecorder(V variable, Solver solver, IPropagationEngine engine, int n) {
+        super(solver, engine);
         this.variables = (V[]) new Variable[]{variable};
-        variable.addMonitor(this);
         p2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
         this.propagators = new Propagator[n];
         this.propIdx = new int[n];
     }
 
-    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver) {
-        this(variable, solver, props.length);
+    public VarEventRecorder(V variable, Propagator<V>[] props, Solver solver, IPropagationEngine engine) {
+        this(variable, solver, engine,  props.length);
         int n = props.length;
         int k = 0; // count the number of distinct propagator
         for (int i = 0; i < n; i++) {
@@ -75,7 +75,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
             int idx = p2i.get(pid);
             if (idx == -1) { // first occurrence of the variable
                 this.propagators[k] = propagator;
-                propagator.addRecorder(this);
                 p2i.put(pid, k);
                 propIdx[k] = k;
                 k++;
@@ -92,11 +91,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     @Override
     public boolean execute() throws ContradictionException {
         throw new SolverException("VarEventRecorder#execute() is empty and should not be called (nor scheduled)!");
-    }
-
-    @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
-        // nothing required here
     }
 
     @Override
@@ -122,17 +116,12 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     }
 
     @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-        // nothing required here
-    }
-
-    @Override
-    public int getIdxInV(V variable) {
+    public int getIdx(V variable) {
         return idxV;
     }
 
     @Override
-    public void setIdxInV(V variable, int idx) {
+    public void setIdx(V variable, int idx) {
         idxV = idx;
     }
 
@@ -170,7 +159,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void activate(Propagator<V> element) {
         int firstA = firstAP.get();
         if (firstA == propagators.length) { // if this is the first propagator activated
-            variables[VINDEX].activate(this); // activate this
+            engine.activateFineEventRecorder(this);
         }
         // then, swap the propagator to the active part (between firstAP and firstPP)
         int id = p2i.get(element.getId());
@@ -204,7 +193,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
         swapP(i, last - 1); //swap it with the last active
         firstPP.add(-1); // decrease pointer to last active
         if (last == 1) { // if it was the last active propagator, desactivate this
-            variables[VINDEX].desactivate(this);
+            engine.desactivateFineEventRecorder(this);
             flush();
         }
     }
@@ -219,11 +208,6 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
 
     void _desactivateP(int i) {
         // void
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override

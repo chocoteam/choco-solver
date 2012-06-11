@@ -54,6 +54,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 	//***********************************************************************************
 
 	private GraphVar g;
+    GraphDeltaMonitor gdm;
 	private IntProcedure enfNode;
 	private PairProcedure remArc;
 	private INeighbors concernedNodes;
@@ -65,6 +66,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 	public PropEachNodeHasLoop(GraphVar graph, INeighbors concernedNodes, Solver sol, Constraint constraint) {
 		super(new GraphVar[]{graph}, sol, constraint, PropagatorPriority.UNARY);
 		this.g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.enfNode = new NodeEnf(this);
 		this.remArc = new ArcRem(this);
 		this.concernedNodes = concernedNodes;
@@ -96,13 +98,14 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if ((mask & EventType.REMOVEARC.mask) != 0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
+        if ((mask & EventType.REMOVEARC.mask) != 0) {
 			gdm.forEachArc(remArc, EventType.REMOVEARC);
 		}
 		if ((mask & EventType.ENFORCENODE.mask) != 0) {
-			eventRecorder.getDeltaMonitor(this, g).forEach(enfNode, EventType.ENFORCENODE);
+			gdm.forEachNode(enfNode, EventType.ENFORCENODE);
 		}
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

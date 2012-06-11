@@ -48,7 +48,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.delta.monitor.GraphDeltaMonitor;
+import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
@@ -65,6 +65,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     //***********************************************************************************
 
     DirectedGraphVar g;
+    IGraphDeltaMonitor gdm;
     int n;
     IntVar[] intVars;
     private PairProcedure arcEnforced, arcRemoved;
@@ -86,6 +87,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     public PropPosInTourGraphReactor(IntVar[] intVars, DirectedGraphVar graph, Constraint constraint, Solver solver) {
         super(ArrayUtils.append(new Variable[]{graph}, intVars), solver, constraint, PropagatorPriority.LINEAR);
         g = graph;
+        gdm = g.monitorDelta(this);
         this.intVars = intVars;
         this.n = g.getEnvelopGraph().getNbNodes();
         arcEnforced = new EnfArc();
@@ -129,9 +131,10 @@ public class PropPosInTourGraphReactor extends Propagator {
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-			GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+            gdm.freeze();
             gdm.forEachArc(arcEnforced, EventType.ENFORCEARC);
             gdm.forEachArc(arcRemoved, EventType.REMOVEARC);
+            gdm.unfreeze();
         }
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }
@@ -241,46 +244,6 @@ public class PropPosInTourGraphReactor extends Propagator {
             level = nbNode;
         }
     }
-//	private void BFS_RG() throws ContradictionException {
-//		BitSet done = new BitSet(n);
-//		TIntArrayList currentSet = new TIntArrayList();
-//		TIntArrayList nextSet = new TIntArrayList();
-//		TIntArrayList nextSCCnodes = new TIntArrayList();
-//		TIntArrayList tmp = null;
-//		int x = 0;
-//		nextSet.add(x);
-//		int level = 0;
-//		int scc = sccOf[x].get();
-//		while(scc!=-1){
-//			while(nextSet.size()>0){
-//				tmp = currentSet;
-//				currentSet = nextSet;
-//				nextSet = tmp;
-//				nextSet.clear();
-//				for(int i=currentSet.size()-1; i>=0; i--){
-//					x = currentSet.get(i);
-//					intVars[x].updateLowerBound(level,this);
-//					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
-//					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//						if(!done.get(j)){
-//							done.set(j);
-//							if(sccOf[j].get()==scc){
-//								nextSet.add(j);
-//							}else{
-//								nextSCCnodes.add(j);
-//							}
-//						}
-//					}
-//				}
-//				level++;
-//			}
-//			scc = rg.getSuccessorsOf(scc).getFirstElement();
-//			tmp = nextSet;
-//			nextSet = nextSCCnodes;
-//			nextSCCnodes = tmp;
-//			nextSCCnodes.clear();
-//		}
-//	}
 
     private void BFSfromEnd() throws ContradictionException {
         done.clear();
@@ -382,14 +345,14 @@ public class PropPosInTourGraphReactor extends Propagator {
     private class EnfArc implements PairProcedure {
         @Override
         public void execute(int i, int j) throws ContradictionException {
-            enfArc(i,j);
+            enfArc(i, j);
         }
     }
 
     private class RemArc implements PairProcedure {
         @Override
         public void execute(int i, int j) throws ContradictionException {
-            remArc(i,j);
+            remArc(i, j);
         }
     }
 }

@@ -40,6 +40,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -69,6 +70,8 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private IStateInt[] occs;
 
+    protected final IIntDeltaMonitor[] idms;
+
     protected final RemProc rem_proc;
 
     protected boolean needFilter;
@@ -76,6 +79,10 @@ public class PropAmongGAC extends Propagator<IntVar> {
     public PropAmongGAC(IntVar[] vars, int[] values, Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.LINEAR, false);
         nb_vars = vars.length - 1;
+        this.idms = new IIntDeltaMonitor[vars.length];
+        for (int i = 0; i < vars.length; i++){
+            idms[i] = vars[i].monitorDelta(this);
+        }
         both = environment.makeBitSet(nb_vars);
         LB = environment.makeInt(0);
         UB = environment.makeInt(0);
@@ -164,7 +171,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
                     }
                 }
             } else {
-                eventRecorder.getDeltaMonitor(this, vars[varIdx]).forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].freeze();
+                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].unfreeze();
             }
             if (needFilter) {
                 filter();
@@ -191,23 +200,23 @@ public class PropAmongGAC extends Propagator<IntVar> {
                 int lb = v.getLB();
                 int ub = v.getUB();
                 int k1 = 0;
-                int k2 = values.length-1;
+                int k2 = values.length - 1;
                 // values is sorted
                 // so first, find the first value inside dom(v)
-                while(k1 < k2 && values[k1]<lb){
+                while (k1 < k2 && values[k1] < lb) {
                     k1++;
                 }
                 // and bottom-up shaving
-                while(k1 <= k2 && v.removeValue(values[k1], this)){
+                while (k1 <= k2 && v.removeValue(values[k1], this)) {
                     occs[i].add(-1);
                     k1++;
                 }
                 // then find the last value inside dom(v)
-                while(k2 > k1 && values[k2]>ub){
+                while (k2 > k1 && values[k2] > ub) {
                     k2--;
                 }
                 // and top bottom shaving
-                while(k2 >= k1 && v.removeValue(values[k2], this)){
+                while (k2 >= k1 && v.removeValue(values[k2], this)) {
                     occs[i].add(-1);
                     k2--;
                 }

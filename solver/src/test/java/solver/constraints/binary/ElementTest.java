@@ -37,6 +37,7 @@ import solver.explanations.ExplanationFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +164,7 @@ public class ElementTest {
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(new Element(varsr[i], values, indicesr[i], 0, ref));
-            lcstrsr.add(new EqualXY_C(varsr[i], indicesr[i + 1], 2 * nbvars / 3, ref));
+            lcstrsr.add(new EqualXY_C(varsr[i], Views.minus(indicesr[i + 1]), 2 * nbvars / 3, ref));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

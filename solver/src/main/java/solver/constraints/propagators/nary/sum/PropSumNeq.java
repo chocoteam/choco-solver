@@ -118,8 +118,7 @@ public class PropSumNeq extends Propagator<IntVar> {
                 }
             } else {
                 // Compute the value to remove (including position in the linear combination)
-                int value = -1 * sum;
-                if (vars[index].removeValue(value, this)) {
+                if (vars[index].removeValue(sum, this)) {
                     this.setPassive();
                 }
             }
@@ -147,9 +146,10 @@ public class PropSumNeq extends Propagator<IntVar> {
             sumLB += x[i].getLB();
             sumUB += x[i].getUB();
         }
-        if (sumUB == b && sumLB == b) {
+        if (sumUB != b && sumLB != b) {
             return ESat.TRUE;
-        } else if (sumLB > b || sumUB < b) {
+        }else
+        if (sumUB == b && sumLB == b) {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;

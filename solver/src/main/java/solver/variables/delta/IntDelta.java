@@ -28,7 +28,6 @@
 package solver.variables.delta;
 
 import solver.ICause;
-import solver.search.loop.AbstractSearchLoop;
 
 /**
  * <br/>

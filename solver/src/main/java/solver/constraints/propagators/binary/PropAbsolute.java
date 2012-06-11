@@ -41,6 +41,7 @@ import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 /**
  * Enforces X = |Y|
@@ -52,11 +53,16 @@ import solver.variables.IntVar;
 public class PropAbsolute extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
+    protected final IIntDeltaMonitor[] idms;
 
     public PropAbsolute(IntVar X, IntVar Y, Solver solver,
                         Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
         rem_proc = new RemProc(this);
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
     }
 
     @Override
@@ -82,14 +88,16 @@ public class PropAbsolute extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if (idxVarInProp == 0) { // filter from X to Y
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        if (varIdx == 0) { // filter from X to Y
             if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
                 updateLowerBoundofY();
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
-                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+                idms[varIdx].freeze();
+                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].unfreeze();
 //                updateHolesinY();
             }
         } else { // filter from Y to X
@@ -102,7 +110,9 @@ public class PropAbsolute extends Propagator<IntVar> {
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
-                eventRecorder.getDeltaMonitor(this, vars[idxVarInProp]).forEach(rem_proc.set(idxVarInProp), EventType.REMOVE);
+                idms[varIdx].freeze();
+                idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+                idms[varIdx].unfreeze();
 //                updateHolesinX();
             }
         }

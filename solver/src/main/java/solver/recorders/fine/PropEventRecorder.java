@@ -32,9 +32,9 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.propagation.IPropagationEngine;
 import solver.variables.EventType;
 import solver.variables.Variable;
-import solver.variables.delta.IDeltaMonitor;
 
 import java.util.Arrays;
 
@@ -44,6 +44,7 @@ import java.util.Arrays;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @revision 05/24/12 remove deltamonitoring
  * @since 24/01/12
  */
 public class PropEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
@@ -54,10 +55,9 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     protected final int[] idxVs; // index of this within variable structures -- mutable
 
 
-    PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, int n) {
-        super(solver);
+    PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, IPropagationEngine engine, int n) {
+        super(solver, engine);
         this.propagators = new Propagator[]{propagator};
-        propagator.addRecorder(this);
         this.variables = variables.clone();
         // create max size arrays
         v2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
@@ -65,8 +65,8 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
         this.idxVs = new int[n];
     }
 
-    public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver) {
-        this(variables, propagator, solver, variables.length);
+    public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, IPropagationEngine engine) {
+        this(variables, propagator, solver, engine, variables.length);
         int n = variables.length;
         int k = 0; // count the number of unique variable
         for (int i = 0; i < n; i++) {
@@ -77,7 +77,6 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
                 this.variables[k] = variable;
                 v2i.put(vid, k);
                 varIdx[k] = k;
-                variable.addMonitor(this); // BEWARE call setIdxInV(V variable, int idx) !!
                 k++;
             }
         }
@@ -91,10 +90,6 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     @Override
     public boolean execute() throws ContradictionException {
         throw new SolverException("PropEventRecorder#execute() is empty and should not be called (nor scheduled)!");
-    }
-
-    @Override
-    public void beforeUpdate(V var, EventType evt, ICause cause) {
     }
 
     @Override
@@ -112,27 +107,18 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     }
 
     @Override
-    public void contradict(V var, EventType evt, ICause cause) {
-    }
-
-    @Override
-    public int getIdxInV(V variable) {
+    public int getIdx(V variable) {
         return idxVs[v2i.get(variable.getId())];
     }
 
     @Override
-    public void setIdxInV(V variable, int idx) {
+    public void setIdx(V variable, int idx) {
         idxVs[v2i.get(variable.getId())] = idx;
     }
 
     @Override
     public void flush() {
         // void
-    }
-
-    @Override
-    public IDeltaMonitor getDeltaMonitor(Propagator propagator, V variable) {
-        return IDeltaMonitor.Default.NONE;
     }
 
     @Override
@@ -143,20 +129,6 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     @Override
     public String toString() {
         return "<< " + Arrays.toString(variables) + "::" + propagators[PINDEX].toString() + " >>";
-    }
-
-    @Override
-    public void activate(Propagator<V> element) {
-        for (int i = 0; i < nbUVar; i++) {
-            variables[varIdx[i]].activate(this);
-        }
-    }
-
-    @Override
-    public void desactivate(Propagator<V> element) {
-        for (int i = 0; i < nbUVar; i++) {
-            variables[varIdx[i]].desactivate(this);
-        }
     }
 
     @Override

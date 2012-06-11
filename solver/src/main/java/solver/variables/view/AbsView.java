@@ -38,10 +38,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.IDeltaMonitor;
-import solver.variables.delta.IntDelta;
+import solver.variables.delta.IIntDeltaMonitor;
+import solver.variables.delta.NoDelta;
 import solver.variables.delta.monitor.IntDeltaMonitor;
-import solver.variables.delta.view.ViewDelta;
 
 
 /**
@@ -65,40 +64,34 @@ public final class AbsView extends IntView {
     }
 
     @Override
-    public void analyseAndAdapt(int mask) {
-        super.analyseAndAdapt(mask);
-        if (!reactOnRemoval && ((modificationEvents & EventType.REMOVE.mask) != 0)) {
-            var.analyseAndAdapt(mask);
-            delta = new ViewDelta(var.getDelta()) {
-                @Override
-                public IDeltaMonitor<IntDelta> createDeltaMonitor(ICause propagator) {
-                    return new IntDeltaMonitor(this, propagator) {
-                        @Override
-                        public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
-                            if (EventType.isRemove(eventType.mask)) {
-                                for (int i = frozenFirst; i < frozenLast; i++) {
-                                    if (propagator != delta.getCause(i)) {
-                                        int v = delta.get(i);
-                                        if (!var.contains(-v)) {
-                                            boolean found = false;
-                                            for (int j = i + 1; !found && j < frozenLast; j++) {
-                                                if (delta.get(j) == -v) {
-                                                    found = true;
-                                                }
-                                            }
-                                            if (!found) {
-                                                proc.execute(Math.abs(v));
-                                            }
-                                        }
+    public IIntDeltaMonitor monitorDelta(ICause propagator) {
+        var.createDelta();
+        if(var.getDelta() == NoDelta.singleton){
+            return IIntDeltaMonitor.Default.NONE;
+        }
+        return new IntDeltaMonitor(var.getDelta(), propagator) {
+            @Override
+            public void forEach(IntProcedure proc, EventType eventType) throws ContradictionException {
+                if (EventType.isRemove(eventType.mask)) {
+                    for (int i = frozenFirst; i < frozenLast; i++) {
+                        if (propagator != delta.getCause(i)) {
+                            int v = delta.get(i);
+                            if (!var.contains(-v)) {
+                                boolean found = false;
+                                for (int j = i + 1; !found && j < frozenLast; j++) {
+                                    if (delta.get(j) == -v) {
+                                        found = true;
                                     }
+                                }
+                                if (!found) {
+                                    proc.execute(Math.abs(v));
                                 }
                             }
                         }
-                    };
+                    }
                 }
-            };
-            reactOnRemoval = true;
-        }
+            }
+        };
     }
 
     @Override
@@ -136,7 +129,7 @@ public final class AbsView extends IntView {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -151,7 +144,7 @@ public final class AbsView extends IntView {
             boolean done = var.removeInterval(-to, -from, this);
             done |= var.removeInterval(from, to, this);
             if (done) {
-                notifyMonitors(EventType.REMOVE, cause);
+                notifyPropagators(EventType.REMOVE, cause);
             }
             return done;
         }
@@ -177,7 +170,7 @@ public final class AbsView extends IntView {
             }
         }
         if (done) {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -197,7 +190,7 @@ public final class AbsView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -220,7 +213,7 @@ public final class AbsView extends IntView {
                     cause = Cause.Null;
                 }
             }
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
         return done;
     }
@@ -711,12 +704,12 @@ public final class AbsView extends IntView {
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
         if ((evt.mask & EventType.BOUND.mask) != 0) {
             if (instantiated()) { // specific case where DOM_SIZE = 2 and LB = -UB
-                notifyMonitors(EventType.INSTANTIATE, cause);
+                notifyPropagators(EventType.INSTANTIATE, cause);
             } else { // otherwise, we do not know the previous values, so its hard to tell wether it is LB or UB mod
-                notifyMonitors(EventType.BOUND, cause);
+                notifyPropagators(EventType.BOUND, cause);
             }
         } else {
-            notifyMonitors(evt, cause);
+            notifyPropagators(evt, cause);
         }
     }
 }

@@ -27,16 +27,19 @@
 
 package samples;
 
+import choco.kernel.ResolutionPolicy;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.nary.Sum;
-import solver.objective.MaxObjectiveManager;
+import solver.constraints.ConstraintFactory;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * <br/>
@@ -53,7 +56,7 @@ public class PertTest {
         Solver solver = new Solver();
 
         IntVar masonry, carpentry, plumbing, ceiling,
-                roofing, painting, windows, facade, garden, moving;
+                roofing, painting, windows, facade, garden;
         masonry = VariableFactory.bounded("masonry", 0, horizon, solver);
         carpentry = VariableFactory.enumerated("carpentry", 0, horizon, solver);
         plumbing = VariableFactory.enumerated("plumbing", 0, horizon, solver);
@@ -82,11 +85,6 @@ public class PertTest {
 
         solver.set(StrategyFactory.minDomMinVal(new IntVar[]{masonry, carpentry, plumbing, ceiling,
                 roofing, painting, windows, facade, garden, objective}, solver.getEnvironment()));
-
-        solver.getSearchLoop().stopAtFirstSolution(false);
-        MaxObjectiveManager maom = new MaxObjectiveManager(objective);
-        maom.setMeasures(solver.getMeasures());
-        solver.getSearchLoop().setObjectivemanager(maom);
         return solver;
 
     }
@@ -95,20 +93,25 @@ public class PertTest {
      * x + d < y
      */
     private static Constraint precedence(IntVar x, int duration, IntVar y, Solver solver) {
-        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, -duration, solver);
+        return ConstraintFactory.lt(Views.offset(x, duration), y, solver);
     }
 
     @Test(groups = "1s")
     public void testAll() {
         Solver sol;
         sol = modeler();
-        sol.findAllSolutions();
+        IPropagationEngine pengine = new PropagationEngine(sol.getEnvironment());
+        PropagationStrategies.values()[0].make(sol, pengine);
+        sol.set(pengine);
+        sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
         long nbsol = sol.getMeasures().getSolutionCount();
         long node = sol.getMeasures().getNodeCount();
-        for (int t = 0; t < PropagationStrategies.values().length; t++) {
+        for (int t = 1; t < PropagationStrategies.values().length; t++) {
             sol = modeler();
-            PropagationStrategies.values()[t].make(sol);
-            sol.findAllSolutions();
+            pengine = new PropagationEngine(sol.getEnvironment());
+            PropagationStrategies.values()[t].make(sol, pengine);
+            sol.set(pengine);
+            sol.findOptimalSolution(ResolutionPolicy.MINIMIZE, objective);
             Assert.assertEquals(sol.getMeasures().getSolutionCount(), nbsol);
             Assert.assertEquals(sol.getMeasures().getNodeCount(), node);
         }

@@ -56,6 +56,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.delta.IIntDeltaMonitor;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -205,6 +206,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
     Solver solver;
 
+    protected final IIntDeltaMonitor[] idms;
     protected final RemProc rem_proc;
 
 
@@ -223,6 +225,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         super(ArrayUtils.<IntVar>append(vars, counterVars), solver, constraint, PropagatorPriority.CUBIC, false);
         this.solver = solver;
         this.vs = vars;
+        this.idms = new IIntDeltaMonitor[this.vars.length];
+        for (int i = 0; i < this.vars.length; i++){
+            idms[i] = this.vars[i].monitorDelta(this);
+        }
         this.offset = vars.length;
         this.z = counterVars;
         this.nbR = this.z.length - 1;
@@ -298,12 +304,14 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int vIdx, int mask) throws ContradictionException {
-        if (vIdx < offset) {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+        if (varIdx < offset) {
             checkWorld();
-            eventRecorder.getDeltaMonitor(this, vars[vIdx]).forEach(rem_proc.set(vIdx), EventType.REMOVE);
+            idms[varIdx].freeze();
+            idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);
+            idms[varIdx].unfreeze();
         } else if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
-            boundUpdate.add(vIdx - offset);
+            boundUpdate.add(varIdx - offset);
             computed = false;
         }
 //        if (getNbPendingER() == 0 && toRemove.size() > 0) {

@@ -53,6 +53,7 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 	//***********************************************************************************
 
 	private DirectedGraphVar g;
+    GraphDeltaMonitor gdm;
 	private PairProcedure enf_proc;
 	private int[] n_Preds;
 
@@ -63,6 +64,7 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 	public PropAtMostNPredecessors(DirectedGraphVar graph, int nbPreds, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		int n = g.getEnvelopGraph().getNbNodes();
 		n_Preds = new int[n];
 		for(int i=0;i<n;i++){
@@ -74,6 +76,7 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 	public PropAtMostNPredecessors(DirectedGraphVar graph, int[] nbPreds, Constraint constraint, Solver solver) {
 		super(new DirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.BINARY);
 		g = graph;
+        gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		n_Preds = nbPreds;
 		enf_proc = new ArcEnf();
 	}
@@ -93,8 +96,9 @@ public class PropAtMostNPredecessors extends Propagator<DirectedGraphVar> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		GraphDeltaMonitor gdm = (GraphDeltaMonitor) eventRecorder.getDeltaMonitor(this,g);
+		gdm.freeze();
 		gdm.forEachArc(enf_proc, EventType.ENFORCEARC);
+        gdm.unfreeze();
 	}
 
 	//***********************************************************************************

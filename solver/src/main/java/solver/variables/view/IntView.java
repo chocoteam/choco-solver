@@ -41,6 +41,7 @@ import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -56,7 +57,8 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntView> implements IView<IntDelta, IntView>, IntVar {
+public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, IntView>
+        implements IView<IntDelta, IIntDeltaMonitor, IntView>, IntVar {
 
     protected final IntVar var;
 
@@ -71,8 +73,13 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
         this.var = var;
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
-        makeList(this);
         this.var.subscribeView(this);
+    }
+
+    @Override
+    public final void recordMask(int mask) {
+        super.recordMask(mask);
+        var.recordMask(mask);
     }
 
     @Override
@@ -113,18 +120,30 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
         return delta;
     }
 
+    @Override
+    public void createDelta() {
+        var.createDelta();
+    }
 
     @Override
-    public void notifyMonitors(EventType event, ICause cause) throws ContradictionException {
+    public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
         if ((modificationEvents & event.mask) != 0) {
-            records.forEach(afterModification.set(this, event, cause));
+            //records.forEach(afterModification.set(this, event, cause));
+            solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
         }
         notifyViews(event, cause);
+        notifyMonitors(event, cause);
+    }
+
+    public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event, cause);
+        }
     }
 
     @Override
     public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
-        notifyMonitors(evt, cause);
+        notifyPropagators(evt, cause);
     }
 
     @Override
@@ -156,15 +175,6 @@ public abstract class IntView extends AbstractVariable<IntDelta, IntView, IntVie
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return 0;
-    }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
         return 0;
     }
 

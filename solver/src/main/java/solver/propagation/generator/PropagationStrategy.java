@@ -26,11 +26,12 @@
  */
 package solver.propagation.generator;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import solver.exception.ContradictionException;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.IPropagationStrategy;
 import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
-
-import java.io.Serializable;
 
 /**
  * An abstract class for DSL to define a propagation strategy.
@@ -42,19 +43,34 @@ import java.io.Serializable;
  * A PropagationStrategy is also schedulable in a master scheduler.
  *
  * @author Charles Prud'homme
- * @since 15/12/11
  * @revision 04/03/12 add update feature
+ * @since 15/12/11
  */
-public abstract class PropagationStrategy<E extends ISchedulable> implements Generator<E>, IScheduler<E>, ISchedulable, Serializable {
+public abstract class PropagationStrategy<E extends ISchedulable> implements IPropagationStrategy<E> {
 
     static enum P {
         pickOne, sweepUp, clearOut, loopOut
     }
 
+    protected E[] elements;
     protected P iteration = P.clearOut; // type of iteration
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected boolean enqueued = false; // to check wether this is enqueud or not.
+    protected IPropagationEngine engine;
+
+    protected PropagationStrategy(Generator<E>... generators) {
+        this.elements = (E[]) new ISchedulable[0];
+        for (int i = 0; i < generators.length; i++) {
+            Generator gen = generators[i];
+            elements = ArrayUtils.append(elements, (E[]) gen.getElements());
+        }
+    }
+
+    protected PropagationStrategy(E... schedulables) {
+        this.elements = schedulables;
+    }
+
 
     //<-- DSL
 
@@ -132,8 +148,6 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements Gen
     public void update(E element) {
         // empty
     }
-
-    public abstract boolean isEmpty();
 
     public abstract int size();
 

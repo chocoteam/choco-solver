@@ -33,6 +33,7 @@ import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
+import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.view.IntView;
 
@@ -46,7 +47,7 @@ import solver.variables.view.IntView;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface IntVar extends Variable<IntDelta, IntView> {
+public interface IntVar extends Variable<IntDelta, IIntDeltaMonitor, IntView> {
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.

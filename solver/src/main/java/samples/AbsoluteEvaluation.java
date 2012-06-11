@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.binary.Absolute;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
@@ -89,9 +91,11 @@ public class AbsoluteEvaluation extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(vars));
-        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(solver.getCstrs()));
-        solver.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut());
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(pengine, vars));
+        Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine,
+                solver.getCstrs()));
+        solver.set(pengine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
     }
 
     @Override
@@ -112,5 +116,9 @@ public class AbsoluteEvaluation extends AbstractProblem {
         }
         st.append(String.format("%d", vars[vars.length - 1].getValue()));
         LoggerFactory.getLogger("bench").info(st.toString());
+    }
+
+    public static void main(String[] args) {
+        new AbsoluteEvaluation().execute(args);
     }
 }

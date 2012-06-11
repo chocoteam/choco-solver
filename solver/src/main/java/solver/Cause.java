@@ -58,13 +58,4 @@ public enum Cause implements ICause {
     public int getPropagationConditions(int vIdx) {
         return 0;
     }
-
-    @Override
-    public void incFail() {
-    }
-
-    @Override
-    public long getFails() {
-        return 0;
-    }
 }

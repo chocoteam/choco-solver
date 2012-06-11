@@ -26,11 +26,10 @@
  */
 package solver.search.strategy.enumerations.sorters;
 
+import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
-import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.FailPerPropagator;
 import solver.variables.IntVar;
 
 /**
@@ -43,23 +42,25 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 04/05/11
  */
-public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearchMonitor {
+public final class DomOverWDeg extends AbstractSorter<IntVar> {
 
-    final IPropagationEngine propEngine;
+    final Solver solver;
+    FailPerPropagator counter;
 
-    protected DomOverWDeg(IPropagationEngine propEngine) {
-        this.propEngine = propEngine;
+    protected DomOverWDeg(Solver solver) {
+        this.solver = solver;
+        counter = new FailPerPropagator(solver.getCstrs(), solver);
     }
 
     private int weight(IntVar v) {
         int w = 0;
         Constraint[] constraints = v.getConstraints();
-        for(int c = 0; c < constraints.length; c++){
+        for (int c = 0; c < constraints.length; c++) {
             Propagator[] propagators = constraints[c].propagators;
-            for(int p = 0; p < propagators.length; p++){
+            for (int p = 0; p < propagators.length; p++) {
                 Propagator prop = propagators[p];
-                if(prop.arity()>1){
-                   w += prop.getFails();
+                if (prop.arity() > 1) {
+                    w += counter.getFails(prop);
                 }
             }
         }
@@ -76,84 +77,5 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements ISearch
         int d1 = o1.getPropagators().length;
         int d2 = o2.getPropagators().length;
         return (s1 * w2 * d2) - (s2 * w1 * d1);
-    }
-
-    @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
-    @Override
-    public void onContradiction(ContradictionException cex) {
-        if (propEngine.getContradictionException().c != null) {
-            propEngine.getContradictionException().c.incFail();
-        }
-    }
-
-    @Override
-    public void beforeDownLeftBranch() {
-    }
-
-    @Override
-    public void beforeDownRightBranch() {
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-    @Override
-    public void beforeInitialize() {
-    }
-
-    @Override
-    public void afterInitialize() {
-    }
-
-    @Override
-    public void beforeInitialPropagation() {
-    }
-
-    @Override
-    public void afterInitialPropagation() {
-    }
-
-    @Override
-    public void beforeOpenNode() {
-    }
-
-    @Override
-    public void afterOpenNode() {
-    }
-
-    @Override
-    public void onSolution() {
-    }
-
-    @Override
-    public void afterDownLeftBranch() {
-    }
-
-    @Override
-    public void afterDownRightBranch() {
-    }
-
-    @Override
-    public void beforeUpBranch() {
-    }
-
-    @Override
-    public void afterUpBranch() {
-    }
-
-    @Override
-    public void beforeRestart() {
-    }
-
-    @Override
-    public void afterRestart() {
-    }
-
-    @Override
-    public void beforeClose() {
-    }
-
-    @Override
-    public void afterClose() {
     }
 }
