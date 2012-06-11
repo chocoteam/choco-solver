@@ -317,4 +317,8 @@ public class HeuristicValFactory {
     public static Filter enumVal(IntVar ivar, int from, int delta, int to, Action action) {
         return new Filter(new Member(ivar, action), unsafeEnum(from, delta, to, action));
     }
+
+    public static Random random(IntVar ivar, long seed) {
+        return new Random(ivar, seed);
+    }
 }

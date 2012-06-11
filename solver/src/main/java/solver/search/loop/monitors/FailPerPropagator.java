@@ -24,38 +24,49 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver;
+package solver.search.loop.monitors;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import solver.Solver;
 import solver.constraints.Constraint;
-import solver.explanations.Deduction;
-import solver.explanations.Explanation;
+import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 
 /**
-* <br/>
-*
-* @author Charles Prud'homme
-* @since 26/08/11
-*/
-public enum Cause implements ICause {
-    Null;
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 11/06/12
+ */
+public class FailPerPropagator extends VoidSearchMonitor {
 
-    @Override
-    public Constraint getConstraint() {
-        return null;
+    protected TIntIntHashMap p2w;
+
+
+    public FailPerPropagator(Constraint[] constraints, Solver solver) {
+        p2w = new TIntIntHashMap();
+        init(constraints);
+        solver.getSearchLoop().plugSearchMonitor(this);
+    }
+
+    private void init(Constraint[] constraints) {
+        for (int c = 0; c < constraints.length; c++) {
+            Propagator[] propagators = constraints[c].propagators;
+            for (int p = 0; p < propagators.length; p++) {
+                p2w.put(propagators[p].getId(), 0);
+
+            }
+        }
     }
 
     @Override
-    public Explanation explain(Deduction d) {
-        return null;
+    public void onContradiction(ContradictionException cex) {
+        if (cex.c != null && cex.c instanceof Propagator) {
+            p2w.adjustOrPutValue(((Propagator) cex.c).getId(), 1, 1);
+        }
     }
 
-    @Override
-    public boolean reactOnPromotion() {
-        return false;
-    }
-
-    @Override
-    public int getPropagationConditions(int vIdx) {
-        return 0;
+    public int getFails(Propagator p) {
+        return p2w.get(p.getId());
     }
 }
