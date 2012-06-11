@@ -114,6 +114,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
 
     @Override
     public void desactivate(Propagator<V> element) {
+        super.desactivate(element);
         this.evtmask = 0;
     }
 

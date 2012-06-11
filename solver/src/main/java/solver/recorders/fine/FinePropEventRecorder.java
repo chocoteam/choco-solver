@@ -132,7 +132,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public void flush() {
-        Arrays.fill(this.evtmasks,0,nbUVar, 0);
+        Arrays.fill(this.evtmasks, 0, nbUVar, 0);
     }
 
     @Override
@@ -146,6 +146,7 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
 
     @Override
     public void desactivate(Propagator<V> element) {
+        super.desactivate(element);
         for (int i = 0; i < nbUVar; i++) {
             this.evtmasks[i] = 0;
         }
