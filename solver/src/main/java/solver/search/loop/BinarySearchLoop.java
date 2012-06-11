@@ -155,7 +155,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
             solver.getEngine().flush();
-            moveTo(UP_BRANCH);
+            moveTo(stateAfterFail);
             jumpTo = 1;
             smList.onContradiction(e);
         }
