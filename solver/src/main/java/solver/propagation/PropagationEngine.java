@@ -283,7 +283,10 @@ public class PropagationEngine implements IPropagationEngine {
     public void onVariableUpdate(Variable variable,
                                  Procedure procedure) throws ContradictionException {
         int id = variable.getId();
-        fines_v.get(id).forEach(procedure);
+        IList list = fines_v.get(id);
+        if (list != null) {
+            list.forEach(procedure);
+        }
     }
 
     @Override
@@ -310,10 +313,6 @@ public class PropagationEngine implements IPropagationEngine {
         if (list != null) { // to handle reified propagator, unknown from the engine
             for (int i = 0; i < list.size(); i++) {
                 AbstractFineEventRecorder fer = list.get(i);
-                Variable[] vars = fer.getVariables();
-                for (int j = 0; j < vars.length; j++) {
-                    fines_v.get(vars[j].getId()).setActive(fer);
-                }
                 fer.activate(propagator);
             }
         }
@@ -326,12 +325,24 @@ public class PropagationEngine implements IPropagationEngine {
         if (list != null) { // to handle reified propagator, unknown from the engine
             for (int i = 0; i < list.size(); i++) {
                 AbstractFineEventRecorder fer = list.get(i);
-                Variable[] vars = fer.getVariables();
-                for (int j = 0; j < vars.length; j++) {
-                    fines_v.get(vars[j].getId()).setPassive(fer);
-                }
                 fer.desactivate(propagator);
             }
+        }
+    }
+
+    @Override
+    public void activateFineEventRecorder(AbstractFineEventRecorder fer) {
+        Variable[] vars = fer.getVariables();
+        for (int j = 0; j < vars.length; j++) {
+            fines_v.get(vars[j].getId()).setActive(fer);
+        }
+    }
+
+    @Override
+    public void desactivateFineEventRecorder(AbstractFineEventRecorder fer) {
+        Variable[] vars = fer.getVariables();
+        for (int j = 0; j < vars.length; j++) {
+            fines_v.get(vars[j].getId()).setPassive(fer);
         }
     }
 }

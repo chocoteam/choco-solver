@@ -123,9 +123,11 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
 
     @Override
     public void activate(Propagator<V> element) {
+        engine.activateFineEventRecorder(this);
     }
 
     @Override
     public void desactivate(Propagator<V> element) {
+        engine.desactivateFineEventRecorder(this);
     }
 }

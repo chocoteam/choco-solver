@@ -95,7 +95,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         }
         this.LB = env.makeInt(0);
         this.UB = env.makeInt(capacity - 1);
-        this.SIZE = env.makeInt(sortedValues.length);
+        this.SIZE = env.makeInt(VALUES.cardinality());
         LENGTH = capacity;
     }
 
@@ -500,9 +500,9 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     }
 
     public IntDeltaMonitor monitorDelta(ICause propagator) {
-            createDelta();
-            return new IntDeltaMonitor(delta, propagator);
-        }
+        createDelta();
+        return new IntDeltaMonitor(delta, propagator);
+    }
 
 
     public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {

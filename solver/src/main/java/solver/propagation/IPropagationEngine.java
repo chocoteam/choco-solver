@@ -151,4 +151,8 @@ public interface IPropagationEngine extends Serializable {
     void addEventRecorder(AbstractFineEventRecorder fer);
 
     void addEventRecorder(AbstractCoarseEventRecorder er);
+
+    void activateFineEventRecorder(AbstractFineEventRecorder fer);
+
+    void desactivateFineEventRecorder(AbstractFineEventRecorder fer);
 }
