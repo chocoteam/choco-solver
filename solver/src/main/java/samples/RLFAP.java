@@ -27,6 +27,7 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.common.util.tools.ArrayUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
@@ -73,10 +74,10 @@ public class RLFAP extends AbstractProblem {
     private static String CTR = "ctr.txt";
 
     @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
-    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen02";
+    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen11";
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
-    boolean opt = false;
+    boolean opt = true;
 
     int[][] _dom, _ctr;
     int[][] _var;
@@ -169,7 +170,12 @@ public class RLFAP extends AbstractProblem {
     public void configureSearch() {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
-        solver.set(StrategyFactory.domwdegMindom(vars, 3));
+        IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
+        if (true) {
+            solver.set(StrategyFactory.domwdegMindom(allvars, 3));
+        } else {
+            solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 1, seed));
+        }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
                 LimitBox.failLimit(solver, 2), 25000);
     }
@@ -185,6 +191,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void solve() {
+        SearchMonitorFactory.log(solver, true, false);
         if (opt)
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else
@@ -217,14 +224,14 @@ public class RLFAP extends AbstractProblem {
 
     public static void main(String[] args) {
         new RLFAP().execute(args);
-        }
+    }
 
     /////////////////////
 
     protected int[][] readDOM(String filename) {
         FileReader f = null;
         String line;
-        TIntList values = new TIntArrayList();
+        TIntHashSet values = new TIntHashSet();
         try {
             f = new FileReader(filename);
             BufferedReader r = new BufferedReader(f);

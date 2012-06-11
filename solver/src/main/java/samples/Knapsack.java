@@ -28,13 +28,14 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.Sum;
-import solver.search.strategy.enumerations.sorters.AbstractSorter;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationStrategies;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -45,7 +46,7 @@ import solver.variables.VariableFactory;
  * the total weight is less than or equal to a given limit and the total value is as large as possible.
  * It derives its name from the problem faced by someone who is constrained by a fixed-size knapsack
  * and must fill it with the most useful items."
- *
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
@@ -54,10 +55,10 @@ import solver.variables.VariableFactory;
 public class Knapsack extends AbstractProblem {
 
     @Option(name = "-d", aliases = "--data", usage = "Knapsack data ID.", required = false)
-    Data data = Data.k10;
+    Data data = Data.k20;
 
     @Option(name = "-n", usage = "Restricted to n objects.", required = false)
-    int n = -1;
+    int n = 13;
 
     int[] capacites;
     int[] energies;
@@ -74,7 +75,7 @@ public class Knapsack extends AbstractProblem {
         // read capacities
         capacites = new int[]{data.data[0], data.data[1]};
         int no = data.data[2];
-        if(n>-1){
+        if (n > -1) {
             no = n;
         }
         energies = new int[no];
@@ -116,25 +117,35 @@ public class Knapsack extends AbstractProblem {
 
     @Override
     public void configureSearch() {
+        /*AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
+            AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
 
-        AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
-        AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
+            AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
 
-        AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
-
-        solver.set(StrategyVarValAssign.dyn(objects,
-                seq,
-                ValidatorFactory.instanciated,
-                solver.getEnvironment()));
-
+            solver.set(StrategyVarValAssign.dyn(objects,
+                    seq,
+                    ValidatorFactory.instanciated,
+                    solver.getEnvironment()));*/
+        boolean ab = true;
+        IntVar[] vars = ArrayUtils.append(new IntVar[]{power},objects);
+        if (!ab) {
+            solver.set(StrategyFactory.domwdegMindom(vars, solver));
+        } else {
+            solver.set(StrategyFactory.ABSrandom(vars, solver, 0.999d, 0.02d, 1, seed));
+        }
+//        SearchMonitorFactory.log(solver,  true, true);
     }
 
     @Override
     public void configureEngine() {
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
+        solver.set(pengine);
     }
 
     @Override
     public void solve() {
+//        SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
     }
 
@@ -152,8 +163,8 @@ public class Knapsack extends AbstractProblem {
         k10(new int[]{500, 550, 10,
                 100, 79, 49, 25, 54, 99, 12, 41, 78, 94, 30, 75, 65, 40, 31, 59, 90, 95, 50, 99}),
         k20(new int[]{1000, 1100, 20,
-                54,38, 12,57, 47,69, 33,90, 30,79, 65,89, 56,28, 57,70, 91,38, 88,71,
-                77,46, 99,41, 29,49, 23,43, 39,36, 86,68, 12,92, 85,33, 22,84, 64,90}),;
+                54, 38, 12, 57, 47, 69, 33, 90, 30, 79, 65, 89, 56, 28, 57, 70, 91, 38, 88, 71,
+                77, 46, 99, 41, 29, 49, 23, 43, 39, 36, 86, 68, 12, 92, 85, 33, 22, 84, 64, 90}),;
         final int[] data;
 
         Data(int[] data) {

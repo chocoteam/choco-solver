@@ -36,16 +36,12 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.unary.Member;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
-import solver.propagation.generator.PArc;
-import solver.propagation.generator.PCoarse;
-import solver.propagation.generator.PCons;
-import solver.propagation.generator.Sort;
-import solver.propagation.generator.predicate.NotInCstrSet;
-import solver.propagation.generator.predicate.Predicate;
-import solver.propagation.generator.sorter.Increasing;
-import solver.propagation.generator.sorter.Seq;
-import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
-import solver.search.strategy.StrategyFactory;
+import solver.propagation.PropagationStrategies;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.enumerations.values.HeuristicValFactory;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -74,7 +70,7 @@ import static solver.constraints.ConstraintFactory.lt;
  */
 public class Partition extends AbstractProblem {
     @Option(name = "-n", usage = "Partition size.", required = false)
-    int N = 2 * 8;
+    int N = 2 * 32;
 
     IntVar[] vars;
     IntVar[] Ovars;
@@ -152,12 +148,21 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
+        ActivityBased dd = new ActivityBased(solver, Ovars, 0.999d, 0.2d, 1000, seed);
+            solver.getSearchLoop().plugSearchMonitor(dd);
+            for (IntVar var : Ovars) {
+                var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
+            }
+            solver.set(StrategyVarValAssign.dyn(Ovars,
+                    new solver.search.strategy.enumerations.sorters.Seq<IntVar>(dd, SorterFactory.random(seed)),
+                    ValidatorFactory.instanciated,
+                    solver.getEnvironment()));
     }
 
     @Override
     public void configureEngine() {
-        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        /*IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
         Sort ad1 = new Sort(
                 new Seq(
                         new Increasing(EvtRecEvaluators.MinArityC),
@@ -166,11 +171,15 @@ public class Partition extends AbstractProblem {
                 new PArc(propagationEngine, vars, new Predicate[]{new NotInCstrSet(heavy)}));
         Sort ad2 = new Sort(new PCons(propagationEngine, heavy));
         Sort coar = new Sort(new PCoarse(propagationEngine, heavy[2]));
-        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut()));
+        solver.set(propagationEngine.set(new Sort(ad1.clearOut(), ad2.pickOne(), coar.pickOne()).clearOut())); */
+        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+        PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, pengine);
+        solver.set(pengine);
     }
 
     @Override
     public void solve() {
+//        SearchMonitorFactory.statEveryXXms(solver, 5000);
         solver.findSolution();
     }
 
