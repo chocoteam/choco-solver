@@ -36,7 +36,6 @@ import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -154,10 +153,11 @@ public final class AbsView extends IntView {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        if (value < 0) {
-            //TODO: explication?
-            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
-        }
+// <nju> unnessary test (will be done when updating L/U B)
+//        if (value < 0) {
+//            //TODO: explication?
+//            this.contradiction(this, EventType.INSTANTIATE, AbstractVariable.MSG_UNKNOWN);
+//        }
         int v = Math.abs(value);
         boolean done = var.updateLowerBound(-v, this);
         done |= var.updateUpperBound(v, this);
@@ -198,10 +198,11 @@ public final class AbsView extends IntView {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.DECUPP, cause));
-        if (value < 0) {
-            //TODO: explication?
-            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
-        }
+// <nju> same as updateLowerBound, no need to test ; will be done when updating bounds
+//        if (value < 0) {
+//            //TODO: explication?
+//            this.contradiction(this, EventType.DECUPP, AbstractVariable.MSG_UNKNOWN);
+//        }
         boolean done = var.updateLowerBound(-value, this);
         done |= var.updateUpperBound(value, this);
         if (done) {

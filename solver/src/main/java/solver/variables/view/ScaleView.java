@@ -91,10 +91,11 @@ public final class ScaleView extends IntView {
         if (value % cste == 0) {
             int inf = getLB();
             int sup = getUB();
-            if (value == inf && value == sup) {
-                solver.getExplainer().removeValue(this, value, cause);
-                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
-            } else {
+// <nju> need to delegate to the underlying variable (contradiction will be handled by the removeValue)
+//            if (value == inf && value == sup) {
+//                solver.getExplainer().removeValue(this, value, cause);
+//                this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
+//            } else {
                 if (inf <= value && value <= sup) {
                     EventType e = EventType.REMOVE;
 
@@ -117,13 +118,13 @@ public final class ScaleView extends IntView {
                                 cause = Cause.Null;
                             }
                         }
-                        this.notifyPropagators(e, cause);
-                        solver.getExplainer().removeValue(this, value, cause);
+                        this.notifyMonitors(e, cause);
+//                        solver.getExplainer().removeValue(this, value, cause);
                         return true;
                     }
                 }
             }
-        }
+//        }
         return false;
     }
 
@@ -147,21 +148,10 @@ public final class ScaleView extends IntView {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
 //        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
-        solver.getExplainer().instantiateTo(this, value, cause);
-        if (this.instantiated()) {
-            if (value != this.getValue()) {
-                this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
-            }
-            return false;
-        }
-        if (contains(value)) {
-            boolean done = var.instantiateTo(value / cste, this);
-            if (done) {
-                notifyPropagators(EventType.INSTANTIATE, cause);
-                return true;
-            }
-        } else {
-            this.contradiction(cause, EventType.INSTANTIATE, MSG_UNKNOWN);
+        boolean done = var.instantiateTo(value / cste, this);
+        if (done) {
+            notifyMonitors(EventType.INSTANTIATE, cause);
+            return true;
         }
         return false;
     }
@@ -171,10 +161,10 @@ public final class ScaleView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.INCLOW, cause));
         int old = this.getLB();
         if (old < value) {
-            if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, cause);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-            } else {
+//            if (this.getUB() < value) {
+//                solver.getExplainer().updateLowerBound(this, old, value, cause);
+//                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
+//            } else {
                 EventType e = EventType.INCLOW;
                 boolean done = var.updateLowerBound(MathUtils.divCeil(value, cste), this);
                 if (instantiated()) {
@@ -184,12 +174,12 @@ public final class ScaleView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyPropagators(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                    this.notifyMonitors(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 
@@ -199,10 +189,11 @@ public final class ScaleView extends IntView {
 //        return var.updateUpperBound(MathUtils.divFloor(value, cste), cause, informCause);
         int old = this.getUB();
         if (old > value) {
-            if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, cause);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-            } else {
+// <nju> need to delegate to the var, see above
+//            if (this.getLB() > value) {
+//                solver.getExplainer().updateUpperBound(this, old, value, cause);
+//                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
+//            } else {
                 EventType e = EventType.DECUPP;
                 boolean done = var.updateUpperBound(MathUtils.divFloor(value, cste), this);
                 if (instantiated()) {
@@ -212,12 +203,12 @@ public final class ScaleView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyPropagators(e, cause);
-                    solver.getExplainer().updateLowerBound(this, old, value, cause);
+                    this.notifyMonitors(e, cause);
+//                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
             }
-        }
+//        }
         return false;
     }
 

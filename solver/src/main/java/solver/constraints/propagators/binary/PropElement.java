@@ -172,15 +172,15 @@ public class PropElement extends Propagator<IntVar> {
 
     public String toString() {
         StringBuilder sb = new StringBuilder(32);
-        sb.append(this.vars[0]).append(" = ");
+        sb.append("nth(").append(this.vars[0]).append(" = ");
         sb.append(" <");
         int i = 0;
-        for (; i < Math.max(this.lval.length - 1, 5); i++) {
+        for (; i < Math.min(this.lval.length - 1, 5); i++) {
             sb.append(this.lval[i]).append(", ");
         }
         if (i == 5 && this.lval.length - 1 > 5) sb.append("..., ");
         sb.append(this.lval[lval.length - 1]);
-        sb.append("> [").append(this.vars[1]).append(']');
+        sb.append("> [").append(this.vars[1]).append("])");
         return sb.toString();
     }
 
