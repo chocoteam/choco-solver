@@ -45,30 +45,36 @@ import java.util.List;
 public class AllTestFactory {
 
     AbstractProblem[] problems = new AbstractProblem[]{
-            new AllIntervalSeries()
+//            new AllIntervalSeries()
+        new AbsoluteEvaluation() ,
+        new AbsoluteEvaluation()
     };
 
     String[][] arguments = new String[][]{
-            {"-o", "5"}
+
+            {"-s", "1234"},
+            {"-s", "1236"},
+
+
     };
 
     long[] nbSol = new long[]{
-            2,
+            6, 18
     };
 
     Environments[] envFact = new Environments[]{
             Environments.TRAIL,
-            Environments.COPY,
-            Environments.BUFFER,
-            Environments.BUFFER_UNSAFE
+//            Environments.COPY,
+//            Environments.BUFFER,
+//            Environments.BUFFER_UNSAFE
     };
 
     ExplanationFactory[] expFact = new ExplanationFactory[]{
             ExplanationFactory.NONE,
             ExplanationFactory.FLATTEN,
             ExplanationFactory.RECORDER,
-            ExplanationFactory.TRACEFLATTEN,
-            ExplanationFactory.TRACERECORDER
+//            ExplanationFactory.TRACEFLATTEN,
+//            ExplanationFactory.TRACERECORDER
     };
 
     SearchLoops[] slFact = new SearchLoops[]{

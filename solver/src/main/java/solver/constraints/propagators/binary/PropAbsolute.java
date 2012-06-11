@@ -34,6 +34,10 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
@@ -239,6 +243,35 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected void updateHoleinY(int remVal) throws ContradictionException {
         vars[1].removeValue(remVal, this);
         vars[1].removeValue(-remVal, this);
+    }
+
+
+    @Override
+    public Explanation explain(Deduction d) {
+//        return super.explain(d);
+        if (d.getVar() == vars[0]) {
+            Explanation explanation = new Explanation(this);
+            if (d instanceof ValueRemoval) {
+                explanation.add (vars[1].explain(VariableState.REM,((ValueRemoval) d).getVal()));
+                explanation.add( vars[1].explain(VariableState.REM,- ((ValueRemoval) d).getVal()));
+            }
+            else {
+                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        } else if (d.getVar() == vars[1]) {
+            Explanation explanation = new Explanation(this);
+            if (d instanceof ValueRemoval) {
+                explanation.add (vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
+            }
+            else {
+                throw new UnsupportedOperationException("PropBasolute only knows how to explain ValueRemovals");
+            }
+            return explanation;
+        }
+        else {
+            return super.explain(d);
+        }
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

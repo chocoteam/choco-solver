@@ -58,12 +58,13 @@ public class AllTest {
 
 
     public AllTest() {
-        this(new AllIntervalSeries(), new String[]{"-o", "5"},
+//        this(new AllIntervalSeries(), new String[]{"-o", "5"},
+        this(new AbsoluteEvaluation(), null,
                 Environments.TRAIL.make(),
                 new AllSolverProp(
-                        SearchLoops.BINARY_WITH_RECOMPUTATION,
-                        ExplanationFactory.NONE),
-                PropagationStrategies.ONE_QUEUE_WITH_ARCS, 2);
+                        SearchLoops.BINARY,
+                        ExplanationFactory.TRACERECORDER),
+                PropagationStrategies.ONE_QUEUE_WITH_ARCS, 6);
     }
 
     public AllTest(AbstractProblem prob, String[] arguments,
@@ -89,7 +90,7 @@ public class AllTest {
         prob.buildModel();
         prob.configureSearch();
         prob.configureEngine();
-        prob.overrideExplanation();
+        //  prob.overrideExplanation();
         SearchMonitorFactory.log(prob.solver, true, true);
         prob.solver.findAllSolutions();
 

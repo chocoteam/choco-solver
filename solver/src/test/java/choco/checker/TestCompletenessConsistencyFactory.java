@@ -50,7 +50,7 @@ public class TestCompletenessConsistencyFactory {
         List<Object> lresult = new ArrayList<Object>(12);
         for (int pe = 0; pe < propagation.length; pe++) {
             int _propagation = propagation[pe];
-            lresult.add(new TestCompletenessConsistency(_propagation));
+//            lresult.add(new TestCompletenessConsistency(_propagation));
         }
         return lresult.toArray();
     }
