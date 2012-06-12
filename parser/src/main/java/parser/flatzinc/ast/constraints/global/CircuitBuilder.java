@@ -25,30 +25,26 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package choco.checker;
+package parser.flatzinc.ast.constraints.global;
 
-import org.testng.annotations.Factory;
-import solver.search.loop.SearchLoops;
-
-import java.util.ArrayList;
+import parser.flatzinc.ast.constraints.IBuilder;
+import parser.flatzinc.ast.expression.EAnnotation;
+import parser.flatzinc.ast.expression.Expression;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import java.util.List;
 
 /**
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @author Jean-Guillaume Fages
+ * @since 10/06/12
  */
-public class TestCompletenessConsistencyFactory {
+public class CircuitBuilder implements IBuilder {
 
-
-    @Factory
-    public Object[] createInstances() {
-        List<Object> lresult = new ArrayList<Object>(12);
-      for (SearchLoops sl : SearchLoops.values()) {
-            lresult.add(new TestCompletenessConsistency(sl));
-        }
-        return lresult.toArray();
+    @Override
+    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        return ConstraintFactory.circuit(exps.get(0).toIntVarArray(solver), solver);
     }
-
 }

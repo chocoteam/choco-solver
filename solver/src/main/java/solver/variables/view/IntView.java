@@ -177,4 +177,9 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
     public int getPropagationConditions(int vIdx) {
         return 0;
     }
+
+    @Override
+    public void wipeOut(@NotNull ICause cause) throws  ContradictionException{
+        var.wipeOut(cause);
+    }
 }

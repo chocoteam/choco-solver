@@ -35,6 +35,7 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -45,35 +46,30 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+
 import java.util.BitSet;
 
 /**
- * Simple nocircuit contraint (from NoSubtour of Pesant or noCycle of Caseaux/Laburthe)
+ * Subcircuit propagator (one circuit and several loops)
  */
-public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
+public class PropSubcircuit extends Propagator<IntVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    int n;
+    private int n;
+	private IntVar length;
     private IStateInt[] origin, end, size;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    /**
-     * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
-     * runs incrementally in O(1) per instantiation event
-     *
-     * @param vars
-     * @param constraint
-     * @param solver
-     */
-    public PropNoSubtour(V[] vars, Solver solver, Constraint constraint) {
+    public PropSubcircuit(IntVar[] vars, IntVar length, Constraint constraint, Solver solver) {
         super(vars, solver, constraint, PropagatorPriority.UNARY, true);
         n = vars.length;
+		this.length = length;
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
@@ -92,8 +88,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-			vars[i].removeValue(i,this);
-            if (vars[i].instantiated()) {
+            if (vars[i].instantiated() && i!=vars[i].getValue()) {
                 fixedVar.add(i);
             }
         }
@@ -104,28 +99,27 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        varInstantiated(idxVarInProp, vars[idxVarInProp].getValue());
+        int next = vars[idxVarInProp].getValue();
+		if(idxVarInProp!=next){
+			varInstantiated(idxVarInProp, next);
+			vars[next].removeValue(next,this);
+		}
     }
 
     private void varInstantiated(int var, int val) throws ContradictionException {
-        if (!vars[var].instantiated()) {
-            throw new UnsupportedOperationException();
-        }
         int last = end[val].get();
         int start = origin[var].get();
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
         if (val == start) {
-            if (size[start].get() != n) {
-                contradiction(vars[var], "");
-            }
+			length.instantiateTo(size[start].get(),this);
         } else {
             size[start].add(size[val].get());
-            if (size[start].get() == n) {
+			if (size[start].get() == length.getUB()) {
                 vars[last].instantiateTo(start, this);
             }
-            if (size[start].get() < n) {
+            if (size[start].get() < length.getLB()) {
                 vars[last].removeValue(start, this);
             }
             origin[last].set(start);

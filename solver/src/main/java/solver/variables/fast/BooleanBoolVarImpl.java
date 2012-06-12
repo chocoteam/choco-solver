@@ -246,6 +246,12 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
         return value < 1 && instantiateTo(value, cause);
     }
 
+
+    @Override
+    public void wipeOut(@NotNull ICause cause) throws ContradictionException {
+        removeInterval(0, 1, cause);
+    }
+
     @Override
     public boolean setToTrue(ICause cause, boolean informCause) throws ContradictionException {
         return instantiateTo(1, cause);

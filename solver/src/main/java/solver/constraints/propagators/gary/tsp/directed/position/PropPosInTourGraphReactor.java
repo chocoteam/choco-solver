@@ -244,46 +244,6 @@ public class PropPosInTourGraphReactor extends Propagator {
             level = nbNode;
         }
     }
-//	private void BFS_RG() throws ContradictionException {
-//		BitSet done = new BitSet(n);
-//		TIntArrayList currentSet = new TIntArrayList();
-//		TIntArrayList nextSet = new TIntArrayList();
-//		TIntArrayList nextSCCnodes = new TIntArrayList();
-//		TIntArrayList tmp = null;
-//		int x = 0;
-//		nextSet.add(x);
-//		int level = 0;
-//		int scc = sccOf[x].get();
-//		while(scc!=-1){
-//			while(nextSet.size()>0){
-//				tmp = currentSet;
-//				currentSet = nextSet;
-//				nextSet = tmp;
-//				nextSet.clear();
-//				for(int i=currentSet.size()-1; i>=0; i--){
-//					x = currentSet.get(i);
-//					intVars[x].updateLowerBound(level,this);
-//					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(x);
-//					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//						if(!done.get(j)){
-//							done.set(j);
-//							if(sccOf[j].get()==scc){
-//								nextSet.add(j);
-//							}else{
-//								nextSCCnodes.add(j);
-//							}
-//						}
-//					}
-//				}
-//				level++;
-//			}
-//			scc = rg.getSuccessorsOf(scc).getFirstElement();
-//			tmp = nextSet;
-//			nextSet = nextSCCnodes;
-//			nextSCCnodes = tmp;
-//			nextSCCnodes.clear();
-//		}
-//	}
 
     private void BFSfromEnd() throws ContradictionException {
         done.clear();

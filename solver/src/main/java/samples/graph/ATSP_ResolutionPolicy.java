@@ -50,6 +50,8 @@ import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGr
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
+import solver.objective.strategies.BottomUp_Minimization;
+import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -62,6 +64,8 @@ import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -78,7 +82,7 @@ import java.util.Random;
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class ATSP_CP12 {
+public class ATSP_ResolutionPolicy {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -145,8 +149,9 @@ public class ATSP_CP12 {
 	public static void createModel() {
 		// create model
 		solver = new Solver();
-		initialUB = optimum;
-		System.out.println("initial UB : "+optimum);
+		initialUB = optimum*100;
+		System.out.println("optimum : "+optimum);
+		System.out.println("initial UB : "+initialUB);
 		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		try {
@@ -186,7 +191,7 @@ public class ATSP_CP12 {
 
 		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
 		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
-		
+
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -250,16 +255,19 @@ public class ATSP_CP12 {
 			gc.addPropagators(map);
 			relax = map;
 		}else{
-			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-			gc.addPropagators(propHK_mst);
-			relax = propHK_mst;
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
 				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_bst);
+				relax = propHK_bst;
+			}
+			else{// MST-based HK
+				System.out.println("MST");
+				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+				gc.addPropagators(propHK_mst);
+				relax = propHK_mst;
 			}
 		}
 		solver.post(gc);
@@ -268,21 +276,17 @@ public class ATSP_CP12 {
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
 		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
-
-//		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
-		solver.set(mainStrat);
-//		switch (main_search){
-//			case 0: solver.set(mainStrat);
-//				break;
-//			case 1: solver.set(new CompositeSearch(new BottomUp(totalCost),mainStrat));break;
-//			case 2: solver.set(new CompositeSearch(new DichotomicSearch(totalCost),mainStrat));
-//				solver.getSearchLoop().restartAfterEachSolution(true);break;
-//			default: throw new UnsupportedOperationException();
-//		}
-
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-		PArc allArcs = new PArc(pengine, gc);
-		solver.set(pengine.set(new Sort(allArcs).clearOut()));
+		switch (main_search){
+			// top-down (default)
+			case 0: solver.set(mainStrat);break;
+			// bottom-up
+			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),mainStrat));break;
+			// dichotomic
+			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),mainStrat));break;
+			default: throw new UnsupportedOperationException();
+		}
+		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
@@ -290,12 +294,6 @@ public class ATSP_CP12 {
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
 			}
-//			public void onSolution() {
-//				System.out.println("youhou");
-//			}
-//			public void onContradiction(ContradictionException cex) {
-//				System.out.println("yaha");
-//			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
@@ -342,7 +340,7 @@ public class ATSP_CP12 {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		heuristic = ATSP_heuristics.enf_sparse;
-		main_search = 0;
+		main_search = 1;
 		configParameters(0);
 		for (String s : list) {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
@@ -350,107 +348,11 @@ public class ATSP_CP12 {
 				loadInstance(dir + "/" + s);
 				if(n>0 && n<170){// || s.contains("p43.atsp")){
 					bst = false;
-//					configParameters(0);
-//					solve();
-//					configParameters((1<<arbo));
-//					solve();
-//					configParameters((1<<pos));
-//					solve();
-//					configParameters((1<<allDiff));
-//					solve();
-					bst = true;
-					configParameters((1<<rg));
-					solve();
-//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
-//					solve();
-				}
-			}
-		}
-	}
-
-	private static void bench_heur() {
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
-		File folder = new File(dir);
-		String[] list = folder.list();
-		main_search = 0;
-		bst = false;
-		configParameters(0);
-		ATSP_heuristics[] toTry = new ATSP_heuristics[]{
-				ATSP_heuristics.rem_MaxRepCost
-				,ATSP_heuristics.enf_MaxRepCost
-				,ATSP_heuristics.rem_MaxMargCost
-				,ATSP_heuristics.sparse
-//				,ATSP_heuristics.enf_sparse
-		};
-		toTry = new ATSP_heuristics[]{ATSP_heuristics.rem_MaxMargCost};
-		for (String s : list) {
-			if (s.contains(".atsp")){// && (!s.contains("170.atsp")) && (!s.contains("p43.atsp"))){//!s.contains("p43")){
-				loadInstance(dir + "/" + s);
-				if(n>0 && n<270){
-					for(ATSP_heuristics atsp_h:toTry){
-						heuristic = atsp_h;
-//						bst = false;
-//						configParameters(1<<rg);
-						bst = true;
-//						configParameters((1<<rg));
-//						solve();
-						configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
-//						solve();
-						solve();
-					}
-				}
-			}
-		}
-	}
-
-	private static void benchRandom() {
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
-		bst = false;
-		main_search = 2;
-		int[] sizes = new int[]{200};
-		int[] costs = new int[]{10,20};
-		for (int s:sizes) {
-			for (int c:costs) {
-				for (int k=0;k<50;k++) {
-					generateInstance(s,c,System.currentTimeMillis());
-					bst=false;
-					configParameters(0);
-					solve();
-					bst=true;
-					configParameters(1<<rg);
+					configParameters((1<<allDiff));
 					solve();
 				}
 			}
 		}
-	}
-
-	private static void generateInstance(int size, int maxCost, long seed) {
-		instanceName = size+";"+maxCost+";"+seed;
-		System.out.println("parsing instance " + instanceName + "...");
-		n = size;
-		Random rd = new Random(seed);
-		double d;
-		distanceMatrix = new int[n][n];
-		for (int i=0; i<n; i++) {
-			for(int j=i+1;j<n;j++){
-				distanceMatrix[i][j] = rd.nextInt(maxCost+1);
-				d =  distanceMatrix[i][j]/10;
-				distanceMatrix[j][i] = distanceMatrix[i][j]+(int)(d*rd.nextDouble());
-			}
-		}
-		noVal = Integer.MAX_VALUE / 2;
-		int maxVal = 0;
-		for (int i = 0; i < n; i++) {
-			distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-			distanceMatrix[n - 1][i] = noVal;
-			distanceMatrix[i][0] = noVal;
-			for (int j = 0; j < n; j++) {
-				if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-					maxVal = distanceMatrix[i][j];
-				}
-			}
-		}
-		initialUB = optimum = n*maxCost;
 	}
 
 	private static void loadInstance(String url) {
@@ -533,150 +435,4 @@ public class ATSP_CP12 {
 			e.printStackTrace();
 		}
 	}
-
-	//***********************************************************************************
-	// ASSIGNMENTS & GLOBAL BRANCHING
-	//***********************************************************************************
-
-	static int lb;
-	static int ub;
-
-	private static class DichotomicSearch extends AbstractStrategy<IntVar> {
-		IntVar obj;
-		long nbSols;
-		protected DichotomicSearch(IntVar obj) {
-			super(new IntVar[]{obj});
-			this.obj = obj;
-			lb = -1;
-		}
-		@Override
-		public void init() {}
-		@Override
-		public Decision getDecision() {
-			if(lb==-1){
-				lb = obj.getLB();
-			}
-			if(obj.getLB()==obj.getUB()){
-				return null;
-			}
-			if(nbSols == solver.getMeasures().getSolutionCount()){
-				return null;
-			}else{
-				nbSols = solver.getMeasures().getSolutionCount();
-				ub = obj.getUB();
-				int target = (lb+ub)/2;
-				System.out.println(lb+" : "+ub+" -> "+target);
-				FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
-				dec.set(obj,target, objCut);
-				return dec;
-			}
-		}
-	}
-
-	private static Assignment<IntVar> objCut = new Assignment<IntVar>() {
-		@Override
-		public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-			var.updateUpperBound(value, cause);
-		}
-		@Override
-		public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-			lb = value+1;
-			var.updateLowerBound(value + 1, cause);
-		}
-		@Override
-		public String toString() {
-			return " <= ";
-		}
-	};
-
-	private static Assignment<GraphVar> graph_sparse = new Assignment<GraphVar>() {
-		@Override
-		public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
-			int n = var.getEnvelopGraph().getNbNodes();
-			if (value>=n){
-				int node = value/n-1;
-				int highestIdx = value%n;
-				INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j>highestIdx){
-						var.removeArc(node,j,cause);
-					}
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-
-		@Override
-		public void unapply(GraphVar var, int value, ICause cause) throws ContradictionException {
-			int n = var.getEnvelopGraph().getNbNodes();
-			if (value>=n){
-				int node = value/n-1;
-				int highestIdx = value%n;
-				INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j<=highestIdx){
-						var.removeArc(node,j,cause);
-					}
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "unapply graph bound";
-		}
-	};
-
-	private static class BottomUp extends AbstractStrategy<IntVar> {
-		IntVar obj;
-		int val;
-		protected BottomUp(IntVar obj) {
-			super(new IntVar[]{obj});
-			this.obj = obj;
-			val = -1;
-		}
-		@Override
-		public void init() {}
-		@Override
-		public Decision getDecision() {
-			if(obj.getLB()==obj.getUB()){
-				return null;
-			}
-			if(val==-1){
-				val = obj.getLB();
-			}
-			int target = val;
-			val++;
-			System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+target);
-			FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
-			dec.set(obj,target, objCut);
-			return dec;
-		}
-	}
-
-	private static class CompositeSearch extends AbstractStrategy {
-
-		AbstractStrategy s1,s2;
-		protected CompositeSearch(AbstractStrategy s1, AbstractStrategy s2) {
-			super(ArrayUtils.append(s1.vars, s2.vars));
-			this.s1 = s1;
-			this.s2 = s2;
-		}
-
-		@Override
-		public void init() {}
-
-		@Override
-		public Decision getDecision() {
-			Decision d = s1.getDecision();
-			if(d==null){
-				d = s2.getDecision();
-			}
-			return d;
-		}
-	}
-
 }
