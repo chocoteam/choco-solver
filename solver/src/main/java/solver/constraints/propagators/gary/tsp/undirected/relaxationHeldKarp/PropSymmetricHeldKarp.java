@@ -65,9 +65,9 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 	protected TIntArrayList mandatoryArcsList;
 	protected  double step;
 	protected AbstractTreeFinder HKfilter, HK;
-	public static long nbRem;
-	protected static boolean waitFirstSol;
-	protected int nbSprints = 30;
+	public long nbRem;
+	protected boolean waitFirstSol;
+	protected int nbSprints;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -85,6 +85,7 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 		penalities = new double[n];
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
+		nbSprints = 30;
 	}
 
 	/** ONE TREE based HK */
@@ -126,11 +127,7 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 	protected void HK_Pascals() throws ContradictionException {
 		double hkb;
 		double alpha = 2;
-//		double beta = 0.95;
 		double beta = 0.5;
-//		if(nbSprints==31){
-//			beta = 0.95;
-//		}
 		double bestHKB;
 		boolean improved;
 		int count = 2;
@@ -240,9 +237,6 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 			}
 			sumPenalities += penalities[i];
 		}
-//		if(mst.getNeighborsOf(0).neighborhoodSize()!=2){
-//			throw new UnsupportedOperationException();
-//		};
 		this.totalPenalities = 2*sumPenalities;
 	}
 
@@ -280,29 +274,18 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-//		nbSprints = n/2;
-//		nbSprints = 31;
-		_propagate(evtmask);
-		nbSprints = 30;
+//		int nb = 0;
 //		for(int i=0;i<n;i++){
-//			penalities[i] = 0;
+//			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 //		}
-//		totalPenalities = 0;
-	}
-
-	public void _propagate(int evtmask) throws ContradictionException {
-		int nb = 0;
-		for(int i=0;i<n;i++){
-			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}
-		nb /= 2;
+//		nb /= 2;
 //		System.out.println(nb+" edges");
 //		System.out.println(obj);
 		HK_algorithm();
-		int nb2 = 0;
-		for(int i=0;i<n;i++){
-			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}nb2 /= 2;
+//		int nb2 = 0;
+//		for(int i=0;i<n;i++){
+//			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//		}nb2 /= 2;
 //		System.out.println("current lower bound : "+obj.getLB());
 //		System.out.println("initial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)");
 //		System.out.println(nb2+" edges");
