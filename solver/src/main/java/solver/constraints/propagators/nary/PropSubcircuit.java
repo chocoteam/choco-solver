@@ -88,6 +88,8 @@ public class PropSubcircuit extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
+			vars[i].updateLowerBound(0,this);
+			vars[i].updateUpperBound(n-1,this);
             if (vars[i].instantiated() && i!=vars[i].getValue()) {
                 fixedVar.add(i);
             }
@@ -134,6 +136,9 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
+		if(!length.instantiated()){
+			return ESat.UNDEFINED;
+		}
         for (int i = 0; i < n; i++) {
             if (!vars[i].instantiated()) {
                 return ESat.UNDEFINED;
@@ -141,8 +146,19 @@ public class PropSubcircuit extends Propagator<IntVar> {
         }
         BitSet visited = new BitSet(n);
         int i = 0;
+		while(i<n && vars[i].getValue()==i){
+			i++;
+		}
+		if(i==n){
+			if(length.getValue()==0){
+				return ESat.TRUE;
+			}else{
+				return ESat.FALSE;
+			}
+		}
+		int first = i;
         int size = 0;
-        while (size != n) {
+        while (size != length.getValue()) {
             size++;
             i = vars[i].getValue();
             if (visited.get(i)) {
@@ -150,7 +166,12 @@ public class PropSubcircuit extends Propagator<IntVar> {
             }
             visited.set(i);
         }
-        if (i == 0) {
+        if (i == first) {
+			for(int j=0;j<n;j++){
+				if(vars[j].getValue()!=j && !visited.get(j)){
+					return ESat.FALSE;
+				}
+			}
             return ESat.TRUE;
         } else {
             return ESat.FALSE;
