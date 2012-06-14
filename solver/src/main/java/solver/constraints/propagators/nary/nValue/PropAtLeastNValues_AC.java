@@ -273,6 +273,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 		if(nValues.getLB()==card){
 			filter();
 		}
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
 	}
 
 	@Override

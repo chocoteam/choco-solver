@@ -170,9 +170,6 @@ public class Robustness {
 		gc.addPropagators(new PropAtMostNPredecessors(graph,preds,gc,solver));
 		gc.addPropagators(new PropAtLeastNPredecessors(graph,preds,gc,solver));
 
-//		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
-//		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
-
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropAllDiffGraphIncremental(graph, n - 1, solver, gc));
 		// STRUCTURAL FILTERING
@@ -198,9 +195,9 @@ public class Robustness {
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
 //		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, null);
-//		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null, new OrderedArcs(graph, seed), GraphStrategy.NodeArcPriority.ARCS);
-		AbstractStrategy mainStrat = StrategyFactory.graphLexico(graph);
+		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null, new OrderedArcs(graph, seed), GraphStrategy.NodeArcPriority.ARCS);
 		solver.set(mainStrat);
+//		solver.set(StrategyFactory.graphLexico(graph));
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
@@ -209,18 +206,6 @@ public class Robustness {
 		solver.findSolution();
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
 			throw new UnsupportedOperationException();
-//			String st = "";
-//			for(int i=0;i<n;i++){
-//				String l = "\n "+i+ " : ";
-//				for(int j=0;j<n;j++){
-//					if(input[i][j]){
-//						l+=j+"\t";
-//					}
-//				}
-//				st+=l;
-//			}
-//			System.out.println(st);
-//			System.exit(0);
 		}
 		// OUTPUT
 		String configst = "";

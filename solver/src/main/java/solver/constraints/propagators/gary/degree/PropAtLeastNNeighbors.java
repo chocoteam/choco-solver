@@ -100,6 +100,7 @@ public class PropAtLeastNNeighbors extends Propagator<UndirectedGraphVar> {
 				enforceNode(node);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

@@ -189,6 +189,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
 				mates[x].add(arc);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	private void addNode(int scc, int node) {

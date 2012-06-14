@@ -113,6 +113,7 @@ public class PropOnePredBut extends Propagator<DirectedGraphVar> {
 				}
 			}
 		}
+		gdm.unfreeze();
 	}
 
     @Override

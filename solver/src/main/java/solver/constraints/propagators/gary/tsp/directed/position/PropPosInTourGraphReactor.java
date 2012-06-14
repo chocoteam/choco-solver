@@ -126,6 +126,8 @@ public class PropPosInTourGraphReactor extends Propagator {
             }
         }
         graphTrasversal();
+		gdm.freeze();
+		gdm.unfreeze();
     }
 
     @Override
