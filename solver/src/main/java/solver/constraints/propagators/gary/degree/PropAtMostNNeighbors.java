@@ -92,6 +92,7 @@ public class PropAtMostNNeighbors extends Propagator<UndirectedGraphVar> {
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			checkNode(node);
 		}
+		gdm.unfreeze();
 	}
 
     @Override

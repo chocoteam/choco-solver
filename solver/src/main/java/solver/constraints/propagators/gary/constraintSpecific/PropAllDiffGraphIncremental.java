@@ -244,6 +244,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
         buildDigraph();
         repairMatching();
         filter();
+		gdm.unfreeze();
     }
 
     @Override

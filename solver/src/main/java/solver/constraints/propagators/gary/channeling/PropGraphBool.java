@@ -87,6 +87,7 @@ public class PropGraphBool extends Propagator<GraphVar> {
 				}
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

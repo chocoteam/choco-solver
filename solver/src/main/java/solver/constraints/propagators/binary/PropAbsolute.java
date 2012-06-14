@@ -85,6 +85,9 @@ public class PropAbsolute extends Propagator<IntVar> {
         updateLowerBoundofY();
         updateUpperBoundofY();
         updateHolesinY();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

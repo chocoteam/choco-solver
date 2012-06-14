@@ -620,7 +620,7 @@ public abstract class AbstractBipartiteGraph extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
 //        this.reinit();
         this.removeUselessEdges(constraint);
-        for (int i = 0; i < this.vars.length; i++){
+        for (int i = 0; i < idms.length; i++){
             idms[i].unfreeze();
         }
     }

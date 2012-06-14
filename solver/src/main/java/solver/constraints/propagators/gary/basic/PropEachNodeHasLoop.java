@@ -94,6 +94,7 @@ public class PropEachNodeHasLoop extends Propagator<GraphVar> {
 				}
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

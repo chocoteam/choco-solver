@@ -126,6 +126,8 @@ public class PropCyclePathChanneling extends Propagator<GraphVar> {
                 undir.enforceArc(i, 0, this);
             }
         }
+		dirdm.unfreeze();
+		undirdm.unfreeze();
     }
 
     @Override

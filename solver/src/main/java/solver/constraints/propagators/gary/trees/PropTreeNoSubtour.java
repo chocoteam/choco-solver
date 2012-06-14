@@ -119,6 +119,7 @@ public class PropTreeNoSubtour extends Propagator<UndirectedGraphVar> {
 				}
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

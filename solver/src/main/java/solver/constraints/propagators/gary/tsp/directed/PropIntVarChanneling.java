@@ -84,7 +84,7 @@ public class PropIntVarChanneling extends Propagator {
 		g = graph;
         gdm = (GraphDeltaMonitor) g.monitorDelta(this);
 		this.intVars = intVars;
-        this.idms = new IIntDeltaMonitor[vars.length];
+        this.idms = new IIntDeltaMonitor[intVars.length];
         for(int i = 0; i < intVars.length;i++){
             idms[i] = intVars[i].monitorDelta(this);
         }
@@ -127,6 +127,10 @@ public class PropIntVarChanneling extends Propagator {
 					ub--;
 				}
 			}
+		}
+		gdm.unfreeze();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
 		}
 	}
 

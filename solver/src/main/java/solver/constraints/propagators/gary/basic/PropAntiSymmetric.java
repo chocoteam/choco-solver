@@ -83,6 +83,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar>{
 				g.removeArc(j, i, this);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

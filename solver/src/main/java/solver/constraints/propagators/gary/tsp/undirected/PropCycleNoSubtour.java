@@ -120,6 +120,7 @@ public class PropCycleNoSubtour extends Propagator<UndirectedGraphVar> {
 				contradiction(g,"");
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

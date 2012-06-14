@@ -114,6 +114,7 @@ public class PropPathNoCycle extends Propagator<DirectedGraphVar> {
 				enforce(i,j);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override
