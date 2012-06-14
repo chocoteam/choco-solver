@@ -125,6 +125,9 @@ public final class PropEqualXY extends Propagator<IntVar> {
             // filtering algo ensures that both are assigned to the same value
             setPassive();
         }
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
 

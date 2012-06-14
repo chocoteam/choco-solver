@@ -110,6 +110,7 @@ public class PropSCCDoorsRules extends Propagator<DirectedGraphVar> {
 		for(int i=nR.get()-1;i>=0;i--){
 			checkSCCLink(i);
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

@@ -127,6 +127,9 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         checkAllY();
         int step = (checkAllX() ? ON_Y : STOP);
         fixPoint(step);
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

@@ -120,6 +120,7 @@ public class PropNLoopsTree extends Propagator{
 			nLoops.instantiateTo(ker, this);
 			active.set(false);
 		}
+		gdm.unfreeze();
 	}
 
     @Override

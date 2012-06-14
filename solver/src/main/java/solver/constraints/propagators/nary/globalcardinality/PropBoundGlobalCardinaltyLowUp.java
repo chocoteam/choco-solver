@@ -97,6 +97,9 @@ public class PropBoundGlobalCardinaltyLowUp extends PropBoundGlobalCardinality {
             initialize();
         }
         filter();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

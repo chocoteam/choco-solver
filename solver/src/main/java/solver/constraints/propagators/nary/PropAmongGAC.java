@@ -128,6 +128,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
             UB.set(ub);
         }
         filter();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     protected void filter() throws ContradictionException {

@@ -130,8 +130,9 @@ public class PropDomainChanneling extends Propagator<IntVar> {
         //Set oldinf & oldsup equals to the nt bounds of the assignment var
         oldinf.set(vars[dsize].getLB());
         oldsup.set(vars[dsize].getUB());
-
-
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

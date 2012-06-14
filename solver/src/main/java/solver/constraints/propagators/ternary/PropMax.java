@@ -84,6 +84,9 @@ public class PropMax extends Propagator<IntVar> {
         if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             filterHoles(true, true);
         }
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     protected void filterHoles(boolean hv1, boolean hv2) throws ContradictionException {

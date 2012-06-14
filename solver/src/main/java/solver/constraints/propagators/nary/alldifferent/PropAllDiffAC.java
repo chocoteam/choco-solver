@@ -318,6 +318,9 @@ public class PropAllDiffAC extends Propagator<IntVar> {
 		}
 		repairMatching();
 		filter();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
 	}
 
 	@Override

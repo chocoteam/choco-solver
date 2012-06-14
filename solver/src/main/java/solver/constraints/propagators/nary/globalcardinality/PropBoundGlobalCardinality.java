@@ -209,6 +209,9 @@ public class PropBoundGlobalCardinality extends Propagator<IntVar> {
             initialize();
         }
         filter();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     void filter() throws ContradictionException {

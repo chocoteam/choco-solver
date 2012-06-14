@@ -110,6 +110,7 @@ public class PropCircuitNoSubtour extends Propagator<DirectedGraphVar> {
 				enforce(i,j);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override
