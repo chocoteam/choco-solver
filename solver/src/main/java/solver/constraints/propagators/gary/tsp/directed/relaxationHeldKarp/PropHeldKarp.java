@@ -65,9 +65,9 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 	protected TIntArrayList mandatoryArcsList;
 	protected double step;
 	protected AbstractMSTFinder HKfilter, HK;
-	public static long nbRem;
-	protected static boolean waitFirstSol;
-	protected int nbSprints = 30;
+	public long nbRem;
+	protected boolean waitFirstSol;
+	protected int nbSprints;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -88,6 +88,7 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		outPenalities = new double[n];
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
+		nbSprints = 30;
 	}
 
 
@@ -198,7 +199,8 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 				}
 			}
 			alpha *= beta;
-			beta  /= 2; // TODO remettre ou pas?
+			beta  /= 2;
+			if(sccOf!=null)return;// not too heavy approach
 		}
 	}
 
@@ -314,15 +316,13 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		nbSprints = 30;
 		HK_algorithm();
 //		totalPenalities = 0;
 //		for(int i=0;i<n;i++){
 //			inPenalities[i] = outPenalities[i] = 0;
 //		}
-//		nbSprints = 7;
-		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * (n-1))) + "%)");
-		System.out.println("current lower bound : "+obj.getLB());
+//		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * (n-1))) + "%)");
+//		System.out.println("current lower bound : "+obj.getLB());
 	}
 
 	@Override
@@ -346,7 +346,6 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 	public boolean contains(int i, int j) {
 		if(mst==null){
 			throw new UnsupportedOperationException("no relaxation computed yet");
-//			return true;
 		}
 		return mst.arcExists(i,j);
 	}

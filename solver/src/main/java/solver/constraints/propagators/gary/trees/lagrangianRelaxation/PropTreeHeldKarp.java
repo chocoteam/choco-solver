@@ -65,9 +65,9 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	protected UndirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
 	protected AbstractTreeFinder HKfilter, HK;
-	public static long nbRem;
-	protected static boolean waitFirstSol;
-	protected int nbSprints = 30;
+	public long nbRem;
+	protected boolean waitFirstSol;
+	protected int nbSprints;
 	protected int maxDegree;
 	double step;
 
@@ -87,6 +87,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		totalPenalities = 0;
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
+		nbSprints = 30;
 		this.maxDegree = maxDegree;
 	}
 
@@ -267,16 +268,16 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int nb = 0;
-		for(int i=0;i<n;i++){
-			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}
-		nb /= 2;System.out.println(nb + " edges\n" + obj);
+//		int nb = 0;
+//		for(int i=0;i<n;i++){
+//			nb+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//		}
+//		nb /= 2;System.out.println(nb + " edges\n" + obj);
 		HK_algorithm();
-		int nb2 = 0;
-		for(int i=0;i<n;i++){
-			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}nb2 /= 2;System.out.println("current lower bound : "+obj.getLB()+"\ninitial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)\n"+nb2+" edges remaining");
+//		int nb2 = 0;
+//		for(int i=0;i<n;i++){
+//			nb2+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+//		}nb2 /= 2;System.out.println("current lower bound : "+obj.getLB()+"\ninitial HK pruned " + nbRem + " arcs ("+((nb-nb2)*100/nb)+"%)\n"+nb2+" edges remaining");
 	}
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {

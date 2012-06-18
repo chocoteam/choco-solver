@@ -250,19 +250,16 @@ public class ATSP_CP12 {
 			gc.addPropagators(map);
 			relax = map;
 		}else{
+			System.out.println("MST");
+			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+			gc.addPropagators(propHK_mst);
+			relax = propHK_mst;
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
 				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_bst);
-				relax = propHK_bst;
-			}
-			else{// MST-based HK
-				System.out.println("MST");
-				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addPropagators(propHK_mst);
-				relax = propHK_mst;
 			}
 		}
 		solver.post(gc);
@@ -359,11 +356,11 @@ public class ATSP_CP12 {
 //					solve();
 //					configParameters((1<<pos));
 //					solve();
-					configParameters((1<<allDiff));
-					solve();
-//					bst = true;
-//					configParameters((1<<rg));
+//					configParameters((1<<allDiff));
 //					solve();
+					bst = true;
+					configParameters((1<<rg));
+					solve();
 //					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
 //					solve();
 				}
