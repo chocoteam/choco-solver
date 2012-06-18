@@ -28,14 +28,15 @@
 package samples;
 
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.Sum;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.StrategyFactory;
+import solver.search.loop.monitors.ABSLNS;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -126,14 +127,11 @@ public class Knapsack extends AbstractProblem {
                     seq,
                     ValidatorFactory.instanciated,
                     solver.getEnvironment()));*/
-        boolean ab = true;
-        IntVar[] vars = ArrayUtils.append(new IntVar[]{power},objects);
-        if (!ab) {
-            solver.set(StrategyFactory.domwdegMindom(vars, solver));
-        } else {
-            solver.set(StrategyFactory.ABSrandom(vars, solver, 0.999d, 0.02d, 1, seed));
-        }
-//        SearchMonitorFactory.log(solver,  true, true);
+        final ActivityBased abs = new ActivityBased(solver, objects, 0.999d, 0.02d, 8, 2.0d, 1, seed);
+        SearchMonitorFactory.log(solver, true, false);
+
+        solver.set(abs);
+        solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, objects, seed, abs, false, objects.length / 2));
     }
 
     @Override
@@ -155,7 +153,7 @@ public class Knapsack extends AbstractProblem {
 
     public static void main(String[] args) {
         new Knapsack().execute(args);
-    }
+        }
 
 
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////

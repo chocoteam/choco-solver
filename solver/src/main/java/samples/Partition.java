@@ -37,11 +37,7 @@ import solver.constraints.unary.Member;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.strategy.StrategyVarValAssign;
+import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -148,16 +144,7 @@ public class Partition extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-//        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
-        ActivityBased dd = new ActivityBased(solver, Ovars, 0.999d, 0.2d, 1000, seed);
-            solver.getSearchLoop().plugSearchMonitor(dd);
-            for (IntVar var : Ovars) {
-                var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-            }
-            solver.set(StrategyVarValAssign.dyn(Ovars,
-                    new solver.search.strategy.enumerations.sorters.Seq<IntVar>(dd, SorterFactory.random(seed)),
-                    ValidatorFactory.instanciated,
-                    solver.getEnvironment()));
+        solver.set(StrategyFactory.minDomMinVal(Ovars, solver.getEnvironment()));
     }
 
     @Override
@@ -216,6 +203,6 @@ public class Partition extends AbstractProblem {
 
     public static void main(String[] args) {
         new Partition().execute(args);
-    }
+        }
 
 }

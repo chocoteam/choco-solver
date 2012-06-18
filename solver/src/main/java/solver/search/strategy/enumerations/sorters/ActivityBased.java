@@ -27,23 +27,33 @@
 package solver.search.strategy.enumerations.sorters;
 
 
+import choco.kernel.common.util.PoolManager;
+import choco.kernel.common.util.iterators.DisposableValueIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
+import solver.search.loop.monitors.SearchMonitorFactory;
+import solver.search.restart.RestartFactory;
+import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.Random;
+import java.util.Comparator;
 
 /**
- *
  * Implementation of the search described in:
  * "Activity-Based Search for Black-Box Constraint Propagramming Solver",
  * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
@@ -52,8 +62,8 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMonitor,
-        IVariableMonitor<IntVar>/*, VariableSelector<IntVar>*/ {
+public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMonitor,
+        IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
@@ -110,15 +120,20 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
     final IntVar[] vars;
 
     final double[] A; // activity of all variables
+    final double[][] Av; // activity of each value of all variables
+    final int[] ov; // values offsets
     final double[] mA; // the mean -- maintained incrementally
+    final double[][] mAv; // the mean of values -- maintained incrementally
     final double[] sA; // the variance -- maintained incrementally -- std dev = sqrt(sA/path-1)
     final BitSet affected; // store affected variables
 
     final double g, d; // g for aging, d for interval size estimation
+    final int a; // forget parameter
+    final double r;
 
     final int[] keys; // to maintain idx of this within variable monitor list
 
-    boolean sampling; // is this still in a sampling phase
+    public static boolean sampling; // is this still in a sampling phase
 
     int nb_probes; // probing size
 
@@ -126,32 +141,123 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
 
     java.util.Random random; //  a random object for the sampling phase
 
-    public ActivityBased(Solver solver, IntVar[] vars, double g, double d, int samplingIterationForced, long seed) {
+    PoolManager<FastDecision> decisionPool;
+
+    int currentVar, currentVal;
+
+    public ActivityBased(Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
+        super(vars);
         this.solver = solver;
         this.vars = vars;
+        A = new double[vars.length];
+        mA = new double[vars.length];
+        sA = new double[vars.length];
+        Av = new double[vars.length][];
+        mAv = new double[vars.length][];
+        ov = new int[vars.length];
+        keys = new int[vars.length];
+        affected = new BitSet(vars.length);
+
         this.v2i = new TIntIntHashMap(vars.length);
         for (int i = 0; i < vars.length; i++) {
             v2i.put(vars[i].getId(), i);
             vars[i].addMonitor(this);
+            Av[i] = new double[vars[i].getDomainSize()];
+            mAv[i] = new double[vars[i].getDomainSize()];
+            ov[i] = vars[i].getLB();
         }
-        A = new double[vars.length];
-        mA = new double[vars.length];
-        sA = new double[vars.length];
-        keys = new int[vars.length];
-        affected = new BitSet(vars.length);
+
         assert g >= 0.0f && g <= 1.0f;
         this.g = g;
         assert d >= 0.0f && d <= 1.0f;
         this.d = d;
+        assert a > 0;
+        this.a = a;
+        this.r = r;
         sampling = true;
-        random = new Random(seed);
+        random = new java.util.Random(seed);
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
         solver.getSearchLoop().restartAfterEachFail(true);
         solver.getSearchLoop().restartAfterEachSolution(true);
         solver.getSearchLoop().plugSearchMonitor(this);
+        decisionPool = new PoolManager<FastDecision>();
 //        init(vars);
+    }
+
+    @Override
+    public void init() {
+    }
+
+    TIntList bests = new TIntArrayList();
+
+    @Override
+    public Decision getDecision() {
+        bests.clear();
+        double bestVal = -1.0d;
+        for (int i = 0; i < vars.length; i++) {
+            int ds = vars[i].getDomainSize();
+            if (ds > 1) {
+                double a = A[v2i.get(vars[i].getId())] / ds;
+                if (a > bestVal) {
+                    bests.clear();
+                    bests.add(i);
+                    bestVal = a;
+                } else if (a == bestVal) {
+                    bests.add(i);
+                }
+            }
+        }
+        if (bests.size() > 0) {
+            currentVar = bests.get(random.nextInt(bests.size()));
+            IntVar best = vars[currentVar];
+            currentVal = best.getLB();
+            if (sampling) {
+                int ds = best.getDomainSize();
+                int n = random.nextInt(ds);
+                if (best.hasEnumeratedDomain()) {
+                    while (n-- > 0) {
+                        currentVal = best.nextValue(currentVal);
+                    }
+                } else {
+                    currentVal += n;
+                }
+            } else {
+                int o = ov[currentVar];
+                if (best.hasEnumeratedDomain()) {
+                    bests.clear();
+                    bestVal = Double.MAX_VALUE;
+                    DisposableValueIterator it = best.getValueIterator(true);
+                    while (it.hasNext()) {
+                        int value = it.next();
+                        double current = Av[currentVar][value - o];
+                        if (current < bestVal) {
+                            bests.clear();
+                            bests.add(value);
+                            bestVal = current;
+                        } else {
+                            bests.add(value);
+                        }
+                    }
+                    currentVal = bests.get(random.nextInt(bests.size()));
+                } else {
+                    int lb = best.getLB();
+                    int ub = best.getUB();
+                    currentVal = Av[currentVar][lb - o] < Av[currentVar][ub - o] ?
+                            lb : ub;
+                }
+            }
+            FastDecision currrent = decisionPool.getE();
+            if (currrent == null) {
+                currrent = new FastDecision(decisionPool);
+            }
+            currrent.set(best, currentVal, Assignment.int_eq);
+//            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
+            return currrent;
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -162,20 +268,23 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
         // select var with the largest ratio A(x)/|D(x)|
         int id1 = v2i.get(o1.getId());
         int id2 = v2i.get(o2.getId());
-        // avoid using / operation
-//        double a1 = A[id1] / o1.getDomainSize();
-//        double a2 = A[id2] / o2.getDomainSize();
-//        System.out.printf("%s:%f vs. %s:%f\n", o1, a1, o2, a2);
-        // * is faster
+        // avoid using / operation, * is faster
         double b1 = A[id1] * o2.getDomainSize();
         double b2 = A[id2] * o1.getDomainSize();
-//        System.out.printf("%s:%f vs. %s:%f\n", o1, b1, o2, b2);
         if (b1 > b2) {
             return -1;
         } else if (b1 < b2) {
             return 1;
         }
         return 0;
+    }
+
+    public double getActivity(IntVar var) {
+        if (v2i.contains(var.getId())) {
+            return A[v2i.get(var.getId())] / var.getDomainSize();
+        } else {
+            return 0.0d;
+        }
     }
 
 
@@ -206,11 +315,16 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
                 A[i] *= sampling ? ONE : g;
             }
         }
+
     }
 
     @Override
     public void beforeDownLeftBranch() {
         beforeDownBranch();
+        Av[currentVar][currentVal - ov[currentVar]] =
+                sampling ?
+                        Av[currentVar][currentVal - ov[currentVar]] + affected.cardinality() :
+                        (Av[currentVar][currentVal - ov[currentVar]] * (a - 1) + affected.cardinality()) / a;
     }
 
     @Override
@@ -240,6 +354,13 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
                 mA[i] += (U / nb_probes);
                 sA[i] += (U * (activity - mA[i]));
                 A[i] = 0;
+                for (int j = 0; j < Av[i].length; j++) {
+                    activity = Av[i][j];
+                    oldmA = mAv[i][j];
+                    U = activity - oldmA;
+
+                    mAv[i][j] += (U / nb_probes);
+                }
             }
             // check if sampling is still required
 //            logger.info("<<<<START check");
@@ -258,8 +379,15 @@ public class ActivityBased extends AbstractSorter<IntVar> implements ISearchMoni
                 }
                 sampling = false;
                 solver.getSearchLoop().restartAfterEachFail(false);
+                // then copy values estimated
                 System.arraycopy(mA, 0, A, 0, mA.length);
+                for (int i = 0; i < A.length; i++) {
+                    System.arraycopy(mAv[i], 0, Av[i], 0, mAv[i].length);
+                }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
+                SearchMonitorFactory.restart(solver, RestartFactory.geometrical(3 * vars.length, r),
+                        LimitBox.failLimit(solver, 3 * vars.length), Integer.MAX_VALUE);
+
             }
         }
     }

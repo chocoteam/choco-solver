@@ -174,7 +174,7 @@ public class RLFAP extends AbstractProblem {
         if (true) {
             solver.set(StrategyFactory.domwdegMindom(allvars, 3));
         } else {
-            solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 1, seed));
+            solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
                 LimitBox.failLimit(solver, 2), 25000);

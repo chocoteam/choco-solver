@@ -265,15 +265,8 @@ public final class StrategyFactory {
                 solver.getEnvironment());
     }
 
-    public static AbstractStrategy<IntVar> ABSrandom(IntVar[] vars, Solver solver, double g, double d, int samplingIterationForced, long seed) {
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.random(var, seed));
-        }
-        ActivityBased dd = new ActivityBased(solver, vars, g, d, samplingIterationForced, seed);
-        return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(dd, SorterFactory.random(seed)),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
+    public static AbstractStrategy<IntVar> ABSrandom(IntVar[] vars, Solver solver, double g, double d, int a, double r, int samplingIterationForced, long seed) {
+        return new ActivityBased(solver, vars, g, d, a, r, samplingIterationForced, seed);
     }
 
     public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
