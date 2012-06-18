@@ -344,6 +344,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Force the search to stop
      */
     public final void interrupt() {
+        nextState = RESUME;
         alive = false;
     }
 
