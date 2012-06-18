@@ -28,11 +28,11 @@ package solver.propagation.generator;
 
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
+import solver.propagation.queues.AQueue;
+import solver.propagation.queues.FixSizeCircularQueue;
+import solver.propagation.queues.LinkedList;
 import solver.recorders.IEventRecorder;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.LinkedList;
 
 
 /**
@@ -45,11 +45,10 @@ import java.util.LinkedList;
  */
 public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    private static final int HIGH = 99999999 ;
+    private static final boolean SMALL_MEMORY_FOOTPRINT = false;
 
     protected S lastPopped;
-//    protected AQueue<S> toPropagate;
-    protected Deque<S> toPropagate;
+    protected AQueue<S> toPropagate;
 
     @SuppressWarnings({"unchecked"})
     public Queue(Generator<S>... generators) {
@@ -59,13 +58,11 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             elements[e].setScheduler(this, e);
             nbe++;
         }
-        if (nbe > HIGH) {
-            toPropagate = new LinkedList<S>();
+        if (SMALL_MEMORY_FOOTPRINT) {
+            toPropagate = new FixSizeCircularQueue<S>(nbe/2);
         } else {
-            toPropagate = new ArrayDeque<S>(nbe);
+            toPropagate = new LinkedList<S>();
         }
-//
-//        toPropagate = new FixSizeCircularQueue<S>(nbe);
     }
 
     public Queue(S[] schedulables) {
@@ -76,14 +73,11 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             nbe++;
         }
 
-        if (nbe > HIGH) {
-            toPropagate = new LinkedList<S>();
+        if (SMALL_MEMORY_FOOTPRINT) {
+            toPropagate = new FixSizeCircularQueue<S>(nbe/2);
         } else {
-            toPropagate = new ArrayDeque<S>(nbe);
+            toPropagate = new LinkedList<S>();
         }
-
-
-//        toPropagate = new FixSizeCircularQueue<S>(nbe);
     }
 
 
@@ -93,29 +87,6 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
     }
 
     //-->
-
-    //<-- PROPAGATION ENGINE
-    public static int count;
-    public static double mean;
-    public static double variance;
-    public static int max;
-
-    protected static void update(int size) throws ContradictionException {
-        count++;
-        double U = size - mean;
-        mean += U / count;
-        variance = U * (size - mean);
-        if (max < size) {
-            max = size;
-        }
-        //if(count >= 500000)throw new ContradictionException();
-        double st = Math.sqrt(variance / (count - 1));
-        //System.out.printf("%d\t%d\t%.3f\t%.3f\t%.3f\n", count,size, mean, mean - st, mean + st);
-    }
-
-    public static void print() {
-        //System.out.printf("count:%d, max:%d, mean:%.3f, sd:%.3f\n", count, max, mean, Math.sqrt(variance / (count - 1)));
-    }
 
     @Override
     public void schedule(S element) {
@@ -161,7 +132,6 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
 
     protected boolean _clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            update(toPropagate.size());
             lastPopped = toPropagate.pop();//.pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {

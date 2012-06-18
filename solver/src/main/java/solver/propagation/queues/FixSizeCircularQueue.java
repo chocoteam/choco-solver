@@ -94,7 +94,7 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
 
     @Override
     public void clear() {
-        head = tail = size =0;
+        head = tail = size = 0;
     }
 
     public E get(int index) {
@@ -105,6 +105,8 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
         elementData[tail] = e;
         tail = convert(1, tail);
         size++;
+        if (head == tail)
+            doubleCapacity();
         return true;
     }
 
@@ -154,7 +156,7 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
         E tmp = elementData[pos];
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
-        if (pos == tail-1) {
+        if (pos == tail - 1) {
             tail = pos;
         }
         size--;
@@ -213,11 +215,31 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
 
     public boolean remove(E e) {
         int i = indexOf(e);
-        if(i>-1){
+        if (i > -1) {
             remove(i);
             return true;
         }
         return false;
     }
 
+    /**
+     * Double the capacity of this deque.  Call only when full, i.e.,
+     * when head and tail have wrapped around to become equal.
+     */
+    private void doubleCapacity() {
+        assert head == tail;
+        int p = head;
+        int n = capacity;
+        int r = n - p; // number of elements to the right of p
+        int newCapacity = n << 1;
+        if (newCapacity < 0)
+            throw new IllegalStateException("Sorry, deque too big");
+        Object[] a = new Object[newCapacity];
+        System.arraycopy(elementData, p, a, 0, r);
+        System.arraycopy(elementData, 0, a, r, p);
+        elementData = (E[]) a;
+        head = 0;
+        tail = n;
+        capacity = newCapacity;
+    }
 }

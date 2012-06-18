@@ -31,7 +31,6 @@ import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.propagation.generator.Queue;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -100,7 +99,6 @@ public class StressTest2 extends AbstractProblem {
     @Override
     public void solve() {
         solver.findSolution();
-        Queue.print();
     }
 
     @Override

@@ -41,8 +41,8 @@ public class RandomLinkedList<E> extends LinkedList<E> {
     Random random;
 
     @SuppressWarnings({"unchecked"})
-    public RandomLinkedList(int size) {
-        super(size);
+    public RandomLinkedList() {
+        super();
         random = new Random();
     }
 

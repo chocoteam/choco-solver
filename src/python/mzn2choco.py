@@ -11,7 +11,7 @@ home = '../../'
 #CHOCO_SOLVER = join(home, 'solver', 'target', 'solver-rocs-1.0-SNAPSHOT-with-dep.jar')
 CHOCO_PARSERS = join(home, 'parser','target',  'parser-rocs-1.0-SNAPSHOT-with-dep.jar')
 CHOCO_LIB = join(home, 'parser','src', 'lib','minizinc')
-CONFIG=join(home, 'src', 'shell', 'config.xml')
+CONFIG=join(home, 'src', 'xml', 'config.xml')
 
 JAVA_OPTS = CMD = '-Xmx256m -Xms256m -XX:+AggressiveOpts'
 

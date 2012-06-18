@@ -27,8 +27,6 @@
 
 package solver.propagation.queues;
 
-import choco.kernel.common.util.PoolManager;
-
 import java.io.Serializable;
 import java.util.NoSuchElementException;
 
@@ -51,18 +49,15 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
         public Entry<E> previous;
     }
 
-    PoolManager<Entry> entries;
-
     Entry<E> header;
 
+    Entry<E> free; // should be cleared sometimes, to help GC
+
     @SuppressWarnings({"unchecked"})
-    public LinkedList(int size) {
+    public LinkedList() {
         header = new Entry<E>();
         header.next = header.previous = header;
-        entries = new PoolManager<Entry>(size);
-        for (int i = 0; i < size; i++) {
-            entries.returnE(new Entry<E>());
-        }
+        free = new Entry<E>();
     }
 
     public boolean isEmpty() {
@@ -102,7 +97,14 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
     }
 
     private Entry<E> addBefore(E e, Entry<E> entry) {
-        Entry<E> newEntry = entries.getE();
+        Entry<E> newEntry;
+        if(free.next != null){
+            newEntry = free.next;
+            free.next = newEntry.next;
+        }else{
+            newEntry = new Entry<E>();
+        }
+
         newEntry.element = e;
         newEntry.next = entry;
         newEntry.previous = entry.previous;
@@ -123,11 +125,15 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
             throw new NoSuchElementException();
 
         E result = e.element;
+
         e.previous.next = e.next;
         e.next.previous = e.previous;
-        e.next = e.previous = null;
+        e.previous = null;
         e.element = null;
-        entries.returnE(e);
+
+        e.next = free.next;
+        free.next = e;
+
         size--;
         return result;
     }

@@ -29,7 +29,6 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.propagation.generator.Queue;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -84,7 +83,6 @@ public class StressTest1 extends AbstractProblem {
     public void solve() {
         //SearchMonitorFactory.log(solver, true, true);
         solver.findSolution();
-        Queue.print();
     }
 
     @Override

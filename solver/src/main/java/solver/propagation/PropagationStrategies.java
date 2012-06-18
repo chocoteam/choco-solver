@@ -34,7 +34,7 @@ import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.FinePropEventRecorder;
+import solver.recorders.fine.prop.FinePropEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
