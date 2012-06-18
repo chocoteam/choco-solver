@@ -24,64 +24,81 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.arc;
 
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
+import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
-import solver.recorders.conditions.ICondition;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
 /**
- * A specialized fine event recorder associated with one variable and one propagator.
- * It observes a variable, records events occurring on the variable,
- * schedules it self when calling the filtering algortithm of the propagator
- * is required.
- * It also stores, if required, pointers to value removals.
  * <br/>
- * on a pris le parti de ne pas mémoriser les événements fins,
- * partant du principe que ca sera de toute facon plus couteux à dépiler et à traiter
- * que de lancer directement la propag' lourde
  *
  * @author Charles Prud'homme
- * @since 01/12/11
+ * @since 02/02/12
  */
-public class ArcEventRecorderWithCondition<V extends Variable> extends ArcEventRecorder<V> {
+public class ArcEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected int idxVinP; // index of the variable within the propagator -- immutable
+    protected int idxV; // index of this within the variable structure -- mutable
 
-    final ICondition condition; // condition to run the filtering algorithm of the propagator
-
-    public ArcEventRecorderWithCondition(V variable, Propagator<V> propagator, int idxInProp,
-                                         ICondition condition, Solver solver,IPropagationEngine engine) {
-        super(variable, propagator, solver, engine);
-        this.idxVinP = idxInProp;
-        this.condition = condition;
-        condition.linkRecorder(this);
+    public ArcEventRecorder(V variable, Propagator<V> propagator, Solver solver,IPropagationEngine engine) {
+        super((V[]) new Variable[]{variable}, new Propagator[]{propagator}, solver, engine);
     }
 
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public boolean execute() throws ContradictionException {
+        throw new SolverException("PropEventRecorder#execute() is empty and should not be called (nor scheduled)!");
+    }
+
+    @Override
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
-            if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP)) != 0) {
-                // 1. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagators[PINDEX].decArity();
-                }
-                // 2. schedule this if condition is valid
-                if (condition.validateScheduling(this, propagators[PINDEX], evt)) {
-                    propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
-                }
-            }
+        if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
+            // schedule the coarse event recorder associated to thos
+            propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
         }
     }
 
     @Override
-    public String toString() {
-        return "<< " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + "::" + condition.toString() + " >>";
+    public int getIdx(V variable) {
+        return idxV;
     }
+
+    @Override
+    public void setIdx(V variable, int idx) {
+        this.idxV = idx;
+    }
+
+    @Override
+    public void flush() {
+        // can be void
+    }
+
+    @Override
+    public void virtuallyExecuted(Propagator propagator) {
+    }
+
+    @Override
+    public String toString() {
+        return "<< " + variables[VINDEX].toString() + "::" + propagators[PINDEX].toString() + " >>";
+    }
+
+    @Override
+    public void enqueue() {
+        enqueued = true;
+        propagators[PINDEX].incNbRecorderEnqued();
+    }
+
+    @Override
+    public void deque() {
+        enqueued = false;
+        propagators[PINDEX].decNbRecrodersEnqued();
+    }
+
 }

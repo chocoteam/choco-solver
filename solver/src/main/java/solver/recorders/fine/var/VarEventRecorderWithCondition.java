@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.var;
 
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -56,7 +56,7 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public VarEventRecorderWithCondition(V variable, Propagator<V>[] propagators, int[] idxVinP,
-                                         ICondition condition, Solver solver,IPropagationEngine engine) {
+                                         ICondition condition, Solver solver, IPropagationEngine engine) {
         super(variable, propagators, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);
@@ -64,23 +64,18 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
     }
 
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        int first = firstAP.get();
-        int last = firstPP.get();
-        for (int k = first; k < last; k++) {
+        for (int k = 0; k < propagators.length; k++) {
             int i = propIdx[k];
             Propagator propagator = propagators[i];
-            if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
+            if (cause != propagator && propagator.isActive()) { // due to idempotency of propagator, it should not schedule itself
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
-                int idx = p2i.get(propagator.getId());
+                int idx = p2i[propagator.getId() - offset];
                 if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx])) != 0) {
-                    // 1. if instantiation, then decrement arity of the propagator
-                    if (EventType.anInstantiationEvent(evt.mask)) {
-                        propagator.decArity();
-                    }
-                    // 2. schedule this if condition is valid
+
+                    // schedule this if condition is valid
                     if (condition.validateScheduling(this, propagator, evt)) {
                         propagator.forcePropagate(EventType.FULL_PROPAGATION);
                     }

@@ -29,7 +29,6 @@ package solver.propagation;
 
 import choco.kernel.common.util.objects.BacktrackableArrayList;
 import choco.kernel.common.util.objects.IList;
-import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -67,7 +66,7 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected IWaterMarking watermarks; // marks every pair of V-P, breaking multiple apperance of V in P
 
-    protected TIntObjectHashMap<IList<AbstractFineEventRecorder>> fines_v;
+    protected TIntObjectHashMap<IList<Variable, AbstractFineEventRecorder>> fines_v;
     protected TIntObjectHashMap<List<AbstractFineEventRecorder>> fines_p;
     protected TIntObjectHashMap<AbstractCoarseEventRecorder> coarses;
 
@@ -118,6 +117,7 @@ public class PropagationEngine implements IPropagationEngine {
                     throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
                 }
             }
+            watermarks = null;
             initialized = true;
         }
         if (!activated) {
@@ -251,7 +251,7 @@ public class PropagationEngine implements IPropagationEngine {
         for (int i = 0; i < vars.length; i++) {
             int id = vars[i].getId();
             if (!fines_v.containsKey(id)) {
-                IList<AbstractFineEventRecorder> list = new BacktrackableArrayList(vars[i], environment, default_nb_props);
+                IList<Variable, AbstractFineEventRecorder> list = new BacktrackableArrayList(vars[i], environment, default_nb_props);
                 list.add(fer, false);
                 fines_v.put(id, list);
             } else {
@@ -280,12 +280,11 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void onVariableUpdate(Variable variable,
-                                 Procedure procedure) throws ContradictionException {
+    public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         int id = variable.getId();
         IList list = fines_v.get(id);
         if (list != null) {
-            list.forEach(procedure);
+            list.forEach(id, type, cause);
         }
     }
 

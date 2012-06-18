@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.var;
 
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -32,6 +32,8 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
+import solver.recorders.IEventRecorder;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -52,116 +54,71 @@ import java.util.Arrays;
  */
 public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V> {
 
-    protected int[][] idxVinPs; // index of the variable within the propagator -- immutable
-    //BEWARE a variable can occur more than one time into a propagator
+    //BEWARE a variable can NOT occur more than one time into a propagator
+    protected final int[] idxVinPs; // index of the variable within the propagator -- immutable
     protected int evtmasks[]; // reference to events occuring -- inclusive OR over event mask
     private boolean flag_swap_during_execution = false; // a flag to capture propagator swapping during its execution
 
-    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver,IPropagationEngine engine) {
-        super(variable, solver, engine, props.length);
-        int n = props.length;
-        // CREATE EMPTY STRUCTURE
-        this.idxVinPs = new int[n][];
-        int k = 0; // count the number of distinct propagator
-        for (int i = 0; i < n; i++) {
-            Propagator propagator = props[i];
-            int pid = propagator.getId();
-            int idx = p2i.get(pid);
-            if (idx == -1) { // first occurrence of the variable
-                this.propagators[k] = propagator;
-                p2i.put(pid, k);
-                propIdx[k] = k;
-                idxVinPs[k] = new int[]{idxVinP[i]};
-                k++;
-            } else {
-                int[] itmp = idxVinPs[idx];
-                idxVinPs[idx] = new int[itmp.length + 1];
-                System.arraycopy(itmp, 0, idxVinPs[idx], 0, itmp.length);
-                idxVinPs[idx][itmp.length] = idxVinP[i];
-            }
-        }
-        if (k < n) {
-            propagators = Arrays.copyOfRange(propagators, 0, k);
-            propIdx = Arrays.copyOfRange(propIdx, 0, k);
-            idxVinPs = Arrays.copyOfRange(idxVinPs, 0, k);
-        }
-        this.evtmasks = new int[k];
-
-        firstAP = solver.getEnvironment().makeInt(k);
-        firstPP = solver.getEnvironment().makeInt(k);
+    public FineVarEventRecorder(V variable, Propagator<V>[] props, int[] idxVinP, Solver solver, IPropagationEngine engine) {
+        super(variable, props, solver, engine);
+        this.idxVinPs = idxVinP.clone();
+        this.evtmasks = new int[props.length];
     }
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
         int first = firstAP.get();
         int last = firstPP.get();
         flag_swap_during_execution = false;
         for (int k = first; k < last; k++) {
-            int i = propIdx[k];
-            Propagator propagator = propagators[i];
-            int idx = p2i.get(propagator.getId());
-            int evtmask_ = evtmasks[idx];
-            if (evtmask_ > 0) {
-//                  LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-                // for concurrent modification..
-                evtmasks[idx] = 0; // and clean up mask
-                assert (propagator.isActive()) : this + " is not active";
-                for (int j = 0; j < idxVinPs[idx].length; j++) {
-                    propagator.fineERcalls++;
-                    propagator.propagate(this, idxVinPs[idx][j], evtmask_);
-                    if (flag_swap_during_execution) {
-                        flag_swap_during_execution = false;
-                        assert (propagator.isPassive()) : this + " is not passive";
-                        last--;
-                        k--;
-                        break;
-                    }
-                    //<cp> if the propagator has been passivate, this has been updated
-                    // and the deltamonitor is already clear() --> no need to unfreeze.
-                }
+            _execute(propIdx[k]);
+            if (flag_swap_during_execution) {
+                flag_swap_during_execution = false;
+                last--;
+                k--;
+                //<cp> if the propagator has been passivate, this has been updated
+                // and the deltamonitor is already clear() --> no need to unfreeze.
             }
-
         }
         return true;
     }
 
+    private void _execute(int i) throws ContradictionException {
+        assert p2i[propagators[i].getId() - offset] == i;
+        int evtmask_ = evtmasks[i];
+        if (evtmask_ > 0) {
+//          LoggerFactory.getLogger("solver").info(">> {}", this.toString());
+            evtmasks[i] = 0; // and clean up mask
+            execute(propagators[i], idxVinPs[i], evtmask_);
+        }
+    }
+
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
 // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
-        boolean oneoremore = false;
+        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+        boolean atleastone = false;
         int first = firstAP.get();
         int last = firstPP.get();
         for (int k = first; k < last; k++) {
             int i = propIdx[k];
             Propagator propagator = propagators[i];
             if (cause != propagator) { // due to idempotency of propagator, it should not schedule itself
-                int idx = p2i.get(propagator.getId());
-                for (int j = 0; j < idxVinPs[idx].length; j++) {
-                    if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx][j])) != 0) {
-                        // 1. if instantiation, then decrement arity of the propagator
-                        if (EventType.anInstantiationEvent(evt.mask)) {
-                            propagator.decArity();
-                        }
-                        // 2. record the event and values removed
-                        if ((evt.mask & evtmasks[idx]) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                            evtmasks[idx] |= evt.strengthened_mask;
-                        }
-                        oneoremore = true;
+//                int idx = p2i[propagator.getId() - offset];
+                assert p2i[propagator.getId() - offset] == i;
+                if ((evt.mask & propagator.getPropagationConditions(idxVinPs[i])) != 0) {
+                    // record the event and values removed
+                    if ((evt.mask & evtmasks[i]) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                        evtmasks[i] |= evt.strengthened_mask;
                     }
+                    atleastone = true;
                 }
             }
         }
-        if (oneoremore) {
-            if (!enqueued) {
-                // 4. schedule this
-                scheduler.schedule(this);
-            } else if (scheduler.needUpdate()) {
-                // 5. inform the scheduler of update if necessary
-                scheduler.update(this);
-            }
+        if (atleastone) {
+            schedule();
         }
     }
 
@@ -171,8 +128,8 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
         int last = firstPP.get();
         for (int k = first; k < last; k++) {
             int i = propIdx[k];
-            int idx = p2i.get(propagators[i].getId());
-            this.evtmasks[idx] = 0;
+            assert p2i[propagators[i].getId() - offset] == i;
+            this.evtmasks[i] = 0;
         }
     }
 
@@ -185,7 +142,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public void virtuallyExecuted(Propagator propagator) {
-        int idx = p2i.get(propagator.getId());
+        int idx = p2i[propagator.getId() - offset];
         this.evtmasks[idx] = 0;
 
         //TODO: to remove when active propagators will be managed smartly
@@ -204,6 +161,6 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public String toString() {
-        return "<< {F} " + variables[VINDEX].toString() + "::" + Arrays.toString(propagators) + " >>";
+        return "<< {F} " + variables[AbstractFineEventRecorder.VINDEX].toString() + "::" + Arrays.toString(propagators) + " >>";
     }
 }

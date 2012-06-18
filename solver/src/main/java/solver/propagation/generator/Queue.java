@@ -28,8 +28,12 @@ package solver.propagation.generator;
 
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
-import solver.propagation.queues.FixSizeCircularQueue;
 import solver.recorders.IEventRecorder;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
+
 
 /**
  * A specific propagation strategy that works like a queue (fifo).
@@ -41,8 +45,11 @@ import solver.recorders.IEventRecorder;
  */
 public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
+    private static final int HIGH = 99999999 ;
+
     protected S lastPopped;
-    protected FixSizeCircularQueue<S> toPropagate;
+//    protected AQueue<S> toPropagate;
+    protected Deque<S> toPropagate;
 
     @SuppressWarnings({"unchecked"})
     public Queue(Generator<S>... generators) {
@@ -52,8 +59,33 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             elements[e].setScheduler(this, e);
             nbe++;
         }
-        toPropagate = new FixSizeCircularQueue<S>(nbe);
+        if (nbe > HIGH) {
+            toPropagate = new LinkedList<S>();
+        } else {
+            toPropagate = new ArrayDeque<S>(nbe);
+        }
+//
+//        toPropagate = new FixSizeCircularQueue<S>(nbe);
     }
+
+    public Queue(S[] schedulables) {
+        super(schedulables);
+        int nbe = 0;
+        for (int e = 0; e < elements.length; e++) {
+            elements[e].setScheduler(this, e);
+            nbe++;
+        }
+
+        if (nbe > HIGH) {
+            toPropagate = new LinkedList<S>();
+        } else {
+            toPropagate = new ArrayDeque<S>(nbe);
+        }
+
+
+//        toPropagate = new FixSizeCircularQueue<S>(nbe);
+    }
+
 
     @Override
     public S[] getElements() {
@@ -63,6 +95,27 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
     //-->
 
     //<-- PROPAGATION ENGINE
+    public static int count;
+    public static double mean;
+    public static double variance;
+    public static int max;
+
+    protected static void update(int size) throws ContradictionException {
+        count++;
+        double U = size - mean;
+        mean += U / count;
+        variance = U * (size - mean);
+        if (max < size) {
+            max = size;
+        }
+        //if(count >= 500000)throw new ContradictionException();
+        double st = Math.sqrt(variance / (count - 1));
+        //System.out.printf("%d\t%d\t%.3f\t%.3f\t%.3f\n", count,size, mean, mean - st, mean + st);
+    }
+
+    public static void print() {
+        //System.out.printf("count:%d, max:%d, mean:%.3f, sd:%.3f\n", count, max, mean, Math.sqrt(variance / (count - 1)));
+    }
 
     @Override
     public void schedule(S element) {
@@ -108,7 +161,8 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
 
     protected boolean _clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            lastPopped = toPropagate.remove();//.pop();
+            update(toPropagate.size());
+            lastPopped = toPropagate.pop();//.pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
@@ -123,7 +177,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             lastPopped.flush();
         }
         while (!toPropagate.isEmpty()) {
-            lastPopped = toPropagate.remove();//.pop();
+            lastPopped = toPropagate.pop();//.pop();
             if (IEventRecorder.LAZY) {
                 lastPopped.flush();
             }

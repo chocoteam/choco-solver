@@ -24,72 +24,58 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.recorders.fine.prop;
 
-package choco.kernel.common.util.objects;
-
-import choco.kernel.common.Indexable;
-import solver.ICause;
+import org.slf4j.LoggerFactory;
+import solver.Solver;
+import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
-import solver.variables.EventType;
-
-import java.io.Serializable;
+import solver.propagation.IPropagationEngine;
+import solver.variables.Variable;
 
 /**
- * A IList is a container of elements.
- * An element in this list has particular behavior: it can change of state (from active to passive),
- * this container must consider this information.
- * Restoring the previous state of elements must be done upon backtracking.
+ * A fine event recorder prop-oriented dedicated to ternary propagators
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 23/02/11
+ * @since 14/06/12
  */
-public interface IList<V, E extends Indexable> extends Serializable {
+public final class FineTernPropEventRecorder<V extends Variable> extends FinePropEventRecorder<V> {
 
-    /**
-     * Add a new <code>element</code>
-     *
-     * @param element to add
-     * @param dynamic
-     */
-    void add(E element, boolean dynamic);
+    public FineTernPropEventRecorder(V[] variables, Propagator<V> vPropagator, int[] idxVinPs, Solver solver, IPropagationEngine engine) {
+        super(variables, vPropagator, idxVinPs, solver, engine);
+    }
 
-    /**
-     * Activate a element
-     *
-     * @param element the modified element
-     */
-    void setActive(E element);
+    @Override
+    public boolean execute() throws ContradictionException {
+        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        _execute(0);
+        _execute(1);
+        _execute(2);
+        return true;
+    }
 
-    /**
-     * Desactivate a element
-     *
-     * @param element the modified element
-     */
-    void setPassive(E element);
 
-    /**
-     * Permanently delete <code>element</code>
-     *
-     * @param element to delete
-     */
-    void remove(E element);
+    @Override
+    public void flush() {
+        this.evtmasks[0] = 0;
+        this.evtmasks[1] = 0;
+    }
 
-    /**
-     * Returns the total number of element contained.
-     *
-     * @return the total number of element contained.
-     */
-    int size();
+    @Override
+    public void virtuallyExecuted(Propagator propagator) {
+        assert this.propagators[PINDEX] == propagator : "wrong propagator";
+        this.evtmasks[0] = 0;
+        this.evtmasks[1] = 0;
+        if (enqueued) {
+            scheduler.remove(this);
+        }
+    }
 
-    /**
-     * Returns the number of active elements.
-     *
-     * @return the number of active elements.
-     */
-    int cardinality();
-
-    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException;
-
-    E get(int i);
+    @Override
+    public void desactivate(Propagator<V> element) {
+        super.desactivate(element);
+        this.evtmasks[0] = 0;
+        this.evtmasks[1] = 0;
+    }
 }

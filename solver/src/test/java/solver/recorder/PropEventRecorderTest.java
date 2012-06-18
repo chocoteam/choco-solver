@@ -39,7 +39,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
 import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.PropEventRecorder;
+import solver.recorders.fine.prop.PropEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -173,10 +173,9 @@ public class PropEventRecorderTest {
         expect(p1.getId()).andReturn(0);
         p1.getPropagationConditions();
         expectLastCall().andReturn(EventType.FULL_PROPAGATION.mask);
-        p1.decArity();
         replay(iv1, iv2, iv3, p1, s1);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
+        per.afterUpdate(iv1.getId(), EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, p1);
     }
 

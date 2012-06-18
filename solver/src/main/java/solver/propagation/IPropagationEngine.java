@@ -26,7 +26,6 @@
  */
 package solver.propagation;
 
-import choco.kernel.common.util.procedure.Procedure;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
@@ -119,10 +118,9 @@ public interface IPropagationEngine extends Serializable {
      * Take into account the modification of a variable
      *
      * @param variable  modified variable
-     * @param procedure procedure to apply
      * @throws ContradictionException
      */
-    void onVariableUpdate(Variable variable, Procedure procedure) throws ContradictionException;
+    void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException;
 
     void onPropagatorExecution(Propagator propagator);
 

@@ -39,7 +39,7 @@ import solver.propagation.ISchedulable;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
 import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.FinePropEventRecorder;
+import solver.recorders.fine.prop.FinePropEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -166,7 +166,6 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(1);
         expect(p1.getPropagationConditions(0)).andReturn(60);
         expect(p1.getPropagationConditions(3)).andReturn(60);
-        p1.decArity();
         expectLastCall().times(3);
         iv3.getId();
         expectLastCall().andReturn(3);
@@ -174,8 +173,8 @@ public class FinePropEventRecorderTest {
         s1.schedule(EasyMock.<ISchedulable>anyObject());
         replay(iv1, iv2, iv3, cer,p1);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
-        per.afterUpdate(iv3, EventType.INSTANTIATE, Cause.Null);
+        per.afterUpdate(iv1.getId(), EventType.INSTANTIATE, Cause.Null);
+        per.afterUpdate(iv3.getId(), EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, cer, p1);
 
         reset(iv1, iv2, iv3, cer, p1);
@@ -195,12 +194,11 @@ public class FinePropEventRecorderTest {
         expectLastCall().andReturn(1);
         expect(p1.getPropagationConditions(0)).andReturn(60);
         expect(p1.getPropagationConditions(3)).andReturn(60);
-        p1.decArity();
         expectLastCall().times(2);
         s1.schedule(EasyMock.<ISchedulable>anyObject());
         replay(iv1, iv2, iv3, cer, p1);
 
-        per.afterUpdate(iv1, EventType.INSTANTIATE, Cause.Null);
+        per.afterUpdate(iv1.getId(), EventType.INSTANTIATE, Cause.Null);
         verify(iv1, iv2, iv3, cer, p1);
     }
 

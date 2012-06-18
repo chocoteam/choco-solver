@@ -24,7 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.arc;
 
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -54,7 +54,7 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
     protected int evtmask; // reference to events occuring -- inclusive OR over event mask
 
 
-    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver,IPropagationEngine engine) {
+    public FineArcEventRecorder(V variable, Propagator<V> propagator, int idxVinP, Solver solver, IPropagationEngine engine) {
         super(variable, propagator, solver, engine);
         this.idxVinP = idxVinP;
     }
@@ -65,36 +65,23 @@ public class FineArcEventRecorder<V extends Variable> extends ArcEventRecorder<V
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
             int evtmask_ = evtmask;
             this.evtmask = 0; // and clean up mask
-            propagators[PINDEX].fineERcalls++;
-            assert (propagators[PINDEX].isActive()) : this + " is not active";
-            propagators[PINDEX].propagate(this, idxVinP, evtmask_);
+            execute(propagators[PINDEX], idxVinP, evtmask_);
         }
         return true;
     }
 
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
             if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP)) != 0) {
                 if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
-                // 1. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagators[PINDEX].decArity();
-                }
-                // 2. schedule this
-                if (!enqueued) {
-                    assert evtmask == 0 : "evt mask has not been cleared correctly";
-                    scheduler.schedule(this);
-                } else if (scheduler.needUpdate()) {
-                    // 3. inform the scheduler of update if necessary
-                    scheduler.update(this);
-                }
-                // 4. record the event and values removed
-                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
-                    evtmask |= evt.strengthened_mask;
-                }
+                // record the event and values removed
+//                if ((evt.mask & evtmask) == 0) { // if the event has not been recorded yet (through strengthened event also).
+                evtmask |= evt.strengthened_mask;
+//                }
+                schedule();
             }
         }
     }

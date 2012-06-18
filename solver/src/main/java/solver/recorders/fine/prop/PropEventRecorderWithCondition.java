@@ -24,9 +24,8 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.prop;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -51,35 +50,24 @@ import java.util.Arrays;
  */
 public class PropEventRecorderWithCondition<V extends Variable> extends PropEventRecorder<V> {
 
-    protected TIntIntHashMap idxVinP; // index of each variable within P -- immutable
+    protected final int[] idxVinP; //; // index of each variable within P -- immutable
 
     final ICondition condition; // condition to run the filtering algorithm of the propagator
 
     public PropEventRecorderWithCondition(V[] variables, Propagator<V> propagator, int[] idxVinPs,
-                                          ICondition condition, Solver solver,IPropagationEngine engine) {
+                                          ICondition condition, Solver solver, IPropagationEngine engine) {
         super(variables, propagator, solver, engine);
         this.condition = condition;
         condition.linkRecorder(this);
-
-        this.idxVinP = new TIntIntHashMap(variables.length, (float) 0.5, -1, -1);
-        for (int i = 0; i < variables.length; i++) {
-            V variable = variables[i];
-            int vid = variable.getId();
-            idxVinP.put(vid, idxVinPs[i]);
-        }
+        this.idxVinP = idxVinPs.clone();
     }
 
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not be schedule itself
-            int vid = var.getId();
-            if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP.get(vid))) != 0) {
-                // 1. if instantiation, then decrement arity of the propagator
-                if (EventType.anInstantiationEvent(evt.mask)) {
-                    propagators[PINDEX].decArity();
-                }
-                // 2. schedule this if condition is valid
+            if ((evt.mask & propagators[PINDEX].getPropagationConditions(idxVinP[vIdx])) != 0) {
+                // schedule this if condition is valid
                 if (condition.validateScheduling(this, propagators[PINDEX], evt)) {
                     propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
                 }

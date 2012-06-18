@@ -32,8 +32,10 @@ import solver.constraints.propagators.Propagator;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.recorders.fine.FineArcEventRecorder;
-import solver.recorders.fine.FinePropEventRecorder;
+import solver.recorders.fine.arc.FineArcEventRecorder;
+import solver.recorders.fine.prop.FineBinPropEventRecorder;
+import solver.recorders.fine.prop.FinePropEventRecorder;
+import solver.recorders.fine.prop.FineTernPropEventRecorder;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -109,16 +111,27 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
             }
         }
         AbstractFineEventRecorder er = null;
+        if(i==0)return;
         if (i == 1) { // in that case, there is only one variable, an Arc is a better alternative
             er = new FineArcEventRecorder(variables[0], prop, pindices[0], solver, propagationEngine);
         } else if (i < nbv) { // if some variables has been removed -- connectected previously
-            er = new FinePropEventRecorder(Arrays.copyOfRange(variables, 0, i), prop,
+            er = make(Arrays.copyOfRange(variables, 0, i), prop,
                     Arrays.copyOfRange(pindices, 0, i), solver, propagationEngine);
         } else {
-            er = new FinePropEventRecorder(variables, prop, pindices, solver, propagationEngine);
+            er = make(variables, prop, pindices, solver, propagationEngine);
         }
         eventRecorders.add(er);
         propagationEngine.addEventRecorder(er);
+    }
+
+    private AbstractFineEventRecorder make(Variable[] variables, Propagator prop, int[] pindices, Solver solver, IPropagationEngine propagationEngine) {
+        if (variables.length == 2) {
+            return new FineBinPropEventRecorder(variables, prop, pindices, solver, propagationEngine);
+        } else if (variables.length == 3) {
+            return new FineTernPropEventRecorder(variables, prop, pindices, solver, propagationEngine);
+        } else {
+            return new FinePropEventRecorder(variables, prop, pindices, solver, propagationEngine);
+        }
     }
 
     @Override

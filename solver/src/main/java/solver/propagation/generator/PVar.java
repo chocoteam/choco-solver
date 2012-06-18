@@ -31,8 +31,8 @@ import solver.constraints.propagators.Propagator;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.generator.predicate.Predicate;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.recorders.fine.FineArcEventRecorder;
-import solver.recorders.fine.FineVarEventRecorder;
+import solver.recorders.fine.arc.FineArcEventRecorder;
+import solver.recorders.fine.var.FineVarEventRecorder;
 import solver.variables.Variable;
 import solver.variables.view.IView;
 

@@ -24,51 +24,74 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package solver.recorders.list;
-
-import choco.kernel.common.util.objects.BacktrackableArrayList;
-import choco.kernel.common.util.objects.HalfBactrackableList;
-import choco.kernel.common.util.objects.IList;
-import choco.kernel.memory.IEnvironment;
-import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.Variable;
+import org.kohsuke.args4j.Option;
+import solver.Solver;
+import solver.constraints.ConstraintFactory;
+import solver.propagation.generator.Queue;
+import solver.search.strategy.StrategyFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
- * A class declaring builder for IList<IVariableMonitor>.
+ * <a href="http://www.g12.cs.mu.oz.au/mzn/stress_tests/propagation_stress0.mzn">Stress test 1</a>
+ * <p/>
+ * propagation stress
+ * Problem is unsatisfiable
+ * int: n; % number of variables
+ * int: d; % domain size
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 24/02/11
+ * @since 28/03/12
  */
-public class VariableMonitorListBuilder {
+public class StressTest1 extends AbstractProblem {
 
-    public static int _DEFAULT = 0; // 0: BacktrackableArrayList, 1: HalfBactrackableList
+    @Option(name = "-n", aliases = "--number", usage = "number of variables.", required = false)
+    int n = 100;
 
-    protected VariableMonitorListBuilder() {
+    @Option(name = "-d", aliases = "--domain", usage = "domain size.", required = false)
+    int d = 100000;
+
+    IntVar[] vars;
+
+    @Override
+    public void createSolver() {
+        solver = new Solver("StressTest1(" + n + "," + d + ")");
     }
 
-    /**
-     * Builds and returns the preset IList object.
-     *
-     * @param environment bracktrackable environment
-     * @param <M>         type of element, should extends IVariableMonitor
-     * @return a implementation of IList
-     */
-    public static <V extends Variable, M extends AbstractFineEventRecorder<V>> IList<V, M> preset(V variable, IEnvironment environment) {
-        switch (_DEFAULT) {
-            case 1:
-                return halfBacktracakbleList(variable, environment);
-            default:
-                return arraylist(variable, environment);
+    @Override
+    public void buildModel() {
+        vars = VariableFactory.boundedArray("v", n, 1, d, solver);
+        for (int i = 0; i < n - 1; i++) {
+            solver.post(ConstraintFactory.leq(vars[i], vars[i + 1], solver));
         }
+        solver.post(ConstraintFactory.lt(vars[n - 1], vars[0], solver));
     }
 
-    public static <V extends Variable, M extends AbstractFineEventRecorder<V>> IList<V, M> arraylist(V variable, IEnvironment environment) {
-        return new BacktrackableArrayList<V, M>(variable, environment);
+    @Override
+    public void configureSearch() {
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
     }
 
-    public static <V extends Variable, M extends AbstractFineEventRecorder<V>> IList<V, M> halfBacktracakbleList(V variable, IEnvironment environment) {
-        return new HalfBactrackableList<V, M>(variable, environment);
+    @Override
+    public void configureEngine() {
+    }
+
+    @Override
+    public void solve() {
+        //SearchMonitorFactory.log(solver, true, true);
+        solver.findSolution();
+        Queue.print();
+    }
+
+    @Override
+    public void prettyOut() {
+    }
+
+    public static void main(String[] args) {
+        new StressTest1().execute(args);
     }
 }

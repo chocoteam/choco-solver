@@ -24,15 +24,15 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine;
+package solver.recorders.fine.prop;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPropagationEngine;
+import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 
@@ -49,42 +49,38 @@ import java.util.Arrays;
  */
 public class PropEventRecorder<V extends Variable> extends AbstractFineEventRecorder<V> {
 
-    protected final TIntIntHashMap v2i; // a hash map to retrieve idx of variable in this data structures
-    protected int[] varIdx; // an array of indices helping retrieving data of a variable, thanks to v2i and var.id
-    protected int nbUVar;// number of unique variable, a bound for arrays
+    protected final int[] v2i; // a kind of hash map to retrieve idx of variable in this data structures
+    protected final int[] varIdx; // an array of indices helping retrieving data of a variable, thanks to v2i and var.id
+    protected final int nbVar;// number of variable
     protected final int[] idxVs; // index of this within variable structures -- mutable
+    protected final int offset;
 
-
-    PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, IPropagationEngine engine, int n) {
-        super(solver, engine);
-        this.propagators = new Propagator[]{propagator};
-        this.variables = variables.clone();
-        // create max size arrays
-        v2i = new TIntIntHashMap(n, (float) 0.5, -1, -1);
-        varIdx = new int[n];
-        this.idxVs = new int[n];
-    }
 
     public PropEventRecorder(V[] variables, Propagator<V> propagator, Solver solver, IPropagationEngine engine) {
-        this(variables, propagator, solver, engine, variables.length);
-        int n = variables.length;
-        int k = 0; // count the number of unique variable
-        for (int i = 0; i < n; i++) {
-            V variable = variables[i];
+        super(variables.clone(), new Propagator[]{propagator}, solver, engine);
+        nbVar = variables.length;
+        // first estimate amplitude of IDs
+        int id = variables[0].getId();
+        int idM = id,idm = id;
+        for (int i = 1; i < variables.length; i++) {
+            id = variables[i].getId();
+            if (id > idM)idM = id;
+            if (id < idm)idm = id;
+        }
+        // then create max size arrays
+        v2i = new int[idM - idm + 1];
+        Arrays.fill(v2i, -1);
+        offset = idm;
+
+        varIdx = new int[nbVar];
+        this.idxVs = new int[nbVar];
+        V variable;
+        for (int i = 0; i < nbVar; i++) {
+            variable = variables[i];
             int vid = variable.getId();
-            int idx = v2i.get(vid);
-            if (idx == -1) { // first occurrence of the variable
-                this.variables[k] = variable;
-                v2i.put(vid, k);
-                varIdx[k] = k;
-                k++;
-            }
+            v2i[vid - offset] = i;
+            varIdx[i] = i;
         }
-        if (k < n) {
-            this.variables = Arrays.copyOfRange(variables, 0, k);
-            this.varIdx = Arrays.copyOfRange(varIdx, 0, k);
-        }
-        nbUVar = k;
     }
 
     @Override
@@ -93,27 +89,23 @@ public class PropEventRecorder<V extends Variable> extends AbstractFineEventReco
     }
 
     @Override
-    public void afterUpdate(V var, EventType evt, ICause cause) {
+    public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
         if (cause != propagators[PINDEX]) { // due to idempotency of propagator, it should not schedule itself
-            // 1. if instantiation, then decrement arity of the propagator
-            if (EventType.anInstantiationEvent(evt.mask)) {
-                propagators[PINDEX].decArity();
-            }
-            // 2. schedule the coarse event recorder associated to thos
+            // schedule the coarse event recorder associated to thos
             propagators[PINDEX].forcePropagate(EventType.FULL_PROPAGATION);
         }
     }
 
     @Override
     public int getIdx(V variable) {
-        return idxVs[v2i.get(variable.getId())];
+        return idxVs[v2i[variable.getId() - offset]];
     }
 
     @Override
     public void setIdx(V variable, int idx) {
-        idxVs[v2i.get(variable.getId())] = idx;
+        idxVs[v2i[variable.getId() - offset]] = idx;
     }
 
     @Override

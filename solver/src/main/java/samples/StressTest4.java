@@ -24,72 +24,63 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package samples;
 
-package choco.kernel.common.util.objects;
-
-import choco.kernel.common.Indexable;
-import solver.ICause;
-import solver.exception.ContradictionException;
-import solver.variables.EventType;
-
-import java.io.Serializable;
+import org.kohsuke.args4j.Option;
+import solver.Solver;
+import solver.constraints.ConstraintFactory;
+import solver.search.strategy.StrategyFactory;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 
 /**
- * A IList is a container of elements.
- * An element in this list has particular behavior: it can change of state (from active to passive),
- * this container must consider this information.
- * Restoring the previous state of elements must be done upon backtracking.
+ * <a href="http://www.g12.cs.mu.oz.au/mzn/stress_tests/init_stress1.mzn">Stress test 3</a>
+ * <p/>
+ * Tests the initialization speed of the engine.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 23/02/11
+ * @since 28/03/12
  */
-public interface IList<V, E extends Indexable> extends Serializable {
+public class StressTest4 extends AbstractProblem {
 
-    /**
-     * Add a new <code>element</code>
-     *
-     * @param element to add
-     * @param dynamic
-     */
-    void add(E element, boolean dynamic);
+    @Option(name = "-s", usage = "size.", required = false)
+    int s = 100000;
 
-    /**
-     * Activate a element
-     *
-     * @param element the modified element
-     */
-    void setActive(E element);
+    IntVar[] vars;
 
-    /**
-     * Desactivate a element
-     *
-     * @param element the modified element
-     */
-    void setPassive(E element);
+    @Override
+    public void createSolver() {
+        solver = new Solver("StressTest3(" + s + ")");
+    }
 
-    /**
-     * Permanently delete <code>element</code>
-     *
-     * @param element to delete
-     */
-    void remove(E element);
+    @Override
+    public void buildModel() {
+        vars = VariableFactory.boundedArray("v", 2, 0, s, solver);
+        solver.post(ConstraintFactory.lt(vars[0], vars[1], solver));
+        solver.post(ConstraintFactory.lt(vars[1], vars[0], solver));
+    }
 
-    /**
-     * Returns the total number of element contained.
-     *
-     * @return the total number of element contained.
-     */
-    int size();
+    @Override
+    public void configureSearch() {
+        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+    }
 
-    /**
-     * Returns the number of active elements.
-     *
-     * @return the number of active elements.
-     */
-    int cardinality();
+    @Override
+    public void configureEngine() {
+    }
 
-    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException;
+    @Override
+    public void solve() {
+        solver.findSolution();
+    }
 
-    E get(int i);
+    @Override
+    public void prettyOut() {
+    }
+
+    public static void main(String[] args) {
+        new StressTest4().execute(args);
+    }
 }
