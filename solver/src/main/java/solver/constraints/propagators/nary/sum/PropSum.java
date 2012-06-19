@@ -119,8 +119,21 @@ public class PropSum extends Propagator<IntVar> {
 			sum.updateUpperBound(root.oldUB.get(),this);
 		}
 		// filter from sum
-		filter_min(root,root.oldLB.get(),root.oldUB.get(),sum.getLB(),sum.getUB());
-		filter_max(root,root.oldLB.get(),root.oldUB.get(),sum.getLB(),sum.getUB());
+		int max = root.oldUB.get();
+		filter_min(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
+		int min = root.oldLB.get();
+		filter_max(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
+		// todo verifier utilite
+		while(max!=root.oldUB.get() || min!=root.oldLB.get()){
+			if(max!=root.oldUB.get()){
+				max = root.oldUB.get();
+				filter_min(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
+			}
+			if(min!=root.oldLB.get()){
+				min = root.oldLB.get();
+				filter_max(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
+			}
+		}
 	}
 
 	@Override
@@ -175,7 +188,7 @@ public class PropSum extends Propagator<IntVar> {
 			}else {
 				IntVar v = vars[index];
 				int lb = sumlb-rootub+node.oldUB.get();
-				v.updateUpperBound(lb,this);
+				v.updateLowerBound(lb,this);
 				node.incLB(lb-node.oldLB.get());
 			}
 		}
