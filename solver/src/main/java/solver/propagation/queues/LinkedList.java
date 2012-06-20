@@ -115,7 +115,12 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
         return newEntry;
     }
 
-    public boolean add(E e) {
+    public boolean addFirst(E e) {
+        addBefore(e, header.next);
+        return true;
+    }
+
+    public boolean addLast(E e) {
         addBefore(e, header);
         return true;
     }
@@ -128,7 +133,7 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
 
         e.previous.next = e.next;
         e.next.previous = e.previous;
-        e.previous = null;
+        e.next = e.previous = null;
         e.element = null;
 
         e.next = free.next;
@@ -141,15 +146,15 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
     /**
      * {@inheritDoc}
      */
-    public E pop() {
-        return remove(header.previous);
+    public E pollFirst() {
+        return remove(header.next);
     }
 
     /**
      * {@inheritDoc}
      */
-    public E remove() {
-        return remove(header.next);
+    public E pollLast() {
+        return remove(header.previous);
     }
 
     /**
@@ -168,6 +173,17 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
             }
         }
         return false;
+    }
+
+    public int indexOf(E o) {
+        assert o != null;
+        int index = 0;
+        for (Entry e = header.next; e != header; e = e.next) {
+            if (o == e.element)
+                return index;
+            index++;
+        }
+        return -1;
     }
 
 }

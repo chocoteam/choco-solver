@@ -106,6 +106,6 @@ public class StressTest2 extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new StressTest2().execute("-log","QUIET");
+        new StressTest2().execute(args);
     }
 }

@@ -43,7 +43,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 29 sept. 2010
  */
-public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
+public class CircularQueue<E> implements AQueue<E>, Serializable {
 
     E[] elementData;
     // head points to the first logical element in the array, and
@@ -71,7 +71,7 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
     }
 
     @SuppressWarnings({"unchecked"})
-    public FixSizeCircularQueue(int size) {
+    public CircularQueue(int size) {
         size = closestGreater2n(size);
         elementData = (E[]) new Object[size];
         capacity = size;
@@ -80,8 +80,8 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
     // The convert() method takes a logical index (as if head was
     // always 0) and calculates the index within elementData
 
-    private int convert(int index, int base) {
-        return (index + base) & (capacity - 1);
+    private int convert(int base, int delta) {
+        return (base + delta) & (capacity - 1);
     }
 
     public boolean isEmpty() {
@@ -101,25 +101,34 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
         return elementData[convert(index, head)];
     }
 
-    public boolean add(E e) {
-        elementData[tail] = e;
-        tail = convert(1, tail);
+    public boolean addFirst(E e) {
+//        elements[head = (head - 1) & (elements.length - 1)] = e;
+//        if (head == tail)
+//            doubleCapacity();
+        elementData[head = convert(head, -1)] = e;
         size++;
         if (head == tail)
             doubleCapacity();
         return true;
     }
 
-    public int indexOf(Object elem) {
-        if (elem == null) {
-            for (int i = 0; i < size; i++)
-                if (elementData[convert(i, head)] == null)
-                    return i;
-        } else {
-            for (int i = 0; i < size; i++)
-                if (elem.equals(elementData[convert(i, head)]))
-                    return i;
-        }
+    public boolean addLast(E e) {
+//        elements[tail] = e;
+//        if ( (tail = (tail + 1) & (elements.length - 1)) == head)
+//            doubleCapacity();
+        elementData[tail] = e;
+        size++;
+        if ((tail = convert(tail, 1)) == head)
+            doubleCapacity();
+        return true;
+    }
+
+
+    public int indexOf(E elem) {
+        assert elem != null;
+        for (int i = 0; i < size; i++)
+            if (elem.equals(elementData[convert(head, i)]))
+                return i;
         return -1;
     }
 
@@ -129,15 +138,15 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
      * It is optimized for removing first and last elements
      * but also allows you to remove in the middle of the list.
      */
-    public E pop() {
-        int pos = convert(0, head);
+    public E pollFirst() {
+        int pos = convert(head, 0);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         E tmp = elementData[pos];
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
         if (pos == head) {
-            head = convert(1, head);
+            head = convert(head, 1);
         }
         size--;
         return tmp;
@@ -149,8 +158,8 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
      * It is optimized for removing first and last elements
      * but also allows you to remove in the middle of the list.
      */
-    public E popLast() {
-        int pos = convert(-1, tail);
+    public E pollLast() {
+        int pos = convert(tail, -1);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         E tmp = elementData[pos];
@@ -170,7 +179,7 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
      * but also allows you to remove in the middle of the list.
      */
     public E remove() {
-        int pos = convert(0, head);
+        int pos = convert(head, 0);
         // an interesting application of try/finally is to avoid
         // having to use local variables
         E tmp = elementData[pos];
@@ -178,7 +187,7 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
         if (pos == head) {
-            head = convert(1, head);
+            head = convert(head, 1);
         }
         size--;
         return tmp;
@@ -191,22 +200,22 @@ public class FixSizeCircularQueue<E> implements AQueue<E>, Serializable {
      * but also allows you to remove in the middle of the list.
      */
     public E remove(int index) {
-        int pos = convert(index, head);
+        int pos = convert(head, index);
         E tmp = elementData[pos];
 //        elementData[pos] = null; // Let gc do its work
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
         if (pos - head == 0) {
-            head = convert(1, head);
+            head = convert(head, 1);
         } else if (pos - tail == 0) {
-            tail = convert(capacity, tail - 1);
+            tail = convert(tail - 1, capacity);
         } else {
             if (pos > head && pos > tail) { // tail/head/pos
                 System.arraycopy(elementData, head, elementData, head + 1, pos - head);
-                head = convert(1, head);
+                head = convert(head, 1);
             } else {
                 System.arraycopy(elementData, pos + 1, elementData, pos, tail - pos - 1);
-                tail = convert(capacity, tail - 1);
+                tail = convert(tail - 1, capacity);
             }
         }
         size--;

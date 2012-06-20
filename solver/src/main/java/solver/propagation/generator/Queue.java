@@ -29,10 +29,9 @@ package solver.propagation.generator;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.AQueue;
-import solver.propagation.queues.FixSizeCircularQueue;
+import solver.propagation.queues.CircularQueue;
 import solver.propagation.queues.LinkedList;
 import solver.recorders.IEventRecorder;
-
 
 
 /**
@@ -45,7 +44,7 @@ import solver.recorders.IEventRecorder;
  */
 public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    private static final boolean SMALL_MEMORY_FOOTPRINT = false;
+    public static boolean LINKED_LIST = false;
 
     protected S lastPopped;
     protected AQueue<S> toPropagate;
@@ -58,10 +57,10 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             elements[e].setScheduler(this, e);
             nbe++;
         }
-        if (SMALL_MEMORY_FOOTPRINT) {
-            toPropagate = new FixSizeCircularQueue<S>(nbe/2);
-        } else {
+        if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
+        } else {
+            toPropagate = new CircularQueue<S>(nbe / 2);
         }
     }
 
@@ -73,10 +72,10 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             nbe++;
         }
 
-        if (SMALL_MEMORY_FOOTPRINT) {
-            toPropagate = new FixSizeCircularQueue<S>(nbe/2);
-        } else {
+        if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
+        } else {
+            toPropagate = new CircularQueue<S>(nbe / 2);
         }
     }
 
@@ -92,7 +91,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
     public void schedule(S element) {
         // CONDITION: the element must not be already present (checked in element)
         assert !element.enqueued();
-        toPropagate.add(element);
+        toPropagate.addLast(element);
         element.enqueue();
         if (!enqueued) {
             scheduler.schedule(this);
@@ -111,7 +110,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
     @Override
     protected boolean _pickOne() throws ContradictionException {
         if (!toPropagate.isEmpty()) {
-            lastPopped = toPropagate.remove();//pop();
+            lastPopped = toPropagate.pollFirst();//pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
@@ -132,7 +131,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
 
     protected boolean _clearOut() throws ContradictionException {
         while (!toPropagate.isEmpty()) {
-            lastPopped = toPropagate.pop();//.pop();
+            lastPopped = toPropagate.pollFirst();//.pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
@@ -147,7 +146,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             lastPopped.flush();
         }
         while (!toPropagate.isEmpty()) {
-            lastPopped = toPropagate.pop();//.pop();
+            lastPopped = toPropagate.pollFirst();//.pop();
             if (IEventRecorder.LAZY) {
                 lastPopped.flush();
             }

@@ -46,7 +46,7 @@ import solver.variables.VariableFactory;
 public class StressTest4 extends AbstractProblem {
 
     @Option(name = "-s", usage = "size.", required = false)
-    int s = 100000;
+    int s = 10000000;
 
     IntVar[] vars;
 
