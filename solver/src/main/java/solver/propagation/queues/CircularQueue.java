@@ -65,7 +65,8 @@ public class CircularQueue<E> implements AQueue<E>, Serializable {
      * @return the powers of 2 value immedialty greater to <code>size</code>
      */
     private static int closestGreater2n(int size) {
-        int _size = Integer.highestOneBit(size) << 1;
+        if(size ==0) return 2;
+        int _size =  Integer.highestOneBit(size) << 1;
         assert (_size >= size);
         return _size;
     }
