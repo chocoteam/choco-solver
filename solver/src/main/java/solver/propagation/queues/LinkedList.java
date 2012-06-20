@@ -98,10 +98,10 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
 
     private Entry<E> addBefore(E e, Entry<E> entry) {
         Entry<E> newEntry;
-        if(free.next != null){
+        if (free.next != null) {
             newEntry = free.next;
             free.next = newEntry.next;
-        }else{
+        } else {
             newEntry = new Entry<E>();
         }
 
@@ -160,8 +160,14 @@ public class LinkedList<E> implements AQueue<E>, Serializable {
     }
 
 
-    public boolean remove(E e) {
-        throw new UnsupportedOperationException();
+    public boolean remove(E o) {
+        for (Entry<E> e = header.next; e != header; e = e.next) {
+            if (o.equals(e.element)) {
+                remove(e);
+                return true;
+            }
+        }
+        return false;
     }
 
 }
