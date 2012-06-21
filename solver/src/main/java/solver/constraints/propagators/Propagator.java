@@ -130,11 +130,13 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     private static <V extends Variable> void checkVariable(V[] vars) {
         set.clear();
         for (V v : vars) {
-            if(set.contains(v.getId())){
-            throw new UnsupportedOperationException(v.toString()+ " occurs more than one time in this propagator. " +
-                    "This is forbidden; you must consider using a View or a EQ constraint.");
+            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
+                if (set.contains(v.getId())) {
+                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                            "This is forbidden; you must consider using a View or a EQ constraint.");
+                }
+                set.add(v.getId());
             }
-            set.add(v.getId());
         }
     }
 
