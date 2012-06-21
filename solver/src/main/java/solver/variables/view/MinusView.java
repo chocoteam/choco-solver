@@ -110,7 +110,7 @@ public class MinusView extends IntView {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().removeValue(this, value, cause);
                 return true;
             }
@@ -139,7 +139,7 @@ public class MinusView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         boolean done = var.instantiateTo(-value, this);
         if (done) {
-            notifyMonitors(EventType.INSTANTIATE, cause);
+            notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -163,7 +163,7 @@ public class MinusView extends IntView {
                 }
             }
             if (done) {
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, -old, -value, cause);
                 return true;
             }
@@ -190,7 +190,7 @@ public class MinusView extends IntView {
                 }
             }
             if (done) {
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 return true;
             }
