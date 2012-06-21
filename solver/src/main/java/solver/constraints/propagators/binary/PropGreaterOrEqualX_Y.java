@@ -24,6 +24,7 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
@@ -32,87 +33,111 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
- * X >= Y + C
- *
+ * X >= Y
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 13/06/12
+ * @since 1 oct. 2010
  */
-public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
+public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     final IntVar x;
     final IntVar y;
-    final int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropGreaterOrEqualX_YC(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
-        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, true);
+    public PropGreaterOrEqualX_Y(IntVar[] vars, Solver solver, IntConstraint constraint) {
+        super(vars, solver, constraint, PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];
-        this.cste = c;
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) {
+        if(vIdx == 0){
             return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
-        } else {
+        }else{
             return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
         }
     }
 
-
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, this);
-        y.updateUpperBound(x.getUB() - this.cste, this);
-        if (x.getLB() >= y.getUB() + this.cste) {
+        x.updateLowerBound(y.getLB(), this);
+        y.updateUpperBound(x.getUB(), this);
+        if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
     }
+
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
-            if (idxVarInProp == 0) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
-            } else {
-                x.updateLowerBound(y.getLB() + this.cste, this);
-            }
+            this.awakeOnInst(varIdx);
         } else {
             if (EventType.isInclow(mask)) {
-                x.updateLowerBound(y.getLB() + this.cste, this);
+                x.updateLowerBound(y.getLB(), this);
             }
             if (EventType.isDecupp(mask)) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
+                y.updateUpperBound(x.getUB(), this);
             }
         }
-        if (x.getLB() >= y.getUB() + this.cste) {
+        if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
     }
 
+    void awakeOnInst(int idx) throws ContradictionException {
+        if (idx == 0) {
+            y.updateUpperBound(x.getUB(), this);
+        } else {
+            x.updateLowerBound(y.getLB(), this);
+        }
+
+    }
 
     @Override
     public ESat isEntailed() {
-        if (x.getUB() < y.getLB() + cste)
+        if (x.getUB() < y.getLB())
             return ESat.FALSE;
-        else if (x.getLB() >= y.getUB() + this.cste)
+        else if (x.getLB() >= y.getUB())
             return ESat.TRUE;
         else
             return ESat.UNDEFINED;
     }
 
+
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(x.getName()).append(" >= ").append(y.getName()).append(" + ").append(cste);
-        return st.toString();
+        StringBuilder bf = new StringBuilder();
+        bf.append("prop(").append(vars[0].getName()).append(".GEQ.").append(vars[1].getName()).append(")");
+        return bf.toString();
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        Explanation expl = new Explanation(this);
+        // the current deduction is due to the current domain of the involved variables
+        Variable var = d.getVar();
+        if (var.equals(x)) {
+            // a deduction has been made on x ; this is related to y only
+            expl.add(y.explain(VariableState.LB));
+        }
+        else if (var.equals(y)) {
+            expl.add(x.explain(VariableState.UB));
+        } else {
+            return super.explain(d);
+        }
+        return expl;
     }
 }

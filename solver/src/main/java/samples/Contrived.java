@@ -30,7 +30,7 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.binary.EqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
@@ -83,11 +83,11 @@ public class Contrived extends AbstractProblem {
 
         solver.post(new AllDifferent(v, solver));
         solver.post(new AllDifferent(w, solver));
-        solver.post(new EqualX_YC(v[3], v[4], 0, solver));
-        solver.post(new EqualX_YC(v[0], w[0], 0, solver));
-        solver.post(new EqualX_YC(v[1], w[1], 0, solver));
-        solver.post(new EqualX_YC(v[2], w[2], 0, solver));
-        solver.post(new EqualX_YC(v[3], w[3], 0, solver));
+        solver.post(new Arithmetic(v[3], "=", v[4], solver));
+        solver.post(new Arithmetic(v[0], "=", w[0], solver));
+        solver.post(new Arithmetic(v[1], "=", w[1], solver));
+        solver.post(new Arithmetic(v[2], "=", w[2], solver));
+        solver.post(new Arithmetic(v[3], "=", w[3], solver));
 
     }
 

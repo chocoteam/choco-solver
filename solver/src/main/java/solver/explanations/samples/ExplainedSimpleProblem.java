@@ -29,7 +29,7 @@ package solver.explanations.samples;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.binary.GreaterOrEqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.explanations.ExplanationFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -57,7 +57,7 @@ public class ExplainedSimpleProblem extends AbstractProblem {
     public void buildModel() {
         vars = VariableFactory.enumeratedArray("x", n, 1, vals, solver);
         for (int i = 0; i < vars.length - 1; i++) {
-            solver.post(new GreaterOrEqualX_YC(vars[i], vars[i + 1], 1, solver));
+            solver.post(new Arithmetic(vars[i], ">", vars[i + 1], solver));
         }
     }
 

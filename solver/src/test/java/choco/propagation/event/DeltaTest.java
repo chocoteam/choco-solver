@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
-import solver.constraints.binary.EqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -61,7 +61,7 @@ public class DeltaTest {
         IntVar x = VariableFactory.enumerated("X", 1, 6, solver);
         IntVar y = VariableFactory.enumerated("Y", 1, 6, solver);
 
-        solver.post(new EqualX_YC(x, y, 0, solver));
+        solver.post(new Arithmetic(x, "=", y, solver));
 
         solver.propagate();
 

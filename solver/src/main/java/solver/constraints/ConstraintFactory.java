@@ -28,17 +28,11 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
 import solver.constraints.propagators.nary.PropIndexValue;
 import solver.constraints.propagators.nary.PropNoSubtour;
 import solver.constraints.propagators.nary.PropSubcircuit;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.sum.PropSumEq;
-import solver.constraints.unary.EqualXC;
-import solver.constraints.unary.NotEqualXC;
-import solver.constraints.unary.Relation;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -66,7 +60,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, int c, Solver solver) {
-        return new EqualXC(x, c, solver);
+        return new Arithmetic(x, "=", c, solver);
     }
 
     /**
@@ -78,7 +72,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, IntVar y, Solver solver) {
-        return new EqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, "=", y, solver);
     }
 
     /**
@@ -91,7 +85,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
-        return new EqualX_YC(x, y, c, solver);
+        return new Arithmetic(x, "=", y, "+", c, solver);
     }
 
     /**
@@ -103,7 +97,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, int c, Solver solver) {
-        return new NotEqualXC(x, c, solver);
+        return new Arithmetic(x, "!=", c, solver);
     }
 
     /**
@@ -115,7 +109,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, IntVar y, Solver solver) {
-        return new NotEqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, "!=", y, solver);
     }
 
     /**
@@ -128,7 +122,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
-        return new NotEqualX_YC(x, y, c, solver);
+        return new Arithmetic(x, "!=", y, "+", c, solver);
     }
 
     /**
@@ -141,7 +135,7 @@ public class ConstraintFactory {
      */
     public static Constraint leq(IntVar x, IntVar y, Solver solver) {
 //        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
-        return new GreaterOrEqualX_YC(y, x, 0, solver);
+        return new Arithmetic(y, ">=", x, solver);
     }
 
     /**
@@ -153,7 +147,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint leq(IntVar x, int c, Solver solver) {
-        return new Relation(x, Relation.R.LQ, c, solver);
+        return new Arithmetic(x, "<=", c, solver);
     }
 
     /**
@@ -165,7 +159,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint lt(IntVar x, int c, Solver solver) {
-        return new GreaterOrEqualX_YC(Views.fixed(c, solver), x, 1, solver);
+        return new Arithmetic(Views.fixed(c, solver), ">=", x, "+", 1, solver);
     }
 
     /**
@@ -177,7 +171,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint lt(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(y, x, 1, solver);
+        return new Arithmetic(y, ">=", x, "+", 1, solver);
     }
 
     /**
@@ -189,7 +183,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint geq(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, ">=", y, solver);
     }
 
     /**
@@ -201,7 +195,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint geq(IntVar x, int c, Solver solver) {
-        return new Relation(x, Relation.R.GQ, c, solver);
+        return new Arithmetic(x, ">=", c, solver);
     }
 
     /**
@@ -213,7 +207,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, int c, Solver solver) {
-        return new GreaterOrEqualX_YC(x, Views.fixed(c, solver), 1, solver);
+        return new Arithmetic(x, ">=", Views.fixed(c, solver), "+", 1, solver);
     }
 
     /**
@@ -225,7 +219,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(x, y, 1, solver);
+        return new Arithmetic(x, ">=", y, "+", 1, solver);
     }
 
 	//*****************************************************************************

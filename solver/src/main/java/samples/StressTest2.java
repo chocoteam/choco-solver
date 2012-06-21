@@ -29,8 +29,8 @@ package samples;
 import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -75,7 +75,7 @@ public class StressTest2 extends AbstractProblem {
             solver.post(ConstraintFactory.leq(y[i], y[i + 1], solver));
         }
         for (int i = 1; i < n; i++) {
-            solver.post(new GreaterOrEqualX_YC(y[i], y[0], -(n - i + 1), solver));
+            solver.post(new Arithmetic(y[i], ">=", y[0], "+", -(n - i + 1), solver));
         }
         solver.post(ConstraintFactory.leq(y[n - 1], x[0], solver));
 
@@ -84,7 +84,7 @@ public class StressTest2 extends AbstractProblem {
                 solver.post(ConstraintFactory.leq(x[i], x[j], solver));
             }
         }
-        solver.post(new GreaterOrEqualX_YC(y[0], x[m - 1], 2, solver));
+        solver.post(new Arithmetic(y[0], ">=", x[m - 1], "+", 2, solver));
     }
 
     @Override

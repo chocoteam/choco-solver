@@ -37,21 +37,20 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * X >= Y + C
- *
+ * X + Y >= C
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 13/06/12
  */
-public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
+public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     final IntVar x;
     final IntVar y;
     final int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropGreaterOrEqualX_YC(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
+    public PropGreaterOrEqualXY_C(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
         super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, true);
         this.x = vars[0];
         this.y = vars[1];
@@ -60,40 +59,29 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) {
-            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
-        } else {
-            return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
-        }
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
 
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, this);
-        y.updateUpperBound(x.getUB() - this.cste, this);
-        if (x.getLB() >= y.getUB() + this.cste) {
+        x.updateLowerBound(this.cste - y.getUB(), this);
+        y.updateLowerBound(this.cste - x.getUB(), this);
+        if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
+        if (EventType.isInstantiate(mask) || EventType.isDecupp(mask)) {
             if (idxVarInProp == 0) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
+                y.updateLowerBound(this.cste - x.getUB(), this);
             } else {
-                x.updateLowerBound(y.getLB() + this.cste, this);
+                x.updateLowerBound(this.cste - y.getUB(), this);
             }
-        } else {
-            if (EventType.isInclow(mask)) {
-                x.updateLowerBound(y.getLB() + this.cste, this);
-            }
-            if (EventType.isDecupp(mask)) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
-            }
-        }
-        if (x.getLB() >= y.getUB() + this.cste) {
+        } // else LOWER BOUND => check entailment
+        if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
     }
@@ -101,9 +89,9 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (x.getUB() < y.getLB() + cste)
+        if (x.getUB() + y.getUB() < cste)
             return ESat.FALSE;
-        else if (x.getLB() >= y.getUB() + this.cste)
+        else if (x.getLB() + y.getLB() >= this.cste)
             return ESat.TRUE;
         else
             return ESat.UNDEFINED;
@@ -112,7 +100,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder();
-        st.append(x.getName()).append(" >= ").append(y.getName()).append(" + ").append(cste);
+        st.append(x.getName()).append(" + ").append(y.getName()).append(" >= ").append(cste);
         return st.toString();
     }
 }

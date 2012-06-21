@@ -1,10 +1,10 @@
 package choco.proba;
 
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -79,10 +79,10 @@ public class PartitionBenchProbas extends AbstractBenchProbas {
             sy[i] = Views.sqr(y[i]);
             allVars.add(sy[i]);
             sxy[size + i] = sy[i];
-            allCstrs.add(new Relation(sx[i], Relation.R.GQ, 1, solver));
-            allCstrs.add(new Relation(sy[i], Relation.R.GQ, 1, solver));
-            allCstrs.add(new Relation(sx[i], Relation.R.LQ, 4 * size * size, solver));
-            allCstrs.add(new Relation(sy[i], Relation.R.LQ, 4 * size * size, solver));
+            allCstrs.add(new Arithmetic(sx[i], ">=", 1, solver));
+            allCstrs.add(new Arithmetic(sy[i], ">=", 1, solver));
+            allCstrs.add(new Arithmetic(sx[i], "<=", 4 * size * size, solver));
+            allCstrs.add(new Arithmetic(sy[i], "<=", 4 * size * size, solver));
         }
         allCstrs.add(Sum.eq(sxy, coeffs, 0, solver));
 

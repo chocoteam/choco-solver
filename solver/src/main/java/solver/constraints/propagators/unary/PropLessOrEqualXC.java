@@ -24,95 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators.binary;
+package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.IntConstraint;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
 /**
- * X >= Y + C
- *
+ * X <= C
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 13/06/12
+ * @since 16/06/11
  */
-public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
+public class PropLessOrEqualXC extends Propagator<IntVar> {
 
-    final IntVar x;
-    final IntVar y;
-    final int cste;
+    private final int constant;
 
-    @SuppressWarnings({"unchecked"})
-    public PropGreaterOrEqualX_YC(IntVar[] vars, int c, Solver solver, IntConstraint constraint) {
-        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, true);
-        this.x = vars[0];
-        this.y = vars[1];
-        this.cste = c;
+    public PropLessOrEqualXC(IntVar var, int cste, Solver solver,
+                             Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        this.constant = cste;
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        if (vIdx == 0) {
-            return EventType.INSTANTIATE.mask + EventType.DECUPP.mask;
-        } else {
-            return EventType.INSTANTIATE.mask + EventType.INCLOW.mask;
-        }
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
     }
-
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, this);
-        y.updateUpperBound(x.getUB() - this.cste, this);
-        if (x.getLB() >= y.getUB() + this.cste) {
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateUpperBound(constant, this)|| vars[0].getUB()<=constant){
             this.setPassive();
         }
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        if (EventType.isInstantiate(mask)) {
-            if (idxVarInProp == 0) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
-            } else {
-                x.updateLowerBound(y.getLB() + this.cste, this);
-            }
-        } else {
-            if (EventType.isInclow(mask)) {
-                x.updateLowerBound(y.getLB() + this.cste, this);
-            }
-            if (EventType.isDecupp(mask)) {
-                y.updateUpperBound(x.getUB() - this.cste, this);
-            }
-        }
-        if (x.getLB() >= y.getUB() + this.cste) {
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateUpperBound(constant, this)|| vars[0].getUB()<=constant){
             this.setPassive();
         }
     }
 
-
     @Override
     public ESat isEntailed() {
-        if (x.getUB() < y.getLB() + cste)
-            return ESat.FALSE;
-        else if (x.getLB() >= y.getUB() + this.cste)
-            return ESat.TRUE;
-        else
-            return ESat.UNDEFINED;
+        return ESat.eval(vars[0].getUB() <= constant);
     }
 
     @Override
     public String toString() {
-        StringBuilder st = new StringBuilder();
-        st.append(x.getName()).append(" >= ").append(y.getName()).append(" + ").append(cste);
-        return st.toString();
+        return vars[0].getName() + " <= " + constant;
+    }
+
+     @Override
+    public Explanation explain(Deduction d) {
+        return new Explanation(this);
     }
 }

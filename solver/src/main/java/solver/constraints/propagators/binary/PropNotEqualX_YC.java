@@ -24,11 +24,9 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package solver.constraints.propagators.binary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -45,8 +43,8 @@ import solver.variables.Variable;
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
  * <br/>
- * <b>X =/= Y</b>
- * <br>where <i>X</i> and <i>Y</i> are <code>Variable</code> objects.
+ * <b>X =/= Y + C</b>
+ * <br>where <i>X</i> and <i>Y</i> are <code>Variable</code> objects and <i>C</i> a constant.
  * <br>
  * This <code>Propagator</code> defines the <code>propagate</code> and <code>awakeOnInst</code> methods. The other ones
  * throw <code>UnsupportedOperationException</code>.
@@ -60,16 +58,18 @@ import solver.variables.Variable;
  * @version 0.01, june 2010
  * @since 0.01
  */
-public class PropNotEqualXY extends Propagator<IntVar> {
+public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     IntVar x;
     IntVar y;
+    int cste;
 
     @SuppressWarnings({"unchecked"})
-    public PropNotEqualXY(IntVar x, IntVar y, Solver solver, Constraint constraint) {
-        super(ArrayUtils.toArray(x,y), solver, constraint, PropagatorPriority.BINARY, false);
-        this.x = x;
-        this.y = y;
+    public PropNotEqualX_YC(IntVar[] vars, int c, Solver solver, Constraint constraint) {
+        super(vars.clone(), solver, constraint, PropagatorPriority.BINARY, false);
+        this.x = vars[0];
+        this.y = vars[1];
+        this.cste = c;
     }
 
     @Override
@@ -88,7 +88,7 @@ public class PropNotEqualXY extends Propagator<IntVar> {
             removeValV1();
         } else if (y.instantiated()) {
             removeValV0();
-        } else if (x.getUB() < (y.getLB()) || (y.getUB()) < x.getLB()) {
+        } else if (x.getUB() < (y.getLB() + cste) || (y.getUB() + cste) < x.getLB()) {
             setPassive();
         }
     }
@@ -110,29 +110,29 @@ public class PropNotEqualXY extends Propagator<IntVar> {
     }
 
     private void removeValV0() throws ContradictionException {
-        if (x.removeValue(y.getValue(), this)) {
+        if (x.removeValue(y.getValue() + this.cste, this)) {
             this.setPassive();
-        } else if (!x.contains(y.getValue())) {
+        } else if (!x.contains(y.getValue() + cste)) {
             this.setPassive();
         }
     }
 
     private void removeValV1() throws ContradictionException {
-        if (y.removeValue(x.getValue(), this)) {
+        if (y.removeValue(x.getValue() - this.cste, this)) {
             this.setPassive();
-        } else if (!y.contains(x.getValue())) {
+        } else if (!y.contains(x.getValue() - cste)) {
             this.setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if ((x.getUB() < y.getLB()) ||
-                (y.getUB() < x.getLB()))
+        if ((x.getUB() < y.getLB() + this.cste) ||
+                (y.getUB() < x.getLB() - this.cste))
             return ESat.TRUE;
         else if (x.instantiated()
                 && y.instantiated()
-                && x.getValue() == y.getValue())
+                && x.getValue() == y.getValue() + this.cste)
             return ESat.FALSE;
         else
             return ESat.UNDEFINED;
@@ -141,7 +141,8 @@ public class PropNotEqualXY extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder bf = new StringBuilder();
-        bf.append("prop(").append(vars[0].getName()).append(".NEQ.").append(vars[1].getName()).append(")");
+        bf.append("prop(").append(vars[0].getName()).append(".NEQ.").append(vars[1].getName());
+        bf.append("+").append(cste).append(")");
         return bf.toString();
     }
 
@@ -153,8 +154,7 @@ public class PropNotEqualXY extends Propagator<IntVar> {
         if (var.equals(x)) {
             // a deduction has been made on x ; this is related to y only
             expl.add(y.explain(VariableState.DOM));
-        }
-        else if (var != null) {
+        } else if (var != null) {
             expl.add(x.explain(VariableState.DOM));
         }
         // and the application of the current propagator

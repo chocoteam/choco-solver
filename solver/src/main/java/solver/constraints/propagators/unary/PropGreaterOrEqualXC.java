@@ -24,42 +24,70 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.unary;
+package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.IntConstraint;
-import solver.constraints.propagators.binary.PropEqualXY;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
 
 /**
- * Unary constraint ensuring:
- * <br/>
- * X = C, where X is a variable and C is a constant
- * <p/>
+ * X >= C
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 16/06/11
  */
-public class EqualXC extends IntConstraint<IntVar> {
+public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     private final int constant;
 
-    public EqualXC(IntVar var, int cste, Solver solver) {
-        super(new IntVar[]{var}, solver);
+    public PropGreaterOrEqualXC(IntVar var, int cste, Solver solver,
+                                Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
         this.constant = cste;
-        setPropagators(new PropEqualXY(var, Views.fixed(cste, solver), solver, this));
     }
 
     @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] == constant);
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask + EventType.BOUND.mask;
+    }
+
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateLowerBound(constant, this)|| vars[0].getLB()>=constant){
+            this.setPassive();
+        }
+    }
+
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        // with views such as abs(...), the prop can be not entailed after initial propagation
+        if(vars[0].updateLowerBound(constant, this)|| vars[0].getLB()>=constant){
+            this.setPassive();
+        }
+    }
+
+    @Override
+    public ESat isEntailed() {
+        return ESat.eval(vars[0].getLB() >= constant);
     }
 
     @Override
     public String toString() {
-        return vars[0].getName() + " = " + constant;
+        return vars[0].getName() + " >= " + constant;
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        return new Explanation(this);
     }
 }

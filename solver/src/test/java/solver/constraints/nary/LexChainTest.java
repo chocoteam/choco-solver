@@ -41,10 +41,8 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
 import solver.constraints.nary.cnf.ALogicTree;
 import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
@@ -83,15 +81,15 @@ public class LexChainTest {
     private ALogicTree reformulate(int i, IntVar[] X, IntVar[] Y, Solver solver) {
         BoolVar b1 = VariableFactory.bool("A" + i, solver);
         solver.post(new ReifiedConstraint(b1,
-                new GreaterOrEqualX_YC(Y[i], X[i], 1, solver),
-                new GreaterOrEqualX_YC(X[i], Y[i], 0, solver), solver));
+                new Arithmetic(Y[i], ">", X[i], solver),
+                new Arithmetic(Y[i], "<=", X[i], solver), solver));
         if (i == X.length - 1) {
             return Literal.pos(b1);
         } else {
             BoolVar b2 = VariableFactory.bool("B" + i, solver);
             solver.post(new ReifiedConstraint(b2,
-                    new EqualX_YC(Y[i], X[i], 0, solver),
-                    new NotEqualX_YC(X[i], Y[i], 0, solver), solver));
+                    new Arithmetic(Y[i], "=", X[i], solver),
+                    new Arithmetic(X[i], "!=", Y[i], solver), solver));
             return Node.or(Literal.pos(b1), Node.and(Literal.pos(b2), reformulate(i + 1, X, Y, solver)));
         }
     }

@@ -24,46 +24,73 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package solver.constraints.binary;
+package solver.constraints.propagators.unary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
-import solver.constraints.IntConstraint;
-import solver.constraints.propagators.binary.PropEqualXY;
+import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.view.Views;
 
 /**
- * X + Y = C
+ * Unary propagator ensuring:
+ * <br/>
+ * X = C, where X is a variable and C is a constant
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 1 oct. 2010
+ * @since 16/06/11
  */
-public class EqualXY_C extends IntConstraint<IntVar> {
+public class PropEqualXC extends Propagator<IntVar> {
 
-    IntVar x;
-    IntVar y;
-    int cste;
+    private final int constant;
 
-    public EqualXY_C(IntVar x, IntVar y, int c, Solver solver) {
-        super(ArrayUtils.toArray(x, y), solver);
-        this.x = x;
-        this.y = y;
-        this.cste = c;
-        setPropagators(new PropEqualXY(x, Views.offset(y, c), solver, this));
+    public PropEqualXC(IntVar var, int cste, Solver solver,
+                       Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+        super(new IntVar[]{var}, solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+        this.constant = cste;
     }
 
     @Override
-    public ESat isSatisfied(int[] tuple) {
-        return ESat.eval(tuple[0] + tuple[1] == this.cste);
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INSTANTIATE.mask;
     }
 
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        vars[0].instantiateTo(constant, this);
+    }
+
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        propagate(EventType.FULL_PROPAGATION.mask);
+    }
+
+    @Override
+    public ESat isEntailed() {
+        if (vars[0].instantiatedTo(constant)) {
+            return ESat.TRUE;
+        } else if (vars[0].contains(constant)) {
+            return ESat.UNDEFINED;
+        }
+        return ESat.FALSE;
+    }
+
+    @Override
     public String toString() {
-        StringBuilder s = new StringBuilder("");
-        s.append(x).append(" + ").append(y).append(" = ").append(cste);
-        return s.toString();
+        return vars[0].getName() + " = " + constant;
+    }
+
+
+    @Override
+    public Explanation explain(Deduction d) {
+        return new Explanation(this);
     }
 }
