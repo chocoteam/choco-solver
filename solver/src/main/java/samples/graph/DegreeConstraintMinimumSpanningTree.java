@@ -250,8 +250,8 @@ public class DegreeConstraintMinimumSpanningTree {
 		gc.addPropagators(new PropAtMostNNeighbors(undi, maxDegree, gc, solver));
 		gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
 		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, matrix, gc, solver));
-		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
-		gc.addPropagators(PropIterativeMST.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
+//		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
+//		gc.addPropagators(PropIterativeMST.mstBasedRelaxation(undi, totalCost, maxDegree, matrix, gc, solver));
 		solver.post(gc);
 		// config
 		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_MinDeg, null);

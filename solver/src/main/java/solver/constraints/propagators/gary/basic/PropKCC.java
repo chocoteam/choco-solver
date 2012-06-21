@@ -54,7 +54,7 @@ public class PropKCC extends Propagator{
 
 	private GraphVar g;
 	private IntVar k;
-	private ConnectivityFinder ker_CC_finder, env_CC_finder;
+	private ConnectivityFinder env_CC_finder, ker_CC_finder;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -74,12 +74,16 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		ker_CC_finder.findAllCC();
 		env_CC_finder.findAllCC();
-		int ke = ker_CC_finder.getNBCC();
 		int ee = env_CC_finder.getNBCC();
-		k.updateLowerBound(ke,this);
-		k.updateUpperBound(ee,this);
+		k.updateLowerBound(ee,this);
+		if(g.instantiated()){
+			k.updateUpperBound(ee,this);
+		}else if(g.getEnvelopOrder()==g.getKernelOrder()){
+			ker_CC_finder.findAllCC();
+			int ke = ker_CC_finder.getNBCC();
+			k.updateUpperBound(ke,this);
+		}
 	}
 
 	
@@ -100,15 +104,20 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public ESat isEntailed() {
-		ker_CC_finder.findAllCC();
 		env_CC_finder.findAllCC();
-		int ke = ker_CC_finder.getNBCC();
 		int ee = env_CC_finder.getNBCC();
-		if(k.getLB()>ee || k.getUB()<ke){
+		if(k.getUB()<ee){
 			return ESat.FALSE;
 		}
 		if(g.instantiated()){
-			return ESat.TRUE;
+			if(k.contains(ee)){
+				if(k.instantiated()){
+					return ESat.TRUE;
+				}else{
+					return ESat.UNDEFINED;
+				}
+			}
+			return ESat.FALSE;
 		}
 		return ESat.UNDEFINED;
 	}
