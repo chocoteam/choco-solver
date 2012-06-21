@@ -33,8 +33,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.propagation.generator.*;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
-import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.prop.FinePropEventRecorder;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 
@@ -53,6 +51,7 @@ public enum PropagationStrategies {
     ONE_QUEUE_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             PArc arcs = new PArc(pengine, constraints);
             PCoarse coarses = new PCoarse(pengine, constraints);
@@ -62,7 +61,7 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PArc(pengine, constraints));
             Queue coarses = new Queue(new PCoarse(pengine, constraints));
@@ -72,7 +71,7 @@ public enum PropagationStrategies {
     PRIORITY_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
             for (int i = 0; i < constraints.length; i++) {
@@ -113,7 +112,7 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_VARS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Variable[] variables = solver.getVars();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PVar(pengine, variables));
@@ -124,7 +123,7 @@ public enum PropagationStrategies {
     INCREASING_DEGREE_VARS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Variable[] variables = solver.getVars();
             Arrays.sort(variables, new Comparator<Variable>() {
                 @Override
@@ -134,21 +133,13 @@ public enum PropagationStrategies {
             });
             PropagationStrategy svar = new Sort(new PVar(pengine, variables)).clearOut();
             Constraint[] constraints = solver.getCstrs();
-            pengine.set(new Sort(svar, new Sort(
-                    /*new Comparator<CoarseEventRecorder> (){
-                        @Override
-                        public int compare(CoarseEventRecorder o1, CoarseEventRecorder o2) {
-                            return o1.getPropagators()[0].getPriority().priority -
-                                    o2.getPropagators()[0].getPriority().priority;
-                        }
-                    },*/new PCoarse(pengine,
-                    constraints)).pickOne()).clearOut());
+            pengine.set(new Sort(svar, new Sort(new PCoarse(pengine, constraints)).pickOne()).clearOut());
         }
     },
     ONE_QUEUE_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             PCons arcs = new PCons(pengine, constraints);
             PCoarse coarses = new PCoarse(pengine, constraints);
@@ -158,7 +149,7 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PCons(pengine, constraints));
             Queue coarses = new Queue(new PCoarse(pengine, constraints));
@@ -168,7 +159,7 @@ public enum PropagationStrategies {
     PRIORITY_QUEUES_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
             for (int i = 0; i < constraints.length; i++) {
@@ -185,8 +176,7 @@ public enum PropagationStrategies {
                 if (queues[i] != null) {
                     real_q.add(
                             new Queue(new PCons(pengine,
-                                    queues[i].toArray(new Propagator[queues[i].size()])
-                            )
+                                    queues[i].toArray(new Propagator[1]))
                             ).pickOne()
                     );
                 }
@@ -198,31 +188,11 @@ public enum PropagationStrategies {
     GECODE() {
         @Override
         public void make(Solver solver, IPropagationEngine pengine) {
+            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
-            int nbP = 0;
-            for (int i = 0; i < constraints.length; i++) {
-                nbP += constraints[i].propagators.length;
-            }
-            FinePropEventRecorder[] per = new FinePropEventRecorder[nbP];
-            CoarseEventRecorder[] cer = new CoarseEventRecorder[nbP];
-            for (int i = 0, k = 0; i < constraints.length; i++) {
-                Propagator[] propagators = constraints[i].propagators;
-                for (int j = 0; j < propagators.length; j++, k++) {
-                    int nbv = propagators[j].getNbVars();
-                    int[] pindices = new int[nbv];
-                    for (int jj = 0; jj < nbv; jj++) {
-                        pindices[jj] = jj;
-                    }
-                    per[k] = new FinePropEventRecorder(propagators[j].getVars(), propagators[j], pindices, solver, pengine);
-                    pengine.addEventRecorder(per[k]);
-                    cer[k] = new CoarseEventRecorder(propagators[j], solver, pengine);
-                    pengine.addEventRecorder(cer[k]);
-                }
-            }
-            NQueue<FinePropEventRecorder> f7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, per);
-            NQueue<CoarseEventRecorder> c7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, cer);
+            NQueue f7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCons(pengine, constraints));
+            NQueue c7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCoarse(pengine, constraints));
             pengine.set(new Sort(f7.clearOut(), c7.pickOne()));
-            pengine.skipCompletnessCheck();
         }
     },
     DEFAULT() {

@@ -29,7 +29,9 @@ package samples;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.ConstraintFactory;
-import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.variables.InputOrder;
+import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -64,7 +66,7 @@ public class StressTest4 extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.inputOrderMinVal(vars, solver.getEnvironment()));
+        solver.set(new Assignment(vars, new InputOrder(vars, solver.getEnvironment()), new InDomainMin()));
     }
 
     @Override

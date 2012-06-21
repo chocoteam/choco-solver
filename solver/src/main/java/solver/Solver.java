@@ -45,11 +45,9 @@ import solver.propagation.PropagationStrategies;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.measure.IMeasures;
 import solver.search.measure.MeasuresRecorder;
-import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.IntVar;
 import solver.variables.Variable;
-import solver.variables.VariableFactory;
 import solver.variables.view.ConstantView;
 import sun.reflect.Reflection;
 
@@ -345,10 +343,6 @@ public class Solver implements Serializable {
             IPropagationEngine engine = new PropagationEngine(environment);
             PropagationStrategies.DEFAULT.make(this, engine);
             this.set(engine);
-        }
-        if (search.getStrategy() == null) {
-            LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(getVars()), this));
         }
         measures.setReadingTimeCount(creationTime + System.nanoTime());
         search.setup();

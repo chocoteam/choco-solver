@@ -193,10 +193,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
                     "!! Be sure you are respecting one of these call configurations :\n " +
                     "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
         }
-        if (strategy == null) {
-            throw new SolverException("!! The search strategy is not defined.\n" +
-                    "!! Please set a predefined one using StrategyFactory or build your own.");
-        }
         return loop();
     }
 

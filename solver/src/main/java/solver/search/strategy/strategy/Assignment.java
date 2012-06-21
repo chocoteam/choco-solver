@@ -30,6 +30,7 @@ package solver.search.strategy.strategy;
 import choco.kernel.common.util.PoolManager;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
+import solver.search.strategy.selectors.ValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -43,11 +44,14 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     VariableSelector<IntVar> varselector;
 
+    ValueIterator valueIterator;
+
     PoolManager<FastDecision> decisionPool;
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector) {
+    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
         super(vars);
         this.varselector = varselector;
+        this.valueIterator = valueIterator;
         decisionPool = new PoolManager<FastDecision>();
     }
 
@@ -61,15 +65,13 @@ public class Assignment extends AbstractStrategy<IntVar> {
         if (varselector.hasNext()) {
             varselector.advance();
             IntVar variable = varselector.getVariable();
-            if (variable.getHeuristicVal().hasNext()) {
-                int value = variable.getHeuristicVal().next();
-                FastDecision d = decisionPool.getE();
-                if (d == null) {
-                    d = new FastDecision(decisionPool);
-                }
-                d.set(variable, value, solver.search.strategy.assignments.Assignment.int_eq);
-                return d;
+            int value = valueIterator.selectValue(variable);
+            FastDecision d = decisionPool.getE();
+            if (d == null) {
+                d = new FastDecision(decisionPool);
             }
+            d.set(variable, value, solver.search.strategy.assignments.Assignment.int_eq);
+            return d;
         }
         return null;
     }

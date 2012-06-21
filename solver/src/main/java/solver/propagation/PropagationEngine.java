@@ -72,9 +72,11 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected int pivot;
 
-    protected boolean initialized = false;
+    protected boolean initialized = false; // is this already initialized
 
-    protected boolean activated = false;
+    protected boolean activated = false; // is propagator activation required
+
+    protected boolean checkProperties = true; // skip water marking phases
 
     protected IEnvironment environment;
 
@@ -106,19 +108,21 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     public void init(Solver solver) {
-        if (!initialized) {
-            prepareWM(solver);
-            // 1. add the default strategy if required
-            if (!watermarks.isEmpty()) {
-                LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
-                PropagationStrategy _default = buildDefault(solver);
-                propagationStrategy = new Sort(propagationStrategy, _default);
+        if (checkProperties) {
+            if (!initialized) {
+                prepareWM(solver);
+                // 1. add the default strategy if required
                 if (!watermarks.isEmpty()) {
-                    throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+                    LoggerFactory.getLogger("solver").warn("PropagationEngine:: the defined strategy is not complete -- build default one.");
+                    PropagationStrategy _default = buildDefault(solver);
+                    propagationStrategy = new Sort(propagationStrategy, _default);
+                    if (!watermarks.isEmpty()) {
+                        throw new RuntimeException("default strategy has encountered a problem :: " + watermarks);
+                    }
                 }
+                watermarks = null;
+                initialized = true;
             }
-            watermarks = null;
-            initialized = true;
         }
         if (!activated) {
             // 2. schedule constraints for initial propagation
@@ -142,8 +146,8 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     @Override
-    public void skipCompletnessCheck() {
-        initialized = true;
+    public void skipProperties() {
+        checkProperties = false;
     }
 
     @Override
@@ -157,7 +161,7 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     public void prepareWM(Solver solver) {
-        if (watermarks == null) {
+        if (checkProperties && watermarks == null) {
             pivot = solver.getNbIdElt();
             Constraint[] constraints = solver.getCstrs();
             // 1. water mark every couple variable-propagator of the solver
@@ -186,23 +190,28 @@ public class PropagationEngine implements IPropagationEngine {
     }
 
     public void clearWatermark(int id1, int id2, int id3) {
-        if (id1 == 0) {// coarse case
-            watermarks.clearMark(id2);
-        } else if (id2 == 0) {// coarse case
-            watermarks.clearMark(id1);
-        } else {
-            watermarks.clearMark(id1, id2, id3);
+        if (checkProperties) {
+            if (id1 == 0) {// coarse case
+                watermarks.clearMark(id2);
+            } else if (id2 == 0) {// coarse case
+                watermarks.clearMark(id1);
+            } else {
+                watermarks.clearMark(id1, id2, id3);
+            }
         }
     }
 
     public boolean isMarked(int id1, int id2, int id3) {
-        if (id1 == 0) {// coarse case
-            return watermarks.isMarked(id2);
-        } else if (id2 == 0) {// coarse case
-            return watermarks.isMarked(id1);
-        } else {
-            return watermarks.isMarked(id1, id2, id3);
+        if (checkProperties) {
+            if (id1 == 0) {// coarse case
+                return watermarks.isMarked(id2);
+            } else if (id2 == 0) {// coarse case
+                return watermarks.isMarked(id1);
+            } else {
+                return watermarks.isMarked(id1, id2, id3);
+            }
         }
+        return true;
     }
 
     protected PropagationStrategy buildDefault(Solver solver) {
