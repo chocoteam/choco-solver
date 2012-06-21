@@ -64,7 +64,7 @@ public class MinusView extends IntView {
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
-        if(var.getDelta() == NoDelta.singleton){
+        if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
         return new IntDeltaMonitor(var.getDelta(), propagator) {
@@ -109,6 +109,9 @@ public class MinusView extends IntView {
             if (done) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
                 this.notifyPropagators(e, cause);
 //                    solver.getExplainer().removeValue(this, value, cause);

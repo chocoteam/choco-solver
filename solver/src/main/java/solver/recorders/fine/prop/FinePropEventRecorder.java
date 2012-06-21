@@ -62,19 +62,16 @@ public class FinePropEventRecorder<V extends Variable> extends PropEventRecorder
     @Override
     public boolean execute() throws ContradictionException {
         if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        int evtmask_;
         for (int i = 0; i < nbVar; i++) {
-            _execute(i);
+            evtmask_ = evtmasks[i];
+            if (evtmask_ > 0) {
+//                LoggerFactory.getLogger("solver").info(">> {}", this.toString());
+                evtmasks[i] = 0; // and clean up mask
+                execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[i], evtmask_);
+            }
         }
         return true;
-    }
-
-    protected final void _execute(int i) throws ContradictionException {
-        int evtmask_ = evtmasks[i];
-        if (evtmask_ > 0) {
-//                LoggerFactory.getLogger("solver").info(">> {}", this.toString());
-            evtmasks[i] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[i], evtmask_);
-        }
     }
 
     @Override
