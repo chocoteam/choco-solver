@@ -52,16 +52,8 @@ public final class FineBinPropEventRecorder<V extends Variable> extends FineProp
     public boolean execute() throws ContradictionException {
         if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
 
-        int evtmask_ = evtmasks[0];
-        if (evtmask_ > 0) {
-            evtmasks[0] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[0], evtmask_);
-        }
-        evtmask_ = evtmasks[1];
-        if (evtmask_ > 0) {
-            evtmasks[1] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[1], evtmask_);
-        }
+        _execute(0);
+        _execute(1);
 
         return true;
     }

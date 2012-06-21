@@ -31,7 +31,6 @@ import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.Variable;
 
 /**
@@ -49,23 +48,10 @@ public final class FineTernPropEventRecorder<V extends Variable> extends FinePro
 
     @Override
     public boolean execute() throws ContradictionException {
-        //<cp>: faster
         if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        int evtmask_ = evtmasks[0];
-        if (evtmask_ > 0) {
-            evtmasks[0] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[0], evtmask_);
-        }
-        evtmask_ = evtmasks[1];
-        if (evtmask_ > 0) {
-            evtmasks[1] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[1], evtmask_);
-        }
-        evtmask_ = evtmasks[2];
-        if (evtmask_ > 0) {
-            evtmasks[2] = 0; // and clean up mask
-            execute(propagators[AbstractFineEventRecorder.PINDEX], idxVinP[2], evtmask_);
-        }
+        _execute(0);
+        _execute(1);
+        _execute(2);
         return true;
     }
 
