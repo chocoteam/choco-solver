@@ -51,6 +51,7 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
+import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -94,11 +95,11 @@ public class DCMST {
 
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
-		bench("DR");
+		bench("DE");
 	}
 
 	public static void bench(String type) {
-		search = 0;
+		search = 2;
 		HCP_Parser.clearFile(outFile = "dcmst_"+type+"_s"+search+".csv");
 		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;search;\n", outFile);
 		File folder = new File(dir+"/"+type);
@@ -111,7 +112,7 @@ public class DCMST {
 				instanceName = s;
 				System.out.println(s);
 				if(parse(file)){
-					setUB(dir+"/"+type,s);
+//					setUB(dir+"/"+type,s);
 					solveDCMST(s);
 				}
 				System.gc();
@@ -271,17 +272,19 @@ public class DCMST {
 		gc.addPropagators(new PropAtLeastNNeighbors(undi, 1, gc, solver));
 		gc.addPropagators(new PropAtMostNNeighbors(undi, dMax, gc, solver));
 		gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
-//		gc.addPropagators(new PropKCC(undi, solver, gc, VariableFactory.bounded("1",1,1,solver)));
+		gc.addPropagators(new PropKCC(undi, solver, gc, VariableFactory.bounded("1",1,1,solver)));
 		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, dist, gc, solver));
-		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropIterativeMST.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropBoundMST.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
+		PropTreeHeldKarp hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk.waitFirstSolution(true);
+		gc.addPropagators(hk);
 		solver.post(gc);
+
 		// config
 //		AbstractStrategy strat = StrategyFactory.graphStrategy(undi,null,new MySearch(undi), GraphStrategy.NodeArcPriority.ARCS);
-//		AbstractStrategy strat = StrategyFactory.graphStrategy(undi,null,new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS);
-		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_multisparse, null);
+		AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi,null,new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS);
+		AbstractStrategy proveOpt = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_multisparse, null);
 //		AbstractStrategy strat = StrategyFactory.graphLexico(undi);
+		AbstractStrategy strat = new Change(undi,firstSol,proveOpt);
 		switch (search){
 			case 0: solver.set(strat);break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
@@ -298,7 +301,7 @@ public class DCMST {
 			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount()>1){
-			throw new UnsupportedOperationException();
+//			throw new UnsupportedOperationException();
 		}
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
@@ -480,6 +483,30 @@ public class DCMST {
 				return false;
 			}
 			return true;
+		}
+	}
+
+	private static class Change extends AbstractStrategy<UndirectedGraphVar>{
+
+		AbstractStrategy first,next;
+		public Change (UndirectedGraphVar g, AbstractStrategy first, AbstractStrategy next){
+			super(new UndirectedGraphVar[]{g});
+			this.first = first;
+			this.next  = next;
+		}
+
+		@Override
+		public void init() {
+			first.init();
+			next.init();
+		}
+
+		@Override
+		public Decision getDecision() {
+			if(solver.getMeasures().getSolutionCount()==0){
+				return first.getDecision();
+			}
+			return next.getDecision();
 		}
 	}
 }

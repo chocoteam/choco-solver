@@ -35,10 +35,10 @@
 package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
@@ -48,24 +48,25 @@ import solver.variables.IntVar;
 
 /**
  * Sum constraint that ensure that the sum of integer variables vars is equal
- * to the integer variable sum
+ * to the integer sum
  *
  * use a tree representation to get a log behavior
  *
  * Should be used for large cases (vars.length>>100)
  */
-public class PropSum extends Propagator<IntVar> {
+public class PropBigSum extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	IntVar sum;
+	int sum;
 	final static int SIZE_GROUP = 20;
 	int nbLayers;
 	Node root;
 	Node[] leafs;
 	int index;
+	Sum.Type type;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -73,7 +74,7 @@ public class PropSum extends Propagator<IntVar> {
 
 	/**
 	 * Sum constraint that ensure that the sum of integer variables vars is equal
-	 * to the integer variable sum
+	 * to the integer sum
 	 *
 	 * use a tree representation to get a log behavior
 	 *
@@ -83,12 +84,16 @@ public class PropSum extends Propagator<IntVar> {
 	 * @param solver
 	 * @param intVarPropagatorConstraint
 	 */
-	protected PropSum(IntVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-		super(ArrayUtils.append(vars,new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+	public PropBigSum(IntVar[] vars, int sum, Sum.Type type, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+		super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
 		this.sum = sum;
-		nbLayers = computeNbLayers(vars.length);
-		leafs = new Node[vars.length];
-		root = new Node(nbLayers,null);
+		this.nbLayers = computeNbLayers(vars.length);
+		this.leafs = new Node[vars.length];
+		this.root = new Node(nbLayers,null);
+		this.type = type;
+		if(type== Sum.Type.NQ){
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	private int computeNbLayers(int nbElements){
@@ -108,47 +113,80 @@ public class PropSum extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		// init structure
 		if((evtmask&EventType.FULL_PROPAGATION.mask)!=0){
-			// compute bounds
-			for(int i=0;i<vars.length-1;i++){
+			root.reset();
+			for(int i=0;i<vars.length;i++){
 				leafs[i].incLB(vars[i].getLB());
 				leafs[i].decUB(vars[i].getUB());
 			}
-			// update sum variable
-			sum.updateLowerBound(root.oldLB.get(),this);
-			sum.updateUpperBound(root.oldUB.get(),this);
 		}
-		// filter from sum
-		int max = root.oldUB.get();
-		filter_min(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
-		int min = root.oldLB.get();
-		filter_max(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
-		// todo verifier utilite
-		while(max!=root.oldUB.get() || min!=root.oldLB.get()){
-			if(max!=root.oldUB.get()){
-				max = root.oldUB.get();
-				filter_min(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
-			}
-			if(min!=root.oldLB.get()){
-				min = root.oldLB.get();
-				filter_max(root,root.oldLB.get(),max,sum.getLB(),sum.getUB());
-			}
+		// filter
+		switch (type) {
+			case LEQ:
+				filter_max(root, root.oldLB.get());
+				break;
+			case GEQ:
+				filter_min(root, root.oldUB.get());
+				break;
+			case EQ:
+				int max = root.oldUB.get();
+				filter_min(root,max);
+				int min = root.oldLB.get();
+				filter_max(root,root.oldLB.get());
+				while(max!=root.oldUB.get() || min!=root.oldLB.get()){
+					if(max!=root.oldUB.get()){
+						max = root.oldUB.get();
+						filter_min(root,max);
+					}
+					if(min!=root.oldLB.get()){
+						min = root.oldLB.get();
+						filter_max(root,root.oldLB.get());
+					}
+				}
 		}
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp<vars.length-1){
-			if((mask & EventType.DECUPP.mask) != 0){
-				leafs[idxVarInProp].decUB(vars[idxVarInProp].getUB()-leafs[idxVarInProp].oldUB.get());
-			}
-			if((mask & EventType.INCLOW.mask) != 0){
-				leafs[idxVarInProp].incLB(vars[idxVarInProp].getLB()-leafs[idxVarInProp].oldLB.get());
-			}
-			sum.updateLowerBound(root.oldLB.get(),this);
-			sum.updateUpperBound(root.oldUB.get(),this);
+//		if((mask & EventType.DECUPP.strengthened_mask) != 0){
+//			leafs[idxVarInProp].decUB(vars[idxVarInProp].getUB()-leafs[idxVarInProp].oldUB.get());
+//		}
+//		if((mask & EventType.INCLOW.strengthened_mask) != 0){
+//			leafs[idxVarInProp].incLB(vars[idxVarInProp].getLB() - leafs[idxVarInProp].oldLB.get());
+//		}
+		int dub = vars[idxVarInProp].getUB()-leafs[idxVarInProp].oldUB.get();
+		if(dub != 0){
+			leafs[idxVarInProp].decUB(dub);
+		}
+		int dlb = vars[idxVarInProp].getLB() - leafs[idxVarInProp].oldLB.get();
+		if(dlb != 0){
+			leafs[idxVarInProp].incLB(dlb);
 		}
 		forcePropagate(EventType.CUSTOM_PROPAGATION);
+//		switch (type) {
+//			case LEQ:
+//				filter_max(root, root.oldLB.get());
+//				break;
+//			case GEQ:
+//				filter_min(root, root.oldUB.get());
+//				break;
+//			case EQ:
+//				int max = root.oldUB.get();
+//				filter_min(root,max);
+//				int min = root.oldLB.get();
+//				filter_max(root,root.oldLB.get());
+//				while(max!=root.oldUB.get() || min!=root.oldLB.get()){
+//					if(max!=root.oldUB.get()){
+//						max = root.oldUB.get();
+//						filter_min(root,max);
+//					}
+//					if(min!=root.oldLB.get()){
+//						min = root.oldLB.get();
+//						filter_max(root,root.oldLB.get());
+//					}
+//				}
+//		}
 	}
 
 	@Override
@@ -158,19 +196,32 @@ public class PropSum extends Propagator<IntVar> {
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.INCLOW.mask+EventType.DECUPP.mask+EventType.INSTANTIATE.mask;
+//		return EventType.INT_ALL_MASK();
+//		return EventType.INSTANTIATE.strengthened_mask;
+		return EventType.INSTANTIATE.mask+EventType.DECUPP.mask+EventType.INCLOW.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
 		int lb = 0;
 		int ub = 0;
-		for(int i=0;i<vars.length-1;i++){
+		for(int i=0;i<vars.length;i++){
 			lb += vars[i].getLB();
 			ub += vars[i].getUB();
 		}
-		if(lb>sum.getUB() || ub<sum.getLB()){
-			return ESat.FALSE;
+		switch (type) {
+			case LEQ:
+				if(lb>sum){
+					return ESat.FALSE;
+				}break;
+			case GEQ:
+				if(ub<sum){
+					return ESat.FALSE;
+				}break;
+			case EQ:
+				if(lb>sum || ub<sum){
+					return ESat.FALSE;
+				}
 		}
 		if(isCompletelyInstantiated()){
 			return ESat.TRUE;
@@ -178,33 +229,35 @@ public class PropSum extends Propagator<IntVar> {
 		return ESat.UNDEFINED;
 	}
 
-	private void filter_min(Node node, int rootlb, int rootub, int sumlb, int sumub) throws ContradictionException {
-		if(rootub-node.oldUB.get()+node.oldLB.get()<sumlb){
+	private void filter_min(Node node, int rootub) throws ContradictionException {
+		if(rootub-node.oldUB.get()+node.oldLB.get()<sum){
 			int index = node.leafIndex;
 			if(index==-1){
 				for(int i=0;i<SIZE_GROUP;i++){
-					filter_min(node.childs[i],rootlb,rootub,sumlb,sumub);
+					filter_min(node.childs[i],rootub);
 				}
 			}else {
 				IntVar v = vars[index];
-				int lb = sumlb-rootub+node.oldUB.get();
+				int lb = sum-rootub+node.oldUB.get();
 				v.updateLowerBound(lb,this);
+				lb = v.getLB();
 				node.incLB(lb-node.oldLB.get());
 			}
 		}
 	}
 
-	private void filter_max(Node node, int rootlb, int rootub, int sumlb, int sumub) throws ContradictionException {
-		if(rootlb-node.oldLB.get()+node.oldUB.get()>sumub){
+	private void filter_max(Node node, int rootlb) throws ContradictionException {
+		if(rootlb-node.oldLB.get()+node.oldUB.get()>sum){
 			int index = node.leafIndex;
 			if(index==-1){
 				for(int i=0;i<SIZE_GROUP;i++){
-					filter_max(node.childs[i],rootlb,rootub,sumlb,sumub);
+					filter_max(node.childs[i],rootlb);
 				}
 			}else {
 				IntVar v = vars[index];
-				int ub = sumub-rootlb+node.oldLB.get();
+				int ub = sum-rootlb+node.oldLB.get();
 				v.updateUpperBound(ub,this);
+				ub = v.getUB();
 				node.decUB(ub-node.oldUB.get());
 			}
 		}
@@ -212,12 +265,12 @@ public class PropSum extends Propagator<IntVar> {
 
 	private class Node{
 
-		Node father;
-		Node[] childs;
-		IStateInt oldLB,oldUB;
-		int leafIndex;
+		private Node father;
+		private Node[] childs;
+		private IStateInt oldLB,oldUB;
+		private int leafIndex;
 
-		Node(int depth, Node father){
+		private Node(int depth, Node father){
 			this.father = father;
 			leafIndex = -1;
 			if(depth>0){
@@ -225,7 +278,7 @@ public class PropSum extends Propagator<IntVar> {
 				for(int i=0;i<SIZE_GROUP;i++){
 					childs[i] = new Node(depth-1,this);
 				}
-			}else if(index<vars.length-1){
+			}else if(index<vars.length){
 				leafIndex = index;
 				leafs[index++] = this;
 			}
@@ -233,31 +286,28 @@ public class PropSum extends Propagator<IntVar> {
 			oldUB = environment.makeInt();
 		}
 
-		void incLB(int delta) {
+		private void incLB(int delta) {
 			oldLB.add(delta);
-			father.incLB(delta);
+			if(father!=null){
+				father.incLB(delta);
+			}
 		}
 
-		void decUB(int delta) {
+		private void decUB(int delta) {
 			oldUB.add(delta);
-			father.decUB(delta);
-		}
-	}
-
-	private class DeadNode extends Node{
-
-		DeadNode(int depth, Node father){
-			super(0,null);
-			oldLB = oldUB = null;
+			if(father!=null){
+				father.decUB(delta);
+			}
 		}
 
-		void incLB(int delta) {
-			throw new UnsupportedOperationException();
-		}
-
-		void decUB(int delta) {
-			oldUB.add(delta);
-			father.decUB(delta);
+		private void reset(){
+			oldLB.set(0);
+			oldUB.set(0);
+			if(childs!=null){
+				for(int i=0;i<SIZE_GROUP;i++){
+					childs[i].reset();
+				}
+			}
 		}
 	}
 }
