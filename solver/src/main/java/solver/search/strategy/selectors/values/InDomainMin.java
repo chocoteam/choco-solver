@@ -27,8 +27,6 @@
 
 package solver.search.strategy.selectors.values;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.search.strategy.selectors.ValueIterator;
 import solver.variables.IntVar;
 
@@ -41,24 +39,9 @@ import solver.variables.IntVar;
  */
 public final class InDomainMin implements ValueIterator<IntVar> {
 
-    protected final IntVar variable;
-
-    protected final IStateInt currentValue;
-
-    public InDomainMin(IntVar variable, IEnvironment env) {
-        this.variable = variable;
-        currentValue = env.makeInt(variable.getLB() - 1);
-    }
-
-    public boolean hasNext(){
-        return Integer.MAX_VALUE != variable.nextValue(currentValue.get());
-    }
-
     @Override
-    public int selectValue() {
-        final int cv = variable.nextValue(currentValue.get());
-        currentValue.set(cv);
-        return cv;
+    public int selectValue(IntVar var) {
+        return var.getLB();
     }
 
 }

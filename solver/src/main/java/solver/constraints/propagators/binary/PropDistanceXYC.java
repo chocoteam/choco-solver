@@ -41,7 +41,7 @@ import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
 
 /**
- * <br/>
+ * | X - Y | op C <br/> op = {"==", "<", ">", "=/="} <br/>
  *
  * @author Charles Prud'homme
  * @since 21/03/12

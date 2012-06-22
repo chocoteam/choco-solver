@@ -29,7 +29,8 @@ package solver.propagation.generator;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.generator.sorter.evaluator.IEvaluator;
-import solver.propagation.queues.FixSizeCircularQueue;
+import solver.propagation.queues.AQueue;
+import solver.propagation.queues.CircularQueue;
 import solver.recorders.IEventRecorder;
 
 import java.util.BitSet;
@@ -47,7 +48,7 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
     protected IEvaluator<S> evaluator;
     protected int offset, size;
     protected S lastPopped;
-    protected FixSizeCircularQueue<S>[] toPropagate;
+    protected AQueue<S>[] toPropagate;
     protected BitSet notEmpty;
 
     @SuppressWarnings({"unchecked"})
@@ -61,9 +62,9 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         this.evaluator = evaluator;
         this.offset = min;
         this.size = max - min + 1;
-        toPropagate = new FixSizeCircularQueue[size];
+        toPropagate = new CircularQueue[size];
         for (int i = 0; i < size; i++) {
-            toPropagate[i] = new FixSizeCircularQueue<S>(nbe);
+            toPropagate[i] = new CircularQueue<S>(nbe);
         }
         notEmpty = new BitSet(size);
     }
@@ -78,9 +79,9 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         this.evaluator = evaluator;
         this.offset = min;
         this.size = max - min + 1;
-        toPropagate = new FixSizeCircularQueue[size];
+        toPropagate = new CircularQueue[size];
         for (int i = 0; i < size; i++) {
-            toPropagate[i] = new FixSizeCircularQueue<S>(nbe);
+            toPropagate[i] = new CircularQueue<S>(nbe);
         }
         notEmpty = new BitSet(size);
     }
@@ -101,14 +102,14 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         assert !element.enqueued();
         int q = evaluator.eval(element) - offset;
         try {
-            toPropagate[q].add(element);
+            toPropagate[q].addLast(element);
             notEmpty.set(q);
         } catch (ArrayIndexOutOfBoundsException e) {
             if (q < offset) {
-                toPropagate[0].add(element);
+                toPropagate[0].addLast(element);
                 notEmpty.set(0);
             } else if (q >= size) {
-                toPropagate[size - 1].add(element);
+                toPropagate[size - 1].addLast(element);
                 notEmpty.set(size - 1);
             }
         }
@@ -141,7 +142,7 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
     protected boolean _pickOne() throws ContradictionException {
         if (!notEmpty.isEmpty()) {
             int q = notEmpty.nextSetBit(0);
-            lastPopped = toPropagate[q].remove();//pop();
+            lastPopped = toPropagate[q].pollFirst();//pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
@@ -168,7 +169,7 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         int q = notEmpty.nextSetBit(0);
         while (q > -1) {
             assert !toPropagate[q].isEmpty();
-            lastPopped = toPropagate[q].remove();//.pop();
+            lastPopped = toPropagate[q].pollFirst();//.pop();
             lastPopped.deque();
             if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
@@ -189,7 +190,7 @@ public final class NQueue<S extends ISchedulable> extends PropagationStrategy<S>
         int q = notEmpty.nextSetBit(0);
         while (q > -1) {
             while (!toPropagate[q].isEmpty()) {
-                lastPopped = toPropagate[q].remove();//.pop();
+                lastPopped = toPropagate[q].pollFirst();//.pop();
                 if (IEventRecorder.LAZY) {
                     lastPopped.flush();
                 }

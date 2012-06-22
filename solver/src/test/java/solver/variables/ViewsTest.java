@@ -30,10 +30,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Cause;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.binary.Absolute;
-import solver.constraints.binary.EqualXY_C;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.ternary.Max;
@@ -188,7 +186,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -1, 3, ref);
 
-                ref.post(new EqualX_YC(z, x, 1, solver));
+                ref.post(new Arithmetic(z, "=", x, "+", 1, solver));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -234,7 +232,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
-                ref.post(new EqualXY_C(x, z, 0, ref));
+                ref.post(new Arithmetic(x, "+", z, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -413,8 +411,8 @@ public class ViewsTest {
                 }
                 ref.post(new AllDifferent(x, ref));
                 ref.post(new AllDifferent(t, ref));
-                ref.post(new GreaterOrEqualX_YC(x[1], x[0], 1, ref));
-                ref.post(new GreaterOrEqualX_YC(t[0], t[k - 2], 1, ref));
+                ref.post(new Arithmetic(x[1], ">", x[0], ref));
+                ref.post(new Arithmetic(t[0], ">", t[k - 2], ref));
                 ref.set(StrategyFactory.random(x, ref.getEnvironment(), seed));
             }
             {
@@ -425,8 +423,8 @@ public class ViewsTest {
                 }
                 solver.post(new AllDifferent(x, solver));
                 solver.post(new AllDifferent(t, solver));
-                solver.post(new GreaterOrEqualX_YC(x[1], x[0], 1, solver));
-                solver.post(new GreaterOrEqualX_YC(t[0], t[k - 2], 1, solver));
+                solver.post(new Arithmetic(x[1], ">", x[0], solver));
+                solver.post(new Arithmetic(t[0], ">", t[k - 2], solver));
                 solver.set(StrategyFactory.random(x, solver.getEnvironment(), seed));
             }
             check(ref, solver, k, true, true);

@@ -28,8 +28,9 @@
 package choco.kernel.common.util.objects;
 
 import choco.kernel.common.Indexable;
-import choco.kernel.common.util.procedure.Procedure;
+import solver.ICause;
 import solver.exception.ContradictionException;
+import solver.variables.EventType;
 
 import java.io.Serializable;
 
@@ -43,7 +44,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public interface IList<E extends Indexable> extends Serializable {
+public interface IList<V, E extends Indexable> extends Serializable {
 
     /**
      * Add a new <code>element</code>
@@ -88,10 +89,7 @@ public interface IList<E extends Indexable> extends Serializable {
      */
     int cardinality();
 
-    /**
-     * This method loops over active elements matching the event to execute the procedure in parameter.
-     */
-    void forEach(Procedure proc) throws ContradictionException;
+    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException;
 
     E get(int i);
 }

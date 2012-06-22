@@ -31,9 +31,9 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.binary.Element;
-import solver.constraints.binary.EqualXY_C;
 import solver.explanations.ExplanationFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -85,9 +85,9 @@ public class EqualXYCExplTest {
 
         for (int i = 0; i < varsr.length - 1 ; i++) {
             lcstrsr.add(new Element(varsr[i], values, indicesr[i], 0, ref));
-            lcstrsr.add(new EqualXY_C(varsr[i], indicesr[i+1], 2 * nbvars / 3 , ref));
+            lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
             lcstrss.add(new Element(varss[i], values, indicess[i], 0, sol));
-            lcstrss.add(new EqualXY_C(varss[i], indicess[i+1], 2 * nbvars / 3 , sol));
+            lcstrss.add(new Arithmetic(varss[i], "+", indicess[i + 1], "=", 2 * nbvars / 3, sol));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

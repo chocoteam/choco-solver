@@ -37,35 +37,35 @@ package solver.search.loop.monitors;
 import solver.Solver;
 import solver.exception.ContradictionException;
 
-public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor{
+public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected Solver solver;
-	protected final boolean restartAfterEachSolution;
+    protected Solver solver;
+    protected final boolean restartAfterEachSolution;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public Abstract_LNS_SearchMonitor(Solver solver, boolean restartAfterEachSolution){
-		solver.getSearchLoop().restartAfterEachSolution(true);
-		this.solver = solver;
-		this.restartAfterEachSolution = restartAfterEachSolution;
-	}
+    public Abstract_LNS_SearchMonitor(Solver solver, boolean restartAfterEachSolution) {
+        solver.getSearchLoop().restartAfterEachSolution(true);
+        this.solver = solver;
+        this.restartAfterEachSolution = restartAfterEachSolution;
+    }
 
-	//***********************************************************************************
-	// RECORD & RESTART
-	//***********************************************************************************
+    //***********************************************************************************
+    // RECORD & RESTART
+    //***********************************************************************************
 
-	@Override
-	public void onSolution() {
-		recordSolution();
-	}
+    @Override
+    public void onSolution() {
+        recordSolution();
+    }
 
-	public void beforeClose() {
+    public void beforeClose() {
 //		if(solver.getMeasures().getSolutionCount()==0){
 //			System.out.println("research complete : no solution");return;
 //		}
@@ -75,54 +75,58 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor{
 //		if(isSearchComplete()){
 //			System.out.println("optimality proved");return;
 //		}
-		if(!(solver.getMeasures().getSolutionCount()==0
-					|| solver.getSearchLoop().getLimitsBox().isReached()
-					|| isSearchComplete())){
-			restrictLess();
-			solver.getSearchLoop().restartAfterEachSolution(true);
-			solver.getSearchLoop().resume();
-		}
-	}
+        if (!(solver.getMeasures().getSolutionCount() == 0
+                || solver.getSearchLoop().getLimitsBox().isReached()
+                || isSearchComplete())) {
+            restrictLess();
+            solver.getSearchLoop().restartAfterEachSolution(true);
+            solver.getSearchLoop().resume();
+        }
+    }
 
-	/**
-	 * @return true iff the search is in a complete mode (no fixed variable)
-	 */
-	protected abstract boolean isSearchComplete();
+    /**
+     * @return true iff the search is in a complete mode (no fixed variable)
+     */
+    protected abstract boolean isSearchComplete();
 
-	/**
-	 * Record values of decision variables to freeze some ones during the next LNS run
-	 */
-	protected abstract void recordSolution();
+    /**
+     * Record values of decision variables to freeze some ones during the next LNS run
+     */
+    protected abstract void recordSolution();
 
-	//***********************************************************************************
-	// FIX VARIABLES FOR NEXT LNS STEP
-	//***********************************************************************************
+    //***********************************************************************************
+    // FIX VARIABLES FOR NEXT LNS STEP
+    //***********************************************************************************
 
-	@Override
-	public void afterRestart() {
-		//System.out.println("SOLVER RESTARTED");
-		solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
-		try{
-			fixSomeVariables();
-		}catch (Exception e){
-			//LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
-			restrictLess();
-			solver.getSearchLoop().restart();
-		}
-	}
+    @Override
+    public void afterRestart() {
+        if (solver.getMeasures().getSolutionCount() > 0) {
+            //System.out.println("SOLVER RESTARTED");
+            solver.getSearchLoop().restartAfterEachSolution(restartAfterEachSolution);
+            try {
+                fixSomeVariables();
+            } catch (Exception e) {
+                //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
+                restrictLess();
+                solver.getSearchLoop().restart();
+            }
+        }
+    }
 
-	/**Freezes some variables in order to have a fast computation
-	 *
-	 * @throws ContradictionException if variables have been fixed to inconsistent values
-	 * this can happen if fixed variables cannot yield to a better solution than the last one
-	 * a contradiction is raised because a cut has been posted on the objective function
-	 * Notice that it could be used to generate a no-good
-	 */
-	protected abstract void fixSomeVariables() throws ContradictionException;
+    /**
+     * Freezes some variables in order to have a fast computation
+     *
+     * @throws ContradictionException if variables have been fixed to inconsistent values
+     *                                this can happen if fixed variables cannot yield to a better solution than the last one
+     *                                a contradiction is raised because a cut has been posted on the objective function
+     *                                Notice that it could be used to generate a no-good
+     */
+    protected abstract void fixSomeVariables() throws ContradictionException;
 
-	/**Use less restriction at the beginning of a LNS run
-	 * in order to get better solutions
-	 * Called when no solution was found during a LNS run (trapped into a local optimum)
-	 */
-	protected abstract void restrictLess();
+    /**
+     * Use less restriction at the beginning of a LNS run
+     * in order to get better solutions
+     * Called when no solution was found during a LNS run (trapped into a local optimum)
+     */
+    protected abstract void restrictLess();
 }

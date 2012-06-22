@@ -64,7 +64,7 @@ public class MinusView extends IntView {
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         var.createDelta();
-        if(var.getDelta() == NoDelta.singleton){
+        if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
         return new IntDeltaMonitor(var.getDelta(), propagator) {
@@ -109,8 +109,11 @@ public class MinusView extends IntView {
             if (done) {
                 if (this.instantiated()) {
                     e = EventType.INSTANTIATE;
+                    if (cause.reactOnPromotion()) {
+                        cause = Cause.Null;
+                    }
                 }
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().removeValue(this, value, cause);
                 return true;
             }
@@ -139,7 +142,7 @@ public class MinusView extends IntView {
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
         boolean done = var.instantiateTo(-value, this);
         if (done) {
-            notifyMonitors(EventType.INSTANTIATE, cause);
+            notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -163,7 +166,7 @@ public class MinusView extends IntView {
                 }
             }
             if (done) {
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, -old, -value, cause);
                 return true;
             }
@@ -190,7 +193,7 @@ public class MinusView extends IntView {
                 }
             }
             if (done) {
-                this.notifyMonitors(e, cause);
+                this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                 return true;
             }

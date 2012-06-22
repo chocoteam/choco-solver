@@ -30,12 +30,11 @@ package samples;
 import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.GreaterOrEqualX_YC;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.constraints.unary.Relation;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.Generator;
@@ -95,7 +94,7 @@ public class GolombRuler extends AbstractProblem {
 
         lex = new Constraint[m - 1];
         for (int i = 0; i < m - 1; i++) {
-            lex[i] = new GreaterOrEqualX_YC(ticks[i + 1], ticks[i], 1, solver);
+            lex[i] = new Arithmetic(ticks[i + 1], ">", ticks[i], solver);
         }
         solver.post(lex);
 
@@ -109,7 +108,7 @@ public class GolombRuler extends AbstractProblem {
                 // <cpru 04/03/12> it is worth adding a constraint instead of a view
                 distances[k] = Sum.eq(new IntVar[]{ticks[j], ticks[i], diffs[k]}, new int[]{1, -1, -1}, 0, solver);
                 solver.post(distances[k]);
-                solver.post(new Relation(diffs[k], Relation.R.GQ, (j - i) * (j - i + 1) / 2, solver));
+                solver.post(new Arithmetic(diffs[k], ">=", (j - i) * (j - i + 1) / 2, solver));
                 solver.post(Sum.leq(new IntVar[]{diffs[k], ticks[m - 1]}, new int[]{1, -1}, -((m - 1 - j + i) * (m - j + i)) / 2, solver));
                 m_diffs[i][j] = diffs[k];
             }

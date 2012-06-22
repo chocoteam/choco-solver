@@ -36,7 +36,9 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
 import solver.exception.ContradictionException;
-import solver.search.loop.AbstractSearchLoop;
+import solver.propagation.IPropagationEngine;
+import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationStrategies;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -65,7 +67,7 @@ public class IntLinCombTest {
         int constant = -random.nextInt(cMax);
 
         Constraint[] cstrs = new Constraint[]{
-                Sum.build(vars, coeffs,  constant, operator, s)
+                Sum.build(vars, coeffs, constant, operator, s)
         };
 
         s.post(cstrs);
@@ -186,6 +188,9 @@ public class IntLinCombTest {
     @Test(groups = "1s")
     public void testUSum2() throws ContradictionException {
         Solver sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
+        IPropagationEngine engine = new PropagationEngine(sum.getEnvironment());
+        PropagationStrategies.DEFAULT.make(sum, engine);
+        sum.set(engine);
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
         ((IntVar) vars[1]).instantiateTo(-1, Cause.Null);

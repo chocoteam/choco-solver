@@ -92,6 +92,9 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
+			vars[i].removeValue(i,this);
+			vars[i].updateLowerBound(0,this);
+			vars[i].updateUpperBound(n-1,this);
             if (vars[i].instantiated()) {
                 fixedVar.add(i);
             }

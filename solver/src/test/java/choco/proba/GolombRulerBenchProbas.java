@@ -1,12 +1,12 @@
 package choco.proba;
 
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.nary.lex.LexChain;
-import solver.constraints.unary.Relation;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -66,7 +66,7 @@ public class GolombRulerBenchProbas extends AbstractBenchProbas {
             for (int j = i + 1; j < size; j++, k++) {
                 diffs[k] = Sum.var(ticks[j], Views.minus(ticks[i]));
                 allVars.add(diffs[k]);
-                allCstrs.add(new Relation(diffs[k], Relation.R.GQ, (j - i) * (j - i + 1) / 2, solver));
+                allCstrs.add(new Arithmetic(diffs[k], ">=", (j - i) * (j - i + 1) / 2, solver));
                 allCstrs.add(Sum.leq(new IntVar[]{diffs[k], ticks[size - 1]}, new int[]{1, -1}, -((size - 1 - j + i) * (size - j + i)) / 2, solver));
             }
         }

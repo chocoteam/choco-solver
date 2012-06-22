@@ -47,6 +47,8 @@ public interface IEventRecorder<V extends Variable> extends solver.propagation.I
 
     public static final boolean LAZY = true;
 
+    static final int VINDEX = 0;
+    static final int PINDEX = 0;
     /**
      * Return an array of the variables declared in <code>this</code>
      * @return array of variables

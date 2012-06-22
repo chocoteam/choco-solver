@@ -31,7 +31,6 @@ import solver.search.strategy.selectors.ValueIterator;
 import solver.variables.IntVar;
 
 /**
- *
  * Assigns the value in the variable's domain closest to the mean of its current bounds.
  * <br/>
  * It computes the mean of the variable's domain. Then it checks if the mean is contained in the domain, otherwise
@@ -44,37 +43,23 @@ import solver.variables.IntVar;
  */
 public class InDomainMiddle implements ValueIterator<IntVar> {
 
-    protected final IntVar variable;
-
-    public InDomainMiddle(IntVar variable) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean hasNext() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int selectValue() {
-        int low = variable.getLB();
-        int upp = variable.getUB();
-        int mean = (low + upp)/2;
+    public int selectValue(IntVar var) {
+        int low = var.getLB();
+        int upp = var.getUB();
+        int mean = (low + upp) / 2;
         int inc = 1;
-        while(!variable.contains(mean) &&
-                mean >= low && mean <= upp){
+        while (!var.contains(mean) &&
+                mean >= low && mean <= upp) {
             inc = -1 * (inc + 1);
             mean += inc;
         }
-        if(variable.contains(mean)){
-           return mean;
+        if (var.contains(mean)) {
+            return mean;
         }
-        return variable.getLB();
+        return var.getLB();
     }
 }

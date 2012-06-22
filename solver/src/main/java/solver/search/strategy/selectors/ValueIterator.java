@@ -40,16 +40,10 @@ import java.io.Serializable;
 public interface ValueIterator<V> extends Serializable {
 
     /**
-     * Checks wether there is a remaining value, not yet used, in the domain
-     * @return true if there is at least one remaining value to check, false otherwise
-     */
-    public boolean hasNext();
-
-    /**
      * Selects and returns the value to constrained chosen variable with.
      * The chosen value must belong to the domain of <code>variable</code>.
      * @return the value, based on the domain of variable
      */
-    public int selectValue();
+    public int selectValue(V var);
 
 }
