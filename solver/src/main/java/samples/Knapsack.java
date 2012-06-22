@@ -31,12 +31,17 @@ import choco.kernel.ResolutionPolicy;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.nary.Sum;
+import solver.objective.strategies.Dichotomic_Maximization;
+import solver.objective.strategies.TopDown_Maximization;
+import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.strategy.AbstractStrategy;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.search.loop.monitors.ABSLNS;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
@@ -114,10 +119,20 @@ public class Knapsack extends AbstractProblem {
 
         solver.post(c_size);
         solver.post(c_energy);
+		solver.post(new solver.constraints.nary.Knapsack(objects,scalar,power,volumes,energies,solver));
     }
 
     @Override
     public void configureSearch() {
+		AbstractStrategy strat = StrategyFactory.domddegMinDom(objects);
+		// top-down
+//		solver.set(new StaticStrategiesSequencer(new TopDown_Maximization(power),strat));
+		// dichotomic
+		solver.set(new StaticStrategiesSequencer(new Dichotomic_Maximization(power,solver),strat));
+		// bottom-up
+//		solver.set(strat);
+
+		// old stuff
         /*AbstractSorter<IntVar> s1 = c_energy.getComparator(Sum.VAR_DECRCOEFFS);
             AbstractSorter<IntVar> s2 = c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
 
@@ -127,23 +142,23 @@ public class Knapsack extends AbstractProblem {
                     seq,
                     ValidatorFactory.instanciated,
                     solver.getEnvironment()));*/
-        final ActivityBased abs = new ActivityBased(solver, objects, 0.999d, 0.02d, 8, 2.0d, 1, seed);
-        SearchMonitorFactory.log(solver, true, false);
-
-        solver.set(abs);
-        solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, objects, seed, abs, false, objects.length / 2));
+//        final ActivityBased abs = new ActivityBased(solver, objects, 0.999d, 0.02d, 8, 2.0d, 1, seed);
+//        SearchMonitorFactory.log(solver, true, false);
+//        solver.set(abs);
+//        solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, objects, seed, abs, false, objects.length / 2));
     }
 
     @Override
     public void configureEngine() {
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
-        solver.set(pengine);
+	// not usefull
+//        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//        PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pengine);
+//        solver.set(pengine);
     }
 
     @Override
     public void solve() {
-//        SearchMonitorFactory.log(solver, true, true);
+//      SearchMonitorFactory.log(solver, true, true);
         solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
     }
 
@@ -173,5 +188,4 @@ public class Knapsack extends AbstractProblem {
             return data[i];
         }
     }
-
 }

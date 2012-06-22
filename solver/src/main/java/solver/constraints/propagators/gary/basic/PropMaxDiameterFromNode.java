@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -35,37 +36,36 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.INeighbors;
 
-/**Propagator that ensures that the final graph consists in K Connected Components (CC)
- *
- * simple checker (runs in linear time)
- * 
- * @author Jean-Guillaume Fages
- */
-public class PropKCC extends Propagator{
+import java.util.BitSet;
+
+public class PropMaxDiameterFromNode extends Propagator<GraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private GraphVar g;
-	private IntVar k;
-	private ConnectivityFinder env_CC_finder, ker_CC_finder;
+	private int maxDiam,node,n;
+	private BitSet visited;
+	private TIntArrayList set,nextSet;
+
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
+	public PropMaxDiameterFromNode(GraphVar graph, int maxDiam, int rootNode, Constraint constraint, Solver solver) {
+		super(new GraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
 		this.g = graph;
-		this.k = k;
-		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
-		ker_CC_finder = new ConnectivityFinder(g.getKernelGraph());
+		this.node = rootNode;
+		this.maxDiam = maxDiam;
+		this.n = g.getEnvelopGraph().getNbNodes();
+		this.visited = new BitSet(n);
+		this.set = new TIntArrayList();
+		this.nextSet = new TIntArrayList();
 	}
 
 	//***********************************************************************************
@@ -74,23 +74,40 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		k.updateLowerBound(ee,this);
-		if(g.instantiated()){
-			k.updateUpperBound(ee,this);
-		}else if(g.getEnvelopOrder()==g.getKernelOrder()){
-			ker_CC_finder.findAllCC();
-			int ke = ker_CC_finder.getNBCC();
-			k.updateUpperBound(ke,this);
+		int i = node;
+		nextSet.clear();
+		set.clear();
+		visited.clear();
+		set.add(i);
+		visited.set(i);
+		INeighbors nei;
+		int depth = 0;
+		while(!set.isEmpty() && depth<maxDiam){
+			for(i=set.size()-1;i>=0;i--){
+				nei = g.getEnvelopGraph().getSuccessorsOf(set.get(i));
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!visited.get(j)){
+						visited.set(j);
+						nextSet.add(j);
+					}
+				}
+			}
+			depth++;
+			TIntArrayList tmp = nextSet;
+			nextSet = set;
+			set = tmp;
+			nextSet.clear();
+		}
+		if(depth>=maxDiam){
+			for(i=visited.nextClearBit(0);i<n;i=visited.nextClearBit(i+1)){
+				g.removeNode(i,this);
+			}
 		}
 	}
 
-	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 		propagate(0);
-		// todo incremental behavior
 	}
 
 	//***********************************************************************************
@@ -99,27 +116,19 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.REMOVEARC.mask + EventType.ENFORCENODE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		if(k.getUB()<ee){
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
+		}
+		try{
+			propagate(0);
+			return ESat.TRUE;
+		}catch (Exception e){
 			return ESat.FALSE;
 		}
-		if(g.instantiated()){
-			if(k.contains(ee)){
-				if(k.instantiated()){
-					return ESat.TRUE;
-				}else{
-					return ESat.UNDEFINED;
-				}
-			}
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
 	}
-	
 }

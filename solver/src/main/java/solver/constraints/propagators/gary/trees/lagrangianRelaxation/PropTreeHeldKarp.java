@@ -35,7 +35,7 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.HeldKarp;
 import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
-import solver.constraints.propagators.gary.trees.KruskalMSTFinder;
+import solver.constraints.propagators.gary.trees.KruskalMST_GAC;
 import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -68,15 +68,16 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	public long nbRem;
 	protected boolean waitFirstSol;
 	protected int nbSprints;
-	protected int maxDegree;
+	protected int[] maxDegree;
 	double step;
+	boolean firstPropag = true;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -92,17 +93,15 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	}
 
 	/** ONE TREE based HK */
-	public static PropTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+	public static PropTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
 		PropTreeHeldKarp phk = new PropTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
-		phk.HKfilter = new KruskalMSTFinder(phk.n,phk);//TODO GAC enforcing
-//		phk.HKfilter = phk.HK;
-//		phk.HK = phk.HKfilter;
+		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
 		return phk;
 	}
 
 	//***********************************************************************************
-	// HK Algorithm(s) 
+	// HK Algorithm(s)
 	//***********************************************************************************
 
 	public void HK_algorithm() throws ContradictionException {
@@ -132,61 +131,185 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		HK_Pascals();
 	}
 
+//	protected void HK_Pascals() throws ContradictionException {
+//		double hkb;
+//		double alpha = 2;
+//		double beta = 0.5;
+//		if(firstPropag || true){
+//			firstPropag = false;
+//			HKfilter.computeMST(costs,g.getEnvelopGraph());
+//			hkb = HKfilter.getBound()-totalPenalities;
+//			mst = HKfilter.getMST();
+//			if(hkb-Math.floor(hkb)<0.001){
+//				hkb = Math.floor(hkb);
+//			}
+//			obj.updateLowerBound((int)Math.ceil(hkb), this);
+//			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//		}
+//		for(int iter=5;iter>0;iter--){
+//			for(int i=nbSprints;i>0;i--){
+//				HK.computeMST(costs,g.getEnvelopGraph());
+//				double kk = 0;
+//				for(int j=0;j<n;j++){
+//					kk+=penalities[j]*maxDegree[j];
+//				}
+//				if(kk!=totalPenalities){
+//					throw new UnsupportedOperationException("error ktot : "+(kk-totalPenalities));
+//				}
+//				hkb = HK.getBound()-totalPenalities;
+//				mst = HK.getMST();
+//				if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+//				obj.updateLowerBound((int)Math.ceil(hkb), this);
+//				if(updateStep(hkb, alpha))break;
+//			}
+////			HKfilter.computeMST(costs,g.getEnvelopGraph());
+////			hkb = HKfilter.getBound()-totalPenalities;
+////			mst = HKfilter.getMST();
+////			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+////			obj.updateLowerBound((int)Math.ceil(hkb), this);
+////			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+////			beta  /= 2;
+////			alpha *= beta;
+//		}
+//		HKfilter.computeMST(costs,g.getEnvelopGraph());
+//		hkb = HKfilter.getBound()-totalPenalities;
+//		mst = HKfilter.getMST();
+//		if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+//		obj.updateLowerBound((int)Math.ceil(hkb), this);
+//		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//	}
+
+//	protected void HK_Pascals() throws ContradictionException {
+//		double hkb;
+//		double alpha = 2;
+//		double beta = 0.5;
+//		for(int iter=5;iter>0;iter--){
+//			converge(alpha);
+//			HKfilter.computeMST(costs,g.getEnvelopGraph());
+//			hkb = HKfilter.getBound()-totalPenalities;
+//			mst = HKfilter.getMST();
+//			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+//			obj.updateLowerBound((int)Math.ceil(hkb), this);
+//			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//			alpha *= beta;
+//			beta/=2;
+//		}
+//	}
+
 	protected void HK_Pascals() throws ContradictionException {
-		double hkb;
-		double alpha = 2;
-		double beta = 0.5;
-		HKfilter.computeMST(costs,g.getEnvelopGraph());
-		hkb = HKfilter.getBound()-totalPenalities;
-		mst = HKfilter.getMST();
-		if(hkb-Math.floor(hkb)<0.001){
-			hkb = Math.floor(hkb);
-		}
-		obj.updateLowerBound((int)Math.ceil(hkb), this);
-//		if((int) Math.ceil(hkb)==evalTree(mst))
-		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-		for(int iter=5;iter>0;iter--){
-			for(int i=nbSprints;i>0;i--){
-				HK.computeMST(costs,g.getEnvelopGraph());
-				double kk = 0;
-				for(int j=0;j<n;j++){
-					kk+=penalities[j];
-				}
-				kk*=maxDegree;
-				if(kk!=totalPenalities){
-					throw new UnsupportedOperationException("error ktot : "+(kk-totalPenalities));
-				}
-				hkb = HK.getBound()-totalPenalities;
-				mst = HK.getMST();
-				if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
-				obj.updateLowerBound((int)Math.ceil(hkb), this);
-				if(updateStep(hkb, alpha))break;
-			}
-			HKfilter.computeMST(costs,g.getEnvelopGraph());
-			hkb = HKfilter.getBound()-totalPenalities;
-			mst = HKfilter.getMST();
-			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
-			obj.updateLowerBound((int)Math.ceil(hkb), this);
-//			if((int) Math.ceil(hkb)==evalTree(mst))
-			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-			if(updateStep(hkb, alpha))return;
-			alpha *= beta;
-			beta  /= 2;
+		if(firstPropag){
+			firstPropag = false;
+			convergeAndFilter();
+		}else{
+			fastRun();
 		}
 	}
 
-//	private int evalTree(UndirectedGraph mst) {
-//		int c = 0;
-//		INeighbors nei;
-//		for(int i=0;i<n;i++){
-//			nei = mst.getSuccessorsOf(i);
-//			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-//				if(i<j){
-//					c+= originalCosts[i][j];
-//				}
-//			}
+	protected void fastRun() throws ContradictionException {
+		convergeFast(2);
+		HKfilter.computeMST(costs,g.getEnvelopGraph());
+		double hkb = HKfilter.getBound()-totalPenalities;
+		mst = HKfilter.getMST();
+		if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+		obj.updateLowerBound((int)Math.ceil(hkb), this);
+		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+	}
+
+	protected void convergeAndFilter() throws ContradictionException {
+		double hkb;
+		double alpha = 2;
+		double beta = 0.5;
+		double besthkb = 0;
+		double oldhkb = -20;
+		while(oldhkb+0.1<besthkb){
+			oldhkb = besthkb;
+			convergeFast(alpha);
+			HKfilter.computeMST(costs,g.getEnvelopGraph());
+			hkb = HKfilter.getBound()-totalPenalities;
+			if(hkb>besthkb){
+				besthkb = hkb;
+			}
+			mst = HKfilter.getMST();
+			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+			obj.updateLowerBound((int)Math.ceil(hkb), this);
+			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+			alpha *= beta;
+			beta/=2;
+		}
+	}
+
+	protected void convergeFast(double alpha) throws ContradictionException {
+		double besthkb = 0;
+		double oldhkb = -20;
+		while(oldhkb+0.1<besthkb){
+			oldhkb = besthkb;
+			for(int i=0;i<nbSprints;i++){
+				HK.computeMST(costs,g.getEnvelopGraph());
+				mst = HK.getMST();
+				double hkb = HK.getBound()-totalPenalities;
+				if(hkb-Math.floor(hkb)<0.001){
+					hkb = Math.floor(hkb);
+				}
+				if(hkb>besthkb){
+					besthkb = hkb;
+				}
+				obj.updateLowerBound((int)Math.ceil(hkb), this);
+				if(updateStep(hkb, alpha))return;
+			}
+		}
+	}
+
+//	protected void HK_Pascals() throws ContradictionException {
+//		double hkb;
+//		double alpha = 2;
+//		double beta = 0.5;
+//		HKfilter.computeMST(costs,g.getEnvelopGraph());
+//		hkb = HKfilter.getBound()-totalPenalities;
+//		mst = HKfilter.getMST();
+//		if(hkb-Math.floor(hkb)<0.001){
+//			hkb = Math.floor(hkb);
 //		}
-//		return c;
+//		obj.updateLowerBound((int)Math.ceil(hkb), this);
+////		if((int) Math.ceil(hkb)==evalTree(mst))
+//		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//		for(int iter=5;iter>0;iter--){
+//			for(int i=nbSprints;i>0;i--){
+//				HK.computeMST(costs,g.getEnvelopGraph());
+//				double kk = 0;
+//				for(int j=0;j<n;j++){
+//					kk+=penalities[j]*maxDegree[j];
+//				}
+////				kk*=maxDegree;
+//				if(kk!=totalPenalities){
+//					throw new UnsupportedOperationException("error ktot : "+(kk-totalPenalities));
+//				}
+//				hkb = HK.getBound()-totalPenalities;
+//				mst = HK.getMST();
+//				if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+//				obj.updateLowerBound((int)Math.ceil(hkb), this);
+//				if(updateStep(hkb, alpha))break;
+//			}
+////			HKfilter.computeMST(costs,g.getEnvelopGraph());
+////			hkb = HKfilter.getBound()-totalPenalities;
+////			mst = HKfilter.getMST();
+////			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+////			obj.updateLowerBound((int)Math.ceil(hkb), this);
+//////			if((int) Math.ceil(hkb)==evalTree(mst))
+////			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+////			if(updateStep(hkb, alpha))return;
+////			alpha *= beta;
+//			beta  /= 2;
+//		}
+//		HKfilter.computeMST(costs,g.getEnvelopGraph());
+//			hkb = HKfilter.getBound()-totalPenalities;
+//			mst = HKfilter.getMST();
+//			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+//			obj.updateLowerBound((int)Math.ceil(hkb), this);
+////			if((int) Math.ceil(hkb)==evalTree(mst))
+//			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//			if(updateStep(hkb, alpha))return;
+////			alpha *= beta;
+////			beta  /= 2;
 //	}
 
 	protected boolean updateStep(double hkb,double alpha) throws ContradictionException {
@@ -202,10 +325,10 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		boolean found = true;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			if(deg>maxDegree){
+			if(deg>maxDegree[i]){
 				found = false;
 			}
-			nb2viol += (maxDegree-deg)*(maxDegree-deg);
+			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 		}
 		if(found){
 			return true;
@@ -219,8 +342,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		totalPenalities = 0;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			penalities[i] += (deg-maxDegree)*step;
-			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree){
+			penalities[i] += (deg-maxDegree[i])*step;
+			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
 				penalities[i] = 0;
 			}
 			if(penalities[i]>maxPen){
@@ -229,9 +352,9 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 			if(penalities[i]>Double.MAX_VALUE/(n-1) || penalities[i]<0){
 				throw new UnsupportedOperationException();
 			}
-			totalPenalities += penalities[i];
+			totalPenalities += penalities[i]*maxDegree[i];
 		}
-		totalPenalities *= maxDegree;
+//		totalPenalities *= maxDegree;
 		if(totalPenalities>Double.MAX_VALUE/(n-1) || totalPenalities<0){
 			throw new UnsupportedOperationException();
 		}

@@ -109,7 +109,7 @@ public class Robustness {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	private static int arbo=0,rg=1,undirectedMate=2,pos=3;
+	private static int arbo=0,rg=1;//,undirectedMate=2,pos=3;
 	private static int NB_PARAM = 4;
 	private static BitSet config = new BitSet(NB_PARAM);
 
@@ -189,41 +189,6 @@ public class Robustness {
 			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
 			gc.addPropagators(SCCP);
 		}
-		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
-			INeighbors nei;
-			for(int i=0;i<n-1;i++){
-				undi.getKernelGraph().activateNode(i);
-				nei = graph.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j==n-1){
-						undi.getEnvelopGraph().addEdge(i,0);
-					}else{
-						undi.getEnvelopGraph().addEdge(i,j);
-					}
-				}
-			}
-			gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-			gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-			gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
-			gc.addPropagators(new PropCyclePathChanneling(graph, undi, gc, solver));
-		}
-		if(config.get(pos)){
-			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
-			try{
-				pos[0].instantiateTo(0, Cause.Null);
-				pos[n-1].instantiateTo(n - 1, Cause.Null);
-			}catch(Exception e){
-				e.printStackTrace();System.exit(0);
-			}
-			gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
-			if(config.get(rg)){
-				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
-			}else{
-				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
-			}
-			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
-		}
 		solver.post(gc);
 	}
 
@@ -282,13 +247,9 @@ public class Robustness {
 					solve();
 					configParameters((1<<arbo));
 					solve();
-					configParameters((1<<pos));
-					solve();
 					configParameters((1<<rg));
 					solve();
-					configParameters((1<<pos)+(1<<rg));
-					solve();
-					configParameters((1<<arbo)+(1<<pos)+(1<<rg));
+					configParameters((1<<arbo)+(1<<rg));
 					solve();
 				}
 			}
@@ -296,10 +257,10 @@ public class Robustness {
 	}
 
 	private static void benchRD() {
-		int[] sizes = new int[]{10,25,50,100};
+		int[] sizes = new int[]{5,10,25,50,100};
 		for (int s:sizes) {
 			for(int k=0;k<100;k++){
-				seed = System.currentTimeMillis();
+				seed = k;//System.currentTimeMillis();
 				instanceName = s+"";
 				GraphGenerator gen  = new GraphGenerator(s,seed, GraphGenerator.InitialProperty.HamiltonianCircuit);
 				input = HCP_Parser.transformMatrix(gen.neighborBasedGenerator(4));
@@ -310,6 +271,8 @@ public class Robustness {
 					configParameters((1<<arbo));
 					solve();
 					configParameters((1<<rg));
+					solve();
+					configParameters((1<<arbo)+(1<<rg));
 					solve();
 				}
 			}

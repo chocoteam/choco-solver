@@ -28,6 +28,8 @@
 package solver.constraints.propagators.gary.basic;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.procedure.PairProcedure;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
@@ -35,37 +37,38 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.IntVar;
-import solver.variables.Variable;
+import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
+import solver.variables.graph.INeighbors;
+import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
+import java.util.BitSet;
 
-/**Propagator that ensures that the final graph consists in K Connected Components (CC)
- *
- * simple checker (runs in linear time)
- * 
- * @author Jean-Guillaume Fages
- */
-public class PropKCC extends Propagator{
+public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
 	private GraphVar g;
-	private IntVar k;
-	private ConnectivityFinder env_CC_finder, ker_CC_finder;
+	private IGraphDeltaMonitor gdm;
+	private BitSet toCompute;
+	private TIntArrayList list;
+	private PairProcedure arcEnf;
+	private int n;
+
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
-		this.g = graph;
-		this.k = k;
-		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
-		ker_CC_finder = new ConnectivityFinder(g.getKernelGraph());
+	public PropNoTriangle(UndirectedGraphVar graph, Constraint constraint, Solver solver) {
+		super(new UndirectedGraphVar[]{graph}, solver, constraint, PropagatorPriority.LINEAR);
+		g = graph;
+		n = g.getEnvelopGraph().getNbNodes();
+		gdm = g.monitorDelta(this);
+		arcEnf = new EnfArc();
+		toCompute = new BitSet(n);
+		list = new TIntArrayList();
 	}
 
 	//***********************************************************************************
@@ -74,23 +77,37 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		k.updateLowerBound(ee,this);
-		if(g.instantiated()){
-			k.updateUpperBound(ee,this);
-		}else if(g.getEnvelopOrder()==g.getKernelOrder()){
-			ker_CC_finder.findAllCC();
-			int ke = ker_CC_finder.getNBCC();
-			k.updateUpperBound(ke,this);
+		for(int i=0;i<n;i++){
+			check(i);
+		}
+		gdm.unfreeze();
+	}
+
+	private void check(int i) throws ContradictionException {
+		list.clear();
+		INeighbors nei = g.getKernelGraph().getSuccessorsOf(i);
+		for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+			list.add(j);
+		}
+		int nl = list.size();
+		for(int j1=0;j1<nl;j1++){
+			for(int j2=j1+1;j2<nl;j2++){
+				if(g.getKernelGraph().getSuccessorsOf(list.get(j1)).contain(list.get(j2))){
+					g.removeArc(list.get(j2),i,this);
+				}
+			}
 		}
 	}
 
-	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
-		// todo incremental behavior
+		toCompute.clear();
+		gdm.freeze();
+		gdm.forEachArc(arcEnf,EventType.ENFORCEARC);
+		gdm.unfreeze();
+		for(int i=toCompute.nextSetBit(0);i>=0;i=toCompute.nextSetBit(i+1)){
+			check(i);
+		}
 	}
 
 	//***********************************************************************************
@@ -99,27 +116,27 @@ public class PropKCC extends Propagator{
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.ENFORCEARC.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		if(k.getUB()<ee){
+		if(!g.instantiated()){
+			return ESat.UNDEFINED;
+		}
+		try{
+			propagate(0);
+			return ESat.TRUE;
+		}catch (Exception e){
 			return ESat.FALSE;
 		}
-		if(g.instantiated()){
-			if(k.contains(ee)){
-				if(k.instantiated()){
-					return ESat.TRUE;
-				}else{
-					return ESat.UNDEFINED;
-				}
-			}
-			return ESat.FALSE;
-		}
-		return ESat.UNDEFINED;
 	}
-	
+
+	private class EnfArc implements PairProcedure {
+		@Override
+		public void execute(int i, int j) throws ContradictionException {
+			toCompute.set(i);
+			toCompute.set(j);
+		}
+	}
 }

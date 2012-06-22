@@ -25,101 +25,136 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.basic;
+/**
+ * Created by IntelliJ IDEA.
+ * User: Jean-Guillaume Fages
+ * Date: 18/06/12
+ * Time: 18:32
+ */
+
+package solver.constraints.propagators.nary.sum;
 
 import choco.kernel.ESat;
+import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.IStateInt;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.Variable;
-import solver.variables.graph.GraphVar;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 
-/**Propagator that ensures that the final graph consists in K Connected Components (CC)
- *
- * simple checker (runs in linear time)
- * 
- * @author Jean-Guillaume Fages
+/**
+ * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
+ * Works incrementally in O(1) per instantiation event
  */
-public class PropKCC extends Propagator{
+public class PropBoolSum extends Propagator<IntVar> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private GraphVar g;
-	private IntVar k;
-	private ConnectivityFinder env_CC_finder, ker_CC_finder;
+	IntVar sum;
+	int n;
+	IStateInt min,max;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropKCC(GraphVar graph, Solver solver, Constraint constraint, IntVar k) {
-		super(new Variable[]{graph,k}, solver, constraint, PropagatorPriority.LINEAR);
-		this.g = graph;
-		this.k = k;
-		env_CC_finder = new ConnectivityFinder(g.getEnvelopGraph());
-		ker_CC_finder = new ConnectivityFinder(g.getKernelGraph());
+	/**
+	 * Constraint that state that the sum of boolean variables vars is equal to the integer variable sum
+	 * Works in O(1) per instantiation event
+	 *
+	 * @param vars
+	 * @param sum
+	 * @param solver
+	 * @param intVarPropagatorConstraint
+	 */
+	protected PropBoolSum(BoolVar[] vars, IntVar sum, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
+		super(ArrayUtils.append(vars,new IntVar[]{sum}), solver, intVarPropagatorConstraint, PropagatorPriority.UNARY, false);
+		this.sum = sum;
+		n = vars.length;
+		min = environment.makeInt();
+		max = environment.makeInt();
 	}
 
 	//***********************************************************************************
-	// PROPAGATIONS
+	// METHODS
 	//***********************************************************************************
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		k.updateLowerBound(ee,this);
-		if(g.instantiated()){
-			k.updateUpperBound(ee,this);
-		}else if(g.getEnvelopOrder()==g.getKernelOrder()){
-			ker_CC_finder.findAllCC();
-			int ke = ker_CC_finder.getNBCC();
-			k.updateUpperBound(ke,this);
+		int lb = 0;
+		int ub = 0;
+		for(int i=0;i<n;i++){
+			lb += vars[i].getLB();
+			ub += vars[i].getUB();
+		}
+		min.set(lb);
+		max.set(ub);
+		filter();
+	}
+
+	private void filter() throws ContradictionException {
+		int lb = min.get();
+		int ub = max.get();
+		sum.updateLowerBound(lb,this);
+		sum.updateUpperBound(ub,this);
+		if(lb!=ub && sum.instantiated()){
+			if(sum.getValue()==lb){
+				for(int i=0;i<n;i++){
+					if(!vars[i].instantiated()){
+						vars[i].instantiateTo(0,this);
+					}
+				}
+				setPassive();
+			}
+			if(sum.getValue()==ub){
+				for(int i=0;i<n;i++){
+					if(!vars[i].instantiated()){
+						vars[i].instantiateTo(1,this);
+					}
+				}
+				setPassive();
+			}
 		}
 	}
 
-	
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		propagate(0);
-		// todo incremental behavior
+		if(idxVarInProp<n){
+			if(vars[idxVarInProp].getValue()==1){
+				min.set(min.get()+1);
+			}else{
+				max.set(max.get()-1);
+			}
+		}
+		filter();
 	}
-
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
 
 	@Override
 	public int getPropagationConditions(int vIdx) {
-		return EventType.REMOVENODE.mask +  EventType.REMOVEARC.mask +  EventType.ENFORCENODE.mask +  EventType.ENFORCEARC.mask + EventType.INT_ALL_MASK();
+		return EventType.INSTANTIATE.mask;
 	}
 
 	@Override
 	public ESat isEntailed() {
-		env_CC_finder.findAllCC();
-		int ee = env_CC_finder.getNBCC();
-		if(k.getUB()<ee){
+		int lb = 0;
+		int ub = 0;
+		for(int i=0;i<n;i++){
+			lb += vars[i].getLB();
+			ub += vars[i].getUB();
+		}
+		if(lb>sum.getUB() || ub<sum.getLB()){
 			return ESat.FALSE;
 		}
-		if(g.instantiated()){
-			if(k.contains(ee)){
-				if(k.instantiated()){
-					return ESat.TRUE;
-				}else{
-					return ESat.UNDEFINED;
-				}
-			}
-			return ESat.FALSE;
+		if(isCompletelyInstantiated()){
+			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
 	}
-	
 }
