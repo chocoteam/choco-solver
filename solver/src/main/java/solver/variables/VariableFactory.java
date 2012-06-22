@@ -90,7 +90,7 @@ public enum VariableFactory {
             return Views.fixed(name, min, solver);
         } else {
             IntVar var = new IntervalIntVarImpl(name, min, max, solver);
-            var.setHeuristicVal(HeuristicValFactory.presetI(var));
+            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }
     }

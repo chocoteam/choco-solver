@@ -30,9 +30,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
@@ -234,8 +233,8 @@ public class AmongTest {
         BoolVar[] bs = VariableFactory.boolArray("b", vs.length, solver);
         IntVar vval = Views.fixed(val, solver);
         for (int i = 0; i < vs.length; i++) {
-            solver.post(new ReifiedConstraint(bs[i], new EqualX_YC(vs[i], vval, 0, solver),
-                    new NotEqualX_YC(vs[i], vval, 0, solver), solver));
+            solver.post(new ReifiedConstraint(bs[i], new Arithmetic(vs[i], "=", vval, solver),
+                    new Arithmetic(vs[i], "!=", vval, solver), solver));
         }
         return Sum.eq(bs, occ, solver);
     }

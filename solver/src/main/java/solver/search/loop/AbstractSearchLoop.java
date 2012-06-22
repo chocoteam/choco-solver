@@ -101,6 +101,9 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
     int stateAfterSolution = UP_BRANCH;
 
+    /* Define the state to move to once a fail occured : UP_BRANCH or RESTART */
+    int stateAfterFail = UP_BRANCH;
+
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
 
@@ -189,10 +192,6 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
             throw new SolverException("!! The search has not been initialized.\n" +
                     "!! Be sure you are respecting one of these call configurations :\n " +
                     "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
-        }
-        if (strategy == null) {
-            throw new SolverException("!! The search strategy is not defined.\n" +
-                    "!! Please set a predefined one using StrategyFactory or build your own.");
         }
         return loop();
     }
@@ -341,6 +340,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Force the search to stop
      */
     public final void interrupt() {
+        nextState = RESUME;
         alive = false;
     }
 
@@ -397,6 +397,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         stateAfterSolution = does ? RESTART : UP_BRANCH;
     }
 
+    public void restartAfterEachFail(boolean does) {
+        stateAfterFail = does ? RESTART : UP_BRANCH;
+    }
+
     public void setSolutionPoolCapacity(int solutionPoolCapacity) {
         this.solutionPoolCapacity = solutionPoolCapacity;
     }
@@ -430,5 +434,15 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
 
     public int getSolutionPoolCapacity() {
         return solutionPoolCapacity;
+    }
+
+    public int getCurrentDepth() {
+        int d = 0;
+        Decision tmp = decision;
+        while (tmp != RootDecision.ME) {
+            tmp = tmp.getPrevious();
+            d++;
+        }
+        return d;
     }
 }

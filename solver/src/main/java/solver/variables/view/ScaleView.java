@@ -118,7 +118,7 @@ public final class ScaleView extends IntView {
                                 cause = Cause.Null;
                             }
                         }
-                        this.notifyMonitors(e, cause);
+                        this.notifyPropagators(e, cause);
 //                        solver.getExplainer().removeValue(this, value, cause);
                         return true;
                     }
@@ -150,7 +150,7 @@ public final class ScaleView extends IntView {
 //        return value % cste == 0 && var.instantiateTo(value / cste, cause, informCause);
         boolean done = var.instantiateTo(value / cste, this);
         if (done) {
-            notifyMonitors(EventType.INSTANTIATE, cause);
+            notifyPropagators(EventType.INSTANTIATE, cause);
             return true;
         }
         return false;
@@ -174,7 +174,7 @@ public final class ScaleView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }
@@ -203,7 +203,7 @@ public final class ScaleView extends IntView {
                     }
                 }
                 if (done) {
-                    this.notifyMonitors(e, cause);
+                    this.notifyPropagators(e, cause);
 //                    solver.getExplainer().updateLowerBound(this, old, value, cause);
                     return true;
                 }

@@ -30,7 +30,7 @@ package solver.explanations.samples;
 
 import samples.AbstractProblem;
 import solver.Solver;
-import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -58,7 +58,7 @@ public class ExplainedOCProblem extends AbstractProblem {
         vars = VariableFactory.enumeratedArray("x", 2*n, 1, vals, solver);
         for (int i = 0; i < n - 1; i++) {
             for (int j = i + 1; j < n ; j++)
-                solver.post(new NotEqualX_YC(vars[2*i], vars[2*j], 0, solver));
+                solver.post(new Arithmetic(vars[2 * i], "!=", vars[2 * j], solver));
         }
     }
 

@@ -31,7 +31,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.unary.Relation;
+import solver.constraints.Arithmetic;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
@@ -68,7 +68,7 @@ public class SquareTests {
         Solver solver = new Solver();
         IntVar A = VariableFactory.enumerated("A", dom[0], solver);
         IntVar B = Views.sqr(A);
-        solver.post(new Relation(B, Relation.R.GT, 0, solver));
+        solver.post(new Arithmetic(B, ">", 0, solver));
 //        SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
@@ -85,7 +85,7 @@ public class SquareTests {
         Arrays.sort(dom2);
         IntVar B = VariableFactory.enumerated("X", dom2, solver);
         solver.post(new Square(B, A, solver));
-        solver.post(new Relation(B, Relation.R.GT, 0, solver));
+        solver.post(new Arithmetic(B, ">", 0, solver));
 //        SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
@@ -110,7 +110,7 @@ public class SquareTests {
         int n = dom[0].length-1;
         IntVar A = VariableFactory.bounded("A", dom[0][0], dom[0][n], solver);
         IntVar B = Views.sqr(A);
-        solver.post(new Relation(B, Relation.R.GT, 0, solver));
+        solver.post(new Arithmetic(B, ">", 0, solver));
         SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;
@@ -125,7 +125,7 @@ public class SquareTests {
         dom2[1] = Math.max(dom[0][0] * dom[0][0], dom[0][n] * dom[0][1]);
         IntVar B = VariableFactory.bounded("B", dom2[0], dom2[1], solver);
         solver.post(new Square(B, A, solver));
-        solver.post(new Relation(B, Relation.R.GT, 0, solver));
+        solver.post(new Arithmetic(B, ">", 0, solver));
         SearchMonitorFactory.log(solver, true, true);
         solver.set(StrategyFactory.random(new IntVar[]{A, B}, solver.getEnvironment(), seed));
         return solver;

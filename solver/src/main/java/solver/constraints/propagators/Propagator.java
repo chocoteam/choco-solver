@@ -31,6 +31,8 @@ import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.Nullable;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
@@ -109,8 +111,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public long fineERcalls, coarseERcalls;  // statistics of calls to filter
 
-    protected final IStateInt arity; // arity of this -- number of uninstantiated variables
-
     protected int fails;
 
     /**
@@ -124,8 +124,26 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final Solver solver;
 
+    private static TIntSet set = new TIntHashSet();
+
+    // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
+    private static <V extends Variable> void checkVariable(V[] vars) {
+        set.clear();
+        for (V v : vars) {
+            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
+                if (set.contains(v.getId())) {
+                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                            "This is forbidden; you must consider using a View or a EQ constraint.");
+                }
+                set.add(v.getId());
+            }
+        }
+    }
+
+
     @SuppressWarnings({"unchecked"})
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
+        checkVariable(vars);
         this.vars = vars.clone();
         this.solver = solver;
         this.environment = solver.getEnvironment();
@@ -141,7 +159,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
                 nbNi++;
             }
         }
-        arity = environment.makeInt(nbNi);
         fails = 0;
         ID = solver.nextId();
     }
@@ -335,12 +352,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @return number of uninstanciated variables
      */
     public int arity() {
-        return arity.get();
-    }
-
-    public void decArity() {
-//        assert (arity.get() >= 0) : "arity < 0 on "+this.constraint;
-        arity.add(-1);
+        int arity = 0;
+        for (int i = 0; i < vars.length; i++) {
+            arity += vars[i].instantiated() ? 0 : 1;
+        }
+        return arity;
     }
 
     /**

@@ -28,6 +28,7 @@ package samples.nsp;
 
 import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Count;
 import solver.constraints.nary.GlobalCardinality;
@@ -41,8 +42,6 @@ import solver.constraints.nary.cnf.ConjunctiveNormalForm;
 import solver.constraints.nary.cnf.Literal;
 import solver.constraints.nary.cnf.Node;
 import solver.constraints.reified.ReifiedConstraint;
-import solver.constraints.unary.EqualXC;
-import solver.constraints.unary.NotEqualXC;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -462,18 +461,18 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         Node.or(Literal.pos(bvars[1]), Literal.pos(bvars[2]), Literal.pos(bvars[3]))
                 );
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], n, solver), new NotEqualXC(s[t], n, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], n, solver), new NotEqualXC(s[t + 1], n, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[2], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[3], new EqualXC(s[t + 2], r, solver), new NotEqualXC(s[t + 2], r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[0], new Arithmetic(s[t], "=", n, solver), new Arithmetic(s[t], "!=", n, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[1], new Arithmetic(s[t + 1], "=", n, solver), new Arithmetic(s[t + 1], "!=", n, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[2], new Arithmetic(s[t + 1], "=", r, solver), new Arithmetic(s[t + 1], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[3], new Arithmetic(s[t + 2], "=", r, solver), new Arithmetic(s[t + 2], "!=", r, solver), solver));
             }
             int t = data.nbDays() - 2;
             BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
 //            solver.post(ConstraintFactory.implies(ConstraintFactory.eq(s[t], n), ConstraintFactory.eq(s[t + 1], n)));
             ALogicTree tree = Node.implies(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
             solver.post(new ConjunctiveNormalForm(tree, solver));
-            solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], n, solver), new NotEqualXC(s[t], n, solver), solver));
-            solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], n, solver), new NotEqualXC(s[t + 1], n, solver), solver));
+            solver.post(new ReifiedConstraint(bvars[0], new Arithmetic(s[t], "=", n, solver), new Arithmetic(s[t], "!=", n, solver), solver));
+            solver.post(new ReifiedConstraint(bvars[1], new Arithmetic(s[t + 1], "=", n, solver), new Arithmetic(s[t + 1], "!=", n, solver), solver));
         }
     }
 
@@ -506,12 +505,12 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                         Node.and(Literal.pos(bvars[4]), Literal.pos(bvars[5]))
                 );
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], r, solver), new NotEqualXC(s[t], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[2], new EqualXC(s[t + 7], r, solver), new NotEqualXC(s[t + 7], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[3], new EqualXC(s[t + 8], r, solver), new NotEqualXC(s[t + 8], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[4], new EqualXC(s[t + 14], r, solver), new NotEqualXC(s[t + 14], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[5], new EqualXC(s[t + 15], r, solver), new NotEqualXC(s[t + 15], r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[0], new Arithmetic(s[t], "=", r, solver), new Arithmetic(s[t], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[1], new Arithmetic(s[t + 1], "=", r, solver), new Arithmetic(s[t + 1], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[2], new Arithmetic(s[t + 7], "=", r, solver), new Arithmetic(s[t + 7], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[3], new Arithmetic(s[t + 8], "=", r, solver), new Arithmetic(s[t + 8], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[4], new Arithmetic(s[t + 14], "=", r, solver), new Arithmetic(s[t + 14], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[5], new Arithmetic(s[t + 15], "=", r, solver), new Arithmetic(s[t + 15], "!=", r, solver), solver));
 
                 /*solver.post(ConstraintFactory.implies(
          ConstraintFactory.and(
@@ -571,8 +570,8 @@ public class NSCPModelConstrained extends NurseSchedulingProblem {
                 BoolVar[] bvars = VariableFactory.boolArray("b", 2, solver);
                 ALogicTree tree = Node.ifOnlyIf(Literal.pos(bvars[0]), Literal.pos(bvars[1]));
                 solver.post(new ConjunctiveNormalForm(tree, solver));
-                solver.post(new ReifiedConstraint(bvars[0], new EqualXC(s[t], r, solver), new NotEqualXC(s[t], r, solver), solver));
-                solver.post(new ReifiedConstraint(bvars[1], new EqualXC(s[t + 1], r, solver), new NotEqualXC(s[t + 1], r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[0], new Arithmetic(s[t], "=", r, solver), new Arithmetic(s[t], "!=", r, solver), solver));
+                solver.post(new ReifiedConstraint(bvars[1], new Arithmetic(s[t + 1], "=", r, solver), new Arithmetic(s[t + 1], "!=", r, solver), solver));
                 //solver.post(ConstraintFactory.ifOnlyIf(ConstraintFactory.eq(s[t], r), ConstraintFactory.eq(s[t + 1], r)));
             }
         }

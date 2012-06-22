@@ -30,6 +30,7 @@ import choco.kernel.common.Indexable;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
+import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.recorders.IActivable;
@@ -55,18 +56,17 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     protected final AbstractSearchLoop loop;
     protected final IPropagationEngine engine;
 
-    protected static final int VINDEX = 0;
-    protected static final int PINDEX = 0;
-
     protected IScheduler scheduler = IScheduler.Default.NONE;
     protected int schedulerIdx = -1; // index in the scheduler if required, -1 by default;
     protected final IMeasures measures; // for timestamp
     protected boolean enqueued; // to check wether this is enqueud or not.
 
-    protected V[] variables; // BEWARE -- must be initialized at the end of the constructor
-    protected Propagator<V>[] propagators; // BEWARE -- must be initialized at the end of the constructor
+    protected final V[] variables;
+    protected final Propagator<V>[] propagators;
 
-    protected AbstractFineEventRecorder(Solver solver, IPropagationEngine engine) {
+    protected AbstractFineEventRecorder(V[] variables, Propagator<V>[] propagators, Solver solver, IPropagationEngine engine) {
+        this.variables = variables;
+        this.propagators = propagators;
         measures = solver.getMeasures();
         enqueued = false;
         schedulerIdx = -1;
@@ -111,7 +111,7 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     }
 
 
-    public abstract void afterUpdate(V var, EventType evt, ICause cause);
+    public abstract void afterUpdate(int vIdx, EventType evt, ICause cause);
 
     /**
      * Set the event recorder in the same state as the one after its execution.
@@ -129,5 +129,19 @@ public abstract class AbstractFineEventRecorder<V extends Variable> implements I
     @Override
     public void desactivate(Propagator<V> element) {
         engine.desactivateFineEventRecorder(this);
+    }
+
+    protected final void schedule() {
+        if (!enqueued) {
+            scheduler.schedule(this);
+        } else if (scheduler.needUpdate()) {
+            scheduler.update(this);
+        }
+    }
+
+    protected final void execute(Propagator propagator, int idx, int mask) throws ContradictionException {
+        assert (propagator.isActive()) : this + " is not active (" + propagator.isStateLess() + " & " + propagator.isPassive() + ")";
+        propagator.fineERcalls++;
+        propagator.propagate(this, idx, mask);
     }
 }

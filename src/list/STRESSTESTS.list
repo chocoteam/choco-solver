@@ -1,0 +1,15 @@
+samples.StressTest1 -n 100 -d 100000 -policy TWO_QUEUES_WITH_ARCS
+samples.StressTest1 -n 100 -d 100000 -policy TWO_QUEUES_WITH_VARS
+samples.StressTest1 -n 100 -d 100000 -policy TWO_QUEUES_WITH_PROPS
+
+samples.StressTest2 -k 100 -n 100 -m 100 -policy TWO_QUEUES_WITH_ARCS
+samples.StressTest2 -k 100 -n 100 -m 100 -policy TWO_QUEUES_WITH_VARS
+samples.StressTest2 -k 100 -n 100 -m 100 -policy TWO_QUEUES_WITH_PROPS
+
+samples.StressTest3 -s 200000 -policy TWO_QUEUES_WITH_ARCS
+samples.StressTest3 -s 200000 -policy TWO_QUEUES_WITH_VARS
+samples.StressTest3 -s 200000 -policy TWO_QUEUES_WITH_PROPS
+
+samples.StressTest4 -s 1000000 -policy TWO_QUEUES_WITH_ARCS
+samples.StressTest4 -s 1000000 -policy TWO_QUEUES_WITH_VARS
+samples.StressTest4 -s 1000000 -policy TWO_QUEUES_WITH_PROPS

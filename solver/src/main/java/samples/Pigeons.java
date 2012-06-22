@@ -29,7 +29,7 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
-import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -44,7 +44,7 @@ import solver.variables.VariableFactory;
 public class Pigeons extends AbstractProblem {
 
     @Option(name = "-n", usage = "Number of nests.", required = false)
-    int n = 5;
+    int n = 10;
     IntVar[] vars;
 
     @Override
@@ -54,14 +54,13 @@ public class Pigeons extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        vars = VariableFactory.enumeratedArray("p", n + 1, 1, n, solver);
+        vars = VariableFactory.enumeratedArray("p", n, 1, n - 1, solver);
 
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n + 1; j++) {
-                solver.post(new NotEqualX_YC(vars[i], vars[j], 0, solver));
+        for (int i = 0; i < n-1; i++) {
+            for (int j = i + 1; j < n ; j++) {
+                solver.post(new Arithmetic(vars[i], "!=", vars[j], solver));
             }
         }
-
     }
 
     @Override

@@ -31,10 +31,9 @@ import choco.kernel.memory.IEnvironment;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
-import solver.constraints.binary.EqualX_YC;
-import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.variables.view.Views;
@@ -127,7 +126,7 @@ public class OffsetViewTest {
         Constraint[] cstrs = {
                 ConstraintFactory.geq(Y, low + coeff - 1, s),
                 ConstraintFactory.leq(Y, upp - coeff - 1, s),
-                new EqualX_YC(X, Y, coeff, s)
+                new Arithmetic(X, "=", Y, "+", coeff, s)
         };
 
         AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(vars, env);

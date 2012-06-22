@@ -43,27 +43,19 @@ import solver.variables.EventType;
  */
 public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
-    protected final Propagator propagator;
-
     int evtmask; // reference to events occuring -- inclusive OR over event mask
 
     public CoarseEventRecorder(Propagator propagator, Solver solver,IPropagationEngine engine) {
-        super(solver, engine);
-        this.propagator = propagator;
-    }
-
-    @Override
-    public Propagator[] getPropagators() {
-        return new Propagator[]{propagator};
+        super(new Propagator[]{propagator}, solver, engine);
     }
 
     public void update(EventType e) {
-        if ((e.mask & propagator.getPropagationConditions()) != 0) {
+        if ((e.mask & propagators[PINDEX].getPropagationConditions()) != 0) {
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
             // 1. store information concerning event
             if (!enqueued) {
                 // 2. schedule this
-                assert evtmask == 0 : "evt mask has not been cleared correctly :"+propagator.toString();
+                assert evtmask == 0 : "evt mask has not been cleared correctly :"+propagators[PINDEX].toString();
                 scheduler.schedule(this);
             } else if (scheduler.needUpdate()) {
                 // 3. inform scheduler if required
@@ -78,23 +70,23 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (propagator.isStateLess()) {
+        if (propagators[PINDEX].isStateLess()) {
             //promote event to top level event FULL_PROPAGATION
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
-            propagator.setActive();
+            propagators[PINDEX].setActive();
         }
-        if (propagator.getNbPendingER() > 0) {
+        if (propagators[PINDEX].getNbPendingER() > 0) {
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
         }
         if (evtmask > 0) {
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
-            propagator.coarseERcalls++;
+            propagators[PINDEX].coarseERcalls++;
             int _evt = evtmask;
             evtmask = 0;
-            propagator.propagate(_evt);
+            propagators[PINDEX].propagate(_evt);
         }
         // unfreeze (and eventually unschedule) every fine event attached to this propagator
-        engine.onPropagatorExecution(propagator);
+        engine.onPropagatorExecution(propagators[PINDEX]);
         return true;
     }
 
@@ -106,6 +98,6 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
 
     @Override
     public String toString() {
-        return "<< ::" + propagator.toString() + ">>";
+        return "<< ::" + propagators[PINDEX].toString() + ">>";
     }
 }

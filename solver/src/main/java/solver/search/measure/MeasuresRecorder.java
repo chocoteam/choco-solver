@@ -68,6 +68,8 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
 
     public long usedMemory;
 
+    public long maxDepth, depth;
+
     protected Solver solver;
 
     protected long startingTime, startingMemory;
@@ -93,6 +95,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         initialPropagationTimeCount = 0;
         propagationCount = 0;
         eventCount = 0;
+        maxDepth = 0;
         cstrs = null;
     }
 
@@ -273,6 +276,9 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     public void beforeOpenNode() {
 //        updateTimeCount();
         nodeCount++;
+        if (depth > maxDepth) {
+            maxDepth = depth;
+        }
     }
 
     @Override
@@ -283,8 +289,19 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public void beforeDownLeftBranch() {
+        depth++;
+    }
+
+    @Override
+    public void beforeDownRightBranch() {
+        depth++;
+    }
+
+    @Override
     public void beforeUpBranch() {
         backtrackCount++;
+        depth--;
     }
 
     @Override
@@ -295,6 +312,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     @Override
     public void afterRestart() {
         restartCount++;
+        depth = 0;
     }
 
     @Override
@@ -356,7 +374,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
         }
         st.append(String.format("\tBuilding time : %,.3fms\n\tInitialisation : %,.3fms\n\tInitial propagation : %,.3fms" +
                 "\n\tResolution : %,.3fs (%,.6fms)\n\tNodes: %,d\n\tBacktracks: %,d\n\tFails: %,d\n\t" +
-                "Restarts: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
+                "Restarts: %,d\n\tMax depth: %,d\n\tPropagations: %,d + %,d\n\tMemory: %,dmb\n\tVariables: %,d\n\tConstraints: %,d\n\tRecords: %,d",
                 readingTimeCount / IN_MS,
                 initialisationTimeCount / IN_MS,
                 initialPropagationTimeCount / IN_MS,
@@ -366,6 +384,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
                 backtrackCount,
                 failCount,
                 restartCount,
+                maxDepth,
                 eventCount,
                 propagationCount,
                 usedMemory,

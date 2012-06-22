@@ -31,7 +31,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import solver.Solver;
-import solver.constraints.binary.NotEqualX_YC;
+import solver.constraints.Arithmetic;
 import solver.constraints.nary.Sum;
 import solver.search.strategy.StrategyFactory;
 
@@ -64,7 +64,7 @@ public class ConstraintTest {
         TerminalParser.parse(fzn.CONSTRAINT, "constraint int_ne(a, b);");
 
         Assert.assertEquals(solver.getCstrs().length, 1);
-        Assert.assertEquals(solver.getCstrs()[0].getClass(), NotEqualX_YC.class);
+        Assert.assertEquals(solver.getCstrs()[0].getClass(), Arithmetic.class);
         preset();
         solver.findAllSolutions();
         Assert.assertEquals(90, solver.getMeasures().getSolutionCount());
