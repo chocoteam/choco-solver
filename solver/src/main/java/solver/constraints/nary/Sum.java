@@ -105,7 +105,7 @@ public class Sum extends IntConstraint<IntVar> {
 			}
 		}
 
-		if(vars.length>100 && type!=Type.NQ){
+		if(vars.length>150 && type!=Type.NQ){
 			setPropagators(new PropBigSum(x,b,type,solver,this));
 		}else{
 			switch (type) {
