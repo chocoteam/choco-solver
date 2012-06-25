@@ -91,8 +91,6 @@ public class MagicSeries extends AbstractProblem {
         // default group
     }
 
-    static long fer = 0;
-
     @Override
     public void configureEngine() {
         final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs(),
@@ -112,20 +110,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
-            @Override
-            public void afterInitialPropagation() {
-                solver.getMeasures().updatePropagationCount();
-                fer = solver.getMeasures().getEventsCount();
-            }
-        });
         solver.findSolution();
-
-        System.out.printf("%d ", fer);
-        solver.getMeasures().updatePropagationCount();
-        fer = solver.getMeasures().getEventsCount() - fer;
-        System.out.printf("%d\n", fer);
-
     }
 
     @Override
