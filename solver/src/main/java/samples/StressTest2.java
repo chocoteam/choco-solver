@@ -52,13 +52,13 @@ import solver.variables.VariableFactory;
 public class StressTest2 extends AbstractProblem {
 
     @Option(name = "-k", usage = "number of times round the loop.", required = false)
-    int k = 5;
+    int k = 100;
 
     @Option(name = "-n", usage = "number of iterations of change per loop .", required = false)
-    int n = 5;
+    int n = 100;
 
     @Option(name = "-m", usage = "m^2 propagators per change of loop.", required = false)
-    int m = 5;
+    int m = 100;
 
     IntVar[] x, y;
 
