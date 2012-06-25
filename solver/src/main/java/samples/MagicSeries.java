@@ -26,6 +26,7 @@
  */
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
@@ -53,7 +54,7 @@ import solver.variables.view.Views;
 public class MagicSeries extends AbstractProblem {
 
     @Option(name = "-n", usage = "Magic series size.", required = false)
-    int n = 500;
+    int n = 1000;
     IntVar[] vars;
 
     Constraint[] counts;
@@ -90,27 +91,41 @@ public class MagicSeries extends AbstractProblem {
         // default group
     }
 
+    static long fer = 0;
+
     @Override
     public void configureEngine() {
-        final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs());
+        final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs(),
+                false, true, false);
         PropagationStrategies.TWO_QUEUES_WITH_PROPS.make(solver, engine);
         solver.set(engine);
-        final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment());
+        final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment(), true, false, true);
         PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, engine2);
         solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
             @Override
             public void afterInitialPropagation() {
-
-                solver.set(engine2);
-                engine2.skipInitialPropagation();
                 engine2.init(solver);
+                solver.set(engine2);
             }
         });
     }
 
     @Override
     public void solve() {
+        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+            @Override
+            public void afterInitialPropagation() {
+                solver.getMeasures().updatePropagationCount();
+                fer = solver.getMeasures().getEventsCount();
+            }
+        });
         solver.findSolution();
+
+        System.out.printf("%d ", fer);
+        solver.getMeasures().updatePropagationCount();
+        fer = solver.getMeasures().getEventsCount() - fer;
+        System.out.printf("%d\n", fer);
+
     }
 
     @Override
@@ -133,6 +148,6 @@ public class MagicSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new MagicSeries().execute(args);
+        new MagicSeries().execute(ArrayUtils.append(args, new String[]{"-log", "QUIET"}));
     }
 }

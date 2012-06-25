@@ -61,27 +61,7 @@ public interface IPropagationEngine extends Serializable {
      */
     void init(Solver solver);
 
-    /**
-     * A call to this will skip the verification of the three following properties:
-     * <br/>
-     * <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
-     * <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
-     * <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
-     * <br/>
-     * As a consequence, the engine can be incomplete.
-     */
-    void skipProperties();
-
-    /**
-     * Skip initial propagation.
-     * DO not post coarse event recorder
-     */
-    void skipInitialPropagation();
-
-    /**
-     * Schedule constraints for coarse propagation
-     */
-    void forceInitialPropagation();
+    boolean forceActivation();
 
     /**
      * Attach a strategy to <code>this</code>.

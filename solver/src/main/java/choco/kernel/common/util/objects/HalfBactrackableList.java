@@ -73,11 +73,11 @@ public class HalfBactrackableList<K extends Variable, E extends AbstractFineEven
     }
 
     @Override
-    public void add(E element, boolean dynamic) {
+    public void add(E element, boolean dynamic, boolean activeSilently) {
         if (dynamic) {
-            dAdd(element);
+            dAdd(element, activeSilently);
         } else {
-            sAdd(element);
+            sAdd(element, activeSilently);
         }
     }
 
@@ -140,7 +140,7 @@ public class HalfBactrackableList<K extends Variable, E extends AbstractFineEven
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void sAdd(E element) {
+    private void sAdd(E element, boolean activeSilently) {
         if (sElements == null) {
             sElements = (E[]) new AbstractFineEventRecorder[SIZE];
         }
@@ -151,11 +151,11 @@ public class HalfBactrackableList<K extends Variable, E extends AbstractFineEven
         }
         element.setIdx(parent, sIdx);
         sElements[sIdx++] = element;
-        this.sFirstActive.add(1);
+        if(!activeSilently)this.sFirstActive.add(1);
         this.sFirstPassive.add(1);
     }
 
-    private void dAdd(E element) {
+    private void dAdd(E element, boolean activeSilently) {
         if (dElements == null) {
             dElements = (E[]) new AbstractFineEventRecorder[SIZE];
             world = dIdx.getEnvironment().getWorldIndex();
@@ -169,7 +169,7 @@ public class HalfBactrackableList<K extends Variable, E extends AbstractFineEven
         element.setIdx(parent, idx + OFFSET);
         dElements[idx++] = element;
         dIdx.add(1);
-        this.dFirstActive.add(1);
+        if(!activeSilently)this.dFirstActive.add(1);
         this.dFirstPassive.add(1);
     }
 

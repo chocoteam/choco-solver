@@ -128,7 +128,7 @@ public abstract class AbstractProblem {
                     configureEngine();
                     break;
                 default:
-                    IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+                    IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment(), false, true, false);
                     policy.make(solver, pengine);
                     solver.set(pengine);
                     break;

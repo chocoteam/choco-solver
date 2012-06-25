@@ -340,7 +340,7 @@ public class Solver implements Serializable {
 
     public Boolean solve() {
         if (engine == null) {
-            IPropagationEngine engine = new PropagationEngine(environment);
+            IPropagationEngine engine = new PropagationEngine(environment, false, true, false);
             PropagationStrategies.DEFAULT.make(this, engine);
             this.set(engine);
         }

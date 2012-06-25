@@ -50,9 +50,10 @@ public interface IList<V, E extends Indexable> extends Serializable {
      * Add a new <code>element</code>
      *
      * @param element to add
-     * @param dynamic
+     * @param dynamic is it dynamice
+     * @param activeSilently is it activated
      */
-    void add(E element, boolean dynamic);
+    void add(E element, boolean dynamic, boolean activeSilently);
 
     /**
      * Activate a element

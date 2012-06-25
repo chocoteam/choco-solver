@@ -96,7 +96,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends Abstract
 
 
     @Override
-    public void add(E element, boolean dynamic) {
+    public void add(E element, boolean dynamic, boolean activeSilently) {
         if (firstActive.get() != firstPassive.get()) {
             throw new UnsupportedOperationException("Can not add an element: activation has already started");
         }
@@ -107,7 +107,7 @@ public final class BacktrackableArrayList<V extends Variable, E extends Abstract
         }
         elements[size] = element;
         element.setIdx(parent, size++);
-        this.firstActive.add(1);
+        if(!activeSilently)this.firstActive.add(1);
         this.firstPassive.add(1);
     }
 
