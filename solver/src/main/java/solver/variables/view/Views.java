@@ -77,6 +77,18 @@ public enum Views {
         return new OffsetView(ivar, cste, ivar.getSolver());
     }
 
+    public static IntVar eq(IntVar ivar) {
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof OffsetView) {
+                OffsetView ov = (OffsetView) views[i];
+                if (ivar == ov.getVariable() && ov.cste == 0) {
+                    return ov;
+                }
+            }
+        }
+        return new OffsetView(ivar, 0, ivar.getSolver());
+    }
 
     public static IntVar minus(IntVar ivar) {
         IView[] views = ivar.getViews();

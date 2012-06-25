@@ -39,6 +39,7 @@ import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 /**
  * CSPLib prob019:<br/>
@@ -70,7 +71,7 @@ public class MagicSeries extends AbstractProblem {
 
         counts = new Count[n];
         for (int i = 0; i < n; i++) {
-            counts[i] = new Count(i, vars, Count.Relop.EQ, vars[i], solver);
+            counts[i] = new Count(i, vars, Count.Relop.EQ, Views.eq(vars[i]), solver);
             solver.post(counts[i]);
         }
         solver.post(Sum.eq(vars, n, solver)); // cstr redundant 1
@@ -91,13 +92,8 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        /*IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-        Sort s1 = new Sort( new PVar(pengine, solver.getVars()));
-        Sort s2 = new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(pengine, solver.getCstrs()));
-        solver.set(pengine.set(new Sort(s1, s2)));*/
-
         final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs());
-        PropagationStrategies.PRIORITY_QUEUES_WITH_PROPS.make(solver, engine);
+        PropagationStrategies.TWO_QUEUES_WITH_PROPS.make(solver, engine);
         solver.set(engine);
         final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment());
         PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, engine2);
@@ -137,6 +133,6 @@ public class MagicSeries extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) new MagicSeries().execute("-log", "QUIET");
+        new MagicSeries().execute(args);
     }
 }
