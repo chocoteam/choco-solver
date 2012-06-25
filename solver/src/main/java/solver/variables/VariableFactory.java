@@ -50,7 +50,7 @@ public enum VariableFactory {
         if (min - Integer.MIN_VALUE == 0 || max - Integer.MAX_VALUE == 0) {
             throw new SolverException(name + ": consider reducing the bounds to avoid unexpected results");
         }
-        if (min - max > 0) {
+        if (max < min) {
             throw new SolverException(name + ": wrong domain definition, lower bound > upper bound");
         }
     }
@@ -90,7 +90,7 @@ public enum VariableFactory {
             return Views.fixed(name, min, solver);
         } else {
             IntVar var = new IntervalIntVarImpl(name, min, max, solver);
-            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
+            var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }
     }

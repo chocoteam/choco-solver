@@ -149,7 +149,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IObjectiveManager objectivemanager = NoObjectiveManager.get();
 
     private boolean alive;
-    public Decision decision = RootDecision.ME;
+    public Decision decision = RootDecision.ROOT;
 
     @SuppressWarnings({"unchecked"})
     public AbstractSearchLoop(Solver solver) {
@@ -324,7 +324,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
         env.worldPopUntil(searchWorldIndex); // restore state after initial propagation
         timeStamp++; // to force clear delta, on solution recording
         Decision tmp;
-        while (decision != RootDecision.ME) {
+        while (decision != RootDecision.ROOT) {
             tmp = decision;
             decision = tmp.getPrevious();
             tmp.free();
@@ -439,7 +439,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public int getCurrentDepth() {
         int d = 0;
         Decision tmp = decision;
-        while (tmp != RootDecision.ME) {
+        while (tmp != RootDecision.ROOT) {
             tmp = tmp.getPrevious();
             d++;
         }

@@ -32,6 +32,11 @@ import gnu.trove.list.array.TFloatArrayList;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.Solver;
+import solver.constraints.nary.Sum;
+import solver.search.strategy.enumerations.sorters.AbstractSorter;
+import solver.search.strategy.enumerations.sorters.Seq;
+import solver.search.strategy.enumerations.validators.ValidatorFactory;
+import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 
 import java.io.IOException;
@@ -43,106 +48,115 @@ import java.io.IOException;
  * @since 19 juil. 2010
  */
 public class KnapsackTest {
-	private final static TFloatArrayList times = new TFloatArrayList();
+    private final static TFloatArrayList times = new TFloatArrayList();
 
-	//public IntVar power; BEWARE removed static field for parallel solving
+    //public IntVar power; BEWARE removed static field for parallel solving
 
 
-	public Solver modelIt(String data, int n) throws IOException {
-		Knapsack pb = new Knapsack();
-		pb.readArgs("-d", data, "-n", ""+n);
-		pb.createSolver();
+    public Solver modelIt(String data, int n) throws IOException {
+        Knapsack pb = new Knapsack();
+        pb.readArgs("-d", data, "-n", "" + n);
+        pb.createSolver();
         pb.buildModel();
-		pb.configureSearch();
+//		pb.configureSearch();
+        AbstractSorter<IntVar> s1 = pb.c_energy.getComparator(Sum.VAR_DECRCOEFFS);
+        AbstractSorter<IntVar> s2 = pb.c_size.getComparator(Sum.VAR_DOMOVERCOEFFS);
+
+        AbstractSorter<IntVar> seq = new Seq<IntVar>(s1, s2);
+
+        pb.solver.set(StrategyVarValAssign.dyn(pb.objects,
+                seq,
+                ValidatorFactory.instanciated,
+                pb.solver.getEnvironment()));
 //        power = pb.power;
-		return pb.getSolver();
-	}
+        return pb.getSolver();
+    }
 
-	public void solveIt(Solver s, boolean optimize) {
-		if (optimize) {
-			// BEWARE trick to find power variable
-			IntVar power = null;
-			for(int i=s.getNbVars()-1;i>=0;i--){
-				if(s.getVar(i).getName().equals("power")){
-					if(power != null){
-						throw new UnsupportedOperationException("The solver has more than one power variable");
-					}
-					power = (IntVar) s.getVar(i);
-				}
-			}
-			if(power==null){
-				throw new UnsupportedOperationException("The solver has no power variable");
-			}
-			// end of trick
-			s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
-		} else {
-			s.findAllSolutions();
-		}
-		times.add(s.getMeasures().getTimeCount());
-	}
+    public void solveIt(Solver s, boolean optimize) {
+        if (optimize) {
+            // BEWARE trick to find power variable
+            IntVar power = null;
+            for (int i = s.getNbVars() - 1; i >= 0; i--) {
+                if (s.getVar(i).getName().equals("power")) {
+                    if (power != null) {
+                        throw new UnsupportedOperationException("The solver has more than one power variable");
+                    }
+                    power = (IntVar) s.getVar(i);
+                }
+            }
+            if (power == null) {
+                throw new UnsupportedOperationException("The solver has no power variable");
+            }
+            // end of trick
+            s.findOptimalSolution(ResolutionPolicy.MAXIMIZE, power);
+        } else {
+            s.findAllSolutions();
+        }
+        times.add(s.getMeasures().getTimeCount());
+    }
 
-	@Test(groups = "10m")
-	public void testMain() throws IOException {
-		KnapsackTest ks = new KnapsackTest();
-		ks.solveIt(ks.modelIt("k10", 10), true);
-		ks.solveIt(ks.modelIt("k20", 13), true);
-	}
+    @Test(groups = "10m")
+    public void testMain() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        ks.solveIt(ks.modelIt("k10", 10), true);
+        ks.solveIt(ks.modelIt("k20", 13), true);
+    }
 
-	@Test(groups = {"1m"})
-	public void testALL5() throws IOException {
-		times.clear();
-		KnapsackTest ks = new KnapsackTest();
-		for (int i = 0; i < 1; i++) {
-			Solver s = ks.modelIt("k10", 3);
-			ks.solveIt(s, true);
-			Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
-			Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
-			Assert.assertEquals(s.getMeasures().getNodeCount(), 7, "nb nod");
-		}
-	}
+    @Test(groups = {"1m"})
+    public void testALL5() throws IOException {
+        times.clear();
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 1; i++) {
+            Solver s = ks.modelIt("k10", 3);
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
+            Assert.assertEquals(s.getMeasures().getSolutionCount(), 3, "nb sol");
+            Assert.assertEquals(s.getMeasures().getNodeCount(), 7, "nb nod");
+        }
+    }
 
-	@Test(groups = {"1m"})
-	public void testALL10() throws IOException {
-		times.clear();
-		KnapsackTest ks = new KnapsackTest();
-		for (int i = 0; i < 1; i++) {
-			Solver s = ks.modelIt("k10", 10);
-			ks.solveIt(s, true);
-			Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
-			Assert.assertEquals(s.getMeasures().getSolutionCount(), 144, "nb sol");
-			Assert.assertEquals(s.getMeasures().getNodeCount(), 470, "nb nod");
-		}
-	}
+    @Test(groups = {"1m"})
+    public void testALL10() throws IOException {
+        times.clear();
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 1; i++) {
+            Solver s = ks.modelIt("k10", 10);
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getMeasures().getObjectiveValue(), 1078, "obj val");
+            Assert.assertEquals(s.getMeasures().getSolutionCount(), 144, "nb sol");
+            Assert.assertEquals(s.getMeasures().getNodeCount(), 470, "nb nod");
+        }
+    }
 
-	@Test(groups = {"10m"})
-	public void testOPT13() throws IOException {
-		KnapsackTest ks = new KnapsackTest();
-		Solver s = ks.modelIt("k20", 13);
-		ks.solveIt(s, true);
-		Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 214, "nb sol");
-		Assert.assertEquals(s.getMeasures().getNodeCount(), 210236, "nb nod");
-	}
+    @Test(groups = {"10m"})
+    public void testOPT13() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        Solver s = ks.modelIt("k20", 13);
+        ks.solveIt(s, true);
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 214, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 210236, "nb nod");
+    }
 
-	@Test(groups = {"10m"})
-	public void testOPT14() throws IOException {
-		KnapsackTest ks = new KnapsackTest();
-		Solver s = ks.modelIt("k20", 14);
-		ks.solveIt(s, true);
-		Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 305, "nb sol");
-		Assert.assertEquals(s.getMeasures().getNodeCount(), 379396, "nb nod");
-	}
+    @Test(groups = {"10m"})
+    public void testOPT14() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        Solver s = ks.modelIt("k20", 14);
+        ks.solveIt(s, true);
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 305, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 379396, "nb nod");
+    }
 
-	@Test(groups = {"10m"})
-	public void testOPT15() throws IOException {
-		KnapsackTest ks = new KnapsackTest();
-		Solver s = ks.modelIt("k20", 15);
+    @Test(groups = {"10m"})
+    public void testOPT15() throws IOException {
+        KnapsackTest ks = new KnapsackTest();
+        Solver s = ks.modelIt("k20", 15);
 //        SearchMonitorFactory.log(s, false, false);
-		ks.solveIt(s, true);
-		Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
-		Assert.assertEquals(s.getMeasures().getSolutionCount(), 297, "nb sol");
-		Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
-	}
+        ks.solveIt(s, true);
+        Assert.assertEquals(s.getMeasures().getObjectiveValue(), 2657, "obj val");
+        Assert.assertEquals(s.getMeasures().getSolutionCount(), 297, "nb sol");
+        Assert.assertEquals(s.getMeasures().getNodeCount(), 1153919, "nb nod");
+    }
 
 }
