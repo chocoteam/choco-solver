@@ -157,7 +157,8 @@ public final class PVariable extends ParVar {
      * @return {@link Variable}
      */
     private static IntVar buildWithInt(String name, THashMap<String, Object> map, Solver solver) {
-        final IntVar iv = VariableFactory.bounded(name, Integer.MIN_VALUE, Integer.MAX_VALUE, solver);
+        final IntVar iv = VariableFactory.bounded(name, (int)(Integer.MIN_VALUE*.99d),
+                (int)(Integer.MAX_VALUE*.99d), solver);
         map.put(name, iv);
         return iv;
     }
@@ -221,7 +222,7 @@ public final class PVariable extends ParVar {
 //                return sv;
 //        }
 //        return null;
-        Exit.log();
+        Exit.log("SET VAR");
         return null;
     }
 
@@ -276,7 +277,7 @@ public final class PVariable extends ParVar {
 //                    svs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, map);
 //                }
 //                map.put(name, svs);
-                Exit.log();
+                Exit.log("SET VAR");
                 break;
             default:
                 break;
@@ -323,7 +324,7 @@ public final class PVariable extends ParVar {
 //                    svs[i] = earr.getWhat_i(i).setVarValue();
 //                }
 //                map.put(name, svs);
-                Exit.log();
+                Exit.log("SET VAR");
                 break;
             default:
                 break;
