@@ -25,65 +25,43 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package solver.search.strategy.selectors.values;
 
-import choco.kernel.common.util.PoolManager;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.ValueIterator;
-import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
+import java.util.Random;
+
 /**
+ * Assigns the middle value in the variable's domain.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Assignment extends AbstractStrategy<IntVar> {
+public class InDomainRandom implements ValueIterator<IntVar> {
 
-    VariableSelector<IntVar> varselector;
+    final Random rand;
 
-    ValueIterator valueIterator;
-
-    PoolManager<FastDecision> decisionPool;
-
-    solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
-
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
-        super(vars);
-        this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
+    public InDomainRandom(long seed) {
+        this.rand = new Random(seed);
     }
 
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
-                      solver.search.strategy.assignments.Assignment assgnt) {
-        super(vars);
-        this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
-        this.assgnt = assgnt;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void init() {
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public Decision getDecision() {
-        if (varselector.hasNext()) {
-            varselector.advance();
-            IntVar variable = varselector.getVariable();
-            int value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
+    public int selectValue(IntVar var) {
+        if (var.hasEnumeratedDomain()) {
+            int i = rand.nextInt(var.getDomainSize());
+            int value = var.getLB();
+            while (i > 0) {
+                value = var.nextValue(value);
+                i--;
             }
-            d.set(variable, value, assgnt);
-            return d;
+            return value;
+        } else {
+            return rand.nextBoolean() ? var.getLB() : var.getUB();
         }
-        return null;
     }
 }

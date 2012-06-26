@@ -25,65 +25,28 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.search.strategy.strategy;
+package solver.search.strategy.selectors.values;
 
-import choco.kernel.common.util.PoolManager;
-import solver.search.strategy.decision.Decision;
-import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.ValueIterator;
-import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
 /**
+ * Assigns the middle value in the variable's domain.
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 2 juil. 2010
  */
-public class Assignment extends AbstractStrategy<IntVar> {
+public class InDomainMedian implements ValueIterator<IntVar> {
 
-    VariableSelector<IntVar> varselector;
-
-    ValueIterator valueIterator;
-
-    PoolManager<FastDecision> decisionPool;
-
-    solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
-
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
-        super(vars);
-        this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
-    }
-
-    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
-                      solver.search.strategy.assignments.Assignment assgnt) {
-        super(vars);
-        this.varselector = varselector;
-        this.valueIterator = valueIterator;
-        decisionPool = new PoolManager<FastDecision>();
-        this.assgnt = assgnt;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void init() {
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public Decision getDecision() {
-        if (varselector.hasNext()) {
-            varselector.advance();
-            IntVar variable = varselector.getVariable();
-            int value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
-            }
-            d.set(variable, value, assgnt);
-            return d;
-        }
-        return null;
+    public int selectValue(IntVar var) {
+        int low = var.getLB();
+        int upp = var.getUB();
+        int mean = (low + upp) / 2;
+        return mean;
     }
 }

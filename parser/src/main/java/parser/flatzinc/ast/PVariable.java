@@ -112,7 +112,7 @@ public final class PVariable extends ParVar {
                             parser.layout.addOutputVar(var);
                             break;
                         default:
-                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+                            //LOGGER.warn("% Unknown annotation :" + varanno.toString());
                     }
                     break;
                 case ANN:
@@ -124,11 +124,11 @@ public final class PVariable extends ParVar {
                             parser.layout.addOutputArrays(name, vars, eanno.exps);
                             break;
                         default:
-                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+//                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
                     }
                     break;
                 default:
-                    LOGGER.warn("% Unknown annotation :" + type.toString());
+//                    LOGGER.warn("% Unknown annotation :" + type.toString());
             }
         }
     }
