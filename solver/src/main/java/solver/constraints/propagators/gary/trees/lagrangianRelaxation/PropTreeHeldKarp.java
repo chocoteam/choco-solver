@@ -219,8 +219,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		double hkb;
 		double alpha = 2;
 		double beta = 0.5;
-		double besthkb = 0;
-		double oldhkb = -20;
+		double besthkb = -9999998;
+		double oldhkb = -9999999;
 		while(oldhkb+0.1<besthkb){
 			oldhkb = besthkb;
 			convergeFast(alpha);
@@ -443,8 +443,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	}
 
 	public double getReplacementCost(int from, int to){
-		throw new UnsupportedOperationException();
-		//return HKfilter.getRepCost(from,to);
+//		throw new UnsupportedOperationException();
+		return HKfilter.getRepCost(from,to);
 	}
 
 	public double getMarginalCost(int from, int to){

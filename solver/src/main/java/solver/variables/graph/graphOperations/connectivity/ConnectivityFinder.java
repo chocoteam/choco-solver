@@ -28,6 +28,7 @@
 package solver.variables.graph.graphOperations.connectivity;
 
 
+import gnu.trove.list.array.TIntArrayList;
 import solver.variables.graph.IActiveNodes;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.INeighbors;
@@ -202,6 +203,92 @@ public class ConnectivityFinder {
 				}
 			}
 		}
+	}
+
+
+	public TIntArrayList isthmusFrom,isthmusTo;
+	private int[] ND,L,H;
+
+	public boolean isConnectedAndFindIsthma(){
+		if(node_CC==null){
+			CC_firstNode = new int[n];
+			CC_nextNode = new int[n];
+			node_CC = new int[n];
+			nodeOfNum = new int[n];
+			numOfNode = new int[n];
+			isthmusFrom = new TIntArrayList();
+			isthmusTo   = new TIntArrayList();
+			ND = new int[n];
+			L  = new int[n];
+			H  = new int[n];
+		}
+		IActiveNodes act = graph.getActiveNodes();
+		for (int i = act.getFirstElement(); i>=0; i = act.getNextElement()) {
+			p[i] = -1;
+		}
+		//algo
+		int start = 0;
+		int i = start;
+		int k = 0;
+		numOfNode[start] = k;
+		nodeOfNum[k] = start;
+		p[start] = start;
+		int j;
+		boolean first = true;
+		while(true){
+			if(first){
+				j = neighbors[i].getFirstElement();
+				first = false;
+			}else{
+				j = neighbors[i].getNextElement();
+			}
+			if(j<0){
+				if(i==start){
+					if(k<act.neighborhoodSize()-1){
+						return false;
+					}else{
+						break;
+					}
+				}
+				i = p[i];
+			}else{
+				if (p[j]==-1) {
+					p[j] = i;
+					i = j;
+					first = true;
+					add(i,0);
+					k++;
+					numOfNode[i] = k;
+					nodeOfNum[k] = i;
+				}
+			}
+		}
+		// POST ORDER PASS FOR FINDING ISTHMUS
+		isthmusFrom.clear();
+		isthmusTo.clear();
+		int currentNode;
+		for(i=n-1; i>=0; i--){
+			currentNode = nodeOfNum[i];
+			ND[currentNode] = 1;
+			L[currentNode]  = i;
+			H[currentNode]  = i;
+			INeighbors nei = neighbors[currentNode];
+			for(int s=nei.getFirstElement(); s>=0; s = nei.getNextElement()){
+				if (p[s]==currentNode){
+					ND[currentNode] += ND[s];
+					L[currentNode] = Math.min(L[currentNode], L[s]);
+					H[currentNode] = Math.max(H[currentNode], H[s]);
+				}else if(s!=p[currentNode]){
+					L[currentNode] = Math.min(L[currentNode], numOfNode[s]);
+					H[currentNode] = Math.max(H[currentNode], numOfNode[s]);
+				}
+				if (s!=currentNode && p[s]==currentNode && L[s]>= numOfNode[s] && H[s] < numOfNode[s]+ND[s]){
+					isthmusFrom.add(currentNode);
+					isthmusTo.add(s);
+				}
+			}
+		}
+		return true;
 	}
 }
 //***********************************************************************************
