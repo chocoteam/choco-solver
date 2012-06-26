@@ -44,7 +44,7 @@ public class MinHeap implements IHeap {
     public MinHeap(int max) {
         keys = new int[max + 1];
         elts = new int[max + 1];
-        posOf = new int[max+1];
+        posOf = new int[max + 1];
         size = 0;
         keys[0] = Integer.MIN_VALUE;
         elts[0] = Integer.MIN_VALUE;
@@ -97,6 +97,9 @@ public class MinHeap implements IHeap {
     public void insert(int key, int elem) {
         if (PRINT) System.out.printf("<< INSERT (%d, %d)\n", key, elem);
         if (PRINT) print();
+        if (size == keys.length - 1) {
+            doubleCapacity();
+        }
         size++;
         int current = size;
         int parent = parent(current);
@@ -112,6 +115,19 @@ public class MinHeap implements IHeap {
         posOf[elem] = current;
         if (PRINT) print();
         if (PRINT) System.out.printf(">>>>>>>>\n");
+    }
+
+    private void doubleCapacity() {
+        int csize = size * 2;
+        int[] tmp = keys;
+        keys = new int[csize];
+        System.arraycopy(tmp, 0, keys, 0, size);
+        tmp = elts;
+        elts = new int[csize];
+        System.arraycopy(tmp, 0, elts, 0, size);
+        tmp = posOf;
+        posOf = new int[csize];
+        System.arraycopy(tmp, 0, posOf, 0, size);
     }
 
 

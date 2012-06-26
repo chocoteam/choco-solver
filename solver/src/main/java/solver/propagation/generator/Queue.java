@@ -60,7 +60,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
         } else {
-            toPropagate = new CircularQueue<S>(nbe / 2);
+            toPropagate = new CircularQueue<S>(nbe / 2 +1);
         }
     }
 
@@ -75,7 +75,7 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
         if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
         } else {
-            toPropagate = new CircularQueue<S>(nbe / 2);
+            toPropagate = new CircularQueue<S>(nbe / 2+1);
         }
     }
 

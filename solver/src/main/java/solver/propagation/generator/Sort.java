@@ -48,7 +48,6 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     protected S lastPopped;
 
     protected BitSet toPropagate;
-    protected boolean init = false;
 
     public Sort(Generator<S>... generators) {
         this(null, generators);
@@ -64,7 +63,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = new BitSet(elements.length/2 +1 );
     }
 
 
