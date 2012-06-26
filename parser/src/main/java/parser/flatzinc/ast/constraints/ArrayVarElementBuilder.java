@@ -49,6 +49,6 @@ public class ArrayVarElementBuilder implements IBuilder {
         IntVar index = exps.get(0).intVarValue(solver);
         IntVar[] values = exps.get(1).toIntVarArray(solver);
         IntVar val = exps.get(2).intVarValue(solver);
-        return new Element(val, values, index, -1, solver);
+        return new Element(val, values, index, 1, solver);
     }
 }

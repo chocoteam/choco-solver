@@ -68,7 +68,7 @@ public class PropElementV extends Propagator<IntVar> {
         for (int i = 0; i < this.vars.length; i++){
             idms[i] = this.vars[i].monitorDelta(this);
         }
-        this.offset = offset;
+        this.offset = -offset;
         valueUpdateNeeded = environment.makeBool(true);
         indexUpdateNeeded = environment.makeBool(true);
         rem_proc = new RemProc(this);
