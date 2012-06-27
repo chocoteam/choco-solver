@@ -29,7 +29,6 @@ package solver.variables;
 
 import solver.Solver;
 import solver.exception.SolverException;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
 import solver.variables.fast.IntervalIntVarImpl;
@@ -64,7 +63,7 @@ public enum VariableFactory {
      */
     public static BoolVar bool(String name, Solver solver) {
         BooleanBoolVarImpl var = new BooleanBoolVarImpl(name, solver);
-        var.setHeuristicVal(HeuristicValFactory.presetI(var));
+        //var.setHeuristicVal(HeuristicValFactory.presetI(var));
         return var;
     }
 
@@ -90,7 +89,7 @@ public enum VariableFactory {
             return Views.fixed(name, min, solver);
         } else {
             IntVar var = new IntervalIntVarImpl(name, min, max, solver);
-            var.setHeuristicVal(HeuristicValFactory.presetI(var));
+            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }
     }
@@ -117,7 +116,7 @@ public enum VariableFactory {
             return Views.fixed(name, min, solver);
         } else {
             BitsetIntVarImpl var = new BitsetIntVarImpl(name, min, max, solver);
-            var.setHeuristicVal(HeuristicValFactory.presetI(var));
+            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }
     }
@@ -146,7 +145,7 @@ public enum VariableFactory {
             return Views.fixed(name, values[0], solver);
         } else {
             BitsetIntVarImpl var = new BitsetIntVarImpl(name, values, solver);
-            var.setHeuristicVal(HeuristicValFactory.presetI(var));
+            //var.setHeuristicVal(HeuristicValFactory.presetI(var));
             return var;
         }
     }
