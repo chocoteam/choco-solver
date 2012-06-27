@@ -104,7 +104,12 @@ public class Switcher<S extends ISchedulable> extends PropagationStrategy<S> {
     public void schedule(S element) {
         assert !element.enqueued();
         int q = evaluator.eval(element) - offset;
-        _schedule(element, q);
+        try {
+            _schedule(element, q);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            if (q < 0) _schedule(element, 0);
+            else _schedule(element, size - 1);
+        }
     }
 
     @Override

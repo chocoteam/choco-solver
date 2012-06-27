@@ -181,9 +181,9 @@ public enum PropagationStrategies {
         @Override
         public void make(Solver solver, IPropagationEngine pengine) {
             Constraint[] constraints = solver.getCstrs();
-            NQueue f7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCons(pengine, constraints));
-            NQueue c7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCoarse(pengine, constraints));
-            pengine.set(new Sort(f7.clearOut(), c7.pickOne()));
+            Sort _7qaf = new Sort(new Switcher(EvtRecEvaluators.MaxDynPriorityC, 0, 7, new Queue(), new PCons(pengine, constraints)));
+            SortDyn _7qac = new SortDyn(EvtRecEvaluators.MaxDynPriorityC, new PCoarse(pengine, constraints));
+            pengine.set(new Sort(_7qaf.pickOne(), _7qac.pickOne()));
         }
     },
     DEFAULT() {

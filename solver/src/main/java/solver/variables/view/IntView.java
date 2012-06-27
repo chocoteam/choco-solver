@@ -127,12 +127,12 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
 
     @Override
     public void notifyPropagators(EventType event, ICause cause) throws ContradictionException {
+        notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
-        notifyMonitors(event, cause);
     }
 
     public void notifyMonitors(EventType event, @NotNull ICause cause) throws ContradictionException {

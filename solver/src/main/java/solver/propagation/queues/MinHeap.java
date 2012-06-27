@@ -118,16 +118,17 @@ public class MinHeap implements IHeap {
     }
 
     private void doubleCapacity() {
+        if (PRINT) System.out.printf("DOUBLE CAPA\n");
         int csize = size * 2;
         int[] tmp = keys;
         keys = new int[csize];
-        System.arraycopy(tmp, 0, keys, 0, size);
+        System.arraycopy(tmp, 0, keys, 0, size+1);
         tmp = elts;
         elts = new int[csize];
-        System.arraycopy(tmp, 0, elts, 0, size);
+        System.arraycopy(tmp, 0, elts, 0, size+1);
         tmp = posOf;
         posOf = new int[csize];
-        System.arraycopy(tmp, 0, posOf, 0, size);
+        System.arraycopy(tmp, 0, posOf, 0, size+1);
     }
 
 

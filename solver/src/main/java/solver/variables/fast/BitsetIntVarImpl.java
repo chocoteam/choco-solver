@@ -511,13 +511,13 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
 
 
     public void notifyPropagators(EventType event, @NotNull ICause cause) throws ContradictionException {
+        notifyMonitors(event, cause);
         if ((modificationEvents & event.mask) != 0) {
             //records.forEach(afterModification.set(this, event, cause));
             //solver.getEngine().onVariableUpdate(this, afterModification.set(this, event, cause));
             solver.getEngine().onVariableUpdate(this, event, cause);
         }
         notifyViews(event, cause);
-        notifyMonitors(event, cause);
     }
 
 
