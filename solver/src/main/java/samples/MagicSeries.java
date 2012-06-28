@@ -95,7 +95,7 @@ public class MagicSeries extends AbstractProblem {
     public void configureEngine() {
         final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs(),
                 false, true, false);
-        PropagationStrategies.TWO_QUEUES_WITH_PROPS.make(solver, engine);
+        PropagationStrategies.GECODE.make(solver, engine);
         solver.set(engine);
         final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment(), true, false, true);
         PropagationStrategies.TWO_QUEUES_WITH_VARS.make(solver, engine2);
