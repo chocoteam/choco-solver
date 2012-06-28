@@ -141,8 +141,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MIN_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = variables[0].nbConstraints();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = variables[i].nbConstraints();
                 if (aa > a) {
                     a = aa;
@@ -159,8 +159,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MAX_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = variables[0].nbConstraints();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = variables[i].nbConstraints();
                 if (aa < a) {
                     a = aa;
@@ -177,8 +177,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder<IntVar> eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MIN_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = ((IntVar)variables[0]).getDomainSize();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = ((IntVar) variables[i]).getDomainSize();
                 if (aa < a) {
                     a = aa;
@@ -195,8 +195,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder<IntVar> eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MAX_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = ((IntVar)variables[0]).getDomainSize();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = ((IntVar) variables[i]).getDomainSize();
                 if (aa < a) {
                     a = aa;
