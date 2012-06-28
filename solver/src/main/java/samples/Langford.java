@@ -144,7 +144,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        new Langford().execute();
+        new Langford().execute(args);
     }
 
 }
