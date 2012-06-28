@@ -28,7 +28,6 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -69,7 +68,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
-            LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
+            //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
             set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver));
         }
         strategy.init();
