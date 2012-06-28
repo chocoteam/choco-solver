@@ -56,7 +56,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             elements[e].setScheduler(this, e);
         }
 //        this.toPropagate = new BinaryTreeHeap(elements.length);
-        this.toPropagate = new MinHeap(elements.length/2+1);
+        this.toPropagate = new MinHeap(elements.length+1);
     }
 
 
