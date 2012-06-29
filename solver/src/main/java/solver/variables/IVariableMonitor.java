@@ -28,6 +28,7 @@ package solver.variables;
 
 import choco.kernel.common.Indexable;
 import solver.ICause;
+import solver.exception.ContradictionException;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -46,6 +47,6 @@ public interface IVariableMonitor<V extends Variable> extends Indexable<V>{
      * @param evt   modification event
      * @param cause origin of the modification
      */
-    void onUpdate(V var, EventType evt, ICause cause);
+    void onUpdate(V var, EventType evt, ICause cause) throws ContradictionException;
 
 }
