@@ -26,12 +26,13 @@
  */
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.Indexable;
-import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
+import solver.variables.Variable;
 
 /**
  * STATIC.......[<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -44,7 +45,7 @@ import solver.recorders.fine.AbstractFineEventRecorder;
  * @deprecated 2 x slower than the BacktrableList
  */
 @Deprecated
-public class HalfBactrackableList<K, E extends Indexable<K>> implements IList<E> {
+public class HalfBactrackableList<K extends Variable, E extends AbstractFineEventRecorder<K>> implements IList<K, E> {
 
     private static final int OFFSET = 100000;
     private static final int SIZE = 16;
@@ -123,19 +124,19 @@ public class HalfBactrackableList<K, E extends Indexable<K>> implements IList<E>
         }
     }
 
-    public void forEach(Procedure proc) throws ContradictionException {
+    @Override
+    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException {
         int first = sFirstActive.get();
         int last = sFirstPassive.get();
         for (int a = first; a < last; a++) {
-            proc.execute(sElements[a]);
+            sElements[a].afterUpdate(vIdx,t,c);
         }
         first = dFirstActive.get();
         last = dFirstPassive.get();
         for (int a = first; a < last; a++) {
-            proc.execute(dElements[a]);
+            dElements[a].afterUpdate(vIdx,t,c);
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

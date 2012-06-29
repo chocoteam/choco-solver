@@ -52,6 +52,8 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Vari
     protected final AbstractSearchLoop loop;
     protected final IPropagationEngine engine;
 
+    protected final Propagator[] propagators;
+
     protected final UnaryProcedure<AbstractFineEventRecorder, Propagator> virtExec = new UnaryProcedure<AbstractFineEventRecorder, Propagator>() {
 
         Propagator coarseProp;
@@ -68,10 +70,16 @@ public abstract class AbstractCoarseEventRecorder implements IEventRecorder<Vari
         }
     };
 
-    protected AbstractCoarseEventRecorder(Solver solver, IPropagationEngine engine) {
+    protected AbstractCoarseEventRecorder(Propagator[] propagators, Solver solver, IPropagationEngine engine) {
         this.enqueued = false;
         this.loop = solver.getSearchLoop();
         this.engine = engine;
+        this.propagators = propagators.clone();
+    }
+
+    @Override
+    public Propagator[] getPropagators() {
+        return propagators;
     }
 
     public abstract void update(EventType e);

@@ -36,8 +36,8 @@ import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IScheduler;
 import solver.propagation.PropagationEngine;
-import solver.recorders.fine.FineVarEventRecorder;
-import solver.recorders.fine.VarEventRecorder;
+import solver.recorders.fine.var.FineVarEventRecorder;
+import solver.recorders.fine.var.VarEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -169,15 +169,13 @@ public class FineVarEventRecorderTest {
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
         p1.getPropagationConditions(5);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
-        p1.decArity();
         expectLastCall().times(2);
         p3.getId();
         expectLastCall().andReturn(3);
         p3.getPropagationConditions(0);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
-        p3.decArity();
         replay(p1, p2, p3, p4, p5);
-        ver.afterUpdate(iv1, EventType.INSTANTIATE, p2);
+        ver.afterUpdate(iv1.getId(), EventType.INSTANTIATE, p2);
         verify(p1, p2, p3, p4, p5);
         reset(p1, p2, p3, p4, p5);
         // <--END PREPARING-->
@@ -220,16 +218,14 @@ public class FineVarEventRecorderTest {
         expectLastCall().andReturn(2);
         p2.getPropagationConditions(1);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
-        p2.decArity();
         p3.getId();
         expectLastCall().andReturn(3);
         p3.getPropagationConditions(0);
         expectLastCall().andReturn(EventType.INSTANTIATE.mask);
-        p3.decArity();
         s1.schedule(ver);
         replay(p1, p2, p3, p4, p5);
 
-        ver.afterUpdate(iv1, EventType.INSTANTIATE, p1);
+        ver.afterUpdate(iv1.getId(), EventType.INSTANTIATE, p1);
 
         verify(p1, p2, p3, p4, p5);
         int[] masks = get("evtmasks", FineVarEventRecorder.class, ver);

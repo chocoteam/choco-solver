@@ -1,5 +1,7 @@
 package samples.graph;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.BitSet;
 import java.util.Random;
 
@@ -140,28 +142,37 @@ public class GraphGenerator {
      * Provide an initial Hamiltonian circuit in graph
      */
     private void generateInitialHamiltonianCircuit() {
-        //int[] perm = new int[size];
-        BitSet nodes = new BitSet(size);
-        for (int i = 0; i < size; i++) {
-            nodes.set(i, true);
-        }
-        int start = rand.nextInt(size);
-        int i = start;
-        nodes.set(i, false);
-        int j;
-        do {
-            int idj = rand.nextInt(size);
-            j = nodes.nextSetBit(idj);
-            if (j == -1) {
-                j = nodes.nextSetBit(0);
-            }
-            if (j != -1) {
-                nodes.set(j, false);
-                graph[i][j] = true;
-                i = j;
-            }
-        } while (j != -1);
-        graph[i][start] = true;
+//        //int[] perm = new int[size];
+//        BitSet nodes = new BitSet(size);
+//        for (int i = 0; i < size; i++) {
+//            nodes.set(i, true);
+//        }
+//        int start = rand.nextInt(size);
+//        int i = start;
+//        nodes.set(i, false);
+//        int j;
+//        do {
+//            int idj = rand.nextInt(size);
+//            j = nodes.nextSetBit(idj);
+//            if (j == -1) {
+//                j = nodes.nextSetBit(0);
+//            }
+//            if (j != -1) {
+//                nodes.set(j, false);
+//                graph[i][j] = true;
+//                i = j;
+//            }
+//        } while (j != -1);
+//        graph[i][start] = true;
+		TIntArrayList nodes = new TIntArrayList(size);
+		for(int i=0;i<size;i++){
+			nodes.add(i);
+		}
+		nodes.shuffle(rand);
+		for(int i=0;i<size-1;i++){
+			graph[nodes.get(i)][nodes.get(i+1)] = true;
+		}
+		graph[nodes.get(size-1)][nodes.get(0)] = true;
     }
 
     /**

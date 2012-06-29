@@ -242,13 +242,13 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     protected static abstract class Monitoring implements TernaryProcedure<AbstractFineEventRecorder, Variable, EventType, ICause> {
-        Variable var;
+        int vIdx;
         EventType evt;
         ICause cause;
 
         @Override
         public TernaryProcedure set(Variable variable, EventType eventType, ICause cause) {
-            this.var = variable;
+            this.vIdx = variable.getId();
             this.evt = eventType;
             this.cause = cause;
             return this;
@@ -265,7 +265,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected static class OnAfterProc extends Monitoring {
         @Override
         public void execute(AbstractFineEventRecorder monitor) throws ContradictionException {
-            monitor.afterUpdate(var, evt, cause);
+            monitor.afterUpdate(vIdx, evt, cause);
         }
     }
 

@@ -250,6 +250,4 @@ public enum VariableFactory {
 		end.addMonitor(update);
 		return new IntVar[]{start,duration,end};
 	}
-
-
 }

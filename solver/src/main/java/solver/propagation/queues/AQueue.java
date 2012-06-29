@@ -41,15 +41,19 @@ public interface AQueue<E> {
 
     E get(int index);
 
-    boolean add(E e);
+    boolean addFirst(E e);
 
-    E pop();
+    boolean addLast(E e);
 
-    E remove();
+    E pollFirst();
+
+    E pollLast();
 
     E remove(int index);
 
     boolean remove(E e);
+
+    int indexOf(E e);
 
     void clear();
 }

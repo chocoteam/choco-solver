@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.binary.PropNotEqualXY;
+import solver.constraints.propagators.binary.PropNotEqualX_Y;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
 import solver.constraints.propagators.nary.alldifferent.PropAllDiffBC;
 import solver.variables.IntVar;
@@ -62,7 +62,7 @@ public class AllDifferent extends IntConstraint<IntVar> {
                 Propagator[] props = new Propagator[(s * s - s) / 2];
                 for (int i = 0; i < s - 1; i++) {
                     for (int j = i + 1; j < s; j++) {
-                        props[k++] = new PropNotEqualXY(vars[i], vars[j], solver, this);
+                        props[k++] = new PropNotEqualX_Y(vars[i], vars[j], solver, this);
                     }
                 }
                 setPropagators(props);

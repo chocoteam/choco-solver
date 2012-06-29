@@ -26,7 +26,6 @@
  */
 package solver.propagation;
 
-import choco.kernel.common.util.procedure.Procedure;
 import com.sun.istack.internal.NotNull;
 import solver.ICause;
 import solver.Solver;
@@ -63,9 +62,15 @@ public interface IPropagationEngine extends Serializable {
     void init(Solver solver);
 
     /**
-     * Skip the completness check -- the strategy can then be incomplete
+     * A call to this will skip the verification of the three following properties:
+     * <br/>
+     * <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
+     * <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
+     * <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
+     * <br/>
+     * As a consequence, the engine can be incomplete.
      */
-    void skipCompletnessCheck();
+    void skipProperties();
 
     /**
      * Skip initial propagation.
@@ -119,10 +124,9 @@ public interface IPropagationEngine extends Serializable {
      * Take into account the modification of a variable
      *
      * @param variable  modified variable
-     * @param procedure procedure to apply
      * @throws ContradictionException
      */
-    void onVariableUpdate(Variable variable, Procedure procedure) throws ContradictionException;
+    void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException;
 
     void onPropagatorExecution(Propagator propagator);
 

@@ -28,13 +28,13 @@
 package solver.constraints;
 
 import solver.Solver;
-import solver.constraints.binary.EqualX_YC;
-import solver.constraints.binary.GreaterOrEqualX_YC;
-import solver.constraints.binary.NotEqualX_YC;
-import solver.constraints.unary.EqualXC;
-import solver.constraints.unary.NotEqualXC;
-import solver.constraints.unary.Relation;
+import solver.constraints.propagators.nary.PropIndexValue;
+import solver.constraints.propagators.nary.PropNoSubtour;
+import solver.constraints.propagators.nary.PropSubcircuit;
+import solver.constraints.propagators.nary.alldifferent.PropAllDiffAC;
+import solver.constraints.propagators.nary.sum.PropSumEq;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
 import solver.variables.view.Views;
 
 /**
@@ -60,7 +60,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, int c, Solver solver) {
-        return new EqualXC(x, c, solver);
+        return new Arithmetic(x, "=", c, solver);
     }
 
     /**
@@ -72,7 +72,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, IntVar y, Solver solver) {
-        return new EqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, "=", y, solver);
     }
 
     /**
@@ -85,7 +85,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint eq(IntVar x, IntVar y, int c, Solver solver) {
-        return new EqualX_YC(x, y, c, solver);
+        return new Arithmetic(x, "=", y, "+", c, solver);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, int c, Solver solver) {
-        return new NotEqualXC(x, c, solver);
+        return new Arithmetic(x, "!=", c, solver);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, IntVar y, Solver solver) {
-        return new NotEqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, "!=", y, solver);
     }
 
     /**
@@ -122,7 +122,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint neq(IntVar x, IntVar y, int c, Solver solver) {
-        return new NotEqualX_YC(x, y, c, solver);
+        return new Arithmetic(x, "!=", y, "+", c, solver);
     }
 
     /**
@@ -135,7 +135,7 @@ public class ConstraintFactory {
      */
     public static Constraint leq(IntVar x, IntVar y, Solver solver) {
 //        return Sum.leq(new IntVar[]{x, y}, new int[]{1, -1}, 0, solver);
-        return new GreaterOrEqualX_YC(y, x, 0, solver);
+        return new Arithmetic(y, ">=", x, solver);
     }
 
     /**
@@ -147,7 +147,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint leq(IntVar x, int c, Solver solver) {
-        return new Relation(x, Relation.R.LQ, c, solver);
+        return new Arithmetic(x, "<=", c, solver);
     }
 
     /**
@@ -159,7 +159,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint lt(IntVar x, int c, Solver solver) {
-        return new GreaterOrEqualX_YC(Views.fixed(c, solver), x, 1, solver);
+        return new Arithmetic(Views.fixed(c, solver), ">=", x, "+", 1, solver);
     }
 
     /**
@@ -171,7 +171,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint lt(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(y, x, 1, solver);
+        return new Arithmetic(y, ">=", x, "+", 1, solver);
     }
 
     /**
@@ -183,7 +183,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint geq(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(x, y, 0, solver);
+        return new Arithmetic(x, ">=", y, solver);
     }
 
     /**
@@ -195,7 +195,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint geq(IntVar x, int c, Solver solver) {
-        return new Relation(x, Relation.R.GQ, c, solver);
+        return new Arithmetic(x, ">=", c, solver);
     }
 
     /**
@@ -207,7 +207,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, int c, Solver solver) {
-        return new GreaterOrEqualX_YC(x, Views.fixed(c, solver), 1, solver);
+        return new Arithmetic(x, ">=", Views.fixed(c, solver), "+", 1, solver);
     }
 
     /**
@@ -219,7 +219,71 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return new GreaterOrEqualX_YC(x, y, 1, solver);
+        return new Arithmetic(x, ">=", y, "+", 1, solver);
     }
+
+	//*****************************************************************************
+	// GLOBAL CONSTRAINTS
+	//*****************************************************************************
+
+	/**Create an empty constraint to be filled with propagators
+	 *
+	 * @param solver
+	 * @return an empty constraint to be filled with propagators
+	 */
+	public static Constraint makeEmptyConstraint(Solver solver){
+		return new Constraint(solver);
+	}
+
+	/**Creates a circuit constraint which ensures that
+	 *
+	 * the elements of vars define a covering circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 *
+	 * @param vars
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint circuit(IntVar[] vars, Solver solver){
+		Constraint c = new Constraint(solver);
+		c.setPropagators(new PropAllDiffAC(vars, c, solver), new PropNoSubtour(vars, solver, c));
+        return c;
+	}
+
+	/**Creates a subcircuit constraint which ensures that
+	 *
+	 * the elements of vars define a single circuit of subcircuitSize nodes
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param subcircuitSize expected number of nodes in the circuit
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, IntVar subcircuitSize, Solver solver){
+		int n = vars.length;
+		IntVar nbLoops = VariableFactory.bounded("nLoops", 0, n, solver);
+		Constraint c = new Constraint(solver);
+		c.addPropagators(new PropSumEq(new IntVar[]{nbLoops,subcircuitSize},n,solver,c));
+		c.addPropagators(new PropAllDiffAC(vars, c, solver));
+		c.addPropagators(new PropIndexValue(vars, nbLoops, c, solver));
+		c.addPropagators(new PropSubcircuit(vars, subcircuitSize, c, solver));
+        return c;
+	}
+
+	/**Creates a subcircuit constraint which ensures that
+	 *
+	 * the elements of vars define a single circuit
+	 * where vars[i] = j means that j is the successor of i.
+	 * and vars[i] = i means that i is not part of the circuit
+	 *
+	 * @param vars
+	 * @param solver
+	 * @return a circuit constraint
+	 */
+	public static Constraint subcircuit(IntVar[] vars, Solver solver){
+		return subcircuit(vars,VariableFactory.bounded("subcircuit length",0,vars.length,solver),solver);
+	}
 
 }

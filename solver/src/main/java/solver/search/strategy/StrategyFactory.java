@@ -34,6 +34,7 @@ import solver.constraints.propagators.gary.IRelaxation;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.enumerations.sorters.Incr;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
 import solver.search.strategy.enumerations.sorters.metrics.LowerBound;
@@ -259,7 +260,7 @@ public final class StrategyFactory {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver),SorterFactory.random(seed)),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random(seed)),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -281,6 +282,9 @@ public final class StrategyFactory {
                 solver.getEnvironment());
     }
 
+    public static AbstractStrategy<IntVar> ABSrandom(IntVar[] vars, Solver solver, double g, double d, int a, double r, int samplingIterationForced, long seed) {
+        return new ActivityBased(solver, vars, g, d, a, r, samplingIterationForced, seed);
+    }
 
     public static <G extends GraphVar> AbstractStrategy graphStrategy(G g, NodeStrategy nodeStrat, ArcStrategy arcStrat, NodeArcPriority priority) {
         return new GraphStrategy(g, nodeStrat, arcStrat, priority);
@@ -294,65 +298,71 @@ public final class StrategyFactory {
         return graphStrategy(g, new RandomNode(g, seed), new RandomArc(g, seed), NodeArcPriority.RANDOM);
     }
 
-	public static AbstractStrategy graphATSP(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax) {
-		return new ATSPSearch(g,heur,relax);
-}
-	private static class ATSPSearch extends AbstractStrategy{
-		ATSP_heuristics heuristic;
-		IRelaxation relaxation;
-		DirectedGraphVar g;
-		int n;
-		PoolManager<GraphDecision> pool;
+    public static AbstractStrategy graphATSP(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax) {
+        return new ATSPSearch(g, heur, relax);
+    }
 
-		ATSPSearch(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax){
-			super(new GraphVar[]{g});
-			this.g = g;
-			this.heuristic = heur;
-			this.relaxation = relax;
-			this.n = g.getEnvelopGraph().getNbNodes();
-			pool = new PoolManager<GraphDecision>();
-		}
-		@Override
-		public void init() {
-			heuristic.init(g,n);
-		}
-		@Override
-		public Decision getDecision() {
-			if(g.instantiated()){
-				return null;
-			}
-			return heuristic.getDecision(g,n,relaxation,pool);
-		}
-	}
+    private static class ATSPSearch extends AbstractStrategy {
+        ATSP_heuristics heuristic;
+        IRelaxation relaxation;
+        DirectedGraphVar g;
+        int n;
+        PoolManager<GraphDecision> pool;
 
-	public static AbstractStrategy graphTSP(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax) {
-		return new TSPSearch(g,heur,relax);
-	}
-	private static class TSPSearch extends AbstractStrategy{
-		TSP_heuristics heuristic;
-		IRelaxation relaxation;
-		UndirectedGraphVar g;
-		int n;
-		PoolManager<GraphDecision> pool;
+        ATSPSearch(DirectedGraphVar g, ATSP_heuristics heur, IRelaxation relax) {
+            super(new GraphVar[]{g});
+            this.g = g;
+            this.heuristic = heur;
+            this.relaxation = relax;
+            this.n = g.getEnvelopGraph().getNbNodes();
+            pool = new PoolManager<GraphDecision>();
+        }
 
-		TSPSearch(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax){
-			super(new GraphVar[]{g});
-			this.g = g;
-			this.heuristic = heur;
-			this.relaxation = relax;
-			this.n = g.getEnvelopGraph().getNbNodes();
-			pool = new PoolManager<GraphDecision>();
-		}
-		@Override
-		public void init() {
-			heuristic.init(g,n);
-		}
-		@Override
-		public Decision getDecision() {
-			if(g.instantiated()){
-				return null;
-			}
-			return heuristic.getDecision(g,n,relaxation,pool);
-		}
-	}
+        @Override
+        public void init() {
+            heuristic.init(g, n);
+        }
+
+        @Override
+        public Decision getDecision() {
+            if (g.instantiated()) {
+                return null;
+            }
+            return heuristic.getDecision(g, n, relaxation, pool);
+        }
+    }
+
+    public static AbstractStrategy graphTSP(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax) {
+        return new TSPSearch(g, heur, relax);
+    }
+
+    private static class TSPSearch extends AbstractStrategy {
+        TSP_heuristics heuristic;
+        IRelaxation relaxation;
+        UndirectedGraphVar g;
+        int n;
+        PoolManager<GraphDecision> pool;
+
+        TSPSearch(UndirectedGraphVar g, TSP_heuristics heur, IRelaxation relax) {
+            super(new GraphVar[]{g});
+            this.g = g;
+            this.heuristic = heur;
+            this.relaxation = relax;
+            this.n = g.getEnvelopGraph().getNbNodes();
+            pool = new PoolManager<GraphDecision>();
+        }
+
+        @Override
+        public void init() {
+            heuristic.init(g, n);
+        }
+
+        @Override
+        public Decision getDecision() {
+            if (g.instantiated()) {
+                return null;
+            }
+            return heuristic.getDecision(g, n, relaxation, pool);
+        }
+    }
 }

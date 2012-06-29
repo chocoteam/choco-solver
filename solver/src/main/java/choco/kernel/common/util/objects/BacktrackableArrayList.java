@@ -27,12 +27,13 @@
 
 package choco.kernel.common.util.objects;
 
-import choco.kernel.common.Indexable;
-import choco.kernel.common.util.procedure.Procedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
+import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.EventType;
+import solver.variables.Variable;
 
 /**
  * [<--inactive-->|<--active--->|<---entailed-->]<br/>
@@ -40,8 +41,8 @@ import solver.recorders.fine.AbstractFineEventRecorder;
  * @author Charles Prud'homme
  * @since 23/02/11
  */
-public final class BacktrackableArrayList<V, E extends Indexable<V>>
-        implements IList<E> {
+public final class BacktrackableArrayList<V extends Variable, E extends AbstractFineEventRecorder<V>>
+        implements IList<V, E> {
 
     protected E[] elements;
     protected int size;
@@ -143,12 +144,11 @@ public final class BacktrackableArrayList<V, E extends Indexable<V>>
         return elements[i];
     }
 
-    @Override
-    public void forEach(Procedure proc) throws ContradictionException {
+    public void forEach(int vIdx, EventType t, ICause c) throws ContradictionException {
         int first = firstActive.get();
         int last = firstPassive.get();
-        for (int a = first; a < last; a++) {
-            proc.execute(elements[a]);
+        for (int a = last-1; a >= first; a--) {
+            elements[a].afterUpdate(vIdx, t, c);
         }
     }
 }

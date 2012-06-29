@@ -28,11 +28,14 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
+import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.RootDecision;
+import solver.variables.VariableFactory;
 
 /**
  * This is the default implementation of {@link AbstractSearchLoop} abstract class.
@@ -65,6 +68,10 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         this.env.worldPush(); // push another wolrd to recorver the state after initial propagation
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
+        if (strategy == null) {
+            LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
+            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver));
+        }
         strategy.init();
         moveTo(OPEN_NODE);
     }
@@ -96,7 +103,6 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         solutionpool.recordSolution(solver);
         objectivemanager.update();
         if (stopAtFirstSolution) {
-            moveTo(RESUME);
             interrupt();
         } else {
             moveTo(stateAfterSolution);
@@ -113,9 +119,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             throw new SolverException("the search loop has not been initialized.\n " +
                     "This appears when 'nextSolution' is called before 'findSolution'.");
         } else if (nextState != RESUME) {
-            throw new SolverException("The search cannot be resumed. \n" +
-                    "Be sure you are respecting one of these call configurations :\n " +
-                    "\tfindSolution ( nextSolution )* | findAllSolutions | findOptimalSolution\n");
+            throw new SolverException("The search cannot be resumed.");
         }
         previousSolutionCount = measures.getSolutionCount();
         moveTo(stateAfterSolution);
@@ -155,7 +159,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             moveTo(OPEN_NODE);
         } catch (ContradictionException e) {
             solver.getEngine().flush();
-            moveTo(UP_BRANCH);
+            moveTo(stateAfterFail);
             jumpTo = 1;
             smList.onContradiction(e);
         }

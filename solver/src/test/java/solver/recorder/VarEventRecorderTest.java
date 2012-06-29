@@ -29,7 +29,7 @@ package solver.recorder;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.recorders.coarse.CoarseEventRecorder;
-import solver.recorders.fine.VarEventRecorder;
+import solver.recorders.fine.var.VarEventRecorder;
 import solver.variables.IntVar;
 
 

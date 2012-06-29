@@ -152,6 +152,86 @@ public enum TSP_heuristics {
 			e = new int[n];
 			currentNode = -1;
 		}
+	},
+
+	enf_multisparse  {
+
+		private int currentNode;
+
+		private int[] e;
+
+		private int getNextSparseNode(UndirectedGraphVar g, int n) {
+			INeighbors nei;
+			int s = n;
+			int si;
+			for (int i = 0; i < n; i++) {
+				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(si<s && si!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+					s = si;
+				}
+			}
+			for (int i = 0; i < n; i++) {
+				e[i] = 0;
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				for(int j=0;j<n;j++){
+					if(nei.neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
+					&& g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+						e[i]++;
+					}
+				}
+			}
+			int bestScore = -1;
+			int score;
+			int node = -1;
+			for (int i = 0; i < n; i++) {
+				nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(nei.neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
+					&& g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+					score = 0;
+					for(int j=0;j<n;j++){
+						score += e[j];
+					}
+					if(score>bestScore){
+						bestScore = score;
+						node = i;
+					}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize() == g.getKernelGraph().getSuccessorsOf(currentNode).neighborhoodSize()){
+				currentNode = getNextSparseNode(g,n);
+			}
+//			int currentNode = getNextSparseNode(g,n);
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			int maxE = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!g.getKernelGraph().arcExists(currentNode,j)){
+					if(maxE == -1 || e[maxE]<e[j]){
+						maxE=j;
+					}
+				}
+			}
+			if(maxE==-1){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.setArc(g,currentNode, maxE, GraphAssignment.graph_enforcer);
+			return fd;
+		}
+
+		public void init(UndirectedGraphVar g, int n){
+			e = new int[n];
+			currentNode = -1;
+		}
 	};
 
 	public abstract Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool);

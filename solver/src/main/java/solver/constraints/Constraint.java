@@ -28,7 +28,6 @@
 package solver.constraints;
 
 import choco.kernel.ESat;
-import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.Nullable;
 import solver.ICause;
 import solver.Solver;
@@ -91,21 +90,18 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
 	public V[] vars;
 	public P[] propagators;
-	protected final IStateInt lastPropagatorActive;
 
 	protected int staticPropagationPriority;
 
 	public Constraint(V[] vars, Solver solver) {
 		this.vars = vars.clone();
 		this.solver = solver;
-		this.lastPropagatorActive = solver.getEnvironment().makeInt();
 	}
 
 
 	//BEWARE : ONLY FOR GRAPH CONSTRAINTS
 	public Constraint(Solver solver) {
 		this.solver = solver;
-		this.lastPropagatorActive = solver.getEnvironment().makeInt();
 	}
 
 	public V[] getVariables() {
@@ -115,15 +111,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 
 	public Solver getSolver() {
 		return solver;
-	}
-
-	/**
-	 * Test if this <code>Constraint</code> object is active, i.e. at least one propagator is active.
-	 *
-	 * @return <code>true</code> if this <code>Constraint</code> object is active, <code>false</code> otherwise.
-	 */
-	public final boolean isActive() {
-		return (lastPropagatorActive.get() == 0);
 	}
 
 	/**
@@ -150,9 +137,8 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 * @return the satisfaction of the constraint
 	 */
 	public ESat isEntailed() {
-		int last = lastPropagatorActive.get();
 		int sat = 0;
-		for (int i = 0; i < last; i++) {
+		for (int i = 0; i < propagators.length; i++) {
 			ESat entail = propagators[i].isEntailed();
 //			System.out.println(propagators[i]+" => "+entail);
 			if (entail.equals(ESat.FALSE)) {
@@ -161,7 +147,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 				sat++;
 			}
 		}
-		if (sat == last) {
+		if (sat == propagators.length) {
 			return ESat.TRUE;
 		}
 		// No need to check if FALSE, must have been returned before
@@ -171,38 +157,12 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	}
 
 	/**
-	 * Move the new entailed propagator from its position to the position of the first entailed propagators
-	 * (right side of the lastPropagatorActive)
-	 * BEWARE: do not preserve order of the propagators
-	 *
-	 * @param prop newly entailed propagator
-	 */
-	public void updateActivity(P prop) {
-		int last = lastPropagatorActive.get();
-		if (propagators.length > 1) {
-			// get the index of the propagator within the list of propagators
-			int i = 0;
-			for (; i < last; i++) {
-				if (prop == propagators[i]) {
-					break;
-				}
-			}
-			// move propagators[i] at the right side of lastPropagatorActive
-			P tmp = propagators[--last];
-			propagators[last] = prop;
-			propagators[i] = tmp;
-		}
-		lastPropagatorActive.add(-1);
-	}
-
-	/**
 	 * Define the list of <code>Propagator</code> objects of this <code>Constraint</code> object.
 	 *
 	 * @param propagators list of <code>Propagator</code> objects.
 	 */
 	public final void setPropagators(P... propagators) {
 		this.propagators = propagators;
-		this.lastPropagatorActive.set(propagators.length);
 	}
 
 	/**
@@ -220,8 +180,6 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 			this.propagators = (P[]) new Propagator[tmp.length + mPropagators.length];
 			System.arraycopy(tmp, 0, propagators, 0, tmp.length);
 			System.arraycopy(mPropagators, 0, propagators, tmp.length, mPropagators.length);
-
-			this.lastPropagatorActive.add(mPropagators.length);
 		}
 	}
 
@@ -229,8 +187,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	 * Link propagators with variables.
 	 */
 	public void declare() {
-		int last = lastPropagatorActive.get();
-		for (int p = 0; p < last; p++) {
+		for (int p = 0; p < propagators.length; p++) {
 			staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
 		}
 	}
