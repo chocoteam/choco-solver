@@ -118,7 +118,7 @@ public class AllIntervalSeries extends AbstractProblem {
     @Override
     public void configureEngine() {
         IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PArc(propagationEngine, vars), new PArc(propagationEngine, dist), new PCons(propagationEngine, ALLDIFF));
+        Queue ad1 = new Queue<AbstractFineEventRecorder>(new PCons(propagationEngine, ALLDIFF), new PArc(propagationEngine, vars), new PArc(propagationEngine, dist));
         Sort coar = new Sort<AbstractCoarseEventRecorder>(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs()));
         solver.set(propagationEngine.set(new Sort(ad1.clearOut(), coar.pickOne()).clearOut()));
     }
