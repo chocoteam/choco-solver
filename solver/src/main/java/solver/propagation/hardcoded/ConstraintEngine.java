@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -67,6 +68,7 @@ public class ConstraintEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator> pro_queue_f;
     protected Propagator lastProp;
     protected final CircularQueue<Propagator> pro_queue_c;
+    protected final TIntIntHashMap p2i; // mapping between propagator ID and its absolute index
     protected final BitSet schedule_f;
     protected final BitSet schedule_c;
     protected final int[][] masks;
@@ -78,28 +80,25 @@ public class ConstraintEngine implements IPropagationEngine {
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList();
         Constraint[] constraints = solver.getCstrs();
-        int mpid = Integer.MAX_VALUE;
-        int Mpid = Integer.MIN_VALUE;
         int mnbv = 0;
+        p2i = new TIntIntHashMap();
+        int k = 0;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
-            for (int j = 0; j < cprops.length; j++) {
+            for (int j = 0; j < cprops.length; j++, k++) {
                 _propagators.add(cprops[j]);
-                int pid = cprops[j].getId();
-                if (pid < mpid) mpid = pid;
-                if (pid > Mpid) Mpid = pid;
+                p2i.put(cprops[j].getId(), k);
                 if (cprops[j].getNbVars() > mnbv) mnbv = cprops[j].getNbVars();
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
 
-        pro_queue_f = new CircularQueue<Propagator>(propagators.length / 2);
+        pro_queue_f = new CircularQueue<Propagator>(propagators.length / 10 + 1);
         pro_queue_c = new CircularQueue<Propagator>(propagators.length);
 
-        int size = solver.getNbIdElt();
-        schedule_f = new BitSet(size);
-        schedule_c = new BitSet(size);
-        masks = new int[Mpid + 1][mnbv + 1];
+        schedule_f = new BitSet(k);
+        schedule_c = new BitSet(k);
+        masks = new int[k][mnbv + 1];
     }
 
     @Override
@@ -115,8 +114,7 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void init(Solver solver) {
         for (int p = 0; p < propagators.length; p++) {
-            pro_queue_c.addLast(propagators[p]);
-            schedule_c.set(propagators[p].getId());
+            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
         }
     }
 
@@ -129,13 +127,14 @@ public class ConstraintEngine implements IPropagationEngine {
                 assert lastProp.isActive() : "propagator is not active";
                 // revision of the variable
                 int pid = lastProp.getId();
-                schedule_f.clear(pid);
+                int aid = p2i.get(pid);
+                schedule_f.clear(aid);
                 Variable[] pVars = lastProp.getVars();
                 int[] vindices = lastProp.getVIndices();
                 for (int v = 0; v < pVars.length; v++) {
-                    int mask = masks[pid][v];
+                    int mask = masks[aid][v];
                     if (mask > 0) {
-                        masks[pid][v] = 0;
+                        masks[aid][v] = 0;
                         lastProp.fineERcalls++;
                         lastProp.propagate(null, vindices[v], mask);
                     }
@@ -148,7 +147,7 @@ public class ConstraintEngine implements IPropagationEngine {
                     lastProp.setActive();
                 }
                 // revision of the propagator
-                schedule_c.clear(pid);
+                schedule_c.clear(p2i.get(pid));
                 lastProp.coarseERcalls++;
                 lastProp.propagate(EventType.FULL_PROPAGATION.mask);
                 onPropagatorExecution(lastProp);
@@ -166,7 +165,7 @@ public class ConstraintEngine implements IPropagationEngine {
             lastProp = pro_queue_f.pollFirst();
             // revision of the variable
             int pid = lastProp.getId();
-            Arrays.fill(masks[pid], 0);
+            Arrays.fill(masks[p2i.get(pid)], 0);
         }
         schedule_f.clear();
         pro_queue_c.clear();
@@ -182,10 +181,11 @@ public class ConstraintEngine implements IPropagationEngine {
             if (cause != prop) {
                 int pid = prop.getId();
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
-                    masks[pid][pindices[p]] |= type.strengthened_mask;
-                    if (!schedule_f.get(pid)) {
+                    int aid = p2i.get(pid);
+                    masks[aid][pindices[p]] |= type.strengthened_mask;
+                    if (!schedule_f.get(aid)) {
                         pro_queue_f.addLast(prop);
-                        schedule_f.set(pid);
+                        schedule_f.set(aid);
                     }
                 }
             }
@@ -196,9 +196,10 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int pid = propagator.getId();
-        if (!schedule_c.get(pid)) {
+        int aid = p2i.get(pid);
+        if (!schedule_c.get(aid)) {
             pro_queue_c.addLast(propagator);
-            schedule_c.set(pid);
+            schedule_c.set(aid);
         }
     }
 
@@ -215,15 +216,16 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
-        if (schedule_f.get(pid)) {
+        int aid = p2i.get(pid);
+        if (schedule_f.get(aid)) {
             for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks[pid][i] = 0;
+                masks[aid][i] = 0;
             }
-            schedule_f.clear(pid);
+            schedule_f.clear(aid);
             pro_queue_f.remove(propagator);
         }
-        if (schedule_c.get(pid)) {
-            schedule_c.clear(pid);
+        if (schedule_c.get(aid)) {
+            schedule_c.clear(aid);
             pro_queue_c.remove(propagator);
         }
     }
