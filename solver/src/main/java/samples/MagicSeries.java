@@ -93,8 +93,7 @@ public class MagicSeries extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        final IPropagationEngine engine = new PropagationEngine(solver.getEnvironment(), solver.getNbVars(), solver.getNbCstrs(),
-                false, true, false);
+        final PropagationEngine engine = new PropagationEngine(solver.getEnvironment(), false, true, false);
         PropagationStrategies.GECODE.make(solver, engine);
         solver.set(engine);
         final IPropagationEngine engine2 = new PropagationEngine(solver.getEnvironment(), true, false, true);

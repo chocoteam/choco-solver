@@ -217,8 +217,10 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
-        for (int i = 0; i < propagator.getNbVars(); i++) {
-            masks[pid][i] = 0;
+        Variable[] variables = propagator.getVars();
+        int[] vindices = propagator.getVIndices();
+        for (int i = 0; i < variables.length; i++) {
+            masks[variables[i].getId()][vindices[i]] = 0;
         }
         if (schedule.get(pid)) {
             schedule.clear(pid);

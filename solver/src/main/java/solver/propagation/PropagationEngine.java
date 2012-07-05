@@ -74,29 +74,20 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected boolean initialized = false; // is this already initialized
 
-    protected final boolean forceInitialPropagation; // is propagator activation required
+    protected boolean forceInitialPropagation= true; // is propagator activation required
 
     protected boolean initialPropagationDone = false; // related to forceInitialPropagation, avoid awaking up propagators 2 times
 
-    protected final boolean checkProperties; // skip water marking phases
+    protected boolean checkProperties= true; // skip water marking phases
 
-    protected final boolean forceActivation; // force activation of event recorder on creation
+    protected boolean forceActivation = false; // force activation of event recorder on creation
 
     protected IEnvironment environment;
 
     protected int default_nb_vars = 16, default_nb_props = 16;
 
     public PropagationEngine(IEnvironment environment) {
-        this(environment, 16, 16, false, true, false);
-    }
-
-    public PropagationEngine(IEnvironment environment, int nbVar, int nbProp) {
-        this(environment, nbVar, nbProp, false, true, false);
-    }
-
-    public PropagationEngine(IEnvironment environment, boolean checkProperties, boolean forceInitialPropagation,
-                             boolean forceActivation) {
-        this(environment, 16, 16, checkProperties, forceInitialPropagation, forceActivation);
+        this(environment, true, true, false);
     }
 
     /**
@@ -110,18 +101,37 @@ public class PropagationEngine implements IPropagationEngine {
      * @param forceInitialPropagation set to true, propagators will be scheduled for initial proapation
      * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
      */
-    public PropagationEngine(IEnvironment environment, int nbVar, int nbProp,
-                             boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
+    public PropagationEngine(IEnvironment environment, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
         this.exception = new ContradictionException();
         this.environment = environment;
-        default_nb_props = nbProp;
-        default_nb_vars = nbVar;
         fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
         fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         coarses = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         this.checkProperties = checkProperties;
         this.forceInitialPropagation = forceInitialPropagation;
         this.forceActivation = forceActivation;
+    }
+
+    /**
+     * Override default parameters. Should be called just after the constructor.
+     *
+     * @param nbVar                   estimation of the number of variables
+     * @param nbProp                  estimation of the number of propagators
+     * @param checkProperties         set to false the verification of the three following properties will be skipped:
+     *                                <br/>
+     *                                <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
+     *                                <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
+     *                                <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
+     *                                <br/>
+     * @param forceInitialPropagation set to true, propagators will be scheduled for initial propagation
+     * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
+     */
+    public void setParameters(int nbVar, int nbProp, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
+        this.checkProperties = checkProperties;
+        this.forceInitialPropagation = forceInitialPropagation;
+        this.forceActivation = forceActivation;
+        default_nb_props = nbProp;
+        default_nb_vars = nbVar;
     }
 
     @Override
