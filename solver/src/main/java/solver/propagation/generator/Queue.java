@@ -30,7 +30,6 @@ import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.AQueue;
 import solver.propagation.queues.CircularQueue;
-import solver.propagation.queues.LinkedList;
 import solver.recorders.IEventRecorder;
 
 
@@ -44,7 +43,7 @@ import solver.recorders.IEventRecorder;
  */
 public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> {
 
-    public static boolean LINKED_LIST = false;
+//    public static boolean LINKED_LIST = false;
 
     protected S lastPopped;
     protected AQueue<S> toPropagate;
@@ -57,11 +56,11 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             elements[e].setScheduler(this, e);
             nbe++;
         }
-        if (LINKED_LIST) {
+        /*if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
-        } else {
+        } else {*/
             toPropagate = new CircularQueue<S>(nbe / 2 + 1);
-        }
+//        }
     }
 
     public Queue(S[] schedulables) {
@@ -72,11 +71,11 @@ public final class Queue<S extends ISchedulable> extends PropagationStrategy<S> 
             nbe++;
         }
 
-        if (LINKED_LIST) {
+        /*if (LINKED_LIST) {
             toPropagate = new LinkedList<S>();
-        } else {
+        } else {*/
             toPropagate = new CircularQueue<S>(nbe / 2 + 1);
-        }
+//        }
     }
 
 

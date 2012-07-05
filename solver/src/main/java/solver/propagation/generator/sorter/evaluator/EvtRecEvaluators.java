@@ -180,7 +180,7 @@ public class EvtRecEvaluators {
             int a = ((IntVar)variables[0]).getDomainSize();
             for (int i = 1; i < variables.length; i++) {
                 int aa = ((IntVar) variables[i]).getDomainSize();
-                if (aa < a) {
+                if (aa > a) {
                     a = aa;
                 }
             }

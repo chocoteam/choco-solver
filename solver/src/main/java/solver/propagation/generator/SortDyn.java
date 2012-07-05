@@ -156,5 +156,10 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
         int idx = element.getIndexInScheduler();
         toPropagate.update(evaluator.eval(element), idx);
     }
+
+    @Override
+    public SortDyn duplicate() {
+        return new SortDyn(this.evaluator);
+    }
     //-->
 }

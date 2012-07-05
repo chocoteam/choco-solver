@@ -190,6 +190,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 		for (int p = 0; p < propagators.length; p++) {
 			staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
 		}
+        for(int v = 0; v < vars.length; v++){
+            vars[v].declareIn(this);
+        }
 	}
 
 	/**

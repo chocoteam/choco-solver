@@ -94,6 +94,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
+    protected int[] vindices;
+
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
@@ -145,6 +147,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
         checkVariable(vars);
         this.vars = vars.clone();
+        this.vindices = new int[vars.length];
+        for (int i = 0; i < vindices.length; i++) {
+            vindices[i] = i;
+        }
         this.solver = solver;
         this.environment = solver.getEnvironment();
         this.state = environment.makeInt(NEW);
@@ -275,6 +281,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public final V[] getVars() {
         return vars;
+    }
+
+    public int[] getVIndices() {
+        return vindices;
     }
 
     /**
