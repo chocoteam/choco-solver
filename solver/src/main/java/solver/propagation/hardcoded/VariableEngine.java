@@ -224,7 +224,7 @@ public class VariableEngine implements IPropagationEngine {
         for (int i = 0; i < variables.length; i++) {
             masks[variables[i].getId()][vindices[i]] = 0;
         }
-        if (schedule[pid] = true) {
+        if (schedule[pid] == true) {
             schedule[pid] = false;
             pro_queue.remove(propagator);
         }
