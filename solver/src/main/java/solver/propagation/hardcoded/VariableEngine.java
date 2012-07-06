@@ -43,7 +43,6 @@ import solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -68,7 +67,7 @@ public class VariableEngine implements IPropagationEngine {
     protected Variable lastVar;
     protected final CircularQueue<Propagator> pro_queue;
     protected Propagator lastProp;
-    protected final BitSet schedule;
+    protected final boolean[] schedule;
     protected final int[][] masks;
 
 
@@ -99,7 +98,7 @@ public class VariableEngine implements IPropagationEngine {
         pro_queue = new CircularQueue<Propagator>(propagators.length);
 
         int size = solver.getNbIdElt();
-        schedule = new BitSet(size);
+        schedule = new boolean[size];
         masks = new int[mvid + 1][mnbp + 1];
     }
 
@@ -116,8 +115,7 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void init(Solver solver) {
         for (int p = 0; p < propagators.length; p++) {
-            pro_queue.addLast(propagators[p]);
-            schedule.set(propagators[p].getId());
+            schedulePropagator(propagators[p], EventType.FULL_PROPAGATION);
         }
     }
 
@@ -129,7 +127,7 @@ public class VariableEngine implements IPropagationEngine {
                 lastVar = var_queue.pollFirst();
                 // revision of the variable
                 int vid = lastVar.getId();
-                schedule.clear(vid);
+                schedule[vid] = false;
                 Propagator[] vProps = lastVar.getPropagators();
                 int[] pindices = lastVar.getPIndices();
                 for (int p = 0; p < vProps.length; p++) {
@@ -149,7 +147,7 @@ public class VariableEngine implements IPropagationEngine {
                     lastProp.setActive();
                 }
                 // revision of the propagator
-                schedule.clear(pid);
+                schedule[pid] = false;
                 lastProp.coarseERcalls++;
                 lastProp.propagate(EventType.FULL_PROPAGATION.mask);
                 onPropagatorExecution(lastProp);
@@ -168,9 +166,13 @@ public class VariableEngine implements IPropagationEngine {
             // revision of the variable
             int vid = lastVar.getId();
             Arrays.fill(masks[vid], 0);
+            schedule[vid] = false;
         }
-        pro_queue.clear();
-        schedule.clear();
+        while(!pro_queue.isEmpty()){
+            lastProp = pro_queue.pollFirst();
+            int pid = lastProp.getId();
+            schedule[pid] = false;
+        }
     }
 
     @Override
@@ -188,9 +190,9 @@ public class VariableEngine implements IPropagationEngine {
                 }
             }
         }
-        if (!schedule.get(vid) && _schedule) {
+        if (!schedule[vid] && _schedule) {
             var_queue.addLast(variable);
-            schedule.set(vid);
+            schedule[vid] = true;
         }
 
     }
@@ -198,9 +200,9 @@ public class VariableEngine implements IPropagationEngine {
     @Override
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int pid = propagator.getId();
-        if (!schedule.get(pid)) {
+        if (!schedule[pid]) {
             pro_queue.addLast(propagator);
-            schedule.set(pid);
+            schedule[pid] = true;
         }
     }
 
@@ -222,8 +224,8 @@ public class VariableEngine implements IPropagationEngine {
         for (int i = 0; i < variables.length; i++) {
             masks[variables[i].getId()][vindices[i]] = 0;
         }
-        if (schedule.get(pid)) {
-            schedule.clear(pid);
+        if (schedule[pid] = true) {
+            schedule[pid] = false;
             pro_queue.remove(propagator);
         }
     }

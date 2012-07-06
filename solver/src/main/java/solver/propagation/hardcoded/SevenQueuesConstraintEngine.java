@@ -28,7 +28,6 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
-import gnu.trove.map.hash.TIntIntHashMap;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,6 +35,8 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
+import solver.propagation.hardcoded.util.AId2AbId;
+import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
@@ -65,14 +66,13 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     protected final IEnvironment environment; // environment of backtrackable objects
     protected final Variable[] variables;
 
-    protected static final int CO = 8; // coarse offset
+    protected static final int O = 8; // coarse offset
 
     protected final Propagator[] propagators;
     protected final CircularQueue<Propagator>[] pro_queue;
     protected Propagator lastProp;
-    protected final BitSet schedule_f;
-    protected final BitSet schedule_c;
-    protected final TIntIntHashMap p2i; // mapping between propagator ID and its absolute index
+    protected final short[] schedule_in_f, schedule_in_c;
+    protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final BitSet notEmpty;
     protected final int[][] masks;
 
@@ -83,26 +83,32 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList();
         Constraint[] constraints = solver.getCstrs();
-        p2i = new TIntIntHashMap();
-        int mnbv = 0;
         int k = 0;
+        int mnbv = 0;
+        int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
             for (int j = 0; j < cprops.length; j++, k++) {
                 _propagators.add(cprops[j]);
-                p2i.put(cprops[j].getId(), k);
                 if (cprops[j].getNbVars() > mnbv) mnbv = cprops[j].getNbVars();
+                int id = cprops[j].getId();
+                m = Math.min(m, id);
+                M = Math.max(M, id);
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
-
+        p2i = new AId2AbId(m, M, -1);
+//        p2i = new MId2AbId(M - m + 1, -1);
+        for (int j = 0; j < propagators.length; j++) {
+            p2i.set(propagators[j].getId(), j);
+        }
         pro_queue = new CircularQueue[16];
         for (int i = 0; i < 16; i++) {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
-        schedule_f = new BitSet(k);
-        schedule_c = new BitSet(k);
+        schedule_in_f = new short[k];
+        schedule_in_c = new short[k];
         masks = new int[k][mnbv + 1];
         notEmpty = new BitSet(15);
     }
@@ -128,14 +134,14 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
-            if (i < CO) { // fine grained
+            if (i < O) { // fine grained
                 while (!pro_queue[i].isEmpty()) {
                     lastProp = pro_queue[i].pollFirst();
-                    assert lastProp.isActive() : "propagator is not active:"+lastProp;
+                    assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     // revision of the variable
                     int pid = lastProp.getId();
                     int aid = p2i.get(pid);
-                    schedule_f.clear(aid);
+                    schedule_in_f[aid] = 0;
                     Variable[] pVars = lastProp.getVars();
                     int[] vindices = lastProp.getVIndices();
                     for (int v = 0; v < pVars.length; v++) {
@@ -155,7 +161,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                     lastProp.setActive();
                 }
                 // revision of the propagator
-                schedule_c.clear(p2i.get(pid));
+                schedule_in_c[p2i.get(pid)] = 0;
                 lastProp.coarseERcalls++;
                 lastProp.propagate(EventType.FULL_PROPAGATION.mask);
                 onPropagatorExecution(lastProp);
@@ -168,25 +174,23 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
+        int aid;
         if (lastProp != null) {
-            int pid = lastProp.getId();
-            int aid = p2i.get(pid);
+            aid = p2i.get(lastProp.getId());
             Arrays.fill(masks[aid], 0);
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
-            if (i < CO) {
-                while (!pro_queue[i].isEmpty()) {
-                    lastProp = pro_queue[i].pollFirst();
-                    // revision of the variable
-                    int pid = lastProp.getId();
-                    int aid = p2i.get(pid);
+            while (!pro_queue[i].isEmpty()) {
+                lastProp = pro_queue[i].pollFirst();
+                // revision of the variable
+                aid = p2i.get(lastProp.getId());
+                if (i < O) {
                     Arrays.fill(masks[aid], 0);
+                    schedule_in_f[aid] = 0;
+                } else {
+                    schedule_in_c[aid] = 0;
                 }
-            } else {
-                pro_queue[i].clear();
             }
-            schedule_f.clear();
-            schedule_c.clear();
             notEmpty.clear();
         }
     }
@@ -202,10 +206,10 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(pid);
                     masks[aid][pindices[p]] |= type.strengthened_mask;
-                    if (!schedule_f.get(aid)) {
+                    if (schedule_in_f[aid] == 0) {
                         int prio = prop.dynPriority();
                         pro_queue[prio].addLast(prop);
-                        schedule_f.set(aid);
+                        schedule_in_f[aid] = (short) (prio + 1);
                         notEmpty.set(prio);
                     }
                 }
@@ -218,11 +222,11 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if (!schedule_c.get(aid)) {
+        if (schedule_in_c[aid] == 0) {
             int prio = propagator.dynPriority();
-            pro_queue[CO + prio].addLast(propagator);
-            schedule_c.set(aid);
-            notEmpty.set(CO+prio);
+            pro_queue[O + prio].addLast(propagator);
+            schedule_in_c[aid] = (short) (prio + 1);
+            notEmpty.set(O + prio);
         }
     }
 
@@ -241,28 +245,16 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int c = propagator.dynPriority();
         int aid = p2i.get(pid);
-        if (schedule_f.get(aid)) {
-            for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks[aid][i] = 0;
-            }
-            schedule_f.clear(aid);
-            for (; c < CO; c++) {
-                int idx = pro_queue[c].indexOf(propagator);
-                if (idx > -1) {
-                    pro_queue[c].remove(idx);
-                    c = CO;
-                }
-            }
+        int prio = schedule_in_f[aid];
+        if (prio > 0) {
+            Arrays.fill(masks[aid], 0, propagator.getNbVars(), 0);
+            schedule_in_f[aid]  = 0;
+            pro_queue[prio-1].remove(propagator);
         }
-        if (schedule_c.get(aid)) {
-            schedule_c.clear(aid);
-            for (; c < CO; c++) {
-                int idx = pro_queue[CO + c].indexOf(propagator);
-                if (idx > -1) {
-                    pro_queue[CO + c].remove(idx);
-                    c = 8;
-                }
-            }
+        prio = schedule_in_c[aid];
+        if (prio > 0) {
+            schedule_in_c[aid]  = 0;
+            pro_queue[O + prio-1].remove(propagator);
         }
     }
 

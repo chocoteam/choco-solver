@@ -37,6 +37,8 @@ import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
+import solver.propagation.hardcoded.util.AId2AbId;
+import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
 import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
@@ -45,7 +47,6 @@ import solver.variables.EventType;
 import solver.variables.Variable;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.List;
 
 /**
@@ -72,9 +73,9 @@ public class ArcEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator> arc_queue_p;
     protected Propagator lastProp;
     protected final CircularQueue<Propagator> pro_queue_c;
-    protected final BitSet schedule_c;
-    protected final TIntIntHashMap v2i; // mapping between variable ID and its absolute index
-    protected final TIntIntHashMap p2i; // mapping between propagator ID and its absolute index
+    protected final boolean[] schedule_c;
+    protected final IId2AbId v2i; // mapping between propagator ID and its absolute index
+    protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final TIntIntHashMap[] masks;
     protected final TIntIntHashMap[] idxVinP;
 //    protected final int[][] masks;  // -1 : not inserted, 0: inserted but no event, >0: inserted and events
@@ -85,30 +86,45 @@ public class ArcEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        v2i = new TIntIntHashMap();
         int nbVar = 0;
+        int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
         for (; nbVar < variables.length; nbVar++) {
-            v2i.put(variables[nbVar].getId(), nbVar);
+            int id = variables[nbVar].getId();
+            m = Math.min(m, id);
+            M = Math.max(M, id);
         }
-        p2i = new TIntIntHashMap();
+        v2i = new AId2AbId(m, M, -1);
+        for (int i = 0; i < nbVar; i++) {
+            int id = variables[i].getId();
+            v2i.set(id, i);
+        }
         List<Propagator> _propagators = new ArrayList();
         Constraint[] constraints = solver.getCstrs();
         int nbProp = 0;
+        m = Integer.MAX_VALUE;
+        M = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
             for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
-                p2i.put(cprops[j].getId(), nbProp);
+                int id = cprops[j].getId();
+                m = Math.min(m, id);
+                M = Math.max(M, id);
             }
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+        p2i = new AId2AbId(m, M, -1);
+//        p2i = new MId2AbId(M - m + 1, -1);
+        for (int j = 0; j < propagators.length; j++) {
+            p2i.set(propagators[j].getId(), j);
+        }
+
 
         arc_queue_v = new CircularQueue<Variable>(8);
         arc_queue_p = new CircularQueue<Propagator>(8);
         pro_queue_c = new CircularQueue<Propagator>(propagators.length);
 
-//        int size = solver.getNbIdElt();
-        schedule_c = new BitSet(nbProp);
+        schedule_c = new boolean[nbProp];
         masks = new TIntIntHashMap[nbVar];
         idxVinP = new TIntIntHashMap[nbVar];
         for (int i = 0; i < variables.length; i++) {
@@ -169,7 +185,7 @@ public class ArcEngine implements IPropagationEngine {
                     lastProp.setActive();
                 }
                 // revision of the propagator
-                schedule_c.clear(p2i.get(lastProp.getId()));
+                schedule_c[p2i.get(lastProp.getId())] = false;
                 lastProp.coarseERcalls++;
                 if (IEventRecorder.DEBUG_PROPAG) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
@@ -196,8 +212,11 @@ public class ArcEngine implements IPropagationEngine {
             int paid = p2i.get(lastProp.getId());
             masks[vaid].put(paid, -1);
         }
-        pro_queue_c.clear();
-        schedule_c.clear();
+        while (!pro_queue_c.isEmpty()) {
+            lastProp = pro_queue_c.pollFirst();
+            int pid = p2i.get(lastProp.getId());
+            schedule_c[pid] = false;
+        }
     }
 
     @Override
@@ -231,12 +250,12 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int paid = p2i.get(propagator.getId());
-        if (!schedule_c.get(paid)) {
+        if (!schedule_c[paid]) {
             if (IEventRecorder.DEBUG_PROPAG) {
                 LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
             }
             pro_queue_c.addLast(propagator);
-            schedule_c.set(paid);
+            schedule_c[paid] = true;
         }
     }
 
@@ -261,8 +280,8 @@ public class ArcEngine implements IPropagationEngine {
                 masks[vaid].adjustValue(paid, -cm); // simply clear the mask
             }
         }
-        if (schedule_c.get(paid)) {
-            schedule_c.clear(paid);
+        if (schedule_c[paid]) {
+            schedule_c[paid] = false;
             pro_queue_c.remove(propagator);
         }
     }
