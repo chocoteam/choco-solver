@@ -152,8 +152,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                             lastProp.propagate(null, vindices[v], mask);
                         }
                     }
-                    notEmpty.clear(i);
                 }
+                notEmpty.clear(i);
             } else { // coarse grained
                 lastProp = pro_queue[i].pollFirst();
                 int pid = lastProp.getId();
@@ -201,7 +201,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop) {
+            if (cause != prop && prop.isActive()) {
                 int pid = prop.getId();
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(pid);
@@ -248,13 +248,13 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int prio = schedule_in_f[aid];
         if (prio > 0) {
             Arrays.fill(masks[aid], 0, propagator.getNbVars(), 0);
-            schedule_in_f[aid]  = 0;
-            pro_queue[prio-1].remove(propagator);
+            schedule_in_f[aid] = 0;
+            pro_queue[prio - 1].remove(propagator);
         }
         prio = schedule_in_c[aid];
         if (prio > 0) {
-            schedule_in_c[aid]  = 0;
-            pro_queue[O + prio-1].remove(propagator);
+            schedule_in_c[aid] = 0;
+            pro_queue[O + prio - 1].remove(propagator);
         }
     }
 

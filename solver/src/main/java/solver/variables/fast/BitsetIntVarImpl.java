@@ -483,7 +483,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 s.append(',').append(i);
                 nb--;
             }
-            if (nb == 0) {
+            if (nb == 0 && SIZE.get() > 6) {
                 s.append("...,").append(this.getUB());
             }
             s.append('}');

@@ -78,8 +78,6 @@ public class ArcEngine implements IPropagationEngine {
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final TIntIntHashMap[] masks;
     protected final TIntIntHashMap[] idxVinP;
-//    protected final int[][] masks;  // -1 : not inserted, 0: inserted but no event, >0: inserted and events
-//    protected final int[][] idxVinP;
 
     public ArcEngine(Solver solver) {
         this.exception = new ContradictionException();
@@ -166,19 +164,19 @@ public class ArcEngine implements IPropagationEngine {
                 lastProp = arc_queue_p.pollFirst();
 //                assert lastProp.isActive() : "propagator is not active"; <= CPRU: a propagator can be inactive, what matters is the mask
 
-                // revision of the variable
-                int vaid = v2i.get(lastVar.getId());
-                int paid = p2i.get(lastProp.getId());
-                int mask = masks[vaid].get(paid);
-                masks[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
-                if (mask > 0) {
-                    if (IEventRecorder.DEBUG_PROPAG) {
-                        LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
+                    // revision of the variable
+                    int vaid = v2i.get(lastVar.getId());
+                    int paid = p2i.get(lastProp.getId());
+                    int mask = masks[vaid].get(paid);
+                    masks[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
+                    if (mask > 0) {
+                        if (IEventRecorder.DEBUG_PROPAG) {
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
+                        }
+                        lastProp.fineERcalls++;
+                        lastProp.propagate(null, idxVinP[vaid].get(paid), mask);
                     }
-                    lastProp.fineERcalls++;
-                    lastProp.propagate(null, idxVinP[vaid].get(paid), mask);
                 }
-            }
             if (!pro_queue_c.isEmpty()) {
                 lastProp = pro_queue_c.pollFirst();
                 if (lastProp.isStateLess()) {
@@ -225,9 +223,9 @@ public class ArcEngine implements IPropagationEngine {
         Propagator[] vProps = variable.getPropagators();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop) {
+            if (cause != prop && prop.isActive()) {
                 int paid = p2i.get(prop.getId());
-                if ((type.mask & prop.getPropagationConditions(idxVinP[paid].get(paid))) != 0) {
+                if ((type.mask & prop.getPropagationConditions(idxVinP[vaid].get(paid))) != 0) {
                     if (IEventRecorder.DEBUG_PROPAG) {
                         LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + variable.toString() + "::" + prop.toString() + " >>");
                     }

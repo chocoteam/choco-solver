@@ -74,6 +74,7 @@ public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonito
         this.delta = NoDelta.singleton;
         this.reactOnRemoval = false;
         this.var.subscribeView(this);
+        this.solver.associates(this);
     }
 
     @Override

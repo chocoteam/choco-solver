@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -38,6 +39,7 @@ import solver.propagation.IPropagationStrategy;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
+import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -140,6 +142,9 @@ public class ConstraintEngine implements IPropagationEngine {
                 for (int v = 0; v < vindices.length; v++) {
                     int mask = masks[aid][v];
                     if (mask > 0) {
+                        if (IEventRecorder.DEBUG_PROPAG) {
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + Arrays.toString(lastProp.getVars()) + "::" + lastProp.toString() + " >>");
+                        }
                         masks[aid][v] = 0;
                         lastProp.fineERcalls++;
                         lastProp.propagate(null, vindices[v], mask);
@@ -155,6 +160,9 @@ public class ConstraintEngine implements IPropagationEngine {
                 // revision of the propagator
                 schedule[p2i.get(pid)] ^= C;
                 lastProp.coarseERcalls++;
+                if (IEventRecorder.DEBUG_PROPAG) {
+                    LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
+                }
                 lastProp.propagate(EventType.FULL_PROPAGATION.mask);
                 onPropagatorExecution(lastProp);
             }
@@ -188,7 +196,9 @@ public class ConstraintEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop) {
+            if (cause != prop && prop.isActive()) {
+                if (IEventRecorder.DEBUG_PROPAG)
+                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(prop.getId());
                     masks[aid][pindices[p]] |= type.strengthened_mask;
@@ -207,6 +217,9 @@ public class ConstraintEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
         if ((schedule[aid] & C) == 0) {
+            if (IEventRecorder.DEBUG_PROPAG) {
+                LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
+            }
             pro_queue_c.addLast(propagator);
             schedule[aid] |= C;
         }
@@ -226,7 +239,11 @@ public class ConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if ((schedule[aid] & F) != 0) {
+        if (lastProp == propagator) {
+            for (int i = 0; i < propagator.getNbVars(); i++) {
+                masks[aid][i] = 0;
+            }
+        } else if ((schedule[aid] & F) != 0) {
             for (int i = 0; i < propagator.getNbVars(); i++) {
                 masks[aid][i] = 0;
             }

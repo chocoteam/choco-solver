@@ -29,7 +29,7 @@ package solver.constraints.propagators;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -102,12 +102,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public IEnvironment environment;
 
-    protected static final int NEW = 0, ACTIVE = 1, PASSIVE = 2;
+    protected static final short NEW = 0, ACTIVE = 1, PASSIVE = 2;
 
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
+    protected short state; // 0 : new -- 1 : active -- 2 : passive
 
     protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
@@ -153,7 +153,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.state = environment.makeInt(NEW);
+        this.state = NEW;
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
@@ -238,27 +238,39 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
-        state.set(ACTIVE);
+        state = ACTIVE;
+        environment.save(new Operation(){
+            @Override
+            public void undo() {
+                state = NEW;
+            }
+        });
         solver.getEngine().activatePropagator(this);
     }
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
         assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
-        state.set(PASSIVE);
+        state = PASSIVE;
+        environment.save(new Operation(){
+            @Override
+            public void undo() {
+                state = PASSIVE;
+            }
+        });
         solver.getEngine().desactivatePropagator(this);
     }
 
     public boolean isStateLess() {
-        return state.get() == NEW;
+        return state == NEW;
     }
 
     public boolean isActive() {
-        return state.get() == ACTIVE;
+        return state == ACTIVE;
     }
 
     public boolean isPassive() {
-        return state.get() == PASSIVE;
+        return state == PASSIVE;
     }
 
     /**

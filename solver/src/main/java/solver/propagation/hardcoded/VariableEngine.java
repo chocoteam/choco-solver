@@ -133,7 +133,7 @@ public class VariableEngine implements IPropagationEngine {
                 for (int p = 0; p < vProps.length; p++) {
                     Propagator prop = vProps[p];
                     int mask = masks[vid][p];
-                    if (mask > 0 && prop.isActive()) {
+                    if (mask > 0) {
                         masks[vid][p] = 0;
                         prop.fineERcalls++;
                         prop.propagate(null, pindices[p], mask);
@@ -183,7 +183,7 @@ public class VariableEngine implements IPropagationEngine {
         int[] pindices = variable.getPIndices();
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
-            if (cause != prop) {
+            if (cause != prop && prop.isActive()) {
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     masks[vid][p] |= type.strengthened_mask;
                     _schedule = true;
