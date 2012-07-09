@@ -172,21 +172,24 @@ public class ConstraintEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
+        int aid;
         if (lastProp != null) {
-            pro_queue_f.addLast(lastProp);
+            aid = p2i.get(lastProp.getId());
+            Arrays.fill(masks[aid], 0);
+            schedule[aid] = 0;
         }
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
             // revision of the variable
-            int aid = p2i.get(lastProp.getId());
+            aid = p2i.get(lastProp.getId());
             Arrays.fill(masks[aid], 0);
-            schedule[aid] ^= F;
+            schedule[aid] = 0;
         }
         while (!pro_queue_c.isEmpty()) {
             lastProp = pro_queue_c.pollFirst();
             // revision of the variable
-            int aid = p2i.get(lastProp.getId());
-            schedule[aid] ^= C;
+            aid = p2i.get(lastProp.getId());
+            schedule[aid] = 0;
         }
     }
 

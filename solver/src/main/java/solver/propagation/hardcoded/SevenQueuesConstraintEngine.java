@@ -178,6 +178,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
             Arrays.fill(masks[aid], 0);
+            schedule_in_f[aid] = 0;
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
             while (!pro_queue[i].isEmpty()) {

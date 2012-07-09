@@ -54,7 +54,7 @@ public enum Views {
         if (value == 0 || value == 1) {
             cste = new BoolConstantView(name, value, solver);
         } else {
-            cste = new ConstantView("cste -- " + value, value, solver);
+            cste = new ConstantView(name, value, solver);
         }
         solver.cachedConstants.put(value, cste);
         return cste;

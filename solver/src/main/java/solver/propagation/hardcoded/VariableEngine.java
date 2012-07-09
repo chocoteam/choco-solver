@@ -158,17 +158,20 @@ public class VariableEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
+        int vid;
         if (lastVar != null) {
-            var_queue.addLast(lastVar);
+            vid = lastVar.getId();
+            Arrays.fill(masks[vid], 0);
+            schedule[vid] = false;
         }
         while (!var_queue.isEmpty()) {
             lastVar = var_queue.pollFirst();
             // revision of the variable
-            int vid = lastVar.getId();
+            vid = lastVar.getId();
             Arrays.fill(masks[vid], 0);
             schedule[vid] = false;
         }
-        while(!pro_queue.isEmpty()){
+        while (!pro_queue.isEmpty()) {
             lastProp = pro_queue.pollFirst();
             int pid = lastProp.getId();
             schedule[pid] = false;
