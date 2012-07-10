@@ -95,10 +95,10 @@ public class DoubleMinHeap {
     }
 
     public void insert(double key, int elem) {
-        if (PRINT) System.out.printf("<< INSERT (%d, %d)\n", key, elem);
+        if (PRINT) System.out.printf("<< INSERT (%.3f, %d)\n", key, elem);
         if (PRINT) print();
-        if (size == keys.length - 1) {
-            doubleCapacity();
+        if (size == keys.length - 1 || elem > keys.length-1) {
+            doubleCapacity(elem);
         }
         size++;
         int current = size;
@@ -117,23 +117,23 @@ public class DoubleMinHeap {
         if (PRINT) System.out.printf(">>>>>>>>\n");
     }
 
-    private void doubleCapacity() {
+    private void doubleCapacity(int elem) {
         if (PRINT) System.out.printf("DOUBLE CAPA\n");
-        int csize = size * 2;
+        int csize = Math.max(keys.length * 2 + 1, elem + 1);
         double[] dtmp = keys;
         keys = new double[csize];
-        System.arraycopy(dtmp, 0, keys, 0, size+1);
+        System.arraycopy(dtmp, 0, keys, 0, size + 1);
         int[] tmp = elts;
         elts = new int[csize];
-        System.arraycopy(tmp, 0, elts, 0, size+1);
+        System.arraycopy(tmp, 0, elts, 0, size + 1);
         tmp = posOf;
         posOf = new int[csize];
-        System.arraycopy(tmp, 0, posOf, 0, size+1);
+        System.arraycopy(tmp, 0, posOf, 0, size + 1);
     }
 
 
     public void update(double new_value, int elem) {
-        if (PRINT) System.out.printf("<< UPDATE (%d, %d)\n", new_value, elem);
+        if (PRINT) System.out.printf("<< UPDATE (%.3f, %d)\n", new_value, elem);
         if (PRINT) print();
         int current = posOf[elem];//indexOf(elem);
         double amount = new_value - keys[current];
@@ -150,7 +150,7 @@ public class DoubleMinHeap {
     public void print() {
         int i;
         for (i = 1; i <= size; i++)
-            System.out.printf("(%d, %s) ", keys[i], elts[i]);
+            System.out.printf("(%.3f, %s) ", keys[i], elts[i]);
         System.out.println();
     }
 

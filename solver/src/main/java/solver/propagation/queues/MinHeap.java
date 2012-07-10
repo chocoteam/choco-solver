@@ -97,8 +97,8 @@ public class MinHeap implements IHeap {
     public void insert(int key, int elem) {
         if (PRINT) System.out.printf("<< INSERT (%d, %d)\n", key, elem);
         if (PRINT) print();
-        if (size == keys.length - 1) {
-            doubleCapacity();
+        if (size == keys.length - 1 || elem > keys.length-1) {
+            doubleCapacity(elem);
         }
         size++;
         int current = size;
@@ -117,9 +117,9 @@ public class MinHeap implements IHeap {
         if (PRINT) System.out.printf(">>>>>>>>\n");
     }
 
-    private void doubleCapacity() {
+    private void doubleCapacity(int elem) {
         if (PRINT) System.out.printf("DOUBLE CAPA\n");
-        int csize = size * 2;
+        int csize = Math.max(keys.length * 2 + 1, elem + 1);
         int[] tmp = keys;
         keys = new int[csize];
         System.arraycopy(tmp, 0, keys, 0, size+1);

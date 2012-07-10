@@ -237,11 +237,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
         if (schedule_in_c[aid] == 0) {
-            int prio = propagator.dynPriority();
-            pro_queue[O + prio].addLast(propagator);
-            schedule_in_c[aid] = (short) (prio + 1);
-            notEmpty.set(O + prio);
+            int priority = propagator.dynPriority();
+            pro_queue[O + priority].addLast(propagator);
+            schedule_in_c[aid] = (short) (priority + 1);
+            notEmpty.set(O + priority);
         }
+        masks_c[aid] |= event.getStrengthenedMask();
     }
 
     @Override
