@@ -36,7 +36,7 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public class WaterMarking2Impl implements IWaterMarking {
 
-    protected TIntHashSet[] elements;
+    protected TIntHashSet elements;
 
     private int OFFSET = 1;
 
@@ -48,7 +48,7 @@ public class WaterMarking2Impl implements IWaterMarking {
         if (nbe2 > Integer.MAX_VALUE) {
             throw new RuntimeException("WaterMarkingImpl cannot handle so much elements!");
         }
-        elements = new TIntHashSet[8];
+        elements = new TIntHashSet();
         this.pivot = pivot;
     }
 
@@ -62,11 +62,7 @@ public class WaterMarking2Impl implements IWaterMarking {
 
     @Override
     public int size() {
-        int s = 0;
-        for (int i = 0; i < elements.length; i++) {
-            s += (elements[i] == null ? 0 : elements[i].size());
-        }
-        return s;
+        return elements.size();
     }
 
     @Override
@@ -76,45 +72,32 @@ public class WaterMarking2Impl implements IWaterMarking {
 
     @Override
     public void putMark(int id) {
-        putMark(0, id, -1);
+        putMark(0, id);
     }
 
     @Override
-    public void putMark(int id1, int id2, int id3) {
-        int id = _id(id1, id2);
-        if (id3 + OFFSET >= elements.length) {
-            int ns = Math.max(elements.length * 3 / 2, id3 + OFFSET) + 1;
-            TIntHashSet[] tmp = elements;
-            elements = new TIntHashSet[ns];
-            System.arraycopy(tmp, 0, elements, 0, tmp.length);
-        }
-        if (elements[id3 + OFFSET] == null) {
-            elements[id3 + OFFSET] = new TIntHashSet();
-        }
-        elements[id3 + OFFSET].add(id);
+    public void putMark(int id1, int id2) {
+        elements.add(_id(id1, id2));
     }
 
     @Override
     public void clearMark(int id) {
-        clearMark(0, id, -1);
+        clearMark(0, id);
     }
 
     @Override
-    public void clearMark(int id1, int id2, int id3) {
-        int id = _id(id1, id2);
+    public void clearMark(int id1, int id2) {
         // we assume it alredy exists
-        elements[id3 + OFFSET].remove(id);
+        elements.remove(_id(id1, id2));
     }
 
     @Override
     public boolean isMarked(int id) {
-        return isMarked(0, id, -1);
+        return isMarked(0, id);
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
-        return id3 + OFFSET < elements.length
-                && elements[id3 + OFFSET] != null
-                && elements[id3 + OFFSET].contains(_id(id1, id2));
+    public boolean isMarked(int id1, int id2) {
+        return elements.contains(_id(id1, id2));
     }
 }

@@ -102,9 +102,9 @@ public class PCons implements Generator<AbstractFineEventRecorder> {
         for (int j = 0; j < nbv; j++) {
             Variable var = variables[j];
             int vidx = var.getId();
-            if (propagationEngine.isMarked(vidx, pidx, j)) {
+            if (propagationEngine.isMarked(vidx, pidx)) {
                 if (validations.length == 0 || validate(var, validations)) {
-                    propagationEngine.clearWatermark(vidx, pidx, j);
+                    propagationEngine.clearWatermark(vidx, pidx);
                     variables[i] = var;
                     pindices[i++] = j;
                 }

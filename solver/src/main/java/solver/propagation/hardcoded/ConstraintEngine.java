@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import gnu.trove.list.array.TIntArrayList;
 import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
@@ -74,7 +75,8 @@ public class ConstraintEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator> pro_queue_c;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final short[] schedule;
-    protected final int[][] masks;
+    protected final int[][] masks_f;
+    protected final int[] masks_c;
 
 
     public ConstraintEngine(Solver solver) {
@@ -83,15 +85,15 @@ public class ConstraintEngine implements IPropagationEngine {
 
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList();
+        TIntArrayList nbVars = new TIntArrayList();
         Constraint[] constraints = solver.getCstrs();
-        int k = 0;
-        int mnbv = 0;
+        int nbProp = 0;
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
-            for (int j = 0; j < cprops.length; j++, k++) {
+            for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
-                if (cprops[j].getNbVars() > mnbv) mnbv = cprops[j].getNbVars();
+                nbVars.add(cprops[j].getNbVars());
                 int id = cprops[j].getId();
                 m = Math.min(m, id);
                 M = Math.max(M, id);
@@ -99,15 +101,18 @@ public class ConstraintEngine implements IPropagationEngine {
         }
         propagators = _propagators.toArray(new Propagator[_propagators.size()]);
         p2i = new AId2AbId(m, M, -1);
-//        p2i = new MId2AbId(M - m + 1, -1);
         for (int j = 0; j < propagators.length; j++) {
             p2i.set(propagators[j].getId(), j);
         }
         pro_queue_f = new CircularQueue<Propagator>(propagators.length / 10 + 1);
         pro_queue_c = new CircularQueue<Propagator>(propagators.length);
 
-        schedule = new short[k];
-        masks = new int[k][mnbv + 1];
+        schedule = new short[nbProp];
+        masks_f = new int[nbProp][];
+        for (int i = 0; i < nbProp; i++) {
+            masks_f[i] = new int[nbVars.get(i)];
+        }
+        masks_c = new int[nbProp];
     }
 
     @Override
@@ -130,22 +135,23 @@ public class ConstraintEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
+        int mask, aid;
+        int[] vindices;
         do {
             while (!pro_queue_f.isEmpty()) {
                 lastProp = pro_queue_f.pollFirst();
                 assert lastProp.isActive() : "propagator is not active";
                 // revision of the variable
-                int pid = lastProp.getId();
-                int aid = p2i.get(pid);
+                aid = p2i.get(lastProp.getId());
                 schedule[aid] ^= F;
-                int[] vindices = lastProp.getVIndices();
+                vindices = lastProp.getVIndices();
                 for (int v = 0; v < vindices.length; v++) {
-                    int mask = masks[aid][v];
+                    mask = masks_f[aid][v];
                     if (mask > 0) {
                         if (IEventRecorder.DEBUG_PROPAG) {
                             LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + Arrays.toString(lastProp.getVars()) + "::" + lastProp.toString() + " >>");
                         }
-                        masks[aid][v] = 0;
+                        masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
                         lastProp.propagate(null, vindices[v], mask);
                     }
@@ -153,18 +159,21 @@ public class ConstraintEngine implements IPropagationEngine {
             }
             if (!pro_queue_c.isEmpty()) {
                 lastProp = pro_queue_c.pollFirst();
-                int pid = lastProp.getId();
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                }
                 // revision of the propagator
-                schedule[p2i.get(pid)] ^= C;
+                aid = p2i.get(lastProp.getId());
+                mask = masks_c[aid];
+                masks_c[aid] = 0;
+                schedule[aid] ^= C;
                 lastProp.coarseERcalls++;
                 if (IEventRecorder.DEBUG_PROPAG) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
-                lastProp.propagate(EventType.FULL_PROPAGATION.mask);
-                onPropagatorExecution(lastProp);
+                lastProp.propagate(mask);
+                if (lastProp.isStateLess()) {
+                    lastProp.setActive();
+                } else {
+                    onPropagatorExecution(lastProp);
+                }
             }
         } while (!pro_queue_f.isEmpty() || !pro_queue_c.isEmpty());
 
@@ -175,14 +184,14 @@ public class ConstraintEngine implements IPropagationEngine {
         int aid;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks[aid], 0);
+            Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
         }
         while (!pro_queue_f.isEmpty()) {
             lastProp = pro_queue_f.pollFirst();
             // revision of the variable
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks[aid], 0);
+            Arrays.fill(masks_f[aid], 0);
             schedule[aid] = 0;
         }
         while (!pro_queue_c.isEmpty()) {
@@ -204,7 +213,7 @@ public class ConstraintEngine implements IPropagationEngine {
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(prop.getId());
-                    masks[aid][pindices[p]] |= type.strengthened_mask;
+                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
                     if ((schedule[aid] & F) == 0) {
                         pro_queue_f.addLast(prop);
                         schedule[aid] |= F;
@@ -225,6 +234,7 @@ public class ConstraintEngine implements IPropagationEngine {
             }
             pro_queue_c.addLast(propagator);
             schedule[aid] |= C;
+            masks_c[aid] |= event.getStrengthenedMask();
         }
     }
 
@@ -244,11 +254,11 @@ public class ConstraintEngine implements IPropagationEngine {
         int aid = p2i.get(pid);
         if (lastProp == propagator) {
             for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks[aid][i] = 0;
+                masks_f[aid][i] = 0;
             }
         } else if ((schedule[aid] & F) != 0) {
             for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks[aid][i] = 0;
+                masks_f[aid][i] = 0;
             }
             schedule[aid] ^= F;
             pro_queue_f.remove(propagator);
@@ -256,6 +266,7 @@ public class ConstraintEngine implements IPropagationEngine {
         if ((schedule[aid] & C) != 0) {
             schedule[aid] ^= C;
             pro_queue_c.remove(propagator);
+            masks_c[aid] = 0;
         }
     }
 
@@ -287,12 +298,12 @@ public class ConstraintEngine implements IPropagationEngine {
     }
 
     @Override
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 

@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -68,7 +69,8 @@ public class VariableEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator> pro_queue;
     protected Propagator lastProp;
     protected final boolean[] schedule;
-    protected final int[][] masks;
+    protected final int[][] masks_f;
+    protected final int[] masks_c;
 
 
     public VariableEngine(Solver solver) {
@@ -76,15 +78,14 @@ public class VariableEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        int mvid = variables[0].getId();
-        int mnbp = variables[0].getPropagators().length;
+        int maxID = variables[0].getId();
+        TIntArrayList nbProps = new TIntArrayList();
+        nbProps.add(variables[0].getPropagators().length);
         for (int i = 1; i < variables.length; i++) {
-            if (mvid < variables[i].getId()) {
-                mvid = variables[i].getId();
+            if (maxID < variables[i].getId()) {
+                maxID = variables[i].getId();
             }
-            if (mnbp < variables[i].getPropagators().length) {
-                mnbp = variables[i].getPropagators().length;
-            }
+            nbProps.add(variables[i].getPropagators().length);
         }
 
         Constraint[] constraints = solver.getCstrs();
@@ -99,7 +100,11 @@ public class VariableEngine implements IPropagationEngine {
 
         int size = solver.getNbIdElt();
         schedule = new boolean[size];
-        masks = new int[mvid + 1][mnbp + 1];
+        masks_f = new int[maxID + 1][];
+        for (int i = 0; i < variables.length; i++) {
+            masks_f[i] = new int[nbProps.get(i)];
+        }
+        masks_c = new int[propagators.length];
     }
 
     @Override
@@ -122,19 +127,20 @@ public class VariableEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
+        int id, mask;
         do {
             while (!var_queue.isEmpty()) {
                 lastVar = var_queue.pollFirst();
                 // revision of the variable
-                int vid = lastVar.getId();
-                schedule[vid] = false;
+                id = lastVar.getId();
+                schedule[id] = false;
                 Propagator[] vProps = lastVar.getPropagators();
                 int[] pindices = lastVar.getPIndices();
                 for (int p = 0; p < vProps.length; p++) {
                     Propagator prop = vProps[p];
-                    int mask = masks[vid][p];
+                    mask = masks_f[id][p];
                     if (mask > 0) {
-                        masks[vid][p] = 0;
+                        masks_f[id][p] = 0;
                         prop.fineERcalls++;
                         prop.propagate(null, pindices[p], mask);
                     }
@@ -142,15 +148,18 @@ public class VariableEngine implements IPropagationEngine {
             }
             if (!pro_queue.isEmpty()) {
                 lastProp = pro_queue.pollFirst();
-                int pid = lastProp.getId();
+                id = lastProp.getId();
+                // revision of the propagator
+                schedule[id] = false;
+                mask = masks_c[id];
+                masks_c[id] = 0;
+                lastProp.coarseERcalls++;
+                lastProp.propagate(mask);
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
+                } else {
+                    onPropagatorExecution(lastProp);
                 }
-                // revision of the propagator
-                schedule[pid] = false;
-                lastProp.coarseERcalls++;
-                lastProp.propagate(EventType.FULL_PROPAGATION.mask);
-                onPropagatorExecution(lastProp);
             }
         } while (!var_queue.isEmpty() || !pro_queue.isEmpty());
 
@@ -158,23 +167,24 @@ public class VariableEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
-        int vid;
+        int id;
         if (lastVar != null) {
-            vid = lastVar.getId();
-            Arrays.fill(masks[vid], 0);
-            schedule[vid] = false;
+            id = lastVar.getId();
+            Arrays.fill(masks_f[id], 0);
+            schedule[id] = false;
         }
         while (!var_queue.isEmpty()) {
             lastVar = var_queue.pollFirst();
             // revision of the variable
-            vid = lastVar.getId();
-            Arrays.fill(masks[vid], 0);
-            schedule[vid] = false;
+            id = lastVar.getId();
+            Arrays.fill(masks_f[id], 0);
+            schedule[id] = false;
         }
         while (!pro_queue.isEmpty()) {
             lastProp = pro_queue.pollFirst();
-            int pid = lastProp.getId();
-            schedule[pid] = false;
+            id = lastProp.getId();
+            schedule[id] = false;
+            masks_c[id] = 0;
         }
     }
 
@@ -188,7 +198,7 @@ public class VariableEngine implements IPropagationEngine {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
-                    masks[vid][p] |= type.strengthened_mask;
+                    masks_f[vid][p] |= type.strengthened_mask;
                     _schedule = true;
                 }
             }
@@ -206,6 +216,7 @@ public class VariableEngine implements IPropagationEngine {
         if (!schedule[pid]) {
             pro_queue.addLast(propagator);
             schedule[pid] = true;
+            masks_c[pid] |= event.getStrengthenedMask();
         }
     }
 
@@ -225,10 +236,11 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            masks[variables[i].getId()][vindices[i]] = 0;
+            masks_f[variables[i].getId()][vindices[i]] = 0;
         }
-        if (schedule[pid] == true) {
+        if (schedule[pid]) {
             schedule[pid] = false;
+            masks_c[pid] = 0;
             pro_queue.remove(propagator);
         }
     }
@@ -261,12 +273,12 @@ public class VariableEngine implements IPropagationEngine {
     }
 
     @Override
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 

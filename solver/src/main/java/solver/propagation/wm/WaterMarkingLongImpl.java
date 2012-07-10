@@ -26,8 +26,7 @@
  */
 package solver.propagation.wm;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.set.hash.TIntHashSet;
+import gnu.trove.set.hash.TLongHashSet;
 
 /**
  * <br/>
@@ -37,17 +36,19 @@ import gnu.trove.set.hash.TIntHashSet;
  */
 public class WaterMarkingLongImpl implements IWaterMarking {
 
-    protected TLongObjectHashMap<TIntHashSet> elements;
+    protected TLongHashSet elements;
 
-    protected long pivot;
+    private int OFFSET = 1;
+
+    protected int pivot;
 
 
-    public WaterMarkingLongImpl(long pivot) {
-        elements = new TLongObjectHashMap<TIntHashSet>();
+    public WaterMarkingLongImpl(int pivot) {
+        elements = new TLongHashSet();
         this.pivot = pivot;
     }
 
-    private long _id(long id1, long id2) {
+    private int _id(int id1, int id2) {
         if (id1 < id2) {
             return id1 * pivot + id2;
         } else {
@@ -62,51 +63,37 @@ public class WaterMarkingLongImpl implements IWaterMarking {
 
     @Override
     public boolean isEmpty() {
-        return elements.isEmpty();
+        return size() == 0;
     }
 
     @Override
     public void putMark(int id) {
-        elements.put(id, null);
+        putMark(0, id);
     }
 
     @Override
-    public void putMark(int id1, int id2, int id3) {
-        long id = _id(id1, id2);
-        if (elements.contains(id)) {
-            elements.get(id).add(id3);
-        } else {
-            TIntHashSet tmp = new TIntHashSet();
-            tmp.add(id3);
-            elements.put(id, tmp);
-        }
+    public void putMark(int id1, int id2) {
+        elements.add(_id(id1, id2));
     }
 
     @Override
     public void clearMark(int id) {
-        elements.remove(id);
+        clearMark(0, id);
     }
 
     @Override
-    public void clearMark(int id1, int id2, int id3) {
-        long id = _id(id1, id2);
-        TIntHashSet tmp = elements.get(id);
-        if (tmp != null) {
-            tmp.remove(id3);
-            if (tmp.isEmpty()) {
-                elements.remove(id);
-            }
-        }
+    public void clearMark(int id1, int id2) {
+        // we assume it alredy exists
+        elements.remove(_id(id1, id2));
     }
 
     @Override
     public boolean isMarked(int id) {
-        return elements.containsKey(id);
+        return isMarked(0, id);
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
-        TIntHashSet tmp = elements.get(_id(id1, id2));
-        return tmp != null && tmp.contains(id3);
+    public boolean isMarked(int id1, int id2) {
+        return elements.contains(_id(id1, id2));
     }
 }

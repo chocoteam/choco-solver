@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -74,7 +75,8 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     protected final short[] schedule_in_f, schedule_in_c;
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
     protected final BitSet notEmpty;
-    protected final int[][] masks;
+    protected final int[][] masks_f;
+    protected final int[] masks_c;
 
     public SevenQueuesConstraintEngine(Solver solver) {
         this.exception = new ContradictionException();
@@ -83,14 +85,14 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         variables = solver.getVars();
         List<Propagator> _propagators = new ArrayList();
         Constraint[] constraints = solver.getCstrs();
-        int k = 0;
-        int mnbv = 0;
+        int nbProp = 0;
+        TIntArrayList nbVars = new TIntArrayList();
         int m = Integer.MAX_VALUE, M = Integer.MIN_VALUE;
         for (int c = 0; c < constraints.length; c++) {
             Propagator[] cprops = constraints[c].propagators;
-            for (int j = 0; j < cprops.length; j++, k++) {
+            for (int j = 0; j < cprops.length; j++, nbProp++) {
                 _propagators.add(cprops[j]);
-                if (cprops[j].getNbVars() > mnbv) mnbv = cprops[j].getNbVars();
+                nbVars.add(cprops[j].getNbVars());
                 int id = cprops[j].getId();
                 m = Math.min(m, id);
                 M = Math.max(M, id);
@@ -107,9 +109,13 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
-        schedule_in_f = new short[k];
-        schedule_in_c = new short[k];
-        masks = new int[k][mnbv + 1];
+        schedule_in_f = new short[nbProp];
+        schedule_in_c = new short[nbProp];
+        masks_f = new int[nbProp][];
+        for (int i = 0; i < nbProp; i++) {
+            masks_f[i] = new int[nbVars.get(i)];
+        }
+        masks_c = new int[nbProp];
         notEmpty = new BitSet(15);
     }
 
@@ -133,21 +139,23 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
+        int mask, pid, aid;
+        int[] vindices;
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             if (i < O) { // fine grained
                 while (!pro_queue[i].isEmpty()) {
                     lastProp = pro_queue[i].pollFirst();
                     assert lastProp.isActive() : "propagator is not active:" + lastProp;
                     // revision of the variable
-                    int pid = lastProp.getId();
-                    int aid = p2i.get(pid);
+                    pid = lastProp.getId();
+                    aid = p2i.get(pid);
                     schedule_in_f[aid] = 0;
                     Variable[] pVars = lastProp.getVars();
-                    int[] vindices = lastProp.getVIndices();
+                    vindices = lastProp.getVIndices();
                     for (int v = 0; v < pVars.length; v++) {
-                        int mask = masks[aid][v];
+                        mask = masks_f[aid][v];
                         if (mask > 0) {
-                            masks[aid][v] = 0;
+                            masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
                             lastProp.propagate(null, vindices[v], mask);
                         }
@@ -156,15 +164,19 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 notEmpty.clear(i);
             } else { // coarse grained
                 lastProp = pro_queue[i].pollFirst();
-                int pid = lastProp.getId();
+                pid = lastProp.getId();
+                // revision of the propagator
+                aid = p2i.get(pid);
+                mask = masks_c[aid];
+                schedule_in_c[aid] = 0;
+                masks_c[aid] = 0;
+                lastProp.coarseERcalls++;
+                lastProp.propagate(mask);
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
+                } else {
+                    onPropagatorExecution(lastProp);
                 }
-                // revision of the propagator
-                schedule_in_c[p2i.get(pid)] = 0;
-                lastProp.coarseERcalls++;
-                lastProp.propagate(EventType.FULL_PROPAGATION.mask);
-                onPropagatorExecution(lastProp);
                 if (pro_queue[i].isEmpty()) {
                     notEmpty.clear(i);
                 }
@@ -177,7 +189,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
         int aid;
         if (lastProp != null) {
             aid = p2i.get(lastProp.getId());
-            Arrays.fill(masks[aid], 0);
+            Arrays.fill(masks_f[aid], 0);
             schedule_in_f[aid] = 0;
         }
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(i + 1)) {
@@ -186,9 +198,10 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 if (i < O) {
-                    Arrays.fill(masks[aid], 0);
+                    Arrays.fill(masks_f[aid], 0);
                     schedule_in_f[aid] = 0;
                 } else {
+                    masks_c[aid] = 0;
                     schedule_in_c[aid] = 0;
                 }
             }
@@ -206,7 +219,7 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 int pid = prop.getId();
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(pid);
-                    masks[aid][pindices[p]] |= type.strengthened_mask;
+                    masks_f[aid][pindices[p]] |= type.strengthened_mask;
                     if (schedule_in_f[aid] == 0) {
                         int prio = prop.dynPriority();
                         pro_queue[prio].addLast(prop);
@@ -244,17 +257,17 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
-        int c = propagator.dynPriority();
         int aid = p2i.get(pid);
         int prio = schedule_in_f[aid];
         if (prio > 0) {
-            Arrays.fill(masks[aid], 0, propagator.getNbVars(), 0);
+            Arrays.fill(masks_f[aid], 0, propagator.getNbVars(), 0);
             schedule_in_f[aid] = 0;
             pro_queue[prio - 1].remove(propagator);
         }
         prio = schedule_in_c[aid];
         if (prio > 0) {
             schedule_in_c[aid] = 0;
+            masks_c[aid] = 0;
             pro_queue[O + prio - 1].remove(propagator);
         }
     }
@@ -287,12 +300,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     }
 
     @Override
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 

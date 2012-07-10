@@ -92,9 +92,9 @@ public interface IPropagationEngine extends Serializable {
 
     void prepareWM(Solver solver);
 
-    void clearWatermark(int id1, int id2, int id3);
+    void clearWatermark(int id1, int id2);
 
-    boolean isMarked(int id1, int id2, int id3);
+    boolean isMarked(int id1, int id2);
 
     //********************************//
     //      SERVICES FOR UPDATING     //

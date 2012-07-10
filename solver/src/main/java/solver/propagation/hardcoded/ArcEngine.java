@@ -73,10 +73,10 @@ public class ArcEngine implements IPropagationEngine {
     protected final CircularQueue<Propagator> arc_queue_p;
     protected Propagator lastProp;
     protected final CircularQueue<Propagator> pro_queue_c;
-    protected final boolean[] schedule_c;
     protected final IId2AbId v2i; // mapping between propagator ID and its absolute index
     protected final IId2AbId p2i; // mapping between propagator ID and its absolute index
-    protected final TIntIntHashMap[] masks;
+    protected final TIntIntHashMap[] masks_f;
+    protected final int[] masks_c;
     protected final TIntIntHashMap[] idxVinP;
 
     public ArcEngine(Solver solver) {
@@ -122,20 +122,20 @@ public class ArcEngine implements IPropagationEngine {
         arc_queue_p = new CircularQueue<Propagator>(8);
         pro_queue_c = new CircularQueue<Propagator>(propagators.length);
 
-        schedule_c = new boolean[nbProp];
-        masks = new TIntIntHashMap[nbVar];
+        masks_f = new TIntIntHashMap[nbVar];
         idxVinP = new TIntIntHashMap[nbVar];
         for (int i = 0; i < variables.length; i++) {
-            masks[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
+            masks_f[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
             idxVinP[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
             Propagator[] vprops = variables[i].getPropagators();
             int[] vindices = variables[i].getPIndices();
             for (int j = 0; j < vprops.length; j++) {
                 int paid = p2i.get(vprops[j].getId());
                 idxVinP[i].put(paid, vindices[j]);
-                masks[i].put(paid, -1);
+                masks_f[i].put(paid, -1);
             }
         }
+        masks_c = new int[nbProp];
     }
 
     @Override
@@ -158,38 +158,42 @@ public class ArcEngine implements IPropagationEngine {
     @SuppressWarnings({"NullableProblems"})
     @Override
     public void propagate() throws ContradictionException {
+        int vaid, paid, mask;
         do {
             while (!arc_queue_v.isEmpty()) {
                 lastVar = arc_queue_v.pollFirst();
                 lastProp = arc_queue_p.pollFirst();
 //                assert lastProp.isActive() : "propagator is not active"; <= CPRU: a propagator can be inactive, what matters is the mask
 
-                    // revision of the variable
-                    int vaid = v2i.get(lastVar.getId());
-                    int paid = p2i.get(lastProp.getId());
-                    int mask = masks[vaid].get(paid);
-                    masks[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
-                    if (mask > 0) {
-                        if (IEventRecorder.DEBUG_PROPAG) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
-                        }
-                        lastProp.fineERcalls++;
-                        lastProp.propagate(null, idxVinP[vaid].get(paid), mask);
+                // revision of the variable
+                vaid = v2i.get(lastVar.getId());
+                paid = p2i.get(lastProp.getId());
+                mask = masks_f[vaid].get(paid);
+                masks_f[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
+                if (mask > 0) {
+                    if (IEventRecorder.DEBUG_PROPAG) {
+                        LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
                     }
+                    lastProp.fineERcalls++;
+                    lastProp.propagate(null, idxVinP[vaid].get(paid), mask);
                 }
+            }
             if (!pro_queue_c.isEmpty()) {
                 lastProp = pro_queue_c.pollFirst();
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                }
                 // revision of the propagator
-                schedule_c[p2i.get(lastProp.getId())] = false;
+                paid = p2i.get(lastProp.getId());
+                mask = masks_c[paid];
+                masks_c[paid] = 0;
                 lastProp.coarseERcalls++;
                 if (IEventRecorder.DEBUG_PROPAG) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
-                lastProp.propagate(EventType.FULL_PROPAGATION.mask);
-                onPropagatorExecution(lastProp);
+                lastProp.propagate(mask);
+                if (lastProp.isStateLess()) {
+                    lastProp.setActive();
+                } else {
+                    onPropagatorExecution(lastProp);
+                }
             }
         } while (!arc_queue_v.isEmpty() || !pro_queue_c.isEmpty());
 
@@ -197,46 +201,48 @@ public class ArcEngine implements IPropagationEngine {
 
     @Override
     public void flush() {
+        int vaid, paid;
         if (lastProp != null && lastVar != null) {
-            int vaid = v2i.get(lastVar.getId());
-            int paid = p2i.get(lastProp.getId());
-            masks[vaid].put(paid, -1);
+            vaid = v2i.get(lastVar.getId());
+            paid = p2i.get(lastProp.getId());
+            masks_f[vaid].put(paid, -1);
         }
         while (!arc_queue_v.isEmpty()) {
             lastVar = arc_queue_v.pollFirst();
             lastProp = arc_queue_p.pollFirst();
             // revision of the variable
-            int vaid = v2i.get(lastVar.getId());
-            int paid = p2i.get(lastProp.getId());
-            masks[vaid].put(paid, -1);
+            vaid = v2i.get(lastVar.getId());
+            paid = p2i.get(lastProp.getId());
+            masks_f[vaid].put(paid, -1);
         }
         while (!pro_queue_c.isEmpty()) {
             lastProp = pro_queue_c.pollFirst();
-            int pid = p2i.get(lastProp.getId());
-            schedule_c[pid] = false;
+            paid = p2i.get(lastProp.getId());
+            masks_c[paid] = 0;
         }
     }
 
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
-        int vaid = v2i.get(variable.getId());
+        Propagator prop;
+        int paid, cm, vaid = v2i.get(variable.getId());
         Propagator[] vProps = variable.getPropagators();
         for (int p = 0; p < vProps.length; p++) {
-            Propagator prop = vProps[p];
+            prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                int paid = p2i.get(prop.getId());
+                paid = p2i.get(prop.getId());
                 if ((type.mask & prop.getPropagationConditions(idxVinP[vaid].get(paid))) != 0) {
                     if (IEventRecorder.DEBUG_PROPAG) {
                         LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + variable.toString() + "::" + prop.toString() + " >>");
                     }
-                    int cm = masks[vaid].get(paid);
+                    cm = masks_f[vaid].get(paid);
                     if (cm == -1) {  // add the arc into the queue
                         arc_queue_v.addLast(variable);
                         arc_queue_p.addLast(prop);
-                        masks[vaid].adjustValue(paid, type.strengthened_mask + 1);
+                        masks_f[vaid].adjustValue(paid, type.strengthened_mask + 1);
                     } else {
                         cm -= (cm |= type.strengthened_mask);
-                        masks[vaid].adjustValue(paid, cm);
+                        masks_f[vaid].adjustValue(paid, cm);
                     }
 
                 }
@@ -248,13 +254,13 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int paid = p2i.get(propagator.getId());
-        if (!schedule_c[paid]) {
+        if (masks_c[paid] == 0) {
             if (IEventRecorder.DEBUG_PROPAG) {
                 LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
             }
             pro_queue_c.addLast(propagator);
-            schedule_c[paid] = true;
         }
+        masks_c[paid] |= event.getStrengthenedMask();
     }
 
     @Override
@@ -269,17 +275,17 @@ public class ArcEngine implements IPropagationEngine {
 
     @Override
     public void desactivatePropagator(Propagator propagator) {
-        int paid = p2i.get(propagator.getId());
+        int vaid, cm, paid = p2i.get(propagator.getId());
         Variable[] variables = propagator.getVars();
         for (int i = 0; i < variables.length; i++) {
-            int vaid = v2i.get(variables[i].getId());
-            int cm = masks[vaid].get(paid);
+            vaid = v2i.get(variables[i].getId());
+            cm = masks_f[vaid].get(paid);
             if (cm > 0) {  // if it is present in the queue
-                masks[vaid].adjustValue(paid, -cm); // simply clear the mask
+                masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
             }
         }
-        if (schedule_c[paid]) {
-            schedule_c[paid] = false;
+        if (masks_c[paid]>0) {
+            masks_c[paid] = 0;
             pro_queue_c.remove(propagator);
         }
     }
@@ -312,12 +318,12 @@ public class ArcEngine implements IPropagationEngine {
     }
 
     @Override
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         throw new UnsupportedOperationException();
     }
 

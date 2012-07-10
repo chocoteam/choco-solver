@@ -210,33 +210,33 @@ public class PropagationEngine implements IPropagationEngine {
                     Variable variable = propagator.getVar(v);
                     if ((variable.getTypeAndKind() & Variable.CSTE) == 0) { // this is not a constant
                         int idV = variable.getId();
-                        watermarks.putMark(idV, idP, v);
+                        watermarks.putMark(idV, idP);
                     }
                 }
             }
         }
     }
 
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         if (checkProperties) {
             if (id1 == 0) {// coarse case
                 watermarks.clearMark(id2);
             } else if (id2 == 0) {// coarse case
                 watermarks.clearMark(id1);
             } else {
-                watermarks.clearMark(id1, id2, id3);
+                watermarks.clearMark(id1, id2);
             }
         }
     }
 
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         if (checkProperties) {
             if (id1 == 0) {// coarse case
                 return watermarks.isMarked(id2);
             } else if (id2 == 0) {// coarse case
                 return watermarks.isMarked(id1);
             } else {
-                return watermarks.isMarked(id1, id2, id3);
+                return watermarks.isMarked(id1, id2);
             }
         }
         return true;
