@@ -255,7 +255,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         environment.save(new Operation(){
             @Override
             public void undo() {
-                state = PASSIVE;
+                state = ACTIVE;
             }
         });
         solver.getEngine().desactivatePropagator(this);
