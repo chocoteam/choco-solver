@@ -170,13 +170,12 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                 mask = masks_c[aid];
                 schedule_in_c[aid] = 0;
                 masks_c[aid] = 0;
-                lastProp.coarseERcalls++;
-                lastProp.propagate(mask);
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
-                } else {
-                    onPropagatorExecution(lastProp);
                 }
+                lastProp.coarseERcalls++;
+                lastProp.propagate(mask);
+                onPropagatorExecution(lastProp);
                 if (pro_queue[i].isEmpty()) {
                     notEmpty.clear(i);
                 }
@@ -259,17 +258,17 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
+        Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
         int prio = schedule_in_f[aid];
-        if (prio > 0) {
-            Arrays.fill(masks_f[aid], 0, propagator.getNbVars(), 0);
+        if (prio > 0) { // if in the queue...
             schedule_in_f[aid] = 0;
-            pro_queue[prio - 1].remove(propagator);
+            pro_queue[prio - 1].remove(propagator); // removed from the queue
         }
         prio = schedule_in_c[aid];
-        if (prio > 0) {
-            schedule_in_c[aid] = 0;
+        if (prio > 0) {  // if in the queue...
             masks_c[aid] = 0;
-            pro_queue[O + prio - 1].remove(propagator);
+            schedule_in_c[aid] = 0;
+            pro_queue[O + prio - 1].remove(propagator); // removed from the queue
         }
     }
 

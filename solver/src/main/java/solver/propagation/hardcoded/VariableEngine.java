@@ -153,13 +153,12 @@ public class VariableEngine implements IPropagationEngine {
                 schedule[id] = false;
                 mask = masks_c[id];
                 masks_c[id] = 0;
-                lastProp.coarseERcalls++;
-                lastProp.propagate(mask);
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
-                } else {
-                    onPropagatorExecution(lastProp);
                 }
+                lastProp.coarseERcalls++;
+                lastProp.propagate(mask);
+                onPropagatorExecution(lastProp);
             }
         } while (!var_queue.isEmpty() || !pro_queue.isEmpty());
 
@@ -179,6 +178,11 @@ public class VariableEngine implements IPropagationEngine {
             id = lastVar.getId();
             Arrays.fill(masks_f[id], 0);
             schedule[id] = false;
+        }
+        if (lastProp != null) {
+            id = lastProp.getId();
+            schedule[id] = false;
+            masks_c[id] = 0;
         }
         while (!pro_queue.isEmpty()) {
             lastProp = pro_queue.pollFirst();
@@ -216,8 +220,8 @@ public class VariableEngine implements IPropagationEngine {
         if (!schedule[pid]) {
             pro_queue.addLast(propagator);
             schedule[pid] = true;
-            masks_c[pid] |= event.getStrengthenedMask();
         }
+        masks_c[pid] |= event.getStrengthenedMask();
     }
 
     @Override

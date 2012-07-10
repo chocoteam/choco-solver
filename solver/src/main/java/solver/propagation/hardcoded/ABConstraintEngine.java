@@ -174,16 +174,15 @@ public class ABConstraintEngine implements IPropagationEngine {
                 schedule[aid] ^= C;
                 mask = masks_c[aid];
                 masks_c[aid] = 0;
-                lastProp.coarseERcalls++;
+                if (lastProp.isStateLess()) {
+                    lastProp.setActive();
+                }
                 if (IEventRecorder.DEBUG_PROPAG) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
+                lastProp.coarseERcalls++;
                 lastProp.propagate(mask);
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                } else {
-                    onPropagatorExecution(lastProp);
-                }
+                onPropagatorExecution(lastProp);
                 w[aid] += 1;
             }
         } while (!pro_queue_f.isEmpty() || !pro_queue_c.isEmpty());
@@ -266,22 +265,15 @@ public class ABConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if (lastProp == propagator) {
-            for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks_f[aid][i] = 0;
-            }
-            schedule[aid] ^= F;
-        } else if ((schedule[aid] & F) != 0) {
-            for (int i = 0; i < propagator.getNbVars(); i++) {
-                masks_f[aid][i] = 0;
-            }
+        Arrays.fill(masks_f[aid], 0);
+        if ((schedule[aid] & F) != 0) {
             schedule[aid] ^= F;
             pro_queue_f.remove(aid);
         }
         if ((schedule[aid] & C) != 0) {
+            masks_c[aid] = 0;
             schedule[aid] ^= C;
             pro_queue_c.remove(aid);
-            masks_c[aid] = 0;
         }
     }
 

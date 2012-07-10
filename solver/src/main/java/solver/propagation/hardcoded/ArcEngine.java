@@ -184,16 +184,15 @@ public class ArcEngine implements IPropagationEngine {
                 paid = p2i.get(lastProp.getId());
                 mask = masks_c[paid];
                 masks_c[paid] = 0;
-                lastProp.coarseERcalls++;
+                if (lastProp.isStateLess()) {
+                    lastProp.setActive();
+                }
                 if (IEventRecorder.DEBUG_PROPAG) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
+                lastProp.coarseERcalls++;
+                onPropagatorExecution(lastProp);
                 lastProp.propagate(mask);
-                if (lastProp.isStateLess()) {
-                    lastProp.setActive();
-                } else {
-                    onPropagatorExecution(lastProp);
-                }
             }
         } while (!arc_queue_v.isEmpty() || !pro_queue_c.isEmpty());
 
@@ -284,7 +283,7 @@ public class ArcEngine implements IPropagationEngine {
                 masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
             }
         }
-        if (masks_c[paid]>0) {
+        if (masks_c[paid] > 0) {
             masks_c[paid] = 0;
             pro_queue_c.remove(propagator);
         }

@@ -250,7 +250,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-        assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
+        assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
         environment.save(new Operation(){
             @Override
