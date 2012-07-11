@@ -148,22 +148,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         checkVariable(vars);
         this.vars = vars.clone();
         this.vindices = new int[vars.length];
-        for (int i = 0; i < vindices.length; i++) {
-            vindices[i] = i;
-        }
         this.solver = solver;
         this.environment = solver.getEnvironment();
         this.state = NEW;
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
-            vars[v].link(this, v);
+            vindices[v] = vars[v].link(this, v);
             vars[v].recordMask(getPropagationConditions(v));
-            if (!vars[v].instantiated()) {
+            /*if (!vars[v].instantiated()) {
                 nbNi++;
-            }
+            }*/
         }
         fails = 0;
         ID = solver.nextId();

@@ -278,7 +278,8 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void link(Propagator propagator, int idxInProp) {
+    public int link(Propagator propagator, int idxInProp) {
+        return -1;
     }
 
     @Override

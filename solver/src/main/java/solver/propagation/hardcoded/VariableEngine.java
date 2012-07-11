@@ -102,9 +102,9 @@ public class VariableEngine implements IPropagationEngine {
         schedule = new boolean[size];
         masks_f = new int[maxID + 1][];
         for (int i = 0; i < variables.length; i++) {
-            masks_f[i] = new int[nbProps.get(i)];
+            masks_f[variables[i].getId()] = new int[nbProps.get(i)];
         }
-        masks_c = new int[propagators.length];
+        masks_c = new int[size];
     }
 
     @Override

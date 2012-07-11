@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView, V extends Variable<D,DM, W>>
+public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, W extends IView, V extends Variable<D, DM, W>>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -84,10 +84,6 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected int mIdx; // index of the last view not null in views -- not backtrable
 
     protected int modificationEvents;
-
-    //    protected final OnBeforeProc beforeModification = new OnBeforeProc();
-    protected final OnAfterProc afterModification = new OnAfterProc();
-//    protected final OnContradiction onContradiction = new OnContradiction();
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -135,7 +131,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         constraints[cLast++] = constraint;
     }
 
-    public void link(Propagator propagator, int idxInProp) {
+    public int link(Propagator propagator, int idxInProp) {
         //ensure capacity
         if (pIdx == propagators.length) {
             Propagator[] tmp = propagators;
@@ -149,6 +145,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         }
         propagators[pIdx] = propagator;
         pindices[pIdx++] = idxInProp;
+        return pIdx - 1;
     }
 
     public void recordMask(int mask) {
