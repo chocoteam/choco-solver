@@ -99,7 +99,7 @@ public class PropReified extends Propagator<Variable> {
 
             }
             try {
-                ((IStateInt)state.get(left[i])).set(ACTIVE);
+                state.setShort(left[i], ACTIVE);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
@@ -110,7 +110,7 @@ public class PropReified extends Propagator<Variable> {
                 right[i].getVar(j).unlink(right[i]);
             }
             try {
-                ((IStateInt)state.get(right[i])).set(ACTIVE);
+                state.setShort(right[i], ACTIVE);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
