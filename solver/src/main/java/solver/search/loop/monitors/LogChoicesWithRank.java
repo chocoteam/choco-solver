@@ -24,61 +24,39 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.recorders.fine.prop;
+package solver.search.loop.monitors;
 
-import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.propagation.IPropagationEngine;
-import solver.variables.Variable;
 
 /**
- * A fine event recorder prop-oriented dedicated to ternary propagators
+ * A search monitor logger which prints choices during the search.
+ * <p/>
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 14/06/12
+ * @since 09/05/11
  */
-public final class FineTernPropEventRecorder<V extends Variable> extends FinePropEventRecorder<V> {
+public final class LogChoicesWithRank extends LogChoices {
 
-    public FineTernPropEventRecorder(V[] variables, Propagator<V> vPropagator, int[] idxVinPs, Solver solver, IPropagationEngine engine) {
-        super(variables, vPropagator, idxVinPs, solver, engine);
+    final int start, end;
+
+    public LogChoicesWithRank(Solver solver, int start, int end) {
+        super(solver);
+        this.start = start;
+        this.end = end;
     }
 
     @Override
-    public boolean execute() throws ContradictionException {
-        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
-        _execute(0);
-        _execute(1);
-        _execute(2);
-        return true;
-    }
-
-
-    @Override
-    public void flush() {
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
-    }
-
-    @Override
-    public void virtuallyExecuted(Propagator propagator) {
-        assert this.propagators[PINDEX] == propagator : "wrong propagator";
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
-        if (enqueued) {
-            scheduler.remove(this);
+    public void beforeDownLeftBranch() {
+        if (solver.getMeasures().getNodeCount() >= start && solver.getMeasures().getNodeCount() <= end) {
+            super.beforeDownLeftBranch();
         }
     }
 
     @Override
-    public void desactivate(Propagator<V> element) {
-        super.desactivate(element);
-        this.evtmasks[0] = 0;
-        this.evtmasks[1] = 0;
-        this.evtmasks[2] = 0;
+    public void beforeDownRightBranch() {
+        if (solver.getMeasures().getNodeCount() >= start && solver.getMeasures().getNodeCount() <= end) {
+            super.beforeDownRightBranch();
+        }
     }
 }

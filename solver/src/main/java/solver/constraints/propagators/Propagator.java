@@ -88,6 +88,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
 
+    protected static final short NEW = 0, ACTIVE = 1, PASSIVE = 2;
+
     private final int ID; // unique id of this
     /**
      * List of <code>variable</code> objects
@@ -102,7 +104,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public IEnvironment environment;
 
-    protected static final short NEW = 0, ACTIVE = 1, PASSIVE = 2;
 
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active

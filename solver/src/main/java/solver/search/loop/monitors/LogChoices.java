@@ -39,7 +39,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 09/05/11
  */
-public final class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
+public class LogChoices extends VoidSearchMonitor implements ISearchMonitor{
 
     final Solver solver;
     final AbstractSearchLoop searchLoop;
