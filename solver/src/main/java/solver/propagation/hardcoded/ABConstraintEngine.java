@@ -153,8 +153,8 @@ public class ABConstraintEngine implements IPropagationEngine {
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 schedule[aid] ^= F;
-                int[] vindices = lastProp.getVIndices();
-                for (int v = 0; v < vindices.length; v++) {
+                int nbVars = lastProp.getNbVars();
+                for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
                         if (IEventRecorder.DEBUG_PROPAG) {
@@ -162,7 +162,7 @@ public class ABConstraintEngine implements IPropagationEngine {
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
-                        lastProp.propagate(null, vindices[v], mask);
+                        lastProp.propagate(null, v, mask);
                     }
                 }
                 w[aid] += 1;

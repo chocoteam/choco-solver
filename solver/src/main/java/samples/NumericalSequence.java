@@ -28,9 +28,11 @@ package samples;
 
 import org.kohsuke.args4j.Option;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.binary.Element;
 import solver.constraints.nary.alldifferent.AllDifferent;
-import solver.propagation.hardcoded.SevenQueuesConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
@@ -50,7 +52,7 @@ public class NumericalSequence extends AbstractProblem {
 
     @Override
     public void createSolver() {
-        solver = new Solver("Suite ("+n+")");
+        solver = new Solver("Suite (" + n + ")");
     }
 
     @Override
@@ -61,9 +63,13 @@ public class NumericalSequence extends AbstractProblem {
         for (int i = 1; i < n - 1; i++) {
             U[i] = VariableFactory.enumerated("U_" + i, 1, n + 1, solver);
         }
-        // U[i+1] = U[U[i]-1]-1
         for (int i = 1; i < n - 1; i++) {
+            // U[i+1] = U[U[i]-1]-1
             solver.post(new Element(Views.offset(U[i], 1), U, Views.offset(U[i - 1], -1), 1, solver));
+        }
+        for (int i = 1; i < n / 2; i++) {
+            // U[n + 1 - i] = n+ 1 - U[i]
+            solver.post(new Arithmetic(U[n - 1 - i], "+", U[i], "=", n + 1, solver));
         }
         solver.post(new AllDifferent(U, solver));
     }
@@ -75,12 +81,12 @@ public class NumericalSequence extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        solver.set(new SevenQueuesConstraintEngine(solver));
+        solver.set(new VariableEngine(solver));
     }
 
     @Override
     public void solve() {
-        /*solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
+        solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor() {
             @Override
             public void onSolution() {
                 StringBuilder st = new StringBuilder();
@@ -91,8 +97,8 @@ public class NumericalSequence extends AbstractProblem {
                 st.append("}");
                 System.out.printf("%s\n", st.toString());
             }
-        });*/
-//        SearchMonitorFactory.log(solver, true, false);
+        });
+        System.out.printf("M = %d\n", n);
         solver.findAllSolutions();
     }
 

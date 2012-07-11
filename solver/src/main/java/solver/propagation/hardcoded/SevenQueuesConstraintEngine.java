@@ -140,7 +140,6 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, pid, aid;
-        int[] vindices;
         for (int i = notEmpty.nextSetBit(0); i > -1; i = notEmpty.nextSetBit(0)) {
             if (i < O) { // fine grained
                 while (!pro_queue[i].isEmpty()) {
@@ -150,14 +149,13 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
                     pid = lastProp.getId();
                     aid = p2i.get(pid);
                     schedule_in_f[aid] = 0;
-                    Variable[] pVars = lastProp.getVars();
-                    vindices = lastProp.getVIndices();
-                    for (int v = 0; v < pVars.length; v++) {
+                    int nbVars = lastProp.getNbVars();
+                    for (int v = 0; v < nbVars; v++) {
                         mask = masks_f[aid][v];
                         if (mask > 0) {
                             masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
-                            lastProp.propagate(null, vindices[v], mask);
+                            lastProp.propagate(null, v, mask);
                         }
                     }
                 }

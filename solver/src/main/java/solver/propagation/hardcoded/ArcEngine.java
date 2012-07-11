@@ -127,11 +127,11 @@ public class ArcEngine implements IPropagationEngine {
         for (int i = 0; i < variables.length; i++) {
             masks_f[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
             idxVinP[i] = new TIntIntHashMap(4, 0.5f, -1, -1);
-            Propagator[] vprops = variables[i].getPropagators();
-            int[] vindices = variables[i].getPIndices();
-            for (int j = 0; j < vprops.length; j++) {
-                int paid = p2i.get(vprops[j].getId());
-                idxVinP[i].put(paid, vindices[j]);
+            Propagator[] varprops = variables[i].getPropagators();
+            int[] idVinP = variables[i].getPIndices();
+            for (int p = 0; p < varprops.length; p++) {
+                int paid = p2i.get(varprops[p].getId());
+                idxVinP[i].put(paid, idVinP[p]);
                 masks_f[i].put(paid, -1);
             }
         }

@@ -136,7 +136,6 @@ public class ConstraintEngine implements IPropagationEngine {
     @Override
     public void propagate() throws ContradictionException {
         int mask, aid;
-        int[] vindices;
         do {
             while (!pro_queue_f.isEmpty()) {
                 lastProp = pro_queue_f.pollFirst();
@@ -144,16 +143,16 @@ public class ConstraintEngine implements IPropagationEngine {
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
                 schedule[aid] ^= F;
-                vindices = lastProp.getVIndices();
-                for (int v = 0; v < vindices.length; v++) {
+                int nbVars = lastProp.getNbVars();
+                for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
                         if (IEventRecorder.DEBUG_PROPAG) {
-                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + Arrays.toString(lastProp.getVars()) + "::" + lastProp.toString() + " >>");
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastProp.getVar(v) + "::" + lastProp.toString() + " >>");
                         }
                         masks_f[aid][v] = 0;
                         lastProp.fineERcalls++;
-                        lastProp.propagate(null, vindices[v], mask);
+                        lastProp.propagate(null, v, mask);
                     }
                 }
             }

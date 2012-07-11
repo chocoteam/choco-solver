@@ -28,7 +28,6 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
-import gnu.trove.list.array.TIntArrayList;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -79,13 +78,10 @@ public class VariableEngine implements IPropagationEngine {
 
         variables = solver.getVars();
         int maxID = variables[0].getId();
-        TIntArrayList nbProps = new TIntArrayList();
-        nbProps.add(variables[0].getPropagators().length);
         for (int i = 1; i < variables.length; i++) {
             if (maxID < variables[i].getId()) {
                 maxID = variables[i].getId();
             }
-            nbProps.add(variables[i].getPropagators().length);
         }
 
         Constraint[] constraints = solver.getCstrs();
@@ -102,7 +98,7 @@ public class VariableEngine implements IPropagationEngine {
         schedule = new boolean[size];
         masks_f = new int[maxID + 1][];
         for (int i = 0; i < variables.length; i++) {
-            masks_f[variables[i].getId()] = new int[nbProps.get(i)];
+            masks_f[variables[i].getId()] = new int[variables[i].getPropagators().length];
         }
         masks_c = new int[size];
     }
@@ -135,14 +131,14 @@ public class VariableEngine implements IPropagationEngine {
                 id = lastVar.getId();
                 schedule[id] = false;
                 Propagator[] vProps = lastVar.getPropagators();
-                int[] pindices = lastVar.getPIndices();
+                int[] idxVinP = lastVar.getPIndices();
                 for (int p = 0; p < vProps.length; p++) {
                     Propagator prop = vProps[p];
                     mask = masks_f[id][p];
                     if (mask > 0) {
                         masks_f[id][p] = 0;
                         prop.fineERcalls++;
-                        prop.propagate(null, pindices[p], mask);
+                        prop.propagate(null, idxVinP[p], mask);
                     }
                 }
             }
@@ -240,7 +236,8 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            masks_f[variables[i].getId()][vindices[i]] = 0;
+            if(vindices[i]>-1)// constant has a negative index
+                masks_f[variables[i].getId()][vindices[i]] = 0;
         }
         if (schedule[pid]) {
             schedule[pid] = false;
