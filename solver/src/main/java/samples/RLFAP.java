@@ -186,8 +186,8 @@ public class RLFAP extends AbstractProblem {
     public void configureEngine() {
         IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
         solver.set(pengine.set(new Sort(
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()),
-                new solver.propagation.generator.Queue(new PCoarse(pengine, solver.getCstrs())))
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars())),
+                new solver.propagation.generator.Queue(new PCoarse(pengine, solver.getCstrs()))
         )));
     }
 
