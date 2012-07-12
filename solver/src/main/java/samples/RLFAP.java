@@ -47,6 +47,9 @@ import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.selectors.values.InDomainMin;
+import solver.search.strategy.selectors.variables.DomOverWDegVS;
+import solver.search.strategy.strategy.Assignment;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -79,7 +82,7 @@ public class RLFAP extends AbstractProblem {
     String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen02";
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
-    boolean opt = false;
+    boolean opt = true;
 
     int[][] _dom, _ctr;
     int[][] _var;
@@ -173,7 +176,9 @@ public class RLFAP extends AbstractProblem {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
         if (true) {
-            solver.set(StrategyFactory.domwdegMindom(vars, seed));
+//            solver.set(StrategyFactory.domwdegMindom(vars, seed));
+            solver.set(new Assignment(vars, new DomOverWDegVS(vars, solver, seed),
+                    new InDomainMin()));
         } else {
             IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
             solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
@@ -193,7 +198,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.limitNode(solver, 100000);
+        SearchMonitorFactory.limitNode(solver, 10000);
         if (opt)
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else
