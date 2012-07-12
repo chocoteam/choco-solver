@@ -38,8 +38,10 @@ import solver.constraints.binary.DistanceXYC;
 import solver.constraints.nary.Count;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
-import solver.propagation.generator.*;
-import solver.propagation.generator.Queue;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.SortDyn;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -171,7 +173,7 @@ public class RLFAP extends AbstractProblem {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
         if (true) {
-            solver.set(StrategyFactory.domwdegMindom(vars, 3));
+            solver.set(StrategyFactory.domwdegMindom(vars, seed));
         } else {
             IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
             solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
@@ -184,8 +186,8 @@ public class RLFAP extends AbstractProblem {
     public void configureEngine() {
         IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
         solver.set(pengine.set(new Sort(
-                new Queue(new PCoarse(pengine, solver.getCstrs())),
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()))
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()),
+                new solver.propagation.generator.Queue(new PCoarse(pengine, solver.getCstrs())))
         )));
     }
 

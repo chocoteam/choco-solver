@@ -43,7 +43,7 @@ public class NurseScheduling {
         },*/
         INC_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.domwdegMindom(vars, s);
+                return StrategyFactory.domwdegMindom(vars, s, System.currentTimeMillis());
             }
         },
         FORCE_INPUT {
@@ -53,7 +53,7 @@ public class NurseScheduling {
         },
         FORCE_DOMWDEG {
             AbstractStrategy getGoal(Solver s, IntVar[] vars) {
-                return StrategyFactory.domwdegMindom(cast(s.getVars()), s);
+                return StrategyFactory.domwdegMindom(cast(s.getVars()), s, System.currentTimeMillis());
             }
         },
         /*DOMWDEG {

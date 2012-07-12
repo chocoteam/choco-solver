@@ -196,34 +196,13 @@ public final class StrategyFactory {
                 environment);
     }
 
-    public static AbstractStrategy<IntVar> domddegMinDom(IntVar[] vars) {
-        Solver solver = vars[0].getSolver();
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domddeg(), SorterFactory.random()),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
-    public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, Solver solver) {
-        for (IntVar var : vars) {
-            var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
-        }
-        return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
-                ValidatorFactory.instanciated,
-                solver.getEnvironment());
-    }
-
     public static AbstractStrategy<IntVar> domwdegMindom(IntVar[] vars, long seed) {
         for (IntVar var : vars) {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         Solver solver = vars[0].getSolver();
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random(seed)),
+                SorterFactory.domOverWDeg(solver, seed),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -233,7 +212,7 @@ public final class StrategyFactory {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.inputOrder(vars)),
+                new Seq<IntVar>(SorterFactory.domOverWDeg(solver, 0), SorterFactory.inputOrder(vars)),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
@@ -243,24 +222,24 @@ public final class StrategyFactory {
             var.setHeuristicVal(HeuristicValFactory.enumVal(var, var.getLB(), 1, var.getUB()));
         }
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random(seed)),
+                SorterFactory.domOverWDeg(solver, seed),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
 
-    public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver) {
+    public static AbstractStrategy<IntVar> domwdegMiddom(IntVar[] vars, Solver solver, long seed) {
         HeuristicValFactory.indomainMiddle(vars);
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
+                SorterFactory.domOverWDeg(solver, seed),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }
 
 
-    public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver) {
+    public static AbstractStrategy<IntVar> domwdegMaxdom(IntVar[] vars, Solver solver, long seed) {
         HeuristicValFactory.indomainMax(vars);
         return StrategyVarValAssign.dyn(vars,
-                new Seq<IntVar>(SorterFactory.domOverWDeg(solver), SorterFactory.random()),
+                SorterFactory.domOverWDeg(solver, seed),
                 ValidatorFactory.instanciated,
                 solver.getEnvironment());
     }

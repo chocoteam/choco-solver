@@ -57,9 +57,11 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
     TIntIntMap vid2dsize, vid2degree, vid2weig;
     TIntObjectHashMap<IStateInt> pid2ari;
     TIntIntHashMap pid2arity;
+    Random rand;
 
-    protected DomOverWDeg(Solver solver) {
+    protected DomOverWDeg(Solver solver, long seed) {
         this.solver = solver;
+        rand = new Random(seed);
         counter = new FailPerPropagator(solver.getCstrs(), solver);
         vid2dsize = new TIntIntHashMap();
         vid2degree = new TIntIntHashMap();
@@ -110,7 +112,10 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
         int s2 = vid2dsize.get(vid2);
         int d1 = vid2degree.get(vid1);
         int d2 = vid2degree.get(vid2);
-        return (s1 * w2 * d2) - (s2 * w1 * d1);
+        int r = (s1 * w2 * d2) - (s2 * w1 * d1);
+        if (r == 0) {
+            return rand.compare(o1, o2);
+        } else return r;
     }
 
     @Override

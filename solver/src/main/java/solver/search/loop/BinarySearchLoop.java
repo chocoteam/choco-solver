@@ -69,7 +69,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
             //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver));
+            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver, System.currentTimeMillis()));
         }
         strategy.init();
         moveTo(OPEN_NODE);
