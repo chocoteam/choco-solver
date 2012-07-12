@@ -74,10 +74,10 @@ public class RLFAP extends AbstractProblem {
     private static String CTR = "ctr.txt";
 
     @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
-    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen11";
+    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen02";
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
-    boolean opt = true;
+    boolean opt = false;
 
     int[][] _dom, _ctr;
     int[][] _var;
@@ -170,10 +170,10 @@ public class RLFAP extends AbstractProblem {
     public void configureSearch() {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
-        IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
         if (true) {
-            solver.set(StrategyFactory.domwdegMindom(allvars, 3));
+            solver.set(StrategyFactory.domwdegMindom(vars, 3));
         } else {
+            IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
             solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
@@ -191,7 +191,6 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
         if (opt)
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else
