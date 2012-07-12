@@ -73,10 +73,11 @@ public enum SearchMonitorFactory {
 
     /**
      * Branch a restart strategy on the search
-     * @param solver the solver
-     * @param restartStrategy the kind of restart strategy
+     *
+     * @param solver               the solver
+     * @param restartStrategy      the kind of restart strategy
      * @param restartStrategyLimit restart trigger
-     * @param restartLimit restart limits (limit of number of restarts)
+     * @param restartLimit         restart limits (limit of number of restarts)
      */
     public static void restart(Solver solver, IRestartStrategy restartStrategy, ILimit restartStrategyLimit, int restartLimit) {
         solver.getSearchLoop().plugSearchMonitor(new RestartManager(
@@ -86,5 +87,29 @@ public enum SearchMonitorFactory {
 
     public static void prop_count(Solver solver) {
         solver.getSearchLoop().plugSearchMonitor(new LogPropagationCount(solver));
+    }
+
+    public static void limitNode(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setNodeLimit(limit);
+    }
+
+    public static void limitSolution(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setSolutionLimit(limit);
+    }
+
+    public static void limitTime(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setTimeLimit(limit);
+    }
+
+    public static void limitThreadTime(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setThreadTimeLimit(limit);
+    }
+
+    public static void limitFail(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setFailLimit(limit);
+    }
+
+    public static void limitBacktrack(Solver solver, long limit) {
+        solver.getSearchLoop().getLimitsBox().setBacktrackLimit(limit);
     }
 }

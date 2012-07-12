@@ -191,6 +191,7 @@ public class RLFAP extends AbstractProblem {
 
     @Override
     public void solve() {
+        SearchMonitorFactory.limitNode(solver, 100000);
         if (opt)
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else
