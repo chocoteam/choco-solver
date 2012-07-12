@@ -96,6 +96,11 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public int getNbProps() {
+        return 0;
+    }
+
+    @Override
     public int[] getPIndices() {
         return new int[0];
     }

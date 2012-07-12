@@ -131,9 +131,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     final int a; // forget parameter
     final double r;
 
-    final int[] keys; // to maintain idx of this within variable monitor list
-
-    public static boolean sampling; // is this still in a sampling phase
+    public boolean sampling; // is this still in a sampling phase
 
     int nb_probes; // probing size
 
@@ -155,16 +153,12 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         Av = new double[vars.length][];
         mAv = new double[vars.length][];
         ov = new int[vars.length];
-        keys = new int[vars.length];
         affected = new BitSet(vars.length);
 
         this.v2i = new TIntIntHashMap(vars.length);
         for (int i = 0; i < vars.length; i++) {
             v2i.put(vars[i].getId(), i);
             vars[i].addMonitor(this);
-            Av[i] = new double[vars[i].getDomainSize()];
-            mAv[i] = new double[vars[i].getDomainSize()];
-            ov[i] = vars[i].getLB();
         }
 
         assert g >= 0.0f && g <= 1.0f;
@@ -188,6 +182,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
 
     @Override
     public void init() {
+        for (int i = 0; i < vars.length; i++) {
+            Av[i] = new double[vars[i].getDomainSize()];
+            mAv[i] = new double[vars[i].getDomainSize()];
+            ov[i] = vars[i].getLB();
+        }
     }
 
     TIntList bests = new TIntArrayList();
@@ -291,16 +290,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     @Override
     public void onUpdate(IntVar var, EventType evt, ICause cause) {
         affected.set(v2i.get(var.getId()));
-    }
-
-    @Override
-    public int getIdx(IntVar key) {
-        return keys[v2i.get(key.getId())];
-    }
-
-    @Override
-    public void setIdx(IntVar key, int idx) {
-        keys[v2i.get(key.getId())] = idx;
     }
 
     private void beforeDownBranch() {

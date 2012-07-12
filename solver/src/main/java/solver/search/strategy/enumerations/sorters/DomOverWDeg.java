@@ -26,11 +26,19 @@
  */
 package solver.search.strategy.enumerations.sorters;
 
+import choco.kernel.memory.IStateInt;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.search.loop.monitors.FailPerPropagator;
+import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * Naive implementation of
@@ -42,24 +50,48 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 04/05/11
  */
-public final class DomOverWDeg extends AbstractSorter<IntVar> {
+public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariableMonitor {
 
     final Solver solver;
     FailPerPropagator counter;
+    TIntIntMap vid2dsize, vid2degree, vid2weig;
+    TIntObjectHashMap<IStateInt> pid2ari;
+    TIntIntHashMap pid2arity;
 
     protected DomOverWDeg(Solver solver) {
         this.solver = solver;
         counter = new FailPerPropagator(solver.getCstrs(), solver);
+        vid2dsize = new TIntIntHashMap();
+        vid2degree = new TIntIntHashMap();
+        vid2weig = new TIntIntHashMap();
+        pid2ari = new TIntObjectHashMap<IStateInt>();
+        pid2arity = new TIntIntHashMap(10, 0.5F, -1, -1);
+
+        Variable[] vars = solver.getVars();
+        for (int i = 0; i < vars.length; i++) {
+            vars[i].addMonitor(this);
+        }
+        Constraint[] cstrs = solver.getCstrs();
+        for (int i = 0; i < cstrs.length; i++) {
+            Propagator[] props = cstrs[i].propagators;
+            for (int j = 0; j < props.length; j++) {
+                pid2ari.put(props[j].getId(), solver.getEnvironment().makeInt(props[j].arity()));
+            }
+        }
     }
 
     private int weight(IntVar v) {
         int w = 0;
-        Constraint[] constraints = v.getConstraints();
-        for (int c = 0; c < constraints.length; c++) {
-            Propagator[] propagators = constraints[c].propagators;
-            for (int p = 0; p < propagators.length; p++) {
-                Propagator prop = propagators[p];
-                if (prop.arity() > 1) {
+        Propagator[] propagators = v.getPropagators();
+        for (int p = 0; p < propagators.length; p++) {
+            Propagator prop = propagators[p];
+            int pid = prop.getId();
+            if (pid2arity.get(pid) > 1) {
+                w += counter.getFails(prop);
+            } else {
+                int a = pid2ari.get(pid).get();
+                pid2arity.put(pid, a);
+                if (a > 1) {
                     w += counter.getFails(prop);
                 }
             }
@@ -70,12 +102,40 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> {
 
     @Override
     public int compare(IntVar o1, IntVar o2) {
-        int w1 = weight(o1);
-        int w2 = weight(o2);
-        int s1 = o1.getDomainSize();
-        int s2 = o2.getDomainSize();
-        int d1 = o1.getPropagators().length;
-        int d2 = o2.getPropagators().length;
+        int vid1 = o1.getId();
+        int vid2 = o2.getId();
+        int w1 = vid2weig.get(vid1);
+        int w2 = vid2weig.get(vid2);
+        int s1 = vid2dsize.get(vid1);
+        int s2 = vid2dsize.get(vid2);
+        int d1 = vid2degree.get(vid1);
+        int d2 = vid2degree.get(vid2);
         return (s1 * w2 * d2) - (s2 * w1 * d1);
+    }
+
+    @Override
+    public int minima(IntVar[] elements, int from, int to) {
+        vid2dsize.clear();
+        vid2degree.clear();
+        vid2weig.clear();
+        pid2arity.clear();
+        for (int i = from; i <= to; i++) {
+            int vid = elements[i].getId();
+            vid2dsize.put(vid, elements[i].getDomainSize());
+            vid2degree.put(vid, elements[i].getNbProps());
+            vid2weig.put(vid, weight(elements[i]));
+        }
+        return super.minima(elements, from, to);
+    }
+
+    @Override
+    public void onUpdate(Variable var, EventType evt, ICause cause) {
+        if (evt == EventType.INSTANTIATE) {
+            Propagator[] props = var.getPropagators();
+            for (int i = 0; i < props.length; i++) {
+                int pid = props[i].getId();
+                pid2ari.get(pid).add(-1);
+            }
+        }
     }
 }

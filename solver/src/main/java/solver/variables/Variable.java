@@ -100,6 +100,8 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      */
     Propagator[] getPropagators();
 
+    int getNbProps();
+
     int[] getPIndices();
 
     W[] getViews();

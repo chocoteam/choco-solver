@@ -173,6 +173,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return propagators;
     }
 
+    public int getNbProps() {
+        return pIdx;
+    }
+
     public int[] getPIndices() {
         if (pindices.length > pIdx) {
             pindices = Arrays.copyOf(pindices, pIdx);
@@ -203,6 +207,11 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     }
 
     public void addMonitor(IVariableMonitor monitor) {
+        // 1. check the non redundancy of a monitor
+        for (int i = 0; i < mIdx; i++) {
+            if (monitors[i] == monitor) return;
+        }
+        // 2. then add the monitor
         if (mIdx == monitors.length) {
             IVariableMonitor<V>[] tmp = monitors;
             monitors = (IVariableMonitor<V>[]) new IView[tmp.length * 3 / 2 + 1];

@@ -4,7 +4,6 @@ import choco.kernel.common.util.procedure.IntProcedure;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
-import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import solver.Cause;
@@ -43,7 +42,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
 
     protected final RemProc rem_proc;
     protected final TIntObjectHashMap<IIntDeltaMonitor> deltamon; // delta monitoring -- can be NONE
-    protected final TIntIntHashMap idxVs; // index of this within the variables structure -- mutable
     protected TIntLongHashMap timestamps; // a timestamp lazy clear the event structures
 	protected final AbstractSearchLoop loop;
 
@@ -57,7 +55,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
         this.vars = vars;
         this.nbNotInstVar = environment.makeInt(vars.length);
         this.deltamon = new TIntObjectHashMap<IIntDeltaMonitor>(vars.length);
-        this.idxVs = new TIntIntHashMap(vars.length, (float) 0.5, -2, -2);
         this.timestamps = new TIntLongHashMap(vars.length, (float) 0.5, -2, -2);
         for (IntVar v : vars) {
             v.recordMask(EventType.REMOVE.mask); // to be sure delta is created and maintained
@@ -176,16 +173,6 @@ public class CondAllDiffBCProba implements IVariableMonitor<IntVar>, ICondition<
 
     @Override
     public void linkRecorder(IEventRecorder recorder) {
-    }
-
-    @Override
-    public int getIdx(IntVar variable) {
-        return idxVs.get(variable.getId());
-    }
-
-    @Override
-    public void setIdx(IntVar variable, int idx) {
-        idxVs.put(variable.getId(), idx);
     }
 
     public boolean test() {
