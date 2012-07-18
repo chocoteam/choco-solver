@@ -301,6 +301,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

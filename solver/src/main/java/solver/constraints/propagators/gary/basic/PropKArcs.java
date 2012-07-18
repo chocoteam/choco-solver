@@ -96,6 +96,7 @@ public class PropKArcs extends Propagator {
 		nbInKer.set(nbK);
 		nbInEnv.set(nbE);
 		filter(nbK, nbE);
+		gdm.unfreeze();
 	}
 
 	@Override

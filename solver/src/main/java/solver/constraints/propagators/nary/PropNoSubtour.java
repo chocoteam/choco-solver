@@ -110,9 +110,6 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
     }
 
     private void varInstantiated(int var, int val) throws ContradictionException {
-        if (!vars[var].instantiated()) {
-            throw new UnsupportedOperationException();
-        }
         int last = end[val].get();
         int start = origin[var].get();
         if (origin[val].get() != val) {

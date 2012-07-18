@@ -33,9 +33,11 @@ import solver.Solver;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
+import solver.search.strategy.enumerations.sorters.Incr;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.enumerations.sorters.Seq;
 import solver.search.strategy.enumerations.sorters.SorterFactory;
+import solver.search.strategy.enumerations.sorters.metrics.LowerBound;
 import solver.search.strategy.enumerations.validators.ValidatorFactory;
 import solver.search.strategy.enumerations.values.HeuristicValFactory;
 import solver.search.strategy.selectors.graph.arcs.RandomArc;
@@ -139,6 +141,21 @@ public final class StrategyFactory {
                 new Seq<IntVar>(SorterFactory.minDomain(), SorterFactory.inputOrder(variables)),
                 ValidatorFactory.instanciated,
                 environment);
+    }
+    
+    /**
+     * Assignment strategy combining <code>?</code> and <code>MinVal</code>
+     *
+     * @param variables   list of variables
+     * @param environment environment
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> minDomVal(IntVar[] variables, IEnvironment environment) {
+    	HeuristicValFactory.indomainMin(variables);
+    	return StrategyVarValAssign.dyn(variables,
+    	               new Seq<IntVar>(new Incr<IntVar>(LowerBound.build()), SorterFactory.inputOrder(variables)),
+    	               ValidatorFactory.instanciated,
+    	               environment);
     }
 
     /**

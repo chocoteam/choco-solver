@@ -114,6 +114,7 @@ public class PropOneSuccBut extends Propagator<DirectedGraphVar> {
 				}
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override

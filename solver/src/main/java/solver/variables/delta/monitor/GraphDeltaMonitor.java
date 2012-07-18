@@ -76,6 +76,7 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
 
 	@Override
 	public void unfreeze() {
+        timestamp = loop.timeStamp;
 		for (int i = 0; i < 3; i++) {
 			this.first[i] = last[i] = delta.getSize(i);
 		}
@@ -96,48 +97,9 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
 		}
 	}
 
-//	@Override
-//	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-//		int type;
-//		switch (evt) {//Otherwise the recorder will do a snapshot of a delta that may have not been cleared yet
-//			case REMOVENODE:
-//				type = IGraphDelta.NR;
-//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-//					if(delta.getCause(i,type)!=propagator){
-//						proc.execute(delta.get(i, type));
-//					}
-//				}
-//				break;
-//			case ENFORCENODE:
-//				type = IGraphDelta.NE;
-//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-//					if(delta.getCause(i,type)!=propagator){
-//						proc.execute(delta.get(i, type));
-//					}
-//				}
-//				break;
-//			case REMOVEARC:
-//				type = IGraphDelta.AR;
-//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-//					if(delta.getCause(i,type)!=propagator){
-//						proc.execute(delta.get(i, type));
-//					}
-//				}
-//				break;
-//			case ENFORCEARC:
-//				type = IGraphDelta.AE;
-//				for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-//					if(delta.getCause(i,type)!=propagator){
-//						proc.execute(delta.get(i, type));
-//					}
-//				}
-//				break;
-//		}
-//	}
-
 	@Deprecated
 	public void forEach(IntProcedure proc, EventType evt) throws ContradictionException {
-		forEachNode(proc,evt);
+		throw new UnsupportedOperationException("use forEachNode or forEachArc instead");
 	}
 
     @Override

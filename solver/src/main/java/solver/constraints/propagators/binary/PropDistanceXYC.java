@@ -120,6 +120,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         } else {
             filterNeq();
         }
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

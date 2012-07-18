@@ -27,6 +27,7 @@
 package solver.variables;
 
 import solver.ICause;
+import solver.exception.ContradictionException;
 
 import java.io.Serializable;
 
@@ -47,6 +48,6 @@ public interface IVariableMonitor<V extends Variable> extends Serializable{
      * @param evt   modification event
      * @param cause origin of the modification
      */
-    void onUpdate(V var, EventType evt, ICause cause);
+    void onUpdate(V var, EventType evt, ICause cause) throws ContradictionException;
 
 }

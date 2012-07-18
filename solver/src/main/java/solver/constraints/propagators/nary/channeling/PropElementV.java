@@ -93,6 +93,9 @@ public class PropElementV extends Propagator<IntVar> {
         } else if (valueUpdateNeeded.get()) {
             updateValueFromIndex();
         }
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

@@ -27,7 +27,9 @@
 
 package solver.variables;
 
+import solver.ICause;
 import solver.Solver;
+import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.variables.fast.BitsetIntVarImpl;
 import solver.variables.fast.BooleanBoolVarImpl;
@@ -176,5 +178,59 @@ public enum VariableFactory {
             }
         }
         return mat;
+    }
+
+    public static IntVar[] task(String name, int est, int lst, int minD, int maxD, int ect, int lct, Solver solver) {
+        final IntVar start = bounded(name + "_start", est, lst, solver);
+        final IntVar duration = bounded(name + "_duration", minD, maxD, solver);
+        final IntVar end = bounded(name + "_end", ect, lct, solver);
+        // TODO verifier coherence
+        IVariableMonitor update = new IVariableMonitor() {
+            @Override
+            public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                // start
+                start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+                start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                // end
+                end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+                end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                // duration
+                duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+                duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+            }
+        };
+        start.addMonitor(update);
+        duration.addMonitor(update);
+        end.addMonitor(update);
+        return new IntVar[]{start, duration, end};
+    }
+
+
+    public static IntVar[] taskEnumerated(String name, int est, int lst, int minD, int maxD, int ect, int lct, Solver solver) {
+        final IntVar start = enumerated(name + "_start", est, lst, solver);
+        final IntVar duration = enumerated(name + "_duration", minD, maxD, solver);
+        final IntVar end = enumerated(name + "_end", ect, lct, solver);
+        // TODO verifier coherence
+        IVariableMonitor update = new IVariableMonitor() {
+            @Override
+            public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+                boolean fixpoint = true;
+                while (fixpoint) {
+                    // start
+                    fixpoint = start.updateLowerBound(end.getLB() - duration.getUB(), cause);
+                    fixpoint |= start.updateUpperBound(end.getUB() - duration.getLB(), cause);
+                    // end
+                    fixpoint |= end.updateLowerBound(start.getLB() + duration.getLB(), cause);
+                    fixpoint |= end.updateUpperBound(start.getUB() + duration.getUB(), cause);
+                    // duration
+                    fixpoint |= duration.updateLowerBound(end.getLB() - start.getUB(), cause);
+                    fixpoint |= duration.updateUpperBound(end.getUB() - start.getLB(), cause);
+                }
+            }
+        };
+        start.addMonitor(update);
+        duration.addMonitor(update);
+        end.addMonitor(update);
+        return new IntVar[]{start, duration, end};
     }
 }

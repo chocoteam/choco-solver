@@ -136,6 +136,7 @@ public class PropEvalObj extends Propagator {
                 }
             }
         }
+		gdm.unfreeze();
     }
 
     @Override

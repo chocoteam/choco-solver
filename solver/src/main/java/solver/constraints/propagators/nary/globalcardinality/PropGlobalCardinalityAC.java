@@ -125,7 +125,9 @@ public class PropGlobalCardinalityAC extends Propagator<IntVar> {
             initialize();
         }
         struct.removeUselessEdges(this);
-
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

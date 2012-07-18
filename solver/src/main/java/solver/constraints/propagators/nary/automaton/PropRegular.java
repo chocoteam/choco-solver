@@ -93,6 +93,9 @@ public class PropRegular extends Propagator<IntVar> {
             }
             vars[i].removeInterval(left, right, this);
         }
+		for(int i=0;i<idms.length;i++){
+			idms[i].unfreeze();
+		}
     }
 
     @Override

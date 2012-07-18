@@ -92,6 +92,7 @@ public class PropAtMostNSuccessors extends Propagator<DirectedGraphVar> {
 		for (int node = act.getFirstElement(); node>=0; node = act.getNextElement()) {
 			checkNode(node);
 		}
+		gdm.unfreeze();
 	}
 
     @Override

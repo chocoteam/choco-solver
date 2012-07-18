@@ -101,6 +101,7 @@ public class PropAtLeastNSuccessors extends Propagator<DirectedGraphVar> {
 				enforceNode(node);
 			}
 		}
+		gdm.unfreeze();
 	}
 
 	@Override
