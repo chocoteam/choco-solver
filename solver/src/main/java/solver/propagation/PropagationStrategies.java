@@ -51,7 +51,6 @@ public enum PropagationStrategies {
     ONE_QUEUE_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             PArc arcs = new PArc(pengine, constraints);
             PCoarse coarses = new PCoarse(pengine, constraints);
@@ -61,7 +60,6 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PArc(pengine, constraints));
             Queue coarses = new Queue(new PCoarse(pengine, constraints));
@@ -71,7 +69,6 @@ public enum PropagationStrategies {
     PRIORITY_QUEUES_WITH_ARCS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
             for (int i = 0; i < constraints.length; i++) {
@@ -112,7 +109,6 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_VARS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Variable[] variables = solver.getVars();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PVar(pengine, variables));
@@ -123,7 +119,6 @@ public enum PropagationStrategies {
     INCREASING_DEGREE_VARS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Variable[] variables = solver.getVars();
             Arrays.sort(variables, new Comparator<Variable>() {
                 @Override
@@ -139,7 +134,6 @@ public enum PropagationStrategies {
     ONE_QUEUE_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             PCons arcs = new PCons(pengine, constraints);
             PCoarse coarses = new PCoarse(pengine, constraints);
@@ -149,7 +143,6 @@ public enum PropagationStrategies {
     TWO_QUEUES_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             Queue arcs = new Queue(new PCons(pengine, constraints));
             Queue coarses = new Queue(new PCoarse(pengine, constraints));
@@ -159,7 +152,6 @@ public enum PropagationStrategies {
     PRIORITY_QUEUES_WITH_PROPS() {
         @SuppressWarnings({"unchecked"})
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
             ArrayList<Propagator>[] queues = new ArrayList[PropagatorPriority.VERY_SLOW.priority + 1];
             for (int i = 0; i < constraints.length; i++) {
@@ -188,13 +180,33 @@ public enum PropagationStrategies {
     GECODE() {
         @Override
         public void make(Solver solver, IPropagationEngine pengine) {
-            pengine.skipProperties();
             Constraint[] constraints = solver.getCstrs();
-            NQueue f7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCons(pengine, constraints));
-            NQueue c7 = new NQueue(EvtRecEvaluators.MaxPriorityC, 0, 7, new PCoarse(pengine, constraints));
-            pengine.set(new Sort(f7.clearOut(), c7.pickOne()));
+            Sort _7qaf = new Sort(new Switcher(EvtRecEvaluators.MaxDynPriorityC, 0, 7, new Queue(), new PCons(pengine, constraints)));
+//            SortDyn _7qac = new SortDyn(EvtRecEvaluators.MaxDynPriorityC, new PCoarse(pengine, constraints));
+            Sort _7qac = new Sort(new Switcher(EvtRecEvaluators.MaxDynPriorityC, 0, 7, new Queue(), new PCoarse(pengine, constraints)));
+            pengine.set(new Sort(_7qaf.clearOut(), _7qac.pickOne()));
         }
     },
+    /*ACTIVITY_C() {
+        @Override
+        public void make(Solver solver, IPropagationEngine pengine) {
+            Constraint[] constraints = solver.getCstrs();
+//            Variable[] variabes = solver.getVars();
+            PropagationStrategy arcs = new Magic(solver.getSearchLoop(), .999f, new PCons(pengine, constraints)).clearOut();
+            PropagationStrategy coarses = new Magic(solver.getSearchLoop(), .999f, new PCoarse(pengine, constraints));
+            pengine.set(new Sort(arcs, coarses.pickOne()).clearOut());
+        }
+    },
+    ACTIVITY_V() {
+        @Override
+        public void make(Solver solver, IPropagationEngine pengine) {
+            Constraint[] constraints = solver.getCstrs();
+            Variable[] variables = solver.getVars();
+            PropagationStrategy arcs = new Magic(solver.getSearchLoop(), .999f, new PVar(pengine, variables)).clearOut();
+            PropagationStrategy coarses = new Magic(solver.getSearchLoop(), .999f, new PCoarse(pengine, constraints));
+            pengine.set(new Sort(arcs, coarses.pickOne()).clearOut());
+        }
+    },*/
     DEFAULT() {
         @Override
         public void make

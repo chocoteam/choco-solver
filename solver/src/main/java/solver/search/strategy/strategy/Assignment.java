@@ -48,11 +48,22 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     PoolManager<FastDecision> decisionPool;
 
+    solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
+
     public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
         super(vars);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
         decisionPool = new PoolManager<FastDecision>();
+    }
+
+    public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
+                      solver.search.strategy.assignments.Assignment assgnt) {
+        super(vars);
+        this.varselector = varselector;
+        this.valueIterator = valueIterator;
+        decisionPool = new PoolManager<FastDecision>();
+        this.assgnt = assgnt;
     }
 
     @Override
@@ -70,7 +81,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
             if (d == null) {
                 d = new FastDecision(decisionPool);
             }
-            d.set(variable, value, solver.search.strategy.assignments.Assignment.int_eq);
+            d.set(variable, value, assgnt);
             return d;
         }
         return null;

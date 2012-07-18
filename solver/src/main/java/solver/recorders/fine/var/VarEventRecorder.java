@@ -81,7 +81,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
             p2i[pid - offset] = i;
             propIdx[i] = i;
         }
-        firstAP = solver.getEnvironment().makeInt(n);
+        firstAP = solver.getEnvironment().makeInt(engine.forceActivation()?0:n);
         firstPP = solver.getEnvironment().makeInt(n);
     }
 

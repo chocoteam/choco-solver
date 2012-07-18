@@ -48,7 +48,6 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     protected S lastPopped;
 
     protected BitSet toPropagate;
-    protected boolean init = false;
 
     public Sort(Generator<S>... generators) {
         this(null, generators);
@@ -64,7 +63,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
         for (int e = 0; e < elements.length; e++) {
             elements[e].setScheduler(this, e);
         }
-        this.toPropagate = new BitSet(elements.length);
+        this.toPropagate = new BitSet(elements.length / 2 + 1);
     }
 
 
@@ -101,7 +100,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -115,7 +114,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
             idx = toPropagate.nextSetBit(idx + 1);
@@ -129,7 +128,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
             idx = toPropagate.nextSetBit(idx + 1);
@@ -146,7 +145,7 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
             toPropagate.clear(idx);
             lastPopped = elements[idx];
             lastPopped.deque();
-            if (!lastPopped.execute()&& !lastPopped.enqueued()) {
+            if (!lastPopped.execute() && !lastPopped.enqueued()) {
                 schedule(lastPopped);
             }
         }
@@ -176,6 +175,16 @@ public final class Sort<S extends ISchedulable> extends PropagationStrategy<S> {
     @Override
     public int size() {
         return toPropagate.cardinality();
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(elements);
+    }
+
+    @Override
+    public Sort duplicate() {
+        return new Sort(this.comparator);
     }
 
     //-->

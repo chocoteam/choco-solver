@@ -99,13 +99,6 @@ public class Alpha extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-        // TODO chercher un meilleur ordre de propagation
-        /*solver.getEngine().addGroup(
-                Group.buildGroup(
-                        Predicates.light(),
-                        new Decr(IncrDomDeg.get()),
-                        Policy.FIXPOINT
-                ));*/
     }
 
     @Override

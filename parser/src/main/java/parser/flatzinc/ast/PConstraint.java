@@ -81,7 +81,7 @@ public final class PConstraint {
         } else {
             String name = properties.getProperty(id);
             if (name == null) {
-                throw new FZNException("Unkown constraint: " + id);
+                throw new FZNException("Unknown constraint: " + id);
             }
             builder = (IBuilder) loadManager(name);
             builders.put(id, builder);

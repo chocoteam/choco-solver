@@ -28,7 +28,6 @@
 package solver.search.loop;
 
 import choco.kernel.ESat;
-import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
@@ -69,8 +68,8 @@ public class BinarySearchLoop extends AbstractSearchLoop {
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {
-            LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
-            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver));
+            //LoggerFactory.getLogger("solver").info("Set default search strategy: Dow/WDeg");
+            set(StrategyFactory.domwdegMindom(VariableFactory.toIntVar(solver.getVars()), solver, System.currentTimeMillis()));
         }
         strategy.init();
         moveTo(OPEN_NODE);
@@ -176,7 +175,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
     protected void upBranch() {
         env.worldPop();
         //if (env.getWorldIndex() <= searchWorldIndex ){// Issue#55
-        if (decision == RootDecision.ME) {// Issue#55
+        if (decision == RootDecision.ROOT) {// Issue#55
             // The entire tree search has been explored, the search cannot be followed
             interrupt();
         } else {

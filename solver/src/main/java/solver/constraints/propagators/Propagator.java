@@ -29,7 +29,7 @@ package solver.constraints.propagators;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
+import choco.kernel.memory.structure.Operation;
 import com.sun.istack.internal.Nullable;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -88,11 +88,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected final static Logger LOGGER = LoggerFactory.getLogger(Propagator.class);
 
+    protected static final short NEW = 0, ACTIVE = 1, PASSIVE = 2;
+
     private final int ID; // unique id of this
     /**
      * List of <code>variable</code> objects
      */
     protected V[] vars;
+
+    protected int[] vindices;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -100,12 +104,11 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public IEnvironment environment;
 
-    protected static final int NEW = 0, ACTIVE = 1, PASSIVE = 2;
 
     /**
      * Backtrackable boolean indicating wether <code>this</code> is active
      */
-    protected IStateInt state; // 0 : new -- 1 : active -- 2 : passive
+    protected short state; // 0 : new -- 1 : active -- 2 : passive
 
     protected int nbPendingER = 0; // counter of enqued records -- usable as trigger for complex algorithm
 
@@ -145,19 +148,19 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority, boolean reactOnPromotion) {
         checkVariable(vars);
         this.vars = vars.clone();
+        this.vindices = new int[vars.length];
         this.solver = solver;
         this.environment = solver.getEnvironment();
-        this.state = environment.makeInt(NEW);
+        this.state = NEW;
         this.constraint = constraint;
         this.priority = priority;
         this.reactOnPromotion = reactOnPromotion;
-        int nbNi = 0;
         for (int v = 0; v < vars.length; v++) {
-            vars[v].link(this, v);
+            vindices[v] = vars[v].link(this, v);
             vars[v].recordMask(getPropagationConditions(v));
-            if (!vars[v].instantiated()) {
+            /*if (!vars[v].instantiated()) {
                 nbNi++;
-            }
+            }*/
         }
         fails = 0;
         ID = solver.nextId();
@@ -232,27 +235,39 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
-        state.set(ACTIVE);
+        state = ACTIVE;
+        environment.save(new Operation(){
+            @Override
+            public void undo() {
+                state = NEW;
+            }
+        });
         solver.getEngine().activatePropagator(this);
     }
 
     @SuppressWarnings({"unchecked"})
     public void setPassive() {
-        assert isActive() : "the propagator is already passive, it cannot set passive more than once in one filtering call";
-        state.set(PASSIVE);
+        assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
+        state = PASSIVE;
+        environment.save(new Operation(){
+            @Override
+            public void undo() {
+                state = ACTIVE;
+            }
+        });
         solver.getEngine().desactivatePropagator(this);
     }
 
     public boolean isStateLess() {
-        return state.get() == NEW;
+        return state == NEW;
     }
 
     public boolean isActive() {
-        return state.get() == ACTIVE;
+        return state == ACTIVE;
     }
 
     public boolean isPassive() {
-        return state.get() == PASSIVE;
+        return state == PASSIVE;
     }
 
     /**
@@ -275,6 +290,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     public final V[] getVars() {
         return vars;
+    }
+
+    public int[] getVIndices() {
+        return vindices;
     }
 
     /**
@@ -357,6 +376,16 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             arity += vars[i].instantiated() ? 0 : 1;
         }
         return arity;
+    }
+
+    public int dynPriority() {
+        int arity = 0;
+        for (int i = 0; i < vars.length && arity <= 3; i++) {
+            arity += vars[i].instantiated() ? 0 : 1;
+        }
+        if (arity > 3) {
+            return priority.priority;
+        } else return arity;
     }
 
     /**

@@ -51,15 +51,15 @@ public class InDomainMiddle implements ValueIterator<IntVar> {
         int low = var.getLB();
         int upp = var.getUB();
         int mean = (low + upp) / 2;
-        int inc = 1;
-        while (!var.contains(mean) &&
-                mean >= low && mean <= upp) {
-            inc = -1 * (inc + 1);
-            mean += inc;
+        if (!var.contains(mean)) {
+            int lb = var.previousValue(mean);
+            int ub = var.previousValue(mean);
+            if ((mean - lb) < (ub - mean)) {
+                return lb;
+            } else {
+                return ub;
+            }
         }
-        if (var.contains(mean)) {
-            return mean;
-        }
-        return var.getLB();
+        return mean;
     }
 }

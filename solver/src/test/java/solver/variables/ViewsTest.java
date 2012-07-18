@@ -209,7 +209,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", -2, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -4, 4, ref);
 
-                ref.post(new Times(x, Views.fixed(2, solver), z, solver));
+                ref.post(new Times(x, Views.fixed(2, ref), z, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {
@@ -232,7 +232,7 @@ public class ViewsTest {
                 IntVar x = VariableFactory.enumerated("x", 0, 2, ref);
                 IntVar z = VariableFactory.enumerated("z", -2, 0, ref);
 
-                ref.post(new Arithmetic(x, "+", z, ref));
+                ref.post(new Arithmetic(z, "+", x,"=",0, ref));
                 ref.set(StrategyFactory.random(new IntVar[]{x, z}, ref.getEnvironment(), seed));
             }
             {

@@ -174,4 +174,8 @@ public abstract class PropagationStrategy<E extends ISchedulable> implements IPr
         }
     }
     //-->
+
+    public PropagationStrategy<E> duplicate() {
+        throw new UnsupportedOperationException("unexpected call to Switcher, should be delegated");
+    }
 }

@@ -36,6 +36,7 @@ import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
+import solver.propagation.PropagationEngines;
 import solver.propagation.PropagationStrategies;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
@@ -64,6 +65,9 @@ public abstract class AbstractProblem {
 
     @Option(name = "-log", usage = "Quiet resolution", required = false)
     Level level = Level.VERBOSE;
+
+    @Option(name = "-engine", usage = "Propagation engine", required = false)
+    PropagationEngines engine = PropagationEngines.DEFAULT;
 
     @Option(name = "-policy", usage = "Propagation policy", required = false)
     PropagationStrategies policy = PropagationStrategies.DEFAULT;
@@ -116,20 +120,30 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            Logger log = LoggerFactory.getLogger("bench");
+            final Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
             this.createSolver();
             this.buildModel();
             this.configureSearch();
 
             overrideExplanation();
-            switch (policy) {
+
+            switch (engine) {
                 case DEFAULT:
-                    configureEngine();
+                case DSLDRIVEN:
+                    switch (policy) {
+                        case DEFAULT:
+                            configureEngine();
+                            break;
+                        default:
+                            IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment(), false, true, false);
+                            policy.make(solver, pengine);
+                            solver.set(pengine);
+                            break;
+                    }
                     break;
                 default:
-                    IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
-                    policy.make(solver, pengine);
+                    IPropagationEngine pengine = engine.make(solver);
                     solver.set(pengine);
                     break;
             }
@@ -139,6 +153,19 @@ public abstract class AbstractProblem {
                         level.getLevel() > Level.VERBOSE.getLevel(),
                         level.getLevel() > Level.SOLUTIONS.getLevel());
             }
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    if (level.getLevel() > Level.SILENT.getLevel()) {
+                        log.info("User interruption...");
+                    }
+                    if (level.getLevel() > Level.QUIET.getLevel()) {
+                        log.info("{}", solver.getMeasures().toString());
+                    } else if (level.getLevel() > Level.SILENT.getLevel()) {
+                        log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                    }
+                }
+            });
 
             this.solve();
             if (level.getLevel() > Level.QUIET.getLevel()) {

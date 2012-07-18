@@ -74,31 +74,74 @@ public class PropagationEngine implements IPropagationEngine {
 
     protected boolean initialized = false; // is this already initialized
 
-    protected boolean activated = false; // is propagator activation required
+    protected boolean forceInitialPropagation= true; // is propagator activation required
 
-    protected boolean checkProperties = true; // skip water marking phases
+    protected boolean initialPropagationDone = false; // related to forceInitialPropagation, avoid awaking up propagators 2 times
+
+    protected boolean checkProperties= true; // skip water marking phases
+
+    protected boolean forceActivation = false; // force activation of event recorder on creation
 
     protected IEnvironment environment;
 
     protected int default_nb_vars = 16, default_nb_props = 16;
 
     public PropagationEngine(IEnvironment environment) {
-        this(environment, 16, 16);
+        this(environment, true, true, false);
     }
 
-    public PropagationEngine(IEnvironment environment, int nbVar, int nbProp) {
+    /**
+     * @param checkProperties         : set to false the verification of the three following properties will be skipped:
+     *                                <br/>
+     *                                <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
+     *                                <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
+     *                                <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
+     *                                <br/>
+     *                                As a consequence, the engine can be incomplete.
+     * @param forceInitialPropagation set to true, propagators will be scheduled for initial proapation
+     * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
+     */
+    public PropagationEngine(IEnvironment environment, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
         this.exception = new ContradictionException();
         this.environment = environment;
-        default_nb_props = nbProp;
-        default_nb_vars = nbVar;
         fines_v = new TIntObjectHashMap(default_nb_vars, 0.5f, -1);
         fines_p = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
         coarses = new TIntObjectHashMap(default_nb_props, 0.5f, -1);
+        this.checkProperties = checkProperties;
+        this.forceInitialPropagation = forceInitialPropagation;
+        this.forceActivation = forceActivation;
+    }
+
+    /**
+     * Override default parameters. Should be called just after the constructor.
+     *
+     * @param nbVar                   estimation of the number of variables
+     * @param nbProp                  estimation of the number of propagators
+     * @param checkProperties         set to false the verification of the three following properties will be skipped:
+     *                                <br/>
+     *                                <b>NoEventLoss</b>: no event can be lost during propagation because every pair constraint-variable (c, v) of the model is represented within the propagation engine.
+     *                                <br/><b>UnitPropagation</b>: no event is propagated more than once because each pair (c, v) of the model is only represented once within the propagation engine.
+     *                                <br/><b>Conformity</b>: no event that does not relate to an existing pair (c, v) of the model is represented within the propagation engine.
+     *                                <br/>
+     * @param forceInitialPropagation set to true, propagators will be scheduled for initial propagation
+     * @param forceActivation         set to true, fine event recorders will be directly activated within the structure.
+     */
+    public void setParameters(int nbVar, int nbProp, boolean checkProperties, boolean forceInitialPropagation, boolean forceActivation) {
+        this.checkProperties = checkProperties;
+        this.forceInitialPropagation = forceInitialPropagation;
+        this.forceActivation = forceActivation;
+        default_nb_props = nbProp;
+        default_nb_vars = nbVar;
     }
 
     @Override
     public boolean initialized() {
         return initialized;
+    }
+
+    @Override
+    public boolean forceActivation() {
+        return forceActivation;
     }
 
     @Override
@@ -124,7 +167,7 @@ public class PropagationEngine implements IPropagationEngine {
                 initialized = true;
             }
         }
-        if (!activated) {
+        if (forceInitialPropagation && !initialPropagationDone) {
             // 2. schedule constraints for initial propagation
             Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
@@ -133,31 +176,16 @@ public class PropagationEngine implements IPropagationEngine {
                     propagators[p].forcePropagate(EventType.FULL_PROPAGATION);
                 }
             }
-            activated = true;
-        } else {
+            initialPropagationDone = true;
+        } else if (!forceActivation) {
             Constraint[] constraints = solver.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] propagators = constraints[c].propagators;
                 for (int p = 0; p < propagators.length; p++) {
-                    activatePropagator(propagators[p]);
+                    if (propagators[p].isActive()) activatePropagator(propagators[p]);
                 }
             }
         }
-    }
-
-    @Override
-    public void skipProperties() {
-        checkProperties = false;
-    }
-
-    @Override
-    public void skipInitialPropagation() {
-        activated = true;
-    }
-
-    @Override
-    public void forceInitialPropagation() {
-        activated = false;
     }
 
     public void prepareWM(Solver solver) {
@@ -182,33 +210,33 @@ public class PropagationEngine implements IPropagationEngine {
                     Variable variable = propagator.getVar(v);
                     if ((variable.getTypeAndKind() & Variable.CSTE) == 0) { // this is not a constant
                         int idV = variable.getId();
-                        watermarks.putMark(idV, idP, v);
+                        watermarks.putMark(idV, idP);
                     }
                 }
             }
         }
     }
 
-    public void clearWatermark(int id1, int id2, int id3) {
+    public void clearWatermark(int id1, int id2) {
         if (checkProperties) {
             if (id1 == 0) {// coarse case
                 watermarks.clearMark(id2);
             } else if (id2 == 0) {// coarse case
                 watermarks.clearMark(id1);
             } else {
-                watermarks.clearMark(id1, id2, id3);
+                watermarks.clearMark(id1, id2);
             }
         }
     }
 
-    public boolean isMarked(int id1, int id2, int id3) {
+    public boolean isMarked(int id1, int id2) {
         if (checkProperties) {
             if (id1 == 0) {// coarse case
                 return watermarks.isMarked(id2);
             } else if (id2 == 0) {// coarse case
                 return watermarks.isMarked(id1);
             } else {
-                return watermarks.isMarked(id1, id2, id3);
+                return watermarks.isMarked(id1, id2);
             }
         }
         return true;
@@ -261,10 +289,10 @@ public class PropagationEngine implements IPropagationEngine {
             int id = vars[i].getId();
             if (!fines_v.containsKey(id)) {
                 IList<Variable, AbstractFineEventRecorder> list = new BacktrackableArrayList(vars[i], environment, default_nb_props);
-                list.add(fer, false);
+                list.add(fer, false, forceActivation);
                 fines_v.put(id, list);
             } else {
-                fines_v.get(id).add(fer, false);
+                fines_v.get(id).add(fer, false, forceActivation);
             }
         }
     }

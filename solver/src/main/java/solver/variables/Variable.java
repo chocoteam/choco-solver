@@ -100,6 +100,8 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      */
     Propagator[] getPropagators();
 
+    int getNbProps();
+
     int[] getPIndices();
 
     W[] getViews();
@@ -161,8 +163,9 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      *
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
+     * @return return the index of the propagator within the variable
      */
-    void link(Propagator propagator, int idxInProp);
+    int link(Propagator propagator, int idxInProp);
 
     /**
      * Analysis propagator event reaction on this, and adapt this

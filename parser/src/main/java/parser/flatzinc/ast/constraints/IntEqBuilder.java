@@ -47,9 +47,8 @@ public class IntEqBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = new IntVar[2];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = exps.get(i).intVarValue(solver);
-        }
+        vars[0] = exps.get(0).intVarValue(solver);
+        vars[1] = exps.get(1).intVarValue(solver);
         return ConstraintFactory.eq(vars[0], vars[1], solver);
     }
 }

@@ -38,6 +38,7 @@ import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.variables.*;
+import solver.variables.view.Views;
 
 import java.util.List;
 
@@ -55,6 +56,9 @@ import java.util.List;
 
 public final class PVariable extends ParVar {
 
+    private static final boolean DEBUG = true;
+    private static final String NO_NAME = "";
+
     static Logger LOGGER = LoggerFactory.getLogger("fzn");
 
     private enum Annotation {
@@ -71,23 +75,23 @@ public final class PVariable extends ParVar {
             // see Flatzinc specifications for more informations.
             switch (type.typeOf) {
                 case INT1:
-                    buildWithInt(identifier, map, solver);
+                    buildWithInt(identifier, expression, map, solver);
                     break;
                 case INT2:
-                    buildWithInt2(identifier, (DInt2) type, map, solver);
+                    buildWithInt2(identifier, (DInt2) type, expression, map, solver);
                     return;
                 case INTN:
-                    buildWithManyInt(identifier, (DManyInt) type, map, solver);
+                    buildWithManyInt(identifier, (DManyInt) type, expression, map, solver);
                     return;
                 case BOOL:
-                    buildWithBool(identifier, map, solver);
+                    buildWithBool(identifier, expression, map, solver);
                     return;
                 case SET:
                     buildWithSet(identifier, (DSet) type, map);
                     return;
                 case ARRAY:
                     if (expression == null) {
-                        buildWithDArray(identifier, (DArray) type, map, solver);
+                        buildWithDArray(identifier, (DArray) type, expression, map, solver);
                     } else {
                         buildWithDArray(identifier, (DArray) type, (EArray) expression, map, solver);
                     }
@@ -104,19 +108,19 @@ public final class PVariable extends ParVar {
             Annotation varanno;
             switch (type) {
                 case IDE:
-                    EIdentifier identifier = (EIdentifier)expression;
+                    EIdentifier identifier = (EIdentifier) expression;
                     varanno = Annotation.valueOf((identifier).value);
                     switch (varanno) {
                         case output_var:
                             IntVar var = (IntVar) map.get(name);
-                            parser.layout.addOutputVar(var);
+                            parser.layout.addOutputVar(name, var);
                             break;
                         default:
-                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+                            //LOGGER.warn("% Unknown annotation :" + varanno.toString());
                     }
                     break;
                 case ANN:
-                    EAnnotation eanno = (EAnnotation)expression;
+                    EAnnotation eanno = (EAnnotation) expression;
                     varanno = Annotation.valueOf(eanno.id.value);
                     switch (varanno) {
                         case output_array:
@@ -124,11 +128,11 @@ public final class PVariable extends ParVar {
                             parser.layout.addOutputArrays(name, vars, eanno.exps);
                             break;
                         default:
-                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+//                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
                     }
                     break;
                 default:
-                    LOGGER.warn("% Unknown annotation :" + type.toString());
+//                    LOGGER.warn("% Unknown annotation :" + type.toString());
             }
         }
     }
@@ -142,8 +146,13 @@ public final class PVariable extends ParVar {
      * @param solver
      * @return {@link Variable}
      */
-    private static BoolVar buildWithBool(String name, THashMap<String, Object> map, Solver solver) {
-        final BoolVar bi = VariableFactory.bool(name, solver);
+    private static BoolVar buildWithBool(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
+        final BoolVar bi;
+        if (expression != null) {
+            bi = (BoolVar)buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
+        } else {
+            bi = VariableFactory.bool(DEBUG?name:NO_NAME, solver);
+        }
         map.put(name, bi);
         return bi;
     }
@@ -151,13 +160,19 @@ public final class PVariable extends ParVar {
     /**
      * Build an unbounded {@link Variable} named {@code name}, defined by {@code type}.
      *
-     * @param name   name of the variable
+     * @param name       name of the variable
+     * @param expression
      * @param map
-     * @param solver
-     * @return {@link Variable}
+     * @param solver     @return {@link Variable}
      */
-    private static IntVar buildWithInt(String name, THashMap<String, Object> map, Solver solver) {
-        final IntVar iv = VariableFactory.bounded(name, Integer.MIN_VALUE, Integer.MAX_VALUE, solver);
+    private static IntVar buildWithInt(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
+        final IntVar iv;
+        if (expression != null) {
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
+        } else {
+            iv = VariableFactory.bounded(DEBUG?name:NO_NAME, (int) (Integer.MIN_VALUE * .99d),
+                    (int) (Integer.MAX_VALUE * .99d), solver);
+        }
         map.put(name, iv);
         return iv;
     }
@@ -171,8 +186,14 @@ public final class PVariable extends ParVar {
      * @param solver
      * @return {@link Variable}
      */
-    private static IntVar buildWithInt2(String name, DInt2 type, THashMap<String, Object> map, Solver solver) {
-        final IntVar iv = VariableFactory.bounded(name, type.getLow(), type.getUpp(), solver);
+    private static IntVar buildWithInt2(String name, DInt2 type, Expression expression, THashMap<String, Object> map, Solver solver) {
+        final IntVar iv;
+        if (expression != null) {
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
+        } else {
+            iv = VariableFactory.bounded(DEBUG?name:NO_NAME, type.getLow(), type.getUpp(), solver);
+
+        }
         map.put(name, iv);
         return iv;
     }
@@ -187,12 +208,33 @@ public final class PVariable extends ParVar {
      * @param solver
      * @return {@link Variable}
      */
-    private static IntVar buildWithManyInt(String name, DManyInt type, THashMap<String, Object> map, Solver solver) {
-        final IntVar iv = VariableFactory.enumerated(name, type.getValues(), solver);
+    private static IntVar buildWithManyInt(String name, DManyInt type, Expression expression, THashMap<String, Object> map, Solver solver) {
+        final IntVar iv;
+        if (expression != null) {
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
+        } else {
+            iv = VariableFactory.enumerated(DEBUG?name:NO_NAME, type.getValues(), solver);
+        }
         map.put(name, iv);
         return iv;
     }
 
+
+    private static IntVar buildOnExpression(String name, Expression expression, THashMap<String, Object> map, Solver solver){
+        final IntVar iv;
+        switch (expression.getTypeOf()){
+            case INT:
+                iv = Views.fixed(name, expression.intValue(), solver);
+                break;
+            case IDE:
+                iv = Views.eq((IntVar) map.get(expression.toString()));
+                break;
+            default:
+                iv = null;
+                Exit.log("Unknown expression");
+        }
+        return iv;
+    }
 
     /**
      * Build a {@link Variable} named {@code name}, defined by {@code type}.
@@ -221,7 +263,7 @@ public final class PVariable extends ParVar {
 //                return sv;
 //        }
 //        return null;
-        Exit.log();
+        Exit.log("SET VAR");
         return null;
     }
 
@@ -235,7 +277,7 @@ public final class PVariable extends ParVar {
      * @param map
      * @param solver
      */
-    private static void buildWithDArray(String name, DArray type, THashMap<String, Object> map, Solver solver) {
+    private static void buildWithDArray(String name, DArray type, Expression expression, THashMap<String, Object> map, Solver solver) {
         final DInt2 index = (DInt2) type.getIndex();
         // no need to get lowB, it is always 1 (see specification of FZN for more informations)
         final int size = index.getUpp();
@@ -245,28 +287,28 @@ public final class PVariable extends ParVar {
             case BOOL:
                 BoolVar[] bs = new BoolVar[size];
                 for (int i = 1; i <= size; i++) {
-                    bs[i - 1] = buildWithBool(name + '_' + i, map, solver);
+                    bs[i - 1] = buildWithBool(name + '_' + i, expression, map, solver);
                 }
                 map.put(name, bs);
                 break;
             case INT1:
                 vs = new IntVar[size];
                 for (int i = 1; i <= size; i++) {
-                    vs[i - 1] = buildWithInt(name + '_' + i, map, solver);
+                    vs[i - 1] = buildWithInt(name + '_' + i, null, map, solver);
                 }
                 map.put(name, vs);
                 break;
             case INT2:
                 vs = new IntVar[size];
                 for (int i = 1; i <= size; i++) {
-                    vs[i - 1] = buildWithInt2(name + '_' + i, (DInt2) what, map, solver);
+                    vs[i - 1] = buildWithInt2(name + '_' + i, (DInt2) what, expression, map, solver);
                 }
                 map.put(name, vs);
                 break;
             case INTN:
                 vs = new IntVar[size];
                 for (int i = 1; i <= size; i++) {
-                    vs[i - 1] = buildWithManyInt(name + '_' + i, (DManyInt) what, map, solver);
+                    vs[i - 1] = buildWithManyInt(name + '_' + i, (DManyInt) what, expression, map, solver);
                 }
                 map.put(name, vs);
                 break;
@@ -276,7 +318,7 @@ public final class PVariable extends ParVar {
 //                    svs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, map);
 //                }
 //                map.put(name, svs);
-                Exit.log();
+                Exit.log("SET VAR");
                 break;
             default:
                 break;
@@ -294,7 +336,7 @@ public final class PVariable extends ParVar {
      * @param map
      * @param solver
      */
-    private static void buildWithDArray(String name, DArray type, EArray earr, THashMap<String, Object> map, Solver solver) {
+    private static void buildWithDArray(String name, DArray type, Expression expression, EArray earr, THashMap<String, Object> map, Solver solver) {
         final DInt2 index = (DInt2) type.getIndex();
         // no need to get lowB, it is always 1 (see specification of FZN for more informations)
         final int size = index.getUpp();
@@ -323,7 +365,7 @@ public final class PVariable extends ParVar {
 //                    svs[i] = earr.getWhat_i(i).setVarValue();
 //                }
 //                map.put(name, svs);
-                Exit.log();
+                Exit.log("SET VAR");
                 break;
             default:
                 break;

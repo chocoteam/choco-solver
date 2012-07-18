@@ -111,7 +111,7 @@ public class Langford extends AbstractProblem {
         solver.set(new Sort(new Sort(new Queue(g1), g2).clearOut(), new PCoarse(solver.getCstrs())).clearOut());*/
         IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
         solver.set(propagationEngine.set(new Sort(
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PArc(propagationEngine, solver.getVars())),
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(propagationEngine, solver.getVars())),
                 new Queue(new PCoarse(propagationEngine, solver.getCstrs())))
         ));
     }
@@ -144,7 +144,7 @@ public class Langford extends AbstractProblem {
     }
 
     public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) new Langford().execute("-log", "QUIET");
+        new Langford().execute(args);
     }
 
 }

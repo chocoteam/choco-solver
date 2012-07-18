@@ -52,6 +52,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
+    List<String> output_names;
     List<IntVar> output_vars;
 
     List<String> output_arrays_names;
@@ -64,6 +65,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
     public FZNLayout() {
         super();
         output_vars = new ArrayList<IntVar>();
+        output_names = new ArrayList<String>();
         output_arrays_names = new ArrayList<String>();
         output_arrays_vars = new ArrayList<IntVar[]>();
     }
@@ -72,8 +74,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
     public void onSolution() {
         if (LOGGER.isInfoEnabled()) {
             for (int i = 0; i < output_vars.size(); i++) {
-                IntVar variable = output_vars.get(i);
-                LOGGER.info("{} = {};", variable.getName(), variable.getValue());
+                LOGGER.info("{} = {};", output_names.get(i), output_vars.get(i).getValue());
             }
             for (int i = 0; i < output_arrays_vars.size(); i++) {
                 String name = output_arrays_names.get(i);
@@ -125,7 +126,8 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
         }
     }
 
-    public void addOutputVar(IntVar variable) {
+    public void addOutputVar(String name, IntVar variable) {
+        output_names.add(name);
         output_vars.add(variable);
     }
 

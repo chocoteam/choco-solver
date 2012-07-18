@@ -47,10 +47,9 @@ public class IntPlusBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = new IntVar[2];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = exps.get(i).intVarValue(solver);
-        }
-        IntVar c = exps.get(3).intVarValue(solver);
+        vars[0] = exps.get(0).intVarValue(solver);
+        vars[1] = exps.get(1).intVarValue(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
         return Sum.eq(vars, c, solver);
     }
 }

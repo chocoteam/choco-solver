@@ -60,6 +60,7 @@ public final class FineTernPropEventRecorder<V extends Variable> extends FinePro
     public void flush() {
         this.evtmasks[0] = 0;
         this.evtmasks[1] = 0;
+        this.evtmasks[2] = 0;
     }
 
     @Override
@@ -67,6 +68,7 @@ public final class FineTernPropEventRecorder<V extends Variable> extends FinePro
         assert this.propagators[PINDEX] == propagator : "wrong propagator";
         this.evtmasks[0] = 0;
         this.evtmasks[1] = 0;
+        this.evtmasks[2] = 0;
         if (enqueued) {
             scheduler.remove(this);
         }
@@ -77,5 +79,6 @@ public final class FineTernPropEventRecorder<V extends Variable> extends FinePro
         super.desactivate(element);
         this.evtmasks[0] = 0;
         this.evtmasks[1] = 0;
+        this.evtmasks[2] = 0;
     }
 }

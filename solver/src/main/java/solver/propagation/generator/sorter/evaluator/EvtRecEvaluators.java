@@ -46,12 +46,12 @@ public class EvtRecEvaluators {
     /**
      * Evaluate the maximum priority among propagators of an event recorder
      */
-    public static IEvaluator<? extends IEventRecorder> MaxPriorityC = new IEvaluator<IEventRecorder>() {
+    public static IEvaluator<IEventRecorder> MaxPriorityC = new IEvaluator<IEventRecorder>() {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Propagator[] propagators = eventRecorder.getPropagators();
-            int p = Integer.MIN_VALUE;
-            for (int i = 0; i < propagators.length; i++) {
+            int p = propagators[0].getPriority().priority;
+            for (int i = 1; i < propagators.length; i++) {
                 int pp = propagators[i].getPriority().priority;
                 if (pp > p) {
                     p = pp;
@@ -62,14 +62,32 @@ public class EvtRecEvaluators {
     };
 
     /**
+     * Evaluate the maximum priority among propagators of an event recorder
+     */
+    public static IEvaluator<IEventRecorder> MaxDynPriorityC = new IEvaluator<IEventRecorder>() {
+        @Override
+        public int eval(IEventRecorder eventRecorder) {
+            Propagator[] propagators = eventRecorder.getPropagators();
+            int a = propagators[0].dynPriority();
+            for (int i = 1; i < propagators.length; i++) {
+                int pp = propagators[i].arity();
+                if (pp > a) {
+                    a = pp;
+                }
+            }
+            return a;
+        }
+    };
+
+    /**
      * Evaluate the minimum priority among propagators of an event recorder
      */
     public static IEvaluator<IEventRecorder> MinPriorityC = new IEvaluator<IEventRecorder>() {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Propagator[] propagators = eventRecorder.getPropagators();
-            int p = Integer.MAX_VALUE;
-            for (int i = 0; i < propagators.length; i++) {
+            int p = propagators[0].getPriority().priority;
+            for (int i = 1; i < propagators.length; i++) {
                 int pp = propagators[i].getPriority().priority;
                 if (pp < p) {
                     p = pp;
@@ -86,8 +104,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Propagator[] propagators = eventRecorder.getPropagators();
-            int p = Integer.MIN_VALUE;
-            for (int i = 0; i < propagators.length; i++) {
+            int p = propagators[0].arity();
+            for (int i = 1; i < propagators.length; i++) {
                 int pp = propagators[i].arity();
                 if (pp > p) {
                     p = pp;
@@ -104,8 +122,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Propagator[] propagators = eventRecorder.getPropagators();
-            int p = Integer.MAX_VALUE;
-            for (int i = 0; i < propagators.length; i++) {
+            int p = propagators[0].getPriority().priority;
+            for (int i = 1; i < propagators.length; i++) {
                 int pp = propagators[i].arity();
                 if (pp < p) {
                     p = pp;
@@ -115,6 +133,7 @@ public class EvtRecEvaluators {
         }
     };
 
+
     /**
      * Evaluate the maximum arity among variables of an event recorder
      */
@@ -122,8 +141,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MIN_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = variables[0].nbConstraints();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = variables[i].nbConstraints();
                 if (aa > a) {
                     a = aa;
@@ -140,8 +159,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MAX_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = variables[0].nbConstraints();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = variables[i].nbConstraints();
                 if (aa < a) {
                     a = aa;
@@ -158,10 +177,10 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder<IntVar> eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MIN_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = ((IntVar)variables[0]).getDomainSize();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = ((IntVar) variables[i]).getDomainSize();
-                if (aa < a) {
+                if (aa > a) {
                     a = aa;
                 }
             }
@@ -176,8 +195,8 @@ public class EvtRecEvaluators {
         @Override
         public int eval(IEventRecorder<IntVar> eventRecorder) {
             Variable[] variables = eventRecorder.getVariables();
-            int a = Integer.MAX_VALUE;
-            for (int i = 0; i < variables.length; i++) {
+            int a = ((IntVar)variables[0]).getDomainSize();
+            for (int i = 1; i < variables.length; i++) {
                 int aa = ((IntVar) variables[i]).getDomainSize();
                 if (aa < a) {
                     a = aa;
@@ -187,4 +206,4 @@ public class EvtRecEvaluators {
         }
     };
 
-                }
+}

@@ -166,9 +166,7 @@ public class CircularQueue<E> implements AQueue<E>, Serializable {
         E tmp = elementData[pos];
         // optimized for FIFO access, i.e. adding to back and
         // removing from front
-        if (pos == tail - 1) {
-            tail = pos;
-        }
+        tail = pos;
         size--;
         return tmp;
     }

@@ -119,9 +119,9 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
             if (validations.length == 0 || validate(var, validations)) {
                 int pidx = prop.getId();
                 int pos = pindices[j];
-                if (propagationEngine.isMarked(vidx, pidx, pos)) {
+                if (propagationEngine.isMarked(vidx, pidx)) {
                     if (validations.length == 0 || validate(prop, validations)) {
-                        propagationEngine.clearWatermark(vidx, pidx, pos);
+                        propagationEngine.clearWatermark(vidx, pidx);
                         FineArcEventRecorder er = new FineArcEventRecorder(var, prop, pos, solver, propagationEngine);
                         eventRecorders.add(er);
                         propagationEngine.addEventRecorder(er);
@@ -143,9 +143,9 @@ public class PArc implements Generator<AbstractFineEventRecorder> {
             Variable var = variables[j];
             if (validations.length == 0 || validate(var, validations)) {
                 int vidx = var.getId();
-                if (propagationEngine.isMarked(vidx, pidx, j)) {
+                if (propagationEngine.isMarked(vidx, pidx)) {
                     if (validations.length == 0 || validate(prop, validations)) {
-                        propagationEngine.clearWatermark(vidx, pidx, j);
+                        propagationEngine.clearWatermark(vidx, pidx);
                         FineArcEventRecorder er = new FineArcEventRecorder(var, prop, j, solver, propagationEngine);
                         eventRecorders.add(er);
                         propagationEngine.addEventRecorder(er);

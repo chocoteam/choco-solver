@@ -54,7 +54,7 @@ public enum Views {
         if (value == 0 || value == 1) {
             cste = new BoolConstantView(name, value, solver);
         } else {
-            cste = new ConstantView("cste -- " + value, value, solver);
+            cste = new ConstantView(name, value, solver);
         }
         solver.cachedConstants.put(value, cste);
         return cste;
@@ -77,6 +77,18 @@ public enum Views {
         return new OffsetView(ivar, cste, ivar.getSolver());
     }
 
+    public static IntVar eq(IntVar ivar) {
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof OffsetView) {
+                OffsetView ov = (OffsetView) views[i];
+                if (ivar == ov.getVariable() && ov.cste == 0) {
+                    return ov;
+                }
+            }
+        }
+        return new OffsetView(ivar, 0, ivar.getSolver());
+    }
 
     public static IntVar minus(IntVar ivar) {
         IView[] views = ivar.getViews();

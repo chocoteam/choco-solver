@@ -32,6 +32,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.view.IntView;
 
 /*
 * User : CPRUDHOM
@@ -80,6 +81,14 @@ public class PVariableTest {
         Assert.assertEquals(oi.getLB(), 0);
         Assert.assertEquals(oi.getUB(), 18);
         Assert.assertEquals(oi.getDomainSize(), 3);
+    }
+
+    @Test
+    public void testOutput(){
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 123456789..987654321: num :: output_var = INT____00001;");
+        Object o = fzn.map.get("num");
+        Assert.assertTrue(IntView.class.isInstance(o));
     }
 //
 //    @Test

@@ -42,13 +42,13 @@ public interface IWaterMarking extends Serializable{
 
     void putMark(int id);
 
-    void putMark(int id1, int id2, int id3);
+    void putMark(int id1, int id2);
 
     void clearMark(int id);
 
-    void clearMark(int id1, int id2, int id3);
+    void clearMark(int id1, int id2);
 
     boolean isMarked(int id);
 
-    boolean isMarked(int id1, int id2, int id3);
+    boolean isMarked(int id1, int id2);
 }

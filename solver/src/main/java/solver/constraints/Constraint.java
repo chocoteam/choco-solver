@@ -102,6 +102,7 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 	//BEWARE : ONLY FOR GRAPH CONSTRAINTS
 	public Constraint(Solver solver) {
 		this.solver = solver;
+        this.vars =(V[])new Variable[0];
 	}
 
 	public V[] getVariables() {
@@ -190,6 +191,9 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 		for (int p = 0; p < propagators.length; p++) {
 			staticPropagationPriority = Math.max(staticPropagationPriority, propagators[p].getPriority().priority);
 		}
+        for(int v = 0; v < vars.length; v++){
+            vars[v].declareIn(this);
+        }
 	}
 
 	/**
