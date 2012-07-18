@@ -65,19 +65,19 @@ public class IntSearch {
             case input_order:
                 return new InputOrder(variables, environment);
             case first_fail:
-                return new FirstFail(variables, environment);
+                return new FirstFail(variables);
             case anti_first_fail:
-                return new AntiFirstFail(variables, environment);
+                return new AntiFirstFail(variables);
             case smallest:
-                return new Smallest(variables, environment);
+                return new Smallest(variables);
             case largest:
-                return new Largest(variables, environment);
+                return new Largest(variables);
             case occurrence:
-                return new Occurrence(variables, environment);
+                return new Occurrence(variables);
             case most_constrained:
-                return new MostConstrained(variables, environment);
+                return new MostConstrained(variables);
             case max_regret:
-                return new MaxRegret(variables, environment);
+                return new MaxRegret(variables);
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;

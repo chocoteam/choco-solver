@@ -120,9 +120,6 @@ public final class DomOverWDeg extends AbstractSorter<IntVar> implements IVariab
 
     @Override
     public int minima(IntVar[] elements, int from, int to) {
-        vid2dsize.clear();
-        vid2degree.clear();
-        vid2weig.clear();
         pid2arity.clear();
         for (int i = from; i <= to; i++) {
             int vid = elements[i].getId();

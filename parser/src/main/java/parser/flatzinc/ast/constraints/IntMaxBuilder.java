@@ -47,9 +47,9 @@ public class IntMaxBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = new IntVar[3];
-        for (int i = 0; i < vars.length; i++) {
-            vars[i] = exps.get(i).intVarValue(solver);
-        }
+        vars[0] = exps.get(0).intVarValue(solver);
+        vars[1] = exps.get(1).intVarValue(solver);
+        vars[2] = exps.get(2).intVarValue(solver);
         return new Max(vars[2], vars[0], vars[1], solver);
     }
 }

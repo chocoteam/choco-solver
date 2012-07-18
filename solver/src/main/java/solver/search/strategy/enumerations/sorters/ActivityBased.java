@@ -183,8 +183,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     @Override
     public void init() {
         for (int i = 0; i < vars.length; i++) {
-            Av[i] = new double[vars[i].getDomainSize()];
-            mAv[i] = new double[vars[i].getDomainSize()];
+            int ampl = vars[i].getUB() - vars[i].getLB() + 1;
+            Av[i] = new double[ampl];
+            mAv[i] = new double[ampl];
             ov[i] = vars[i].getLB();
         }
     }

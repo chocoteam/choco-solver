@@ -120,7 +120,7 @@ public abstract class AbstractProblem {
 
     public final void execute(String... args) {
         if (this.readArgs(args)) {
-            Logger log = LoggerFactory.getLogger("bench");
+            final Logger log = LoggerFactory.getLogger("bench");
             this.printDescription();
             this.createSolver();
             this.buildModel();
@@ -153,6 +153,19 @@ public abstract class AbstractProblem {
                         level.getLevel() > Level.VERBOSE.getLevel(),
                         level.getLevel() > Level.SOLUTIONS.getLevel());
             }
+
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                public void run() {
+                    if (level.getLevel() > Level.SILENT.getLevel()) {
+                        log.info("User interruption...");
+                    }
+                    if (level.getLevel() > Level.QUIET.getLevel()) {
+                        log.info("{}", solver.getMeasures().toString());
+                    } else if (level.getLevel() > Level.SILENT.getLevel()) {
+                        log.info("[STATISTICS {}]", solver.getMeasures().toOneLineString());
+                    }
+                }
+            });
 
             this.solve();
             if (level.getLevel() > Level.QUIET.getLevel()) {

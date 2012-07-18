@@ -54,7 +54,7 @@ public class InverseChanneling extends IntConstraint<IntVar> {
     protected final int nbX, nbY;
 
     public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver) {
-        this(X, Y, solver, AllDifferent.Type.AC);
+        this(X, Y, solver, AllDifferent.Type.BC);
     }
 
     public InverseChanneling(IntVar[] X, IntVar[] Y, Solver solver, AllDifferent.Type type) {

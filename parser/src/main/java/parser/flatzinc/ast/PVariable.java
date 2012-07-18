@@ -56,7 +56,7 @@ import java.util.List;
 
 public final class PVariable extends ParVar {
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
     private static final String NO_NAME = "";
 
     static Logger LOGGER = LoggerFactory.getLogger("fzn");
@@ -84,7 +84,7 @@ public final class PVariable extends ParVar {
                     buildWithManyInt(identifier, (DManyInt) type, expression, map, solver);
                     return;
                 case BOOL:
-                    buildWithBool(identifier, map, solver);
+                    buildWithBool(identifier, expression, map, solver);
                     return;
                 case SET:
                     buildWithSet(identifier, (DSet) type, map);
@@ -146,8 +146,13 @@ public final class PVariable extends ParVar {
      * @param solver
      * @return {@link Variable}
      */
-    private static BoolVar buildWithBool(String name, THashMap<String, Object> map, Solver solver) {
-        final BoolVar bi = VariableFactory.bool(DEBUG?name:NO_NAME, solver);
+    private static BoolVar buildWithBool(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
+        final BoolVar bi;
+        if (expression != null) {
+            bi = (BoolVar)buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
+        } else {
+            bi = VariableFactory.bool(DEBUG?name:NO_NAME, solver);
+        }
         map.put(name, bi);
         return bi;
     }
@@ -163,7 +168,7 @@ public final class PVariable extends ParVar {
     private static IntVar buildWithInt(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
         if (expression != null) {
-            iv = Views.eq((IntVar) map.get(expression.toString()));
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
         } else {
             iv = VariableFactory.bounded(DEBUG?name:NO_NAME, (int) (Integer.MIN_VALUE * .99d),
                     (int) (Integer.MAX_VALUE * .99d), solver);
@@ -184,7 +189,7 @@ public final class PVariable extends ParVar {
     private static IntVar buildWithInt2(String name, DInt2 type, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
         if (expression != null) {
-            iv = Views.eq((IntVar) map.get(expression.toString()));
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
         } else {
             iv = VariableFactory.bounded(DEBUG?name:NO_NAME, type.getLow(), type.getUpp(), solver);
 
@@ -206,7 +211,7 @@ public final class PVariable extends ParVar {
     private static IntVar buildWithManyInt(String name, DManyInt type, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
         if (expression != null) {
-            iv = Views.eq((IntVar) map.get(expression.toString()));
+            iv = buildOnExpression(DEBUG?name:NO_NAME, expression, map, solver);
         } else {
             iv = VariableFactory.enumerated(DEBUG?name:NO_NAME, type.getValues(), solver);
         }
@@ -214,6 +219,22 @@ public final class PVariable extends ParVar {
         return iv;
     }
 
+
+    private static IntVar buildOnExpression(String name, Expression expression, THashMap<String, Object> map, Solver solver){
+        final IntVar iv;
+        switch (expression.getTypeOf()){
+            case INT:
+                iv = Views.fixed(name, expression.intValue(), solver);
+                break;
+            case IDE:
+                iv = Views.eq((IntVar) map.get(expression.toString()));
+                break;
+            default:
+                iv = null;
+                Exit.log("Unknown expression");
+        }
+        return iv;
+    }
 
     /**
      * Build a {@link Variable} named {@code name}, defined by {@code type}.
@@ -266,7 +287,7 @@ public final class PVariable extends ParVar {
             case BOOL:
                 BoolVar[] bs = new BoolVar[size];
                 for (int i = 1; i <= size; i++) {
-                    bs[i - 1] = buildWithBool(name + '_' + i, map, solver);
+                    bs[i - 1] = buildWithBool(name + '_' + i, expression, map, solver);
                 }
                 map.put(name, bs);
                 break;

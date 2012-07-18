@@ -77,18 +77,23 @@ public class ParseAndSolve {
     }
 
     private void parseandsolve() {
-        FZNParser parser = new FZNParser();
+        final FZNParser parser = new FZNParser();
         LOGGER.info("% load file ...");
         parser.loadInstance(new File(instance));
         LOGGER.info("% parse instance...");
         parser.parse();
         LOGGER.info("% solve instance...");
-        Solver solver = parser.solver;
+        final Solver solver = parser.solver;
 //        SearchMonitorFactory.statEveryXXms(solver, 1000);
-        parser = null;
-        if(tl > -1){
+        if (tl > -1) {
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         }
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LOGGER.info("% User interruption...");
+                parser.layout.beforeClose();
+            }
+        });
         solver.solve();
     }
 

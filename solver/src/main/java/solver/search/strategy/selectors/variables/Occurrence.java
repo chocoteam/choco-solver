@@ -27,8 +27,6 @@
 
 package solver.search.strategy.selectors.variables;
 
-import choco.kernel.memory.IEnvironment;
-import choco.kernel.memory.IStateInt;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.variables.IntVar;
 
@@ -47,11 +45,11 @@ public class Occurrence implements VariableSelector<IntVar> {
     IntVar[] variables;
 
     /* index of the smallest domain variable */
-    IStateInt large_idx;
+    int large_idx;
 
-    public Occurrence(IntVar[] variables, IEnvironment environment) {
+    public Occurrence(IntVar[] variables) {
         this.variables = variables.clone();
-        large_idx = environment.makeInt(0);
+        large_idx = 0;
 
     }
 
@@ -74,11 +72,11 @@ public class Occurrence implements VariableSelector<IntVar> {
                large_idx = idx;
             }
         }
-        this.large_idx.set(large_idx);
+        this.large_idx = large_idx;
     }
 
     @Override
     public IntVar getVariable() {
-        return variables[large_idx.get()];
+        return variables[large_idx];
     }
 }

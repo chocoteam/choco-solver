@@ -27,8 +27,6 @@
 
     <logger name="explainer" level="error"/>
 
-    <logger name="explainer" level="info"/>
-
      <logger name="fzn" level="error"/>
 
     <root level="warn">
