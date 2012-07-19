@@ -194,8 +194,6 @@ public final class FZNParser {
             Mapper.curry(DInt2.class).sequence(
                     TerminalParser.term("var").succeeds(), INT_CONST, TerminalParser.term(".."), INT_CONST
             );
-
-
     /**
      * Scanner for list of int declaration, like {1, 5, 8}.
      * Create a {@link parser.flatzinc.ast.declaration.DManyInt} object.
@@ -227,13 +225,15 @@ public final class FZNParser {
                     INTS
             );
 
+    final Parser<Declaration> INDEX_SET = Parsers.or(INT, INT2);
+
     /**
      * Scanner for array of smth, like "array [int] of bool".
      * Creat a {@link DArray} object
      */
     final Parser<DArray> ARRAY_OF =
             Mapper.curry(DArray.class).sequence(
-                    TerminalParser.phrase("array ["), Parsers.or(INT, INT2), TerminalParser.phrase("] of"),
+                    TerminalParser.phrase("array ["), INDEX_SET, TerminalParser.phrase("] of"),
                     Parsers.or(PRIMITIVES, SET_OF_INT)
             );
 

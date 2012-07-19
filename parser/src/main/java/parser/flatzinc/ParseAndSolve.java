@@ -88,13 +88,17 @@ public class ParseAndSolve {
         if (tl > -1) {
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         }
+        final boolean[] stop = {true};
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                LOGGER.info("% User interruption...");
-                parser.layout.beforeClose();
+                if (stop[0]) {
+                    LOGGER.info("% User interruption...");
+                    parser.layout.beforeClose();
+                }
             }
         });
         solver.solve();
+        stop[0] = false;
     }
 
 }
