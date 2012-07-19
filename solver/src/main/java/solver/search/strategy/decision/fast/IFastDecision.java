@@ -27,7 +27,6 @@
 
 package solver.search.strategy.decision.fast;
 
-import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.variables.Variable;
 
@@ -39,5 +38,5 @@ import solver.variables.Variable;
  */
 public interface IFastDecision<V extends Variable> extends Decision {
 
-   void set(V var, int value, Assignment<V> assignment);
+//   void set(V var, int value, Assignment<V> assignment);
 }

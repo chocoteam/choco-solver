@@ -62,6 +62,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     public static final String MSG_UNKNOWN = "unknown value";
     public static final String MSG_UPP = "new lower bound is greater than upper bound";
     public static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    public static final String MSG_BOUND = "new bounds are incorrect";
     protected static final String NO_NAME = "";
 
 

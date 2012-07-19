@@ -27,6 +27,8 @@
 
 package solver.search.strategy.selectors;
 
+import solver.variables.IntVar;
+
 import java.io.Serializable;
 
 /**
@@ -37,13 +39,13 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 28 sept. 2010
  */
-public interface ValueIterator<V> extends Serializable {
+public interface InValueIterator extends Serializable {
 
     /**
      * Selects and returns the value to constrained chosen variable with.
      * The chosen value must belong to the domain of <code>variable</code>.
      * @return the value, based on the domain of variable
      */
-    public int selectValue(V var);
+    public int selectValue(IntVar var);
 
 }

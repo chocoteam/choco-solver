@@ -31,7 +31,6 @@ import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.variables.EventType;
@@ -140,10 +139,4 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
     public Deduction getPositiveDeduction() {
         throw new UnsupportedOperationException(("GraphDecision is not equipped for explanations"));
     }
-
-	@Override
-	@Deprecated
-	public void set(GraphVar var, int value, Assignment<GraphVar> graphVarAssignment) {
-		throw new UnsupportedOperationException();
-	}
 }

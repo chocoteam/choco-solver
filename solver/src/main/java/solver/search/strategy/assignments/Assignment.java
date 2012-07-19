@@ -31,6 +31,7 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.Variable;
+
 import java.io.Serializable;
 
 /**
@@ -39,7 +40,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public abstract class Assignment<V extends Variable> implements Serializable{
+public abstract class Assignment<V extends Variable> implements Serializable {
 
     public abstract void apply(V var, int value, ICause cause) throws ContradictionException;
 

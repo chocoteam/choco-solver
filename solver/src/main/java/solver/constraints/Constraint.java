@@ -28,11 +28,8 @@
 package solver.constraints;
 
 import choco.kernel.ESat;
-import com.sun.istack.internal.Nullable;
-import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
 import solver.exception.SolverException;
 import solver.propagation.IPriority;
 import solver.search.strategy.enumerations.sorters.AbstractSorter;
@@ -228,17 +225,5 @@ public class Constraint<V extends Variable, P extends Propagator<V>> implements 
 			return Belong.build(this);
 		}
 		throw new SolverException("Unknown metric name :" + name);
-	}
-
-	/**
-	 * Throws a contradiction exception based on <variable, message>
-	 *
-	 * @param cause    ICause object causes the exception
-	 * @param variable involved variable
-	 * @param message  detailed message
-	 * @throws ContradictionException expected behavior
-	 */
-	protected void contradiction(ICause cause, @Nullable Variable variable, String message) throws ContradictionException {
-		solver.getEngine().fails(cause, variable, message);
 	}
 }

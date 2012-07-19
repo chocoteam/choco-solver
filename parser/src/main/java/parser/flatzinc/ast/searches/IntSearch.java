@@ -31,7 +31,7 @@ import choco.kernel.memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
 import solver.search.strategy.enumerations.sorters.ActivityBased;
-import solver.search.strategy.selectors.ValueIterator;
+import solver.search.strategy.selectors.InValueIterator;
 import solver.search.strategy.selectors.VariableSelector;
 import solver.search.strategy.selectors.values.*;
 import solver.search.strategy.selectors.variables.*;
@@ -86,7 +86,7 @@ public class IntSearch {
 
     private static solver.search.strategy.strategy.Assignment valueIterator(IntVar[] variables, VariableSelector<IntVar> variableSelector,
                                                                             Assignment assignmennt) {
-        ValueIterator<IntVar> valSelector = null;
+        InValueIterator valSelector = null;
         solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
         switch (assignmennt) {
             case indomain:
