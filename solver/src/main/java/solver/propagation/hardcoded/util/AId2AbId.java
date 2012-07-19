@@ -32,16 +32,22 @@ public class AId2AbId implements IId2AbId {
 
     final int[] map;
     final int offset;
+    final int noValue;
+    final int size;
 
     public AId2AbId(int minKey, int maxKey, int noValue) {
-        this.map = new int[maxKey - minKey + 1];
+        this.size = maxKey - minKey + 1;
+        this.map = new int[size];
         Arrays.fill(map, noValue);
         offset = minKey;
+        this.noValue = noValue;
     }
 
     @Override
     public int get(int key) {
-        return map[key - offset];
+        key -= offset;
+        if (key < 0 || key > size) return noValue;
+        return map[key];
     }
 
     @Override

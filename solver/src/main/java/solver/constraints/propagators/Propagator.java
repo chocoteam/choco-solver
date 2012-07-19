@@ -296,6 +296,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vindices;
     }
 
+    public void setVIndices(int idx, int val){
+        vindices[idx] = val;
+    }
+
     /**
      * Returns the number of variables involved in <code>this</code>.
      *

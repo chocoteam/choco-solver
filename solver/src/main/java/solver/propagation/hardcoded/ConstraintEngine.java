@@ -250,15 +250,17 @@ public class ConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-        if ((schedule[aid] & F) != 0) { // if in the queue...
-            schedule[aid] ^= F;
-            pro_queue_f.remove(propagator); // removed from the queue
-        }
-        if ((schedule[aid] & C) != 0) { // if in the queue...
-            schedule[aid] ^= C;
-            masks_c[aid] = 0;
-            pro_queue_c.remove(propagator); // removed from the queue
+        if (aid != -1) {
+            Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
+            if ((schedule[aid] & F) != 0) { // if in the queue...
+                schedule[aid] ^= F;
+                pro_queue_f.remove(propagator); // removed from the queue
+            }
+            if ((schedule[aid] & C) != 0) { // if in the queue...
+                schedule[aid] ^= C;
+                masks_c[aid] = 0;
+                pro_queue_c.remove(propagator); // removed from the queue
+            }
         }
     }
 

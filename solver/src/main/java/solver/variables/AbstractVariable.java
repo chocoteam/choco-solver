@@ -164,6 +164,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         pIdx--;
         propagators[i] = propagators[pIdx];
         pindices[i] = pindices[pIdx];
+        propagators[i].setVIndices(pindices[i], i);
     }
 
     public Propagator[] getPropagators() {

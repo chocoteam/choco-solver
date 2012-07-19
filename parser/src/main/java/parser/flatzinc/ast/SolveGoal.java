@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.EIdentifier;
 import parser.flatzinc.ast.expression.Expression;
-import parser.flatzinc.ast.searches.Assignment;
 import parser.flatzinc.ast.searches.IntSearch;
 import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
@@ -42,6 +41,8 @@ import solver.Solver;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ABSLNS;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
@@ -113,8 +114,12 @@ public class SolveGoal {
             for (int i = 0; i < ivars.length; i++) {
                 ivars[i] = (IntVar) vars[i];
             }
-            strategy = IntSearch.build(ivars,
-                    VarChoice.input_order, Assignment.indomain_min, Strategy.complete, solver);
+
+            ActivityBased abs = new ActivityBased(solver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
+            solver.set(abs);
+            if (type != Resolution.SATISFY) {
+                solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, ivars, 29091981L, abs, false, ivars.length / 2));
+            }
         }
 
         solver.set(strategy);

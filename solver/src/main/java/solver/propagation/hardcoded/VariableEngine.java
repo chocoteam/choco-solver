@@ -236,8 +236,9 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            if(vindices[i]>-1)// constant has a negative index
-                masks_f[variables[i].getId()][vindices[i]] = 0;
+            int vid = variables[i].getId();
+            if (vindices[i] > -1 && vindices[i] < masks_f[vid].length)// constant has a negative index
+                masks_f[vid][vindices[i]] = 0;
         }
         if (schedule[pid]) {
             schedule[pid] = false;
