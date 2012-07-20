@@ -57,7 +57,7 @@ public class RealConstraint extends Constraint<RealVar, Propagator<RealVar>> {
     }
 
     /**
-     * ad a function to <code>this</code>.
+     * add a function to <code>this</code>.
      * <br/>
      * A function is a string declared using the following format:
      * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
@@ -66,15 +66,36 @@ public class RealConstraint extends Constraint<RealVar, Propagator<RealVar>> {
      * <p/>
      * <p/>
      * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, solver);
+     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, Ibex.HC4, solver);
      * </pre>
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
      * @param vars      array of variables
-     * @param options   list of options to give to IBEX
+     * @param option    propagation option index (0 is DEFAULT)
      */
-    public void addFunction(String functions, RealVar[] vars, String[] options) {
-        addPropagators(new RealPropagator(contractors++, functions, vars, options, solver, this));
+    public void addFunction(String functions, RealVar[] vars, int option) {
+        addPropagators(new RealPropagator(contractors++, functions, vars, option, solver, this));
+    }
+
+    /**
+     * add a function to <code>this</code>.
+          * <br/>
+          * A function is a string declared using the following format:
+          * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+          * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+          * <br/> A complete list is avalaible in the documentation of IBEX.
+          * <p/>
+          * <p/>
+          * <blockquote><pre>
+          * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, solver);
+          * </pre>
+          * </blockquote>
+     *
+     * @param functions list of functions, separated by a semi-colon
+     * @param vars      array of variables
+     */
+    public void addFunction(String functions, RealVar[] vars) {
+        addPropagators(new RealPropagator(contractors++, functions, vars, 0, solver, this));
     }
 }

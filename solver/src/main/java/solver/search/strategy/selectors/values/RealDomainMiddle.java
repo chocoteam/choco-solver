@@ -26,6 +26,7 @@
  */
 package solver.search.strategy.selectors.values;
 
+import solver.exception.SolverException;
 import solver.search.strategy.selectors.RealValueIterator;
 import solver.variables.RealVar;
 
@@ -40,9 +41,13 @@ public class RealDomainMiddle implements RealValueIterator {
     @Override
     public double selectValue(RealVar var) {
         double low = var.getLB();
-        if(low == Double.NEGATIVE_INFINITY)low = -Double.MAX_VALUE;
+        if (low == Double.NEGATIVE_INFINITY) low = -Double.MAX_VALUE;
         double upp = var.getUB();
-        if(upp == Double.POSITIVE_INFINITY)upp = Double.MAX_VALUE;
-        return (low + upp) / 2.0;
+        if (upp == Double.POSITIVE_INFINITY) upp = Double.MAX_VALUE;
+        double r = (low + upp) / 2.0;
+        if (r <= low || r >= upp) {
+            throw new SolverException("RealDomainMiddle: find a value outside current domain!");
+        }
+        return r;
     }
 }

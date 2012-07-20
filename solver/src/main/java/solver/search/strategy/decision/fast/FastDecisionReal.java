@@ -72,7 +72,7 @@ public class FastDecisionReal extends AbstractDecision<RealVar> {
         if (branch == 1) {
             var.updateUpperBound(value, this);
         } else if (branch == 2) {
-            var.updateLowerBound(value + var.getPrecision(), this);
+            var.updateLowerBound(value, this);
         }
     }
 

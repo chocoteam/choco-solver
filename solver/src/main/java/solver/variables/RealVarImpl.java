@@ -222,6 +222,6 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
     }
 
     public String toString() {
-        return String.format("%s = [%f,%f]", name, getLB(), getUB());
+        return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
     }
 }

@@ -48,7 +48,7 @@ public class RealPropagator extends Propagator<RealVar> {
 
     final Ibex ibex;
     final String functions;
-    final String[] options;
+    final int option;
     final int contractorIdx;
 
     /**
@@ -71,12 +71,12 @@ public class RealPropagator extends Propagator<RealVar> {
      * @param options   list of options to give to IBEX
      * @param solver    the solver
      */
-    public RealPropagator(int cIdx, String functions, RealVar[] vars, String[] options, Solver solver, RealConstraint rconstraint) {
+    public RealPropagator(int cIdx, String functions, RealVar[] vars, int options, Solver solver, RealConstraint rconstraint) {
         super(vars, solver, rconstraint, PropagatorPriority.LINEAR, false);
         this.contractorIdx = cIdx;
         this.ibex = rconstraint.ibex;
         this.functions = functions;
-        this.options = options;
+        this.option = options;
         ibex.add_ctr(vars.length, functions);
     }
 

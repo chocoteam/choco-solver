@@ -51,7 +51,7 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void printDescription() {
-        StringBuffer st = new StringBuffer(24);
+        StringBuilder st = new StringBuilder(24);
         st.append("The CycloHexan problem consists in finding the 3D configuration of a cyclohexane molecule.\n");
         st.append("It is decribed with a system of three non linear equations : \n");
         st.append(" y^2 * (1 + z^2) + z * (z - 24 * y) = -13 \n" +
@@ -77,9 +77,9 @@ public class CycloHexan extends AbstractProblem {
         vars = new RealVar[]{x, y, z};
         RealConstraint rcons = new RealConstraint(solver);
         ibex = rcons.ibex;
-        rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, null);
-        rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, null);
-        rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars, null);
+        rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars);
+        rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars);
+        rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars);
         solver.post(rcons);
     }
 
@@ -94,7 +94,7 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void solve() {
-        solver.findSolution();
+        solver.findAllSolutions();
     }
 
     @Override
