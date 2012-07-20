@@ -89,8 +89,8 @@ public class SolveGoal {
     }
 
     private void defineGoal(Solver solver) {
-        AbstractStrategy strategy = null;
         if (annotations.size() > 0) {
+            AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
                 throw new UnsupportedOperationException("SolveGoal:: wrong annotations size");
             } else {
@@ -106,6 +106,7 @@ public class SolveGoal {
                 } else {
                     strategy = readSearchAnnotation(annotation, solver);
                 }
+                solver.set(strategy);
             }
         } else {
             LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");
@@ -121,8 +122,6 @@ public class SolveGoal {
                 solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, ivars, 29091981L, abs, false, ivars.length / 2));
             }
         }
-
-        solver.set(strategy);
 
         AbstractSearchLoop search = solver.getSearchLoop();
         switch (type) {
