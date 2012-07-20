@@ -45,7 +45,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.view.Views;
 
 import java.io.Serializable;
 
@@ -131,17 +133,22 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private static <V extends Variable> void checkVariable(V[] vars) {
-        set.clear();
-        for (V v : vars) {
-            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                if (set.contains(v.getId())) {
-                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                            "This is forbidden; you must consider using a View or a EQ constraint.");
+            set.clear();
+            for (int i = 0; i < vars.length; i++) {
+                Variable v = vars[i];
+                if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
+                    if (set.contains(v.getId())) {
+                        if (v instanceof IntVar) {
+                            vars[i] = (V) Views.eq((IntVar) v);
+                        } else {
+                            throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                    "This is forbidden; you must consider using a View or a EQ constraint.");
+                        }
+                    }
+                    set.add(vars[i].getId());
                 }
-                set.add(v.getId());
             }
         }
-    }
 
 
     @SuppressWarnings({"unchecked"})
