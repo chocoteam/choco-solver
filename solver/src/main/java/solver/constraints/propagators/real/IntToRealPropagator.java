@@ -28,58 +28,42 @@ package solver.constraints.propagators.real;
 
 import choco.kernel.ESat;
 import solver.Solver;
+import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.real.Ibex;
-import solver.constraints.real.RealConstraint;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
-import solver.variables.RealVar;
+import solver.variables.IntVar;
 
 /**
- * A propagator for real variable.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18/07/12
+ * @since 20/07/12
  */
-public class RealPropagator extends Propagator<RealVar> {
+public class IntToRealPropagator extends Propagator<IntVar> {
 
     final Ibex ibex;
-    final String functions;
-    final int option;
     final int contractorIdx;
 
     /**
-     * Create a propagator on real variables, propagated using IBEX.
-     * <br/>
-     * A constraint is defined using <code>functions</code>.
-     * A function is a string declared using the following format:
-     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is avalaible in the documentation of IBEX.
-     * <p/>
-     * <p/>
-     * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, solver);
-     * </pre>
-     * </blockquote>
+     * Create a propagator informing Ibex of variable to discretize
      *
-     * @param ibex      continuous solver
-     * @param functions list of functions, separated by a semi-colon
-     * @param vars      array of variables
-     * @param options   list of options to give to IBEX
-     * @param solver    the solver
+     * @param ibex        continuous solver
+     * @param cIdx        index of the propagator in Ibex
+     * @param vars        array of integer variables
+     * @param solver      master solver
+     * @param rconstraint real constraint
      */
-    public RealPropagator(Ibex ibex, int cIdx, String functions, RealVar[] vars, int options, Solver solver, RealConstraint rconstraint) {
-        super(vars, solver, rconstraint, PropagatorPriority.LINEAR, false);
-        this.contractorIdx = cIdx;
+    public IntToRealPropagator(Ibex ibex, int cIdx, IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> rconstraint) {
+        super(vars, solver, rconstraint, PropagatorPriority.LINEAR);
         this.ibex = ibex;
-        this.functions = functions;
-        this.option = options;
-        this.ibex.add_ctr(vars.length, functions, option);
+        this.contractorIdx = cIdx;
+        this.ibex.add_int_ctr(vars.length);
     }
+
 
     @Override
     public int getPropagationConditions() {
@@ -104,7 +88,8 @@ public class RealPropagator extends Propagator<RealVar> {
                 contradiction(null, "Ibex failed");
             case Ibex.CONTRACT:
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], this);
+                    vars[i].updateLowerBound((int) domains[2 * i], this);
+                    vars[i].updateUpperBound((int) domains[2 * i + 1], this);
                 }
                 return;
             case Ibex.ENTAILED:

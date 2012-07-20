@@ -279,7 +279,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void subscribeView(IntView view) {
+    public void subscribeView(IView view) {
     }
 
     @Override

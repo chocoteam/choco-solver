@@ -38,6 +38,11 @@ package solver.constraints.real;/*
  */
 public class Ibex {
 
+    /* Possible contraction strategies. */
+    public static final int COMPO = 0;
+    public static final int HC4 = 1;
+    public static final int HC4_NEWTON = 2;
+
     /* Constants for the status of a contraction. */
     public static final int FAIL = 0;
     public static final int ENTAILED = 1;
@@ -54,13 +59,35 @@ public class Ibex {
     }
 
     /**
-     * Create a new IBEX constraint (and an associated contractor).
+     * Create a new IBEX constraint with a default contractor.
+     * <p/>
+     * The default contractor is COMPO.
      * <p/>
      * Example: add_ctr(2,{0}={1}) will add the constraint x=y.
      *
-     * @param nb_var - Number of variables
+     * @param nb_var - Number of variables.
+     * @param syntax - The constraint
      */
     public native void add_ctr(int nb_var, String syntax);
+
+    /**
+     * Same as add_ctr except that a specific contractor is used.
+     *
+     * @param nb_var - Number of variables
+     * @param syntax - The constraint
+     * @param option - A value between COMPO, HC4 or HC4_NEWTON.
+     */
+    public native void add_ctr(int nb_var, String syntax, int option);
+
+    /**
+     * Constraint nb_var variables to be integer variables.
+     *
+     * @param nb_var - Number of variables
+     *               /////@param mask   - Set whether a variable is integral or not.
+     *               /////                mask[i]==true <=> the ith variable is integral.
+     */
+    public native void add_int_ctr(int nb_var);
+
 
     /**
      * Call the contractor associated to a constraint.

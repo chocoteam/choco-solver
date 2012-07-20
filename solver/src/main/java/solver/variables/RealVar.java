@@ -31,7 +31,6 @@ import solver.ICause;
 import solver.exception.ContradictionException;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
-import solver.variables.view.IView;
 
 /**
  * An interface to declare variable for continuous constraints (solved using IBEX).
@@ -40,7 +39,7 @@ import solver.variables.view.IView;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public interface RealVar extends Variable<NoDelta, IDeltaMonitor<NoDelta>, IView> {
+public interface RealVar extends Variable<NoDelta, IDeltaMonitor<NoDelta>> {
 
     /**
      * Retrieves the lower bound of the variable

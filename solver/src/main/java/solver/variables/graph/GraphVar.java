@@ -41,7 +41,6 @@ import solver.variables.delta.GraphDelta;
 import solver.variables.delta.IGraphDelta;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
-import solver.variables.view.IView;
 
 
 /**
@@ -49,8 +48,8 @@ import solver.variables.view.IView;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
-        implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
+public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, GraphVar<E>>
+        implements Variable<IGraphDelta, IGraphDeltaMonitor>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
 	//***********************************************************************************

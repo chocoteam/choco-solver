@@ -35,10 +35,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
-import solver.variables.view.IView;
 
-public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>,IView, MetaVariable<V>>
-        implements Variable<NoDelta, IDeltaMonitor<NoDelta>, IView> {
+public class MetaVariable<V extends Variable> extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, MetaVariable<V>>
+        implements Variable<NoDelta, IDeltaMonitor<NoDelta>> {
 
     protected V[] components;
     protected int dim;

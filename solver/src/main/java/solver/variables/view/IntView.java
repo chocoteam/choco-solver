@@ -57,8 +57,8 @@ import solver.variables.delta.NoDelta;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntView, IntView>
-        implements IView<IntDelta, IIntDeltaMonitor, IntView>, IntVar {
+public abstract class IntView extends AbstractVariable<IntDelta, IIntDeltaMonitor, IntVar>
+        implements IView<IntDelta, IIntDeltaMonitor>, IntVar {
 
     protected final IntVar var;
 

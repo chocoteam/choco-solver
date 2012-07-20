@@ -28,6 +28,7 @@ package solver.variables.view;
 
 import solver.Solver;
 import solver.variables.IntVar;
+import solver.variables.RealVar;
 
 /**
  * Factory to build views.
@@ -164,5 +165,26 @@ public enum Views {
             }
         }
         return new SqrView(ivar, ivar.getSolver());
+    }
+
+    public static RealVar real(IntVar ivar, double precision) {
+        IView[] views = ivar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof RealView) {
+                RealView mv = (RealView) views[i];
+                if (ivar == mv.getVariable()) {
+                    return mv;
+                }
+            }
+        }
+        return new RealView(ivar, precision);
+    }
+
+    public static RealVar[] real(IntVar[] ivars, double precision) {
+        RealVar[] reals = new RealVar[ivars.length];
+        for (int i = 0; i < ivars.length; i++) {
+            reals[i] = real(ivars[i], precision);
+        }
+        return reals;
     }
 }

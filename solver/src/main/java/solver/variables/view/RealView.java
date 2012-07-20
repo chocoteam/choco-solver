@@ -24,38 +24,102 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
+package solver.variables.view;
 
-import choco.kernel.memory.IStateDouble;
 import com.sun.istack.internal.NotNull;
+import com.sun.istack.internal.Nullable;
 import solver.ICause;
-import solver.Solver;
+import solver.constraints.Constraint;
 import solver.exception.ContradictionException;
-import solver.exception.SolverException;
+import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
+import solver.variables.*;
 import solver.variables.delta.IDeltaMonitor;
 import solver.variables.delta.NoDelta;
 
 /**
- * An implementation of RealVar, variable for continuous contraints (solved using IBEX).
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18/07/12
+ * @since 20/07/12
  */
-public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, RealVar> implements RealVar {
+public class RealView extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta>, RealVar>
+        implements IView<NoDelta, IDeltaMonitor<NoDelta>>, RealVar {
 
-    private static final long serialVersionUID = 1L;
+    protected final IntVar var;
 
-    IStateDouble LB, UB;
-    double precision;
+    protected final double precision;
 
-    protected RealVarImpl(String name, double lb, double ub, double precision, Solver solver) {
-        super(name, solver);
-        this.LB = solver.getEnvironment().makeFloat(lb);
-        this.UB = solver.getEnvironment().makeFloat(ub);
+    protected RealView(IntVar var, double precision) {
+        super(var.getSolver());
+        this.var = var;
         this.precision = precision;
+        this.var.subscribeView(this);
+        this.solver.associates(this);
+    }
+
+    @Override
+    public IntVar getVariable() {
+        return var;
+    }
+
+    @Override
+    public void transformEvent(EventType evt, ICause cause) throws ContradictionException {
+        if (evt == EventType.INSTANTIATE) {
+            evt = EventType.BOUND;
+        } else if (evt == EventType.REMOVE) {
+            return;
+        }
+        notifyPropagators(evt, cause);
+    }
+
+    @Override
+    public void recordMask(int mask) {
+        super.recordMask(mask);
+        var.recordMask(mask);
+    }
+
+    ///////////// SERVICES REQUIRED FROM CAUSE ////////////////////////////
+
+    @Override
+    public Constraint getConstraint() {
+        return null;
+    }
+
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return 0;
+    }
+
+    @Override
+    public boolean reactOnPromotion() {
+        return false;
+    }
+
+    @Override
+    public double getLB() {
+        return var.getLB();
+    }
+
+    @Override
+    public double getUB() {
+        return var.getUB();
+    }
+
+    @Override
+    public boolean updateLowerBound(double value, @NotNull ICause cause) throws ContradictionException {
+        return var.updateLowerBound((int) value, cause);
+    }
+
+    @Override
+    public boolean updateUpperBound(double value, @NotNull ICause cause) throws ContradictionException {
+        return var.updateUpperBound((int) value, cause);
+    }
+
+    @Override
+    public boolean updateBounds(double lowerbound, double upperbound, @NotNull ICause cause) throws ContradictionException {
+        return var.updateLowerBound((int) lowerbound, cause) & var.updateUpperBound((int) upperbound, cause);
     }
 
     @Override
@@ -64,83 +128,9 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
     }
 
     @Override
-    public double getLB() {
-        return LB.get();
-    }
-
-    @Override
-    public double getUB() {
-        return UB.get();
-    }
-
-    @Override
-    public boolean updateLowerBound(double value, @NotNull ICause cause) throws ContradictionException {
-//        TODO ICause antipromo = cause;
-        double old = this.getLB();
-        if (old < value) {
-            if (this.getUB() < value) {
-//                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                this.contradiction(cause, EventType.INCLOW, MSG_LOW);
-            } else {
-                LB.set(value);
-                this.notifyPropagators(EventType.INCLOW, cause);
-
-//                TODO solver.getExplainer().updateLowerBound(this, old, value, antipromo);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean updateUpperBound(double value, @NotNull ICause cause) throws ContradictionException {
-//        TODO ICause antipromo = cause;
-        double old = this.getUB();
-        if (old > value) {
-            if (this.getLB() > value) {
-//                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                this.contradiction(cause, EventType.DECUPP, MSG_UPP);
-            } else {
-                UB.set(value);
-                this.notifyPropagators(EventType.DECUPP, cause);
-//                TODO solver.getExplainer().updateUpperBound(this, old, value, antipromo);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean updateBounds(double lowerbound, double upperbound, @NotNull ICause cause) throws ContradictionException {
-//        TODO ICause antipromo = cause;
-        double oldlb = this.getLB();
-        double oldub = this.getUB();
-        if (oldlb < lowerbound || oldub > upperbound) {
-            if (oldub < lowerbound || oldlb > upperbound) {
-//                TODO solver.getExplainer()...
-                this.contradiction(cause, EventType.BOUND, MSG_BOUND);
-            } else {
-                EventType e = EventType.VOID;
-                if (oldlb < lowerbound) {
-                    LB.set(lowerbound);
-                    e = EventType.INCLOW;
-                }
-                if (oldub > upperbound) {
-                    UB.set(upperbound);
-                    e = (e == EventType.INCLOW) ? EventType.BOUND : EventType.DECUPP;
-                }
-                this.notifyPropagators(e, cause);
-//                TODO solver.getExplainer()...
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public boolean instantiated() {
-        double lb = LB.get();
-        double ub = UB.get();
+        double lb = var.getLB();
+        double ub = var.getUB();
         if (ub - lb < precision) return true;
         return nextValue(lb) >= ub;   // TODO à confirmer auprès de Gilles
     }
@@ -157,30 +147,6 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
         }
     }
 
-    public Explanation explain(VariableState what) {
-        /*Explanation expl = new Explanation(null, null);
-        OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
-        DisposableValueIterator it = invdom.getValueIterator();
-        while (it.hasNext()) {
-            int val = it.next();
-            if ((what == VariableState.LB && val < this.getLB())
-                    || (what == VariableState.UB && val > this.getUB())
-                    || (what == VariableState.DOM)) {
-                expl.add(solver.getExplainer().explain(this, val));
-            }
-        }
-        return expl;*/
-        return null;
-    }
-
-    @Override
-    public Explanation explain(VariableState what, int val) {
-        /*Explanation expl = new Explanation();
-        expl.add(solver.getExplainer().explain(this, val));
-        return expl;*/
-        return null;
-    }
-
     @Override
     public NoDelta getDelta() {
         return NoDelta.singleton;
@@ -188,7 +154,6 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
 
     @Override
     public void createDelta() {
-        throw new SolverException("Unable to create delta for RealVar!");
     }
 
     @Override
@@ -217,10 +182,21 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
 
     @Override
     public int getTypeAndKind() {
-        return VAR + REAL;
+        return Variable.VIEW + var.getTypeAndKind();
     }
 
-    public String toString() {
-        return String.format("%s = [%.16f,%.16f]", name, getLB(), getUB());
+    @Override
+    public Explanation explain(@Nullable Deduction d) {
+        return null;
+    }
+
+    @Override
+    public Explanation explain(VariableState what) {
+        return null;
+    }
+
+    @Override
+    public Explanation explain(VariableState what, int val) {
+        return null;
     }
 }

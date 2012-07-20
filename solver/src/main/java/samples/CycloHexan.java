@@ -77,9 +77,15 @@ public class CycloHexan extends AbstractProblem {
         vars = new RealVar[]{x, y, z};
         RealConstraint rcons = new RealConstraint(solver);
         ibex = rcons.ibex;
-        rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars);
-        rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars);
-        rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars);
+        /*rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, Ibex.COMPO);
+        rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, Ibex.COMPO);
+        rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars);*/
+        rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13;" +
+                "{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13;" +
+                "{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13",
+                Ibex.HC4_NEWTON, vars);
+
+
         solver.post(rcons);
     }
 

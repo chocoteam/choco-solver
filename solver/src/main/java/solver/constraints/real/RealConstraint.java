@@ -28,8 +28,9 @@ package solver.constraints.real;
 
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.real.IntToRealPropagator;
 import solver.constraints.propagators.real.RealPropagator;
+import solver.variables.IntVar;
 import solver.variables.RealVar;
 
 /**
@@ -39,7 +40,7 @@ import solver.variables.RealVar;
  * @author Charles Prud'homme
  * @since 18/07/12
  */
-public class RealConstraint extends Constraint<RealVar, Propagator<RealVar>> {
+public class RealConstraint extends Constraint {
 
     public final Ibex ibex;
     public int contractors;
@@ -71,31 +72,39 @@ public class RealConstraint extends Constraint<RealVar, Propagator<RealVar>> {
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
-     * @param vars      array of variables
      * @param option    propagation option index (0 is DEFAULT)
+     * @param vars      array of variables
      */
-    public void addFunction(String functions, RealVar[] vars, int option) {
-        addPropagators(new RealPropagator(contractors++, functions, vars, option, solver, this));
+    public void addFunction(String functions, int option, RealVar... vars) {
+        addPropagators(new RealPropagator(ibex, contractors++, functions, vars, option, solver, this));
     }
 
     /**
      * add a function to <code>this</code>.
-          * <br/>
-          * A function is a string declared using the following format:
-          * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-          * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-          * <br/> A complete list is avalaible in the documentation of IBEX.
-          * <p/>
-          * <p/>
-          * <blockquote><pre>
-          * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, solver);
-          * </pre>
-          * </blockquote>
+     * <br/>
+     * A function is a string declared using the following format:
+     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+     * <br/> A complete list is avalaible in the documentation of IBEX.
+     * <p/>
+     * <p/>
+     * <blockquote><pre>
+     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, solver);
+     * </pre>
+     * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
      * @param vars      array of variables
      */
-    public void addFunction(String functions, RealVar[] vars) {
-        addPropagators(new RealPropagator(contractors++, functions, vars, 0, solver, this));
+    public void addFunction(String functions, RealVar... vars) {
+        addPropagators(new RealPropagator(ibex, contractors++, functions, vars, 0, solver, this));
+    }
+
+    /**
+     * Add a discretization constraint to Ibex, forcing variable in parameters to be considered as discrete
+     * @param vars array of variables
+     */
+    public void discretize(IntVar... vars) {
+        addPropagators(new IntToRealPropagator(ibex, contractors++, vars, solver, this));
     }
 }

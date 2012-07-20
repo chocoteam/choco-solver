@@ -51,7 +51,7 @@ import java.util.Arrays;
  * @revision CPRU: remove effectless procedures (before + on contradiction)
  * @since 30 june 2011
  */
-public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, W extends IView, V extends Variable<D, DM, W>>
+public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonitor<D>, V extends Variable<D, DM>>
         implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -78,7 +78,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected int[] pindices;    // but it indices must be different
     protected int pIdx;
 
-    protected W[] views; // views to inform of domain modification
+    protected IView[] views; // views to inform of domain modification
     protected int vIdx; // index of the last view not null in views -- not backtrable
 
     protected IVariableMonitor<V>[] monitors; // monitors to inform of domain modification
@@ -95,7 +95,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     protected AbstractVariable(String name, Solver solver) {
         this.name = name;
         this.solver = solver;
-        views = (W[]) new IView[2];
+        views = new IView[2];
         monitors = (IVariableMonitor<V>[]) new IVariableMonitor[2];
         propagators = new Propagator[8];
         pindices = new int[8];
@@ -225,10 +225,10 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         throw new UnsupportedOperationException("not yet implemented");
     }
 
-    public void subscribeView(W view) {
+    public void subscribeView(IView view) {
         if (vIdx == views.length) {
             IView[] tmp = views;
-            views = (W[]) new IView[tmp.length * 3 / 2 + 1];
+            views = new IView[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
         }
         views[vIdx++] = view;
@@ -242,7 +242,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         return solver;
     }
 
-    public W[] getViews() {
+    public IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 
