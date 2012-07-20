@@ -102,7 +102,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
             } else {
                 if (searchLoop.getLimitsBox().isReached()
                         && !(searchLoop.getObjectivemanager() instanceof NoObjectiveManager)) {
-                    LOGGER.info("=====UNBOUDNED=====");
+                    LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
                 }
