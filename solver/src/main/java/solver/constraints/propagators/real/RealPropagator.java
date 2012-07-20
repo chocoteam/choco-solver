@@ -24,11 +24,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.constraints.propagators;
+package solver.constraints.propagators.real;
 
 import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
+import solver.constraints.propagators.Propagator;
+import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.real.Ibex;
+import solver.constraints.real.RealConstraint;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -43,8 +46,10 @@ import solver.variables.RealVar;
  */
 public class RealPropagator extends Propagator<RealVar> {
 
-    String functions;
-    String[] options;
+    final Ibex ibex;
+    final String functions;
+    final String[] options;
+    final int contractorIdx;
 
     /**
      * Create a propagator on real variables, propagated using IBEX.
@@ -66,10 +71,13 @@ public class RealPropagator extends Propagator<RealVar> {
      * @param options   list of options to give to IBEX
      * @param solver    the solver
      */
-    public RealPropagator(String functions, RealVar[] vars, String[] options, Solver solver, Constraint<RealVar, Propagator<RealVar>> realVarPropagatorConstraint) {
-        super(vars, solver, realVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+    public RealPropagator(int cIdx, String functions, RealVar[] vars, String[] options, Solver solver, RealConstraint rconstraint) {
+        super(vars, solver, rconstraint, PropagatorPriority.LINEAR, false);
+        this.contractorIdx = cIdx;
+        this.ibex = rconstraint.ibex;
         this.functions = functions;
         this.options = options;
+        ibex.add_ctr(vars.length, functions);
     }
 
     @Override
@@ -84,10 +92,31 @@ public class RealPropagator extends Propagator<RealVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        double domains[] = new double[2 * vars.length];
+        for (int i = 0; i < vars.length; i++) {
+            domains[2 * i] = vars[i].getLB();
+            domains[2 * i + 1] = vars[i].getUB();
+        }
+        int result = ibex.contract(contractorIdx, domains);
+        switch (result) {
+            case Ibex.FAIL:
+                contradiction(null, "Ibex failed");
+            case Ibex.CONTRACT:
+                for (int i = 0; i < vars.length; i++) {
+                    vars[i].updateBounds(domains[2 * i], domains[2 * i + 1], this);
+                }
+                return;
+            case Ibex.ENTAILED:
+                return;
+            case Ibex.NOTHING:
+            default:
+                return;
+        }
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        forcePropagate(EventType.FULL_PROPAGATION);
     }
 
     @Override

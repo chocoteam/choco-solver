@@ -122,11 +122,11 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
                 this.contradiction(cause, EventType.BOUND, MSG_BOUND);
             } else {
                 EventType e = EventType.VOID;
-                if (oldub < lowerbound) {
+                if (oldlb < lowerbound) {
                     LB.set(lowerbound);
                     e = EventType.INCLOW;
                 }
-                if (oldlb > upperbound) {
+                if (oldub > upperbound) {
                     UB.set(upperbound);
                     e = (e == EventType.INCLOW) ? EventType.BOUND : EventType.DECUPP;
                 }
@@ -222,6 +222,6 @@ public class RealVarImpl extends AbstractVariable<NoDelta, IDeltaMonitor<NoDelta
     }
 
     public String toString() {
-        return String.format("%s = [%.3f,%.3f]", name, getLB(), getUB());
+        return String.format("%s = [%f,%f]", name, getLB(), getUB());
     }
 }

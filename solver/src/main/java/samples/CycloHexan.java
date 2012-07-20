@@ -28,6 +28,7 @@ package samples;
 
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.real.Ibex;
 import solver.constraints.real.RealConstraint;
 import solver.search.strategy.selectors.values.RealDomainMiddle;
 import solver.search.strategy.selectors.variables.Cyclic;
@@ -46,6 +47,7 @@ public class CycloHexan extends AbstractProblem {
 
     RealVar[] vars;
     RealVar x, y, z;
+    Ibex ibex;
 
     @Override
     public void printDescription() {
@@ -68,14 +70,17 @@ public class CycloHexan extends AbstractProblem {
     @Override
     public void buildModel() {
         double precision = 1.0e-6;
-        x = VariableFactory.real("x", -Double.MAX_VALUE, Double.MAX_VALUE, precision, solver);
+        x = VariableFactory.real("x", Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, precision, solver);
         y = VariableFactory.real("y", -1.0e8, 1.0e8, precision, solver);
         z = VariableFactory.real("z", -1.0e8, 1.0e8, precision, solver);
 
         vars = new RealVar[]{x, y, z};
-        solver.post(new RealConstraint("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, null, solver));
-        solver.post(new RealConstraint("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, null, solver));
-        solver.post(new RealConstraint("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars, null, solver));
+        RealConstraint rcons = new RealConstraint(solver);
+        ibex = rcons.ibex;
+        rcons.addFunction("{1}^2 * (1 + {2}^2) + {2} * ({2} - 24 * {1}) = -13", vars, null);
+        rcons.addFunction("{0}^2 * (1 + {1}^2) + {1} * ({1} - 24 * {0}) = -13", vars, null);
+        rcons.addFunction("{2}^2 * (1 + {0}^2) + {0} * ({0} - 24 * {2}) = -13", vars, null);
+        solver.post(rcons);
     }
 
     @Override
@@ -94,7 +99,14 @@ public class CycloHexan extends AbstractProblem {
 
     @Override
     public void prettyOut() {
-
+        LoggerFactory.getLogger("bench").info("CycloHexan");
+        StringBuilder st = new StringBuilder();
+        st.append("\t");
+        for (int i = 0; i < vars.length; i++) {
+            st.append(String.format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
+        }
+        LoggerFactory.getLogger("bench").info(st.toString());
+        ibex.release();
     }
 
     public static void main(String[] args) {

@@ -26,55 +26,34 @@
  */
 package solver.constraints.real;
 
-import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.real.RealPropagator;
-import solver.variables.RealVar;
-
 /**
- * A constraint on real variables, solved using IBEX.
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 18/07/12
+ * @since 19/07/12
  */
-public class RealConstraint extends Constraint<RealVar, Propagator<RealVar>> {
+public class Test {
 
-    public final Ibex ibex;
-    public int contractors;
+    public static void main(String[] args) {
 
-    /**
-     * Create a constraint on real variables.
-     * This is propagated using IBEX.
-     *
-     * @param solver the solver
-     */
-    public RealConstraint(Solver solver) {
-        super(solver);
-        ibex = new Ibex();
-        contractors = 0;
-    }
+        Ibex ibex = new Ibex();
 
-    /**
-     * ad a function to <code>this</code>.
-     * <br/>
-     * A function is a string declared using the following format:
-     * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
-     * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
-     * <br/> A complete list is avalaible in the documentation of IBEX.
-     * <p/>
-     * <p/>
-     * <blockquote><pre>
-     * new RealConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", new RealVar[]{x,y}, new String[]{""}, solver);
-     * </pre>
-     * </blockquote>
-     *
-     * @param functions list of functions, separated by a semi-colon
-     * @param vars      array of variables
-     * @param options   list of options to give to IBEX
-     */
-    public void addFunction(String functions, RealVar[] vars, String[] options) {
-        addPropagators(new RealPropagator(contractors++, functions, vars, options, solver, this));
+        ibex.add_ctr(2, "{0}+{1}=3");
+
+        double domains[] = {1.0, 10.0, 1.0, 10.0};
+        System.out.println("Before contract:");
+        System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
+
+        int result = ibex.contract(0, domains);
+
+        if (result == Ibex.FAIL) {
+            System.out.println("Failed!");
+        } else if (result == Ibex.CONTRACT) {
+            System.out.println("After contract:");
+            System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
+        } else {
+            System.out.println("Nothing.");
+        }
+        ibex.release();
     }
 }
