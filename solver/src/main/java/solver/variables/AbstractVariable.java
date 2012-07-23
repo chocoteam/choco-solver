@@ -235,7 +235,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     }
 
     public int nbConstraints() {
-        throw new UnsupportedOperationException();
+        return pIdx;
     }
 
     public Solver getSolver() {
