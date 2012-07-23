@@ -54,7 +54,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class AbsView extends IntView {
+public final class AbsView extends IntView<IntVar> {
 
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;

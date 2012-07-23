@@ -27,6 +27,7 @@
 package solver.variables.view;
 
 import solver.Solver;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
 
 /**
@@ -89,6 +90,19 @@ public enum Views {
         }
         return new OffsetView(ivar, 0, ivar.getSolver());
     }
+
+    public static BoolVar eq(BoolVar boolVar) {
+            IView[] views = boolVar.getViews();
+            for (int i = 0; i < views.length; i++) {
+                if (views[i] instanceof BoolEqView) {
+                    BoolEqView ov = (BoolEqView) views[i];
+                    if (boolVar == ov.getVariable() && ov.cste == 0) {
+                        return ov;
+                    }
+                }
+            }
+            return new BoolEqView(boolVar, boolVar.getSolver());
+        }
 
     public static IntVar minus(IntVar ivar) {
         IView[] views = ivar.getViews();

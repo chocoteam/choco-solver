@@ -90,27 +90,27 @@ public final class PVariable extends ParVar {
                 if (expression == null) {
                     buildWithDArray(identifier, (DArray) type, expression, map, solver);
                 } else {
-                    buildWithDArray(identifier, (DArray) type, (EArray) expression, map, solver);
+                    buildWithDArray(identifier, (DArray) type, expression, map, solver);
                 }
                 break;
         }
-        readAnnotations(identifier, annotations, parser, map);
+        readAnnotations(identifier, type, annotations, parser, map);
 
     }
 
-    private static void readAnnotations(String name, List<EAnnotation> annotations, FZNParser parser, THashMap<String, Object> map) {
+    private static void readAnnotations(String name, Declaration type, List<EAnnotation> annotations, FZNParser parser, THashMap<String, Object> map) {
         for (int i = 0; i < annotations.size(); i++) {
             Expression expression = annotations.get(i);
-            Expression.EType type = expression.getTypeOf();
+            Expression.EType etype = expression.getTypeOf();
             Annotation varanno;
-            switch (type) {
+            switch (etype) {
                 case IDE:
                     EIdentifier identifier = (EIdentifier) expression;
                     varanno = Annotation.valueOf((identifier).value);
                     switch (varanno) {
                         case output_var:
                             IntVar var = (IntVar) map.get(name);
-                            parser.layout.addOutputVar(name, var);
+                            parser.layout.addOutputVar(name, var, type);
                             break;
                         default:
                             //LOGGER.warn("% Unknown annotation :" + varanno.toString());
@@ -122,7 +122,7 @@ public final class PVariable extends ParVar {
                     switch (varanno) {
                         case output_array:
                             IntVar[] vars = (IntVar[]) map.get(name);
-                            parser.layout.addOutputArrays(name, vars, eanno.exps);
+                            parser.layout.addOutputArrays(name, vars, eanno.exps, type);
                             break;
                         default:
 //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());

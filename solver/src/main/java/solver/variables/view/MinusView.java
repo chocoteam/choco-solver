@@ -52,7 +52,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView {
+public class MinusView extends IntView<IntVar> {
 
     DisposableValueIterator _viterator;
     DisposableRangeIterator _riterator;
