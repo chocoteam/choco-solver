@@ -41,8 +41,7 @@ import solver.Solver;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
-import solver.search.loop.monitors.ABSLNS;
-import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
@@ -116,11 +115,12 @@ public class SolveGoal {
                 ivars[i] = (IntVar) vars[i];
             }
 
-            ActivityBased abs = new ActivityBased(solver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
+            /*ActivityBased abs = new ActivityBased(solver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
             solver.set(abs);
             if (type != Resolution.SATISFY) {
                 solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, ivars, 29091981L, abs, false, ivars.length / 2));
-            }
+            }*/
+            solver.set(StrategyFactory.random(ivars, solver.getEnvironment()));
         }
 
         AbstractSearchLoop search = solver.getSearchLoop();
