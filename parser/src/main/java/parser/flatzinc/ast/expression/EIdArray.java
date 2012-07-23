@@ -43,8 +43,8 @@ import solver.variables.view.Views;
 */
 public final class EIdArray extends Expression{
 
-    final String name;
-    final EInt index;
+    public final String name;
+    public final EInt index;
     final Object object;
 
     public EIdArray(THashMap<String, Object> map, String id, EInt i) {

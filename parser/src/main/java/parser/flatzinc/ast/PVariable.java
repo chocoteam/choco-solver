@@ -31,10 +31,7 @@ import gnu.trove.map.hash.THashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.ast.declaration.*;
-import parser.flatzinc.ast.expression.EAnnotation;
-import parser.flatzinc.ast.expression.EArray;
-import parser.flatzinc.ast.expression.EIdentifier;
-import parser.flatzinc.ast.expression.Expression;
+import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.variables.*;
@@ -227,6 +224,10 @@ public final class PVariable extends ParVar {
                 break;
             case IDE:
                 iv = Views.eq((IntVar) map.get(expression.toString()));
+                break;
+            case IDA:
+                EIdArray eida = (EIdArray) expression;
+                iv = ((IntVar[])map.get(eida.name))[eida.index.intValue()-1];
                 break;
             default:
                 iv = null;
