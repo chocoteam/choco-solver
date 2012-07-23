@@ -44,6 +44,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
+import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -133,22 +134,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private static <V extends Variable> void checkVariable(V[] vars) {
-            set.clear();
-            for (int i = 0; i < vars.length; i++) {
-                Variable v = vars[i];
-                if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
-                    if (set.contains(v.getId())) {
-                        if (v instanceof IntVar) {
-                            vars[i] = (V) Views.eq((IntVar) v);
-                        } else {
-                            throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                                    "This is forbidden; you must consider using a View or a EQ constraint.");
-                        }
+        set.clear();
+        for (int i = 0; i < vars.length; i++) {
+            Variable v = vars[i];
+            if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
+                if (set.contains(v.getId())) {
+                    if ((v.getTypeAndKind()& Variable.BOOL)!=0) {
+                        vars[i] = (V) Views.eq((BoolVar) v);
+                    } else if ((v.getTypeAndKind()& Variable.INT)!=0) {
+                        vars[i] = (V) Views.eq((IntVar) v);
+                    } else {
+                        throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                "This is forbidden; you must consider using a View or a EQ constraint.");
                     }
-                    set.add(vars[i].getId());
                 }
+                set.add(vars[i].getId());
             }
         }
+    }
 
 
     @SuppressWarnings({"unchecked"})
@@ -243,7 +246,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        environment.save(new Operation(){
+        environment.save(new Operation() {
             @Override
             public void undo() {
                 state = NEW;
@@ -256,7 +259,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
-        environment.save(new Operation(){
+        environment.save(new Operation() {
             @Override
             public void undo() {
                 state = ACTIVE;
@@ -303,7 +306,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vindices;
     }
 
-    public void setVIndices(int idx, int val){
+    public void setVIndices(int idx, int val) {
         vindices[idx] = val;
     }
 
