@@ -44,7 +44,6 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
-import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -139,9 +138,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
             Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
-                    if ((v.getTypeAndKind()& Variable.BOOL)!=0) {
-                        vars[i] = (V) Views.eq((BoolVar) v);
-                    } else if ((v.getTypeAndKind()& Variable.INT)!=0) {
+                    if ((v.getTypeAndKind() & Variable.INT) != 0) {
                         vars[i] = (V) Views.eq((IntVar) v);
                     } else {
                         throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
