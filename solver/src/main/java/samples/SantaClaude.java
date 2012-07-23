@@ -72,7 +72,7 @@ public class SantaClaude extends AbstractProblem {
         kid_gift = VariableFactory.enumeratedArray("g2k", n_kids, 0, n_gifts, solver);
         kid_price = VariableFactory.enumeratedArray("p2k", n_kids, 0, max_price, solver);
         total_cost = VariableFactory.bounded("total cost", 0, max_price * n_kids, solver);
-        average = VariableFactory.real("average", 8.0, 9.0, precision, solver);
+        average = VariableFactory.real("average", 0, max_price * n_kids, precision, solver);
 
 
         gift_price = new int[n_gifts];
@@ -92,13 +92,11 @@ public class SantaClaude extends AbstractProblem {
             function.append("+{").append(i).append('}');
         }
         function.append(")/").append(n_kids).append("=").append('{').append(n_kids).append('}');
-//        function.append(";{").append(n_kids).append("} in [120,129]");
 
         RealVar[] all_vars = ArrayUtils.append(Views.real(kid_price, precision), new RealVar[]{average});
 
         ave_cons.addFunction(function.toString(), all_vars);
-//        ave_cons.addFunction("{0} in [120.5,129.5]", average);
-//        ave_cons.addFunction("{0} >= 120.5; {0} <= 129.5]", average);
+        ave_cons.addFunction("{0} = [10.5,12.5]", average);
         ave_cons.discretize(kid_price);
         solver.post(ave_cons);
     }
