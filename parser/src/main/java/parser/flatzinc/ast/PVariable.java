@@ -34,6 +34,7 @@ import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
+import solver.constraints.unary.Member;
 import solver.variables.*;
 import solver.variables.view.Views;
 
@@ -186,6 +187,9 @@ public final class PVariable extends ParVar {
         final IntVar iv;
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
+            int lb = type.getLow();
+            int ub = type.getUpp();
+            solver.post(new Member(iv, lb, ub, solver));
         } else {
             iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
 
@@ -208,6 +212,8 @@ public final class PVariable extends ParVar {
         final IntVar iv;
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
+            int[] values = type.getValues();
+            solver.post(new Member(iv, values, solver));
         } else {
             iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getValues(), solver);
         }
@@ -227,7 +233,7 @@ public final class PVariable extends ParVar {
                 break;
             case IDA:
                 EIdArray eida = (EIdArray) expression;
-                iv = ((IntVar[])map.get(eida.name))[eida.index.intValue()-1];
+                iv = ((IntVar[]) map.get(eida.name))[eida.index.intValue() - 1];
                 break;
             default:
                 iv = null;
