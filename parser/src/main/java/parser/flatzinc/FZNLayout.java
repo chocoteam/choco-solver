@@ -153,7 +153,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
     public void addOutputVar(String name, IntVar variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
-        output_arrays_types.add(type.typeOf);
+        output_types.add(type.typeOf);
     }
 
     public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
