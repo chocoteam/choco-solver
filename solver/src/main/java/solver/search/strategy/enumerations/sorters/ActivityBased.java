@@ -446,6 +446,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     @Override
+    public void afterInterrupt() {
+    }
+
+    @Override
     public void beforeClose() {
     }
 

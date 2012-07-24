@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
+import solver.propagation.hardcoded.ConstraintEngine;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,7 +85,8 @@ public class ParseAndSolve {
         parser.parse();
         LOGGER.info("% solve instance...");
         final Solver solver = parser.solver;
-//        SearchMonitorFactory.log(solver, true, true);
+        solver.set(new ConstraintEngine(solver));
+//        SearchMonitorFactory.log(solver, true, false);
 //        SearchMonitorFactory.statEveryXXms(solver, 1000);
         if (tl > -1) {
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);

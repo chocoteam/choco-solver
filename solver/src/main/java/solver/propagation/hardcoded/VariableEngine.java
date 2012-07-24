@@ -188,6 +188,15 @@ public class VariableEngine implements IPropagationEngine {
         }
     }
 
+    public void check() {
+        for (int i = 0; i < masks_f.length; i++) {
+            if (masks_f[i] != null)
+                for (int j = 0; j < masks_f[i].length; j++) {
+                    assert masks_f[i][j] == 0 : "MASK NOT CLEARED "+variables[0].getSolver().getMeasures().toOneShortLineString();
+                }
+        }
+    }
+
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
         int vid = variable.getId();
