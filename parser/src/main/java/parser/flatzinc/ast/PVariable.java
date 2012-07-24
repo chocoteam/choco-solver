@@ -231,6 +231,9 @@ public final class PVariable extends ParVar {
     private static IntVar buildOnExpression(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
         final IntVar iv;
         switch (expression.getTypeOf()) {
+            case BOO:
+                iv = expression.boolVarValue(solver);
+                break;
             case INT:
                 iv = Views.fixed(name, expression.intValue(), solver);
                 break;

@@ -156,12 +156,17 @@ public final class Parameter extends ParVar {
                 map.put(name, iarr);
                 break;
             case SET:
+                int[][] sarr = new int[size][];
+                for (int i = 0; i < size; i++) {
+                    sarr[i] = ((ESet) value.getWhat_i(i)).enumVal();
+                }
+                map.put(name, sarr);
 //                SetConstantVariable[] sarr = new SetConstantVariable[size];
 //                for(int i = 0; i < size; i++){
 //                    sarr[i] = buildSet(name+ '_' +i, (ESet)value.getWhat_i(i), map);
 //                }
 //                map.put(name, sarr);
-                Exit.log();
+//                Exit.log("% array of set unavailable");
                 break;
             case ARRAY:
                 LoggerFactory.getLogger("parser").error("Parameter#buildArray ARRAY: unexpected type for " + name);
