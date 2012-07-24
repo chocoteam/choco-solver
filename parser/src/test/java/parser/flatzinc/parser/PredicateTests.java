@@ -117,9 +117,9 @@ public class PredicateTests {
 
     @Test
     public void test_bool_clause(){
-        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1 .. 3] var bool : as;");
-        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1 .. 4] var bool : bs;");
-        TerminalParser.parse(fzn.CONSTRAINT, "constraint bool_clause(a, b);");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1 .. 3] of var bool : as;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1 .. 4] of var bool : bs;");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint bool_clause(as, bs);");
     }
 
     @Test
@@ -244,7 +244,7 @@ public class PredicateTests {
     @Test
     public void test_int_lin_eq_reif(){
         TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1 ..3] of var 1 .. 3 : bs;");
-        TerminalParser.parse(fzn.PAR_VAR_DECL, "var int : c;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var bool : r;");
         TerminalParser.parse(fzn.CONSTRAINT, "constraint int_lin_eq_reif([1, 2, 3], bs, 7, r);");
     }
 
@@ -294,7 +294,7 @@ public class PredicateTests {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 3 : a;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 2 : b;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 3 : c;");
-        TerminalParser.parse(fzn.CONSTRAINT, "constraint max(a, b, c);");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint int_max(a, b, c);");
     }
 
     @Test
@@ -302,7 +302,7 @@ public class PredicateTests {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 3 : a;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 2 : b;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 3 : c;");
-        TerminalParser.parse(fzn.CONSTRAINT, "constraint min(a, b, c);");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint int_min(a, b, c);");
     }
 
     @Test
@@ -310,7 +310,7 @@ public class PredicateTests {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 3 : a;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 2 : b;");
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var -3 .. 3 : c;");
-        TerminalParser.parse(fzn.CONSTRAINT, "constraint mod(a, b, c);");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint int_mod(a, b, c);");
     }
 
     @Test

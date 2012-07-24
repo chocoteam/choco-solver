@@ -63,7 +63,8 @@ public final class PVariable extends ParVar {
         output_var,
         output_array,
         is_defined_var,
-        var_is_introduced
+        var_is_introduced,
+        viz
     }
 
     public PVariable(THashMap<String, Object> map, Declaration type, String identifier, List<EAnnotation> annotations, Expression expression, FZNParser parser) {
@@ -118,14 +119,18 @@ public final class PVariable extends ParVar {
                     break;
                 case ANN:
                     EAnnotation eanno = (EAnnotation) expression;
-                    varanno = Annotation.valueOf(eanno.id.value);
-                    switch (varanno) {
-                        case output_array:
-                            IntVar[] vars = (IntVar[]) map.get(name);
-                            parser.layout.addOutputArrays(name, vars, eanno.exps, type);
-                            break;
-                        default:
+                    try {
+                        varanno = Annotation.valueOf(eanno.id.value);
+                        switch (varanno) {
+                            case output_array:
+                                IntVar[] vars = (IntVar[]) map.get(name);
+                                parser.layout.addOutputArrays(name, vars, eanno.exps, type);
+                                break;
+                            default:
 //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
+                        }
+                    } catch (IllegalArgumentException ignored) {
+//                        LOGGER.warn("% Unknown annotation :" + eanno.toString());
                     }
                     break;
                 default:
@@ -143,6 +148,7 @@ public final class PVariable extends ParVar {
      * @param solver
      * @return {@link Variable}
      */
+
     private static BoolVar buildWithBool(String name, Expression expression, THashMap<String, Object> map, Solver solver) {
         final BoolVar bi;
         if (expression != null) {

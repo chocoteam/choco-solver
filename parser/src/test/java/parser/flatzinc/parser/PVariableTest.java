@@ -160,4 +160,11 @@ public class PVariableTest {
         Assert.assertEquals(oi[0].getDomainSize(), 1);
     }
 
+    @Test
+    public void testArray4(){
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "array [1..8] of var 1..8: queens " +
+                ":: output_array([1..8]) " +
+                ":: viz([viztype(\"vector\"), vizpos(0, 2), vizdisplay(\"expanded\"), vizwidth(8), vizheight(8), vizrange(1, 8)]);");
+    }
+
 }
