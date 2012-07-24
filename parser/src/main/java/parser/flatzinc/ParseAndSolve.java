@@ -84,6 +84,7 @@ public class ParseAndSolve {
         parser.parse();
         LOGGER.info("% solve instance...");
         final Solver solver = parser.solver;
+//        SearchMonitorFactory.log(solver, true, true);
 //        SearchMonitorFactory.statEveryXXms(solver, 1000);
         if (tl > -1) {
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
