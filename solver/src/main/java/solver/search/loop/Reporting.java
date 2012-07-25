@@ -78,6 +78,7 @@ public enum Reporting {
         sb.append(onUnsatisfiedConstraints(solver)).append("\n");
         sb.append(StringUtils.pad("", 50, "=")).append("\n");
         sb.append(onDecisions(solver)).append("\n");
+        sb.append(solver.getMeasures().toOneShortLineString());
         sb.append(StringUtils.pad("", 50, "#")).append("\n");
         return sb.toString();
     }

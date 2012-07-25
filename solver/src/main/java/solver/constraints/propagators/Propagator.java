@@ -98,7 +98,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
-    protected int[] vindices;
+    protected int[] vindices;  // index of this within the list of propagator of the i^th variable
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -299,12 +299,23 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars;
     }
 
+    /**
+     * index of the propagator within its variables
+     * @return
+     */
     public int[] getVIndices() {
         return vindices;
     }
 
     public void setVIndices(int idx, int val) {
         vindices[idx] = val;
+    }
+
+    public void unlink() {
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].unlink(this, vindices[v]);
+            vindices[v] = -1;
+        }
     }
 
     /**
