@@ -62,7 +62,32 @@ public class NValues extends IntConstraint<IntVar> {
 		addPropagators(new PropNValues_Light(vars, concernedValues, nValues, this, solver));
     }
 
-    /**
+	/**
+	 * NValues constraint
+	 * The number of distinct values in vars is exactly nValues
+	 *
+	 * @param vars
+	 * @param nValues
+	 * @param solver
+	 */
+    public NValues(IntVar[] vars, IntVar nValues, Solver solver) {
+        this(vars,nValues,getDomainUnion(vars),solver);
+    }
+
+	private static TIntArrayList getDomainUnion(IntVar[] vars) {
+		TIntArrayList values = new TIntArrayList();
+		for(IntVar v:vars){
+			int ub = v.getUB();
+			for(int i=v.getLB();i<=ub;i=v.nextValue(i)){
+				if(!values.contains(i)){
+					values.add(i);
+				}
+			}
+		}
+		return values;
+	}
+
+	/**
      * Checks if the constraint is satisfied when all variables are instantiated.
      *
      * @param tuple an complete instantiation
