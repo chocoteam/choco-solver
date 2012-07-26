@@ -197,7 +197,12 @@ public final class PVariable extends ParVar {
             int ub = type.getUpp();
             solver.post(new Member(iv, lb, ub, solver));
         } else {
-            iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
+            int size = type.getUpp() - type.getLow() + 1;
+            if (size < 256) {
+                iv = VariableFactory.enumerated(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
+            }else{
+                iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, type.getLow(), type.getUpp(), solver);
+            }
 
         }
         map.put(name, iv);
@@ -293,7 +298,7 @@ public final class PVariable extends ParVar {
      * @param solver
      */
     private static void buildWithDArray(String name, DArray type, Expression expression, THashMap<String, Object> map, Solver solver) {
-        final DInt2 index = (DInt2) type.getIndex();
+        final DInt2 index = (DInt2) type.getIndex(0);
         // no need to get lowB, it is always 1 (see specification of FZN for more informations)
         final int size = index.getUpp();
         final Declaration what = type.getWhat();
@@ -379,7 +384,7 @@ public final class PVariable extends ParVar {
      * @param solver
      */
     private static void buildWithDArray(String name, DArray type, Expression expression, EArray earr, THashMap<String, Object> map, Solver solver) {
-        final DInt2 index = (DInt2) type.getIndex();
+        final DInt2 index = (DInt2) type.getIndex(0);
         // no need to get lowB, it is always 1 (see specification of FZN for more informations)
         final int size = index.getUpp();
         final Declaration what = type.getWhat();

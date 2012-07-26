@@ -233,7 +233,9 @@ public final class FZNParser {
      */
     static final  Parser<DArray> ARRAY_OF =
             Mapper.curry(DArray.class).sequence(
-                    TerminalParser.phrase("array ["), INDEX_SET, TerminalParser.phrase("] of"),
+                    TerminalParser.phrase("array ["),
+                    INDEX_SET.sepBy(TerminalParser.term(",")),
+                    TerminalParser.phrase("] of"),
                     Parsers.or(PRIMITIVES, SET_OF_INT)
             );
 

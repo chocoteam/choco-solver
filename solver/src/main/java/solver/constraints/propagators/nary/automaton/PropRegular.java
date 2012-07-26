@@ -143,8 +143,6 @@ public class PropRegular extends Propagator<IntVar> {
                 while (it.hasNext()) {
                     int arcId = it.next();
                     p.temp.push(arcId);
-
-
                 }
                 it.dispose();
 

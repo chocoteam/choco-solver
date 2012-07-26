@@ -260,16 +260,11 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            int vid = variables[i].getId();
-            if (masks_f[vid] != null) {
+            if (vindices[i] > -1) {// constant has a negative index
+                assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
+                int vid = variables[i].getId();
                 assert vindices[i] < masks_f[vid].length;
-                if (vindices[i] > -1) {// constant has a negative index
-                    if (variables[i].getPropagators()[vindices[i]] != propagator) {
-                        System.out.println("gpg");
-                    }
-                    assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
-                    masks_f[vid][vindices[i]] = 0;
-                }
+                masks_f[vid][vindices[i]] = 0;
             }
         }
         int pid = propagator.getId();

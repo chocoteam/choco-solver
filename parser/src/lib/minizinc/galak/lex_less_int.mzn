@@ -5,22 +5,26 @@
 
 predicate lex_less_int(array[int] of var int: x,
                        array[int] of var int: y) =
-    let { int: lx = min(index_set(x)),
-          int: ux = max(index_set(x)),
-          int: ly = min(index_set(y)),
-          int: uy = max(index_set(y)),
-          int: size = max(ux - lx, uy - ly),
-          array[0..size+1] of var bool: b }
-    in
-    b[0]
-    /\
-    forall(i in 0..size) (
-        b[i] = ( x[lx + i] <= y[ly + i]
-                 /\
-                (x[lx + i] <  y[ly + i] \/ b[i+1]) )
-    )
-    /\
-    b[size + 1] = (ux - lx < uy - ly);
+%    let { int: lx = min(index_set(x)),
+%          int: ux = max(index_set(x)),
+%          int: ly = min(index_set(y)),
+%          int: uy = max(index_set(y)),
+%          int: size = max(ux - lx, uy - ly),
+%          array[0..size+1] of var bool: b }
+%    in
+%    b[0]
+%    /\
+%    forall(i in 0..size) (
+%        b[i] = ( x[lx + i] <= y[ly + i]
+%                 /\
+%                (x[lx + i] <  y[ly + i] \/ b[i+1]) )
+%    )
+%    /\
+%    b[size + 1] = (ux - lx < uy - ly);
+%
+lex_lessChoco(x,y);
+
+predicate lex_lessChoco(array[int] of var int: x, array[int] of var int: y);
 
 
 predicate lex_lt_int(array[int] of var int: x,

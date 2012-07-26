@@ -343,4 +343,12 @@ public class PredicateTests {
         TerminalParser.parse(fzn.PAR_VAR_DECL, "var int : c;");
         TerminalParser.parse(fzn.CONSTRAINT, "constraint int_times(a, b, c);");
     }
+
+    @Test
+    public void test_regular(){
+        TerminalParser.parse(FZNParser.PRED_DECL, "predicate regularChoco(array [int] of var int: x, int: Q, int: S, array [int, int] of int: d, int: q0, set of int: F);");
+        TerminalParser.parse(fzn.PAR_VAR_DECL,"array [1..20] of var 1..6: board;");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint regularChoco(board, 4, 6, [3, 3, 3, 4, 3, 3, 2, 2, 2, 0, 2, 2, 3, 3, 3, 4, 3, 3, 2, 2, 2, 0, 2, 2], 1, 1..2);");
+
+    }
 }

@@ -62,8 +62,12 @@ public final class Parameter extends ParVar {
                 break;
             case ARRAY:
                 DArray arr = (DArray) type;
-                DInt2 index = (DInt2) arr.getIndex();
-                buildArray(identifier, index, arr.getWhat(), (EArray) expression, map);
+                if (arr.getDimension() == 1) {
+                    DInt2 index = (DInt2) arr.getIndex(0);
+                    buildArray(identifier, index, arr.getWhat(), (EArray) expression, map);
+                }else{
+                    Exit.log("cannot handle more than one dimension!");
+                }
                 break;
         }
 
