@@ -28,7 +28,6 @@ package solver.constraints.propagators.nary.globalcardinality;
 
 import choco.kernel.ESat;
 import choco.kernel.common.util.tools.ArrayUtils;
-import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import solver.Solver;
@@ -42,7 +41,6 @@ import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import java.util.BitSet;
 
@@ -77,7 +75,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 	private TIntIntHashMap map;
 	int[] fifo;
 	private IntVar[] cards;
-	private IStateInt[] flow;
+	private int[] flow;
 	private TIntArrayList boundedVariables;
 
 	//***********************************************************************************
@@ -120,21 +118,19 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 		n2 = idx;
 		fifo = new int[n2];
 		matching = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
+		digraph = new DirectedGraph(n2 + 1, GraphType.MATRIX);
 		father = new int[n2];
 		in = new BitSet(n2);
 		SCCfinder = new StrongConnectivityFinder(digraph);
 		//
 		this.lb = new int[n2];
 		this.ub = new int[n2];
-		this.flow = new IStateInt[n2];
+		this.flow = new int[n2];
 		for(int i=0; i<n; i++){
 			ub[i] = lb[i] = 1; // 1 unit of flow per variable
-			flow[i] = environment.makeInt(0);
 		}
 		for(int i=n; i<n2; i++){
 			ub[i] = n; // [0,n] units of flow per value (default)
-			flow[i] = environment.makeInt(0);
 		}
 		for(int i=0; i<value.length; i++){
 			idx = map.get(value[i]);
@@ -173,7 +169,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	private void buildDigraph() throws ContradictionException {
 		for (int i = 0; i < n2; i++) {
-			flow[i].set(0);
+			flow[i] = 0;
 			digraph.getSuccessorsOf(i).clear();
 			digraph.getPredecessorsOf(i).clear();
 		}
@@ -184,20 +180,20 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 			ub = v.getUB();
 			if(v.instantiated()){
 				j = map.get(v.getValue());
-				if (flow[j].get()<this.ub[j]){
+				if (flow[j]<this.ub[j]){
 					digraph.addArc(j, i);
-					flow[i].add(1);
-					flow[j].add(1);
+					flow[i]++;
+					flow[j]++;
 				} else {
 					contradiction(v, "");
 				}
 			}else{
 				for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
 					j = map.get(k);
-					if (flow[i].get()<this.ub[i] && flow[j].get()<this.ub[j]){//
+					if (flow[i]<this.ub[i] && flow[j]<this.ub[j]){//
 						digraph.addArc(j, i);
-						flow[i].add(1);
-						flow[j].add(1);
+						flow[i]++;
+						flow[j]++;
 					} else {
 						digraph.addArc(i, j);
 					}
@@ -212,12 +208,12 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	private void repairMatching() throws ContradictionException {
 		for (int i=0; i<n; i++) {
-			if(flow[i].get()==0){
+			if(flow[i]==0){
 				assignVariable(i);
 			}
 		}
 		for (int i=n; i<n2; i++) {
-			while(flow[i].get()<lb[i]){
+			while(flow[i]<lb[i]){
 				useValue(i);
 			}
 		}
@@ -232,8 +228,8 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 	private void assignVariable(int i) throws ContradictionException {
 		int mate = augmentPath_BFS(i);
 		if (mate != -1) {
-			flow[mate].add(1);
-			flow[i].add(1);
+			flow[mate]++;
+			flow[i]++;
 			int tmp = mate;
 			while (tmp != i) {
 				digraph.removeArc(father[tmp], tmp);
@@ -259,7 +255,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 					father[y] = x;
 					fifo[indexLast++] = y;
 					in.set(y);
-					if (flow[y].get()<this.ub[y]){
+					if (flow[y]<this.ub[y]){
 						if(y<n){
 							throw new UnsupportedOperationException();
 						}
@@ -274,8 +270,8 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 	private void useValue(int i) throws ContradictionException {
 		int mate = swapValue_BFS(i);
 		if (mate != -1) {
-			flow[mate].add(-1);
-			flow[i].add(1);
+			flow[mate]--;
+			flow[i]++;
 			int tmp = mate;
 			while (tmp != i) {
 				digraph.removeArc(tmp, father[tmp]);
@@ -301,7 +297,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 					father[y] = x;
 					fifo[indexLast++] = y;
 					in.set(y);
-					if (flow[y].get()<this.ub[y]){
+					if (flow[y]<this.ub[y]){
 						return y;
 					}
 				}
@@ -318,10 +314,10 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 		digraph.desactivateNode(n2);
 		digraph.activateNode(n2);
 		for (int i = n; i < n2; i++) {
-			if (flow[i].get()<ub[i]) {
+			if (flow[i]<ub[i]) {
 				digraph.addArc(i, n2);
 			}
-			if(flow[i].get()>lb[i]){
+			if(flow[i]>lb[i]){
 				digraph.addArc(n2, i);
 			}
 		}
