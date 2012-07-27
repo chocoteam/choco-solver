@@ -59,6 +59,7 @@ public class OneIntDeltaMonitor implements IIntDeltaMonitor {
     @Override
     public void unfreeze() {
         used = false;
+		delta.lazyClear(); // fix 27/07/12
     }
 
     @Override

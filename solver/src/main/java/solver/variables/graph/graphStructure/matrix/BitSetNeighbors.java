@@ -90,4 +90,10 @@ public class BitSetNeighbors extends BitSet implements INeighbors {
 		current = nextSetBit(current+1);
 		return current;
 	}
+
+	@Override
+	public void clear() {
+		card = 0;
+		super.clear();
+	}
 }

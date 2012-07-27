@@ -81,6 +81,10 @@ public class GraphDeltaMonitor implements IGraphDeltaMonitor {
 			this.first[i] = last[i] = delta.getSize(i);
 		}
 		this.first[3] = last[3] = delta.getSize(IGraphDelta.AE_tail);
+
+		// VRAIMENT UTILE?
+		delta.lazyClear();	// fix 27/07/12
+		lazyClear();		// fix 27/07/12
 	}
 
     public void lazyClear() {
