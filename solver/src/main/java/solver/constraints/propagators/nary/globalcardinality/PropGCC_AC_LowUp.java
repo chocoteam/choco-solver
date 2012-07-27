@@ -127,7 +127,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		}
 		n2 = idx;
 		fifo = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
+		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST);
 		remProc = new DirectedRemProc();
 		father = new int[n2];
 		in = new BitSet(n2);
@@ -343,7 +343,12 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 					j = map.get(k);
 					if (nodeSCC[i] != nodeSCC[j]) {
 						if (digraph.arcExists(j,i)) {
-							v.instantiateTo(k,this);
+							if(v.instantiateTo(k,this)){
+								INeighbors nei = digraph.getSuccessorsOf(i);
+								for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+									digraph.removeArc(i,s);
+								}
+							}
 						} else {
 							v.removeValue(k, this);
 							digraph.removeArc(i, j);

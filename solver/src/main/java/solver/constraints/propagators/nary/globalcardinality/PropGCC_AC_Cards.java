@@ -116,7 +116,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 		}
 		n2 = idx;
 		fifo = new int[n2];
-		digraph = new DirectedGraph(n2 + 1, GraphType.MATRIX);
+		digraph = new DirectedGraph(n2 + 1, GraphType.LINKED_LIST);
 		father = new int[n2];
 		in = new BitSet(n2);
 		SCCfinder = new StrongConnectivityFinder(digraph);
@@ -330,7 +330,12 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 					j = map.get(k);
 					if (nodeSCC[i] != nodeSCC[j]) {
 						if (digraph.arcExists(j,i)) {
-							v.instantiateTo(k,this);
+							if(v.instantiateTo(k,this)){
+								INeighbors nei = digraph.getSuccessorsOf(i);
+								for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+									digraph.removeArc(i,s);
+								}
+							}
 						} else {
 							v.removeValue(k, this);
 							digraph.removeArc(i, j);
@@ -395,8 +400,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-//		forcePropagate(EventType.CUSTOM_PROPAGATION);
-		propagate(0);
+		forcePropagate(EventType.FULL_PROPAGATION);
 	}
 
 	//***********************************************************************************
@@ -410,7 +414,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	@Override
 	public int getPropagationConditions() {
-		return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
+		return EventType.FULL_PROPAGATION.mask;
 	}
 
 	@Override
