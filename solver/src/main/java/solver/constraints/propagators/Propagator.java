@@ -100,6 +100,8 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     protected int[] vindices;  // index of this within the list of propagator of the i^th variable
 
+    protected Operation[] operations;
+
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
      * to deal with internal backtrackable structure.
@@ -171,6 +173,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         fails = 0;
         ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
     }
 
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
@@ -243,12 +259,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        environment.save(new Operation() {
-            @Override
-            public void undo() {
-                state = NEW;
-            }
-        });
+        environment.save(operations[NEW]);
         solver.getEngine().activatePropagator(this);
     }
 
@@ -256,12 +267,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
-        environment.save(new Operation() {
-            @Override
-            public void undo() {
-                state = ACTIVE;
-            }
-        });
+        environment.save(operations[ACTIVE]);
         solver.getEngine().desactivatePropagator(this);
     }
 
@@ -301,6 +307,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     /**
      * index of the propagator within its variables
+     *
      * @return
      */
     public int[] getVIndices() {

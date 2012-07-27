@@ -63,8 +63,7 @@ public class BinarySearchLoop extends AbstractSearchLoop {
             solver.setFeasible(Boolean.FALSE);
             solver.getEngine().flush();
             interrupt();
-        }
-        this.env.worldPush(); // push another wolrd to recorver the state after initial propagation
+        }        this.env.worldPush(); // push another wolrd to recorver the state after initial propagation
         this.searchWorldIndex = env.getWorldIndex();
         // call to HeuristicVal.update(Action.initial_propagation)
         if (strategy == null) {

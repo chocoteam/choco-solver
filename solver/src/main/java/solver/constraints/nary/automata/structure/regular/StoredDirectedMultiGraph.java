@@ -28,7 +28,9 @@
 package solver.constraints.nary.automata.structure.regular;
 
 import choco.kernel.common.util.iterators.DisposableIntIterator;
+import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.memory.IEnvironment;
+import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSetWithOffset;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
@@ -54,7 +56,6 @@ public class StoredDirectedMultiGraph {
     int[] offsets;
     TIntStack stack = new TIntArrayStack();
 
-
     StoredIndexedBipartiteSetWithOffset[] supports;
 
 
@@ -77,8 +78,8 @@ public class StoredDirectedMultiGraph {
     public Arcs GArcs;
 
 
-    public StoredDirectedMultiGraph(IEnvironment environment,
-                                    DirectedMultigraph<Node, Arc> graph, int[] starts, int[] offsets, int supportLength) {
+    public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
+                                    int[] starts, int[] offsets, int supportLength) {
         this.starts = starts;
         this.offsets = offsets;
 
@@ -148,69 +149,145 @@ public class StoredDirectedMultiGraph {
 
     }
 
+    private final int getIdx(int i, int j) {
+        return starts[i] + j - offsets[i];
+    }
+
     public final StoredIndexedBipartiteSetWithOffset getSupport(int i, int j) {
-        int idx = starts[i] + j - offsets[i];
-        return supports[idx];
-
-
+        return supports[getIdx(i, j)];
     }
 
 
-    public void removeArc(int arcId, Propagator<IntVar> propagator) throws ContradictionException {
-        int orig = GArcs.origs[arcId];
-        int dest = GArcs.dests[arcId];
+    private void removeArc(Propagator<IntVar> propagator) throws ContradictionException {
+        while (stack.size() > 0) {
+            int arcId = stack.pop();
 
-        int layer = GNodes.layers[orig];
-        int value = GArcs.values[arcId];
+            int orig = GArcs.origs[arcId];
+            int dest = GArcs.dests[arcId];
 
-        StoredIndexedBipartiteSetWithOffset support = getSupport(layer, value);
-        support.remove(arcId);
+            int layer = GNodes.layers[orig];
+            int value = GArcs.values[arcId];
 
-        if (support.isEmpty()) {
-            IntVar var = propagator.getVar(layer);
-            try {
-                var.removeValue(value, propagator);
-            } catch (ContradictionException ex) {
-                stack.clear();
-                throw ex;
+            StoredIndexedBipartiteSetWithOffset support = getSupport(layer, value);
+            support.remove(arcId);
+
+            if (support.isEmpty()) {
+                IntVar var = propagator.getVar(layer);
+                try {
+                    var.removeValue(value, propagator);
+                } catch (ContradictionException ex) {
+                    stack.clear();
+                    throw ex;
+                }
             }
-        }
 
-        DisposableIntIterator it;
-        StoredIndexedBipartiteSetWithOffset out = GNodes.outArcs[orig];
-        StoredIndexedBipartiteSetWithOffset in;
+            DisposableIntIterator it;
+            StoredIndexedBipartiteSetWithOffset out = GNodes.outArcs[orig];
+            StoredIndexedBipartiteSetWithOffset in;
 
-        out.remove(arcId);
+            out.remove(arcId);
 
 
-        if (GNodes.layers[orig] > 0 && out.isEmpty()) {
-            in = GNodes.inArcs[orig];
-            it = in.getIterator();
-            while (it.hasNext()) {
-                int id = it.next();
-                stack.push(id);
+            if (GNodes.layers[orig] > 0 && out.isEmpty()) {
+                in = GNodes.inArcs[orig];
+                it = in.getIterator();
+                while (it.hasNext()) {
+                    int id = it.next();
+                    stack.push(id);
+                }
+                it.dispose();
             }
-            it.dispose();
-        }
 
-        in = GNodes.inArcs[dest];
-        in.remove(arcId);
+            in = GNodes.inArcs[dest];
+            in.remove(arcId);
 
-        if (GNodes.layers[dest] < propagator.getNbVars() && in.isEmpty()) {
-            out = GNodes.outArcs[dest];
-            it = out.getIterator();
-            while (it.hasNext()) {
-                int id = it.next();
-                stack.push(id);
+            if (GNodes.layers[dest] < propagator.getNbVars() && in.isEmpty()) {
+                out = GNodes.outArcs[dest];
+                it = out.getIterator();
+                while (it.hasNext()) {
+                    int id = it.next();
+                    stack.push(id);
+                }
+                it.dispose();
+
             }
-            it.dispose();
 
-        }
-
-        while (!(stack.size() == 0)) {
-            removeArc(stack.pop(), propagator);
+//        while (!(stack.size() == 0)) {
+//            int v = stack.pop();
+//            removeArc(v, propagator);
+//        }
         }
     }
 
 
+    public void updateSupports(int idxVar, IntVar var, Propagator p) throws ContradictionException {
+        //1. from 'from' to var.lb
+        int from = offsets[idxVar];
+        int to = var.getLB();
+        for (int value = from; value < to; value++) {
+            clearSupports(getSupport(idxVar, value), p);
+        }
+        //2. holes between var.lb and var.ub
+        DisposableRangeIterator rit = var.getRangeIterator(true);
+        rit.hasNext();
+        from = rit.max();
+        rit.next();
+        while (rit.hasNext()) {
+            to = rit.min();
+            for (int value = from; value < to; value++) {
+                clearSupports(getSupport(idxVar, value), p);
+            }
+            from = rit.max();
+            rit.next();
+        }
+        rit.dispose();
+        if (idxVar == starts.length - 1) {
+            to = supports.length - getIdx(idxVar, offsets[idxVar]) + offsets[idxVar];
+        } else {
+            to = getIdx(idxVar + 1, offsets[idxVar + 1]) - getIdx(idxVar, offsets[idxVar]) + offsets[idxVar];
+        }
+        //3. from var.ub  to 'to'
+        from = var.getUB() + 1;
+        for (int value = from; value < to; value++) {
+            clearSupports(getSupport(idxVar, value), p);
+        }
+    }
+
+    public void clearSupports(StoredIndexedBipartiteSet supports, Propagator p) throws ContradictionException {
+        if (supports != null) {
+            DisposableIntIterator it = supports.getIterator();
+            while (it.hasNext()) {
+                int arcId = it.next();
+                stack.push(arcId);
+            }
+            it.dispose();
+            removeArc(p);
+        }
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuilder st = new StringBuilder();
+        int nb = 0;
+        for (int i = 0; i < supports.length; i++) {
+            if (supports[i] != null && !supports[i].isEmpty()) {
+                nb++;
+            }
+        }
+        st.append("nb: ").append(nb).append("\n");
+
+        for (int i = 0; i < supports.length; i++) {
+            if (supports[i] != null && !supports[i].isEmpty()) {
+                DisposableIntIterator it = supports[i].getIterator();
+                while (it.hasNext()) {
+                    int arcId = it.next();
+                    st.append(arcId).append(",");
+                }
+                it.dispose();
+                st.append("\n");
+            }
+        }
+        return st.toString();
+    }
 }

@@ -71,6 +71,8 @@ public class IntDeltaMonitor implements IIntDeltaMonitor {
     @Override
     public void unfreeze() {
         //propagator is idempotent
+        delta.lazyClear();
+        lazyClear();
 		timestamp = loop.timeStamp;
         this.first = this.last = delta.size();
     }

@@ -176,21 +176,21 @@ public final class FZNParser {
      * Scanner for "int" keyword.
      * Create {@link parser.flatzinc.ast.declaration.DInt} object.
      */
-    static final  Parser<DBool> BOOL = Mapper.curry(DBool.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("bool"));
+    static final Parser<DBool> BOOL = Mapper.curry(DBool.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("bool"));
 
 
     /**
      * Scanner for "int" keyword.
      * Create {@link parser.flatzinc.ast.declaration.DInt} object.
      */
-    static final  Parser<DInt> INT =
+    static final Parser<DInt> INT =
             Mapper.curry(DInt.class).sequence(TerminalParser.term("var").succeeds(), TerminalParser.term("int"));
 
     /**
      * Scanner for bounds of int declaration, like 1..3.
      * Create a {@link parser.flatzinc.ast.declaration.DInt2} object.
      */
-    static final  Parser<DInt2> INT2 =
+    static final Parser<DInt2> INT2 =
             Mapper.curry(DInt2.class).sequence(
                     TerminalParser.term("var").succeeds(), INT_CONST, TerminalParser.term(".."), INT_CONST
             );
@@ -198,7 +198,7 @@ public final class FZNParser {
      * Scanner for list of int declaration, like {1, 5, 8}.
      * Create a {@link parser.flatzinc.ast.declaration.DManyInt} object.
      */
-    static final  Parser<DManyInt> MANY_INT =
+    static final Parser<DManyInt> MANY_INT =
             Mapper.curry(DManyInt.class).sequence(
                     TerminalParser.term("var").succeeds(), TerminalParser.term("{"), INT_CONST.sepBy(TerminalParser.term(",")), TerminalParser.term("}")
             );
@@ -219,19 +219,19 @@ public final class FZNParser {
      * Scanner for a set of int, like "set of int", "set of 1..3" or "set of {1,2,3}".
      * Create a {@link DSet} object.
      */
-    static final  Parser<DSet> SET_OF_INT =
+    static final Parser<DSet> SET_OF_INT =
             Mapper.curry(DSet.class).sequence(
                     TerminalParser.term("var").succeeds(), TerminalParser.phrase("set of"),
                     INTS
             );
 
-    static final  Parser<Declaration> INDEX_SET = Parsers.or(INT, INT2);
+    static final Parser<Declaration> INDEX_SET = Parsers.or(INT, INT2);
 
     /**
      * Scanner for array of smth, like "array [int] of bool".
      * Creat a {@link DArray} object
      */
-    static final  Parser<DArray> ARRAY_OF =
+    static final Parser<DArray> ARRAY_OF =
             Mapper.curry(DArray.class).sequence(
                     TerminalParser.phrase("array ["),
                     INDEX_SET.sepBy(TerminalParser.term(",")),
@@ -244,7 +244,7 @@ public final class FZNParser {
      * See FZN specifications for more informations.
      * Create {@link Declaration} object
      */
-    static final  Parser<Declaration> TYPE =
+    static final Parser<Declaration> TYPE =
             Parsers.or(PRIMITIVES, SET_OF_INT, ARRAY_OF);
 
     /**
@@ -258,7 +258,7 @@ public final class FZNParser {
      * Scanner for predicate parameters.
      * Create a {@link PredParam} object.
      */
-    static final  Parser<PredParam> PRED_PARAM =
+    static final Parser<PredParam> PRED_PARAM =
             Mapper.curry(PredParam.class).sequence(TYPE, TerminalParser.term(":"), TerminalParser.IDENTIFIER);
 
 
@@ -266,7 +266,7 @@ public final class FZNParser {
      * Scanner for predicate declaration
      * Create a {@link parser.flatzinc.ast.Predicate} object
      */
-    static final  Parser<Predicate> PRED_DECL =
+    static final Parser<Predicate> PRED_DECL =
             Mapper.curry(Predicate.class).sequence(TerminalParser.term("predicate"), TerminalParser.IDENTIFIER, list(PRED_PARAM), TerminalParser.term(";"));
 
     /**
@@ -383,5 +383,9 @@ public final class FZNParser {
      */
     public void loadInstance(File file) {
         this.instance = readFileAsString(file);
+    }
+
+    public void loadInstance(String instance) {
+        this.instance = instance;
     }
 }

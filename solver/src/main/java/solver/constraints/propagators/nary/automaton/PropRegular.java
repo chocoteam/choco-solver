@@ -27,11 +27,8 @@
 package solver.constraints.propagators.nary.automaton;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.iterators.DisposableIntIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.memory.structure.StoredIndexedBipartiteSet;
-import gnu.trove.stack.TIntStack;
-import gnu.trove.stack.array.TIntArrayStack;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.automata.FA.IAutomaton;
@@ -42,6 +39,7 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 
 /**
@@ -54,20 +52,27 @@ public class PropRegular extends Propagator<IntVar> {
 
     final StoredDirectedMultiGraph graph;
     final IAutomaton automaton;
-    final TIntStack temp = new TIntArrayStack();
+    static int num;
+    int _num;
 
     protected final RemProc rem_proc;
     protected final IIntDeltaMonitor[] idms;
 
     public PropRegular(IntVar[] vars, IAutomaton automaton, StoredDirectedMultiGraph graph, Solver solver, Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(vars, solver, intVarPropagatorConstraint, PropagatorPriority.LINEAR, false);
+        _num = num++;
         this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++){
+        for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
         this.graph = graph;
+    }
+
+    @Override
+    public int getPropagationConditions() {
+        return EventType.FULL_PROPAGATION.mask + EventType.CUSTOM_PROPAGATION.mask;
     }
 
     @Override
@@ -77,6 +82,11 @@ public class PropRegular extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        if ((EventType.FULL_PROPAGATION.mask & evtmask) != 0) {
+            for (int i = 0; i < vars.length; i++) {
+                graph.updateSupports(i, vars[i], this);
+            }
+        }
         int left, right;
         for (int i = 0; i < vars.length; i++) {
             left = right = Integer.MIN_VALUE;
@@ -93,9 +103,9 @@ public class PropRegular extends Propagator<IntVar> {
             }
             vars[i].removeInterval(left, right, this);
         }
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
@@ -138,24 +148,22 @@ public class PropRegular extends Propagator<IntVar> {
         @Override
         public void execute(int i) throws ContradictionException {
             StoredIndexedBipartiteSet sup = p.graph.getSupport(idxVar, i);
-            if (sup != null) {
-                DisposableIntIterator it = sup.getIterator();
-                while (it.hasNext()) {
-                    int arcId = it.next();
-                    p.temp.push(arcId);
-                }
-                it.dispose();
-
-                while (p.temp.size() > 0) {
-                    int arcId = p.temp.pop();
-                    try {
-                        p.graph.removeArc(arcId, this.p);
-                    } catch (ContradictionException e) {
-                        p.temp.clear();
-                        throw e;
-                    }
-                }
-            }
+            p.graph.clearSupports(sup, p);
         }
     }
+
+    @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(32);
+            sb.append("Regular@").append(_num).append("(");
+            for (int i = 0; i < vars.length; i++) {
+                if (i > 0) sb.append(", ");
+                Variable var = vars[i];
+                sb.append(var.getName());
+            }
+            sb.append(")");
+    //        sb.append(propagators[0].toString());
+            return sb.toString();
+        }
+
 }
