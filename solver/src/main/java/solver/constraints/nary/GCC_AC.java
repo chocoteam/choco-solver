@@ -38,7 +38,8 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
-import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_Cards;
+import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_Cards_AC;
+import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_Cards_Fast;
 import solver.constraints.propagators.nary.globalcardinality.PropGCC_AC_LowUp;
 import solver.variables.IntVar;
 
@@ -58,14 +59,35 @@ public class GCC_AC extends Constraint<IntVar,Propagator<IntVar>>{
 	 * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
 	 * Does not run incrementally
 	 *
-	 * @param vars
-	 * @param value
-	 * @param cards
+	 * By default, and for efficiency reason, does not perform AC over cardinality variables
+	 *
+	 * @param vars restricted variables
+	 * @param value values that correspond to cardinality restrictions
+	 * @param cards cardinality variables
 	 * @param solver
 	 */
 	public GCC_AC(IntVar[] vars, int[] value, IntVar[] cards, Solver solver) {
+		this(vars,value,cards,true,solver);
+	}
+
+	/**
+	 * Global Cardinality Constraint (GCC) for integer variables
+	 * foreach i, |{v = value[i] | for any v in vars}|=cards[i]
+	 * Does not run incrementally
+	 *
+	 * @param vars restricted variables
+	 * @param value values that correspond to cardinality restrictions
+	 * @param cards cardinality variables
+	 * @param AC_on_Card usually faster if false
+	 * @param solver
+	 */
+	public GCC_AC(IntVar[] vars, int[] value, IntVar[] cards, boolean AC_on_Card, Solver solver) {
 		super(ArrayUtils.append(vars,cards), solver);
-		addPropagators(new PropGCC_AC_Cards(vars,value,cards,this,solver));
+		if(AC_on_Card){
+			addPropagators(new PropGCC_AC_Cards_AC(vars,value,cards,this,solver));
+		}else{
+			addPropagators(new PropGCC_AC_Cards_Fast(vars, value, cards, this, solver));
+		}
 	}
 
 	/**
@@ -73,10 +95,10 @@ public class GCC_AC extends Constraint<IntVar,Propagator<IntVar>>{
 	 * foreach i, low[i]<=|{v = value[i] | for any v in vars}|<=up[i]
 	 * Runs incrementally
 	 *
-	 * @param vars
-	 * @param value
-	 * @param low
-	 * @param up
+	 * @param vars restricted variables
+	 * @param value values that correspond to cardinality restrictions
+	 * @param low minimum number of occurence of values
+	 * @param up maximum number of occurence of values
 	 * @param solver
 	 */
 	public GCC_AC(IntVar[] vars, int[] value, int[] low, int[] up, Solver solver) {

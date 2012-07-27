@@ -40,8 +40,10 @@ import solver.propagation.generator.Sort;
 import solver.propagation.generator.SortDyn;
 import solver.propagation.generator.sorter.Increasing;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
+import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.VariableFactory;
 
 import java.util.Arrays;
@@ -136,15 +138,25 @@ public class CarSequencing extends AbstractProblem {
 
 	@Override
 	public void configureSearch() {
-		solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
+		solver.set(StrategyFactory.inputOrderMinVal(cars, solver.getEnvironment()));
+//		solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
+		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
+			int c = 0;
+			public void afterOpenNode() {
+				c++;
+				if(c%100==0){
+					System.out.println("tree search nodes : "+c);
+				}
+    }
+		});
 	}
 
 	@Override
 	public void configureEngine() {
-//        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
-//        solver.set(propagationEngine.set(new Sort(
-//                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(propagationEngine, solver.getVars())),
-//                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs())))));
+        IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+        solver.set(propagationEngine.set(new Sort(
+                    new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(propagationEngine, solver.getVars())),
+                    new Sort(new Increasing(EvtRecEvaluators.MaxArityC), new PCoarse(propagationEngine, solver.getCstrs())))));
 	}
 
 	@Override
@@ -154,12 +166,19 @@ public class CarSequencing extends AbstractProblem {
 
 	@Override
 	public void prettyOut() {
-		LoggerFactory.getLogger("bench").info("Car sequencing : {}", data.name());
-		LoggerFactory.getLogger("bench").info(data.source());
-		LoggerFactory.getLogger("bench").info("\nA valid sequence for this set of cars is:");
-		for (int i = 0; i < cars.length; i++) {
-			int k = cars[i].getValue();
-			LoggerFactory.getLogger("bench").info(String.format("%d\t %s", k, Arrays.toString(matrix[k])));
+//		LoggerFactory.getLogger("bench").info("Car sequencing : {}", data.name());
+//		LoggerFactory.getLogger("bench").info(data.source());
+//		LoggerFactory.getLogger("bench").info("\nA valid sequence for this set of cars is:");
+//		for (int i = 0; i < cars.length; i++) {
+//			int k = cars[i].getValue();
+//			LoggerFactory.getLogger("bench").info(String.format("%d\t %s", k, Arrays.toString(matrix[k])));
+//		}
+		Variable[] vars = solver.getVars();
+		for(Variable v:vars){
+			if(!v.instantiated()){
+				System.out.println(v);
+				throw new UnsupportedOperationException();
+			}
 		}
 	}
 
