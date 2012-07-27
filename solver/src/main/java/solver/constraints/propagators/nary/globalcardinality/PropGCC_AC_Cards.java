@@ -65,7 +65,6 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	private int n, n2;
 	private DirectedGraph digraph;
-	private int[] matching;
 	private int[] nodeSCC;
 	//	private BitSet free;
 	private StrongConnectivityFinder SCCfinder;
@@ -117,7 +116,6 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 		}
 		n2 = idx;
 		fifo = new int[n2];
-		matching = new int[n2];
 		digraph = new DirectedGraph(n2 + 1, GraphType.MATRIX);
 		father = new int[n2];
 		in = new BitSet(n2);
@@ -216,12 +214,6 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 			while(flow[i]<lb[i]){
 				useValue(i);
 			}
-		}
-		int p;
-		for (int i = 0; i < n; i++) {
-			p = digraph.getPredecessorsOf(i).getFirstElement();
-			matching[p] = i;
-			matching[i] = p;
 		}
 	}
 
@@ -337,7 +329,7 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
 					j = map.get(k);
 					if (nodeSCC[i] != nodeSCC[j]) {
-						if (matching[i] == j && matching[j] == i) {
+						if (digraph.arcExists(j,i)) {
 							v.instantiateTo(k,this);
 						} else {
 							v.removeValue(k, this);
@@ -403,7 +395,8 @@ public class PropGCC_AC_Cards extends Propagator<IntVar> {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-		forcePropagate(EventType.CUSTOM_PROPAGATION);
+//		forcePropagate(EventType.CUSTOM_PROPAGATION);
+		propagate(0);
 	}
 
 	//***********************************************************************************

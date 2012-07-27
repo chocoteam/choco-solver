@@ -70,7 +70,6 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 
 	private int n, n2;
 	private DirectedGraph digraph;
-	private int[] matching;
 	private int[] nodeSCC;
 	//	private BitSet free;
 	private UnaryIntProcedure remProc;
@@ -128,7 +127,6 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 		}
 		n2 = idx;
 		fifo = new int[n2];
-		matching = new int[n2];
 		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.MATRIX);
 		remProc = new DirectedRemProc();
 		father = new int[n2];
@@ -228,12 +226,6 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 			while(flow[i].get()<lb[i]){
 				useValue(i);
 			}
-		}
-		int p;
-		for (int i = 0; i < n; i++) {
-			p = digraph.getPredecessorsOf(i).getFirstElement();
-			matching[p] = i;
-			matching[i] = p;
 		}
 	}
 
@@ -350,7 +342,7 @@ public class PropGCC_AC_LowUp extends Propagator<IntVar> {
 				for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
 					j = map.get(k);
 					if (nodeSCC[i] != nodeSCC[j]) {
-						if (matching[i] == j && matching[j] == i) {
+						if (digraph.arcExists(j,i)) {
 							v.instantiateTo(k,this);
 						} else {
 							v.removeValue(k, this);

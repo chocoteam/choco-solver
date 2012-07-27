@@ -29,6 +29,7 @@ package samples;
 import org.kohsuke.args4j.Option;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
+import solver.constraints.nary.GCC_AC;
 import solver.constraints.nary.GlobalCardinality;
 import solver.constraints.nary.Sum;
 import solver.propagation.IPropagationEngine;
@@ -105,10 +106,12 @@ public class CarSequencing extends AbstractProblem {
                     atMost[i] = VariableFactory.bounded("atmost_" + optNum + "_" + seqStart + "_" + nbConf, 0, optfreq[optNum][0], solver);
                 }
 
-                solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
+//				solver.post(GlobalCardinality.make(carSequence, options[optNum], atMost, solver));
+				solver.post(new GCC_AC(carSequence, options[optNum], atMost, solver));
 
                 IntVar[] atLeast = VariableFactory.boundedArray("atleast_" + optNum + "_" + seqStart, idleConfs[optNum].length, 0, max, solver);
-                solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
+				solver.post(GlobalCardinality.make(carSequence, idleConfs[optNum], atLeast, solver));
+//				solver.post(new GCC_AC(carSequence, idleConfs[optNum], atLeast, solver));
                 // all others configurations may be chosen
                 solver.post(Sum.geq(atLeast, optfreq[optNum][1] - optfreq[optNum][0], solver));
             }
@@ -119,7 +122,8 @@ public class CarSequencing extends AbstractProblem {
             expArray[i] = VariableFactory.enumerated("var_" + i, 0, demands[i], solver);
             values[i] = i;
         }
-        solver.post(GlobalCardinality.make(cars, values, expArray, solver));
+		solver.post(GlobalCardinality.make(cars, values, expArray, solver));
+//		solver.post(new GCC_AC(cars, values, expArray, solver));
     }
 
     private static IntVar[] extractor(IntVar[] cars, int initialNumber, int amount) {
@@ -133,7 +137,8 @@ public class CarSequencing extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
+        solver.set(StrategyFactory.inputOrderMinVal(cars, solver.getEnvironment()));
+//        solver.set(StrategyFactory.minDomMinVal(cars, solver.getEnvironment()));
     }
 
     @Override
