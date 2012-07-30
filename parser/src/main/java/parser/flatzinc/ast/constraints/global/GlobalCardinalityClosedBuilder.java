@@ -33,6 +33,8 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.GCC_AC;
+import solver.constraints.nary.GlobalCardinality;
+import solver.constraints.unary.Member;
 import solver.variables.IntVar;
 
 import java.util.List;
@@ -40,17 +42,26 @@ import java.util.List;
 /**
  * <br/>
  *
- * @author Jean-Guillaume Fages
- * @since 26/07/12
+ * @author Charles Prud'homme
+ * @since 26/01/11
  */
-public class GlobalCardinalityLowUpBuilder implements IBuilder {
+public class GlobalCardinalityClosedBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] vars = exps.get(0).toIntVarArray(solver);
         int[] values = exps.get(1).toIntArray();
-        int[] low = exps.get(2).toIntArray();
-        int[] up = exps.get(3).toIntArray();
-        return new GCC_AC(vars, values, low, up, solver);
+        IntVar[] cards = exps.get(2).toIntVarArray(solver);
+
+        for(int i = 0; i< vars.length; i++){
+            solver.post(new Member(vars[i], values, solver));
+        }
+        // si nbVAL > 2*NBVAR => BC
+        boolean ac = values.length <= 2 * vars.length;
+        if (ac) {
+            return new GCC_AC(vars, values, cards, solver);
+        } else {
+            return GlobalCardinality.make(vars, values, cards, solver);
+        }
     }
 }
