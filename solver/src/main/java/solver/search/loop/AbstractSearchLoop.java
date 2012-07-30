@@ -342,7 +342,13 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     public final void interrupt() {
         nextState = RESUME;
         alive = false;
+        smList.afterInterrupt();
     }
+
+    public final void forceAlive(boolean bvalue) {
+        alive = bvalue;
+    }
+
 
     /**
      * Sets the following action in the search to be a restart instruction.

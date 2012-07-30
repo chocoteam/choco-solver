@@ -301,7 +301,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void unlink(Propagator propagator) {
+    public void unlink(Propagator propagator, int idx) {
     }
 
     @Override

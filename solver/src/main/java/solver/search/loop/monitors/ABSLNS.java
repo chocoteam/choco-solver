@@ -26,6 +26,8 @@
  */
 package solver.search.loop.monitors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import solver.Cause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -44,6 +46,7 @@ import java.util.Random;
  */
 public class ABSLNS extends Abstract_LNS_SearchMonitor {
 
+    public static final Logger logger = LoggerFactory.getLogger("solver");
 
     private final int n;
     private final IntVar[] vars;
@@ -75,7 +78,11 @@ public class ABSLNS extends Abstract_LNS_SearchMonitor {
     @Override
     protected void restrictLess() {
         nbFixedVars /= 2;
-        System.out.println("nbFixedVars " + nbFixedVars);
+//        System.out.println("nbFixedVars " + nbFixedVars);
+        if (logger.isInfoEnabled()) {
+            solver.getMeasures().updateTimeCount();
+            logger.info(">> nbFixedVars {}", nbFixedVars);
+        }
     }
 
     @Override

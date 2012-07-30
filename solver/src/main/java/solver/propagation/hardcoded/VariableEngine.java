@@ -28,6 +28,7 @@ package solver.propagation.hardcoded;
 
 import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
+import org.slf4j.LoggerFactory;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -36,6 +37,7 @@ import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.IPropagationStrategy;
 import solver.propagation.queues.CircularQueue;
+import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -133,12 +135,15 @@ public class VariableEngine implements IPropagationEngine {
                 Propagator[] vProps = lastVar.getPropagators();
                 int[] idxVinP = lastVar.getPIndices();
                 for (int p = 0; p < vProps.length; p++) {
-                    Propagator prop = vProps[p];
+                    lastProp = vProps[p];
                     mask = masks_f[id][p];
                     if (mask > 0) {
+                        if (IEventRecorder.DEBUG_PROPAG) {
+                            LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar + "::" + lastProp.toString() + " >>");
+                        }
                         masks_f[id][p] = 0;
-                        prop.fineERcalls++;
-                        prop.propagate(null, idxVinP[p], mask);
+                        lastProp.fineERcalls++;
+                        lastProp.propagate(null, idxVinP[p], mask);
                     }
                 }
             }
@@ -151,6 +156,9 @@ public class VariableEngine implements IPropagationEngine {
                 masks_c[id] = 0;
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
+                }
+                if (IEventRecorder.DEBUG_PROPAG) {
+                    LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
                 lastProp.coarseERcalls++;
                 lastProp.propagate(mask);
@@ -188,8 +196,20 @@ public class VariableEngine implements IPropagationEngine {
         }
     }
 
+    public void check() {
+        for (int i = 0; i < masks_f.length; i++) {
+            if (masks_f[i] != null)
+                for (int j = 0; j < masks_f[i].length; j++) {
+                    assert masks_f[i][j] == 0 : "MASK NOT CLEARED " + variables[0].getSolver().getMeasures().toOneShortLineString();
+                }
+        }
+    }
+
     @Override
     public void onVariableUpdate(Variable variable, EventType type, ICause cause) throws ContradictionException {
+        if (Variable.DEBUG_EVENT) {
+            LoggerFactory.getLogger("solver").info("\t>> {} {} => {}", new Object[]{variable, type, cause});
+        }
         int vid = variable.getId();
         boolean _schedule = false;
         Propagator[] vProps = variable.getPropagators();
@@ -197,6 +217,8 @@ public class VariableEngine implements IPropagationEngine {
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
+                if (IEventRecorder.DEBUG_PROPAG)
+                    LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     masks_f[vid][p] |= type.strengthened_mask;
                     _schedule = true;
@@ -214,6 +236,9 @@ public class VariableEngine implements IPropagationEngine {
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int pid = propagator.getId();
         if (!schedule[pid]) {
+            if (IEventRecorder.DEBUG_PROPAG) {
+                LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
+            }
             pro_queue.addLast(propagator);
             schedule[pid] = true;
         }
@@ -232,13 +257,17 @@ public class VariableEngine implements IPropagationEngine {
 
     @Override
     public void desactivatePropagator(Propagator propagator) {
-        int pid = propagator.getId();
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            if(vindices[i]>-1)// constant has a negative index
-                masks_f[variables[i].getId()][vindices[i]] = 0;
+            if (vindices[i] > -1) {// constant has a negative index
+                assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
+                int vid = variables[i].getId();
+                assert vindices[i] < masks_f[vid].length;
+                masks_f[vid][vindices[i]] = 0;
+            }
         }
+        int pid = propagator.getId();
         if (schedule[pid]) {
             schedule[pid] = false;
             masks_c[pid] = 0;
@@ -255,7 +284,7 @@ public class VariableEngine implements IPropagationEngine {
 
     @Override
     public boolean initialized() {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override

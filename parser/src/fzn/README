@@ -1,0 +1,4 @@
+
+1. Untar the choco.tar into the directory <dir>
+2   a. Call fzn_choco with the option "-c" set to <dir>
+    b. OR directly override the variable CHOCO_PATH to <dir> in the fzn_choco script

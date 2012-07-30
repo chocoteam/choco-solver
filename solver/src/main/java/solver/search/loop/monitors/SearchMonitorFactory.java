@@ -58,6 +58,11 @@ public enum SearchMonitorFactory {
         }
     }
 
+    public static void logWithRank(Solver solver, int s, int e) {
+        AbstractSearchLoop sl = solver.getSearchLoop();
+        sl.plugSearchMonitor(new LogChoicesWithRank(solver, s,  e));
+    }
+
     /**
      * Print one-line statistics every XX ms
      *

@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
+import solver.propagation.hardcoded.ConstraintEngine;
+import solver.propagation.hardcoded.VariableEngine;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,10 +51,19 @@ public class ParseAndSolve {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
-    @Option(name = "-f", usage = "Flatzinc file.", required = true)
+    @Option(name = "-f", aliases = {"--fzn-inst"} ,usage = "Flatzinc instance file.", required = true)
     private static String instance;
 
-    @Option(name = "-tl", usage = "Time limit.", required = false)
+    @Option(name = "-a", aliases = {"--all"},usage = "Search for all solutions.", required = false)
+    private static boolean all = false;
+
+    @Option(name = "-i", aliases = {"--ignore-search"},usage = "Ignore search strategy.", required = false)
+    private static boolean free = false;
+
+    @Option(name = "-p", aliases = {"--nb-cores"},usage = "Number of cores available for parallel search", required = false)
+    private static int nb_cores = 1;
+
+    @Option(name = "-tl", aliases = {"--time-limit"},usage = "Time limit.", required = false)
     private static long tl = -1;
 
 
@@ -84,17 +95,50 @@ public class ParseAndSolve {
         parser.parse();
         LOGGER.info("% solve instance...");
         final Solver solver = parser.solver;
+//        System.out.printf("%s\n", solver.toString());
+        if(solver.getNbCstrs()> solver.getNbVars()){
+            solver.set(new VariableEngine(solver));
+        }else{
+            solver.set(new ConstraintEngine(solver));
+        }
+        /*int p = 0;
+        switch (p) {
+            case 0:
+                solver.set(new ConstraintEngine(solver));
+                break;
+            case 1:
+                solver.set(new VariableEngine(solver));
+                break;
+            case 2:
+                solver.set(new SevenQueuesConstraintEngine(solver));
+                break;
+            case 3:
+                solver.set(new ABConstraintEngine(solver));
+                break;
+            case 4:
+                IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
+                PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
+                solver.set(pe);
+                break;
+        }*/
+//        SearchMonitorFactory.logWithRank(solver, 212, 220);
+//        solver.getSearchLoop().getLimitsBox().setNodeLimit(10);
+//        SearchMonitorFactory.log(solver, true, true);
 //        SearchMonitorFactory.statEveryXXms(solver, 1000);
         if (tl > -1) {
             solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
         }
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                LOGGER.info("% User interruption...");
-                parser.layout.beforeClose();
-            }
-        });
+//        final boolean[] stop = {true};
+//        Runtime.getRuntime().addShutdownHook(new Thread() {
+//            public void run() {
+//                if (stop[0]) {
+//                    LOGGER.info("% User interruption...");
+//                    parser.layout.beforeClose();
+//                }
+//            }
+//        });
         solver.solve();
+//        stop[0] = false;
     }
 
 }

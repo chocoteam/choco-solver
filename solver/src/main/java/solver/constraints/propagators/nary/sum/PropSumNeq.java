@@ -101,7 +101,7 @@ public class PropSumNeq extends Propagator<IntVar> {
     private void filter() throws ContradictionException {
         if (nb_instantiated.get() >= vars.length - 1) {
             int index = -1;
-            int sum = b;
+            int sum = -b;
             for (int i = 0; i < vars.length; i++) {
                 if (vars[i].instantiated()) {
                     sum += vars[i].getValue();

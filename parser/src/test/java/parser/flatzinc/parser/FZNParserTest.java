@@ -250,7 +250,7 @@ public class FZNParserTest {
 
     @Test
     public void testAnnotations2(){
-        Object o = TerminalParser.parse(fzn.ANNOTATIONS, "::seq_search([ int_search([a],input_order,indomain_min, complete)])");
+        Object o = TerminalParser.parse(fzn.ANNOTATIONS, "::seq_search([int_search([a],input_order,indomain_min,complete)])");
         Assert.assertTrue(o instanceof List);
         Assert.assertEquals(1, ((List) o).size());
     }

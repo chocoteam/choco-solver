@@ -5,12 +5,12 @@
 %-----------------------------------------------------------------------------%
 predicate inverse(array[int] of var int: f,
                   array[int] of var int: invf) =
-    inverseChanneling(f, invf);
+    inverseChoco(f, invf);
 
 % The implementation of the constraint in the choco solver.
 % This should not be called directly, instead the definition above should
 % be used.
-predicate inverseChanneling(array[int] of var int: f,
+predicate inverseChoco(array[int] of var int: f,
                   array[int] of var int: invf);
 
 %-----------------------------------------------------------------------------%

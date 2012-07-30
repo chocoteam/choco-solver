@@ -73,8 +73,8 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
 
     protected final String name;
 
-    protected Propagator[] propagators; // one propagator can appear more than one time
-    protected int[] pindices;    // but it indices must be different
+    protected Propagator[] propagators; // list of propagators of the variable
+    protected int[] pindices;    // index of the variable in the i^th propagator
     protected int pIdx;
 
     protected W[] views; // views to inform of domain modification
@@ -152,18 +152,26 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
         modificationEvents |= mask;
     }
 
-    public void unlink(Propagator propagator) {
-        // 1. find the propagator
-        int i = 0;
-        while (i < pIdx && propagators[i] != propagator) {
-            i++;
-        }
-        assert i < pIdx : "remove unknown propagator";
-
-        // 2. swap it with the last one
+    public void unlink(Propagator propagator, int idxInProp) {
+//        int i = 0;
+//        while (i < pIdx && propagators[i] != propagator) {
+//            i++;
+//        }
+//        assert idxInProp == i: "wrong index";
+//        assert i < pIdx : "remove unknown propagator";
+        assert idxInProp < pIdx : "remove unknown propagator";
+        // swap it with the last one
         pIdx--;
-        propagators[i] = propagators[pIdx];
-        pindices[i] = pindices[pIdx];
+        if (pIdx > idxInProp) {
+            // swap with the pidx^th propagator
+            propagators[idxInProp] = propagators[pIdx];
+            assert propagators[idxInProp].getVar(pindices[pIdx]).getId() == this.ID;
+            propagators[idxInProp].setVIndices(pindices[pIdx], idxInProp);
+            pindices[idxInProp] = pindices[pIdx];
+        }
+        propagators[pIdx] = null;
+        pindices[pIdx] = 0;
+
     }
 
     public Propagator[] getPropagators() {
@@ -234,7 +242,7 @@ public abstract class AbstractVariable<D extends IDelta, DM extends IDeltaMonito
     }
 
     public int nbConstraints() {
-        throw new UnsupportedOperationException();
+        return pIdx;
     }
 
     public Solver getSolver() {

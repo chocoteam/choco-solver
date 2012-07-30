@@ -49,7 +49,7 @@ public class PropBinAC2001 extends PropBinCSP {
     protected int offset0;
     protected int offset1;
 
-    protected PropBinAC2001(IntVar x, IntVar y, BinRelation relation, Solver solver,
+    public PropBinAC2001(IntVar x, IntVar y, BinRelation relation, Solver solver,
                             Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
         super(x, y, relation, solver, intVarPropagatorConstraint);
         offset0 = x.getLB();

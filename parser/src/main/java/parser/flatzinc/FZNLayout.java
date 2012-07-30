@@ -27,12 +27,17 @@
 
 package parser.flatzinc;
 
+import choco.kernel.ESat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parser.flatzinc.ast.Exit;
+import parser.flatzinc.ast.declaration.DArray;
+import parser.flatzinc.ast.declaration.Declaration;
 import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.ESetBounds;
 import parser.flatzinc.ast.expression.ESetList;
 import parser.flatzinc.ast.expression.Expression;
+import solver.constraints.Constraint;
 import solver.objective.NoObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
 import solver.search.loop.monitors.ISearchMonitor;
@@ -53,48 +58,92 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
     List<String> output_names;
+    List<Declaration.DType> output_types;
     List<IntVar> output_vars;
 
     List<String> output_arrays_names;
+    List<Declaration.DType> output_arrays_types;
     List<IntVar[]> output_arrays_vars;
 
     StringBuilder stringBuilder = new StringBuilder();
 
     AbstractSearchLoop searchLoop;
 
+    boolean wrongSolution;
+    int nbSolution;
+
     public FZNLayout() {
         super();
         output_vars = new ArrayList<IntVar>();
         output_names = new ArrayList<String>();
+        output_types = new ArrayList<Declaration.DType>();
         output_arrays_names = new ArrayList<String>();
         output_arrays_vars = new ArrayList<IntVar[]>();
+        output_arrays_types = new ArrayList<Declaration.DType>();
     }
 
     @Override
     public void onSolution() {
-        if (LOGGER.isInfoEnabled()) {
-            for (int i = 0; i < output_vars.size(); i++) {
-                LOGGER.info("{} = {};", output_names.get(i), output_vars.get(i).getValue());
-            }
-            for (int i = 0; i < output_arrays_vars.size(); i++) {
-                String name = output_arrays_names.get(i);
-                IntVar[] ivars = output_arrays_vars.get(i);
-                stringBuilder.append(ivars[0].getValue());
-                for (int j = 1; j < ivars.length; j++) {
-                    stringBuilder.append(", ").append(ivars[j].getValue());
+        if (check()) {
+            wrongSolution = false;
+            nbSolution++;
+            if (LOGGER.isInfoEnabled()) {
+                for (int i = 0; i < output_vars.size(); i++) {
+                    LOGGER.info("{} = {};", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
+
                 }
-                LOGGER.info(name, stringBuilder.toString());
-                stringBuilder.setLength(0);
+                for (int i = 0; i < output_arrays_vars.size(); i++) {
+                    String name = output_arrays_names.get(i);
+                    IntVar[] ivars = output_arrays_vars.get(i);
+                    Declaration.DType type = output_arrays_types.get(i);
+                    stringBuilder.append(value(ivars[0], type));
+                    for (int j = 1; j < ivars.length; j++) {
+                        stringBuilder.append(", ").append(value(ivars[j], type));
+                    }
+                    LOGGER.info(name, stringBuilder.toString());
+                    stringBuilder.setLength(0);
+                }
+                LOGGER.info("----------");
             }
-            LOGGER.info("----------");
+        } else {
+            wrongSolution = true;
+            LOGGER.info("% Wrong solution found!");
+            LOGGER.info("% Waiting to be killed !");
+
         }
     }
 
+    private boolean check() {
+        Constraint[] cstrs = searchLoop.getSolver().getCstrs();
+        for (int c = 0; c < cstrs.length; c++) {
+            ESat satC = cstrs[c].isSatisfied();
+            if (!ESat.TRUE.equals(satC)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private String value(IntVar var, Declaration.DType type) {
+        switch (type) {
+            case BOOL:
+                return var.getValue() == 1 ? "true" : "false";
+            case INT1:
+            case INT2:
+            case INTN:
+                return Integer.toString(var.getValue());
+            default:
+                Exit.log();
+        }
+        return "";
+    }
+
+
     @Override
-    public void beforeClose () {
+    public void beforeClose() {
         if (LOGGER.isInfoEnabled()) {
             if (searchLoop.getMeasures().getSolutionCount() == 0) {
-                if (searchLoop.getLimitsBox().isReached()) {
+                if ((wrongSolution && nbSolution == 0) || searchLoop.getLimitsBox().isReached()) {
                     LOGGER.info("=====UNKNOWN=====");
                 } else {
                     LOGGER.info("=====UNSATISFIABLE=====");
@@ -102,7 +151,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
             } else {
                 if (searchLoop.getLimitsBox().isReached()
                         && !(searchLoop.getObjectivemanager() instanceof NoObjectiveManager)) {
-                    LOGGER.info("=====UNBOUDNED=====");
+                    LOGGER.info("=====UNBOUNDED=====");
                 } else {
                     LOGGER.info("==========");
                 }
@@ -126,12 +175,13 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
         }
     }
 
-    public void addOutputVar(String name, IntVar variable) {
+    public void addOutputVar(String name, IntVar variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
+        output_types.add(type.typeOf);
     }
 
-    public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices) {
+    public void addOutputArrays(String name, IntVar[] variables, List<Expression> indices, Declaration type) {
         EArray array = (EArray) indices.get(0);
         stringBuilder.append(name).append(" = array").append(array.what.size()).append("d(");
 
@@ -144,6 +194,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
 
         output_arrays_names.add(stringBuilder.toString());
         output_arrays_vars.add(variables.clone());
+        output_arrays_types.add(((DArray) type).getWhat().typeOf);
         stringBuilder.setLength(0);
     }
 

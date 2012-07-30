@@ -94,10 +94,7 @@ public class PropReified extends Propagator<Variable> {
         }
         for (int i = 0; i < left.length; i++) {
             // disconnect propagator from variable
-            for (int j = 0; j < left[i].getNbVars(); j++) {
-                left[i].getVar(j).unlink(left[i]);
-
-            }
+            left[i].unlink();
             try {
                 state.setShort(left[i], ACTIVE);
             } catch (IllegalAccessException e) {
@@ -106,9 +103,7 @@ public class PropReified extends Propagator<Variable> {
         }
         for (int i = 0; i < right.length; i++) {
             // disconnect propagator from variable
-            for (int j = 0; j < right[i].getNbVars(); j++) {
-                right[i].getVar(j).unlink(right[i]);
-            }
+            right[i].unlink();
             try {
                 state.setShort(right[i], ACTIVE);
             } catch (IllegalAccessException e) {
