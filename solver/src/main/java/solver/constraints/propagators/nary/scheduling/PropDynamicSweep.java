@@ -21,8 +21,8 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 	private DynamicSweepMin sweepMin;
 	private DynamicSweepMax sweepMax;
 	private Solver s;
-	private int greedyMode;
-	private int aggregateMode;
+	private final int greedyMode;
+	private final int aggregateMode;
 	
 	private int[] mapping;
 	
@@ -31,7 +31,7 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 	int nbEventsToAdd;
 	
 	
-	public PropDynamicSweep(int nbTasks, int limit, IntVar[] vars, Solver solver, Constraint<IntVar,Propagator<IntVar>> cstr, int greedyMode, int aggregatedProfile) {
+	public PropDynamicSweep(IntVar[] vars, Solver solver, Constraint<IntVar,Propagator<IntVar>> cstr, int greedyMode, int aggregatedProfile) {
 		super(vars,solver,cstr,PropagatorPriority.QUADRATIC,true);
 		this.s = solver;
 		this.greedyMode = greedyMode;
@@ -76,8 +76,7 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 			for(int is=0, ie=2*cu.nbTasks(), ih=3*cu.nbTasks();is<cu.nbTasks();is++,ie++,ih++) {
 				if ( i >= vars[is].getValue() && i < vars[ie].getValue() ) sumHeight += vars[ih].getValue(); 
 			}
-			if (sumHeight > cu.limit()) { 
-				//System.out.println("sumHeight = "+sumHeight+" at "+i);
+			if (sumHeight > cu.limit()) {
 				return ESat.FALSE;
 			}
 		}
@@ -158,7 +157,6 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 	
 	public final void mainLoop() throws ContradictionException {	
 		int state = 0;
-		boolean allTasksAreInstantiated;
 		int[][] eventsToAdd;
 		boolean succeed = false;
 		boolean res, max;
@@ -172,12 +170,10 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 		
 		do {
 			for(int is=0;is<cu.nbTasks();is++) {
-				//vars[is].updateCompulsoryPart();
-				vars[is].notifyMonitors(null, null); // TODO equivalent a la ligne du dessus ???
+				vars[is].notifyMonitors(null, null);
 			}
 			// copy variable bounds to arrays
-			eventsToAdd = copyAndAggregate(ls, us, ld, le, ue, h); // the number AP events is stored in nbEventsToAdd
-	//for(int i=0;i<ls.length;i++) System.out.println("ls["+i+"]="+ls[i]);
+			eventsToAdd = copyAndAggregate(ls, us, ld, le, ue, h); // the number of AP events is stored in nbEventsToAdd
 			
 			// ===== GREEDY MODE =====
 			if (greedyMode!=0 && state==0) { // Greedy mode is ON and it is the first loop
@@ -189,11 +185,11 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 				} else {
 					assert(greedy.allTasksAreFixed()); // ASSERT
 					for(int is=0;is<this.nbTasksInFilteringAlgo;is++) { // update variables and stop !
-						vars[mapping[is]].updateLowerBound(greedy.ls(is), this); //updateEST(greedy.ls(i));
-						vars[mapping[is]].updateUpperBound(greedy.us(is), this); //updateLST(greedy.us(i));
-						vars[mapping[is]+cu.nbTasks()].updateLowerBound(greedy.ld(is), this); //updateMinDuration(greedy.ld(i));
-						vars[mapping[is]+2*cu.nbTasks()].updateLowerBound(greedy.le(is), this); //updateECT(greedy.le(i));
-						vars[mapping[is]+2*cu.nbTasks()].updateUpperBound(greedy.ue(is), this); //updateLCT(greedy.ue(i));
+						vars[mapping[is]].updateLowerBound(greedy.ls(is), this);
+						vars[mapping[is]].updateUpperBound(greedy.us(is), this);
+						vars[mapping[is]+cu.nbTasks()].updateLowerBound(greedy.ld(is), this);
+						vars[mapping[is]+2*cu.nbTasks()].updateLowerBound(greedy.le(is), this);
+						vars[mapping[is]+2*cu.nbTasks()].updateUpperBound(greedy.ue(is), this);
 					}
 					return;
 				}
@@ -206,7 +202,7 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 				res = sweepMax.sweepMax(eventsToAdd, nbEventsToAdd);
 				max = false;
 				
-				do {
+				while (res) {
 					if (max) {
 						if (sweepMin.isSweepMaxNeeded()) { // check if sweep max should be run.
 							res = sweepMax.sweepMax(eventsToAdd, nbEventsToAdd);
@@ -218,14 +214,8 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 						res = sweepMin.sweepMin(eventsToAdd, nbEventsToAdd);
 					}
 					max = !max;
-				} while (res);
+				}
 			}
-			
-			// DBG
-			//for(int is=0;is<cu.nbTasks();is++) {
-			//	System.out.println("t0: ["+ls[is]+".."+us[is]+"] + ["+ld[is]+".."+ld[is]+"] -> ["+le[is]+".."+ue[is]+"]");
-			//}
-			// DBG
 			
 			state = 0;
 			// update variables.
@@ -242,7 +232,6 @@ public class PropDynamicSweep extends Propagator<IntVar> {
 				state = state-(vars[mapping[is]].getUB()-vars[mapping[is]].getLB())
 							 -(vars[mapping[is]+2*cu.nbTasks()].getUB()-vars[mapping[is]+2*cu.nbTasks()].getLB())
 							 -vars[mapping[is]+cu.nbTasks()].getLB();
-				//if (!vars[mapping[is]].isInstantiated()) allTasksAreInstantiated = false;
 			}
 		} while (state != 0);
 	}
