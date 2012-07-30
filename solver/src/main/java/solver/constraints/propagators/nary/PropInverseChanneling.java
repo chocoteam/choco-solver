@@ -68,7 +68,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         super(ArrayUtils.append(X, Y), solver, constraint, PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++){
-            idms[i] = this.vars[i].monitorDelta(this);
+            idms[i] = vars[i].hasEnumeratedDomain()?this.vars[i].monitorDelta(this):IIntDeltaMonitor.Default.NONE;
         }
         this.X = X;
         this.Y = Y;

@@ -26,9 +26,10 @@
  */
 package solver.variables;
 
-import choco.kernel.common.Indexable;
 import solver.ICause;
 import solver.exception.ContradictionException;
+
+import java.io.Serializable;
 
 /**
  * A monitor for Variable, to observe variable modification (for integer variable : value removals, bounds modification
@@ -38,7 +39,7 @@ import solver.exception.ContradictionException;
  * @author Charles Prud'homme
  * @since 14/11/11
  */
-public interface IVariableMonitor<V extends Variable> extends Indexable<V>{
+public interface IVariableMonitor<V extends Variable> extends Serializable{
 
     /**
      * Operations to execute after updating the domain variable

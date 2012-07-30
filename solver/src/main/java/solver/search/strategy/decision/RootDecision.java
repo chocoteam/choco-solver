@@ -39,7 +39,7 @@ import solver.explanations.Explanation;
  * @since 01/06/12
  */
 public enum RootDecision implements Decision{
-    ME;
+    ROOT;
 
     @Override
     public boolean hasNext() {

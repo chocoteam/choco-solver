@@ -48,8 +48,6 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     protected IHeap toPropagate;
     protected S lastPopped;
 
-    protected boolean init = false;
-
     @SuppressWarnings({"unchecked"})
     public SortDyn(IEvaluator<S> evaluator, Generator<S>... generators) {
         super(generators);
@@ -58,7 +56,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
             elements[e].setScheduler(this, e);
         }
 //        this.toPropagate = new BinaryTreeHeap(elements.length);
-        this.toPropagate = new MinHeap(elements.length);
+        this.toPropagate = new MinHeap(elements.length+1);
     }
 
 
@@ -157,6 +155,11 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
     public void update(S element) {
         int idx = element.getIndexInScheduler();
         toPropagate.update(evaluator.eval(element), idx);
+    }
+
+    @Override
+    public SortDyn duplicate() {
+        return new SortDyn(this.evaluator);
     }
     //-->
 }

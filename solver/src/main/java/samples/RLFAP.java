@@ -38,8 +38,10 @@ import solver.constraints.binary.DistanceXYC;
 import solver.constraints.nary.Count;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
-import solver.propagation.generator.*;
-import solver.propagation.generator.Queue;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.PVar;
+import solver.propagation.generator.Sort;
+import solver.propagation.generator.SortDyn;
 import solver.propagation.generator.sorter.evaluator.EvtRecEvaluators;
 import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -74,10 +76,10 @@ public class RLFAP extends AbstractProblem {
     private static String CTR = "ctr.txt";
 
     @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory.", required = false)
-    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen11";
+    String dir = "/Users/cprudhom/Downloads/FullRLFAP/CELAR/scen02";
 
     @Option(name = "-o", aliases = "--optimize", usage = "Minimize the number of allocated frequencies", required = false)
-    boolean opt = true;
+    boolean opt = false;
 
     int[][] _dom, _ctr;
     int[][] _var;
@@ -170,10 +172,12 @@ public class RLFAP extends AbstractProblem {
     public void configureSearch() {
 //        solver.set(StrategyFactory.minDomMinVal(vars, solver.getEnvironment()));
 //        solver.set(StrategyFactory.domddegMinDom(vars));
-        IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
         if (true) {
-            solver.set(StrategyFactory.domwdegMindom(allvars, 3));
+            solver.set(StrategyFactory.domwdegMindom(vars, seed));
+//            solver.set(new Assignment(vars, new DomOverWDegVS(vars, solver, seed),
+//                    new InDomainMin()));
         } else {
+            IntVar[] allvars = ArrayUtils.append(vars, cards, new IntVar[]{nb0});
             solver.set(StrategyFactory.ABSrandom(allvars, solver, 0.999d, 0.2d, 8, 1.1d, 1, seed));
         }
         SearchMonitorFactory.restart(solver, RestartFactory.luby(2, 2),
@@ -184,14 +188,14 @@ public class RLFAP extends AbstractProblem {
     public void configureEngine() {
         IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
         solver.set(pengine.set(new Sort(
-                new Queue(new PCoarse(pengine, solver.getCstrs())),
-                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars()))
+                new SortDyn(EvtRecEvaluators.MinDomSize, new PVar(pengine, solver.getVars())),
+                new solver.propagation.generator.Queue(new PCoarse(pengine, solver.getCstrs()))
         )));
     }
 
     @Override
     public void solve() {
-        SearchMonitorFactory.log(solver, true, false);
+        SearchMonitorFactory.limitNode(solver, 10000);
         if (opt)
             solver.findOptimalSolution(ResolutionPolicy.MAXIMIZE, nb0);
         else

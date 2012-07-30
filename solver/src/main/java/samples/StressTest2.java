@@ -30,7 +30,6 @@ import choco.kernel.common.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
 import solver.Solver;
 import solver.constraints.Arithmetic;
-import solver.constraints.ConstraintFactory;
 import solver.search.strategy.selectors.values.InDomainMin;
 import solver.search.strategy.selectors.variables.InputOrder;
 import solver.search.strategy.strategy.Assignment;
@@ -70,23 +69,23 @@ public class StressTest2 extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        y = VariableFactory.boundedArray("y", n, 0, k * n, solver);
-        x = VariableFactory.boundedArray("x", m, 0, k * n, solver);
+        y = VariableFactory.boundedArray("y", n+1, 0, k * n, solver);
+        x = VariableFactory.boundedArray("x", m+1, 0, k * n, solver);
 
-        for (int i = 0; i < n - 1; i++) {
-            solver.post(ConstraintFactory.leq(y[i], y[i + 1], solver));
+        for (int i = 2; i <= n; i++) {
+            solver.post(new Arithmetic(y[i - 1], "-", y[i], "<=", 0, solver));
         }
-        for (int i = 1; i < n; i++) {
-            solver.post(new Arithmetic(y[i], ">=", y[0], "+", -(n - i + 1), solver));
+        for (int i = 1; i <= n; i++) {
+            solver.post(new Arithmetic(y[0], "-", y[i], "<=", n - i + 1, solver));
         }
-        solver.post(ConstraintFactory.leq(y[n - 1], x[0], solver));
+        solver.post(new Arithmetic(y[n], "-", x[0], "<=", 0, solver));
 
-        for (int i = 0; i < m - 1; i++) {
-            for (int j = i + 1; j < m; j++) {
-                solver.post(ConstraintFactory.leq(x[i], x[j], solver));
+        for (int i = 0; i < m; i++) {
+            for (int j = i + 1; j <= m; j++) {
+                solver.post(new Arithmetic(x[i], "-", x[j], "<=", 0, solver));
             }
         }
-        solver.post(new Arithmetic(y[0], ">=", x[m - 1], "+", 2, solver));
+        solver.post(new Arithmetic(x[m], "-", y[0], "<=", -2, solver));
     }
 
     @Override

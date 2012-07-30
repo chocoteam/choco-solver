@@ -177,8 +177,8 @@ public class SorterFactory {
      * @param solver declaring solver
      * @return dom/wdeg sorter
      */
-    public static AbstractSorter<IntVar> domOverWDeg(Solver solver) {
-        DomOverWDeg dd = new DomOverWDeg(solver);
+    public static AbstractSorter<IntVar> domOverWDeg(Solver solver, long seed) {
+        DomOverWDeg dd = new DomOverWDeg(solver, seed);
         return dd;
     }
 }

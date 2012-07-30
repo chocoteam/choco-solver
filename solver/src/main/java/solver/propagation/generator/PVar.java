@@ -82,9 +82,9 @@ public class PVar implements Generator<AbstractFineEventRecorder> {
             Propagator prop = propagators[j];
             int pidx = prop.getId();
             int pos = pindices[j];
-            if (propagationEngine.isMarked(vidx, pidx, pos)) {
+            if (propagationEngine.isMarked(vidx, pidx)) {
                 if (validations.length == 0 || validate(prop, validations)) {
-                    propagationEngine.clearWatermark(vidx, pidx, pos);
+                    propagationEngine.clearWatermark(vidx, pidx);
                     propagators[i] = prop;
                     pindices[i++] = pindices[j];
                 }

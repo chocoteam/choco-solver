@@ -74,10 +74,10 @@ public class CoarseEventRecorder extends AbstractCoarseEventRecorder {
             //promote event to top level event FULL_PROPAGATION
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
             propagators[PINDEX].setActive();
-        }
-        if (propagators[PINDEX].getNbPendingER() > 0) {
+        }else if (propagators[PINDEX].getNbPendingER() > 0) {
             evtmask |= EventType.FULL_PROPAGATION.strengthened_mask;
         }
+        assert evtmask >0;
         if (evtmask > 0) {
             if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
             propagators[PINDEX].coarseERcalls++;

@@ -164,7 +164,7 @@ public class ElementTest {
 
         for (int i = 0; i < varsr.length - 1; i++) {
             lcstrsr.add(new Element(varsr[i], values, indicesr[i], 0, ref));
-            lcstrsr.add(new Arithmetic(varsr[i], "=", indicesr[i + 1], "+", 2 * nbvars / 3, ref));
+            lcstrsr.add(new Arithmetic(varsr[i], "+", indicesr[i + 1], "=", 2 * nbvars / 3, ref));
         }
 
         Constraint[] cstrsr = lcstrsr.toArray(new Constraint[lcstrsr.size()]);

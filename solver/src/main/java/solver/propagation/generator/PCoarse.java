@@ -69,8 +69,8 @@ public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
                     Propagator propagator = propagators[j];
                     if (validations.length == 0 || validate(propagator, validations)) {
                         int pidx = propagator.getId();
-                        if (propagationEngine.isMarked(0, pidx, 0)) {
-                            propagationEngine.clearWatermark(0, pidx, 0);
+                        if (propagationEngine.isMarked(0, pidx)) {
+                            propagationEngine.clearWatermark(0, pidx);
                             CoarseEventRecorder er = new CoarseEventRecorder(propagator, solver, propagationEngine);
                             eventRecorders.add(er);
                             propagationEngine.addEventRecorder(er);
@@ -92,8 +92,8 @@ public class PCoarse implements Generator<AbstractCoarseEventRecorder> {
                 Propagator propagator = propagators[i];
                 if (validations.length == 0 || validate(propagator, validations)) {
                     int pidx = propagator.getId();
-                    if (propagationEngine.isMarked(0, pidx, 0)) {
-                        propagationEngine.clearWatermark(0, pidx, 0);
+                    if (propagationEngine.isMarked(0, pidx)) {
+                        propagationEngine.clearWatermark(0, pidx);
                         CoarseEventRecorder er = new CoarseEventRecorder(propagator, solver, propagationEngine);
                         eventRecorders.add(er);
                         propagationEngine.addEventRecorder(er);

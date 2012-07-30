@@ -49,9 +49,8 @@ public class IntLeReifBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
         IntVar[] ivars = new IntVar[2];
-        for (int i = 0; i < ivars.length; i++) {
-            ivars[i] = exps.get(i).intVarValue(solver);
-        }
+        ivars[0] = exps.get(0).intVarValue(solver);
+        ivars[1] = exps.get(1).intVarValue(solver);
         BoolVar bvar = exps.get(2).boolVarValue(solver);
         return new ReifiedConstraint(bvar,
                 ConstraintFactory.leq(ivars[0], ivars[1], solver),

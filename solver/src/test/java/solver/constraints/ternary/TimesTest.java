@@ -27,13 +27,9 @@
 
 package solver.constraints.ternary;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
 import solver.Solver;
-import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.strategy.AbstractStrategy;
+import solver.constraints.Constraint;
 import solver.variables.IntVar;
-import solver.variables.VariableFactory;
 
 /**
  * <br/>
@@ -41,25 +37,16 @@ import solver.variables.VariableFactory;
  * @author Charles Prud'homme
  * @since 07/02/11
  */
-public class TimesTest {
+public class TimesTest extends AbstractTernaryTest{
 
-    @Test(groups = "1s")
-    public void test1() {
-        Solver s = new Solver();
+    @Override
+    protected int validTuple(int vx, int vy, int vz) {
+        return vx * vy == vz?1:0;
+    }
 
-        IntVar X, Y, Z;
-        X = VariableFactory.enumerated("X", new int[]{1, 2}, s);
-        Y = VariableFactory.enumerated("Y", new int[]{2, 4}, s);
-        Z = VariableFactory.enumerated("Z", new int[]{2,3,4,5}, s);
-
-        s.post(new Times(X, Y, Z, s));
-
-        AbstractStrategy strategy = StrategyFactory.inputOrderMinVal(new IntVar[]{X,Y,Z}, s.getEnvironment());
-        s.set(strategy);
-//        SearchMonitorFactory.log(s, true, false);
-        s.findAllSolutions();
-        Assert.assertEquals(s.getMeasures().getSolutionCount(), 3);
-        Assert.assertEquals(s.getMeasures().getNodeCount(), 5);
+    @Override
+    protected Constraint make(IntVar[] vars, Solver solver) {
+        return new Times(vars[0], vars[1], vars[2], solver);
     }
 
 }

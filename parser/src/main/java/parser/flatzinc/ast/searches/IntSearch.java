@@ -30,17 +30,12 @@ package parser.flatzinc.ast.searches;
 import choco.kernel.memory.IEnvironment;
 import org.slf4j.LoggerFactory;
 import solver.Solver;
-import solver.search.strategy.enumerations.sorters.Seq;
-import solver.search.strategy.enumerations.sorters.SorterFactory;
-import solver.search.strategy.enumerations.validators.ValidatorFactory;
-import solver.search.strategy.enumerations.values.HeuristicValFactory;
-import solver.search.strategy.enumerations.values.comparators.Distance;
-import solver.search.strategy.enumerations.values.heuristics.nary.Join;
-import solver.search.strategy.enumerations.values.heuristics.unary.DropN;
-import solver.search.strategy.enumerations.values.metrics.Median;
-import solver.search.strategy.enumerations.values.metrics.Metric;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
+import solver.search.strategy.selectors.ValueIterator;
+import solver.search.strategy.selectors.VariableSelector;
+import solver.search.strategy.selectors.values.*;
+import solver.search.strategy.selectors.variables.*;
 import solver.search.strategy.strategy.AbstractStrategy;
-import solver.search.strategy.strategy.StrategyVarValAssign;
 import solver.variables.IntVar;
 
 /**
@@ -51,96 +46,79 @@ import solver.variables.IntVar;
  */
 public class IntSearch {
 
+    private static long seed = 29091981;
+
     private IntSearch() {
     }
 
-    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignmennt, Strategy strategy, Solver solver) {
-        valueIterator(variables, assignmennt);
-        return variableSelector(variables, varChoice, solver);
+    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Strategy strategy, Solver solver) {
+        VariableSelector<IntVar> varsel = variableSelector(variables, varChoice, solver);
+        if (varsel == null) { // free search
+            return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 2.0d, 1, seed);
+        }
+        return valueIterator(variables, varsel, assignment);
     }
 
-    private static StrategyVarValAssign variableSelector(IntVar[] variables, VarChoice varChoice, Solver solver) {
+    private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice, Solver solver) {
         IEnvironment environment = solver.getEnvironment();
         switch (varChoice) {
             case input_order:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.inputOrder(variables), ValidatorFactory.instanciated, environment);
+                return new InputOrder(variables, environment);
             case first_fail:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.minDomain(), ValidatorFactory.instanciated, environment);
+                return new FirstFail(variables);
             case anti_first_fail:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.maxDomain(), ValidatorFactory.instanciated, environment);
+                return new AntiFirstFail(variables);
             case smallest:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.smallest(), ValidatorFactory.instanciated, environment);
+                return new Smallest(variables);
             case largest:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.largest(), ValidatorFactory.instanciated, environment);
+                return new Largest(variables);
             case occurrence:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.mostConstrained(), ValidatorFactory.instanciated, environment);
+                return new Occurrence(variables);
             case most_constrained:
-                return StrategyVarValAssign.sta(variables,
-                        new Seq<IntVar>(SorterFactory.smallest(), SorterFactory.mostConstrained()),
-                        ValidatorFactory.instanciated, environment);
+                return new MostConstrained(variables);
             case max_regret:
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.maxRegret(), ValidatorFactory.instanciated, environment);
+                return new MaxRegret(variables);
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + varChoice.name() + ". Set default.");
-                return StrategyVarValAssign.sta(variables,
-                        SorterFactory.domOverWDeg(solver), ValidatorFactory.instanciated, environment);
+                return null;
         }
     }
 
-    private static void valueIterator(IntVar[] variables, Assignment assignmennt) {
+    private static solver.search.strategy.strategy.Assignment valueIterator(IntVar[] variables, VariableSelector<IntVar> variableSelector,
+                                                                            Assignment assignmennt) {
+        ValueIterator<IntVar> valSelector = null;
+        solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
         switch (assignmennt) {
             case indomain:
             case indomain_min:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i], variables[i].getLB(), 1, variables[i].getUB()));
-                }
+                valSelector = new InDomainMin();
                 break;
             case indomain_max:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i], variables[i].getUB(), -1, variables[i].getLB()));
-                }
+                valSelector = new InDomainMax();
                 break;
             case indomain_middle:
-                for (int i = 0; i < variables.length; i++) {
-                    //TODO: EnumVal with Metric as paramater (bounds and delta)
-                    Metric median = new Median(variables[i]);
-                    variables[i].setHeuristicVal(
-                            new Join(new Distance(median),
-                                    HeuristicValFactory.enumVal(variables[i], median.getValue() + 1, 1, variables[i].getUB()),
-                                    HeuristicValFactory.enumVal(variables[i], median.getValue(), -1, variables[i].getLB())
-                            ));
-                }
+                valSelector = new InDomainMiddle();
                 break;
             case indomain_median:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(
-                            new DropN(HeuristicValFactory.enumVal(variables[i]),
-                                    new solver.search.strategy.enumerations.values.metrics.Middle(variables[i]))
-                    );
-                }
+                valSelector = new InDomainMedian();
                 break;
             case indomain_random:
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(new solver.search.strategy.enumerations.values.heuristics.zeroary.Random(variables[i]));
-                }
+                valSelector = new InDomainRandom(seed);
                 break;
             case indomain_split:
-            case indomain_reverse_split:
             case indomain_interval:
+                valSelector = new InDomainMiddle();
+                assgnt = solver.search.strategy.assignments.Assignment.int_split;
+                break;
+            case indomain_reverse_split:
+                valSelector = new InDomainMiddle();
+                assgnt = solver.search.strategy.assignments.Assignment.int_reverse_split;
+                break;
             default:
                 LoggerFactory.getLogger("fzn").error("% No implementation for " + assignmennt.name() + ". Set default.");
-                for (int i = 0; i < variables.length; i++) {
-                    variables[i].setHeuristicVal(HeuristicValFactory.enumVal(variables[i]));
-                }
-
+                valSelector = new InDomainMin();
         }
+        return new solver.search.strategy.strategy.Assignment(variables, variableSelector, valSelector, assgnt);
     }
 
 

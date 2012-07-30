@@ -93,7 +93,7 @@ public class PropElement extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int vIdx) {
         if (vIdx == 0) {   // value : need to react on removals
-            return EventType.REMOVE.mask;
+            return EventType.INT_ALL_MASK();
         } else {  // index : need to react on removals AND on instantiations
             return EventType.INSTANTIATE.mask + EventType.REMOVE.mask;
         }

@@ -50,7 +50,7 @@ public class Builder {
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
 		} else if (this.branchingStrategy.equals("minvalue")) {
-			solver.set(StrategyFactory.minDomVal(starts, solver.getEnvironment()));
+			solver.set(StrategyFactory.minDomLowBound(starts, solver.getEnvironment()));
 		} else {
 			assert(false);
 		}
@@ -85,7 +85,7 @@ public class Builder {
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
 		} else if (this.branchingStrategy.equals("minvalue")) {
-			solver.set(StrategyFactory.minDomVal(starts, solver.getEnvironment()));
+			solver.set(StrategyFactory.minDomLowBound(starts, solver.getEnvironment()));
 		} else {
 			assert(false);
 		}
@@ -120,7 +120,7 @@ public class Builder {
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
 		} else if (this.branchingStrategy.equals("minvalue")) {
-			solver.set(StrategyFactory.minDomVal(starts, solver.getEnvironment()));
+			solver.set(StrategyFactory.minDomLowBound(starts, solver.getEnvironment()));
 		} else {
 			assert(false);
 		}
@@ -196,7 +196,7 @@ public class Builder {
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
 		} else if (this.branchingStrategy.equals("minvalue")) {
-			solver.set(StrategyFactory.minDomVal(starts, solver.getEnvironment()));
+			solver.set(StrategyFactory.minDomLowBound(starts, solver.getEnvironment()));
 		} else {
 			assert(false);
 		}

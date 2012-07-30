@@ -111,7 +111,7 @@ public class OpenStacks extends AbstractProblem {
         for (int t = 1; t < np + 1; t++) {
             for (int i = 0; i < nc; i++) {
                 // o[i,t] = o[i,t-1] + orders[i,s[t]] );
-                IntVar value = VariableFactory.enumerated("val_" + i, 0, norders[i], solver);
+                IntVar value = VariableFactory.enumerated("val_" + t + "_" + i, 0, norders[i], solver);
                 solver.post(new Element(value, orders[i], scheds[t - 1], 0, solver));
                 solver.post(Sum.eq(new IntVar[]{o[i][t - 1], value}, o[i][t], solver));
             }
@@ -119,7 +119,7 @@ public class OpenStacks extends AbstractProblem {
         o2b = VariableFactory.boolMatrix("b", np, nc, solver);
         for (int i = 0; i < nc; i++) {
             for (int j = 1; j < np + 1; j++) {
-                BoolVar[] btmp = VariableFactory.boolArray("bT", 2, solver);
+                BoolVar[] btmp = VariableFactory.boolArray("bT_"+i+"_"+j, 2, solver);
                 solver.post(new ReifiedConstraint(
                         btmp[0],
                         ConstraintFactory.lt(o[i][j - 1], Views.fixed(norders[i], solver), solver),
@@ -152,12 +152,13 @@ public class OpenStacks extends AbstractProblem {
 
     @Override
     public void configureEngine() {
-       /* if (true) {
-            solver.set(new Sort(
-                    new SortDyn(EvtRecEvaluators.MinDomSize, SortDyn.Op.MAX, new PVar(scheds)),
-                    new SortDyn(EvtRecEvaluators.MaxArityV, SortDyn.Op.MAX, new PVar(solver.getVars())),
-                    new Queue(new PCoarse(solver.getCstrs()))));
-        } else*/ {
+        /* if (true) {
+           solver.set(new Sort(
+                   new SortDyn(EvtRecEvaluators.MinDomSize, SortDyn.Op.MAX, new PVar(scheds)),
+                   new SortDyn(EvtRecEvaluators.MaxArityV, SortDyn.Op.MAX, new PVar(solver.getVars())),
+                   new Queue(new PCoarse(solver.getCstrs()))));
+       } else*/
+        {
             IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
             pengine.set(new Sort(
                     new Queue(new PArc(pengine, scheds)),
@@ -212,7 +213,7 @@ public class OpenStacks extends AbstractProblem {
     ////////////////////////////////////////// DATA ////////////////////////////////////////////////////////////////////
     static enum Data {
         V_small(new int[]{
-                5, 6, //nb customers= 10, nb products = 20,
+                5, 6, //nb customers= 5, nb products = 6,
                 // orders
                 0, 0, 1, 0, 1, 0,
                 0, 1, 0, 0, 0, 0,

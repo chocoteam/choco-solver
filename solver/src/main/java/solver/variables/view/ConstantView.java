@@ -96,6 +96,11 @@ public class ConstantView implements IntVar {
     }
 
     @Override
+    public int getNbProps() {
+        return 0;
+    }
+
+    @Override
     public int[] getPIndices() {
         return new int[0];
     }
@@ -278,7 +283,8 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void link(Propagator propagator, int idxInProp) {
+    public int link(Propagator propagator, int idxInProp) {
+        return -1;
     }
 
     @Override

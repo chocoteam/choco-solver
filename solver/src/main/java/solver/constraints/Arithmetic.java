@@ -247,4 +247,14 @@ public class Arithmetic extends IntConstraint<IntVar> {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        if(isBinary){
+            return vars[0].getName() +" "+ op1 +" "+ vars[1].getName() +" "+ op2 +" "+ cste;
+        }else{
+            return vars[0].getName() +" "+ op1 +" "+ cste;
+        }
+
+    }
 }

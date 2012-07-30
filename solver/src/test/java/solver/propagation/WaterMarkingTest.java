@@ -30,7 +30,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import solver.propagation.wm.IWaterMarking;
 import solver.propagation.wm.WaterMarkers;
-import solver.propagation.wm.WaterMarkingImpl;
+import solver.propagation.wm.WaterMarking2Impl;
 import solver.propagation.wm.WaterMarkingLongImpl;
 
 /**
@@ -44,36 +44,32 @@ public class WaterMarkingTest {
     private void test(int size) {
         IWaterMarking wm = WaterMarkers.make(size);
         for (int i = 0; i < size; i++) {
-            for (int j = size; j < 2*size; j++) {
-                for (int k = 0; k < 3; k++) {
-                    wm.putMark(i, j, k);
-                }
+            for (int j = size; j < 2 * size; j++) {
+                wm.putMark(i, j);
             }
         }
         Assert.assertFalse(wm.isEmpty());
         for (int i = 0; i < size; i++) {
-            for (int j = size; j < 2*size; j++) {
-                for (int k = 0; k < 3; k++) {
-                    Assert.assertTrue(wm.isMarked(i, j, k));
-                    wm.clearMark(i, j, k);
-                    Assert.assertFalse(wm.isMarked(i, j, k));
-                }
+            for (int j = size; j < 2 * size; j++) {
+                Assert.assertTrue(wm.isMarked(i, j));
+                wm.clearMark(i, j);
+                Assert.assertFalse(wm.isMarked(i, j));
             }
         }
     }
 
     @Test
-    public void testSmall(){
-        for(int i = 1; i < 2047; i = i<< 1){
-            System.out.println("i:"+i);
+    public void testSmall() {
+        for (int i = 1; i < 2047; i = i << 1) {
+            System.out.println("i:" + i);
             test(i);
         }
     }
 
     @Test
-    public void testLarge(){
+    public void testLarge() {
         IWaterMarking wm = WaterMarkers.make(6000);
-        Assert.assertTrue(wm instanceof WaterMarkingImpl);
+        Assert.assertTrue(wm instanceof WaterMarking2Impl);
         wm = WaterMarkers.make(65000);
         Assert.assertTrue(wm instanceof WaterMarkingLongImpl);
     }

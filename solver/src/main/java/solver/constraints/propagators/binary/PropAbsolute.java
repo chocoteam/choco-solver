@@ -61,7 +61,7 @@ public class PropAbsolute extends Propagator<IntVar> {
         rem_proc = new RemProc(this);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++){
-            idms[i] = this.vars[i].monitorDelta(this);
+            idms[i] = vars[i].hasEnumeratedDomain()?this.vars[i].monitorDelta(this):IIntDeltaMonitor.Default.NONE;
         }
     }
 
