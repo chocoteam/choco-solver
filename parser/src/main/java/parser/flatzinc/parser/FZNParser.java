@@ -57,6 +57,9 @@ public final class FZNParser {
     public final Solver solver = new Solver();
     public final FZNLayout layout = new FZNLayout();
 
+    public final boolean all;
+    public final boolean free;
+
     /**
      * Map to find an object with its name.
      */
@@ -64,8 +67,14 @@ public final class FZNParser {
 
     public String instance;
 
-    public FZNParser() {
+    public FZNParser(boolean all, boolean free) {
         PARVAR.setParser(this);
+        this.all = all;
+        this.free = free;
+    }
+
+    public FZNParser() {
+        this(false, false);
     }
 
     /**

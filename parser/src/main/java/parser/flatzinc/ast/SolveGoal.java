@@ -86,11 +86,11 @@ public class SolveGoal {
         this.annotations = annotations;
         this.type = type;
         this.expr = expr;
-        defineGoal(parser.solver);
+        defineGoal(parser, parser.solver);
     }
 
-    private void defineGoal(Solver solver) {
-        if (annotations.size() > 0) {
+    private void defineGoal(FZNParser parser, Solver solver) {
+        if (annotations.size() > 0 && !parser.free) {
             AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
                 throw new UnsupportedOperationException("SolveGoal:: wrong annotations size");
@@ -138,7 +138,7 @@ public class SolveGoal {
         AbstractSearchLoop search = solver.getSearchLoop();
         switch (type) {
             case SATISFY:
-                search.stopAtFirstSolution(true);
+                search.stopAtFirstSolution(!parser.all);
                 break;
             case MAXIMIZE:
                 IntVar max = expr.intVarValue(solver);

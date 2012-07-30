@@ -69,8 +69,8 @@ public class RegularBuilder implements IBuilder {
                 }
             }
         }
-        auto.removeDeadTransitions();
-        auto.minimize();
+//        auto.removeDeadTransitions();
+//        auto.minimize();
 
         return new Regular(vars, auto, solver);
     }

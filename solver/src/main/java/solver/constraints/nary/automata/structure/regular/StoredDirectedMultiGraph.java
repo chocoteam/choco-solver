@@ -190,12 +190,14 @@ public class StoredDirectedMultiGraph {
 
             if (GNodes.layers[orig] > 0 && out.isEmpty()) {
                 in = GNodes.inArcs[orig];
-                it = in.getIterator();
-                while (it.hasNext()) {
-                    int id = it.next();
-                    stack.push(id);
+                if (in != null) {
+                    it = in.getIterator();
+                    while (it.hasNext()) {
+                        int id = it.next();
+                        stack.push(id);
+                    }
+                    it.dispose();
                 }
-                it.dispose();
             }
 
             in = GNodes.inArcs[dest];
@@ -203,12 +205,14 @@ public class StoredDirectedMultiGraph {
 
             if (GNodes.layers[dest] < propagator.getNbVars() && in.isEmpty()) {
                 out = GNodes.outArcs[dest];
-                it = out.getIterator();
-                while (it.hasNext()) {
-                    int id = it.next();
-                    stack.push(id);
+                if (out != null) {
+                    it = out.getIterator();
+                    while (it.hasNext()) {
+                        int id = it.next();
+                        stack.push(id);
+                    }
+                    it.dispose();
                 }
-                it.dispose();
 
             }
 
