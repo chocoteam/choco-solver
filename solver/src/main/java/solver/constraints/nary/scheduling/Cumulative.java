@@ -6,6 +6,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.nary.scheduling.PropDynamicSweep;
+import solver.constraints.propagators.nary.scheduling.PropQuadraticEdgeFinding;
 import solver.variables.IntVar;
 
 /**
@@ -36,11 +37,11 @@ import solver.variables.IntVar;
  */
 public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
 	
-	private int nbTasks;
-	private int limit;
+	private final int nbTasks;
+	private final int limit;
 	
 	public static enum Type {
-		SWEEP, DYNAMIC_SWEEP, EDGE_FINDING, TASK_INTERVALS, GREEDY
+		SWEEP, DYNAMIC_SWEEP, EDGE_FINDING, GREEDY
 	}
 	
 	public Cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, int limit, Solver solver) {
@@ -48,7 +49,7 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
 		assert(starts.length == durations.length && starts.length == ends.length && starts.length == heights.length);
 		this.nbTasks = starts.length;
 		this.limit = limit;
-		setPropagators(new PropDynamicSweep(nbTasks, limit, vars, solver, this, 0, 1));
+		setPropagators(new PropDynamicSweep(vars, solver, this, 0, 1));
 	}
 
 	public Cumulative(IntVar[] starts, IntVar[] durations, IntVar[] ends, IntVar[] heights, int limit, Solver solver, Type type) {
@@ -57,9 +58,17 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
 		this.nbTasks = starts.length;
 		this.limit = limit;
 		switch (type) {
-			case DYNAMIC_SWEEP : setPropagators(new PropDynamicSweep(nbTasks, limit, vars, solver, this, 0, 1)); break;
-			case GREEDY : setPropagators(new PropDynamicSweep(nbTasks, limit, vars, solver, this, 1, 0)); break; // TODO Agregation des profils ˆ mettre par defaut ?
-			default: setPropagators(new PropDynamicSweep(nbTasks, limit, vars, solver, this, 0, 1));
+			case DYNAMIC_SWEEP:
+                setPropagators(new PropDynamicSweep(vars, solver, this, 0, 1));
+                break;
+            case EDGE_FINDING:
+                setPropagators(new PropDynamicSweep(vars, solver, this, 0, 1),new PropQuadraticEdgeFinding(vars, solver, this));
+                break;
+			case GREEDY:
+                setPropagators(new PropDynamicSweep(vars, solver, this, 1, 0));
+                break;
+			default:
+                setPropagators(new PropDynamicSweep(vars, solver, this, 0, 1));
 		}
 	}
 	
@@ -72,7 +81,7 @@ public class Cumulative extends Constraint<IntVar, Propagator<IntVar>> {
 		int minStart = Integer.MAX_VALUE;
 		int maxEnd = Integer.MIN_VALUE;
 		// compute min start and max end
-		for(int is=0, id=nbTasks, ie=2*nbTasks, ih=3*nbTasks;is<this.nbTasks;is++,id++,ie++) { // is = start index, id = duration index, ie = end index
+		for(int is=0, id=nbTasks, ie=2*nbTasks, ih=3*nbTasks;is<this.nbTasks;is++,id++,ie++,ih++) { // is = start index, id = duration index, ie = end index
 			if (!vars[is].instantiated() || !vars[id].instantiated() || !vars[ie].instantiated() || !vars[ih].instantiated()) return ESat.UNDEFINED;
 			if (vars[is].getValue() < minStart) minStart = vars[is].getValue();
 			if (vars[ie].getValue() > maxEnd) maxEnd = vars[ie].getValue();

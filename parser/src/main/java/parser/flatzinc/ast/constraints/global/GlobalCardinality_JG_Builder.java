@@ -25,75 +25,31 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.matrix;
+package parser.flatzinc.ast.constraints.global;
 
-import java.util.BitSet;
-import solver.variables.graph.INeighbors;
+import parser.flatzinc.ast.constraints.IBuilder;
+import parser.flatzinc.ast.expression.EAnnotation;
+import parser.flatzinc.ast.expression.Expression;
+import solver.Solver;
+import solver.constraints.Constraint;
+import solver.constraints.nary.GCC_AC;
+import solver.variables.IntVar;
+
+import java.util.List;
 
 /**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+ * <br/>
+ *
+ * @author Jean-Guillaume Fages
+ * @since 26/07/12
  */
-public class BitSetNeighbors extends BitSet implements INeighbors {
-
-	private int current;//enables to iterate
-	private int card;	// enable to get the cardinality in O(1)
-    
-	public BitSetNeighbors(int nbits) {
-        super(nbits);
-        card = 0;
-        current = 0;
-    }
+public class GlobalCardinality_JG_Builder implements IBuilder {
 
     @Override
-    public void add(int element) {
-    	if(!get(element)){
-    		card++;
-            this.set(element, true);
-    	}
+    public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
+        IntVar[] vars = exps.get(0).toIntVarArray(solver);
+        int[] values = exps.get(1).toIntArray();
+        IntVar[] cards = exps.get(2).toIntVarArray(solver);
+        return new GCC_AC(vars, values, cards, solver);
     }
-
-    @Override
-    public boolean remove(int element) {
-        boolean isIn = this.get(element);
-        if (isIn) {
-            this.set(element, false);
-            card--;
-        }
-        return isIn;
-    }
-
-    @Override
-    public boolean contain(int element) {
-        return this.get(element);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return this.cardinality() == 0;
-    }
-
-    @Override
-    public int neighborhoodSize() {
-        return this.card;
-    }
-
-	@Override
-	public int getFirstElement() {
-		current = nextSetBit(0);
-		return current;
-	}
-
-	@Override
-	public int getNextElement() {
-		current = nextSetBit(current+1);
-		return current;
-	}
-
-	@Override
-	public void clear() {
-		card = 0;
-		super.clear();
-	}
 }
