@@ -83,7 +83,9 @@ public class TableBuilder implements IBuilder {
                         && between(couple[1], min[1], max[1])) {
                     relation.setCouple(couple[0], couple[1]);
                 } else {
-                    LoggerFactory.getLogger("fzn").warn("{" + couple[0] + "," + couple[1] + "} will not be added, because it doesn't respect domain bounds");
+                    LoggerFactory.getLogger("fzn").warn("% {" + couple[0] + "," + couple[1] + "} will not be added, " +
+                            "{0} is not inside [{1},{2}] or {3} is not inside [{4},{5}] ",
+                            new int[]{couple[0], min[0], max[0], couple[1], min[1], max[1]});
                 }
             }
             return new BinCSP(x[0], x[1], relation);
