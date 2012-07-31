@@ -35,7 +35,7 @@ import solver.constraints.Arithmetic;
 import solver.exception.ContradictionException;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.delta.Delta;
+import solver.variables.delta.EnumDelta;
 
 /**
  * <br/>
@@ -48,7 +48,7 @@ public class DeltaTest {
     @Test(groups = "1s")
     public void testAdd() {
         Solver sol = new Solver();
-        Delta d = new Delta(sol.getSearchLoop());
+        EnumDelta d = new EnumDelta(sol.getSearchLoop());
         for (int i = 1; i < 40; i++) {
             d.add(i, Cause.Null);
             Assert.assertEquals(d.size(), i);

@@ -49,7 +49,7 @@ public class GraphDelta implements IGraphDelta {
 		deltaOfType = new IntDelta[NB];
 		this.loop = loop;
 		for(int i=0;i<NB;i++){
-			deltaOfType[i] = new Delta(loop);
+			deltaOfType[i] = new EnumDelta(loop);
 		}
 		timestamp = loop.timeStamp;
     }

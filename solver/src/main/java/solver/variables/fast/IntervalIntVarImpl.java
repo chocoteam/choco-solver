@@ -45,7 +45,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.Delta;
+import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -426,7 +426,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new Delta(solver.getSearchLoop());
+            delta = new EnumDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }
