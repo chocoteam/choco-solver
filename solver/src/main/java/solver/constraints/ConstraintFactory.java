@@ -207,7 +207,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, int c, Solver solver) {
-        return new Arithmetic(x, ">=", Views.fixed(c, solver), "+", 1, solver);
+        return new Arithmetic(x, ">", c, solver);
     }
 
     /**
@@ -219,7 +219,7 @@ public class ConstraintFactory {
      * @param solver
      */
     public static Constraint gt(IntVar x, IntVar y, Solver solver) {
-        return new Arithmetic(x, ">=", y, "+", 1, solver);
+        return new Arithmetic(x, ">", y, solver);
     }
 
 	//*****************************************************************************

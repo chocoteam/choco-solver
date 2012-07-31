@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
+ * (&#8707; i &#8712; 1..N: as[i]) &#8660; r where n is the length of as
  * <br/>
  *
  * @author Charles Prud'homme
@@ -47,15 +48,15 @@ import java.util.List;
 public class ArrayBoolOrBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        BoolVar[] vars = exps.get(0).toBoolVarArray(solver);
-        BoolVar result = exps.get(1).boolVarValue(solver);
+        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
+        BoolVar r = exps.get(1).boolVarValue(solver);
 
-        Literal[] lits = new Literal[vars.length];
-        for (int i = 0; i < vars.length; i++) {
-            lits[i] = Literal.pos(vars[i]);
+        Literal[] l_as = new Literal[as.length];
+        for (int i = 0; i < as.length; i++) {
+            l_as[i] = Literal.pos(as[i]);
         }
-        Literal r = Literal.pos(result);
+        Literal l_r = Literal.pos(r);
 
-        return new ConjunctiveNormalForm(Node.reified(r, Node.or(lits)), solver);
+        return new ConjunctiveNormalForm(Node.reified(l_r, Node.or(l_as)), solver);
     }
 }

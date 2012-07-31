@@ -38,6 +38,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * a &#8712; b
  * <br/>
  *
  * @author Charles Prud'homme

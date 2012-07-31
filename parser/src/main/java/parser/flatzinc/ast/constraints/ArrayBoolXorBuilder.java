@@ -27,29 +27,34 @@
 
 package parser.flatzinc.ast.constraints;
 
+import choco.kernel.common.util.tools.StringUtils;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
-import solver.constraints.ternary.DivXYZ;
+import solver.constraints.nary.Sum;
+import solver.constraints.ternary.ModXYZ;
+import solver.variables.BoolVar;
 import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.List;
 
 /**
- * a/b = c rouding towards 0
+ * (((&#8721; i &#8712; 1..n: as[i]) mod 2) = 1) where n is the length of as
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 26/01/11
  */
-public class IntDivBuilder implements IBuilder {
-
+public class ArrayBoolXorBuilder implements IBuilder {
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar a = exps.get(0).intVarValue(solver);
-        IntVar b = exps.get(1).intVarValue(solver);
-        IntVar c = exps.get(2).intVarValue(solver);
-        return new DivXYZ(a, b, c, solver);
+        BoolVar[] as = exps.get(0).toBoolVarArray(solver);
+
+        IntVar res = VariableFactory.bounded(StringUtils.randomName(), 0, as.length, solver);
+        solver.post(Sum.eq(as, res, solver));
+        return new ModXYZ(res, Views.fixed(2, solver), Views.fixed(1, solver), solver);
     }
 }
