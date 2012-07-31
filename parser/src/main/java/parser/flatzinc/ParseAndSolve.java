@@ -52,19 +52,19 @@ public class ParseAndSolve {
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
     @Option(name = "-f", aliases = {"--fzn-inst"} ,usage = "Flatzinc instance file.", required = true)
-    private static String instance;
+    private String instance;
 
     @Option(name = "-a", aliases = {"--all"},usage = "Search for all solutions.", required = false)
-    private static boolean all = false;
+    private boolean all = false;
 
     @Option(name = "-i", aliases = {"--ignore-search"},usage = "Ignore search strategy.", required = false)
-    private static boolean free = false;
+    private boolean free = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"},usage = "Number of cores available for parallel search", required = false)
-    private static int nb_cores = 1;
+    private int nb_cores = 1;
 
     @Option(name = "-tl", aliases = {"--time-limit"},usage = "Time limit.", required = false)
-    private static long tl = -1;
+    private long tl = -1;
 
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
@@ -88,7 +88,7 @@ public class ParseAndSolve {
     }
 
     private void parseandsolve() {
-        final FZNParser parser = new FZNParser();
+        final FZNParser parser = new FZNParser(all, free);
         LOGGER.info("% load file ...");
         parser.loadInstance(new File(instance));
         LOGGER.info("% parse instance...");
