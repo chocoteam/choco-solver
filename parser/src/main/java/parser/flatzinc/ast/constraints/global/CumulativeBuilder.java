@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.nary.Sum;
-import solver.constraints.nary.scheduling.Cumulative;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.view.Views;
@@ -76,13 +75,13 @@ public class CumulativeBuilder implements IBuilder {
             decomp = true;
         }
 
-        if (!decomp) {
+        /*if (!decomp) {
             if (starts.length > 10000) {
                 return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.GREEDY);
             } else {
                 return new Cumulative(starts, durations, ends, resources, limit, solver, Cumulative.Type.DYNAMIC_SWEEP);
             }
-        }
+        }*/
         return null;
     }
 }

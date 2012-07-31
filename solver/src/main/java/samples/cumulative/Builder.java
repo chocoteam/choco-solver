@@ -9,7 +9,6 @@ import solver.search.measure.IMeasures;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
-import solver.variables.view.Views;
 
 
 public class Builder {
@@ -191,7 +190,7 @@ public class Builder {
 			ends[i] = task[2];
 			heights[i] = VariableFactory.bounded("h"+i, h[i], h[i], solver);
 		}
-		Constraint c = new Cumulative(starts, durations, ends, heights, Views.fixed(capa,solver), solver, type);
+		Constraint c = new Cumulative(starts, durations, ends, heights, capa, solver, type);
 		solver.post(c);
 		if (this.branchingStrategy.equals("minsize")) {
 			solver.set(StrategyFactory.minDomMinVal(starts, solver.getEnvironment()));
