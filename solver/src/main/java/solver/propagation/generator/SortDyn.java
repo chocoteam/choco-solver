@@ -26,12 +26,12 @@
  */
 package solver.propagation.generator;
 
+import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.generator.sorter.evaluator.IEvaluator;
 import solver.propagation.queues.IHeap;
 import solver.propagation.queues.MinHeap;
-import solver.recorders.IEventRecorder;
 
 /**
  * A specific propagation engine that works like a list, each element has a fixed index.
@@ -129,7 +129,7 @@ public final class SortDyn<S extends ISchedulable> extends PropagationStrategy<S
         while (!toPropagate.isEmpty()) {
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
-            if (IEventRecorder.LAZY) {
+            if (Configuration.LAZY_UPDATE) {
                 lastPopped.flush();
             }
             lastPopped.deque();

@@ -27,8 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 
 public class GraphDelta implements IGraphDelta {
@@ -82,7 +82,7 @@ public class GraphDelta implements IGraphDelta {
 
 	@Override
 	public void add(int element, int type, ICause cause) {
-		if(IEventRecorder.LAZY){
+		if(Configuration.LAZY_UPDATE){
 			lazyClear();
 		}
 		deltaOfType[type].add(element,cause);

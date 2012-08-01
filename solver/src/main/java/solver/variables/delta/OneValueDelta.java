@@ -27,8 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -59,7 +59,7 @@ public final class OneValueDelta implements IntDelta {
 
     @Override
     public void add(int value, ICause cause) {
-        if (IEventRecorder.LAZY) {
+        if (Configuration.LAZY_UPDATE) {
             lazyClear();
         }
         this.value = value;

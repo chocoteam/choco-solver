@@ -27,12 +27,12 @@
 package solver.recorders.fine.var;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
-import solver.recorders.IEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -67,7 +67,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
         int first = firstAP.get();
         int last = firstPP.get();
         flag_swap_during_execution = false;
@@ -98,7 +98,7 @@ public class FineVarEventRecorder<V extends Variable> extends VarEventRecorder<V
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
 // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (IEventRecorder.DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
         boolean atleastone = false;
         int first = firstAP.get();
         int last = firstPP.get();

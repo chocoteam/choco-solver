@@ -31,6 +31,7 @@ import com.sun.istack.internal.NotNull;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -41,7 +42,6 @@ import solver.propagation.IPropagationStrategy;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.DoubleMinHeap;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -157,7 +157,7 @@ public class ABConstraintEngine implements IPropagationEngine {
                 for (int v = 0; v < nbVars; v++) {
                     mask = masks_f[aid][v];
                     if (mask > 0) {
-                        if (IEventRecorder.DEBUG_PROPAG) {
+                        if (Configuration.PRINT_PROPAGATION) {
                             LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + Arrays.toString(lastProp.getVars()) + "::" + lastProp.toString() + " >>");
                         }
                         masks_f[aid][v] = 0;
@@ -177,7 +177,7 @@ public class ABConstraintEngine implements IPropagationEngine {
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
                 }
-                if (IEventRecorder.DEBUG_PROPAG) {
+                if (Configuration.PRINT_PROPAGATION) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
                 lastProp.coarseERcalls++;
@@ -221,7 +221,7 @@ public class ABConstraintEngine implements IPropagationEngine {
         for (int p = 0; p < vProps.length; p++) {
             Propagator prop = vProps[p];
             if (cause != prop && prop.isActive()) {
-                if (IEventRecorder.DEBUG_PROPAG)
+                if (Configuration.PRINT_PROPAGATION)
                     LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + Arrays.toString(prop.getVars()) + "::" + prop.toString() + " >>");
                 if ((type.mask & prop.getPropagationConditions(pindices[p])) != 0) {
                     int aid = p2i.get(prop.getId());
@@ -241,7 +241,7 @@ public class ABConstraintEngine implements IPropagationEngine {
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int aid = p2i.get(propagator.getId());
         if ((schedule[aid] & C) == 0) {
-            if (IEventRecorder.DEBUG_PROPAG) {
+            if (Configuration.PRINT_PROPAGATION) {
                 LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
             }
             double _w = w[aid];

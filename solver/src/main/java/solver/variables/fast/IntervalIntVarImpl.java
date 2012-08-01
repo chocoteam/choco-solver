@@ -35,6 +35,7 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
 import solver.Cause;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -122,7 +123,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            solver.getExplainer().removeValue(this, value, antipromo);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
@@ -156,10 +157,10 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
-            solver.getExplainer().removeValue(this, value, antipromo);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
             return true;
         }
         return false;
@@ -194,7 +195,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        solver.getExplainer().instantiateTo(this, value, cause);
+        if(Configuration.PLUG_EXPLANATION)solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -248,7 +249,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -269,7 +270,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
                 this.notifyPropagators(e, cause);
 
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
 
             }
@@ -299,7 +300,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -320,7 +321,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                     }
                 }
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
         }

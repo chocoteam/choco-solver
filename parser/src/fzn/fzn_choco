@@ -107,4 +107,4 @@ then
     ARGS=$ARGS" -i"
 fi
 
-java -Xss64m -Xms64m -Xmx2048m -cp .:$CHOCO_JAR -Dlogback.configurationFile=$LOG_FILE parser.flatzinc.ParseAndSolve $ARGS
+java -Xss64m -Xms64m -Xmx4096m -cp .:$CHOCO_JAR -Dlogback.configurationFile=$LOG_FILE parser.flatzinc.ParseAndSolve $ARGS

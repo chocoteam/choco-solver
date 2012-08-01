@@ -28,6 +28,7 @@ package solver.recorders.fine.var;
 
 import choco.kernel.memory.IStateInt;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -94,7 +95,7 @@ public class VarEventRecorder<V extends Variable> extends AbstractFineEventRecor
     public void afterUpdate(int vIdx, EventType evt, ICause cause) {
         // Only notify constraints that filter on the specific event received
         assert cause != null : "should be Cause.Null instead";
-        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {}", this.toString());
 
         int first = firstAP.get();
         int last = firstPP.get();
