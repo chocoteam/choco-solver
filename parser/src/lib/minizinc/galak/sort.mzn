@@ -16,4 +16,6 @@ predicate sort(array[int] of var int: x, array[int] of var int: y) =
         alldifferent(p) /\
         increasing(y)
     );
+%sortChoco(x,y);
 
+%predicate sortChoco(array[int] of var int: x, array[int] of var int: y);

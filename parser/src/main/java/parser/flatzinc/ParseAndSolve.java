@@ -27,6 +27,7 @@
 
 package parser.flatzinc;
 
+import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -40,6 +41,8 @@ import solver.propagation.hardcoded.VariableEngine;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <br/>
@@ -51,20 +54,21 @@ public class ParseAndSolve {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger("fzn");
 
-    @Option(name = "-f", aliases = {"--fzn-inst"} ,usage = "Flatzinc instance file.", required = true)
-    private static String instance;
+    // receives other command line parameters than options
+    @Argument
+    private List<String> instances = new ArrayList<String>();
 
-    @Option(name = "-a", aliases = {"--all"},usage = "Search for all solutions.", required = false)
-    private static boolean all = false;
+    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions.", required = false)
+    private boolean all = false;
 
-    @Option(name = "-i", aliases = {"--ignore-search"},usage = "Ignore search strategy.", required = false)
-    private static boolean free = false;
+    @Option(name = "-i", aliases = {"--ignore-search"}, usage = "Ignore search strategy.", required = false)
+    private boolean free = false;
 
-    @Option(name = "-p", aliases = {"--nb-cores"},usage = "Number of cores available for parallel search", required = false)
-    private static int nb_cores = 1;
+    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search", required = false)
+    private int nb_cores = 1;
 
-    @Option(name = "-tl", aliases = {"--time-limit"},usage = "Time limit.", required = false)
-    private static long tl = -1;
+    @Option(name = "-tl", aliases = {"--time-limit"}, usage = "Time limit.", required = false)
+    private long tl = -1;
 
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
@@ -78,7 +82,7 @@ public class ParseAndSolve {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
-            System.err.println("java SampleMain [options...]");
+            System.err.println("ParseAndSolve [options...] fzn_instance...");
             parser.printUsage(System.err);
             System.err.println("\nCheck MiniZinc is correctly installed.");
             System.err.println();
@@ -88,46 +92,54 @@ public class ParseAndSolve {
     }
 
     private void parseandsolve() {
-        final FZNParser parser = new FZNParser();
-        LOGGER.info("% load file ...");
-        parser.loadInstance(new File(instance));
-        LOGGER.info("% parse instance...");
-        parser.parse();
-        LOGGER.info("% solve instance...");
-        final Solver solver = parser.solver;
-//        System.out.printf("%s\n", solver.toString());
-        if(solver.getNbCstrs()> solver.getNbVars()){
-            solver.set(new VariableEngine(solver));
-        }else{
-            solver.set(new ConstraintEngine(solver));
-        }
-        /*int p = 0;
-        switch (p) {
-            case 0:
-                solver.set(new ConstraintEngine(solver));
-                break;
-            case 1:
+        for (String instance : instances) {
+            final FZNParser parser = new FZNParser(all, free);
+            LOGGER.info("% load file ...");
+            parser.loadInstance(new File(instance));
+            LOGGER.info("% parse instance...");
+            parser.parse();
+            LOGGER.info("% solve instance...");
+            final Solver solver = parser.solver;
+            if (solver.getNbCstrs() > solver.getNbVars()) {
                 solver.set(new VariableEngine(solver));
-                break;
-            case 2:
-                solver.set(new SevenQueuesConstraintEngine(solver));
-                break;
-            case 3:
-                solver.set(new ABConstraintEngine(solver));
-                break;
-            case 4:
-                IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
-                PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
-                solver.set(pe);
-                break;
-        }*/
+//                solver.set(new EightQueuesVariableEngine(solver));
+            } else {
+                solver.set(new ConstraintEngine(solver));
+//                solver.set(new EightQueuesConstraintEngine(solver));
+            }
+            /*int p = 2;
+            switch (p) {
+                case 0:
+                    solver.set(new ConstraintEngine(solver));
+                    break;
+                case 1:
+                    solver.set(new VariableEngine(solver));
+                    break;
+                case 2:
+                    solver.set(new SevenQueuesConstraintEngine(solver));
+                    break;
+                case 3:
+                    solver.set(new EightQueuesConstraintEngine(solver));
+                    break;
+                case 5:
+                    solver.set(new EightQueuesVariableEngine(solver));
+                    break;
+                case 6:
+                    solver.set(new ABConstraintEngine(solver));
+                    break;
+                case 7:
+                    IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
+                    PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
+                    solver.set(pe);
+                    break;
+            }*/
 //        SearchMonitorFactory.logWithRank(solver, 212, 220);
 //        solver.getSearchLoop().getLimitsBox().setNodeLimit(10);
 //        SearchMonitorFactory.log(solver, true, true);
 //        SearchMonitorFactory.statEveryXXms(solver, 1000);
-        if (tl > -1) {
-            solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
-        }
+            if (tl > -1) {
+                solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
+            }
 //        final boolean[] stop = {true};
 //        Runtime.getRuntime().addShutdownHook(new Thread() {
 //            public void run() {
@@ -137,8 +149,9 @@ public class ParseAndSolve {
 //                }
 //            }
 //        });
-        solver.solve();
+            solver.solve();
 //        stop[0] = false;
+        }
     }
 
 }

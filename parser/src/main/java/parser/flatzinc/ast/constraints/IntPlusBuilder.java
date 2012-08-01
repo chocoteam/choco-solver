@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * a + b = c
  * <br/>
  *
  * @author Charles Prud'homme

@@ -114,6 +114,19 @@ public enum Views {
         return new BoolEqView(boolVar, boolVar.getSolver());
     }
 
+    public static BoolVar not(BoolVar boolVar) {
+        IView[] views = boolVar.getViews();
+        for (int i = 0; i < views.length; i++) {
+            if (views[i] instanceof BoolEqView) {
+                BoolNotView ov = (BoolNotView) views[i];
+                if (boolVar == ov.getVariable()) {
+                    return ov;
+                }
+            }
+        }
+        return new BoolNotView(boolVar, boolVar.getSolver());
+    }
+
     public static IntVar minus(IntVar ivar) {
         IView[] views = ivar.getViews();
         for (int i = 0; i < views.length; i++) {

@@ -30,13 +30,14 @@ package parser.flatzinc.ast.constraints;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.variables.IntVar;
 
 import java.util.List;
 
 /**
+ * a < b
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,9 +47,9 @@ public class IntLtBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] vars = new IntVar[2];
-        vars[0] = exps.get(0).intVarValue(solver);
-        vars[1] = exps.get(1).intVarValue(solver);
-        return ConstraintFactory.lt(vars[0], vars[1], solver);
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+
+        return new Arithmetic(a, "<", b, solver);
     }
 }

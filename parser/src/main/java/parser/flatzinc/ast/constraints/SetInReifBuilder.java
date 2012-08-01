@@ -41,6 +41,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * (a &#8712; b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -50,23 +51,23 @@ public class SetInReifBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar var = exps.get(0).intVarValue(solver);
+        IntVar a = exps.get(0).intVarValue(solver);
         Constraint[] cs = new Constraint[2];
         if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
             int[] values = exps.get(1).toIntArray();
-            cs[0] = new Member(var, values, solver);
-            cs[1] = new NotMember(var, values, solver);
+            cs[0] = new Member(a, values, solver);
+            cs[1] = new NotMember(a, values, solver);
         } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
             int low = ((ESetBounds) exps.get(1)).getLow();
             int upp = ((ESetBounds) exps.get(1)).getUpp();
-            cs[0] = new Member(var, low, upp, solver);
-            cs[1] = new NotMember(var, low, upp, solver);
+            cs[0] = new Member(a, low, upp, solver);
+            cs[1] = new NotMember(a, low, upp, solver);
         } else {
             Exit.log("SetVar unavailable");
             return null;
         }
-        BoolVar bvar = exps.get(2).boolVarValue(solver);
-        return new ReifiedConstraint(bvar, cs[0], cs[1], solver);
+        BoolVar r = exps.get(2).boolVarValue(solver);
+        return new ReifiedConstraint(r, cs[0], cs[1], solver);
 
     }
 }

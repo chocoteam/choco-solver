@@ -146,13 +146,15 @@ public class PropSumNeq extends Propagator<IntVar> {
             sumLB += x[i].getLB();
             sumUB += x[i].getUB();
         }
-        if (sumUB != b && sumLB != b) {
+        if (sumLB < sumUB) { // not instantiated
+            if (sumLB <= b && b <= sumUB) {
+                return ESat.UNDEFINED;
+            }
             return ESat.TRUE;
-        }else
-        if (sumUB == b && sumLB == b) {
-            return ESat.FALSE;
+        } else { // instantiated
+            assert sumLB == sumUB;
+            return ESat.eval(sumLB != b);
         }
-        return ESat.UNDEFINED;
     }
 
     @Override

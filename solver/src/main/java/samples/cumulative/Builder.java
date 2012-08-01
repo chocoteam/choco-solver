@@ -11,7 +11,6 @@ import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 
 
-
 public class Builder {
 
 	private boolean solveAll;

@@ -173,5 +173,19 @@ public class ConstraintTest {
         fzn.solver.findSolution();
     }
 
+    @Test
+    public void testIntLinLeReif() {
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 10: a;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var 1 .. 10: b;");
+        TerminalParser.parse(fzn.PAR_VAR_DECL, "var bool : c;");
+        TerminalParser.parse(fzn.CONSTRAINT, "constraint int_lin_le_reif(a, b,c);");
+
+        Assert.assertEquals(solver.getCstrs().length, 1);
+        Assert.assertEquals(solver.getCstrs()[0].getClass(), Arithmetic.class);
+        preset();
+        solver.findAllSolutions();
+        Assert.assertEquals(90, solver.getMeasures().getSolutionCount());
+    }
+
 
 }

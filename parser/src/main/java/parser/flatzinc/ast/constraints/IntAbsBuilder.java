@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * |a| = b
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,9 +47,8 @@ public class IntAbsBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] vars = new IntVar[2];
-        vars[0] = exps.get(0).intVarValue(solver);
-        vars[1] = exps.get(1).intVarValue(solver);
-        return new Absolute(vars[1], vars[0], solver);
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        return new Absolute(b, a, solver);
     }
 }

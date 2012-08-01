@@ -27,8 +27,8 @@
 
 package solver.variables.delta;
 
+import solver.Configuration;
 import solver.ICause;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -37,7 +37,7 @@ import solver.search.loop.AbstractSearchLoop;
  * It defines methods to <code>add</code> a value, <code>clear</code> the structure
  * and execute a <code>Procedure</code> for each value stored.
  */
-public final class Delta implements IntDelta {
+public final class EnumDelta implements IntDelta {
     private static final int SIZE = 32;
 
     int[] rem;
@@ -46,7 +46,7 @@ public final class Delta implements IntDelta {
     int timestamp = -1;
     final AbstractSearchLoop loop;
 
-    public Delta(AbstractSearchLoop loop) {
+    public EnumDelta(AbstractSearchLoop loop) {
         rem = new int[SIZE];
         causes = new ICause[SIZE];
         this.loop = loop;
@@ -76,7 +76,7 @@ public final class Delta implements IntDelta {
      * @param cause of the removal
      */
     public void add(int value, ICause cause) {
-        if (IEventRecorder.LAZY) {
+        if (Configuration.LAZY_UPDATE) {
             lazyClear();
         }
         ensureCapacity();

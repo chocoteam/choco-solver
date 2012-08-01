@@ -48,8 +48,6 @@ import java.io.Serializable;
  */
 public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extends IView> extends Identity, Serializable {
 
-    public static final boolean DEBUG_EVENT = false;
-
     // **** DEFINE THE TYPE OF A VARIABLE **** //
     // MUST BE A COMBINATION OF TYPE AND KIND
     // TYPE (exclusive)

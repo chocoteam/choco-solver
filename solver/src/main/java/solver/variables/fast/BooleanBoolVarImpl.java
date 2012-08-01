@@ -34,6 +34,7 @@ import choco.kernel.common.util.iterators.DisposableValueBoundIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.structure.IndexedBipartiteSet;
 import com.sun.istack.internal.NotNull;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -178,7 +179,7 @@ public final class BooleanBoolVarImpl extends AbstractVariable<IntDelta, IIntDel
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
 //        records.forEach(beforeModification.set(this, EventType.INSTANTIATE, cause));
-        solver.getExplainer().instantiateTo(this, value, cause);
+        if(Configuration.PLUG_EXPLANATION)solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);

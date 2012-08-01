@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * b &#8712; 1..n &#8743; as[b] = c where n is the length of as
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,9 +47,9 @@ public class ArrayElementBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar index = exps.get(0).intVarValue(solver);
-        int[] values = exps.get(1).toIntArray();
-        IntVar val = exps.get(2).intVarValue(solver);
-        return new Element(val, values, index, 1, solver);
+        IntVar b = exps.get(0).intVarValue(solver);
+        int[] as = exps.get(1).toIntArray();
+        IntVar c = exps.get(2).intVarValue(solver);
+        return new Element(c, as, b, 1, solver);
     }
 }

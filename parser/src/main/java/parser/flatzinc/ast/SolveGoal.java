@@ -113,11 +113,14 @@ public class SolveGoal {
                 for (int i = 0; i < ivars.length; i++) {
                     ivars[i] = (IntVar) vars[i];
                 }
+                long t = System.currentTimeMillis();
                 solver.set(
-                new StrategiesSequencer(solver.getEnvironment(),
-                        strategy, StrategyFactory.random(ivars, solver.getEnvironment()))
+                        new StrategiesSequencer(solver.getEnvironment(),
+                        strategy,
+                                StrategyFactory.random(ivars, solver.getEnvironment(), t))
                 );
 
+                System.out.println("% t:"+t);
             }
         } else {
             LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");

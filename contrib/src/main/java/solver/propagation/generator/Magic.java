@@ -26,10 +26,10 @@
  */
 package solver.propagation.generator;
 
+import solver.Configuration;
 import solver.exception.ContradictionException;
 import solver.propagation.ISchedulable;
 import solver.propagation.queues.DoubleMinHeap;
-import solver.recorders.IEventRecorder;
 import solver.search.loop.AbstractSearchLoop;
 
 /**
@@ -148,7 +148,7 @@ public final class Magic<S extends ISchedulable> extends PropagationStrategy<S> 
         while (!toPropagate.isEmpty()) {
             int idx = toPropagate.removemin();
             lastPopped = elements[idx];
-            if (IEventRecorder.LAZY) {
+            if (Configuration.LAZY_UPDATE) {
                 lastPopped.flush();
             }
             lastPopped.deque();
