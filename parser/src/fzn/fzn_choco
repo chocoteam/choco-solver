@@ -92,7 +92,7 @@ then
     echo "No flatzinc file found"
     exit 1
 else
-    ARGS="-f $FILE -tl $TIME_LIMIT -p $NB_NODES"
+    ARGS="$FILE -tl $TIME_LIMIT -p $NB_NODES"
 fi
 
 if test "$STOP_AT_FIRST" = "no"

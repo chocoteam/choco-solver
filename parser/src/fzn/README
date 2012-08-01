@@ -1,4 +1,8 @@
 
 1. Untar the choco.tar into the directory <dir>
-2   a. Call fzn_choco with the option "-c" set to <dir>
-    b. OR directly override the variable CHOCO_PATH to <dir> in the fzn_choco script
+2. Options of fzn_choco can be printed using "-h" option
+    a. the option "-c <dir>" must be passed
+    b. the default time limit is set to 900000ms
+
+Example:
+    fzn_choco --time-limit 900000 -c . /usr/local/minizinc-1.5.1/benchmarks/alpha/alpha.fzn

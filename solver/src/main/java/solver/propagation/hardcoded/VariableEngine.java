@@ -79,9 +79,9 @@ public class VariableEngine implements IPropagationEngine {
         this.environment = solver.getEnvironment();
 
         variables = solver.getVars();
-        int maxID = variables[0].getId();
-        for (int i = 1; i < variables.length; i++) {
-            if (maxID < variables[i].getId()) {
+        int maxID = 0;
+        for (int i = 0; i < variables.length; i++) {
+            if (maxID == 0 || maxID < variables[i].getId()) {
                 maxID = variables[i].getId();
             }
         }
