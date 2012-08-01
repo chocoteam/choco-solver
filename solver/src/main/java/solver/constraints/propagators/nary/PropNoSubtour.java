@@ -45,6 +45,8 @@ import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -57,6 +59,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
     //***********************************************************************************
 
     int n;
+    int offset = 0; // lower bound
     private IStateInt[] origin, end, size;
 
     //***********************************************************************************
@@ -72,6 +75,19 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
      * @param solver
      */
     public PropNoSubtour(V[] vars, Solver solver, Constraint constraint) {
+        this(vars, 0, solver, constraint);
+    }
+
+    /**
+     * Ensures that graph has no subcircuit, with Caseaux/Laburthe/Pesant algorithm
+     * runs incrementally in O(1) per instantiation event
+     *
+     * @param vars
+     * @param offset
+     * @param constraint
+     * @param solver
+     */
+    public PropNoSubtour(V[] vars, int offset, Solver solver, Constraint constraint) {
         super(vars, solver, constraint, PropagatorPriority.UNARY, true);
         n = vars.length;
         origin = new IStateInt[n];
@@ -82,6 +98,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
             end[i] = environment.makeInt(i);
             size[i] = environment.makeInt(1);
         }
+        this.offset = offset;
     }
 
     //***********************************************************************************
@@ -92,26 +109,33 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-			vars[i].removeValue(i,this);
-			vars[i].updateLowerBound(0,this);
-			vars[i].updateUpperBound(n-1,this);
+            vars[i].removeValue(i + offset, this);
+            vars[i].updateLowerBound(offset, this);
+            vars[i].updateUpperBound(n - 1 + offset, this);
             if (vars[i].instantiated()) {
                 fixedVar.add(i);
             }
         }
         for (int i = 0; i < fixedVar.size(); i++) {
-            varInstantiated(fixedVar.get(i), vars[fixedVar.get(i)].getValue());
+            varInstantiated(fixedVar.get(i), vars[fixedVar.get(i)].getValue() - offset);
         }
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-        varInstantiated(idxVarInProp, vars[idxVarInProp].getValue());
+        varInstantiated(idxVarInProp, vars[idxVarInProp].getValue() - offset);
     }
 
+    /**
+     * var in [0,n-1] and val in [0,n-1]
+     *
+     * @param var origin
+     * @param val dest
+     * @throws ContradictionException
+     */
     private void varInstantiated(int var, int val) throws ContradictionException {
-        int last = end[val].get();
-        int start = origin[var].get();
+        int last = end[val].get(); // last in [0,n-1]
+        int start = origin[var].get(); // start in [0,n-1]
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
@@ -122,10 +146,10 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
         } else {
             size[start].add(size[val].get());
             if (size[start].get() == n) {
-                vars[last].instantiateTo(start, this);
+                vars[last].instantiateTo(start + offset, this);
             }
             if (size[start].get() < n) {
-                vars[last].removeValue(start, this);
+                vars[last].removeValue(start + offset, this);
             }
             origin[last].set(start);
             end[start].set(last);
@@ -149,7 +173,7 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
         int size = 0;
         while (size != n) {
             size++;
-            i = vars[i].getValue();
+            i = vars[i].getValue() - offset;
             if (visited.get(i)) {
                 return ESat.FALSE;
             }
@@ -160,5 +184,10 @@ public class PropNoSubtour<V extends IntVar> extends Propagator<V> {
         } else {
             return ESat.FALSE;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "PropNoSubTour(" + Arrays.toString(vars) + ")";
     }
 }

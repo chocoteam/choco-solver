@@ -49,129 +49,136 @@ import solver.variables.IntVar;
 
 /**
  * PropIndexValue(vars,nb) ensures that the number of variable such that vars[i] = i is equal to nb
- *
+ * <p/>
  * can be used within the SubCircuit constraint for instance: a subcircuit of length k involves n-k loops
+ *
  * @author Jean-Guillaume Fages
  */
 public class PropIndexValue extends Propagator<IntVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private int n;
-	private IntVar nb;
-	private IStateInt minLoops, maxLoops;
-	private IStateBool[] possible;
+    private int n;
+    private int offset; // lower bound
+    private IntVar nb;
+    private IStateInt minLoops, maxLoops;
+    private IStateBool[] possible;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropIndexValue(IntVar[] vars, IntVar nb, Constraint constraint, Solver solver) {
-		super(ArrayUtils.append(vars,new IntVar[]{nb}), solver, constraint, PropagatorPriority.LINEAR, true);
-		n = vars.length;
-		this.nb = nb;
-		minLoops = environment.makeInt();
-		maxLoops = environment.makeInt();
-		possible = new IStateBool[n];
-		for(int i=0;i<n;i++){
-			possible[i] = environment.makeBool(false);
-		}
-	}
+    public PropIndexValue(IntVar[] vars, IntVar nb, Constraint constraint, Solver solver) {
+        this(vars, 0, nb, constraint, solver);
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    public PropIndexValue(IntVar[] vars, int offset, IntVar nb, Constraint constraint, Solver solver) {
+        super(ArrayUtils.append(vars, new IntVar[]{nb}), solver, constraint, PropagatorPriority.LINEAR, true);
+        n = vars.length;
+        this.nb = nb;
+        this.offset = offset;
+        minLoops = environment.makeInt();
+        maxLoops = environment.makeInt();
+        possible = new IStateBool[n];
+        for (int i = 0; i < n; i++) {
+            possible[i] = environment.makeBool(false);
+        }
+    }
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int min = 0;
-		int max = 0;
-		boolean b;
-		for (int i = 0; i < n; i++) {
-			b = vars[i].contains(i);
-			possible[i].set(b);
-			if (b) {
-				max++;
-				if(vars[i].instantiated()){
-					min++;
-				}
-			}
-		}
-		minLoops.set(min);
-		maxLoops.set(max);
-		filter();
-	}
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	private void filter() throws ContradictionException {
-		int min = minLoops.get();
-		int max = maxLoops.get();
-		nb.updateLowerBound(min,this);
-		nb.updateUpperBound(max,this);
-		if(min!=max && nb.instantiated()){
-			if(min==nb.getValue()){
-				for (int i = 0; i < n; i++) {
-					if (!vars[i].instantiated()) {
-						vars[i].removeValue(i,this);
-					}
-				}
-				maxLoops.set(min);
-				setPassive();
-			}else if(max==nb.getValue()){
-				for (int i = 0; i < n; i++) {
-					if (vars[i].contains(i)) {
-						vars[i].instantiateTo(i,this);
-					}
-				}
-				minLoops.set(max);
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int min = 0;
+        int max = 0;
+        boolean b;
+        for (int i = 0; i < n; i++) {
+            b = vars[i].contains(i + offset);
+            possible[i].set(b);
+            if (b) {
+                max++;
+                if (vars[i].instantiated()) {
+                    min++;
+                }
+            }
+        }
+        minLoops.set(min);
+        maxLoops.set(max);
+        filter();
+    }
 
-	@Override
-	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(idxVarInProp<n){
-			// il avait une boucle avant
-			if(possible[idxVarInProp].get()){
-				IntVar v = vars[idxVarInProp];
-				if(v.instantiated() && v.getValue()==idxVarInProp){
-					minLoops.add(1);
-				}
-				boolean b = v.contains(idxVarInProp);
-				if(!b){
-					maxLoops.add(-1);
-					possible[idxVarInProp].set(false);
-				}
-			}
-		}
-		filter();
-	}
+    private void filter() throws ContradictionException {
+        int min = minLoops.get();
+        int max = maxLoops.get();
+        nb.updateLowerBound(min, this);
+        nb.updateUpperBound(max, this);
+        if (min != max && nb.instantiated()) {
+            if (min == nb.getValue()) {
+                for (int i = 0; i < n; i++) {
+                    if (!vars[i].instantiated()) {
+                        vars[i].removeValue(i + offset, this);
+                    }
+                }
+                maxLoops.set(min);
+                setPassive();
+            } else if (max == nb.getValue()) {
+                for (int i = 0; i < n; i++) {
+                    if (vars[i].contains(i)) {
+                        vars[i].instantiateTo(i + offset, this);
+                    }
+                }
+                minLoops.set(max);
+                setPassive();
+            }
+        }
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return EventType.INT_ALL_MASK();
-	}
+    @Override
+    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+        if (idxVarInProp < n) {
+            // il avait une boucle avant
+            if (possible[idxVarInProp].get()) {
+                IntVar v = vars[idxVarInProp];
+                if (v.instantiated() && v.getValue() == idxVarInProp + offset) {
+                    minLoops.add(1);
+                }
+                boolean b = v.contains(idxVarInProp + offset);
+                if (!b) {
+                    maxLoops.add(-1);
+                    possible[idxVarInProp].set(false);
+                }
+            }
+        }
+        filter();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int min = 0;
-		int max = 0;
-		for (int i = 0; i < n; i++) {
-			if (vars[i].contains(i)) {
-				max++;
-				if(vars[i].instantiated()){
-					min++;
-				}
-			}
-		}
-		if(min>nb.getUB() || max<nb.getLB()){
-			return ESat.FALSE;
-		}
-		if(isCompletelyInstantiated()){
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return EventType.INT_ALL_MASK();
+    }
+
+    @Override
+    public ESat isEntailed() {
+        int min = 0;
+        int max = 0;
+        for (int i = 0; i < n; i++) {
+            if (vars[i].contains(i + offset)) {
+                max++;
+                if (vars[i].instantiated()) {
+                    min++;
+                }
+            }
+        }
+        if (min > nb.getUB() || max < nb.getLB()) {
+            return ESat.FALSE;
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }
