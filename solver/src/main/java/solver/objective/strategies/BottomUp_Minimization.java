@@ -51,6 +51,7 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 	private int val;
 	private PoolManager<FastDecision> pool;
 	private boolean firstCall;
+	private int UB;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -61,6 +62,9 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 		this.obj = obj;
 		firstCall = true;
 		pool = new PoolManager<FastDecision>();
+		// waits a first solution before triggering the bottom-up minimization
+		obj.getSolver().getSearchLoop().restartAfterEachSolution(true);
+		obj.getSolver().getSearchLoop().getLimitsBox().setSolutionLimit(2);
 	}
 
 	//***********************************************************************************
@@ -72,12 +76,19 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 
 	@Override
 	public Decision getDecision() {
+		if(obj.getSolver().getMeasures().getSolutionCount()==0){
+			return null;
+		}
 		if(obj.instantiated()){
 			return null;
 		}
 		if(firstCall){
 			firstCall = false;
 			val = obj.getLB();
+			UB = obj.getUB();
+		}
+		if(val>UB){
+			return null;
 		}
 		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val);
 		FastDecision dec = pool.getE();

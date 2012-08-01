@@ -51,6 +51,7 @@ public class TopDown_Maximization extends AbstractStrategy<IntVar> {
 	private int val;
 	private PoolManager<FastDecision> pool;
 	private boolean firstCall;
+	private int LB;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -61,6 +62,9 @@ public class TopDown_Maximization extends AbstractStrategy<IntVar> {
 		this.obj = obj;
 		firstCall = true;
 		pool = new PoolManager<FastDecision>();
+		// waits a first solution before triggering the top-down maximization
+		obj.getSolver().getSearchLoop().restartAfterEachSolution(true);
+		obj.getSolver().getSearchLoop().getLimitsBox().setSolutionLimit(2);
 	}
 
 	//***********************************************************************************
@@ -78,6 +82,10 @@ public class TopDown_Maximization extends AbstractStrategy<IntVar> {
 		if(firstCall){
 			firstCall = false;
 			val = obj.getUB();
+			LB = obj.getLB();
+		}
+		if(val<LB){
+			return null;
 		}
 		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val);
 		FastDecision dec = pool.getE();
