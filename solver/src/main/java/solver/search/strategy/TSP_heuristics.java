@@ -35,6 +35,7 @@
 package solver.search.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import samples.graph.DCMST;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.assignments.GraphAssignment;
@@ -210,10 +211,19 @@ public enum TSP_heuristics {
 //			int currentNode = getNextSparseNode(g,n);
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
 			int maxE = -1;
+			int minCost = 0;
+//			boolean lowCost = DCMST.solver.getMeasures().getSolutionCount()==0;
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!g.getKernelGraph().arcExists(currentNode,j)){
-					if(maxE == -1 || e[maxE]<e[j]){
+//					boolean ok = (lowCost && DCMST.dist[currentNode][j]<minCost)
+//							|| (DCMST.dist[currentNode][j]>minCost && !lowCost);
+					if(maxE == -1 || e[maxE]<e[j]
+
+					|| (e[maxE]==e[j] && DCMST.dist[currentNode][j]<minCost)
+//					|| (e[maxE]==e[j] && ok)
+						){
 						maxE=j;
+						minCost = DCMST.dist[currentNode][j];
 					}
 				}
 			}
