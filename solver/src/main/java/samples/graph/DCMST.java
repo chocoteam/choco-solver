@@ -96,7 +96,7 @@ public class DCMST {
 
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
-		bench("D");
+		bench("DR");
 	}
 
 	public static void bench(String type) {
@@ -345,8 +345,7 @@ public class DCMST {
 		AbstractStrategy strat = new Change(undi,firstSol,proveOpt);
 		switch (search){
 			case 0: solver.set(proveOpt);break;
-			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));
-				break;
+			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
 			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
 			default: throw new UnsupportedOperationException();
 		}
