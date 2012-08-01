@@ -5,6 +5,12 @@
 %-----------------------------------------------------------------------------%
 predicate inverse(array[int] of var int: f,
                   array[int] of var int: invf) =
+%    forall(i in index_set(f), j in index_set(invf)) (
+%               f[i] in index_set(invf) /\
+%            invf[j] in index_set(f   ) /\
+%            (j == f[i] <-> i == invf[j])
+%        );
+%
     inverseChoco(f, invf);
 
 % The implementation of the constraint in the choco solver.
