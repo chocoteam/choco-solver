@@ -100,13 +100,14 @@ public class ParseAndSolve {
             parser.parse();
             LOGGER.info("% solve instance...");
             final Solver solver = parser.solver;
-//        System.out.printf("%s\n", solver.toString());
             if (solver.getNbCstrs() > solver.getNbVars()) {
                 solver.set(new VariableEngine(solver));
+//                solver.set(new EightQueuesVariableEngine(solver));
             } else {
                 solver.set(new ConstraintEngine(solver));
+//                solver.set(new EightQueuesConstraintEngine(solver));
             }
-            /*int p = 0;
+            /*int p = 2;
             switch (p) {
                 case 0:
                     solver.set(new ConstraintEngine(solver));
@@ -118,9 +119,15 @@ public class ParseAndSolve {
                     solver.set(new SevenQueuesConstraintEngine(solver));
                     break;
                 case 3:
+                    solver.set(new EightQueuesConstraintEngine(solver));
+                    break;
+                case 5:
+                    solver.set(new EightQueuesVariableEngine(solver));
+                    break;
+                case 6:
                     solver.set(new ABConstraintEngine(solver));
                     break;
-                case 4:
+                case 7:
                     IPropagationEngine pe = new PropagationEngine(solver.getEnvironment());
                     PropagationStrategies.TWO_QUEUES_WITH_ARCS.make(solver, pe);
                     solver.set(pe);
