@@ -305,7 +305,7 @@ public class DegreeConstraintMinimumSpanningTree {
 		gc.addPropagators(PropSymmetricHeldKarp.oneTreeBasedRelaxation(undi, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
-		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse, null);
+		AbstractStrategy strat = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_sparse_corrected, null);
 		switch (search){
 			case 0: solver.set(strat);break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;

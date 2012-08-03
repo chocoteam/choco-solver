@@ -34,11 +34,8 @@ import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.flow.PropGCC_LowUp_undirected;
-import solver.constraints.propagators.gary.flow.PropGCC_cost_LowUp_undirected;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropIterativeMST;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
 import solver.objective.strategies.BottomUp_Minimization;
 import solver.objective.strategies.Dichotomic_Minimization;
@@ -49,7 +46,6 @@ import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.TSP_heuristics;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
@@ -60,7 +56,6 @@ import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-
 import java.io.*;
 
 /**
@@ -78,14 +73,15 @@ public class DCMST {
 	private static String instanceName;
 	private static int n,nMin,nMax;
 	private static int[] dMax;
-	public static int[][] dist;
+	private static int[][] dist;
 	// model
-	public static IntVar totalCost;
-	public static Solver solver;
+	private static IntVar totalCost;
+	private static Solver solver;
 	private static int search;
 	private static int lb,ub;
 	// other
-	private static final long TIMELIMIT = 14400000;
+	private static final long TIMELIMIT = 100000;
+	//	private static final long TIMELIMIT = 14400000;
 	private static String outFile;
 	private static PropTreeHeldKarp hk;
 	private static final boolean optGiven = false;
@@ -96,7 +92,7 @@ public class DCMST {
 
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
-		bench("DR");
+		bench("DE");
 	}
 
 	public static void bench(String type) {
@@ -264,11 +260,11 @@ public class DCMST {
 		solver = new Solver();
 		// variables
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
-		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
-				if(dist[i][j]!=-1){
+				if(dist[i][j]!=-1 && !(dMax[i]==1 && dMax[j]==1)){
 					undi.getEnvelopGraph().addEdge(i,j);
 				}
 			}
@@ -281,30 +277,10 @@ public class DCMST {
 		gc.addPropagators(new PropKCC(undi, solver, gc, VariableFactory.bounded("1",1,1,solver)));
 		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, dist, gc, solver));
 
-		//		// GCC
-//		int[] low = new int[n*2];
-//		int[] up = new int[n*2];
-//		int[][] costMatrix = new int[n*2][n*2];
-//		for(int i=0;i<n;i++){
-//			low[i] = up[i] = 1;
-//			low[i+n] = 0;
-//			up[i+n] = dMax[i]-1;
-//			INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//				costMatrix[i][j+n] = costMatrix[j+n][i] = costMatrix[i+n][j] = costMatrix[j][i+n] = dist[i][j];
-//			}
-//		}
-//		low[0] = up[0] = 0;
-//		low[n] = 1;
-//		up[n] = dMax[0];
-//		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
-//		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
-
 		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk);
-
-//		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
+		solver.post(gc);
 
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
@@ -324,27 +300,12 @@ public class DCMST {
 			}
 		});
 
-
-//		// cost-GCC
-//		gc.addPropagators(new PropGCC_cost_LowUp_undirected(undi, flow, totalCost,
-//				costMatrix,low, up, gc, solver));
-
-		solver.post(gc);
-
 		// config
-//		AbstractStrategy strat = StrategyFactory.graphStrategy(undi,null,new MySearch(undi), GraphStrategy.NodeArcPriority.ARCS);
-		AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi,null,new MinCost(undi), GraphStrategy.NodeArcPriority.ARCS);
-//		AbstractStrategy middle   = StrategyFactory.graphStrategy(undi,null,new MaxRC(undi), GraphStrategy.NodeArcPriority.ARCS);
-		AbstractStrategy proveOpt = StrategyFactory.graphTSP(undi, TSP_heuristics.enf_multisparse, null);
-//		AbstractStrategy strat = StrategyFactory.graphLexico(undi);
-//		middle = proveOpt;
-//		proveOpt = firstSol;
-
-//		proveOpt = StrategyFactory.graphStrategy(undi,null,new Lex(undi), GraphStrategy.NodeArcPriority.ARCS);
-
-		AbstractStrategy strat = new Change(undi,firstSol,proveOpt);
+		AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi,null,new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
+		AbstractStrategy findOpt = StrategyFactory.graphStrategy(undi, null, new MST_MinDeg(undi), GraphStrategy.NodeArcPriority.ARCS);
+		AbstractStrategy strat = new Change(undi,firstSol,findOpt);
 		switch (search){
-			case 0: solver.set(proveOpt);break;
+			case 0: solver.set(findOpt);break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
 			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
 			default: throw new UnsupportedOperationException();
@@ -361,14 +322,6 @@ public class DCMST {
 		if(solver.getMeasures().getSolutionCount()>1){
 //			throw new UnsupportedOperationException();
 		}
-//		int narc = 0;
-//		for(int i=0;i<n;i++){
-//			narc += undi.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-//		}
-//		narc /= 2;
-//		System.out.println("%%%%%%%%%%%");
-//		System.out.println("M : "+narc);
-//		System.out.println("%%%%%%%%%%%");
 		//output
 		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" + solver.getMeasures().getFailCount() + ";"
@@ -376,150 +329,9 @@ public class DCMST {
 		HCP_Parser.writeTextInto(txt, outFile);
 	}
 
-	private static class MinKerDeg extends ArcStrategy<UndirectedGraphVar>{
+	private static class MST_MinDeg extends ArcStrategy<UndirectedGraphVar>{
 
-		public MinKerDeg (UndirectedGraphVar g){
-			super(g);
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			return milleFeuille();
-//			return biggest();
-		}
-
-		private boolean milleFeuille(){
-			int minK = n;
-			int minE = n+1;
-			int ker,env;
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				env = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(env!=ker){
-					if(ker<minK){
-						minK = ker;
-						minE = env;
-					}else if(ker==minK && env<minE){
-						minE = env;
-					}
-				}
-			}
-			if(minE == minK){
-				from = to = -1;
-				return false;
-			}
-			int cost;
-			int minCost = 0;
-			from = -1;
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				env = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(ker==minK && env == minE){
-					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							cost = dist[i][j];
-							if(from==-1 || cost<minCost){
-								minCost = cost;
-								this.from = i;
-								this.to = j;
-							}
-						}
-					}
-				}
-			}
-			if(from==-1){
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
-
-		private boolean biggest(){
-			int deltaMax = 0;
-			int delta;
-			for(int i=0;i<n;i++){
-				delta = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-						-g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(delta>deltaMax){
-					deltaMax = delta;
-				}
-			}
-			if(deltaMax==0){
-				from = to = -1;
-				return false;
-			}
-			int cost;
-			int minCost = 0;
-			from = -1;
-			for(int i=0;i<n;i++){
-				delta = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-						-g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(delta==deltaMax){
-					INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							cost = dist[i][j];
-							if(from==-1 || cost<minCost){
-								minCost = cost;
-								this.from = i;
-								this.to = j;
-							}
-						}
-					}
-				}
-			}
-			if(from==-1){
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
-	}
-	private static class MySearch extends ArcStrategy<UndirectedGraphVar>{
-
-		public MySearch (UndirectedGraphVar g){
-			super(g);
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			int deltaMin = n+1;
-			int ker,env;
-			from = -1;
-			to = -1;
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
-				env = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(env!=ker){
-					if(dMax[i]-ker<deltaMin){
-						deltaMin = dMax[i]-ker;
-						from = i;
-					}
-				}
-			}
-			if(from==-1){
-				return false;
-			}
-			int cost;
-			int minCost = 0;
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!g.getKernelGraph().arcExists(from,j)){
-					cost = dist[from][j];
-					if(to==-1 || cost<minCost){
-						minCost = cost;
-						to = j;
-					}
-				}
-			}
-			if(from==-1 || to ==-1){
-				throw new UnsupportedOperationException();
-			}
-			return true;
-		}
-	}
-	private static class MaxRC extends ArcStrategy<UndirectedGraphVar>{
-
-		public MaxRC (UndirectedGraphVar g){
+		public MST_MinDeg (UndirectedGraphVar g){
 			super(g);
 		}
 
@@ -527,31 +339,51 @@ public class DCMST {
 		public boolean computeNextArc() {
 			from = -1;
 			to = -1;
-			double cost,bestCost=0;
+			minDelta();
+			if(from==-1){
+				return false;
+			}
+			return true;
+		}
+
+		private void minDelta(){
 			INeighbors nei;
+			int minDelta = 5*n;
 			for(int i=0;i<n;i++){
 				nei = hk.getMST().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(!g.getKernelGraph().arcExists(i,j)){
-						cost = dist[i][j];//hk.getReplacementCost(i,j);
-						if(from==-1 || cost<bestCost){
-							bestCost = cost;
-							from = i;
-							to = j;
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							if(dMax[i]-k<minDelta){
+								minDelta = dMax[i]-k;
+							}
 						}
 					}
-				}
 			}
-			if(from==-1){
-				return false;
+			int minDeg = 0;//3*n;
+			for(int i=0;i<n;i++){
+				nei = hk.getMST().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							if(d>minDeg){
+								minDeg = d;
+								from = i;
+								to = j;
+							}
+						}
+					}
 			}
-			return true;
 		}
 	}
 
-	private static class MinCost extends ArcStrategy<UndirectedGraphVar>{
+	private static class FirstSol extends ArcStrategy<UndirectedGraphVar>{
 
-		public MinCost (UndirectedGraphVar g){
+		public FirstSol (UndirectedGraphVar g){
 			super(g);
 		}
 
@@ -561,6 +393,23 @@ public class DCMST {
 			to = -1;
 			int minCost = 0;
 			INeighbors env,ker;
+
+			for(int i=0;i<n;i++){
+				ker = g.getKernelGraph().getSuccessorsOf(i);
+				env = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(ker.neighborhoodSize()==0){
+					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
+						int cost = dist[i][j];
+						if(to==-1 || cost<minCost){
+							minCost = cost;
+							from = i;
+							to = j;
+						}
+					}
+					return true;
+				}
+			}
+
 			for(int i=0;i<n;i++){
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -608,27 +457,25 @@ public class DCMST {
 		}
 	}
 
-	private static class Lex extends ArcStrategy<UndirectedGraphVar>{
-
-		public Lex (UndirectedGraphVar g){
-			super(g);
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			for(int i=0;i<n;i++){
-				for(int j=i+1;j<n;j++){
-					if(!g.getKernelGraph().arcExists(i,j)){
-						if(g.getEnvelopGraph().arcExists(i,j)){
-							from = i;
-							to = j;
-							return true;
-						}
-					}
-				}
-			}
-			from = to = -1;
-			return false;
-		}
-	}
+//		// GCC
+//		int[] low = new int[n*2];
+//		int[] up = new int[n*2];
+//		int[][] costMatrix = new int[n*2][n*2];
+//		for(int i=0;i<n;i++){
+//			low[i] = up[i] = 1;
+//			low[i+n] = 0;
+//			up[i+n] = dMax[i]-1;
+//			INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(i);
+//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//				costMatrix[i][j+n] = costMatrix[j+n][i] = costMatrix[i+n][j] = costMatrix[j][i+n] = dist[i][j];
+//			}
+//		}
+//		low[0] = up[0] = 0;
+//		low[n] = 1;
+//		up[n] = dMax[0];
+//		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
+//		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
+//		// cost-GCC
+//		gc.addPropagators(new PropGCC_cost_LowUp_undirected(undi, flow, totalCost,
+//		costMatrix,low, up, gc, solver));
 }
