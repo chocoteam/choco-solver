@@ -92,6 +92,10 @@ public class Dichotomic_Maximization extends AbstractStrategy<IntVar> {
 			nbSols = solver.getMeasures().getSolutionCount();
 			lb = obj.getLB();
 			ub = Math.min(ub,obj.getUB());//check
+			if(lb>ub){// we should post a cut instead
+				solver.getSearchLoop().interrupt();
+				return null;
+			}
 			int target = (lb+ub)/2;
 			System.out.println(lb+" : "+ub+" -> "+target);
 			FastDecision dec = pool.getE();
