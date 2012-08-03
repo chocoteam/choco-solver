@@ -35,9 +35,7 @@
 package solver.search.strategy;
 
 import choco.kernel.common.util.PoolManager;
-import samples.graph.DCMST;
 import solver.constraints.propagators.gary.IRelaxation;
-import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -77,7 +75,7 @@ public enum TSP_heuristics {
 		}
 	},
 
-	enf_sparse  {
+	enf_sparse_CP12  {
 
 		private int currentNode;
 		
@@ -155,7 +153,7 @@ public enum TSP_heuristics {
 		}
 	},
 
-	enf_multisparse  {
+	enf_sparse_corrected  {
 
 		private int currentNode;
 
@@ -167,16 +165,15 @@ public enum TSP_heuristics {
 			int si;
 			for (int i = 0; i < n; i++) {
 				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-				if(si<s && si!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+				if(si<s && si>2){
 					s = si;
 				}
 			}
 			for (int i = 0; i < n; i++) {
 				e[i] = 0;
 				nei = g.getEnvelopGraph().getPredecessorsOf(i);
-				for(int j=0;j<n;j++){
-					if(nei.neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
-					&& g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
 						e[i]++;
 					}
 				}
@@ -185,11 +182,10 @@ public enum TSP_heuristics {
 			int score;
 			int node = -1;
 			for (int i = 0; i < n; i++) {
-				nei = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(nei.neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
-					&& g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					score = 0;
-					for(int j=0;j<n;j++){
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						score += e[j];
 					}
 					if(score>bestScore){
@@ -205,25 +201,15 @@ public enum TSP_heuristics {
 		}
 
 		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
-			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize() == g.getKernelGraph().getSuccessorsOf(currentNode).neighborhoodSize()){
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==2){
 				currentNode = getNextSparseNode(g,n);
 			}
-//			int currentNode = getNextSparseNode(g,n);
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
 			int maxE = -1;
-			int minCost = 0;
-//			boolean lowCost = DCMST.solver.getMeasures().getSolutionCount()==0;
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(!g.getKernelGraph().arcExists(currentNode,j)){
-//					boolean ok = (lowCost && DCMST.dist[currentNode][j]<minCost)
-//							|| (DCMST.dist[currentNode][j]>minCost && !lowCost);
-					if(maxE == -1 || e[maxE]<e[j]
-
-					|| (e[maxE]==e[j] && DCMST.dist[currentNode][j]<minCost)
-//					|| (e[maxE]==e[j] && ok)
-						){
+					if(maxE == -1 || e[maxE]<e[j]){
 						maxE=j;
-						minCost = DCMST.dist[currentNode][j];
 					}
 				}
 			}
@@ -242,6 +228,127 @@ public enum TSP_heuristics {
 			e = new int[n];
 			currentNode = -1;
 		}
+	},
+
+	enf_multisparse_corrected  {
+
+		private int currentNode;
+
+		private int[] e;
+
+		private int getNextSparseNode(UndirectedGraphVar g, int n) {
+			INeighbors nei;
+			int s = n;
+			int si;
+			for (int i = 0; i < n; i++) {
+				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(si<s && si>g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()){
+					s = si;
+				}
+			}
+			for (int i = 0; i < n; i++) {
+				e[i] = 0;
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+						e[i]++;
+					}
+				}
+			}
+			int bestScore = -1;
+			int score;
+			int node = -1;
+			for (int i = 0; i < n; i++) {
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
+					score = 0;
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						score += e[j];
+					}
+					if(score>bestScore){
+						bestScore = score;
+						node = i;
+					}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==
+								   g.getKernelGraph().getSuccessorsOf(currentNode).neighborhoodSize()){
+				currentNode = getNextSparseNode(g,n);
+			}
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			int maxE = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!g.getKernelGraph().arcExists(currentNode,j)){
+					if(maxE == -1 || e[maxE]<e[j]){
+						maxE=j;
+					}
+				}
+			}
+			if(maxE==-1){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.setArc(g,currentNode, maxE, GraphAssignment.graph_enforcer);
+			return fd;
+		}
+
+		public void init(UndirectedGraphVar g, int n){
+			e = new int[n];
+			currentNode = -1;
+		}
+	},
+
+	enf_DCMST  {
+
+		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			INeighbors nei;
+			int minDelta = 5*n;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							if(2-k<minDelta){
+								minDelta = 2-k;
+							}
+						}
+					}
+			}
+			int minDeg = 0;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(nei.neighborhoodSize()!=k && 2-k==minDelta)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							if(d>minDeg){
+								minDeg = d;
+								fd.setArc(g,i,j, GraphAssignment.graph_enforcer);
+							}
+						}
+					}
+			}
+			return fd;
+		}
+
+		public void init(UndirectedGraphVar g, int n){}
 	};
 
 	public abstract Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool);
