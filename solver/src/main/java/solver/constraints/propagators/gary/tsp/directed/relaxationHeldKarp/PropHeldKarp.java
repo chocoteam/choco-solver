@@ -122,18 +122,21 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		}
 		// initialisation
 		resetMA();
-		setupMatrix();
+		updateCostMatrix();
 		HK_Pascals();
+//		notLagrangian();
 	}
 
-	protected void setupMatrix() throws ContradictionException {
-		INeighbors nei;
-		for(int i=0;i<n;i++){
-			nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
-				costs[i][j] = originalCosts[i][j] + outPenalities[i] + inPenalities[j];
-			}
+
+	private void notLagrangian() throws ContradictionException {
+		HKfilter.computeMST(costs,g.getEnvelopGraph());
+		double hkb = HKfilter.getBound()-totalPenalities;
+		mst = HKfilter.getMST();
+		if(hkb-Math.floor(hkb)<0.001){
+			hkb = Math.floor(hkb);
 		}
+		obj.updateLowerBound((int)Math.ceil(hkb), this);
+		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 	}
 
 	protected void HK_Pascals() throws ContradictionException {
@@ -200,7 +203,7 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 			}
 			alpha *= beta;
 			beta  /= 2;
-			if(sccOf!=null)return;// not too heavy approach
+			//if(sccOf!=null)return;// not too heavy approach
 		}
 	}
 
@@ -224,6 +227,9 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		double target = obj.getUB();
 //		target = (obj.getUB()+obj.getLB())/2;
 		if(target-hkb<0){
+			if(hkb>target+0.1){
+				throw new UnsupportedOperationException();
+			}
 			target = hkb+0.1;
 		}
 		int inDeg,outDeg;
@@ -243,6 +249,12 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 			return;
 		}
 		step = alpha*(target-hkb)/nb2viol;
+		if(step<0.000001){
+			step = 0;
+		}
+		if(step>100){
+			step = 100;
+		}
 	}
 
 	protected void HKPenalities() {
@@ -251,16 +263,28 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		}
 		double totalPenalities = 0;
 		int inDeg,outDeg;
+//		double max = 10000;
 		for(int i=0;i<n;i++){
 			inDeg = mst.getPredecessorsOf(i).neighborhoodSize();
 			outDeg = mst.getSuccessorsOf(i).neighborhoodSize();
 			inPenalities[i] += (inDeg-1)*step;
+//			inPenalities[i] = Math.min(inPenalities[i], max);
+//			inPenalities[i] = Math.max(inPenalities[i],-max);
 			outPenalities[i]+= (outDeg-1)*step;
+//			outPenalities[i] = Math.min(outPenalities[i], max);
+//			outPenalities[i] = Math.max(outPenalities[i],-max);
 			totalPenalities += inPenalities[i]+outPenalities[i];
 		}
 		totalPenalities += 2*step;
 		inPenalities[source] = outPenalities[sink] = 0;
 		this.totalPenalities = totalPenalities;
+		double t = 0;
+		for(int i=0;i<n;i++){
+			t+=inPenalities[i]+outPenalities[i];
+		}
+		if(t!=totalPenalities){
+			this.totalPenalities = t;
+		}
 	}
 
 	protected void updateCostMatrix() {
@@ -269,6 +293,9 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				costs[i][j] = originalCosts[i][j] + outPenalities[i] + inPenalities[j];
+//				if(costs[i][j]>100000 || costs[i][j]<-100000){
+//					throw new UnsupportedOperationException();
+//				}
 			}
 		}
 	}

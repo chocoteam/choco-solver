@@ -37,6 +37,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.constraints.nary.lex.Lex;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.arborescences.PropAntiArborescence;
 import solver.constraints.propagators.gary.arborescences.PropArborescence;
@@ -62,6 +63,8 @@ import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.graph.ArcStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -78,19 +81,19 @@ import java.util.Random;
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class ATSP_CP12 {
+public class ATSP_ISMP {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
+	private static final long TIMELIMIT = 30000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
-	private static String instanceName;
-	private static int[][] distanceMatrix;
-	private static int n, noVal, optimum, initialUB;
+	public static String instanceName;
+	public static int[][] distanceMatrix;
+	public static int n, noVal, optimum, initialUB;
 	private static Solver solver;
 	// model
 	private static DirectedGraphVar graph;
@@ -109,10 +112,11 @@ public class ATSP_CP12 {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	private static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
-	private static int NB_PARAM = 5;
+	public static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
+	public static int NB_PARAM = 5;
 	private static BitSet config = new BitSet(NB_PARAM);
-	private static boolean bst;
+	public static boolean bst;
+	public static boolean khun;
 
 	public static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -152,7 +156,7 @@ public class ATSP_CP12 {
 		try {
 			for (int i = 0; i < n - 1; i++) {
 				graph.getKernelGraph().activateNode(i);
-				for (int j = 0; j < n; j++) {
+				for (int j = 1; j < n; j++) {
 					if (distanceMatrix[i][j] != noVal) {
 						graph.getEnvelopGraph().addArc(i, j);
 					}
@@ -186,7 +190,7 @@ public class ATSP_CP12 {
 
 		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
 		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
-		
+
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -245,32 +249,55 @@ public class ATSP_CP12 {
 			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
 		}
 		// COST BASED FILTERING
-		if(instanceName.contains("rbg")){
+		if(khun){
 			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
 			gc.addPropagators(map);
-			relax = map;
-		}else{
-			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-			gc.addPropagators(propHK_mst);
-			relax = propHK_mst;
+//			relax = map;
+		}
+// else{
+//			System.out.println("MST");
+//			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+//			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+//			gc.addPropagators(propHK_mst);
+//			relax = propHK_mst;
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
 				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_bst);
 			}
-		}
+			else{
+				System.out.println("MST");
+				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+				gc.addPropagators(propHK_mst);
+				relax = propHK_mst;
+			}
+//			System.out.println("MST");
+		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+		propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+		gc.addPropagators(propHK_mst);
+		relax = propHK_mst;
+//		}
 		solver.post(gc);
 	}
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
-		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
+		AbstractStrategy mainStrat = null;//StrategyFactory.graphATSP(graph, heuristic, relax);
+
+		switch(policy){
+			case 7 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, relax);break;
+			case 8 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse_corrected, relax);break;
+			case 9 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.sparse_corrected, relax);break;
+			default: mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy), GraphStrategy.NodeArcPriority.ARCS);
+		}
+
+//		mainStrat = StrategyFactory.graphStrategy(graph, null,new LexArcs(graph), GraphStrategy.NodeArcPriority.ARCS);
 
 //		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
 		solver.set(mainStrat);
+
 //		switch (main_search){
 //			case 0: solver.set(mainStrat);
 //				break;
@@ -280,7 +307,7 @@ public class ATSP_CP12 {
 //			default: throw new UnsupportedOperationException();
 //		}
 
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
 		PArc allArcs = new PArc(pengine, gc);
 		solver.set(pengine.set(new Sort(allArcs).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
@@ -289,6 +316,7 @@ public class ATSP_CP12 {
 				if(totalCost.instantiated()){
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
+//				solver.getSearchLoop().interrupt();
 			}
 //			public void onSolution() {
 //				System.out.println("youhou");
@@ -301,10 +329,15 @@ public class ATSP_CP12 {
 		//SOLVE
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
-			throw new UnsupportedOperationException();
+//			throw new UnsupportedOperationException();
 		}
 		// OUTPUT
-		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+//		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+		int bestCost = totalCost.getLB();
+		int m = 0;
+		for(int i=0;i<n;i++){
+			m+=graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+		}
 		String configst = "";
 		for(int i=0;i<NB_PARAM;i++){
 			if(config.get(i)){
@@ -320,7 +353,7 @@ public class ATSP_CP12 {
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost + ";"+searchMode[main_search]+";"+configst+"\n";
+				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
 		writeTextInto(txt, outFile);
 	}
 
@@ -329,14 +362,27 @@ public class ATSP_CP12 {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		outFile = "atsp_fast.csv";
-//		clearFile(outFile);
-//		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-//		bench();
+		resetFile();
+		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
-		trans();
+//		trans();
 
+	}
+
+	public static void resetFile() {
+		outFile = "atsp_fast.csv";
+		clearFile(outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+	}
+	public static void reset(int[][] m, String s, int p, int cp, int ub) {
+		distanceMatrix = m;
+		instanceName = s;
+		policy = p;
+		n = distanceMatrix.length;
+		configParameters(cp);
+		noVal = -1;
+		optimum = initialUB = ub;
 	}
 
 	private static void trans(){
@@ -390,6 +436,7 @@ public class ATSP_CP12 {
 		writeTextInto(s,file);
 	}
 
+	static int policy;
 	private static void bench() {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		File folder = new File(dir);
@@ -401,9 +448,14 @@ public class ATSP_CP12 {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
-				if(n>0 && n<170){// || s.contains("p43.atsp")){
+				if(n>0 && n<75){// || s.contains("p43.atsp")){
 					bst = false;
-//					configParameters(0);
+					configParameters(0);
+					for(int i=0;i<7;i++){
+						policy = i;
+						solve();
+					}
+//					configParameters((1<<pos));
 //					solve();
 //					configParameters((1<<arbo));
 //					solve();
@@ -411,15 +463,29 @@ public class ATSP_CP12 {
 //					solve();
 //					configParameters((1<<allDiff));
 //					solve();
-					bst = true;
-					configParameters((1<<rg));
-					solve();
+//					bst = true;
+//					configParameters((1<<pos)+(1<<rg));
+//					solve();
 //					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
 //					solve();
 				}
 			}
 		}
 	}
+	public final static int[] configs = new int[]{
+			0,
+			(1<<allDiff),
+			(1<<arbo),
+			(1<<pos),
+			(1<<rg),
+			(1<<rg)+(1<<arbo)+(1<<allDiff),
+			(1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff)
+	};
+	public final static int[] bstconfigs = new int[]{
+			(1<<rg),
+			(1<<rg)+(1<<arbo)+(1<<allDiff),
+			(1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff)
+	};
 
 	private static void bench_heur() {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
@@ -539,24 +605,24 @@ public class ATSP_CP12 {
 					}
 				}
 			}
-			//TODO add again
-//			noVal = distanceMatrix[0][0];
-//			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
-//			int maxVal = 0;
-//			for (int i = 0; i < n; i++) {
-//				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-//				distanceMatrix[n - 1][i] = noVal;
-//				distanceMatrix[i][0] = noVal;
-//				for (int j = 0; j < n; j++) {
-//					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-//						maxVal = distanceMatrix[i][j];
-//					}
-//				}
-//			}
-//			line = buf.readLine();
-//			line = buf.readLine();
-//			initialUB = maxVal*n;
-//			optimum = Integer.parseInt(line.replaceAll(" ", ""));
+			//TODO remove for atsp->tsp convertion
+			noVal = distanceMatrix[0][0];
+			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
+			int maxVal = 0;
+			for (int i = 0; i < n; i++) {
+				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
+				distanceMatrix[n - 1][i] = noVal;
+				distanceMatrix[i][0] = noVal;
+				for (int j = 0; j < n; j++) {
+					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
+						maxVal = distanceMatrix[i][j];
+					}
+				}
+			}
+			line = buf.readLine();
+			line = buf.readLine();
+			initialUB = maxVal*n;
+			optimum = Integer.parseInt(line.replaceAll(" ", ""));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -733,4 +799,22 @@ public class ATSP_CP12 {
 		}
 	}
 
+	private static class LexArcs extends ArcStrategy {
+		public LexArcs(DirectedGraphVar graph) {
+			super(graph);
+		}
+		public boolean computeNextArc(){
+			for(int i=0;i<n;i++){
+				for(int j=0;j<n;j++){
+					if(g.getEnvelopGraph().arcExists(i,j) && !g.getKernelGraph().arcExists(i,j)){
+						from = i;
+						to = j;
+						return true;
+					}
+				}
+			}
+			from = to = -1;
+			return false;
+		}
+	}
 }

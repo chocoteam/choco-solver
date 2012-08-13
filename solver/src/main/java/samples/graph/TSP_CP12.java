@@ -50,6 +50,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
 import solver.search.strategy.TSP_heuristics;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -67,7 +68,7 @@ public class TSP_CP12 {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 1800000;
+	private static final long TIMELIMIT = 100000;
 	private static final int MAX_SIZE = 600;
 	private static String outFile;
 	private static int upperBound = Integer.MAX_VALUE/4;
@@ -316,32 +317,43 @@ public class TSP_CP12 {
 		}
 	}
 
+	static int policy;
+
 	public static void bench() {
 		clearFile(outFile = "tsp.csv");
 		writeTextInto("instance;sols;fails;nodes;time;obj;allDiffAC;search;\n", outFile);
 		String dir = "/Users/jfages07/github/In4Ga/benchRousseau";
-//		String dir = "/Users/jfages07/github/In4Ga/mediumTSP/OneMinute";
+//		String dir = "/Users/jfages07/github/In4Ga/mediumTSP";
 		File folder = new File(dir);
 		String[] list = folder.list();
 		int[][] matrix;
 		optProofOnly = true;
 		allDiffAC = false;
 		search = 0;
-		heuristic = TSP_heuristics.enf_sparse;
+		heuristic = TSP_heuristics.enf_node_arc_tests;
 //		boolean pursue = true;//false;
+		int[] pol = new int[]{4};
+		ATSP_ISMP.resetFile();
 		for (String s : list) {
 //			if (s.contains("lin318")){
 //				pursue = true;
 //			}
 //			if(pursue)
-			if (s.contains(".tsp") && (!s.contains("a280")) && (!s.contains("gil262")) && (!s.contains("gz")) && (!s.contains("lin"))){
+//			if(s.contains("pr299"))
+			if (s.contains(".tsp") && (!s.contains("gz")) && (!s.contains("lin"))){
 				matrix = parseInstance(dir + "/" + s);
-				if((matrix!=null && matrix.length>=0 && matrix.length<300)){
+				if((matrix!=null && matrix.length>=0 && matrix.length<400)){
 					if(optProofOnly){
 						setUB(s.split("\\.")[0]);
 						System.out.println("optimum : "+upperBound);
 					}
-					solveUndirected(matrix, s);
+					for(int i:pol){
+						policy = i;
+//						solveUndirected(matrix, s);
+//						allDiffAC = true;
+//						solveDirected(matrix,s);
+						solveATSP(matrix,s);
+					}
 //					degHeur = false;
 //					solveUndirected(matrix, s);
 //					System.exit(0);
@@ -408,7 +420,11 @@ public class TSP_CP12 {
 		if(search!=0){
 			throw new UnsupportedOperationException("not implemented");
 		}
-		solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));
+//		solver.set(StrategyFactory.graphLexico(undi));
+//		solver.set(StrategyFactory.graphTSP(undi, heuristic, mst));
+
+		 solver.set(StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,matrix,mst,policy), GraphStrategy.NodeArcPriority.ARCS));
+
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
@@ -446,6 +462,26 @@ public class TSP_CP12 {
 		}
 	}
 
+	private static void solveATSP(int[][] m, String s) {
+		int[][] matrix = transformMatrix(m);
+		ATSP_ISMP.bst=false;
+		ATSP_ISMP.khun=false;
+		for(int cp:ATSP_ISMP.configs){
+			ATSP_ISMP.reset(matrix,s,policy,cp,upperBound);
+			ATSP_ISMP.solve();
+		}
+		ATSP_ISMP.khun=true;
+		for(int cp:ATSP_ISMP.configs){
+			ATSP_ISMP.reset(matrix,s,policy,cp,upperBound);
+			ATSP_ISMP.solve();
+		}
+		ATSP_ISMP.khun=false;
+		ATSP_ISMP.bst=true;
+		for(int cp:ATSP_ISMP.bstconfigs){
+			ATSP_ISMP.reset(matrix,s,policy,cp,upperBound);
+			ATSP_ISMP.solve();
+		}
+	}
 	private static void solveDirected(int[][] m, String instanceName) {
 		int[][] matrix = transformMatrix(m);
 		int n = matrix.length;
@@ -474,7 +510,8 @@ public class TSP_CP12 {
 		gc.addPropagators(PropHeldKarp.mstBasedRelaxation(dir, 0, n - 1, totalCost, matrix, gc, solver));
 		solver.post(gc);
 		// config
-		solver.set(StrategyFactory.graphATSP(dir, ATSP_heuristics.enf_sparse, mst));
+//		solver.set(StrategyFactory.graphATSP(dir, ATSP_heuristics.enf_sparse, mst));
+		solver.set(StrategyFactory.graphStrategy(dir, null,new GraphStrategyBench(dir,matrix,mst,policy), GraphStrategy.NodeArcPriority.ARCS));
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);

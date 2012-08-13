@@ -35,6 +35,7 @@
 package solver.search.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
@@ -43,7 +44,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 public enum TSP_heuristics {
-	
+
 	enf_MinDeg {
 		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
 			INeighbors suc;
@@ -78,7 +79,7 @@ public enum TSP_heuristics {
 	enf_sparse_CP12  {
 
 		private int currentNode;
-		
+
 		private int[] e;
 
 		private int getNextSparseNode(UndirectedGraphVar g, int n) {
@@ -279,7 +280,7 @@ public enum TSP_heuristics {
 
 		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
 			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==
-								   g.getKernelGraph().getSuccessorsOf(currentNode).neighborhoodSize()){
+					g.getKernelGraph().getSuccessorsOf(currentNode).neighborhoodSize()){
 				currentNode = getNextSparseNode(g,n);
 			}
 			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
@@ -305,6 +306,308 @@ public enum TSP_heuristics {
 		public void init(UndirectedGraphVar g, int n){
 			e = new int[n];
 			currentNode = -1;
+		}
+	},
+
+	enf_node_arc_tests  {
+
+		private int currentNode;
+		private IRelaxation relax;
+
+		private int getNextSparseNode(UndirectedGraphVar g, int n) {
+			return minKminE(g,n);
+		}
+
+		private int nextDCMST(UndirectedGraphVar g, int n){
+			INeighbors nei;
+			int node = -1;
+			int minDelta = 5*n;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							if(2-k<minDelta){
+								minDelta = 2-k;
+								node = i;
+							}
+						}
+					}
+			}
+			if(node == -1){
+				minDelta = 5*n;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(!g.getKernelGraph().arcExists(i,j)){
+								if(2-k<minDelta){
+									minDelta = 2-k;
+									node = i;
+								}
+							}
+						}
+				}
+				int minDeg = 0;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(nei.neighborhoodSize()!=k && 2-k==minDelta)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(!g.getKernelGraph().arcExists(i,j)){
+								int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+										+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+								if(d>minDeg){
+									minDeg = d;
+									node = i;
+								}
+							}
+						}
+				}
+			}else{
+				int minDeg = 0;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(nei.neighborhoodSize()!=k && 2-k==minDelta)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+								int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+										+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+								if(d>minDeg){
+									minDeg = d;
+									node = i;
+								}
+							}
+						}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		private int minKminE(UndirectedGraphVar g, int n){
+			INeighbors nei;
+			int node = -1;
+			int minK = 0;//5*n;
+			for(int i=0;i<n;i++){
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && k>minK){
+					minK = k;
+					node = i;
+				}
+			}
+//			int minK = 5*n;
+//			for(int i=0;i<n;i++){
+//				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+//				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && k<minK){
+//					minK = k;
+//					node = i;
+//				}
+//			}
+//			int minE = 0;
+//			for(int i=0;i<n;i++){
+//				nei = g.getEnvelopGraph().getNeighborsOf(i);
+//				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+//				if(nei.neighborhoodSize()!=k && k==minK)
+//					if(nei.neighborhoodSize()>minE){
+//						minE = nei.neighborhoodSize();
+//						node = i;
+//					}
+//			}
+			int minE = 5*n;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(nei.neighborhoodSize()!=k && k==minK)
+					if(nei.neighborhoodSize()<minE){
+						minE = nei.neighborhoodSize();
+						node = i;
+					}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			if(this.relax==null){
+				this.relax = relax;
+			}
+			if (currentNode==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode).neighborhoodSize()==2){
+				currentNode = getNextSparseNode(g,n);
+			}
+			double minDeg = 5*n;
+			int i = currentNode;
+			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(i);
+			int next = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if((relax.contains(i,j)) && !g.getKernelGraph().arcExists(i,j)){
+//					int d = g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+					double d = relax.getReplacementCost(i,j);
+					if(next == -1 || d<minDeg){
+						minDeg = d;
+						next = j;
+					}
+				}
+			}
+			if(next == -1){
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().arcExists(i,j)){
+						int d = g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+						if(next == -1 || d<minDeg){
+							minDeg = d;
+							next = j;
+						}
+					}
+				}
+			}
+			if(next==-1){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.setArc(g,currentNode, next, GraphAssignment.graph_enforcer);
+			return fd;
+		}
+
+		public void init(UndirectedGraphVar g, int n){
+			currentNode = -1;
+			relax = null;
+		}
+	},
+
+	enf_sparse_dcmst_state  {
+
+		private IStateInt currentNode;
+		private IRelaxation relax;
+
+		private int getNextSparseNode(UndirectedGraphVar g, int n) {
+			INeighbors nei;
+			int node = -1;
+			int minDelta = 5*n;
+			for(int i=0;i<n;i++){
+				nei = g.getEnvelopGraph().getNeighborsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+							if(2-k<minDelta){
+								minDelta = 2-k;
+								node = i;
+							}
+						}
+					}
+			}
+			if(node == -1){
+				minDelta = 5*n;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(!g.getKernelGraph().arcExists(i,j)){
+								if(2-k<minDelta){
+									minDelta = 2-k;
+									node = i;
+								}
+							}
+						}
+				}
+				int minDeg = 0;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(nei.neighborhoodSize()!=k && 2-k==minDelta)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(!g.getKernelGraph().arcExists(i,j)){
+								int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+										+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+								if(d>minDeg){
+									minDeg = d;
+									node = i;
+								}
+							}
+						}
+				}
+			}else{
+				int minDeg = 0;
+				for(int i=0;i<n;i++){
+					nei = g.getEnvelopGraph().getNeighborsOf(i);
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					if(nei.neighborhoodSize()!=k && 2-k==minDelta)
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+								int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+										+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+								if(d>minDeg){
+									minDeg = d;
+									node = i;
+								}
+							}
+						}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(UndirectedGraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			if(this.relax==null){
+				this.relax = relax;
+			}
+			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).neighborhoodSize()==2){
+				currentNode.set(getNextSparseNode(g,n));
+			}
+			int minDeg = 0;
+			int i = currentNode.get();
+			INeighbors nei = g.getEnvelopGraph().getNeighborsOf(i);
+			int next = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(relax.contains(i,j) && !g.getKernelGraph().arcExists(i,j)){
+					int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+							+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+					if(d>minDeg){
+						minDeg = d;
+						next = j;
+					}
+				}
+			}
+			if(next == -1){
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().arcExists(i,j)){
+						int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+								+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+						if(d>minDeg){
+							minDeg = d;
+							next = j;
+						}
+					}
+				}
+			}
+			if(next==-1){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.setArc(g,currentNode.get(), next, GraphAssignment.graph_enforcer);
+			return fd;
+		}
+
+		public void init(UndirectedGraphVar g, int n){
+			currentNode = g.getSolver().getEnvironment().makeInt(-1);
+			relax = null;
 		}
 	},
 

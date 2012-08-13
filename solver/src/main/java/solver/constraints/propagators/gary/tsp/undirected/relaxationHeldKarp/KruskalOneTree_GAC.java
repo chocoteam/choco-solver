@@ -394,7 +394,8 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 
 	public double getRepCost(int from, int to){
 		if(from>to){
-			throw new UnsupportedOperationException();
+			return getRepCost(to,from);//to check
+//			throw new UnsupportedOperationException();
 		}
 		if(from==0){
 			return 0;

@@ -35,6 +35,7 @@
 package solver.search.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.constraints.propagators.gary.IRelaxation;
 import solver.exception.ContradictionException;
@@ -307,6 +308,92 @@ public enum ATSP_heuristics {
 		}
 	},
 
+	sparse_corrected  {
+		private IStateInt currentNode;
+		private int last;
+		private int[] e;
+
+		private int getNextSparseNode(GraphVar g, int n) {
+			INeighbors nei;
+			int s = n;
+			int si;
+			for (int i = 0; i < n; i++) {
+				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(si<s && si>1){
+					s = si;
+				}
+			}
+			for (int i = 0; i < n; i++) {
+				e[i] = 0;
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+						e[i]++;
+					}
+				}
+			}
+			int bestScore = -1;
+			int score;
+			int node = -1;
+			for (int i = 0; i < n; i++) {
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
+					score = 0;
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						score += e[j];
+					}
+					if(score>bestScore){
+						bestScore = score;
+						node = i;
+					}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+//			currentNode.set(last);//trick to be more efficient
+			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).neighborhoodSize()==1){
+				currentNode.set(getNextSparseNode(g,n));
+			}
+			int currentNode = this.currentNode.get();
+			last = currentNode;
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			if(nei.neighborhoodSize() > 5){
+				int count = 0;
+				for(int j=0;j<n;j++){
+					if(g.getEnvelopGraph().arcExists(currentNode,j)){
+						count++;
+						if(count==nei.neighborhoodSize()/2){
+							GraphDecision fd = pool.getE();
+							if(fd==null){
+								fd = new GraphDecision(pool);
+							}
+							fd.setArc(g,currentNode,j, GraphAssignment.graph_split);
+							return fd;
+						}
+					}
+				}
+				throw new UnsupportedOperationException();
+			}else{
+				GraphDecision fd = pool.getE();
+				if(fd==null){
+					fd = new GraphDecision(pool);
+				}
+			fd.setArc(g,currentNode, nei.getFirstElement(), GraphAssignment.graph_enforcer);
+				return fd;
+			}
+		}
+		public void init(GraphVar g, int n){
+			e = new int[n];
+			last = -1;
+			currentNode = g.getSolver().getEnvironment().makeInt(-1);
+		}
+	},
+
 	enf_sparse  {
 		private int currentNode;
 		private int[] e;
@@ -377,6 +464,80 @@ public enum ATSP_heuristics {
 		public void init(GraphVar g, int n){
 			e = new int[n];
 			currentNode = -1;
+		}
+	},
+
+	enf_sparse_corrected  {
+		private IStateInt currentNode;
+		private int[] e;
+
+		private int getNextSparseNode(GraphVar g, int n) {
+			INeighbors nei;
+			int s = n;
+			int si;
+			for (int i = 0; i < n; i++) {
+				si = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(si<s && si>1){
+					s = si;
+				}
+			}
+			for (int i = 0; i < n; i++) {
+				e[i] = 0;
+				nei = g.getEnvelopGraph().getPredecessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(g.getEnvelopGraph().getSuccessorsOf(j).neighborhoodSize()==s){
+						e[i]++;
+					}
+				}
+			}
+			int bestScore = -1;
+			int score;
+			int node = -1;
+			for (int i = 0; i < n; i++) {
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()==s){
+					nei = g.getEnvelopGraph().getSuccessorsOf(i);
+					score = 0;
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						score += e[j];
+					}
+					if(score>bestScore){
+						bestScore = score;
+						node = i;
+					}
+				}
+			}
+			if(node == -1){
+				throw new UnsupportedOperationException();
+			}
+			return node;
+		}
+
+		public Decision getDecision(GraphVar g, int n, IRelaxation relax, PoolManager<GraphDecision> pool) {
+			if (currentNode.get()==-1 || g.getEnvelopGraph().getSuccessorsOf(currentNode.get()).neighborhoodSize()==1){
+				currentNode.set(getNextSparseNode(g,n));
+			}
+//			int currentNode = getNextSparseNode(g,n);
+			int currentNode = this.currentNode.get();
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(currentNode);
+			int maxE = -1;
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(maxE == -1 || e[maxE]<e[j]){
+					maxE=j;
+				}
+			}
+			if(maxE==-1){
+				throw new UnsupportedOperationException();
+			}
+			GraphDecision fd = pool.getE();
+			if(fd==null){
+				fd = new GraphDecision(pool);
+			}
+			fd.setArc(g,currentNode, maxE, GraphAssignment.graph_enforcer);
+			return fd;
+		}
+		public void init(GraphVar g, int n){
+			e = new int[n];
+			currentNode = g.getSolver().getEnvironment().makeInt(-1);
 		}
 	};
 

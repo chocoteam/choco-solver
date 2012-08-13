@@ -35,6 +35,7 @@ import solver.Cause;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
+import solver.constraints.ConstraintFactory;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.propagators.gary.IRelaxation;
@@ -45,11 +46,13 @@ import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.tsp.PropCyclePathChanneling;
 import solver.constraints.propagators.gary.tsp.directed.*;
+import solver.constraints.propagators.gary.tsp.directed.position.PropPosGraphWithPreds;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
+import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
@@ -62,6 +65,10 @@ import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
+import solver.search.strategy.strategy.StaticStrategiesSequencer;
+import solver.search.strategy.strategy.StrategiesSequencer;
+import solver.search.strategy.strategy.graph.ArcStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
 import solver.variables.graph.GraphType;
@@ -78,23 +85,24 @@ import java.util.Random;
 /**
  * Parse and solve an Asymmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class ATSP_CP12 {
+public class SOP {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 60000;
-	private static String outFile = "atsp.csv";
+	private static final long TIMELIMIT = 20000;
+	private static String outFile = "sop.csv";
 	private static int seed = 0;
 	// instance
-	private static String instanceName;
-	private static int[][] distanceMatrix;
-	private static int n, noVal, optimum, initialUB;
+	public static String instanceName;
+	public static int[][] distanceMatrix;
+	public static int n, optimum, initialUB;
 	private static Solver solver;
 	// model
 	private static DirectedGraphVar graph;
 	private static IntVar totalCost;
+	private static IntVar[] positions;
 	private static Constraint gc;
 	// RG data structure
 	private static IStateInt nR;
@@ -109,10 +117,11 @@ public class ATSP_CP12 {
 	// MODEL CONFIGURATION
 	//***********************************************************************************
 
-	private static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
-	private static int NB_PARAM = 5;
+	public static int arbo=0,rg=1,undirectedMate=2,pos=3,allDiff=4;//,time=5;
+	public static int NB_PARAM = 5;
 	private static BitSet config = new BitSet(NB_PARAM);
-	private static boolean bst;
+	public static boolean bst;
+	public static boolean khun;
 
 	public static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -137,6 +146,7 @@ public class ATSP_CP12 {
 	//***********************************************************************************
 
 	public static void solve() {
+//		initialUB = optimum = 55;
 		createModel();
 		addPropagators();
 		configureAndSolve();
@@ -152,16 +162,16 @@ public class ATSP_CP12 {
 		try {
 			for (int i = 0; i < n - 1; i++) {
 				graph.getKernelGraph().activateNode(i);
-				for (int j = 0; j < n; j++) {
-					if (distanceMatrix[i][j] != noVal) {
+				for (int j = 1; j < n; j++) {
+					if (distanceMatrix[i][j] != -1) {
 						graph.getEnvelopGraph().addArc(i, j);
 					}
 				}
 				graph.getEnvelopGraph().removeArc(i, i);
 			}
 			graph.getKernelGraph().activateNode(n-1);
-			graph.getEnvelopGraph().removeArc(0, n-1);
-			graph.getEnvelopGraph().removeArc(n-1,0);
+//			graph.getEnvelopGraph().removeArc(0, n-1);
+//			graph.getEnvelopGraph().removeArc(n-1,0);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -186,7 +196,7 @@ public class ATSP_CP12 {
 
 		gc.addPropagators(new PropOneSuccBut(graph, n - 1, gc, solver));
 		gc.addPropagators(new PropOnePredBut(graph, 0, gc, solver));
-		
+
 		gc.addPropagators(new PropPathNoCycle(graph, 0, n - 1, gc, solver));
 		gc.addPropagators(new PropSumArcCosts(graph, totalCost, distanceMatrix, gc, solver));
 		if(config.get(allDiff)){
@@ -209,68 +219,92 @@ public class ATSP_CP12 {
 			PropSCCDoorsRules SCCP = new PropSCCDoorsRules(graph, gc, solver, nR, sccOf, outArcs, G_R, sccFirst, sccNext);
 			gc.addPropagators(SCCP);
 		}
-		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
-			INeighbors nei;
-			for(int i=0;i<n-1;i++){
-				undi.getKernelGraph().activateNode(i);
-				nei = graph.getEnvelopGraph().getSuccessorsOf(i);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j==n-1){
-						undi.getEnvelopGraph().addEdge(i,0);
-					}else{
-						undi.getEnvelopGraph().addEdge(i,j);
-					}
+//		if(config.get(pos)){
+		IntVar[] pos = VariableFactory.boundedArray("pos", n, 0, n - 1, solver);
+		positions = pos;
+		try{
+			pos[0].instantiateTo(0, Cause.Null);
+			pos[n-1].instantiateTo(n - 1, Cause.Null);
+		}catch(Exception e){
+			e.printStackTrace();System.exit(0);
+		}
+		for(int i=1;i<n;i++){
+			INeighbors suc = graph.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=0;j<n;j++){
+				if(i!=j && distanceMatrix[i][j]==-1){
+					solver.post(ConstraintFactory.lt(pos[j],pos[i],solver));
 				}
 			}
-			gc.addPropagators(new PropCycleNoSubtour(undi, gc, solver));
-			gc.addPropagators(new PropAtLeastNNeighbors(undi, 2, gc, solver));
-			gc.addPropagators(new PropAtMostNNeighbors(undi, 2, gc, solver));
-			gc.addPropagators(new PropCyclePathChanneling(graph, undi, gc, solver));
 		}
-		if(config.get(pos)){
-			IntVar[] pos = VariableFactory.boundedArray("pos",n,0,n-1,solver);
-			try{
-				pos[0].instantiateTo(0, Cause.Null);
-				pos[n-1].instantiateTo(n - 1, Cause.Null);
-			}catch(Exception e){
-				e.printStackTrace();System.exit(0);
-			}
-			gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
-			if(config.get(rg)){
-				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
-			}else{
-				gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
-			}
-			solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
+		gc.addPropagators(new PropPosInTour(pos, graph, gc, solver));
+		if(config.get(rg)){
+			gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver, nR, sccOf, outArcs, G_R));
+		}else{
+			gc.addPropagators(new PropPosInTourGraphReactor(pos, graph, gc, solver));
 		}
+		if(config.get(rg)){
+			gc.addPropagators(new PropPosGraphWithPreds(pos, graph, distanceMatrix,gc, solver, nR, sccOf, outArcs, G_R));
+		}else{
+			gc.addPropagators(new PropPosGraphWithPreds(pos, graph, distanceMatrix,gc, solver));
+		}
+		solver.post(new AllDifferent(pos,solver, AllDifferent.Type.BC));
+//		}
 		// COST BASED FILTERING
-		if(instanceName.contains("rbg")){
+		if(khun){
 			PropKhun map = new PropKhun(graph,totalCost,distanceMatrix,solver,gc);
 			gc.addPropagators(map);
-			relax = map;
-		}else{
-			System.out.println("MST");
+//			relax = map;
+		}
+// else{
+//			System.out.println("MST");
+//			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+//			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+//			gc.addPropagators(propHK_mst);
+//			relax = propHK_mst;
+		if(config.get(rg) && bst){// BST-based HK
+			System.out.println("BST");
+			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+			propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+			gc.addPropagators(propHK_bst);
+		}
+		else{
+//				System.out.println("MST");
 			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
 			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 			gc.addPropagators(propHK_mst);
-			relax = propHK_mst;
-			if(config.get(rg) && bst){// BST-based HK
-				System.out.println("BST");
-				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
-				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-				gc.addPropagators(propHK_bst);
-			}
+//				relax = propHK_mst;
 		}
+//			System.out.println("MST");
+		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+		propHK_mst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
+		gc.addPropagators(propHK_mst);
+		relax = propHK_mst;
+//		}
 		solver.post(gc);
 	}
 
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
-		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
+//		AbstractStrategy mainStrat = null;//StrategyFactory.graphATSP(graph, heuristic, relax);
+//
+//		switch(policy){
+//			case 7 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, relax);break;
+//			case 8 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse_corrected, relax);break;
+//			case 9 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.sparse_corrected, relax);break;
+//			default: mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy), GraphStrategy.NodeArcPriority.ARCS);
+//		}
 
-//		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
+//		mainStrat = StrategyFactory.graphStrategy(graph, null,new LexArcs(graph), GraphStrategy.NodeArcPriority.ARCS);
+
+		AbstractStrategy mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy), GraphStrategy.NodeArcPriority.ARCS);
+//		solver.set(mainStrat);
+
+//		solver.set(StrategyFactory.graphLexico(graph));
+
+//		mainStrat = StrategyFactory.ABSrandom(positions,solver,0.999d, 0.2d, 8, 1.1d, 1, 0);
+//		mainStrat = new MySearch(positions,solver);
 		solver.set(mainStrat);
+//		solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),mainStrat));
 //		switch (main_search){
 //			case 0: solver.set(mainStrat);
 //				break;
@@ -280,7 +314,8 @@ public class ATSP_CP12 {
 //			default: throw new UnsupportedOperationException();
 //		}
 
-        IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+
+		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
 		PArc allArcs = new PArc(pengine, gc);
 		solver.set(pengine.set(new Sort(allArcs).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
@@ -289,22 +324,24 @@ public class ATSP_CP12 {
 				if(totalCost.instantiated()){
 					solver.getSearchLoop().stopAtFirstSolution(true);
 				}
+				System.out.println("obj after initial prop : "+totalCost);
+//				System.exit(0);
 			}
-//			public void onSolution() {
-//				System.out.println("youhou");
-//			}
-//			public void onContradiction(ContradictionException cex) {
-//				System.out.println("yaha");
-//			}
 		});
 		SearchMonitorFactory.log(solver, true, false);
 		//SOLVE
-		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
+		solver.findSolution();
+//		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		if (solver.getMeasures().getSolutionCount() == 0 && solver.getMeasures().getTimeCount() < TIMELIMIT) {
 			throw new UnsupportedOperationException();
 		}
 		// OUTPUT
-		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+//		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
+		int bestCost = totalCost.getLB();
+		int m = 0;
+		for(int i=0;i<n;i++){
+			m+=graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
+		}
 		String configst = "";
 		for(int i=0;i<NB_PARAM;i++){
 			if(config.get(i)){
@@ -320,7 +357,7 @@ public class ATSP_CP12 {
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost + ";"+searchMode[main_search]+";"+configst+"\n";
+				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
 		writeTextInto(txt, outFile);
 	}
 
@@ -329,14 +366,25 @@ public class ATSP_CP12 {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		outFile = "atsp_fast.csv";
-//		clearFile(outFile);
-//		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-//		bench();
+		resetFile();
+		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
-		trans();
+//		trans();
 
+	}
+
+	public static void resetFile() {
+		clearFile(outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+	}
+	public static void reset(int[][] m, String s, int p, int cp, int ub) {
+		distanceMatrix = m;
+		instanceName = s;
+		policy = p;
+		n = distanceMatrix.length;
+		configParameters(cp);
+		optimum = initialUB = ub;
 	}
 
 	private static void trans(){
@@ -390,20 +438,33 @@ public class ATSP_CP12 {
 		writeTextInto(s,file);
 	}
 
+	static int policy;
 	private static void bench() {
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
+		String dir = "/Users/jfages07/github/In4Ga/ALL_sop";
 		File folder = new File(dir);
 		String[] list = folder.list();
-		heuristic = ATSP_heuristics.enf_sparse;
-		main_search = 0;
+//		heuristic = ATSP_heuristics.enf_sparse;
+//		main_search = 0;
+		policy = 1;
 		configParameters(0);
 		for (String s : list) {
-			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
+			if(!s.contains("43.1"))
+				if ((s.contains(".sop"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
-				loadInstance(dir + "/" + s);
-				if(n>0 && n<170){// || s.contains("p43.atsp")){
-					bst = false;
-//					configParameters(0);
+					loadInstance(dir + "/" + s);
+					if(n>0 && n<50){// || s.contains("p43.atsp")){
+//					bst = true;
+//					khun = true;
+//						configParameters((1<<arbo)+(1<<allDiff));
+//					configParameters((1<<allDiff));
+//						solve();
+//					configParameters((1<<arbo)+(1<<allDiff));
+//					solve();
+//					configParameters((1<<rg)+(1<<allDiff));
+//					solve();
+//					System.exit(0);
+//					}
+//					configParameters((1<<pos));
 //					solve();
 //					configParameters((1<<arbo));
 //					solve();
@@ -411,15 +472,33 @@ public class ATSP_CP12 {
 //					solve();
 //					configParameters((1<<allDiff));
 //					solve();
-					bst = true;
-					configParameters((1<<rg));
-					solve();
-//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+						bst = true;
+//					configParameters((1<<pos)+(1<<rg));
 //					solve();
+//					configParameters(0);
+//					solve();
+//					configParameters((1<<allDiff));
+//					solve();
+						configParameters((1<<rg)+(1<<arbo)+(1<<allDiff));
+						solve();
+					}
 				}
-			}
 		}
 	}
+	public final static int[] configs = new int[]{
+			0,
+			(1<<allDiff),
+			(1<<arbo),
+			(1<<pos),
+			(1<<rg),
+			(1<<rg)+(1<<arbo)+(1<<allDiff),
+			(1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff)
+	};
+	public final static int[] bstconfigs = new int[]{
+			(1<<rg),
+			(1<<rg)+(1<<arbo)+(1<<allDiff),
+			(1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff)
+	};
 
 	private static void bench_heur() {
 		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
@@ -456,56 +535,6 @@ public class ATSP_CP12 {
 		}
 	}
 
-	private static void benchRandom() {
-		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
-		bst = false;
-		main_search = 2;
-		int[] sizes = new int[]{200};
-		int[] costs = new int[]{10,20};
-		for (int s:sizes) {
-			for (int c:costs) {
-				for (int k=0;k<50;k++) {
-					generateInstance(s,c,System.currentTimeMillis());
-					bst=false;
-					configParameters(0);
-					solve();
-					bst=true;
-					configParameters(1<<rg);
-					solve();
-				}
-			}
-		}
-	}
-
-	private static void generateInstance(int size, int maxCost, long seed) {
-		instanceName = size+";"+maxCost+";"+seed;
-		System.out.println("parsing instance " + instanceName + "...");
-		n = size;
-		Random rd = new Random(seed);
-		double d;
-		distanceMatrix = new int[n][n];
-		for (int i=0; i<n; i++) {
-			for(int j=i+1;j<n;j++){
-				distanceMatrix[i][j] = rd.nextInt(maxCost+1);
-				d =  distanceMatrix[i][j]/10;
-				distanceMatrix[j][i] = distanceMatrix[i][j]+(int)(d*rd.nextDouble());
-			}
-		}
-		noVal = Integer.MAX_VALUE / 2;
-		int maxVal = 0;
-		for (int i = 0; i < n; i++) {
-			distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-			distanceMatrix[n - 1][i] = noVal;
-			distanceMatrix[i][0] = noVal;
-			for (int j = 0; j < n; j++) {
-				if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-					maxVal = distanceMatrix[i][j];
-				}
-			}
-		}
-		initialUB = optimum = n*maxCost;
-	}
-
 	private static void loadInstance(String url) {
 		File file = new File(url);
 		try {
@@ -516,22 +545,23 @@ public class ATSP_CP12 {
 			line = buf.readLine();
 			line = buf.readLine();
 			line = buf.readLine();
-			n = Integer.parseInt(line.split(":")[1].replaceAll(" ", "")) + 1;
+			n = Integer.parseInt(line.split(":")[1].replaceAll(" ", ""));
 			distanceMatrix = new int[n][n];
 			line = buf.readLine();
 			line = buf.readLine();
 			line = buf.readLine();
+			line = buf.readLine();
 			String[] lineNumbers;
-			for (int i = 0; i < n - 1; i++) {
+			for (int i = 0; i < n; i++) {
 				int nbSuccs = 0;
-				while (nbSuccs < n - 1) {
+				while (nbSuccs < n) {
 					line = buf.readLine();
 					line = line.replaceAll(" * ", " ");
 					lineNumbers = line.split(" ");
 					for (int j = 1; j < lineNumbers.length; j++) {
-						if (nbSuccs == n - 1) {
+						if (nbSuccs == n) {
 							i++;
-							if (i == n - 1) break;
+							if (i == n) break;
 							nbSuccs = 0;
 						}
 						distanceMatrix[i][nbSuccs] = Integer.parseInt(lineNumbers[j]);
@@ -539,24 +569,22 @@ public class ATSP_CP12 {
 					}
 				}
 			}
-			//TODO add again
-//			noVal = distanceMatrix[0][0];
-//			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
-//			int maxVal = 0;
-//			for (int i = 0; i < n; i++) {
-//				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-//				distanceMatrix[n - 1][i] = noVal;
-//				distanceMatrix[i][0] = noVal;
-//				for (int j = 0; j < n; j++) {
-//					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-//						maxVal = distanceMatrix[i][j];
-//					}
-//				}
-//			}
-//			line = buf.readLine();
-//			line = buf.readLine();
-//			initialUB = maxVal*n;
-//			optimum = Integer.parseInt(line.replaceAll(" ", ""));
+			//TODO remove for atsp->tsp convertion
+			int maxVal = 0;
+			distanceMatrix[0][n-1] = -1;
+			for (int i = 0; i < n; i++) {
+				distanceMatrix[i][i] = -1;
+				for (int j = 0; j < n; j++) {
+					if (distanceMatrix[i][j] > maxVal) {
+						maxVal = distanceMatrix[i][j];
+					}
+				}
+			}
+			line = buf.readLine();
+			line = buf.readLine();
+			initialUB = maxVal*n;
+			optimum = Integer.parseInt(line.replaceAll(" ", ""));
+			System.out.println(optimum);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -588,149 +616,38 @@ public class ATSP_CP12 {
 		}
 	}
 
-	//***********************************************************************************
-	// ASSIGNMENTS & GLOBAL BRANCHING
-	//***********************************************************************************
+	private static class MySearch extends AbstractStrategy<IntVar> {
+		private PoolManager<FastDecision> pool;
 
-	static int lb;
-	static int ub;
-
-	private static class DichotomicSearch extends AbstractStrategy<IntVar> {
-		IntVar obj;
-		long nbSols;
-		protected DichotomicSearch(IntVar obj) {
-			super(new IntVar[]{obj});
-			this.obj = obj;
-			lb = -1;
+		public MySearch(IntVar[] positions, Solver solver) {
+			super(positions);
+			this.pool = new PoolManager<FastDecision>();
 		}
+
 		@Override
 		public void init() {}
+
 		@Override
 		public Decision getDecision() {
-			if(lb==-1){
-				lb = obj.getLB();
-			}
-			if(obj.getLB()==obj.getUB()){
-				return null;
-			}
-			if(nbSols == solver.getMeasures().getSolutionCount()){
-				return null;
-			}else{
-				nbSols = solver.getMeasures().getSolutionCount();
-				ub = obj.getUB();
-				int target = (lb+ub)/2;
-				System.out.println(lb+" : "+ub+" -> "+target);
-				FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
-				dec.set(obj,target, objCut);
-				return dec;
-			}
-		}
-	}
-
-	private static Assignment<IntVar> objCut = new Assignment<IntVar>() {
-		@Override
-		public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-			var.updateUpperBound(value, cause);
-		}
-		@Override
-		public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-			lb = value+1;
-			var.updateLowerBound(value + 1, cause);
-		}
-		@Override
-		public String toString() {
-			return " <= ";
-		}
-	};
-
-	private static Assignment<GraphVar> graph_sparse = new Assignment<GraphVar>() {
-		@Override
-		public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
-			int n = var.getEnvelopGraph().getNbNodes();
-			if (value>=n){
-				int node = value/n-1;
-				int highestIdx = value%n;
-				INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j>highestIdx){
-						var.removeArc(node,j,cause);
+			int ms = 0;
+			IntVar var = null;
+			for(int i=0;i<n;i++){
+				if(!vars[i].instantiated()){
+					if(vars[i].getDomainSize()>ms){
+						var = vars[i];
+						ms = var.getDomainSize();
 					}
 				}
-			}else{
-				throw new UnsupportedOperationException();
 			}
-		}
-
-		@Override
-		public void unapply(GraphVar var, int value, ICause cause) throws ContradictionException {
-			int n = var.getEnvelopGraph().getNbNodes();
-			if (value>=n){
-				int node = value/n-1;
-				int highestIdx = value%n;
-				INeighbors nei = var.getEnvelopGraph().getSuccessorsOf(node);
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(j<=highestIdx){
-						var.removeArc(node,j,cause);
-					}
-				}
-			}else{
-				throw new UnsupportedOperationException();
-			}
-		}
-
-		@Override
-		public String toString() {
-			return "unapply graph bound";
-		}
-	};
-
-	private static class BottomUp extends AbstractStrategy<IntVar> {
-		IntVar obj;
-		int val;
-		protected BottomUp(IntVar obj) {
-			super(new IntVar[]{obj});
-			this.obj = obj;
-			val = -1;
-		}
-		@Override
-		public void init() {}
-		@Override
-		public Decision getDecision() {
-			if(obj.getLB()==obj.getUB()){
+			if(var==null){
 				return null;
 			}
-			if(val==-1){
-				val = obj.getLB();
+			FastDecision dec = pool.getE();
+			if(dec==null){
+				dec = new FastDecision(pool);
 			}
-			int target = val;
-			val++;
-			System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+target);
-			FastDecision dec = new FastDecision(new PoolManager<FastDecision>());
-			dec.set(obj,target, objCut);
+			dec.set(var,(var.getUB()+var.getLB())/2, Assignment.int_split);
 			return dec;
 		}
 	}
-
-	private static class CompositeSearch extends AbstractStrategy {
-
-		AbstractStrategy s1,s2;
-		protected CompositeSearch(AbstractStrategy s1, AbstractStrategy s2) {
-			super(ArrayUtils.append(s1.vars, s2.vars));
-			this.s1 = s1;
-			this.s2 = s2;
-		}
-
-		@Override
-		public void init() {}
-
-		@Override
-		public Decision getDecision() {
-			Decision d = s1.getDecision();
-			if(d==null){
-				d = s2.getDecision();
-			}
-			return d;
-		}
-	}
-
 }
