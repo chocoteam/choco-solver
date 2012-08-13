@@ -116,10 +116,16 @@ public class StrategyVarValAssign extends AbstractStrategy<IntVar> {
         }
     }
 
+//	IntVar trick; // TODO en parler avec charles!
     @Override
     @SuppressWarnings({"unchecked"})
     public Decision getDecision() {
         if (varColl.hasNext()) {
+//			IntVar var = trick;
+//			if(trick==null || trick.instantiated()){
+//				var = varColl.next();
+//			}
+//			trick = var;
             IntVar var = varColl.next();
             // test on first selection of the variable
             if (!firstSelection.get(var.getId()).get()) {
