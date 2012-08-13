@@ -144,7 +144,7 @@ public class PropPosInTourGraphReactor extends Propagator {
     @Override
     public int getPropagationConditions(int vIdx) {
         return EventType.REMOVEARC.mask + EventType.ENFORCEARC.mask
-                + EventType.DECUPP.mask + EventType.INCLOW.mask;
+                + EventType.INSTANTIATE.mask + EventType.DECUPP.mask + EventType.INCLOW.mask;
     }
 
     @Override

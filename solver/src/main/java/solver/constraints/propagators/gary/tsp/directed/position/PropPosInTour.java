@@ -87,14 +87,14 @@ public class PropPosInTour extends Propagator {
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		if(intVars[idxVarInProp].instantiated()){
-			enfVarPos(idxVarInProp,intVars[idxVarInProp].getValue());
-		}
 		if((mask & EventType.INCLOW.mask)!=0){
 			upLB(idxVarInProp,intVars[idxVarInProp].getLB());
 		}
 		if((mask & EventType.DECUPP.mask)!=0){
 			upUB(idxVarInProp,intVars[idxVarInProp].getUB());
+		}
+		if(intVars[idxVarInProp].instantiated()){
+			enfVarPos(idxVarInProp,intVars[idxVarInProp].getValue());
 		}
 	}
 
