@@ -131,7 +131,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
     //***********************************************************************************
 
     private void buildDigraph() {
-        free.flip(0, n2);
+        free.set(0, n2);
         int j;
         INeighbors nei;
         for (int i = 0; i < n; i++) {
