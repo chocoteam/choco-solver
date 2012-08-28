@@ -148,6 +148,7 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 
 	private void buildDigraph() throws ContradictionException {
 		digraph.desactivateNode(n2);
+		costValue = 0;
 		for (int i = 0; i < n2; i++) {
 			flow[i].set(0);
 			digraph.getSuccessorsOf(i).clear();
@@ -178,7 +179,7 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 				useValue(i);
 			}
 		}
-		maxFlowValue.updateLowerBound(totalFlow.get(),this);
+		maxFlowValue.updateLowerBound(totalFlow.get(), this);
 		if(maxFlowValue.getUB()>totalFlow.get()){
 			// find max flow (case not tested yet)
 			for (int i=0; i<n; i++) {
@@ -205,6 +206,17 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 		// find min cost max flow
 		while(negativeCircuitExists()){
 			applyNegativeCircuit();
+			digraph.desactivateNode(n2);
+			costValue = 0;
+			for(int i=0;i<n;i++){
+				INeighbors nei = digraph.getPredecessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					costValue += costMatrix[i][j];
+				}
+				flow[i].set(nei.neighborhoodSize());
+				nei = digraph.getSuccessorsOf(i+n);
+				flow[i+n].set(nei.neighborhoodSize());
+			}
 		}
 		costValue = 0;
 		for(int i=0;i<n;i++){
@@ -212,16 +224,12 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				costValue += costMatrix[i][j];
 			}
-			flow[i].set(nei.neighborhoodSize());
-			nei = digraph.getSuccessorsOf(i+n);
-			flow[i+n].set(nei.neighborhoodSize());
 		}
-		flowCost.updateLowerBound(costValue,this);
+		flowCost.updateLowerBound(costValue, this);
 	}
 
 	private boolean negativeCircuitExists() {
 		// initialization
-		digraph.desactivateNode(n2);
 		digraph.activateNode(n2);
 		for (int i = 0; i < n; i++) {//TODO verifier
 			if (flow[i].get()<ub[i]) {
@@ -291,7 +299,9 @@ public class PropGCC_cost_LowUp_undirected extends Propagator<Variable> {
 	private void applyNegativeCircuit() {
 		int i = cycleNode;
 		int p = father[cycleNode];
-		assert p>=0;
+		if(p<0){
+			throw new UnsupportedOperationException();
+		}
 		in.clear();
 		do{
 			in.set(i);

@@ -86,6 +86,7 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
 		nbSprints = 30;
+		nbSprints = 50;
 	}
 
 	/** ONE TREE based HK */
@@ -100,6 +101,7 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 	// HK Algorithm(s) 
 	//***********************************************************************************
 
+//	private TIntArrayList ff,ft,ef,et;
 	public void HK_algorithm() throws ContradictionException {
 		if(waitFirstSol && solver.getMeasures().getSolutionCount()==0){
 			return;//the UB does not allow to prune
@@ -108,7 +110,25 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 		clearStructures();
 		rebuildGraph();
 		setCosts();
+//		if(ff==null){
+//			ff = new TIntArrayList();
+//			ft = new TIntArrayList();
+//			ef = new TIntArrayList();
+//			et = new TIntArrayList();
+//		}
+//		ff.clear();
+//		ft.clear();
+//		ef.clear();
+//		et.clear();
 		HK_Pascals();
+//		int m = ff.size();
+//		for(int i=0;i<m;i++){
+//			g.removeArc(ff.get(i),ft.get(i),this);
+//		}
+//		m = ef.size();
+//		for(int i=0;i<m;i++){
+//			g.enforceArc(ef.get(i),et.get(i),this);
+//		}
 	}
 
 	protected void setCosts() {
@@ -155,6 +175,7 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 					hkb = Math.floor(hkb);
 				}
 				obj.updateLowerBound((int)Math.ceil(hkb), this);
+				// HK.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE (not always true)
 				updateStep(hkb,alpha);
 				HKPenalities();
@@ -259,10 +280,14 @@ public class PropSymmetricHeldKarp extends Propagator implements HeldKarp {
 
 	public void remove(int from, int to) throws ContradictionException {
 		g.removeArc(from,to,this);
-		nbRem++;
+//		ff.add(from);
+//		ft.add(to);
+//		nbRem++;
 	}
 	public void enforce(int from, int to) throws ContradictionException {
 		g.enforceArc(from,to,this);
+//		ef.add(from);
+//		et.add(to);
 	}
 	public void contradiction() throws ContradictionException {
 		contradiction(g,"mst failure");

@@ -58,18 +58,21 @@ public class GraphStrategyBench extends ArcStrategy {
 	final int MAX_COST = 4;
 	final int IN_SUPPORT_LEX = 5;
 	final int OUT_SUPPORT_LEX = 6;
-
 	IStateInt prev;
-	TIntArrayList stack;
+//	TIntArrayList stack;
+	boolean usetrick;
 
-	public GraphStrategyBench(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation, int policy) {
+	public GraphStrategyBench(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation, int policy,boolean useTrick) {
 		super(graphVar);
+		this.usetrick = useTrick;
 		mode = policy;
 		costs = costMatrix;
 		relax = relaxation;
 		n = graphVar.getEnvelopGraph().getNbNodes();
 		prev = graphVar.getSolver().getEnvironment().makeInt(-1);
 //		stack = new TIntArrayList();
+//		usetrick = false;
+		this.usetrick = true;
 	}
 
 	@Override
@@ -81,9 +84,9 @@ public class GraphStrategyBench extends ArcStrategy {
 //		if(g.getSolver().getMeasures().getSolutionCount()==0){
 //			mode = 3;
 //		}else{
-//			mode = 1;
+//			mode = 4;
 //		}
-		constructivePath();
+//		constructivePath();
 		boolean b = nextArc();
 //		prev.set(from);
 //		stack.add(from);
@@ -91,6 +94,7 @@ public class GraphStrategyBench extends ArcStrategy {
 	}
 
 	public boolean nextArc() {
+		if(usetrick)
 		if(computeTrickyNextArc()){
 			return true;
 		}

@@ -51,7 +51,7 @@ import java.util.Random;
 /**
  * Lagrangian relaxation of the DCMST problem
  */
-public class PropTreeHeldKarp extends Propagator implements HeldKarp {
+public class PropBundleTreeHeldKarp extends Propagator implements HeldKarp {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -62,7 +62,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	protected int n;
 	protected int[][] originalCosts;
 	protected double[][] costs;
-	double[] penalities;
+	double[] penalities,penalities1,penalities2;
 	double totalPenalities;
 	protected UndirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
@@ -74,13 +74,15 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	double step;
 	boolean firstPropag = true;
 	private Random rd;
+	private double coef1 = 1;
+	private double coef2 = 1;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+	protected PropBundleTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -88,6 +90,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		originalCosts = costMatrix;
 		costs = new double[n][n];
 		penalities = new double[n];
+		penalities1 = new double[n];
+		penalities2 = new double[n];
 		totalPenalities = 0;
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
@@ -97,8 +101,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	}
 
 	/** ONE TREE based HK */
-	public static PropTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropTreeHeldKarp phk = new PropTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
+	public static PropBundleTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropBundleTreeHeldKarp phk = new PropBundleTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
 		return phk;
@@ -115,12 +119,6 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		// initialisation
 		mandatoryArcsList.clear();
 		INeighbors nei;
-//		if(firstPropag){
-//			totalPenalities = 0;
-//			for(int i=0;i<n;i++){
-//				penalities[i] = 0;
-//			}
-//		}
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -131,7 +129,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				if(i<j){
-					costs[j][i] = costs[i][j] = originalCosts[i][j] + penalities[i] + penalities[j];
+					costs[j][i] = costs[i][j] = originalCosts[i][j]+ penalities[i] + penalities[j];
 					if(costs[i][j]<0){
 						throw new UnsupportedOperationException();
 					}
@@ -395,7 +393,11 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		totalPenalities = 0;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			penalities[i] += (deg-maxDegree[i])*step;
+			penalities1[i] = penalities2[i];
+			penalities2[i] += (deg-maxDegree[i])*step;
+		}
+		for(int i=0;i<n;i++){
+			penalities[i] = coef1*penalities1[i]+coef2*penalities2[i];
 			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
 				penalities[i] = 0;
 			}
@@ -428,9 +430,10 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	//***********************************************************************************
 
 	public void remove(int from, int to) throws ContradictionException {
-//		if(firstPropag){
+//		if(!firstPropag){
 		g.removeArc(from,to,this);
-//		}else{
+//		}
+//		else{
 //		fr.add(from);
 //		tr.add(to);
 //		}

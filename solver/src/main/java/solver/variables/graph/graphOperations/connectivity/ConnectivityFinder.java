@@ -75,6 +75,18 @@ public class ConnectivityFinder {
 		return nbCC;
 	}
 
+	public int[] getCC_firstNode() {
+		return CC_firstNode;
+	}
+
+	public int[] getCC_nextNode() {
+		return CC_nextNode;
+	}
+
+	public int[] getNode_CC() {
+		return node_CC;
+	}
+
 	/**Find all connected components of graph by performing one dfs
 	 * Complexity : O(M+N) light and fast in practice
 	 */

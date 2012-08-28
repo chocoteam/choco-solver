@@ -51,7 +51,7 @@ import java.util.Random;
 /**
  * Lagrangian relaxation of the DCMST problem
  */
-public class PropTreeHeldKarp extends Propagator implements HeldKarp {
+public class PropResetTreeHeldKarp extends Propagator implements HeldKarp {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -80,7 +80,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+	protected PropResetTreeHeldKarp(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -93,12 +93,12 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		nbRem  = 0;
 		nbSprints = 30;
 		this.maxDegree = maxDegree;
-		rd = new Random(0);
+		rd = new Random(1);
 	}
 
 	/** ONE TREE based HK */
-	public static PropTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropTreeHeldKarp phk = new PropTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
+	public static PropResetTreeHeldKarp mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropResetTreeHeldKarp phk = new PropResetTreeHeldKarp(graph,cost,maxDegree,costMatrix,constraint,solver);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
 		return phk;
@@ -115,12 +115,16 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		// initialisation
 		mandatoryArcsList.clear();
 		INeighbors nei;
-//		if(firstPropag){
-//			totalPenalities = 0;
-//			for(int i=0;i<n;i++){
-//				penalities[i] = 0;
-//			}
-//		}
+		totalPenalities = 0;
+		for(int i=0;i<n;i++){
+			nei = g.getEnvelopGraph().getSuccessorsOf(i);
+//			penalities[i] += (nei.neighborhoodSize()/maxDegree[i])*(nei.neighborhoodSize()/maxDegree[i]);
+			penalities[i] += nei.neighborhoodSize()/maxDegree[i];
+			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
+				penalities[i] = 0;
+			}
+			totalPenalities += penalities[i]*maxDegree[i];
+		}
 		for(int i=0;i<n;i++){
 			nei = g.getKernelGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
@@ -158,11 +162,10 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //		tr.clear();
 //		fe.clear();
 //		te.clear();
-		nbSprints = 30;
 		if(nbSols!=solver.getMeasures().getSolutionCount()
 				|| obj.getUB()<objUB
 				|| (firstPropag && !waitFirstSol)){
-			nbSprints = 100;
+			nbSprints = 50;
 			nbSols = solver.getMeasures().getSolutionCount();
 			objUB = obj.getUB();
 			convergeAndFilter();
@@ -175,10 +178,25 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //			restartRandom(0); //reset
 			firstPropag = false;
 		}else{
+			nbSprints = 30;
 			fastRun();
-//			convergeAndFilter();
 		}
 
+		if(true){
+			return;
+		}
+		if(obj.getLB()+5<obj.getUB()){
+			int nbIter = n;
+			int nb = nbIter;
+			while(nb>0 && obj.getUB()>obj.getLB()){
+				nb--;
+				nbSprints = 100;
+				restartRandom(10);
+			}
+		}
+		nbSprints = 30;
+		fastRun();
+//
 //		if(obj.getLB()<obj.getUB()){
 //			for(int i=0;i<n;i++){
 //				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
@@ -215,7 +233,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //		te.clear();
 
 //		if(obj.getLB()+5<obj.getUB()){
-//			int nbIter = n/10;
+//			int nbIter = n;
 //			int nb = nbIter;
 //			while(nb>0 && obj.getUB()>obj.getLB()){
 //				nb--;
@@ -223,7 +241,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //				restartRandom(10);
 //			}
 //		}
-//		nbSprints = 30;
+//		nbSprints = 100;
 //		fastRun();
 
 		// WHEN OPTIMUM IS GIVEN
@@ -276,8 +294,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		}
 		for(int k=0;k<coef;k++){
 			int i = rd.nextInt(n);
-//			penalities[i] += rd.nextDouble();
-			penalities[i] = n*rd.nextDouble();
+			penalities[i] += n*rd.nextDouble();
+//			penalities[i] = n*rd.nextDouble();
 //			penalities[i] = rd.nextGaussian();
 //			penalities[i] = coef*rd.nextDouble();
 			if(penalities[i]<0 || g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize() <= maxDegree[i]){
