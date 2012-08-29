@@ -173,8 +173,10 @@ public final class PVariable extends ParVar {
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, map, solver);
         } else {
-            iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, (int) (Integer.MIN_VALUE * .99d),
-                    (int) (Integer.MAX_VALUE * .99d), solver);
+//            iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, (int) (Integer.MIN_VALUE * .99d),
+//                    (int) (Integer.MAX_VALUE * .99d), solver);
+			iv = VariableFactory.bounded(DEBUG ? name : NO_NAME, (int) (-1000000),
+                    (int) (1000000), solver);
         }
         map.put(name, iv);
         return iv;
