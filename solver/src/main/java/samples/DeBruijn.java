@@ -34,25 +34,239 @@
 
 package samples;
 
+import choco.kernel.common.util.tools.ArrayUtils;
+import solver.Solver;
+import solver.constraints.ConstraintFactory;
+import solver.constraints.nary.Sum;
+import solver.constraints.nary.alldifferent.AllDifferent;
+import solver.variables.BoolVar;
+import solver.variables.IntVar;
+import solver.variables.VariableFactory;
+
 public class DeBruijn {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+
+//
+    // Note: The names is the same as the MiniZinc model for
+    // easy comparison.
+    //
+
+    // These parameters may be set by the user:
+    //  - base
+    //  - n
+    //  - m
+    int base;          // the base to use. Also known as k.
+    int n;             // number of bits representing the numbers
+    int m;             // length of the sequence, defaults to m = base^n
+    int num_solutions; // number of solutions to show, default all
+
+    // The constraint variables
+    Solver s;
+    IntVar[] x;        // the decimal numbers
+    BoolVar[][] binary; // the representation of numbers in x, in the choosen base
+    IntVar[] bin_code; // the de Bruijn sequence (first number in binary)
 
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+   // integer power method
+    static int pow( int x, int y) {
+        int z = x;
+        for( int i = 1; i < y; i++ ) z *= x;
+        return z;
+    } // end pow
 
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //
+    // the model
+    //
+    public void model(int in_base, int in_n, int in_m, int in_num_solutions) {
+        s = new Solver();
+        base = in_base;
+        n = in_n;
+        int pow_base_n = pow(base,n); // base^n, the range of integers
+        m = pow_base_n;
+        if (in_m > 0) {
+            if (in_m > m) {
+                System.out.println("m must be <= base^n (" + m + ")");
+                System.exit(1);
+            }
+            m = in_m;
+        }
+        num_solutions = in_num_solutions;
+        System.out.println("Using base: " + base + " n: " + n + " m: " + m);
+
+        // decimal representation, ranges from 0..base^n-1
+		System.out.println(s);
+        x = VariableFactory.boundedArray("x", m, 0, pow_base_n - 1, s);
 
 
-	//***********************************************************************************
-	// ACCESSORS
-	//***********************************************************************************
+        //
+        // convert between decimal number in x[i] and "base-ary" numbers
+        // in binary[i][0..n-1].
+        //
+        // (This corresponds to the predicate toNum in the MiniZinc model)
+        //
+
+        // calculate the weights array
+        int[] weights = new int[n];
+        int[] coefs = new int[n+1];
+        int w = 1;
+        for(int i = 0; i < n; i++) {
+            weights[n-i-1] = w;
+            coefs[n-i-1] = w;
+            w *= base;
+        }
+		coefs[n] = -1;
+
+        // connect binary <-> x
+        binary = new BoolVar[m][n];
+        for(int i = 0; i < m; i++) {
+            binary[i] = VariableFactory.boolArray("binary" + i, n, s);
+			IntVar[] sum = ArrayUtils.append(binary[i], new IntVar[]{x[i]});
+            s.post(Sum.build(sum, coefs, 0, Sum.Type.EQ, s));
+//            s.post(ConstraintFactory.eq(x[i], Sum.build(binary[i], weights)));
+        }
+
+        //
+        // assert the the deBruijn property:  element i in binary starts
+        // with the end of element i-1
+        //
+        for(int i = 1; i < m; i++) {
+            for(int j = 1; j < n; j++) {
+                s.post(ConstraintFactory.eq(binary[i - 1][j], binary[i][j - 1], s));
+            }
+        }
+
+        // ... "around the corner": last element is connected to the first
+        for(int j = 1; j < n; j++) {
+            s.post(ConstraintFactory.eq(binary[m - 1][j], binary[0][j - 1], s));
+        }
+
+
+
+        //
+        // This is the de Bruijn sequence, i.e.
+        // the first element of of each row in binary[i]
+        //
+        bin_code = new IntVar[m];
+        for(int i = 0; i < m; i++) {
+            bin_code[i] = VariableFactory.bounded("bin_code_" + i, 0, base-1, s);
+            s.post(ConstraintFactory.eq(bin_code[i], binary[i][0], s));
+        }
+
+
+        // All values in x should be different
+		s.post(new AllDifferent(x,s));
+
+		// Symmetry breaking: the minimum value in x should be the
+		// first element.
+		//TODO model.addConstraint(min(x, x[0]));
+
+    } // end model
+
+
+    //
+    // Search
+    //
+    public void search() {
+		s.findSolution();
+
+        // System.out.println(s.pretty());
+        if (s.isFeasible()) {
+
+            int num_sols = 0;
+            // ChocoUtils.printAllSolutions(model, s);
+
+            do {
+
+                System.out.print("\ndecimal values: ");
+                for (int i = 0; i < m; i++) {
+                    System.out.print(x[i].getValue() + " ");
+//                    System.out.print(s.getVar(x[i]).getVal() + " ");
+                }
+
+                System.out.print("\nde Bruijn sequence: ");
+                for(int i = 0; i < m; i++) {
+                    System.out.print(bin_code[i].getValue() + " ");
+//                    System.out.print(s.getVar(bin_code[i]).getVal() + " ");
+                }
+
+
+                System.out.println("\nbinary:");
+
+                for(int i = 0; i < m; i++) {
+                    for(int j = 0; j < n; j++) {
+                        System.out.print(binary[i][j].getValue() + " ");
+//                        System.out.print(s.getVar(binary[i][j]).getVal() + " ");
+                    }
+                    System.out.println(" : " + x[i].getValue());
+//                    System.out.println(" : " + s.getVar(x[i]).getVal());
+                }
+
+
+                System.out.println("");
+                num_sols++;
+                if (num_solutions > 0 && num_sols >= num_solutions) {
+                    break;
+                }
+
+            } while (s.nextSolution() == Boolean.TRUE);
+
+
+            /*
+            System.out.print("decimal values: ");
+            for(int i = 0; i < m; i++) {
+                System.out.print(s.getVar(x[i]).getVal() + " ");
+            }
+            System.out.println();
+
+            System.out.println("\nbinary:");
+
+            for(int i = 0; i < m; i++) {
+                for(int j = 0; j < n; j++) {
+                    System.out.print(s.getVar(binary[i][j]).getVal() + " ");
+                }
+                System.out.println(" : " + s.getVar(x[i]).getVal());
+            }
+            */
+
+            System.out.println("nbSol: " + s.getMeasures().getSolutionCount());
+
+        } else {
+            System.out.println("No solutions.");
+        }// end if result
+
+
+    }
+
+    //
+    // Running the program
+    //  * java DeBruijn base n
+    //  * java DeBruijn base n m
+    //  * java DeBruijn base n m num_solutions
+    //
+    public static void main(String args[]) {
+
+        int base = 2;
+        int n = 3;
+        int m = 0;
+        int num_solutions = 0;
+
+        if (args.length >= 4) {
+            num_solutions = Integer.parseInt(args[3]);
+        }
+
+        if (args.length >= 3) {
+            m = Integer.parseInt(args[2]);
+        }
+        if (args.length >= 2) {
+            base = Integer.parseInt(args[0]);
+            n = Integer.parseInt(args[1]);
+        }
+
+        DeBruijn debruijn = new DeBruijn();
+        debruijn.model(base, n, m, num_solutions);
+        debruijn.search();
+
+    } // end main
 
 }
