@@ -48,7 +48,7 @@ import solver.variables.view.Views;
 public class ModXYZ extends IntConstraint<IntVar> {
 
     public ModXYZ(IntVar X, IntVar Y, IntVar Z, Solver solver) {
-        super(new IntVar[]{Z, X, Y}, solver);
+        super(new IntVar[]{X, Y, Z}, solver);
         int xl = Math.abs(X.getLB());
         int xu = Math.abs(X.getUB());
         int b = Math.max(xl, xu);
