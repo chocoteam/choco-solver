@@ -658,64 +658,6 @@ public class DCMST {
 				return false;
 			}
 
-			// Subtour elimination callback.  Whenever a feasible solution is found,
-			// find the subtour that contains node 0, and add a subtour elimination
-			// constraint if the tour doesn't visit every node.
-
-//			protected void callback() {
-//				try {
-//					if (where == GRB.CB_MIPSOL) {
-//						// Found an integer feasible solution - does it visit every node?
-//						int n = vars.length;
-//						int[] tour = findsubtour(getSolution(vars));
-//
-//						if (tour.length < n) {
-//							// Add subtour elimination constraint
-//							GRBLinExpr expr = new GRBLinExpr();
-//							for (int i = 0; i < tour.length-1; i++)
-//								expr.addTerm(1.0, vars[tour[i]][tour[i+1]]);
-//							expr.addTerm(1.0, vars[tour[tour.length-1]][tour[0]]);
-//							addLazy(expr, GRB.LESS_EQUAL, tour.length-1);
-//						}
-//					}
-//				} catch (GRBException e) {
-//					System.out.println("Error code: " + e.getErrorCode() + ". " +
-//							e.getMessage());
-//					e.printStackTrace();
-//				}
-//			}
-
-			// Given an integer-feasible solution 'sol', find the sub-tour that
-			// contains node 0.  Result is returned in 'tour', and length is
-			// returned in 'tourlenP'.
-
-//			protected int[] findsubtour(double[][] sol){
-//				int n = sol.length;
-//				boolean[] seen = new boolean[n];
-//				int[] tour = new int[n];
-//				int i, index, node;
-//
-//				for (i = 0; i < n; i++)
-//					seen[i] = false;
-//
-//				node = 0;
-//				for (index = 0; index < n; index++) {
-//					tour[index] = node;
-//					seen[node] = true;
-//					for (i = 0; i < n; i++)
-//						if (sol[node][i] > 0.5 && !seen[i]) {
-//							node = i;
-//							break;
-//						}
-//					if (i == n)
-//						break;
-//				}
-//				int result[] = new int[index+1];
-//				for (i = 0; i <= index; i++)
-//					result[i] = tour[i];
-//				return result;
-//			}
-
 			protected int[] findsubtour(double[] solarray){
 				boolean[] seen = new boolean[n];
 				int[] tour = new int[n];
@@ -757,183 +699,6 @@ public class DCMST {
 				return result;
 			}
 
-//			public boolean solveLP2() throws ContradictionException {
-//				try {
-//					IloCplex cplex = new IloCplex();
-//					cplex.setOut(new OutputStream() {
-//						@Override
-//						public void write(int i) throws IOException {
-//
-//						}
-//					});
-////					cplex.clearModel();
-//					int nbX = n*(n-1)/2;
-//					INeighbors nei;
-//					int[] costX = new int[nbX];
-//					TIntIntHashMap map = new TIntIntHashMap();
-//					int[] revmap = new int[nbX];
-//					int index = 0;
-//					IloNumVar[] x = new IloNumVar[nbX];
-//					for(int i=0;i<n;i++){
-//						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-//						for(int j=i+1;j<n;j++){
-//							revmap[index] = i*n+j;
-//							map.put(i*n+j,index);
-//							costX[index] = dist[i][j];
-//							if(nei.contain(j)){
-//								if(!undi.getKernelGraph().arcExists(i,j)){
-//									x[index] = cplex.numVar(0,1);
-//								}else{
-//									x[index] = cplex.numVar(1,1);
-//								}
-//							}else{
-//								x[index] = cplex.numVar(0,0);
-//							}
-//							index++;
-//						}
-//					}
-//					//obj
-//					cplex.addMinimize(cplex.scalProd(x,costX));
-//					//cons
-//					cplex.addEq(cplex.sum(x),n-1);
-//					for(int i=0;i<n;i++){
-//						nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-//						IloNumVar[] neivar = new IloNumVar[nei.neighborhoodSize()];
-//						int k = 0;
-//						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//							int id = map.get(i*n+j);
-//							if(i>j){
-//								id = map.get(j*n+i);
-//							}
-//							neivar[k++] = x[id];
-//						}
-//						cplex.addLe(cplex.sum(neivar),dMax[i]);
-//						cplex.addGe(cplex.sum(neivar),1);
-//					}
-//					//subtours
-////					System.out.println(cuts.size()+" subtour elimination cuts");
-//					for(int s=0;s<cuts.size();s++){
-//						int k = cuts.get(s).size();
-//						IloNumVar[] newcut = new IloNumVar[k];
-//						for(int i=0;i<k;i++){
-//							newcut[i] = x[cuts.get(s).get(i)];
-//						}
-//						cplex.addGe(cplex.sum(newcut),1);
-//					}
-//					//solve
-////					cplex.exportModel("/Users/jfages07/Desktop/truc.mps");
-//					boolean again = false;
-//					if ( cplex.solve() ) {
-//						if(true){
-//							System.out.println(cplex.getObjValue());
-//							System.exit(0);
-//						}
-////						cplex.output();
-////						System.exit(0);
-//						//check cuts
-//						for(int s=0;s<cuts.size();s++){
-//							int k = cuts.get(s).size();
-//							double newcutval = 0;
-//							for(int i=0;i<k;i++){
-//								newcutval += cplex.getValue(x[cuts.get(s).get(i)]);
-//							}
-//							if(newcutval<1){
-//								throw new UnsupportedOperationException("cut violated!!! " +newcutval);
-//							}
-//						}
-////						System.out.println("Solution status = " + cplex.getStatus());
-////						System.out.println("Solution value = " + cplex.getObjValue());
-//						double no = cplex.getObjValue();
-////						System.out.println("old obj : "+totalCost);
-//						if(no>totalCost.getLB()){
-//							System.out.println("IMPROVED to "+cplex.getObjValue());
-////							System.exit(0);
-//						}
-//						totalCost.updateLowerBound((int)Math.ceil(no),this);
-////						System.out.println("new lb  : "+no);
-//						int ub = totalCost.getUB();
-//						UndirectedGraph gsol = new UndirectedGraph(n,GraphType.LINKED_LIST);
-//						for(int i=0;i<nbX;i++){
-//							if(cplex.getValue(x[i])>0){
-//								int from = revmap[i]/n;
-//								int to = revmap[i]%n;
-//								gsol.addEdge(from,to);
-//							}
-////							if(cplex.getValue(x[i])==0 && cplex.getReducedCost(x[i])<0){
-////								throw new UnsupportedOperationException();
-////							}
-////							if(cplex.getValue(x[i])==1 && cplex.getReducedCost(x[i])>0){
-////								System.out.println("var "+i+" : "+cplex.getValue(x[i])+" /rc : "+cplex.getReducedCost(x[i]));
-////								throw new UnsupportedOperationException();
-////							}
-////							if(cplex.getValue(x[i])>0){
-////							System.out.println("x["+i+"] "+cplex.getValue(x[i]));
-////							System.out.println("reduced cost : "+cplex.getReducedCost(x[i]));
-////							}
-////							System.exit(0);
-//							if(no+cplex.getReducedCost(x[i])>ub){
-//								int from = revmap[i]/n;
-//								int to = revmap[i]%n;
-////								if(cplex.getValue(x[i])!=1){
-//								if(cplex.getValue(x[i])==0){
-//									if(undi.getEnvelopGraph().arcExists(from,to)){
-//										System.out.println("FILTER");
-////										System.exit(0);
-//									}
-//									undi.removeArc(from,to,this);
-//								}
-//							}
-//						}
-//						ConnectivityFinder ccf = new ConnectivityFinder(gsol);
-//						ccf.findAllCC();
-//						int nbcc = ccf.getNBCC();
-//						if(nbcc>1){
-//							for(int cc=0;cc<nbcc;cc++){
-//								TIntArrayList cut = new TIntArrayList();
-//								TIntArrayList nodesCC = new TIntArrayList();
-//								for(int i=0;i<nbX;i++){
-//									int from = revmap[i]/n;
-//									int to = revmap[i]%n;
-//									if((ccf.getNode_CC()[from]==cc && ccf.getNode_CC()[to]!=cc)
-//											||(ccf.getNode_CC()[to]==cc && ccf.getNode_CC()[from]!=cc)){
-//										if(cplex.getValue(x[i])>0){
-//											throw new UnsupportedOperationException();
-//										}
-//										cut.add(i);
-//										if(ccf.getNode_CC()[from]==cc && !nodesCC.contains(from)){
-//											nodesCC.add(from);
-//										}
-//										if(ccf.getNode_CC()[to]==cc && !nodesCC.contains(to)){
-//											nodesCC.add(to);
-//										}
-//									}
-//								}
-//								cuts.add(cut);
-//								again = true;
-//							}
-//						}else{
-//							System.out.println("NO SUBTOUR FOUND");
-//						}
-//					}else{
-//						System.out.println(cplex.getStatus());
-//						if(cplex.getStatus().toString().contains("Infeasible")){
-//							contradiction(undi,"");
-//							return false;
-//						}
-//						throw new UnsupportedOperationException();
-//					}
-//					if(!again){
-//						System.out.println(cplex.getObjValue());
-//					}
-//					cplex.end();
-//					return again;
-//					// create model and solve it
-//				} catch (IloException e) {
-//					System.err.println("Concert exception caught: " + e);
-//				}
-//				return false;
-//			}
-
 			@Override
 			public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
 				propagate(0);
@@ -944,24 +709,15 @@ public class DCMST {
 				return ESat.UNDEFINED;
 			}
 		};
-
-
-//		gc.addPropagators(PropBundleTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-
 		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk);
 
-//		gc.addPropagators(PropResetTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-
-
-//		gc.addPropagators(euclFilter);
-
+		gc.addPropagators(euclFilter);
 		gc.addPropagators(lp2Filter);
-
+//		gc.addPropagators(PropBundleTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
+//		gc.addPropagators(PropResetTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
 //		gc.addPropagators(PropPositiveTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-
-
 //		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
 
 		solver.post(gc);
@@ -996,17 +752,17 @@ public class DCMST {
 		// config
 		AbstractStrategy firstSol = StrategyFactory.graphStrategy(undi,null,new FirstSol(undi), GraphStrategy.NodeArcPriority.ARCS);
 		AbstractStrategy findOpt = StrategyFactory.graphStrategy(undi, null, new MST_MinDeg(undi), GraphStrategy.NodeArcPriority.ARCS);
-		findOpt = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,1,true), GraphStrategy.NodeArcPriority.ARCS);
+//		findOpt = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,1,true), GraphStrategy.NodeArcPriority.ARCS);
 		AbstractStrategy strat = new Change(undi,firstSol,findOpt);
 //		strat = StrategyFactory.graphRandom(undi,0);
 //		strat = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,null,4,true), GraphStrategy.NodeArcPriority.ARCS);
 //		strat = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,0,true), GraphStrategy.NodeArcPriority.ARCS);
 		switch (search){
-//			case 0: solver.set(findOpt);break;
-			case 0:
-				solver.set(strat);
-				solver.getSearchLoop().restartAfterEachSolution(true);
-				break;
+			case 0: solver.set(findOpt);break;
+//			case 0:
+//				solver.set(strat);
+//				solver.getSearchLoop().restartAfterEachSolution(true);
+//				break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
 			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
 			default: throw new UnsupportedOperationException();
@@ -1040,10 +796,11 @@ public class DCMST {
 		public boolean computeNextArc() {
 			from = -1;
 			to = -1;
-			minDelta();
+			minDelta2();
 			if(from==-1){
 				return false;
 			}
+			System.out.println(from+" - "+to);
 			return true;
 		}
 
@@ -1053,7 +810,122 @@ public class DCMST {
 			for(int i=0;i<n;i++){
 				nei = hk.getMST().getSuccessorsOf(i);
 				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k)
+				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				if(e!=k && e>dMax[i])
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							if(dMax[i]-k<minDelta){
+								minDelta = dMax[i]-k;
+							}
+						}
+					}
+			}
+			int minDeg = 3*n;
+			for(int i=0;i<n;i++){
+				nei = hk.getMST().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							if(d<minDeg){
+								minDeg = d;
+								from = i;
+								to = j;
+							}
+						}
+					}
+			}
+			if(to!=-1){
+				return;
+			}
+			for(int i=0;i<n;i++){
+				nei = hk.getMST().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				if(e!=k)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							if(dMax[i]-k<minDelta){
+								minDelta = dMax[i]-k;
+							}
+						}
+					}
+			}
+			for(int i=0;i<n;i++){
+				nei = hk.getMST().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(!g.getKernelGraph().arcExists(i,j)){
+							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
+									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+							if(d<minDeg){
+								minDeg = d;
+								from = i;
+								to = j;
+							}
+						}
+					}
+			}
+		}
+
+		private void minDelta2(){
+			INeighbors nei;
+			int minDelta = 5*n;
+			int maxDeg = 0;
+			from = -1;
+			for(int i=0;i<n;i++){
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				if(e!=k && e>dMax[i] && e>maxDeg){
+					maxDeg = e;
+					from = e;
+				}
+			}
+			if(from==-1){
+				for(int i=0;i<n;i++){
+					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+					int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+					if(e!=k && e>maxDeg){
+						maxDeg = e;
+						from = e;
+					}
+				}
+			}
+			if(from==-1){
+				return;
+			}
+			int minDeg = 3*n;
+			nei = g.getEnvelopGraph().getSuccessorsOf(from);
+//			nei = hk.getMST().getSuccessorsOf(i);
+			int k = g.getKernelGraph().getNeighborsOf(from).neighborhoodSize();
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(!g.getKernelGraph().arcExists(from,j)){
+					int d = g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
+					if(d<minDeg){
+						minDeg = d;
+						to = j;
+					}
+				}
+			}
+			if(to==-1){
+				System.out.println("g");
+				System.out.println(nei);
+				System.out.println(g.getKernelGraph().getNeighborsOf(from));
+				System.exit(0);
+			}
+		}
+
+		private void original(){
+			INeighbors nei;
+			int minDelta = 5*n;
+			for(int i=0;i<n;i++){
+				nei = hk.getMST().getSuccessorsOf(i);
+				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
+				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
+				if(e!=k)
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!g.getKernelGraph().arcExists(i,j)){
 							if(dMax[i]-k<minDelta){
