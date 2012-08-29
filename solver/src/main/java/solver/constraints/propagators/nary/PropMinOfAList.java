@@ -81,11 +81,15 @@ public class PropMinOfAList extends Propagator<IntVar> {
         for (int i = VARS_OFFSET; i < nbVars; i++) {
             vars[i].updateLowerBound(minValue, this);
         }
-        onlyOneMaxCandidatePropagation();
+//        onlyOneMaxCandidatePropagation();
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
+		if(true){
+			forcePropagate(EventType.FULL_PROPAGATION);
+			return;
+		}
         if (EventType.isInstantiate(mask)) {
             if (idx >= VARS_OFFSET) { // Variable in the list
                 IntVar minVar = vars[MIN_INDEX];
