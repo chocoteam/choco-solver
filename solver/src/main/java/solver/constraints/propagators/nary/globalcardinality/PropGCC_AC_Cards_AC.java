@@ -235,9 +235,6 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
 		in.clear();
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
-		//
-		in.set(root);
-		//
 		int x, y;
 		INeighbors succs;
 		while (indexFirst != indexLast) {
@@ -297,9 +294,6 @@ public class PropGCC_AC_Cards_AC extends Propagator<IntVar> {
 		in.clear();
 		int indexFirst = 0, indexLast = 0;
 		fifo[indexLast++] = root;
-		//
-		in.set(root);
-		//
 		int x, y;
 		INeighbors succs;
 		while (indexFirst != indexLast) {
