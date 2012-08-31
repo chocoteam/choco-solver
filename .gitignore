@@ -3,3 +3,7 @@
 *.ipr
 *.iws
 choco.iws~
+
+*.jar
+
+parser/src/fzn/fzn_choco
