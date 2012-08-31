@@ -38,6 +38,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
+import solver.objective.MinObjectiveManager;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
@@ -83,20 +84,27 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
 			firstCall = false;
 			lb = obj.getLB();
 		}
-		if(obj.getLB()==obj.getUB()){
-			return null;
-		}
 		if(nbSols == solver.getMeasures().getSolutionCount()){
 			return null;
 		}else{
 			nbSols = solver.getMeasures().getSolutionCount();
 			ub = obj.getUB();
 			lb = Math.max(lb,obj.getLB());//check
+			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			man.updateLB(lb);
+			if(lb==obj.getUB()){
+				return null;
+			}
 			if(lb>ub){// we should post a cut instead
 				solver.getSearchLoop().interrupt();
 				return null;
 			}
-			int target = (lb+ub)/2;
+			int target;
+			target = (3*lb+ub)/4;
+//			if(target<lb+10){
+//				System.out.println("dich");
+//				target = (lb+ub)/2;
+//			}
 			System.out.println(lb+" : "+ub+" -> "+target);
 			FastDecision dec = pool.getE();
 			if(dec==null){
@@ -116,6 +124,8 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
 		public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
 			lb = value+1;
 			System.out.println("unapply objective decision");
+			MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
+			man.updateLB(lb);
 			var.updateLowerBound(lb, cause);
 		}
 		@Override
