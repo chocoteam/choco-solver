@@ -72,7 +72,7 @@ public class GraphStrategyBench extends ArcStrategy {
 		prev = graphVar.getSolver().getEnvironment().makeInt(-1);
 //		stack = new TIntArrayList();
 //		usetrick = false;
-		this.usetrick = true;
+//		this.usetrick = false;
 	}
 
 	@Override

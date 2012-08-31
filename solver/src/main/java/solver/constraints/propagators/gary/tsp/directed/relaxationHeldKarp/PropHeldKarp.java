@@ -124,6 +124,7 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		resetMA();
 		updateCostMatrix();
 		HK_Pascals();
+		HK_Pascals();//TODO REMOVE
 //		notLagrangian();
 	}
 

@@ -64,7 +64,7 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	protected DirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
 	protected double step;
-	protected AbstractMSTFinder HKfilter, HK;
+	protected AbstractMSTFinder HKfilter, HK, bst_HKfilter, bst_HK;
 	public long nbRem;
 	protected boolean waitFirstSol;
 	protected int nbSprints;
@@ -91,15 +91,6 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		nbSprints = 30;
 	}
 
-
-	/** MST based HK */
-	public static PropSurroHeldKarp mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropSurroHeldKarp phk = new PropSurroHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
-		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
-		phk.HK = new PrimMSTFinder(phk.n,phk);
-		return phk;
-	}
-
 	protected IStateInt[] sccOf;
 	protected IStateInt nr;
 	/** BST based HK */
@@ -107,8 +98,10 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		PropSurroHeldKarp phk = new PropSurroHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.sccOf = sccOf;
 		phk.nr = nR;
-		phk.HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
-		phk.HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
+		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
+		phk.HK = new PrimMSTFinder(phk.n,phk);
+		phk.bst_HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
+		phk.bst_HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
 		return phk;
 	}
 
@@ -123,7 +116,8 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		// initialisation
 		resetMA();
 		updateCostMatrix();
-		HK_Pascals();
+		HK_Pascals(HKfilter,HK);
+		HK_Pascals(bst_HKfilter,bst_HK);
 //		notLagrangian();
 	}
 
@@ -139,7 +133,7 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 	}
 
-	protected void HK_Pascals() throws ContradictionException {
+	protected void HK_Pascals(AbstractMSTFinder HKfilter, AbstractMSTFinder HK) throws ContradictionException {
 		double hkb;
 		double alpha = 2;
 		double beta = 0.5;

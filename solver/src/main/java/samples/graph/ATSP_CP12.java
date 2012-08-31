@@ -48,6 +48,7 @@ import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropSurroHeldKarp;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
 import solver.propagation.IPropagationEngine;
@@ -250,16 +251,18 @@ public class ATSP_CP12 {
 			gc.addPropagators(map);
 			relax = map;
 		}else{
-			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
-			gc.addPropagators(propHK_mst);
-			relax = propHK_mst;
 			if(config.get(rg) && bst){// BST-based HK
 				System.out.println("BST");
-				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+				PropSurroHeldKarp propHK_bst = PropSurroHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+//				PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 				propHK_bst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 				gc.addPropagators(propHK_bst);
+			}else{
+				System.out.println("MST");
+				PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
+				propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
+				gc.addPropagators(propHK_mst);
+				relax = propHK_mst;
 			}
 		}
 		solver.post(gc);
@@ -268,7 +271,7 @@ public class ATSP_CP12 {
 	public static void configureAndSolve() {
 		//SOLVER CONFIG
 		AbstractStrategy mainStrat = StrategyFactory.graphATSP(graph, heuristic, relax);
-
+		mainStrat = StrategyFactory.graphLexico(graph);
 //		AbstractStrategy mainStrat = new MyStrat(new GraphVar[]{graph});
 		solver.set(mainStrat);
 //		switch (main_search){
@@ -329,13 +332,13 @@ public class ATSP_CP12 {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		outFile = "atsp_fast.csv";
-//		clearFile(outFile);
-//		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
-//		bench();
+		outFile = "atsp_fast.csv";
+		clearFile(outFile);
+		writeTextInto("instance;sols;fails;nodes;time;obj;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+		bench();
 //		String instance = "/Users/jfages07/github/In4Ga/atsp_instances/ft53.atsp";
 //		testInstance(instance);
-		trans();
+//		trans();
 
 	}
 
@@ -401,7 +404,7 @@ public class ATSP_CP12 {
 			if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
 				loadInstance(dir + "/" + s);
-				if(n>0 && n<170){// || s.contains("p43.atsp")){
+				if(n>0 && n<190){// || s.contains("p43.atsp")){
 					bst = false;
 //					configParameters(0);
 //					solve();
@@ -409,10 +412,10 @@ public class ATSP_CP12 {
 //					solve();
 //					configParameters((1<<pos));
 //					solve();
-//					configParameters((1<<allDiff));
-//					solve();
+					configParameters((1<<allDiff));
+					solve();
 					bst = true;
-					configParameters((1<<rg));
+					configParameters((1<<rg)+(1<<allDiff));
 					solve();
 //					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
 //					solve();
@@ -540,23 +543,23 @@ public class ATSP_CP12 {
 				}
 			}
 			//TODO add again
-//			noVal = distanceMatrix[0][0];
-//			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
-//			int maxVal = 0;
-//			for (int i = 0; i < n; i++) {
-//				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
-//				distanceMatrix[n - 1][i] = noVal;
-//				distanceMatrix[i][0] = noVal;
-//				for (int j = 0; j < n; j++) {
-//					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
-//						maxVal = distanceMatrix[i][j];
-//					}
-//				}
-//			}
-//			line = buf.readLine();
-//			line = buf.readLine();
-//			initialUB = maxVal*n;
-//			optimum = Integer.parseInt(line.replaceAll(" ", ""));
+			noVal = distanceMatrix[0][0];
+			if (noVal == 0) noVal = Integer.MAX_VALUE / 2;
+			int maxVal = 0;
+			for (int i = 0; i < n; i++) {
+				distanceMatrix[i][n - 1] = distanceMatrix[i][0];
+				distanceMatrix[n - 1][i] = noVal;
+				distanceMatrix[i][0] = noVal;
+				for (int j = 0; j < n; j++) {
+					if (distanceMatrix[i][j] != noVal && distanceMatrix[i][j] > maxVal) {
+						maxVal = distanceMatrix[i][j];
+					}
+				}
+			}
+			line = buf.readLine();
+			line = buf.readLine();
+			initialUB = maxVal*n;
+			optimum = Integer.parseInt(line.replaceAll(" ", ""));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
