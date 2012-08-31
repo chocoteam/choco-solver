@@ -139,4 +139,23 @@ public class AnnotationTest {
         TerminalParser.parse(fzn.expression(), "seq_search([int_search([a],input_order,indomain_min,complete)])");
     }
 
+    @Test
+    public void testOutput() {
+        fzn = new FZNParser(true, false);
+        fzn.loadInstance("array [1..2] of var 1..3: xs :: output_array([1..2]);\n" +
+                "constraint int_lt(xs[1], xs[2]); % x[1] < x[2].\n" +
+                "solve satisfy;");
+        fzn.parse();
+        fzn.solver.solve();
+    }
+
+    @Test
+    public void testOutput2() {
+        fzn = new FZNParser(true, false);
+        fzn.loadInstance("array [1..0] of var 0..315: st_rec_y :: output_array([{}]);\n" +
+                "solve satisfy;");
+        fzn.parse();
+        fzn.solver.solve();
+    }
+
 }
