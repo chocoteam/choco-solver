@@ -36,126 +36,135 @@ package samples.graph;
 
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.gary.IRelaxation;
+import solver.search.strategy.assignments.GraphAssignment;
+import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.graph.GraphDecision;
 import solver.search.strategy.strategy.graph.ArcStrategy;
+import solver.search.strategy.strategy.graph.GraphStrategy;
 import solver.variables.graph.GraphVar;
 
-public class GraphStrategyBench2 extends ArcStrategy {
+public class GraphStrategyBench2 extends GraphStrategy {
 
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
+	public static final int FIRST = 0;
+	public static final int LAST = 14;
+	// heuristics
+	static final int LEX = 0;
+	static final int MIN_P_DEGREE = 1;
+	static final int MAX_P_DEGREE = 2;
+	static final int MIN_M_DEGREE = 3;
+	static final int MAX_M_DEGREE = 4;
+	static final int MIN_COMMON = 5;
+	static final int MAX_COMMON = 6;
+	static final int MIN_COST = 7;
+	static final int MAX_COST = 8;
+	static final int IN_SUPPORT_LEX = 9;
+	static final int OUT_SUPPORT_LEX = 10;
+	static final int MIN_REDUCED_COST = 11;
+	static final int MAX_REDUCED_COST = 12;
+	static final int MIN_REPLACEMENT_COST = 13;
+	static final int MAX_REPLACEMENT_COST = 14;
+
+	// variables
 	int n;
 	int mode;
 	int[][] costs;
 	IRelaxation relax;
-	final int LEX = 0;
-	final int MIN_DEGREE = 1;
-	final int MAX_DEGREE = 2;
-	final int MIN_COST = 3;
-	final int MAX_COST = 4;
-	final int IN_SUPPORT_LEX = 5;
-	final int OUT_SUPPORT_LEX = 6;
-	IStateInt prev;
-//	TIntArrayList stack;
-	boolean usetrick;
+	boolean usetrick,constructive;
+	GraphAssignment decisionType;
+	int from,to;
+	int value;
 
-	public GraphStrategyBench2(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation, int policy, boolean useTrick) {
-		super(graphVar);
-		this.usetrick = useTrick;
-		mode = policy;
+	public GraphStrategyBench2(GraphVar graphVar, int[][] costMatrix, IRelaxation relaxation) {
+		super(graphVar,null,null,null);
 		costs = costMatrix;
 		relax = relaxation;
-		n = graphVar.getEnvelopGraph().getNbNodes();
-		prev = graphVar.getSolver().getEnvironment().makeInt(-1);
-//		stack = new TIntArrayList();
-//		usetrick = false;
-//		this.usetrick = false;
+		n = costMatrix.length;
+	}
+
+	public void configure(int policy, boolean enforce, boolean useTrick, boolean construct){
+		this.usetrick = useTrick;
+		this.constructive = construct;
+		if(construct && !useTrick){
+			throw new UnsupportedOperationException();
+		}
+		if(enforce){
+			decisionType = GraphAssignment.graph_enforcer;
+		}else{
+			decisionType = GraphAssignment.graph_remover;
+		}
+		mode = policy;
 	}
 
 	@Override
-	public boolean computeNextArc() {
-//		from = prev.get();
-//		if(stack.size()>0){
-//			from = stack.removeAt(stack.size()-1);
-//		}
+	public Decision getDecision() {
+		if(g.instantiated()){
+			return null;
+		}
+		GraphDecision dec = pool.getE();
+		if(dec == null){
+			dec = new GraphDecision(pool);
+		}
+		computeNextArc();
+		dec.setArc(g,from,to, decisionType);
+		return dec;
+	}
+
+	public void computeNextArc() {
 //		if(g.getSolver().getMeasures().getSolutionCount()==0){
 //			mode = 3;
 //		}else{
 //			mode = 4;
 //		}
-//		constructivePath();
-		boolean b = nextArc();
-//		prev.set(from);
-//		stack.add(from);
-		return b;
-	}
-
-	public boolean nextArc() {
-		if(usetrick)
-		if(computeTrickyNextArc()){
-			return true;
+		if(constructive){
+			constructivePath();
 		}
+		if(usetrick)
+			if(computeTrickyNextArc()){
+				return;
+			}
 		from = to = -1;
-		int value = -1;
+		value = -1;
 		for(int i=0;i<n;i++){
-			for(int j=0;j<n;j++){
-				if(g.getEnvelopGraph().arcExists(i,j)&&!g.getKernelGraph().arcExists(i,j)){
-					switch (mode){
-						case LEX:
-							from = i;
-							to = j;
-							return true;
-						case MIN_DEGREE:
-						case MAX_DEGREE:
-							int v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
-							if(from==-1 || (v<value && mode==MIN_DEGREE) || (v>value && mode==MAX_DEGREE)){
-								value = v;
-								from = i;
-								to = j;
-							}break;
-						case MIN_COST:
-						case MAX_COST:
-							int c = costs[i][j];
-							if(from==-1 || (c<value && mode==MIN_COST) || (c>value && mode==MAX_COST)){
-								value = c;
-								from = i;
-								to = j;
-							}break;
-						case IN_SUPPORT_LEX:
-							if(relax.contains(i,j)){
-								from = i;
-								to = j;
-								return true;
-							}break;
-						case OUT_SUPPORT_LEX:
-							if(!relax.contains(i,j)){
-								from = i;
-								to = j;
-								return true;
-							}break;
-						default : throw new UnsupportedOperationException("mode "+mode+" does not exist");
-					}
-				}
+			if(evaluateNeighbors(i)){
+				return;
 			}
 		}
-		return from!=-1;
+		if (to==-1){
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	public boolean computeTrickyNextArc() {
-//		while(stack.size()>0 && from != -1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-//				         g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
-//			from = stack.removeAt(stack.size()-1);
-//		}
 		if(from == -1 || g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-				         g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+				g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
 			return false;
 		}
 		to = -1;
-		int value = -1;
-		int i = from;
+		value = -1;
+		evaluateNeighbors(from);
+		return to!=-1;
+	}
+
+	private void constructivePath(){
+		int x = 0;
+		int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+		while(y!=-1){
+			x = y;
+			y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
+			if(y==-1){
+				y = g.getKernelGraph().getSuccessorsOf(x).getNextElement();
+			}
+		}
+		from = x;
+	}
+
+	public boolean evaluateNeighbors(int i) {
+		int v;
 		for(int j=0;j<n;j++){
 			if(g.getEnvelopGraph().arcExists(i,j)&&!g.getKernelGraph().arcExists(i,j)){
 				switch (mode){
@@ -163,20 +172,45 @@ public class GraphStrategyBench2 extends ArcStrategy {
 						from = i;
 						to = j;
 						return true;
-					case MIN_DEGREE:
-					case MAX_DEGREE:
-						int v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
+					case MIN_P_DEGREE:
+					case MAX_P_DEGREE:
+						v = g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()
 								+ g.getEnvelopGraph().getPredecessorsOf(j).neighborhoodSize();
-						if(to==-1 || (v<value && mode==MIN_DEGREE) || (v>value && mode==MAX_DEGREE)){
+						if(from==-1 || (v<value && mode==MIN_P_DEGREE) || (v>value && mode==MAX_P_DEGREE)){
+							value = v;
+							from = i;
+							to = j;
+						}break;
+					case MIN_M_DEGREE:
+					case MAX_M_DEGREE:
+						v = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize()
+								+ g.getKernelGraph().getPredecessorsOf(j).neighborhoodSize();
+						if(from==-1 || (v<value && mode==MIN_M_DEGREE) || (v>value && mode==MAX_M_DEGREE)){
+							value = v;
+							from = i;
+							to = j;
+						}break;
+					case MIN_COMMON:
+					case MAX_COMMON:
+						v = 0;
+						for(int k=0;k<n;k++){
+							if(g.getEnvelopGraph().getSuccessorsOf(k).contain(i)){
+								v++;
+							}
+							if(g.getEnvelopGraph().getSuccessorsOf(k).contain(j)){
+								v++;
+							}
+						}
+						if(from==-1 || (v<value && mode==MIN_COMMON) || (v>value && mode==MAX_COMMON)){
 							value = v;
 							from = i;
 							to = j;
 						}break;
 					case MIN_COST:
 					case MAX_COST:
-						int c = costs[i][j];
-						if(to==-1 || (c<value && mode==MIN_COST) || (c>value && mode==MAX_COST)){
-							value = c;
+						v = costs[i][j];
+						if(from==-1 || (v<value && mode==MIN_COST) || (v>value && mode==MAX_COST)){
+							value = v;
 							from = i;
 							to = j;
 						}break;
@@ -192,20 +226,30 @@ public class GraphStrategyBench2 extends ArcStrategy {
 							to = j;
 							return true;
 						}break;
+					case MIN_REDUCED_COST:
+					case MAX_REDUCED_COST:
+						if(!relax.contains(i,j)){
+							v = (int)relax.getMarginalCost(i,j);
+							if(from==-1 || (v<value && mode==MIN_REDUCED_COST) || (v>value && mode==MAX_REDUCED_COST)){
+								value = v;
+								from = i;
+								to = j;
+							}
+						}break;
+					case MIN_REPLACEMENT_COST:
+					case MAX_REPLACEMENT_COST:
+						if(relax.contains(i,j)){
+							v = (int)relax.getReplacementCost(i,j);
+							if(from==-1 || (v<value && mode==MIN_REPLACEMENT_COST) || (v>value && mode==MAX_REPLACEMENT_COST)){
+								value = v;
+								from = i;
+								to = j;
+							}
+						}break;
 					default : throw new UnsupportedOperationException("mode "+mode+" does not exist");
 				}
 			}
 		}
-		return to!=-1;
-	}
-
-	private void constructivePath(){
-		int x = 0;
-		int y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-		while(y!=-1){
-			x = y;
-			y = g.getKernelGraph().getSuccessorsOf(x).getFirstElement();
-		}
-		from = x;
+		return false;
 	}
 }
