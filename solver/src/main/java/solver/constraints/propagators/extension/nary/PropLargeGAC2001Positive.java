@@ -138,7 +138,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        return null;
+        return ESat.TRUE;
     }
 
     /**
