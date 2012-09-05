@@ -74,7 +74,7 @@ public class ParseAndSolve {
 
     @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n0: constraint\n1: variable\n2: 7q cstrs\n3: 8q cstrs." +
             "\n4: 8q vars\n5: abs\n6: arcs\n-1: default", required = false)
-    private byte eng = 0;
+    private byte eng = -1;
 
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
