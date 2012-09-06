@@ -39,6 +39,7 @@ import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
 import solver.propagation.hardcoded.*;
+import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,6 +76,9 @@ public class ParseAndSolve {
     @Option(name = "-e", aliases = {"--engine"}, usage = "Engine Number.\n0: constraint\n1: variable\n2: 7q cstrs\n3: 8q cstrs." +
             "\n4: 8q vars\n5: abs\n6: arcs\n-1: default", required = false)
     private byte eng = -1;
+
+    @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
+    private String csv = "";
 
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
@@ -140,6 +144,10 @@ public class ParseAndSolve {
                     }
 
             }
+            if (!csv.equals("")) {
+                SearchMonitorFactory.toCSV(solver, instance, csv);
+            }
+
 //        SearchMonitorFactory.logWithRank(solver, 4783, 4785);
 //        solver.getSearchLoop().getLimitsBox().setNodeLimit(4785);
 //        SearchMonitorFactory.log(solver, true, true);
