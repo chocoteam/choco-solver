@@ -40,15 +40,16 @@ import solver.variables.IntVar;
 /**
  * X = MIN(Y,Z)
  * <br/>
+ * ensures bound consistency
  *
  * @author Charles Prud'homme
  * @since 19/04/11
  */
-public class PropMin extends Propagator<IntVar> {
+public class PropMinBC extends Propagator<IntVar> {
 
     IntVar MIN, v1, v2;
 
-    public PropMin(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
+    public PropMinBC(IntVar X, IntVar Y, IntVar Z, Solver solver, Constraint<IntVar,
             Propagator<IntVar>> intVarPropagatorConstraint) {
         super(new IntVar[]{X, Y, Z}, solver, intVarPropagatorConstraint, PropagatorPriority.TERNARY, true);
         this.MIN = X;
@@ -84,12 +85,7 @@ public class PropMin extends Propagator<IntVar> {
         c += (vars[2].instantiated() ? 4 : 0);
         switch (c) {
             case 7: // everything is instantiated
-                if (vars[0].getValue() != Math.min(vars[1].getValue(), vars[2].getValue())) {
-                    contradiction(null, "");
-                }
-                setPassive();
-                break;
-            case 6: // Z and Y are instantiated
+            case 6:// Z and Y are instantiated
                 vars[0].instantiateTo(Math.min(vars[1].getValue(), vars[2].getValue()), this);
                 setPassive();
                 break;
@@ -101,18 +97,20 @@ public class PropMin extends Propagator<IntVar> {
                     vars[1].instantiateTo(min, this);
                     setPassive();
                 } else if (min > val2) {
-                    contradiction(vars[2], "");
+                    contradiction(vars[2], "wrong min selected");
+                } else { // X = Z
+                    vars[1].updateLowerBound(min, this);
                 }
             }
             break;
             case 4: // Z is instantiated
             {
                 int val = vars[2].getValue();
-                if (val < vars[1].getLB()) {
+                if (val < vars[1].getLB()) { // => X = Z
                     vars[0].instantiateTo(val, this);
                     setPassive();
                 } else {
-                    vars[0].updateUpperBound(val, this);
+                    _filter();
                 }
             }
             break;
@@ -125,30 +123,34 @@ public class PropMin extends Propagator<IntVar> {
                     setPassive();
                 } else if (min > val1) {
                     contradiction(vars[1], "");
+                } else { // X = Y
+                    vars[2].updateLowerBound(min, this);
                 }
             }
             break;
             case 2: // Y is instantiated
             {
                 int val = vars[1].getValue();
-                if (val < vars[2].getLB()) {
+                if (val < vars[2].getLB()) { // => X = Y
                     vars[0].instantiateTo(val, this);
                     setPassive();
-                } else {
-                    vars[0].updateUpperBound(val, this);
+                } else { // val in Z
+                    _filter();
                 }
             }
             break;
             case 1: // X is instantiated
             {
                 int min = vars[0].getValue();
-                if(!vars[1].contains(min) && !vars[2].contains(min)){
+                if (!vars[1].contains(min) && !vars[2].contains(min)) {
                     contradiction(vars[0], null);
                 }
                 if (vars[1].getLB() > min) {
                     vars[2].instantiateTo(min, this);
+                    setPassive();
                 } else if (vars[2].getLB() > min) {
                     vars[1].instantiateTo(min, this);
+                    setPassive();
                 } else {
                     vars[1].updateLowerBound(min, this);
                     vars[2].updateLowerBound(min, this);
@@ -157,20 +159,24 @@ public class PropMin extends Propagator<IntVar> {
 
             break;
             case 0: // otherwise
-                boolean change;
-                do {
-                    change = vars[0].updateLowerBound(Math.min(vars[1].getLB(), vars[2].getLB()), this);
-                    change |= vars[0].updateUpperBound(Math.min(vars[1].getUB(), vars[2].getUB()), this);
-                    change |= vars[1].updateLowerBound(vars[0].getLB(), this);
-                    change |= vars[2].updateLowerBound(vars[0].getLB(), this);
-                    if (vars[2].getLB() > vars[0].getUB()) {
-                        change |= vars[1].updateUpperBound(vars[0].getUB(), this);
-                    } else if (vars[1].getLB() > vars[0].getUB()) {
-                        change |= vars[2].updateUpperBound(vars[0].getUB(), this);
-                    }
-                } while (change);
+                _filter();
                 break;
         }
+    }
+
+    private void _filter() throws ContradictionException {
+        boolean change;
+        do {
+            change = vars[0].updateLowerBound(Math.min(vars[1].getLB(), vars[2].getLB()), this);
+            change |= vars[0].updateUpperBound(Math.min(vars[1].getUB(), vars[2].getUB()), this);
+            change |= vars[1].updateLowerBound(vars[0].getLB(), this);
+            change |= vars[2].updateLowerBound(vars[0].getLB(), this);
+            if (vars[2].getLB() > vars[0].getUB()) {
+                change |= vars[1].updateUpperBound(vars[0].getUB(), this);
+            } else if (vars[1].getLB() > vars[0].getUB()) {
+                change |= vars[2].updateUpperBound(vars[0].getUB(), this);
+            }
+        } while (change);
     }
 
     @Override
