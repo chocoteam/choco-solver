@@ -162,7 +162,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        vars[indexVar].removeInterval(left, right, this);
+                        vars[indexVar].removeInterval(left, right, aCause);
                         left = right = val;
                     }
                     //                    vars[indexVar].removeVal(val, this, false);
@@ -170,7 +170,7 @@ public class PropLargeGAC2001Positive extends Propagator<IntVar> {
                     setSupport(indexVar, val, currentIdxSupport);
                 }
             }
-            vars[indexVar].removeInterval(left, right, this);
+            vars[indexVar].removeInterval(left, right, aCause);
         } finally {
             itv.dispose();
         }

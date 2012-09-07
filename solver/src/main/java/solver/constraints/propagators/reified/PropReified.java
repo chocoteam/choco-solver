@@ -100,6 +100,7 @@ public class PropReified extends Propagator<Variable> {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+            left[i].overrideCause(this);
         }
         for (int i = 0; i < right.length; i++) {
             // disconnect propagator from variable
@@ -109,6 +110,7 @@ public class PropReified extends Propagator<Variable> {
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
+            right[i].overrideCause(this);
         }
         lastActiveL = environment.makeInt(left.length);
         lastActiveR = environment.makeInt(right.length);
@@ -185,14 +187,14 @@ public class PropReified extends Propagator<Variable> {
         ESat sat = entailed(left, lastActiveL);
         switch (sat) {
             case TRUE:
-                bVar.setToTrue(this, false);
+                bVar.setToTrue(aCause, false);
                 this.setPassive();
                 break;
             case FALSE:
                 sat = entailed(right, lastActiveR);
                 switch (sat) {
                     case TRUE:
-                        bVar.setToFalse(this, false);
+                        bVar.setToFalse(aCause, false);
                         this.setPassive();
                         break;
                     case FALSE:

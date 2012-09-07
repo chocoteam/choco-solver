@@ -1,3 +1,30 @@
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package solver.constraints.propagators.nary.scheduling;
 
 /**
@@ -31,76 +58,75 @@ public class PropQuadraticEdgeFinding extends Propagator<IntVar> {
 
     private Solver s;
     int nbTasks;
-    private int[] heirelease,durrelease,releasedates,heidue,durdue,duedates;
+    private int[] heirelease, durrelease, releasedates, heidue, durdue, duedates;
     private int[] indexrelease, indexdue, endrelease, releaseend;
 
-    public PropQuadraticEdgeFinding(IntVar[] vars, Solver solver, Constraint<IntVar,Propagator<IntVar>> cstr) {
-        super(vars,solver,cstr, PropagatorPriority.QUADRATIC,true);
+    public PropQuadraticEdgeFinding(IntVar[] vars, Solver solver, Constraint<IntVar, Propagator<IntVar>> cstr) {
+        super(vars, solver, cstr, PropagatorPriority.QUADRATIC, true);
         this.s = solver;
-        this.nbTasks = ((Cumulative)(constraint)).nbTasks();
+        this.nbTasks = ((Cumulative) (constraint)).nbTasks();
         this.cu = (Cumulative) constraint;
     }
 
-    public boolean kameugneStartEF() throws ContradictionException{
+    public boolean kameugneStartEF() throws ContradictionException {
         boolean modified = false;
         initializeEdgeFindingKameugneStart();
         int[] LBp = new int[nbTasks];
         int[] Dupd = new int[nbTasks];
         int[] SLupd = new int[nbTasks];
         int[] E = new int[nbTasks];
-        int energy,maxEnergy,rRho,rTho;
-        int rest,restP,minSL;
-        for(int i = 0;i < nbTasks;i++){
+        int energy, maxEnergy, rRho, rTho;
+        int rest, restP, minSL;
+        for (int i = 0; i < nbTasks; i++) {
             LBp[i] = releasedates[i];
             Dupd[i] = Integer.MIN_VALUE;
             SLupd[i] = Integer.MIN_VALUE;
         }
-        for(int u = 0;u<nbTasks;u++){
+        for (int u = 0; u < nbTasks; u++) {
             energy = 0;
             maxEnergy = 0;
             //Original algorithm :
             rRho = Integer.MIN_VALUE;
 
-            for(int i=nbTasks-1;i>=0;i--){
+            for (int i = nbTasks - 1; i >= 0; i--) {
 
-                if(endrelease[i] <= duedates[u]){
-                    energy += heirelease[i]*durrelease[i];
-                    if(energy/(duedates[u] - releasedates[i]) > maxEnergy/(duedates[u] - rRho)){
+                if (endrelease[i] <= duedates[u]) {
+                    energy += heirelease[i] * durrelease[i];
+                    if (energy / (duedates[u] - releasedates[i]) > maxEnergy / (duedates[u] - rRho)) {
                         maxEnergy = energy;
                         rRho = releasedates[i];
                     }
-                }
-                else{
-                    rest = maxEnergy - (cu.limit() - heirelease[i])*(duedates[u] - rRho);
-                    if(rest > 0){
-                        Dupd[i] = (int)Math.max(Dupd[i], rRho+Math.ceil(rest/heirelease[i]));
+                } else {
+                    rest = maxEnergy - (cu.limit() - heirelease[i]) * (duedates[u] - rRho);
+                    if (rest > 0) {
+                        Dupd[i] = (int) Math.max(Dupd[i], rRho + Math.ceil(rest / heirelease[i]));
                     }
                 }
                 E[i] = energy;
             }
             minSL = Integer.MAX_VALUE;
             rTho = duedates[u];
-            for(int i = 0;i<nbTasks;i++){
+            for (int i = 0; i < nbTasks; i++) {
 
-                if(cu.limit()*(duedates[u]-releasedates[i]) - E[i]< minSL){
+                if (cu.limit() * (duedates[u] - releasedates[i]) - E[i] < minSL) {
                     rTho = releasedates[i];
-                    minSL = (int)cu.limit()*(duedates[u]-rTho) - E[i];
+                    minSL = (int) cu.limit() * (duedates[u] - rTho) - E[i];
                 }
-                if(endrelease[i] > duedates[u]){
-                    restP = heirelease[i]*(duedates[u] - rTho) - minSL;
-                    if((rTho <= duedates[u]) && (restP > 0)){
-                        SLupd[i] = (int)Math.max(SLupd[i], rTho + Math.ceil(restP/heirelease[i]));
+                if (endrelease[i] > duedates[u]) {
+                    restP = heirelease[i] * (duedates[u] - rTho) - minSL;
+                    if ((rTho <= duedates[u]) && (restP > 0)) {
+                        SLupd[i] = (int) Math.max(SLupd[i], rTho + Math.ceil(restP / heirelease[i]));
                     }
-                    if((releasedates[i] + durrelease[i] >= duedates[u]) || (minSL - (durrelease[i] * heirelease[i]) < 0)){
-                        LBp[i] = Math.max(LBp[i],Math.max(Dupd[i],SLupd[i]));
+                    if ((releasedates[i] + durrelease[i] >= duedates[u]) || (minSL - (durrelease[i] * heirelease[i]) < 0)) {
+                        LBp[i] = Math.max(LBp[i], Math.max(Dupd[i], SLupd[i]));
                     }
                 }
             }
             //System.out.println("-----------------------");
         }
-        for(int i = 0;i < nbTasks;i++){
-            modified |= vars[indexrelease[i]].updateLowerBound(LBp[i],this);
-            modified |= vars[2*nbTasks+indexrelease[i]].updateLowerBound(LBp[i]+durrelease[i],this);
+        for (int i = 0; i < nbTasks; i++) {
+            modified |= vars[indexrelease[i]].updateLowerBound(LBp[i], aCause);
+            modified |= vars[2 * nbTasks + indexrelease[i]].updateLowerBound(LBp[i] + durrelease[i], aCause);
         }
         return modified;
     }
@@ -116,21 +142,21 @@ public class PropQuadraticEdgeFinding extends Propagator<IntVar> {
         indexdue = new int[nbTasks];
         endrelease = new int[nbTasks];
         releaseend = new int[nbTasks];
-        for(int i = 0;i<nbTasks;i++){
+        for (int i = 0; i < nbTasks; i++) {
             releasedates[i] = vars[i].getLB();
-            durrelease[i] = vars[i+nbTasks].getLB();
-            heirelease[i] = vars[i+3*nbTasks].getLB();
+            durrelease[i] = vars[i + nbTasks].getLB();
+            heirelease[i] = vars[i + 3 * nbTasks].getLB();
             indexrelease[i] = i;
-            endrelease[i] = vars[i+2*nbTasks].getUB();
+            endrelease[i] = vars[i + 2 * nbTasks].getUB();
 
-            duedates[i] = vars[i+2*nbTasks].getUB();
-            durdue[i] = vars[i+nbTasks].getLB();
-            heidue[i] = vars[i+3*nbTasks].getLB();
+            duedates[i] = vars[i + 2 * nbTasks].getUB();
+            durdue[i] = vars[i + nbTasks].getLB();
+            heidue[i] = vars[i + 3 * nbTasks].getLB();
             indexdue[i] = i;
             releaseend[i] = vars[i].getLB();
         }
-        sort(new int[][]{releasedates,durrelease,heirelease,indexrelease,endrelease});
-        sort(new int[][]{duedates,durdue,heidue,indexdue,releaseend});
+        sort(new int[][]{releasedates, durrelease, heirelease, indexrelease, endrelease});
+        sort(new int[][]{duedates, durdue, heidue, indexdue, releaseend});
     }
 
     /**
@@ -152,7 +178,7 @@ public class PropQuadraticEdgeFinding extends Propagator<IntVar> {
                         for (int m = i; m <= j; m++) {
                             for (int n = m; n > i
                                     && tab[0][n - 1] > tab[0][n]; n--)
-                                swap(n, n - 1,tab);
+                                swap(n, n - 1, tab);
                             range[m] = -((j + 1) - m);
                             sortedCount++;
                         }
@@ -241,18 +267,19 @@ public class PropQuadraticEdgeFinding extends Propagator<IntVar> {
         int minStart = Integer.MAX_VALUE;
         int maxEnd = Integer.MIN_VALUE;
         // compute min start and max end
-        for(int is=0, id=cu.nbTasks(), ie=2*cu.nbTasks(), ih=3*cu.nbTasks();is<cu.nbTasks();is++,id++,ie++,ih++) { // is = start index, id = duration index, ie = end index
-            if (!vars[is].instantiated() || !vars[id].instantiated() || !vars[ie].instantiated() || !vars[ih].instantiated() ) return ESat.UNDEFINED;
+        for (int is = 0, id = cu.nbTasks(), ie = 2 * cu.nbTasks(), ih = 3 * cu.nbTasks(); is < cu.nbTasks(); is++, id++, ie++, ih++) { // is = start index, id = duration index, ie = end index
+            if (!vars[is].instantiated() || !vars[id].instantiated() || !vars[ie].instantiated() || !vars[ih].instantiated())
+                return ESat.UNDEFINED;
             if (vars[is].getValue() < minStart) minStart = vars[is].getValue();
             if (vars[ie].getValue() > maxEnd) maxEnd = vars[ie].getValue();
         }
         int sumHeight;
         // scan the time axis and check the height
-        for(int i=minStart;i<=maxEnd;i++) {
+        for (int i = minStart; i <= maxEnd; i++) {
             sumHeight = 0;
             //System.out.println(minStart+"   "+maxEnd);
-            for(int is=0, ie=2*cu.nbTasks(), ih=3*cu.nbTasks();is<cu.nbTasks();is++,ie++,ih++) {
-                if ( i >= vars[is].getValue() && i < vars[ie].getValue() ) sumHeight += vars[ih].getValue();
+            for (int is = 0, ie = 2 * cu.nbTasks(), ih = 3 * cu.nbTasks(); is < cu.nbTasks(); is++, ie++, ih++) {
+                if (i >= vars[is].getValue() && i < vars[ie].getValue()) sumHeight += vars[ih].getValue();
             }
             if (sumHeight > cu.limit()) {
                 //System.out.println("sumHeight = "+sumHeight+" at "+i);

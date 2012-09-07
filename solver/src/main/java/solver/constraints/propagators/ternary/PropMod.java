@@ -95,9 +95,9 @@ public class PropMod extends Propagator<IntVar> {
             {
                 int z = vars[2].getValue();
                 if (z == 0) {
-                    vars[0].instantiateTo(vars[1].getValue(), this);
+                    vars[0].instantiateTo(vars[1].getValue(), aCause);
                 } else {
-                    vars[0].instantiateTo(vars[1].getValue() % vars[2].getValue(), this);
+                    vars[0].instantiateTo(vars[1].getValue() % vars[2].getValue(), aCause);
                 }
                 setPassive();
             }

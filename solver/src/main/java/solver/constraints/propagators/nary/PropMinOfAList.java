@@ -75,50 +75,50 @@ public class PropMinOfAList extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         int nbVars = vars.length;
         IntVar minVar = vars[MIN_INDEX];
-        minVar.updateLowerBound(minInf(), this);
-        minVar.updateUpperBound(minSup(), this);
+        minVar.updateLowerBound(minInf(), aCause);
+        minVar.updateUpperBound(minSup(), aCause);
         int minValue = minVar.getLB();
         for (int i = VARS_OFFSET; i < nbVars; i++) {
-            vars[i].updateLowerBound(minValue, this);
+            vars[i].updateLowerBound(minValue, aCause);
         }
 //        onlyOneMaxCandidatePropagation();
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idx, int mask) throws ContradictionException {
-		if(true){
-			forcePropagate(EventType.FULL_PROPAGATION);
-			return;
-		}
+        if (true) {
+            forcePropagate(EventType.FULL_PROPAGATION);
+            return;
+        }
         if (EventType.isInstantiate(mask)) {
             if (idx >= VARS_OFFSET) { // Variable in the list
                 IntVar minVar = vars[MIN_INDEX];
-                minVar.updateLowerBound(minInf(), this);
-                minVar.updateUpperBound(minSup(), this);
+                minVar.updateLowerBound(minInf(), aCause);
+                minVar.updateUpperBound(minSup(), aCause);
             } else { // Maximum variable
                 int nbVars = vars.length;
                 int minValue = vars[MIN_INDEX].getLB();
                 for (int i = VARS_OFFSET; i < nbVars; i++) {
-                    vars[i].updateLowerBound(minValue, this);
+                    vars[i].updateLowerBound(minValue, aCause);
                 }
                 onlyOneMaxCandidatePropagation();
             }
         } else if (EventType.isBound(mask)) {
             if (EventType.isInclow(mask)) {
                 if (idx >= VARS_OFFSET) { // Variable in the list
-                    vars[MIN_INDEX].updateLowerBound(minInf(), this);
+                    vars[MIN_INDEX].updateLowerBound(minInf(), aCause);
                     onlyOneMaxCandidatePropagation();
                 } else { // Minimum variable
                     int nbVars = vars.length;
                     int minVal = vars[MIN_INDEX].getLB();
                     for (int i = VARS_OFFSET; i < nbVars; i++) {
-                        vars[i].updateLowerBound(minVal, this);
+                        vars[i].updateLowerBound(minVal, aCause);
                     }
                 }
             }
             if (EventType.isDecupp(mask)) {
                 if (idx >= VARS_OFFSET) { // Variable in the list
-                    vars[MIN_INDEX].updateUpperBound(minSup(), this);
+                    vars[MIN_INDEX].updateUpperBound(minSup(), aCause);
                 } else { // Maximum variable
                     onlyOneMaxCandidatePropagation();
                 }
@@ -228,8 +228,8 @@ public class PropMinOfAList extends Propagator<IntVar> {
             }
         }
         if (idx != -1) {
-            minVar.updateUpperBound(vars[idx].getUB(), this);
-            vars[idx].updateUpperBound(minVar.getUB(), this);
+            minVar.updateUpperBound(vars[idx].getUB(), aCause);
+            vars[idx].updateUpperBound(minVar.getUB(), aCause);
         }
     }
 }

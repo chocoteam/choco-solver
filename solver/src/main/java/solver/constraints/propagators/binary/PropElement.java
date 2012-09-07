@@ -97,8 +97,8 @@ public class PropElement extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        this.vars[1].updateLowerBound(cste, this);
-        this.vars[1].updateUpperBound(lval.length - 1 + cste, this);
+        this.vars[1].updateLowerBound(cste, aCause);
+        this.vars[1].updateUpperBound(lval.length - 1 + cste, aCause);
         filter(false, 2);
     }
 
@@ -120,7 +120,7 @@ public class PropElement extends Propagator<IntVar> {
     public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             if (varIdx == 1) {  // INDEX (should be only that)
-                this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], this);
+                this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], aCause);
                 this.setPassive();
             }
         }
@@ -190,11 +190,11 @@ public class PropElement extends Propagator<IntVar> {
         boolean hasChanged;
 
         if (s == Sort.desc) {
-            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getUB() - cste], this);
-            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getLB() - cste], this);
+            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getUB() - cste], aCause);
+            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getLB() - cste], aCause);
         } else if (s == Sort.asc) {
-            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getLB() - cste], this);
-            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getUB() - cste], this);
+            hasChanged = this.vars[0].updateLowerBound(this.lval[vars[1].getLB() - cste], aCause);
+            hasChanged |= this.vars[0].updateUpperBound(this.lval[vars[1].getUB() - cste], aCause);
         } else {
             int minVal = Integer.MAX_VALUE;
             int maxVal = Integer.MIN_VALUE;
@@ -230,8 +230,8 @@ public class PropElement extends Propagator<IntVar> {
                         s = Sort.none;
                     }
                 }
-                hasChanged = this.vars[0].updateLowerBound(minVal, this);
-                hasChanged |= this.vars[0].updateUpperBound(maxVal, this);
+                hasChanged = this.vars[0].updateLowerBound(minVal, aCause);
+                hasChanged |= this.vars[0].updateUpperBound(maxVal, aCause);
             } finally {
                 iter.dispose();
             }
@@ -253,17 +253,17 @@ public class PropElement extends Propagator<IntVar> {
         while ((this.vars[1].contains(minFeasibleIndex))
                 && !(this.vars[0].contains(lval[minFeasibleIndex - this.cste])))
             minFeasibleIndex++;
-        hasChanged = this.vars[1].updateLowerBound(minFeasibleIndex, this);
+        hasChanged = this.vars[1].updateLowerBound(minFeasibleIndex, aCause);
 
         while ((this.vars[1].contains(maxFeasibleIndex))
                 && !(this.vars[0].contains(lval[maxFeasibleIndex - this.cste])))
             maxFeasibleIndex--;
-        hasChanged |= this.vars[1].updateUpperBound(maxFeasibleIndex, this);
+        hasChanged |= this.vars[1].updateUpperBound(maxFeasibleIndex, aCause);
 
         if (this.vars[1].hasEnumeratedDomain()) {
             for (int i = minFeasibleIndex + 1; i <= maxFeasibleIndex - 1; i++) {
                 if (this.vars[1].contains(i) && !(this.vars[0].contains(this.lval[i - this.cste])))
-                    hasChanged |= this.vars[1].removeValue(i, this);
+                    hasChanged |= this.vars[1].removeValue(i, aCause);
             }
         }
         return hasChanged;

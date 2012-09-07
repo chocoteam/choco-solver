@@ -163,7 +163,7 @@ public class PropSumEqIncr extends Propagator<IntVar> {
                 if (Ii - (b - sumLB_) > 0) {
                     lb = oldx[i].get();
                     ub = lb + Ii;
-                    if (x[i].updateUpperBound(b - sumLB_ + lb, this)) {
+                    if (x[i].updateUpperBound(b - sumLB_ + lb, aCause)) {
                         int nub = x[i].getUB();
                         sumUB.add(nub - ub);
                         I[i].set(nub - lb);
@@ -195,7 +195,7 @@ public class PropSumEqIncr extends Propagator<IntVar> {
                 if (Ii > -(b - sumUB_)) {
                     lb = oldx[i].get();
                     ub = lb + Ii;
-                    if (x[i].updateLowerBound(b - sumUB_ + ub, this)) {
+                    if (x[i].updateLowerBound(b - sumUB_ + ub, aCause)) {
                         int nlb = x[i].getLB();
                         sumLB.add(nlb - lb);
                         I[i].set(ub - nlb);

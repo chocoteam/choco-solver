@@ -92,7 +92,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 if (val0 == right + 1) {
                     right = val0;
                 } else {
-                    vars[0].removeInterval(left, right, this);
+                    vars[0].removeInterval(left, right, aCause);
                     left = val0;
                     right = val0;
                 }
@@ -101,7 +101,7 @@ public class PropBinAC2001 extends PropBinCSP {
 
             found = false;
         }
-        vars[0].removeInterval(left, right, this);
+        vars[0].removeInterval(left, right, aCause);
 
         found = false;
         right = left = Integer.MIN_VALUE;
@@ -119,7 +119,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 if (val1 == right + 1) {
                     right = val1;
                 } else {
-                    vars[1].removeInterval(left, right, this);
+                    vars[1].removeInterval(left, right, aCause);
                     left = val1;
                     right = val1;
                 }
@@ -127,7 +127,7 @@ public class PropBinAC2001 extends PropBinCSP {
                 currentSupport1[val1 - offset1].set(support);
             found = false;
         }
-        vars[1].removeInterval(left, right, this);
+        vars[1].removeInterval(left, right, aCause);
     }
 
     @Override
@@ -173,13 +173,13 @@ public class PropBinAC2001 extends PropBinCSP {
                     if (val1 == right + 1) {
                         right = val1;
                     } else {
-                        vars[1].removeInterval(left, right, this);
+                        vars[1].removeInterval(left, right, aCause);
                         left = right = val1;
                     }
                 }
             }
         }
-        vars[1].removeInterval(left, right, this);
+        vars[1].removeInterval(left, right, aCause);
     }
 
     // updates the support for all values in the domain of v0, and remove unsupported values for v0
@@ -202,13 +202,13 @@ public class PropBinAC2001 extends PropBinCSP {
                     if (val0 == right + 1) {
                         right = val0;
                     } else {
-                        vars[0].removeInterval(left, right, this);
+                        vars[0].removeInterval(left, right, aCause);
                         left = right = val0;
                     }
                 }
             }
         }
-        vars[0].removeInterval(left, right, this);
+        vars[0].removeInterval(left, right, aCause);
     }
 
     protected void awakeOnInst(int idx) throws ContradictionException {
@@ -222,13 +222,13 @@ public class PropBinAC2001 extends PropBinCSP {
                     if (val1 == right + 1) {
                         right = val1;
                     } else {
-                        vars[1].removeInterval(left, right, this);
+                        vars[1].removeInterval(left, right, aCause);
                         left = val1;
                         right = val1;
                     }
                 }
             }
-            vars[1].removeInterval(left, right, this);
+            vars[1].removeInterval(left, right, aCause);
         } else {
             int value = vars[1].getValue();
             int left = Integer.MIN_VALUE;
@@ -239,13 +239,13 @@ public class PropBinAC2001 extends PropBinCSP {
                     if (val0 == right + 1) {
                         right = val0;
                     } else {
-                        vars[0].removeInterval(left, right, this);
+                        vars[0].removeInterval(left, right, aCause);
                         left = val0;
                         right = val0;
                     }
                 }
             }
-            vars[0].removeInterval(left, right, this);
+            vars[0].removeInterval(left, right, aCause);
         }
     }
 }

@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.constraints.propagators.gary.constraintSpecific;
@@ -55,7 +55,7 @@ public class PropNTree extends Propagator {
     IntVar nTree;
     int minTree = 0;
     private TIntArrayList nonSinks;
-	private StrongConnectivityFinder SCCfinder;
+    private StrongConnectivityFinder SCCfinder;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,8 +66,8 @@ public class PropNTree extends Propagator {
         super(new Variable[]{graph, nT}, solver, constraint, PropagatorPriority.QUADRATIC);
         g = graph;
         nTree = nT;
-		SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
-		nonSinks = new TIntArrayList();
+        SCCfinder = new StrongConnectivityFinder(g.getEnvelopGraph());
+        nonSinks = new TIntArrayList();
     }
 
     //***********************************************************************************
@@ -159,7 +159,7 @@ public class PropNTree extends Propagator {
                 for (int y = nei.getFirstElement(); y >= 0; y = nei.getNextElement()) {
                     //--- STANDART PRUNING
                     if (dominatorsFinder.isDomminatedBy(y, x)) {
-                        g.removeArc(x, y, this);
+                        g.removeArc(x, y, aCause);
                     }
                     // ENFORCE ARC-DOMINATORS (redondant)
                 }
@@ -170,35 +170,35 @@ public class PropNTree extends Propagator {
     }
 
     private void minTreePruning() throws ContradictionException {
-        nTree.updateLowerBound(minTree, this);
+        nTree.updateLowerBound(minTree, aCause);
         if (nTree.getUB() == minTree) {
-            int node,scc;
-            for (int k=nonSinks.size()-1;k>=0;k--) {
-				scc = nonSinks.get(k);
-				node = SCCfinder.getSCCFirstNode(scc);
-				while(node!=-1){
-					if (g.getEnvelopGraph().arcExists(node, node)) {
-                        g.removeArc(node, node, this);
+            int node, scc;
+            for (int k = nonSinks.size() - 1; k >= 0; k--) {
+                scc = nonSinks.get(k);
+                node = SCCfinder.getSCCFirstNode(scc);
+                while (node != -1) {
+                    if (g.getEnvelopGraph().arcExists(node, node)) {
+                        g.removeArc(node, node, aCause);
                     }
-					node = SCCfinder.getNextNode(node);
-				}
+                    node = SCCfinder.getNextNode(node);
+                }
             }
         }
     }
 
     private void computeSinks() {
-		SCCfinder.findAllSCC();
+        SCCfinder.findAllSCC();
         int[] sccOf = SCCfinder.getNodesSCC();
         nonSinks.clear();
         boolean looksSink;
         INeighbors nei;
         int node;
-		int nbSinks = 0;
-		for(int i=SCCfinder.getNbSCC()-1;i>=0;i--){
+        int nbSinks = 0;
+        for (int i = SCCfinder.getNbSCC() - 1; i >= 0; i--) {
             looksSink = true;
             boolean inKer = false;
-			node = SCCfinder.getSCCFirstNode(i);
-			while(node!=-1){
+            node = SCCfinder.getSCCFirstNode(i);
+            while (node != -1) {
                 if (g.getKernelGraph().getActiveNodes().isActive(node)) {
                     inKer = true;
                 }
@@ -206,17 +206,17 @@ public class PropNTree extends Propagator {
                 for (int suc = nei.getFirstElement(); suc >= 0 && looksSink; suc = nei.getNextElement()) {
                     if (sccOf[suc] != sccOf[node]) {
                         looksSink = false;
-						break;
+                        break;
                     }
                 }
                 if (!looksSink) {
                     node = -1;
-                }else{
-					node = SCCfinder.getNextNode(node);
-				}
+                } else {
+                    node = SCCfinder.getNextNode(node);
+                }
             }
             if (looksSink && inKer) {
-				nbSinks++;
+                nbSinks++;
             } else {
                 nonSinks.add(i);
             }

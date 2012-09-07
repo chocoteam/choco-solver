@@ -86,7 +86,7 @@ public class PropMaxBC extends Propagator<IntVar> {
         switch (c) {
             case 7: // everything is instantiated
             case 6:// Z and Y are instantiated
-                vars[0].instantiateTo(Math.max(vars[1].getValue(), vars[2].getValue()), this);
+                vars[0].instantiateTo(Math.max(vars[1].getValue(), vars[2].getValue()), aCause);
                 setPassive();
                 break;
             case 5: //  X and Z are instantiated
@@ -94,12 +94,12 @@ public class PropMaxBC extends Propagator<IntVar> {
                 int max = vars[0].getValue();
                 int val2 = vars[2].getValue();
                 if (max > val2) {
-                    vars[1].instantiateTo(max, this);
+                    vars[1].instantiateTo(max, aCause);
                     setPassive();
                 } else if (max < val2) {
                     contradiction(vars[2], "wrong max selected");
                 } else { // X = Z
-                    vars[1].updateUpperBound(max, this);
+                    vars[1].updateUpperBound(max, aCause);
                 }
             }
             break;
@@ -107,7 +107,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[2].getValue();
                 if (val > vars[1].getUB()) { // => X = Z
-                    vars[0].instantiateTo(val, this);
+                    vars[0].instantiateTo(val, aCause);
                     setPassive();
                 } else {
                     _filter();
@@ -119,12 +119,12 @@ public class PropMaxBC extends Propagator<IntVar> {
                 int max = vars[0].getValue();
                 int val1 = vars[1].getValue();
                 if (max > val1) {
-                    vars[2].instantiateTo(max, this);
+                    vars[2].instantiateTo(max, aCause);
                     setPassive();
                 } else if (max < val1) {
                     contradiction(vars[1], "");
                 } else { // X = Y
-                    vars[2].updateUpperBound(max, this);
+                    vars[2].updateUpperBound(max, aCause);
                 }
             }
             break;
@@ -132,7 +132,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[1].getValue();
                 if (val > vars[2].getUB()) { // => X = Y
-                    vars[0].instantiateTo(val, this);
+                    vars[0].instantiateTo(val, aCause);
                     setPassive();
                 } else { // val in Z
                     _filter();
@@ -146,14 +146,14 @@ public class PropMaxBC extends Propagator<IntVar> {
                     contradiction(vars[0], null);
                 }
                 if (vars[1].getUB() < max) {
-                    vars[2].instantiateTo(max, this);
+                    vars[2].instantiateTo(max, aCause);
                     setPassive();
                 } else if (vars[2].getUB() < max) {
-                    vars[1].instantiateTo(max, this);
+                    vars[1].instantiateTo(max, aCause);
                     setPassive();
                 } else {
-                    vars[1].updateUpperBound(max, this);
-                    vars[2].updateUpperBound(max, this);
+                    vars[1].updateUpperBound(max, aCause);
+                    vars[2].updateUpperBound(max, aCause);
                 }
             }
 
@@ -167,14 +167,14 @@ public class PropMaxBC extends Propagator<IntVar> {
     private void _filter() throws ContradictionException {
         boolean change;
         do {
-            change = vars[0].updateLowerBound(Math.max(vars[1].getLB(), vars[2].getLB()), this);
-            change |= vars[0].updateUpperBound(Math.max(vars[1].getUB(), vars[2].getUB()), this);
-            change |= vars[1].updateUpperBound(vars[0].getUB(), this);
-            change |= vars[2].updateUpperBound(vars[0].getUB(), this);
+            change = vars[0].updateLowerBound(Math.max(vars[1].getLB(), vars[2].getLB()), aCause);
+            change |= vars[0].updateUpperBound(Math.max(vars[1].getUB(), vars[2].getUB()), aCause);
+            change |= vars[1].updateUpperBound(vars[0].getUB(), aCause);
+            change |= vars[2].updateUpperBound(vars[0].getUB(), aCause);
             if (vars[2].getUB() < vars[0].getLB()) {
-                change |= vars[1].updateLowerBound(vars[0].getLB(), this);
+                change |= vars[1].updateLowerBound(vars[0].getLB(), aCause);
             } else if (vars[1].getUB() < vars[0].getLB()) {
-                change |= vars[2].updateLowerBound(vars[0].getLB(), this);
+                change |= vars[2].updateLowerBound(vars[0].getLB(), aCause);
             }
         } while (change);
     }

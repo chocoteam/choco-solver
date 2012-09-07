@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.nary.automaton;
 
@@ -74,7 +74,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                            Solver solver, Constraint<IntVar, Propagator<IntVar>> constraint) {
         super(vars, solver, constraint, PropagatorPriority.CUBIC, false);
         this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++){
+        for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         this.zIdx = vars.length - 1;
@@ -105,20 +105,20 @@ public class PropCostRegular extends Propagator<IntVar> {
      */
     protected void initialize() throws ContradictionException {
         Bounds bounds = this.cautomaton.getCounters().get(0).bounds();
-        vars[zIdx].updateLowerBound(bounds.min.value, this);
-        vars[zIdx].updateUpperBound(bounds.max.value, this);
+        vars[zIdx].updateLowerBound(bounds.min.value, aCause);
+        vars[zIdx].updateUpperBound(bounds.max.value, aCause);
         this.prefilter();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if((evtmask & EventType.FULL_PROPAGATION.mask) !=0){
+        if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
             initialize();
         }
         filter();
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
@@ -170,8 +170,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
 
         DisposableIntIterator it = this.graph.inGraph.getIterator();
         //for (int id = this.graph.inGraph.nextSetBit(0) ; id >=0 ; id = this.graph.inGraph.nextSetBit(id+1))  {
@@ -202,7 +202,7 @@ public class PropCostRegular extends Propagator<IntVar> {
                 while (toRemove.size() > 0) {
                     int id = toRemove.pop();
                     // toRemove.removeLast();
-                    this.graph.removeArc(id, toRemove, this);
+                    this.graph.removeArc(id, toRemove, this, aCause);
                 }
                 while (this.graph.toUpdateLeft.size() > 0) {
                     this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -268,7 +268,7 @@ public class PropCostRegular extends Propagator<IntVar> {
             while (toRemove.size() > 0) {
                 int id = toRemove.pop();
                 // toRemove.removeLast();
-                this.graph.removeArc(id, toRemove, this);
+                this.graph.removeArc(id, toRemove, this, aCause);
             }
             while (this.graph.toUpdateLeft.size() > 0) {
                 this.graph.updateLeft(this.graph.toUpdateLeft.pop(), toRemove, this);
@@ -283,8 +283,8 @@ public class PropCostRegular extends Propagator<IntVar> {
         double zinf = this.graph.GNodes.spft.get(this.graph.sourceIndex);
         double zsup = this.graph.GNodes.lpfs.get(this.graph.tinkIndex);
 
-        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), this);
-        vars[zIdx].updateUpperBound((int) Math.floor(zsup), this);
+        vars[zIdx].updateLowerBound((int) Math.ceil(zinf), aCause);
+        vars[zIdx].updateUpperBound((int) Math.floor(zsup), aCause);
     }
 
 

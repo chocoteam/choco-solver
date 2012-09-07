@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.binary;
 
@@ -65,7 +65,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         super(vars, solver, constraint, PropagatorPriority.BINARY, false);
         if (operator == EQ) {
             this.idms = new IIntDeltaMonitor[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++){
+            for (int i = 0; i < this.vars.length; i++) {
                 idms[i] = this.vars[i].monitorDelta(this);
             }
         } else {
@@ -104,14 +104,14 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             if (vars[0].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[0], vars[1]);
             } else {
-                vars[0].updateLowerBound(vars[1].getLB() - cste, this);
-                vars[0].updateUpperBound(vars[1].getUB() + cste, this);
+                vars[0].updateLowerBound(vars[1].getLB() - cste, aCause);
+                vars[0].updateUpperBound(vars[1].getUB() + cste, aCause);
             }
             if (vars[1].hasEnumeratedDomain()) {
                 filterFromVarToVar(vars[1], vars[0]);
             } else {
-                vars[1].updateLowerBound(vars[0].getLB() - cste, this);
-                vars[1].updateUpperBound(vars[0].getUB() + cste, this);
+                vars[1].updateLowerBound(vars[0].getLB() - cste, aCause);
+                vars[1].updateUpperBound(vars[0].getUB() + cste, aCause);
             }
         } else if (operator == GT) {
             filterGT();
@@ -120,9 +120,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         } else {
             filterNeq();
         }
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
@@ -225,7 +225,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 int to = it.max();
                 for (int value = from; value <= to; value++)
                     if (!var2.contains(value - cste) && !var2.contains(value + cste)) {
-                        var1.removeValue(value, this);
+                        var1.removeValue(value, aCause);
                     }
                 it.next();
             }
@@ -242,11 +242,11 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int lbv0 = vars[1].getUB() - cste;
             int ubv0 = vars[1].getLB() + cste;
             // remove interval [lbv0, ubv0] from domain of vars[0]
-            vars[0].removeInterval(lbv0, ubv0, this);
+            vars[0].removeInterval(lbv0, ubv0, aCause);
             int lbv1 = vars[0].getUB() - cste;
             int ubv1 = vars[0].getLB() + cste;
             // remove interval [lbv1, ubv1] from domain of vars[1]
-            vars[1].removeInterval(lbv1, ubv1, this);
+            vars[1].removeInterval(lbv1, ubv1, aCause);
         } else {
             this.setPassive();
         }
@@ -260,7 +260,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int lbv0 = v0.getUB() - cste;
             int ubv0 = v0.getLB() + cste;
             // remove interval [lbv0, ubv0] from domain of vars[0]
-            v1.removeInterval(lbv0, ubv0, this);
+            v1.removeInterval(lbv0, ubv0, aCause);
         } else {
             this.setPassive();
         }
@@ -270,18 +270,18 @@ public class PropDistanceXYC extends Propagator<IntVar> {
      * In case of a LT
      */
     public void filterLT() throws ContradictionException {
-        vars[0].updateLowerBound(vars[1].getLB() - cste + 1, this);
-        vars[0].updateUpperBound(vars[1].getUB() + cste - 1, this);
-        vars[1].updateLowerBound(vars[0].getLB() - cste + 1, this);
-        vars[1].updateUpperBound(vars[0].getUB() + cste - 1, this);
+        vars[0].updateLowerBound(vars[1].getLB() - cste + 1, aCause);
+        vars[0].updateUpperBound(vars[1].getUB() + cste - 1, aCause);
+        vars[1].updateLowerBound(vars[0].getLB() - cste + 1, aCause);
+        vars[1].updateUpperBound(vars[0].getUB() + cste - 1, aCause);
     }
 
     /**
      * In case of a LT, due to a modification on v0 domain
      */
     public void filterLTonVar(IntVar v0, IntVar v1) throws ContradictionException {
-        v1.updateLowerBound(v0.getLB() - cste + 1, this);
-        v1.updateUpperBound(v0.getUB() + cste - 1, this);
+        v1.updateLowerBound(v0.getLB() - cste + 1, aCause);
+        v1.updateUpperBound(v0.getUB() + cste - 1, aCause);
     }
 
     /**
@@ -292,11 +292,11 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int end = v0.getLB() + cste;
             for (int val = v0.getLB(); val <= end; val = v1.nextValue(val)) {
                 if (!v0.contains(val - cste) && !v0.contains(val + cste)) {
-                    v1.removeValue(val, this);
+                    v1.removeValue(val, aCause);
                 }
             }
         } else {
-            v1.updateLowerBound(v0.getLB() - cste, this);
+            v1.updateLowerBound(v0.getLB() - cste, aCause);
         }
     }
 
@@ -314,12 +314,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             int val = initval;
             do {
                 if (!v0.contains(val - cste) && !v0.contains(val + cste)) {
-                    v1.removeValue(val, this);
+                    v1.removeValue(val, aCause);
                 }
                 val = v1.nextValue(val);
             } while (val <= v1.getUB() && val > initval); //todo : pourquoi besoin du deuxieme currentElement ?
         } else {
-            v1.updateUpperBound(v0.getUB() + cste, this);
+            v1.updateUpperBound(v0.getUB() + cste, aCause);
         }
     }
 
@@ -328,9 +328,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
      */
     public void filterOnInst(IntVar v, int val) throws ContradictionException {
         if (!v.contains(val + cste)) {
-            v.instantiateTo(val - cste, this);
+            v.instantiateTo(val - cste, aCause);
         } else if (!v.contains(val - cste)) {
-            v.instantiateTo(val + cste, this);
+            v.instantiateTo(val + cste, aCause);
         } else {
             if (v.hasEnumeratedDomain()) {
                 DisposableRangeIterator rit = v.getRangeIterator(true);
@@ -340,7 +340,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                         int to = rit.max();
                         for (int value = from; value <= to; value++) {
                             if (value != (val - cste) && value != (val + cste)) {
-                                v.removeValue(value, this);
+                                v.removeValue(value, aCause);
                             }
                         }
                         rit.next();
@@ -349,8 +349,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     rit.dispose();
                 }
             } else {
-                v.updateLowerBound(val - cste, this);
-                v.updateUpperBound(val + cste, this);
+                v.updateLowerBound(val - cste, aCause);
+                v.updateUpperBound(val + cste, aCause);
             }
         }
     }
@@ -358,12 +358,12 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     public void filterNeq() throws ContradictionException {
         if (cste >= 0) {
             if (vars[0].instantiated()) {
-                vars[1].removeValue(vars[0].getValue() + cste, this);
-                vars[1].removeValue(vars[0].getValue() - cste, this);
+                vars[1].removeValue(vars[0].getValue() + cste, aCause);
+                vars[1].removeValue(vars[0].getValue() - cste, aCause);
             }
             if (vars[1].instantiated()) {
-                vars[0].removeValue(vars[1].getValue() + cste, this);
-                vars[0].removeValue(vars[1].getValue() - cste, this);
+                vars[0].removeValue(vars[1].getValue() + cste, aCause);
+                vars[0].removeValue(vars[1].getValue() - cste, aCause);
             }
         } else {
             this.setPassive();

@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.constraints.propagators.binary;
 
@@ -60,8 +60,8 @@ public class PropAbsolute extends Propagator<IntVar> {
         super(ArrayUtils.toArray(X, Y), solver, intVarPropagatorConstraint, PropagatorPriority.BINARY, false);
         rem_proc = new RemProc(this);
         this.idms = new IIntDeltaMonitor[this.vars.length];
-        for (int i = 0; i < this.vars.length; i++){
-            idms[i] = vars[i].hasEnumeratedDomain()?this.vars[i].monitorDelta(this):IIntDeltaMonitor.Default.NONE;
+        for (int i = 0; i < this.vars.length; i++) {
+            idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
         }
     }
 
@@ -85,9 +85,9 @@ public class PropAbsolute extends Propagator<IntVar> {
         updateLowerBoundofY();
         updateUpperBoundofY();
         updateHolesinY();
-		for(int i=0;i<idms.length;i++){
-			idms[i].unfreeze();
-		}
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].unfreeze();
+        }
     }
 
     @Override
@@ -153,11 +153,11 @@ public class PropAbsolute extends Propagator<IntVar> {
     protected void updateLowerBoundofX() throws ContradictionException {
         int a0 = vars[1].nextValue(-1);
         int b0 = Math.max(Integer.MIN_VALUE + 1, vars[1].previousValue(1));
-        vars[0].updateLowerBound(Math.min(a0, -b0), this);
+        vars[0].updateLowerBound(Math.min(a0, -b0), aCause);
     }
 
     protected void updateUpperBoundofX() throws ContradictionException {
-        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), this);
+        vars[0].updateUpperBound(Math.max(Math.abs(vars[1].getLB()), Math.abs(vars[1].getUB())), aCause);
 
     }
 
@@ -171,12 +171,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[0].removeInterval(left, right, this);
+                        vars[0].removeInterval(left, right, aCause);
                         left = right = value;
                     }
                 }
             }
-            vars[0].removeInterval(left, right, this);
+            vars[0].removeInterval(left, right, aCause);
         } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
@@ -186,7 +186,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].nextValue(value);
             }
-            vars[0].updateLowerBound(nlb, this);
+            vars[0].updateLowerBound(nlb, aCause);
 
             value = vars[0].getUB();
             int nub = value + 1;
@@ -196,22 +196,22 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[0].previousValue(value);
             }
-            vars[0].updateUpperBound(nub, this);
+            vars[0].updateUpperBound(nub, aCause);
         }
     }
 
     protected void updateHoleinX(int remVal) throws ContradictionException {
         if (!vars[1].contains(-remVal)) {
-            vars[0].removeValue(Math.abs(remVal), this);
+            vars[0].removeValue(Math.abs(remVal), aCause);
         }
     }
 
     protected void updateLowerBoundofY() throws ContradictionException {
-        vars[1].updateLowerBound(-vars[0].getUB(), this);
+        vars[1].updateLowerBound(-vars[0].getUB(), aCause);
     }
 
     protected void updateUpperBoundofY() throws ContradictionException {
-        vars[1].updateUpperBound(vars[0].getUB(), this);
+        vars[1].updateUpperBound(vars[0].getUB(), aCause);
     }
 
     protected void updateHolesinY() throws ContradictionException {
@@ -224,12 +224,12 @@ public class PropAbsolute extends Propagator<IntVar> {
                     if (value == right + 1) {
                         right = value;
                     } else {
-                        vars[1].removeInterval(left, right, this);
+                        vars[1].removeInterval(left, right, aCause);
                         left = right = value;
                     }
                 }
             }
-            vars[1].removeInterval(left, right, this);
+            vars[1].removeInterval(left, right, aCause);
         } else {
             int value = vars[1].getLB();
             int nlb = value - 1;
@@ -239,7 +239,7 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].nextValue(value);
             }
-            vars[1].updateLowerBound(nlb, this);
+            vars[1].updateLowerBound(nlb, aCause);
 
             value = vars[1].getUB();
             int nub = value + 1;
@@ -249,13 +249,13 @@ public class PropAbsolute extends Propagator<IntVar> {
                 }
                 value = vars[1].previousValue(value);
             }
-            vars[1].updateUpperBound(nub, this);
+            vars[1].updateUpperBound(nub, aCause);
         }
     }
 
     protected void updateHoleinY(int remVal) throws ContradictionException {
-        vars[1].removeValue(remVal, this);
-        vars[1].removeValue(-remVal, this);
+        vars[1].removeValue(remVal, aCause);
+        vars[1].removeValue(-remVal, aCause);
     }
 
 
@@ -265,24 +265,21 @@ public class PropAbsolute extends Propagator<IntVar> {
         if (d.getVar() == vars[0]) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add (vars[1].explain(VariableState.REM,((ValueRemoval) d).getVal()));
-                explanation.add( vars[1].explain(VariableState.REM,- ((ValueRemoval) d).getVal()));
-            }
-            else {
+                explanation.add(vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+                explanation.add(vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal()));
+            } else {
                 throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
             return explanation;
         } else if (d.getVar() == vars[1]) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add (vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
-            }
-            else {
+                explanation.add(vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
+            } else {
                 throw new UnsupportedOperationException("PropBasolute only knows how to explain ValueRemovals");
             }
             return explanation;
-        }
-        else {
+        } else {
             return super.explain(d);
         }
     }

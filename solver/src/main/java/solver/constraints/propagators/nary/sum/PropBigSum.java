@@ -241,11 +241,11 @@ public class PropBigSum extends Propagator<IntVar> {
                 int val;
                 if (index < pos) {
                     val = divCeil(sum - rootub + node.oldUB.get(), coeffs[index]);
-                    v.updateLowerBound(val, this);
+                    v.updateLowerBound(val, aCause);
                     val = v.getLB() * coeffs[index];
                 } else {
                     val = divFloor(-(sum - rootub + node.oldUB.get()), -coeffs[index]);
-                    v.updateUpperBound(val, this);
+                    v.updateUpperBound(val, aCause);
                     val = v.getUB() * coeffs[index];
                 }
 
@@ -266,11 +266,11 @@ public class PropBigSum extends Propagator<IntVar> {
                 int val;
                 if (index < pos) {
                     val = divFloor(sum - rootlb + node.oldLB.get(), coeffs[index]);
-                    v.updateUpperBound(val, this);
+                    v.updateUpperBound(val, aCause);
                     val = v.getUB() * coeffs[index];
                 } else {
                     val = divCeil(-(sum - rootlb + node.oldLB.get()), -coeffs[index]);
-                    v.updateLowerBound(val, this);
+                    v.updateLowerBound(val, aCause);
                     val = v.getLB() * coeffs[index];
                 }
                 node.decUB(val - node.oldUB.get());

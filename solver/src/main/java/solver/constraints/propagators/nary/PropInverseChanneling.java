@@ -102,7 +102,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             int i = index;
             int j = val + Ox;
             if (0 <= j && j < nbY) {
-                Y[j].removeValue(i - Oy, this);
+                Y[j].removeValue(i - Oy, aCause);
                 if (Y[j].instantiated()) {
                     awakeOnInst(j + nbX);
                 }
@@ -113,7 +113,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             int j = index - nbX;
             int i = val + Oy;
             if (0 <= i && i < nbX) {
-                X[i].removeValue(j - Ox, this);
+                X[i].removeValue(j - Ox, aCause);
                 if (X[i].instantiated()) {
                     awakeOnInst(i);
                 }
@@ -155,12 +155,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        X[i].removeInterval(left, right, this);
+                        X[i].removeInterval(left, right, aCause);
                         left = right = val;
                     }
                 }
             }
-            X[i].removeInterval(left, right, this);
+            X[i].removeInterval(left, right, aCause);
         }
         // Y[j] = i' && i' = i - Oy[j] => 0 <= i < nbX
         for (int j = 0; j < nbY; j++) {
@@ -172,12 +172,12 @@ public class PropInverseChanneling extends Propagator<IntVar> {
                     if (val == right + 1) {
                         right = val;
                     } else {
-                        Y[j].removeInterval(left, right, this);
+                        Y[j].removeInterval(left, right, aCause);
                         left = right = val;
                     }
                 }
             }
-            Y[j].removeInterval(left, right, this);
+            Y[j].removeInterval(left, right, aCause);
         }
     }
 
@@ -187,7 +187,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         if (index < nbX) {
             int i = index;
             int j = X[i].getValue() + Ox;
-            modified = Y[j].instantiateTo(i - Oy, this);
+            modified = Y[j].instantiateTo(i - Oy, aCause);
             // j" =\= j, Y[j"] =\= i - Oy[j"]
             // CPRU: removed, should be handle by the allDifferent constraint
             /*for (int jj = 0; jj < nbY; jj++) {
@@ -200,7 +200,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
         else {
             int j = index - nbX;
             int i = Y[j].getValue() + Oy;
-            modified = X[i].instantiateTo(j - Ox, this);
+            modified = X[i].instantiateTo(j - Ox, aCause);
             // i" =\= i, X[i"] =\= j - Ox[i"]
             // CPRU: removed, should be handle by the allDifferent constraint
             /*for (int ii = 0; ii < nbX; ii++) {
@@ -242,7 +242,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             // 0 < j < Y, j = j' + Ox[i], X[i] =\= j' => Y[j] =\= i + Oy[j]
             for (int j = 0; j < nbY; j++) {
                 if (!X[i].contains(j - Ox)) {
-                    modified |= Y[j].removeValue(i - Oy, this);
+                    modified |= Y[j].removeValue(i - Oy, aCause);
                 }
             }
         }
@@ -265,7 +265,7 @@ public class PropInverseChanneling extends Propagator<IntVar> {
             // 0 < i < X, i = i' + Oy[j], Y[j] =\= i' => X[i] =\= j + Ox[i]
             for (int i = 0; i < nbX; i++) {
                 if (!Y[j].contains(i - Oy)) {
-                    modified |= X[i].removeValue(j - Ox, this);
+                    modified |= X[i].removeValue(j - Ox, aCause);
                 }
             }
         }
