@@ -31,7 +31,9 @@ import choco.checker.DomainBuilder;
 import gnu.trove.set.hash.TIntHashSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import solver.Cause;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
 import solver.constraints.ConstraintFactory;
 import solver.constraints.nary.Sum;
@@ -39,10 +41,13 @@ import solver.constraints.nary.alldifferent.AllDifferent;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.constraints.unary.Member;
 import solver.constraints.unary.NotMember;
+import solver.exception.ContradictionException;
+import solver.propagation.hardcoded.VariableEngine;
 import solver.search.strategy.StrategyFactory;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
 import solver.variables.VariableFactory;
+import solver.variables.view.Views;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -279,6 +284,49 @@ public class ReifiedTest {
         long sol1 = s1.getMeasures().getSolutionCount();
         long sol2 = s2.getMeasures().getSolutionCount();
         Assert.assertEquals(sol2, sol1, "nb sol incorrect");
+
+    }
+
+    @Test(groups = {"1s"})
+    public void testBACP() {
+        Solver solver = new Solver();
+        IntVar cp = VariableFactory.enumerated("cp", 1, 10, solver);
+        BoolVar[] bv = VariableFactory.boolArray("b1", 10, solver);
+        for (int i = 1; i <= 10; i++) {
+            solver.post(new
+                    ReifiedConstraint(
+                    bv[i-1],
+                    new Arithmetic(cp, "=", i, solver),
+                    new Arithmetic(cp, "!=", i, solver),
+                    solver
+            ));
+        }
+
+        IntVar cp2 = VariableFactory.enumerated("cp27", 1, 10, solver);
+        solver.post(new Arithmetic(cp2, ">=", cp, solver));
+
+        BoolVar[] bv2 = VariableFactory.boolArray("b2", 10, solver);
+                for (int i = 1; i <= 10; i++) {
+                    solver.post(new
+                            ReifiedConstraint(
+                            bv2[i-1],
+                            new Arithmetic(Views.fixed(i, solver), "<", cp, solver),
+                            new Arithmetic(Views.fixed(i, solver), ">=", cp, solver),
+                            solver
+                    ));
+                }
+
+        solver.set(new VariableEngine(solver));
+        solver.getEngine().init(solver);
+        try {
+            solver.propagate();
+            cp.updateUpperBound(5, Cause.Null);
+            solver.propagate();
+            bv[0].instantiateTo(1, Cause.Null);
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
 
     }
 

@@ -44,4 +44,8 @@ public final class EString extends Expression {
         this.st = st;
     }
 
+    @Override
+    public String toString() {
+        return st;
+    }
 }

@@ -57,7 +57,7 @@ public class IncArrayEvents {
 				if (range[i] >= i) {
 					j = range[i];
 					if (j - i < 7) {
-						// selectionsort the elements from a[i] to a[j]
+						// selectionsort the elements from date[i] to date[j]
 						// inclusive
 						// and set all their ranges to -((j+1)-k)
 						for (int m = i; m <= j; m++) {

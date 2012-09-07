@@ -45,7 +45,9 @@ import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
+import solver.variables.IntVar;
 import solver.variables.Variable;
+import solver.variables.view.Views;
 
 import java.io.Serializable;
 
@@ -96,7 +98,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     protected V[] vars;
 
-    protected int[] vindices;
+    protected int[] vindices;  // index of this within the list of propagator of the i^th variable
+
+    protected Operation[] operations;
 
     /**
      * Reference to the <code>Solver</code>'s <code>IEnvironment</code>,
@@ -132,13 +136,18 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
     private static <V extends Variable> void checkVariable(V[] vars) {
         set.clear();
-        for (V v : vars) {
+        for (int i = 0; i < vars.length; i++) {
+            Variable v = vars[i];
             if ((v.getTypeAndKind() & Variable.CSTE) == 0) {
                 if (set.contains(v.getId())) {
-                    throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
-                            "This is forbidden; you must consider using a View or a EQ constraint.");
+                    if ((v.getTypeAndKind() & Variable.INT) != 0) {
+                        vars[i] = (V) Views.eq((IntVar) v);
+                    } else {
+                        throw new UnsupportedOperationException(v.toString() + " occurs more than one time in this propagator. " +
+                                "This is forbidden; you must consider using a View or a EQ constraint.");
+                    }
                 }
-                set.add(v.getId());
+                set.add(vars[i].getId());
             }
         }
     }
@@ -164,6 +173,20 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         }
         fails = 0;
         ID = solver.nextId();
+        operations = new Operation[]{
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = NEW;
+                    }
+                },
+                new Operation() {
+                    @Override
+                    public void undo() {
+                        state = ACTIVE;
+                    }
+                }
+        };
     }
 
     protected Propagator(V[] vars, Solver solver, Constraint<V, Propagator<V>> constraint, PropagatorPriority priority) {
@@ -236,12 +259,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setActive() {
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
-        environment.save(new Operation(){
-            @Override
-            public void undo() {
-                state = NEW;
-            }
-        });
+        environment.save(operations[NEW]);
         solver.getEngine().activatePropagator(this);
     }
 
@@ -249,12 +267,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     public void setPassive() {
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
-        environment.save(new Operation(){
-            @Override
-            public void undo() {
-                state = ACTIVE;
-            }
-        });
+        environment.save(operations[ACTIVE]);
         solver.getEngine().desactivatePropagator(this);
     }
 
@@ -292,8 +305,24 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return vars;
     }
 
+    /**
+     * index of the propagator within its variables
+     *
+     * @return
+     */
     public int[] getVIndices() {
         return vindices;
+    }
+
+    public void setVIndices(int idx, int val) {
+        vindices[idx] = val;
+    }
+
+    public void unlink() {
+        for (int v = 0; v < vars.length; v++) {
+            vars[v].unlink(this, vindices[v]);
+            vindices[v] = -1;
+        }
     }
 
     /**

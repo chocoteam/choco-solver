@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package solver.search.strategy.enumerations.sorters;
 
@@ -31,6 +31,7 @@ import choco.kernel.common.util.PoolManager;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,6 @@ import solver.variables.EventType;
 import solver.variables.IVariableMonitor;
 import solver.variables.IntVar;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 
@@ -120,11 +120,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     final IntVar[] vars;
 
     final double[] A; // activity of all variables
-    final double[][] Av; // activity of each value of all variables
-    final int[] ov; // values offsets
     final double[] mA; // the mean -- maintained incrementally
-    final double[][] mAv; // the mean of values -- maintained incrementally
     final double[] sA; // the variance -- maintained incrementally -- std dev = sqrt(sA/path-1)
+    final IVal[] vAct; // activity of each value of all variables
+
     final BitSet affected; // store affected variables
 
     final double g, d; // g for aging, d for interval size estimation
@@ -150,9 +149,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         A = new double[vars.length];
         mA = new double[vars.length];
         sA = new double[vars.length];
-        Av = new double[vars.length][];
-        mAv = new double[vars.length][];
-        ov = new int[vars.length];
+        vAct = new IVal[vars.length];
         affected = new BitSet(vars.length);
 
         this.v2i = new TIntIntHashMap(vars.length);
@@ -183,10 +180,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     @Override
     public void init() {
         for (int i = 0; i < vars.length; i++) {
+            //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
-            Av[i] = new double[ampl];
-            mAv[i] = new double[ampl];
-            ov[i] = vars[i].getLB();
+            if (ampl > 512) {
+                vAct[i] = new MapVal(vars[i].getLB());
+            } else {
+                vAct[i] = new ArrayVal(ampl, vars[i].getLB());
+            }
         }
     }
 
@@ -224,14 +224,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
                     currentVal += n;
                 }
             } else {
-                int o = ov[currentVar];
                 if (best.hasEnumeratedDomain()) {
                     bests.clear();
                     bestVal = Double.MAX_VALUE;
                     DisposableValueIterator it = best.getValueIterator(true);
                     while (it.hasNext()) {
                         int value = it.next();
-                        double current = Av[currentVar][value - o];
+                        double current = vAct[currentVar].activity(value);
                         if (current < bestVal) {
                             bests.clear();
                             bests.add(value);
@@ -244,7 +243,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
                 } else {
                     int lb = best.getLB();
                     int ub = best.getUB();
-                    currentVal = Av[currentVar][lb - o] < Av[currentVar][ub - o] ?
+                    currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
                             lb : ub;
                 }
             }
@@ -311,10 +310,11 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     @Override
     public void beforeDownLeftBranch() {
         beforeDownBranch();
-        Av[currentVar][currentVal - ov[currentVar]] =
-                sampling ?
-                        Av[currentVar][currentVal - ov[currentVar]] + affected.cardinality() :
-                        (Av[currentVar][currentVal - ov[currentVar]] * (a - 1) + affected.cardinality()) / a;
+        double act = vAct[currentVar].activity(currentVal);
+        if (sampling)
+            vAct[currentVar].setactivity(currentVal, act + affected.cardinality());
+        else
+            vAct[currentVar].setactivity(currentVal, (act * (a - 1) + affected.cardinality()) / a);
     }
 
     @Override
@@ -344,13 +344,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
                 mA[i] += (U / nb_probes);
                 sA[i] += (U * (activity - mA[i]));
                 A[i] = 0;
-                for (int j = 0; j < Av[i].length; j++) {
-                    activity = Av[i][j];
-                    oldmA = mAv[i][j];
-                    U = activity - oldmA;
-
-                    mAv[i][j] += (U / nb_probes);
-                }
+                vAct[i].update(nb_probes);
             }
             // check if sampling is still required
 //            logger.info("<<<<START check");
@@ -364,15 +358,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 if (logger.isInfoEnabled()) {
                     solver.getMeasures().updateTimeCount();
-                    logger.info(">> STOP SAMPLING: {}", solver.getMeasures().toOneShortLineString());
-                    logger.info(">> {}", Arrays.toString(mA));
+                    //logger.info(">> STOP SAMPLING: {}", solver.getMeasures().toOneShortLineString());
+                    //logger.info(">> {}", Arrays.toString(mA));
                 }
                 sampling = false;
                 solver.getSearchLoop().restartAfterEachFail(false);
                 // then copy values estimated
                 System.arraycopy(mA, 0, A, 0, mA.length);
                 for (int i = 0; i < A.length; i++) {
-                    System.arraycopy(mAv[i], 0, Av[i], 0, mAv[i].length);
+                    vAct[i].transfer();
                 }
 //                solver.getSearchLoop().restartAfterEachSolution(false);
                 SearchMonitorFactory.restart(solver, RestartFactory.geometrical(3 * vars.length, r),
@@ -445,6 +439,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     }
 
     @Override
+    public void afterInterrupt() {
+    }
+
+    @Override
     public void beforeClose() {
     }
 
@@ -452,5 +450,100 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
     public void afterClose() {
     }
 
+
+    private static interface IVal {
+
+        double activity(int value);
+
+        void setactivity(int value, double activity);
+
+        void update(int nb_probes);
+
+        void transfer();
+    }
+
+    private static final class ArrayVal implements IVal {
+
+        final double[] Av;
+        final double[] mAv;
+        final int size;
+        final int os;  // offset
+
+        private ArrayVal(int size, int os) {
+            this.size = size;
+            this.os = os;
+            this.Av = new double[size];
+            this.mAv = new double[size];
+        }
+
+        @Override
+        public double activity(int value) {
+            return Av[value - os];
+        }
+
+
+        @Override
+        public void setactivity(int value, double activity) {
+            Av[value - os] = activity;
+        }
+
+        @Override
+        public void update(int nb_probes) {
+            double activity, oldmA, U;
+            for (int j = 0; j < Av.length; j++) {
+                activity = Av[j];
+                oldmA = mAv[j];
+                U = activity - oldmA;
+                mAv[j] += (U / nb_probes);
+            }
+        }
+
+        @Override
+        public void transfer() {
+            System.arraycopy(mAv, 0, Av, 0, size);
+        }
+    }
+
+    private static final class MapVal implements IVal {
+
+        final TIntDoubleHashMap Av;
+        final TIntDoubleHashMap mAv;
+        final int os;  // offset
+
+        private MapVal(int os) {
+            this.os = os;
+            this.Av = new TIntDoubleHashMap(32, 0.5f, 0, 0);
+            this.mAv = new TIntDoubleHashMap(32, 0.5f, 0, 0);
+        }
+
+        @Override
+        public double activity(int value) {
+            return Av.get(value - os);
+        }
+
+        @Override
+        public void setactivity(int value, double activity) {
+            Av.put(value - os, activity);
+        }
+
+        @Override
+        public void update(int nb_probes) {
+            double activity, oldmA, U;
+            int[] keys = Av.keys();
+            for (int j = 0; j < keys.length; j++) {
+                int k = keys[j];
+                activity = Av.get(k);
+                oldmA = mAv.get(k);
+                U = activity - oldmA;
+                mAv.adjustValue(k, U / nb_probes);
+            }
+        }
+
+        @Override
+        public void transfer() {
+            Av.clear();
+            Av.putAll(mAv);
+        }
+    }
 
 }

@@ -30,8 +30,8 @@ package parser.flatzinc.ast.constraints;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
 import solver.Solver;
+import solver.constraints.Arithmetic;
 import solver.constraints.Constraint;
-import solver.constraints.ConstraintFactory;
 import solver.constraints.reified.ReifiedConstraint;
 import solver.variables.BoolVar;
 import solver.variables.IntVar;
@@ -39,6 +39,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * (a < b) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -48,13 +49,13 @@ public class IntLtReifBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] ivars = new IntVar[2];
-        ivars[0] = exps.get(0).intVarValue(solver);
-        ivars[1] = exps.get(1).intVarValue(solver);
-        BoolVar bvar = exps.get(2).boolVarValue(solver);
-        return new ReifiedConstraint(bvar,
-                ConstraintFactory.lt(ivars[0], ivars[1], solver),
-                ConstraintFactory.geq(ivars[0], ivars[1], solver),
-                solver);
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        BoolVar r = exps.get(2).boolVarValue(solver);
+
+        Constraint c = new Arithmetic(a, "<", b, solver);
+        Constraint oc = new Arithmetic(a, ">=", b, solver);
+
+        return new ReifiedConstraint(r, c, oc, solver);
     }
 }

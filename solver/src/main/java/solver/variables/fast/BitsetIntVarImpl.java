@@ -34,6 +34,7 @@ import choco.kernel.memory.IStateBitSet;
 import choco.kernel.memory.IStateInt;
 import com.sun.istack.internal.NotNull;
 import solver.Cause;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -44,7 +45,7 @@ import solver.search.strategy.enumerations.values.heuristics.HeuristicVal;
 import solver.variables.AbstractVariable;
 import solver.variables.EventType;
 import solver.variables.IntVar;
-import solver.variables.delta.Delta;
+import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
@@ -166,7 +167,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
             if (SIZE.get() == 1) {
-                solver.getExplainer().removeValue(this, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
 //            monitors.forEach(onContradiction.set(this, EventType.REMOVE, cause));
                 this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
             }
@@ -198,7 +199,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
             }
             this.notifyPropagators(e, cause);
-            solver.getExplainer().removeValue(this, value, antipromo);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
         }
         return change;
     }
@@ -240,7 +241,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
-        solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
+        if(Configuration.PLUG_EXPLANATION)solver.getExplainer().instantiateTo(this, value, cause);   // the explainer is informed before the actual instantiation is performed
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -299,7 +300,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -326,7 +327,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return change;
 
             }
@@ -358,7 +359,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -384,7 +385,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
                 }
                 assert (change);
                 this.notifyPropagators(e, cause);
-                solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return change;
             }
         }
@@ -499,7 +500,7 @@ public final class BitsetIntVarImpl extends AbstractVariable<IntDelta, IIntDelta
     @Override
     public void createDelta() {
         if (!reactOnRemoval) {
-            delta = new Delta(solver.getSearchLoop());
+            delta = new EnumDelta(solver.getSearchLoop());
             reactOnRemoval = true;
         }
     }

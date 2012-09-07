@@ -1,0 +1,8 @@
+Choco is a java library for constraint satisfaction problems (CSP) and constraint programming (CP).
+It is built on a event-based propagation mechanism with backtrackable structures.
+Choco is an open-source software, distributed under a BSD License and hosted by sourceforge.net.
+
+Main authors are Charles Prud'homme, Xavier Lorca and Jean-Guillaume Fages (Ecole des Mines de Nantes, France).
+Major contributors are Hadrien Cambazard (INP Grenoble France) and Arnaud Malapert (Université Nice Sophia Antipolis, France).
+
+For any informations visit our website : http://choco.emn.fr.

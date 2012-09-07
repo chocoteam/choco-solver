@@ -94,14 +94,21 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
     void declareIn(Constraint constraint);
 
     /**
-     * Return the arrau of propagators this
+     * Return the array of propagators this
      *
      * @return
      */
     Propagator[] getPropagators();
 
+    /**
+     * Return the number of propagators
+     * @return
+     */
     int getNbProps();
 
+    /**
+     * Return indices of the variable in its propagators
+     */
     int[] getPIndices();
 
     W[] getViews();
@@ -180,7 +187,7 @@ public interface Variable<D extends IDelta, DM extends IDeltaMonitor<D>,W extend
      *
      * @param propagator the propagator to remove
      */
-    void unlink(Propagator propagator);
+    void unlink(Propagator propagator, int idxInProp);
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>

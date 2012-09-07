@@ -35,7 +35,6 @@
 package solver.constraints.propagators.nary;
 
 import choco.kernel.ESat;
-import choco.kernel.common.util.tools.ArrayUtils;
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
@@ -59,7 +58,8 @@ public class PropSubcircuit extends Propagator<IntVar> {
     //***********************************************************************************
 
     private int n;
-	private IntVar length;
+    private int offset; // lower bound
+    private IntVar length;
     private IStateInt[] origin, end, size;
 
     //***********************************************************************************
@@ -67,9 +67,14 @@ public class PropSubcircuit extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropSubcircuit(IntVar[] vars, IntVar length, Constraint constraint, Solver solver) {
+        this(vars, 0, length, constraint, solver);
+    }
+
+    public PropSubcircuit(IntVar[] vars, int offset, IntVar length, Constraint constraint, Solver solver) {
         super(vars, solver, constraint, PropagatorPriority.UNARY, true);
         n = vars.length;
-		this.length = length;
+        this.offset = offset;
+        this.length = length;
         origin = new IStateInt[n];
         end = new IStateInt[n];
         size = new IStateInt[n];
@@ -88,41 +93,48 @@ public class PropSubcircuit extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         TIntArrayList fixedVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
-			vars[i].updateLowerBound(0,this);
-			vars[i].updateUpperBound(n-1,this);
-            if (vars[i].instantiated() && i!=vars[i].getValue()) {
+            vars[i].updateLowerBound(offset, this);
+            vars[i].updateUpperBound(n - 1 + offset, this);
+            if (vars[i].instantiated() && i + offset != vars[i].getValue()) {
                 fixedVar.add(i);
             }
         }
         for (int i = 0; i < fixedVar.size(); i++) {
-            varInstantiated(fixedVar.get(i), vars[fixedVar.get(i)].getValue());
+            varInstantiated(fixedVar.get(i), vars[fixedVar.get(i)].getValue() - offset);
         }
     }
 
     @Override
     public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
         int next = vars[idxVarInProp].getValue();
-		if(idxVarInProp!=next){
-			varInstantiated(idxVarInProp, next);
-			vars[next].removeValue(next,this);
-		}
+        if (idxVarInProp != next - offset) {
+            varInstantiated(idxVarInProp, next - offset);
+            vars[next - offset].removeValue(next, this);
+        }
     }
 
+    /**
+     * var in [0,n-1] and val in [0,n-1]
+     *
+     * @param var origin
+     * @param val dest
+     * @throws ContradictionException
+     */
     private void varInstantiated(int var, int val) throws ContradictionException {
-        int last = end[val].get();
-        int start = origin[var].get();
+        int last = end[val].get();  // last in [0, n-1]
+        int start = origin[var].get(); // start in [0, n-1]
         if (origin[val].get() != val) {
             contradiction(vars[var], "");
         }
         if (val == start) {
-			length.instantiateTo(size[start].get(),this);
+            length.instantiateTo(size[start].get(), this);
         } else {
             size[start].add(size[val].get());
-			if (size[start].get() == length.getUB()) {
-                vars[last].instantiateTo(start, this);
+            if (size[start].get() == length.getUB()) {
+                vars[last].instantiateTo(start + offset, this);
             }
             if (size[start].get() < length.getLB()) {
-                vars[last].removeValue(start, this);
+                vars[last].removeValue(start + offset, this);
             }
             origin[last].set(start);
             end[start].set(last);
@@ -136,9 +148,9 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		if(!length.instantiated()){
-			return ESat.UNDEFINED;
-		}
+        if (!length.instantiated()) {
+            return ESat.UNDEFINED;
+        }
         for (int i = 0; i < n; i++) {
             if (!vars[i].instantiated()) {
                 return ESat.UNDEFINED;
@@ -146,17 +158,17 @@ public class PropSubcircuit extends Propagator<IntVar> {
         }
         BitSet visited = new BitSet(n);
         int i = 0;
-		while(i<n && vars[i].getValue()==i){
-			i++;
-		}
-		if(i==n){
-			if(length.getValue()==0){
-				return ESat.TRUE;
-			}else{
-				return ESat.FALSE;
-			}
-		}
-		int first = i;
+        while (i < n && vars[i].getValue() == i) {
+            i++;
+        }
+        if (i == n) {
+            if (length.getValue() == 0) {
+                return ESat.TRUE;
+            } else {
+                return ESat.FALSE;
+            }
+        }
+        int first = i;
         int size = 0;
         while (size != length.getValue()) {
             size++;
@@ -167,11 +179,11 @@ public class PropSubcircuit extends Propagator<IntVar> {
             visited.set(i);
         }
         if (i == first) {
-			for(int j=0;j<n;j++){
-				if(vars[j].getValue()!=j && !visited.get(j)){
-					return ESat.FALSE;
-				}
-			}
+            for (int j = 0; j < n; j++) {
+                if (vars[j].getValue() != j && !visited.get(j)) {
+                    return ESat.FALSE;
+                }
+            }
             return ESat.TRUE;
         } else {
             return ESat.FALSE;

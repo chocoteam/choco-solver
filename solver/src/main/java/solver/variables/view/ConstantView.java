@@ -31,6 +31,7 @@ import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.memory.IStateBool;
 import com.sun.istack.internal.NotNull;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -119,7 +120,7 @@ public class ConstantView implements IntVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
@@ -128,7 +129,7 @@ public class ConstantView implements IntVar {
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.REMOVE, "unique value removal");
         }
         return false;
@@ -137,7 +138,7 @@ public class ConstantView implements IntVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INSTANTIATE, "outside domain instantitation");
         }
         return false;
@@ -146,7 +147,7 @@ public class ConstantView implements IntVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.INCLOW, "outside domain update bound");
         }
         return false;
@@ -155,7 +156,7 @@ public class ConstantView implements IntVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
-            solver.getExplainer().removeValue(this, constante, cause);
+            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, constante, cause);
             this.contradiction(cause, EventType.DECUPP, "outside domain update bound");
         }
         return false;
@@ -301,7 +302,7 @@ public class ConstantView implements IntVar {
     }
 
     @Override
-    public void unlink(Propagator propagator) {
+    public void unlink(Propagator propagator, int idx) {
     }
 
     @Override

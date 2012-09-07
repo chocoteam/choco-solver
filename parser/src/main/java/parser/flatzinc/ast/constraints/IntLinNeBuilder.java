@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * &#8721; i &#8712; 1..n: as[i].bs[i] &#8800; c where n is the common length of as and bs
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,9 +47,9 @@ public class IntLinNeBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        int[] coeffs = exps.get(0).toIntArray();
-        IntVar[] vars = exps.get(1).toIntVarArray(solver);
-        int result = exps.get(2).intValue();
-        return Sum.neq(vars, coeffs, result, solver);
+        int[] as = exps.get(0).toIntArray();
+        IntVar[] bs = exps.get(1).toIntVarArray(solver);
+        int c = exps.get(2).intValue();
+        return Sum.neq(bs, as, c, solver);
     }
 }

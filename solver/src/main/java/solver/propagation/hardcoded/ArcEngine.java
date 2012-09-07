@@ -30,6 +30,7 @@ import choco.kernel.memory.IEnvironment;
 import com.sun.istack.internal.NotNull;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,7 +41,6 @@ import solver.propagation.IPropagationStrategy;
 import solver.propagation.hardcoded.util.AId2AbId;
 import solver.propagation.hardcoded.util.IId2AbId;
 import solver.propagation.queues.CircularQueue;
-import solver.recorders.IEventRecorder;
 import solver.recorders.coarse.AbstractCoarseEventRecorder;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -171,7 +171,7 @@ public class ArcEngine implements IPropagationEngine {
                 mask = masks_f[vaid].get(paid);
                 masks_f[vaid].adjustValue(paid, -(mask + 1)); // we add +1 to make sure new value is -1
                 if (mask > 0) {
-                    if (IEventRecorder.DEBUG_PROPAG) {
+                    if (Configuration.PRINT_PROPAGATION) {
                         LoggerFactory.getLogger("solver").info("* {}", "<< {F} " + lastVar.toString() + "::" + lastProp.toString() + " >>");
                     }
                     lastProp.fineERcalls++;
@@ -187,7 +187,7 @@ public class ArcEngine implements IPropagationEngine {
                 if (lastProp.isStateLess()) {
                     lastProp.setActive();
                 }
-                if (IEventRecorder.DEBUG_PROPAG) {
+                if (Configuration.PRINT_PROPAGATION) {
                     LoggerFactory.getLogger("solver").info("* {}", "<< ::" + lastProp.toString() + " >>");
                 }
                 lastProp.coarseERcalls++;
@@ -231,7 +231,7 @@ public class ArcEngine implements IPropagationEngine {
             if (cause != prop && prop.isActive()) {
                 paid = p2i.get(prop.getId());
                 if ((type.mask & prop.getPropagationConditions(idxVinP[vaid].get(paid))) != 0) {
-                    if (IEventRecorder.DEBUG_PROPAG) {
+                    if (Configuration.PRINT_PROPAGATION) {
                         LoggerFactory.getLogger("solver").info("\t|- {}", "<< {F} " + variable.toString() + "::" + prop.toString() + " >>");
                     }
                     cm = masks_f[vaid].get(paid);
@@ -254,7 +254,7 @@ public class ArcEngine implements IPropagationEngine {
     public void schedulePropagator(@NotNull Propagator propagator, EventType event) {
         int paid = p2i.get(propagator.getId());
         if (masks_c[paid] == 0) {
-            if (IEventRecorder.DEBUG_PROPAG) {
+            if (Configuration.PRINT_PROPAGATION) {
                 LoggerFactory.getLogger("solver").info("\t|- {}", "<< ::" + propagator.toString() + " >>");
             }
             pro_queue_c.addLast(propagator);
@@ -275,17 +275,21 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         int vaid, cm, paid = p2i.get(propagator.getId());
-        Variable[] variables = propagator.getVars();
-        for (int i = 0; i < variables.length; i++) {
-            vaid = v2i.get(variables[i].getId());
-            cm = masks_f[vaid].get(paid);
-            if (cm > 0) {  // if it is present in the queue
-                masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
+        if (paid > -1) {
+            Variable[] variables = propagator.getVars();
+            for (int i = 0; i < variables.length; i++) {
+                vaid = v2i.get(variables[i].getId());
+                if (vaid > -1) {
+                    cm = masks_f[vaid].get(paid);
+                    if (cm > 0) {  // if it is present in the queue
+                        masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
+                    }
+                }
             }
-        }
-        if (masks_c[paid] > 0) {
-            masks_c[paid] = 0;
-            pro_queue_c.remove(propagator);
+            if (masks_c[paid] > 0) {
+                masks_c[paid] = 0;
+                pro_queue_c.remove(propagator);
+            }
         }
     }
 

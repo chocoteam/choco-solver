@@ -31,7 +31,7 @@ import choco.kernel.memory.IEnvironment;
 import choco.kernel.memory.IStateInt;
 import solver.ICause;
 import solver.search.loop.AbstractSearchLoop;
-import solver.variables.delta.Delta;
+import solver.variables.delta.EnumDelta;
 import solver.variables.delta.IntDelta;
 import solver.variables.delta.NoDelta;
 
@@ -240,7 +240,7 @@ public final class IntervalIntDomain implements IIntDomain {
     public void recordRemoveValues() {
         //nothing to do, interval domain does not react on value removals
 //      TODO:  LoggerFactory.getLogger("solver").warn("an adapted delta should be build for bounded domain");
-        delta = new Delta(loop);
+        delta = new EnumDelta(loop);
     }
 
     /**

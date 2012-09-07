@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package parser.flatzinc.ast;
@@ -33,7 +33,6 @@ import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.EArray;
 import parser.flatzinc.ast.expression.EIdentifier;
 import parser.flatzinc.ast.expression.Expression;
-import parser.flatzinc.ast.searches.Assignment;
 import parser.flatzinc.ast.searches.IntSearch;
 import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
@@ -42,6 +41,9 @@ import solver.Solver;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
 import solver.search.loop.AbstractSearchLoop;
+import solver.search.loop.monitors.ABSLNS;
+import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.enumerations.sorters.ActivityBased;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StrategiesSequencer;
 import solver.variables.IntVar;
@@ -84,12 +86,12 @@ public class SolveGoal {
         this.annotations = annotations;
         this.type = type;
         this.expr = expr;
-        defineGoal(parser.solver);
+        defineGoal(parser, parser.solver);
     }
 
-    private void defineGoal(Solver solver) {
-        AbstractStrategy strategy = null;
-        if (annotations.size() > 0) {
+    private void defineGoal(FZNParser parser, Solver solver) {
+        if (annotations.size() > 0 && !parser.free) {
+            AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
                 throw new UnsupportedOperationException("SolveGoal:: wrong annotations size");
             } else {
@@ -105,6 +107,20 @@ public class SolveGoal {
                 } else {
                     strategy = readSearchAnnotation(annotation, solver);
                 }
+//                solver.set(strategy);
+                Variable[] vars = solver.getVars();
+                IntVar[] ivars = new IntVar[vars.length];
+                for (int i = 0; i < ivars.length; i++) {
+                    ivars[i] = (IntVar) vars[i];
+                }
+                long t = System.currentTimeMillis();
+                solver.set(
+                        new StrategiesSequencer(solver.getEnvironment(),
+                                strategy,
+                                StrategyFactory.random(ivars, solver.getEnvironment(), t))
+                );
+
+                System.out.println("% t:" + t);
             }
         } else {
             LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");
@@ -113,16 +129,22 @@ public class SolveGoal {
             for (int i = 0; i < ivars.length; i++) {
                 ivars[i] = (IntVar) vars[i];
             }
-            strategy = IntSearch.build(ivars,
-                    VarChoice.input_order, Assignment.indomain_min, Strategy.complete, solver);
+            if (type == Resolution.SATISFY && !solver.getSearchLoop().stopAtFirstSolution()) {
+                solver.set(StrategyFactory.minDomMinVal(ivars, solver.getEnvironment()));
+            } else {
+                ActivityBased abs = new ActivityBased(solver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
+                solver.set(abs);
+                if (type != Resolution.SATISFY) {
+                    solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, ivars, 29091981L, abs, false, ivars.length / 2));
+                }
+            }
+//            solver.set(StrategyFactory.random(ivars, solver.getEnvironment()));
         }
-
-        solver.set(strategy);
 
         AbstractSearchLoop search = solver.getSearchLoop();
         switch (type) {
             case SATISFY:
-                search.stopAtFirstSolution(true);
+                search.stopAtFirstSolution(!parser.all);
                 break;
             case MAXIMIZE:
                 IntVar max = expr.intVarValue(solver);

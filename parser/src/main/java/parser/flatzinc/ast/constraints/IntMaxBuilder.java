@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * max(a, b) = c
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,10 +47,9 @@ public class IntMaxBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] vars = new IntVar[3];
-        vars[0] = exps.get(0).intVarValue(solver);
-        vars[1] = exps.get(1).intVarValue(solver);
-        vars[2] = exps.get(2).intVarValue(solver);
-        return new Max(vars[2], vars[0], vars[1], solver);
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        return new Max(c, a, b, solver);
     }
 }

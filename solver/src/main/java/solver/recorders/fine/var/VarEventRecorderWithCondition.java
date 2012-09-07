@@ -27,6 +27,7 @@
 package solver.recorders.fine.var;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
@@ -71,7 +72,7 @@ public class VarEventRecorderWithCondition<V extends Variable> extends VarEventR
             int i = propIdx[k];
             Propagator propagator = propagators[i];
             if (cause != propagator && propagator.isActive()) { // due to idempotency of propagator, it should not schedule itself
-                if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
+                if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("\t|- {} - {}", this.toString(), propagator);
                 int idx = p2i[propagator.getId() - offset];
                 if ((evt.mask & propagator.getPropagationConditions(idxVinPs[idx])) != 0) {
 

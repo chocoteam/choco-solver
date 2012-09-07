@@ -53,7 +53,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 09/08/11
  */
-public final class SqrView extends IntView {
+public final class SqrView extends IntView<IntVar> {
 
     protected DisposableValueIterator _viterator;
     protected DisposableRangeIterator _riterator;

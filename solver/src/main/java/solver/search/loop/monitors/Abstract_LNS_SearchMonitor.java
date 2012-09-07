@@ -65,23 +65,30 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
         recordSolution();
     }
 
-    public void beforeClose() {
-//		if(solver.getMeasures().getSolutionCount()==0){
-//			System.out.println("research complete : no solution");return;
-//		}
-//		if(solver.getSearchLoop().getLimitsBox().isReached()){
-//			System.out.println("limit reached");return;
-//		}
-//		if(isSearchComplete()){
-//			System.out.println("optimality proved");return;
-//		}
+    @Override
+    public void afterInterrupt() {
+        super.afterInterrupt();
+        //		if(solver.getMeasures().getSolutionCount()==0){
+        //			System.out.println("research complete : no solution");return;
+        //		}
+        //		if(solver.getSearchLoop().getLimitsBox().isReached()){
+        //			System.out.println("limit reached");return;
+        //		}
+        //		if(isSearchComplete()){
+        //			System.out.println("optimality proved");return;
+        //		}
         if (!(solver.getMeasures().getSolutionCount() == 0
                 || solver.getSearchLoop().getLimitsBox().isReached()
                 || isSearchComplete())) {
             restrictLess();
             solver.getSearchLoop().restartAfterEachSolution(true);
-            solver.getSearchLoop().resume();
+            solver.getSearchLoop().forceAlive(true);
+            solver.getSearchLoop().restart();
         }
+    }
+
+    @Override
+    public void beforeClose() {
     }
 
     /**
@@ -107,6 +114,7 @@ public abstract class Abstract_LNS_SearchMonitor extends VoidSearchMonitor {
                 fixSomeVariables();
             } catch (Exception e) {
                 //LOGGER.warn("fixing some variables raised a failure. Restart LNS to get a better fragment");
+                solver.getEngine().flush();
                 restrictLess();
                 solver.getSearchLoop().restart();
             }

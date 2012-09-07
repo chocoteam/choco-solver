@@ -43,10 +43,6 @@ import java.io.Serializable;
  */
 public interface IEventRecorder<V extends Variable> extends solver.propagation.ISchedulable, Serializable {
 
-    public static final boolean DEBUG_PROPAG = false;
-
-    public static final boolean LAZY = true;
-
     static final int VINDEX = 0;
     static final int PINDEX = 0;
     /**

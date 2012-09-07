@@ -78,7 +78,12 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        return ESat.eval(vars[0].getLB() >= constant);
+        if(vars[0].getLB() >= constant){
+            return ESat.TRUE;
+        }else if (vars[0].getUB() < constant){
+            return ESat.FALSE;
+        }
+        return ESat.UNDEFINED;
     }
 
     @Override

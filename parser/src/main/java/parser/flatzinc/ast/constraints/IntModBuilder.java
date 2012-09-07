@@ -37,6 +37,7 @@ import solver.variables.IntVar;
 import java.util.List;
 
 /**
+ * a - x.b = c where x = a/b rounding towards 0
  * <br/>
  *
  * @author Charles Prud'homme
@@ -46,10 +47,9 @@ public class IntModBuilder implements IBuilder {
 
     @Override
     public Constraint build(Solver solver, String name, List<Expression> exps, List<EAnnotation> annotations) {
-        IntVar[] vars = new IntVar[3];
-        vars[0] = exps.get(0).intVarValue(solver);
-        vars[1] = exps.get(1).intVarValue(solver);
-        vars[2] = exps.get(2).intVarValue(solver);
-        return new ModXYZ(vars[0], vars[1], vars[2], solver);
+        IntVar a = exps.get(0).intVarValue(solver);
+        IntVar b = exps.get(1).intVarValue(solver);
+        IntVar c = exps.get(2).intVarValue(solver);
+        return new ModXYZ(a, b, c, solver);
     }
 }

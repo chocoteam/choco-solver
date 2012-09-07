@@ -53,7 +53,7 @@ import solver.variables.delta.monitor.IntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends IntView {
+public final class ScaleView extends IntView<IntVar> {
 
     final int cste;
     DisposableValueIterator _viterator;

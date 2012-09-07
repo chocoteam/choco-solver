@@ -27,6 +27,7 @@
 package solver.recorders.fine.prop;
 
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.Solver;
 import solver.constraints.propagators.Propagator;
 import solver.exception.ContradictionException;
@@ -48,7 +49,7 @@ public final class FineTernPropEventRecorder<V extends Variable> extends FinePro
 
     @Override
     public boolean execute() throws ContradictionException {
-        if (DEBUG_PROPAG) LoggerFactory.getLogger("solver").info("* {}", this.toString());
+        if (Configuration.PRINT_PROPAGATION) LoggerFactory.getLogger("solver").info("* {}", this.toString());
         _execute(0);
         _execute(1);
         _execute(2);

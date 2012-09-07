@@ -39,6 +39,7 @@ import solver.variables.BoolVar;
 import java.util.List;
 
 /**
+ * (&#8707; i &#8712; 1..nas: as[i]) &#8744; (&#8707; i &#8712; 1..nbs: &not;bs[i]) &#8660; r
  * <br/>
  *
  * @author Charles Prud'homme
@@ -50,16 +51,15 @@ public class BoolClauseBuilder implements IBuilder {
         BoolVar[] as = exps.get(0).toBoolVarArray(solver);
         BoolVar[] bs = exps.get(1).toBoolVarArray(solver);
 
-        Literal[] poss = new Literal[as.length];
+        Literal[] lits = new Literal[as.length + bs.length];
         for (int i = 0; i < as.length; i++) {
-            poss[i] = Literal.pos(as[i]);
+            lits[i] = Literal.pos(as[i]);
         }
-
-        Literal[] negs = new Literal[bs.length];
+        int al = as.length;
         for (int i = 0; i < bs.length; i++) {
-            negs[i] = Literal.neg(bs[i]);
+            lits[i + al] = Literal.neg(bs[i]);
         }
 
-        return new ConjunctiveNormalForm(Node.or(Node.or(poss), Node.or(negs)), solver);
+        return new ConjunctiveNormalForm(Node.or(lits), solver);
     }
 }
