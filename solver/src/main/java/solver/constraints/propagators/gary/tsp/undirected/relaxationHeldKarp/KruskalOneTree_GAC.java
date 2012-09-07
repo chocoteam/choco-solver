@@ -45,6 +45,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 
 	private int min1,min2;
 	private int[][] map;
+	private double[][] marginalCosts;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -53,6 +54,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 	public KruskalOneTree_GAC(int nbNodes, HeldKarp propagator) {
 		super(nbNodes,propagator);
 		map = new int[n][n];
+		marginalCosts = new double[n][n];
 	}
 
 	//***********************************************************************************
@@ -144,13 +146,12 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 		}
 
 		int j;
-		double repCost;
 		for(int arc=activeArcs.nextSetBit(0); arc>=0; arc=activeArcs.nextSetBit(arc+1)){
 			i = sortedArcs[arc]/n;
 			j = sortedArcs[arc]%n;
 			if(!Tree.arcExists(i,j)){
-				repCost = ccTEdgeCost[lca.getLCA(i,j)];
-				if(costs[i*n+j]-repCost > delta){
+				marginalCosts[i][j] = costs[i*n+j]-ccTEdgeCost[lca.getLCA(i,j)];
+				if(marginalCosts[i][j] > delta){
 					activeArcs.clear(arc);
 					propHK.remove(i,j);
 				}else{
@@ -161,8 +162,11 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 		for(i=1;i<n;i++){
 			nei = Tree.getSuccessorsOf(i);
 			for(j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(i<j && (map[i][j]==-1 || costs[map[i][j]]-costs[i*n+j]>delta)){
+				if(i<j)
+				if(map[i][j]==-1 || costs[map[i][j]]-costs[i*n+j]>delta){
 					propHK.enforce(i,j);
+				}else{
+					marginalCosts[i][j] = costs[map[i][j]]-costs[i*n+j];
 				}
 //				if(j!=0 && costs[map[i][j]]-costs[i*n+j]>delta){
 //					propHK.enforce(i,j);
@@ -395,11 +399,25 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 	public double getRepCost(int from, int to){
 		if(from>to){
 			return getRepCost(to,from);//to check
-//			throw new UnsupportedOperationException();
 		}
 		if(from==0){
 			return 0;
 		}
-		return costs[map[from][to]]-costs[from*n+to];
+		return marginalCosts[from][to];
+//		if(map[from][to]==-1){
+//			System.out.println(map[to][from]);
+//			System.exit(0);
+//		}
+//		return costs[map[from][to]]-costs[from*n+to];
 	}
+
+//	public double getMarginalCost(int from, int to){
+//		if(from>to){
+//			return getRepCost(to,from);//to check
+//		}
+//		if(from==0){
+//			return 0;
+//		}
+//		return costs[from*n+to]-ccTEdgeCost[lca.getLCA(from,to)];
+//	}
 }

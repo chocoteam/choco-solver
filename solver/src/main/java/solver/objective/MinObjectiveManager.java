@@ -47,7 +47,7 @@ import solver.variables.IntVar;
 public class MinObjectiveManager extends IObjectiveManager {
 
     private int bestKnownUpperBound;
-    private int bestKnownLowerBound;
+	private int bestKnownLowerBound;
 
     final IntVar objective;
 
@@ -71,6 +71,13 @@ public class MinObjectiveManager extends IObjectiveManager {
         return bestKnownUpperBound;
     }
 
+	public int getBestKnownLowerBound() {
+		return bestKnownLowerBound;
+	}
+
+	public int getBestKnownUpperBound() {
+		return bestKnownUpperBound;
+	}
 
     /**
      * {@inheritDoc}

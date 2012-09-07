@@ -27,6 +27,8 @@
 
 package samples.graph;
 
+import solver.Solver;
+
 import java.io.*;
 
 /**
@@ -148,6 +150,24 @@ public class HCP_Parser {
 	// RECORDING RESULTS
 	//***********************************************************************************
 
+	/**Record results
+	 *
+	 * @param solver
+	 * @param problem String identifying the instance that has been solved
+	 * @param trick binary 0 if trick disabled 1 otherwise
+	 * @param outputFile absolute path of the CSV output file
+	 */
+	public static void record(Solver solver, String problem, int trick, String outputFile) {
+		String line = problem+";"+trick+";"
+		+solver.getMeasures().getNodeCount()+";"+solver.getMeasures().getTimeCount()+";\n";
+		writeTextInto(line,outputFile);
+	}
+
+	/**Add text at the end of file
+	 *
+	 * @param text
+	 * @param file
+	 */
 	public static void writeTextInto(String text, String file) {
 		try {
 			FileWriter out = new FileWriter(file, true);
@@ -159,6 +179,10 @@ public class HCP_Parser {
 		}
 	}
 
+	/**Empty file
+	 *
+	 * @param file
+	 */
 	public static void clearFile(String file) {
 		try {
 			FileWriter out = new FileWriter(file, false);

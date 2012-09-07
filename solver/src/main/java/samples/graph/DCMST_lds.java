@@ -27,29 +27,20 @@
 
 package samples.graph;
 
-import gnu.trove.impl.hash.TIntIntHash;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.hash.TIntIntHashMap;
-import ilog.concert.*;
-import ilog.cplex.*;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
-import choco.kernel.common.util.procedure.PairProcedure;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.basic.PropKCC;
-import solver.constraints.propagators.gary.basic.PropMaxDiameter;
-import solver.constraints.propagators.gary.basic.PropMaxDiameterFromNode;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
 import solver.constraints.propagators.gary.flow.PropGCC_LowUp_undirected;
-import solver.constraints.propagators.gary.flow.PropGCC_cost_LowUp_undirected;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
-import solver.constraints.propagators.gary.trees.lagrangianRelaxation.*;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
 import solver.exception.ContradictionException;
 import solver.objective.MinObjectiveManager;
 import solver.objective.strategies.BottomUp_Minimization;
@@ -71,19 +62,19 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
-import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.graphOperations.connectivity.ConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
-import java.io.*;
-import java.util.ArrayList;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
  */
-public class DCMST {
+public class DCMST_lds {
 
 	//***********************************************************************************
 	// VARIABLES

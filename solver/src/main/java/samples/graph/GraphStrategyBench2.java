@@ -140,10 +140,17 @@ public class GraphStrategyBench2 extends GraphStrategy {
 	}
 
 	public boolean computeTrickyNextArc() {
-		if(from == -1 || g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-				g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+		if(from == -1
+		|| g.getKernelGraph().edgeExists(from,to)
+		|| g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize() == g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()
+				){
 			return false;
 		}
+//		if(from == -1
+//|| g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
+//				g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+//			return false;
+//		}
 		to = -1;
 		value = -1;
 		evaluateNeighbors(from);
