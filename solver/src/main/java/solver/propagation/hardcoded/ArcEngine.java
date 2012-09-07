@@ -275,22 +275,23 @@ public class ArcEngine implements IPropagationEngine {
     @Override
     public void desactivatePropagator(Propagator propagator) {
         int vaid, cm, paid = p2i.get(propagator.getId());
-        if (paid > -1) {
-            Variable[] variables = propagator.getVars();
-            for (int i = 0; i < variables.length; i++) {
-                vaid = v2i.get(variables[i].getId());
-                if (vaid > -1) {
-                    cm = masks_f[vaid].get(paid);
-                    if (cm > 0) {  // if it is present in the queue
-                        masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
-                    }
+//        if (paid > -1) {
+        assert paid > -1 : "try to desactivate an unknown constraint";
+        Variable[] variables = propagator.getVars();
+        for (int i = 0; i < variables.length; i++) {
+            vaid = v2i.get(variables[i].getId());
+            if (vaid > -1) {
+                cm = masks_f[vaid].get(paid);
+                if (cm > 0) {  // if it is present in the queue
+                    masks_f[vaid].adjustValue(paid, -cm); // simply clear the mask
                 }
             }
-            if (masks_c[paid] > 0) {
-                masks_c[paid] = 0;
-                pro_queue_c.remove(propagator);
-            }
         }
+        if (masks_c[paid] > 0) {
+            masks_c[paid] = 0;
+            pro_queue_c.remove(propagator);
+        }
+//        }
     }
 
     @Override

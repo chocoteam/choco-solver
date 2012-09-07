@@ -260,7 +260,7 @@ public class VariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            if (vindices[i] > -1) {// constant has a negative index
+            if (vindices[i] > -1) {// constants and reified propagators have a negative index
                 assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = variables[i].getId();
                 assert vindices[i] < masks_f[vid].length;
@@ -268,6 +268,7 @@ public class VariableEngine implements IPropagationEngine {
             }
         }
         int pid = propagator.getId();
+        assert pid > -1 : "try to desactivate an unknown constraint";
         if (schedule[pid]) {
             schedule[pid] = false;
             masks_c[pid] = 0;

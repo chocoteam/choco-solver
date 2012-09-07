@@ -272,7 +272,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isStateLess() : "the propagator is already active, it cannot set active";
         state = ACTIVE;
         environment.save(operations[NEW]);
-        solver.getEngine().activatePropagator(this);
+        // to handle properly reified constraint, the cause must be checked
+        if (aCause == this) {
+            solver.getEngine().activatePropagator(this);
+        }
     }
 
     @SuppressWarnings({"unchecked"})
@@ -280,7 +283,10 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         assert isActive() : this.toString() + " is already passive, it cannot set passive more than once in one filtering call";
         state = PASSIVE;
         environment.save(operations[ACTIVE]);
-        solver.getEngine().desactivatePropagator(this);
+        // to handle properly reified constraint, the cause must be checked
+        if (aCause == this) {
+            solver.getEngine().desactivatePropagator(this);
+        }
     }
 
     public boolean isStateLess() {
@@ -437,6 +443,6 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @throws ContradictionException expected behavior
      */
     public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
-        solver.getEngine().fails(this, variable, message);
+        solver.getEngine().fails(aCause, variable, message);
     }
 }

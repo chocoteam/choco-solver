@@ -291,7 +291,7 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
         Variable[] variables = propagator.getVars();
         int[] vindices = propagator.getVIndices();
         for (int i = 0; i < variables.length; i++) {
-            if (vindices[i] > -1) {// constant has a negative index
+            if (vindices[i] > -1) {// constants and reified propagators have a negative index
                 assert variables[i].getPropagators()[vindices[i]] == propagator : propagator.toString() + " >> " + variables[i];
                 int vid = variables[i].getId();
                 assert vindices[i] < masks_f[vid].length;
@@ -300,14 +300,15 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
         }
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if (aid > -1) {
-            int prio = schedule_in_c[aid];
-            if (prio > 0) {  // if in the queue...
-                masks_c[aid] = 0;
-                schedule_in_c[aid] = 0;
-                pro_queue[prio - 1].remove(propagator); // removed from the queue
-            }
+//        if (aid > -1) {
+        assert aid > -1 : "try to desactivate an unknown constraint";
+        int prio = schedule_in_c[aid];
+        if (prio > 0) {  // if in the queue...
+            masks_c[aid] = 0;
+            schedule_in_c[aid] = 0;
+            pro_queue[prio - 1].remove(propagator); // removed from the queue
         }
+//        }
     }
 
     @Override

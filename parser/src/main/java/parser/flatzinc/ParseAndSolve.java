@@ -82,7 +82,7 @@ public class ParseAndSolve {
     private String csv = "";
 
     @Option(name = "-exp", usage = "Explanation engine.", required = false)
-    protected ExplanationFactory expeng = ExplanationFactory.RECORDER;
+    protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
         new ParseAndSolve().doMain(args);

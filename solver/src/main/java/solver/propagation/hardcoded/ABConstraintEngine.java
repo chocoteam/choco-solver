@@ -268,18 +268,19 @@ public class ABConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if (aid != -1) {
-            Arrays.fill(masks_f[aid], 0);
-            if ((schedule[aid] & F) != 0) {
-                schedule[aid] ^= F;
-                pro_queue_f.remove(aid);
-            }
-            if ((schedule[aid] & C) != 0) {
-                masks_c[aid] = 0;
-                schedule[aid] ^= C;
-                pro_queue_c.remove(aid);
-            }
+//        if (aid != -1) {
+        assert aid > -1 : "try to desactivate an unknown constraint";
+        Arrays.fill(masks_f[aid], 0);
+        if ((schedule[aid] & F) != 0) {
+            schedule[aid] ^= F;
+            pro_queue_f.remove(aid);
         }
+        if ((schedule[aid] & C) != 0) {
+            masks_c[aid] = 0;
+            schedule[aid] ^= C;
+            pro_queue_c.remove(aid);
+        }
+//        }
     }
 
     @Override

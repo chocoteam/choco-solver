@@ -263,20 +263,21 @@ public class SevenQueuesConstraintEngine implements IPropagationEngine {
     public void desactivatePropagator(Propagator propagator) {
         int pid = propagator.getId();
         int aid = p2i.get(pid);
-        if (aid > -1) {
-            Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
-            int prio = schedule_in_f[aid];
-            if (prio > 0) { // if in the queue...
-                schedule_in_f[aid] = 0;
-                pro_queue[prio - 1].remove(propagator); // removed from the queue
-            }
-            prio = schedule_in_c[aid];
-            if (prio > 0) {  // if in the queue...
-                masks_c[aid] = 0;
-                schedule_in_c[aid] = 0;
-                pro_queue[O + prio - 1].remove(propagator); // removed from the queue
-            }
+//        if (aid > -1) {
+        assert aid > -1 : "try to desactivate an unknown constraint";
+        Arrays.fill(masks_f[aid], 0); // fill with NO_MASK, outside the loop, to handle propagator currently executed
+        int prio = schedule_in_f[aid];
+        if (prio > 0) { // if in the queue...
+            schedule_in_f[aid] = 0;
+            pro_queue[prio - 1].remove(propagator); // removed from the queue
         }
+        prio = schedule_in_c[aid];
+        if (prio > 0) {  // if in the queue...
+            masks_c[aid] = 0;
+            schedule_in_c[aid] = 0;
+            pro_queue[O + prio - 1].remove(propagator); // removed from the queue
+        }
+//        }
     }
 
     @Override
