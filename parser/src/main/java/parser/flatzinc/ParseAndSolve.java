@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
+import solver.explanations.ExplanationFactory;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.PropagationStrategies;
@@ -80,6 +81,8 @@ public class ParseAndSolve {
     @Option(name = "-csv", usage = "CSV file path to trace the results.", required = false)
     private String csv = "";
 
+    @Option(name = "-exp", usage = "Explanation engine.", required = false)
+    protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
     public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
         new ParseAndSolve().doMain(args);
@@ -147,7 +150,8 @@ public class ParseAndSolve {
             if (!csv.equals("")) {
                 SearchMonitorFactory.toCSV(solver, instance, csv);
             }
-
+            expeng.make(solver);
+            SearchMonitorFactory.prop_count(solver);
 //        SearchMonitorFactory.logWithRank(solver, 4783, 4785);
 //        solver.getSearchLoop().getLimitsBox().setNodeLimit(4785);
 //        SearchMonitorFactory.log(solver, true, true);
