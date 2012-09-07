@@ -53,7 +53,6 @@ import solver.constraints.nary.automata.structure.multicostregular.StoredDirecte
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -307,7 +306,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < offset) {
             checkWorld();
             idms[varIdx].freeze();

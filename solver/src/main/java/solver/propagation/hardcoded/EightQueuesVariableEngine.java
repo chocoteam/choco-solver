@@ -118,9 +118,9 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
             pro_queue[i] = new CircularQueue<Propagator>(16);
         }
 
-        schedule_v = new boolean[maxID+1];
+        schedule_v = new boolean[maxID + 1];
         schedule_in_c = new short[nbProp];
-        masks_f = new int[maxID+1][];
+        masks_f = new int[maxID + 1][];
         for (int i = 0; i < variables.length; i++) {
             masks_f[variables[i].getId()] = new int[variables[i].getPropagators().length];
         }
@@ -166,7 +166,7 @@ public class EightQueuesVariableEngine implements IPropagationEngine {
                         }
                         masks_f[id][p] = 0;
                         lastProp.fineERcalls++;
-                        lastProp.propagate(null, idxVinP[p], mask);
+                        lastProp.propagate(idxVinP[p], mask);
                     }
                 }
             }

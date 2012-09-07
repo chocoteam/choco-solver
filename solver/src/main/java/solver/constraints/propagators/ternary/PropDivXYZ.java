@@ -32,7 +32,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.view.Views;
@@ -178,13 +177,12 @@ public class PropDivXYZ extends Propagator<IntVar> {
      * its related views (sign(vars[varIdx]) and |vars[varIdx]|). Filtering is delegate
      * to the main propagation method.
      *
-     * @param eventRecorder a fine event recorder
-     * @param varIdx:       modified variable since the last call
-     * @param pmask:        type of variable modification
+     * @param varIdx: modified variable since the last call
+     * @param pmask:  type of variable modification
      * @throws ContradictionException
      */
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int pmask) throws ContradictionException {
+    public void propagate(int varIdx, int pmask) throws ContradictionException {
         // enforce propagation
         forcePropagate(EventType.CUSTOM_PROPAGATION);
     }

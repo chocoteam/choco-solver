@@ -34,7 +34,6 @@ import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -69,7 +68,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         // with views such as abs(...), the prop can be not entailed after initial propagation
         if (vars[0].updateUpperBound(constant, aCause) || vars[0].getUB() <= constant) {
             this.setPassive();

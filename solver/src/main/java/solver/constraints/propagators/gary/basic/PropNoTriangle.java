@@ -35,7 +35,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphVar;
@@ -101,7 +100,7 @@ public class PropNoTriangle extends Propagator<UndirectedGraphVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         toCompute.clear();
         gdm.freeze();
         gdm.forEachArc(arcEnf, EventType.ENFORCEARC);

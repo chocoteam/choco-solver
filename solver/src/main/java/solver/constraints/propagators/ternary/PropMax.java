@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -149,7 +148,7 @@ public class PropMax extends Propagator<IntVar> {
 
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             filter(true, true);
         } else if (EventType.isInclow(mask)) {

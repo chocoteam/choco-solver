@@ -38,7 +38,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -117,7 +116,7 @@ public class PropElement extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             if (varIdx == 1) {  // INDEX (should be only that)
                 this.vars[0].instantiateTo(this.lval[this.vars[1].getValue() - this.cste], aCause);

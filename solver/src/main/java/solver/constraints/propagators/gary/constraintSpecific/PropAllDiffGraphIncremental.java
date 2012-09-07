@@ -33,7 +33,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
@@ -247,7 +246,7 @@ public class PropAllDiffGraphIncremental extends Propagator<GraphVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         free.clear();
         gdm.freeze();
         gdm.forEachArc(remProc, EventType.REMOVEARC);

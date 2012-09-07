@@ -34,7 +34,6 @@ import solver.constraints.gary.relations.GraphRelation;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.Variable;
 import solver.variables.graph.GraphVar;
@@ -81,7 +80,7 @@ public class PropRelationGraph extends Propagator {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         checkVar(idxVarInProp);
     }
 

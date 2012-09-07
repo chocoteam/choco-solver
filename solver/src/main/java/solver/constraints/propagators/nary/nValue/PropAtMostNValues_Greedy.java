@@ -34,7 +34,6 @@ import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
@@ -180,7 +179,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
                 }
             }
             for (int i = in.nextSetBit(0); i >= 0; i = in.nextSetBit(i + 1)) {
-                propagate(null, i, 0);
+                propagate(i, 0);
             }
         }
     }
@@ -254,7 +253,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
             }
         }
         for (int i = in.nextSetBit(0); i >= 0; i = in.nextSetBit(i + 1)) {
-            propagate(null, i, 0);
+            propagate(i, 0);
         }
     }
 
@@ -309,7 +308,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp < n) {
             INeighbors nei = digraph.getNeighborsOf(idxVarInProp);
             for (int v = nei.getFirstElement(); v >= 0; v = nei.getNextElement()) {

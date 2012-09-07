@@ -32,7 +32,6 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -78,7 +77,7 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (EventType.isInstantiate(mask)) {
             if (idxVarInProp == 0) {
                 y.updateUpperBound(x.getUB() - this.cste, aCause);

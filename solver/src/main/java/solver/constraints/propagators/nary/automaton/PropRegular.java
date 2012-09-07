@@ -42,7 +42,6 @@ import solver.constraints.nary.automata.structure.regular.StoredDirectedMultiGra
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -120,7 +119,7 @@ public class PropRegular extends Propagator<IntVar> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx,
+    public void propagate(int varIdx,
                           int mask) throws ContradictionException {
         idms[varIdx].freeze();
         idms[varIdx].forEach(rem_proc.set(varIdx), EventType.REMOVE);

@@ -37,7 +37,6 @@ import solver.constraints.propagators.gary.HeldKarp;
 import solver.constraints.propagators.gary.trees.AbstractTreeFinder;
 import solver.constraints.propagators.gary.trees.PrimMSTFinder;
 import solver.exception.ContradictionException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -204,7 +203,7 @@ public class PropBoundMST extends Propagator implements HeldKarp {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         throw new UnsupportedOperationException();
     }
 

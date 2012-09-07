@@ -43,7 +43,6 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
@@ -252,13 +251,12 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
     /**
      * Call filtering algorihtm defined within the <code>Propagator</code> objects.
      *
-     * @param eventRecorder a fine event recorder
-     * @param idxVarInProp  index of the variable <code>var</code> in <code>this</code>
-     * @param mask          type of event
+     * @param idxVarInProp index of the variable <code>var</code> in <code>this</code>
+     * @param mask         type of event
      * @throws solver.exception.ContradictionException
      *          if a contradiction occurs
      */
-    public abstract void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException;
+    public abstract void propagate(int idxVarInProp, int mask) throws ContradictionException;
 
     /**
      * Add the coarse event recorder into the engine

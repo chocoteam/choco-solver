@@ -35,7 +35,6 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
-import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.BoolVar;
 import solver.variables.EventType;
 import solver.variables.Variable;
@@ -122,7 +121,7 @@ public class PropReified extends Propagator<Variable> {
     }
 
     @Override
-    public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
+    public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {// bool var is instantiated
             filterFromBool();
         } else {
