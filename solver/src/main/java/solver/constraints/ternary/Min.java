@@ -31,7 +31,7 @@ import choco.kernel.ESat;
 import choco.kernel.common.util.tools.StringUtils;
 import solver.Solver;
 import solver.constraints.IntConstraint;
-import solver.constraints.propagators.ternary.PropMin;
+import solver.constraints.propagators.ternary.PropMinBC;
 import solver.variables.IntVar;
 import solver.variables.fast.IntervalIntVarImpl;
 
@@ -51,7 +51,7 @@ public class Min extends IntConstraint<IntVar> {
         this.X = X;
         this.Y = Y;
         this.Z = Z;
-        setPropagators(new PropMin(X, Y, Z, solver, this));
+        setPropagators(new PropMinBC(X, Y, Z, solver, this));
     }
 
     public static IntVar var(IntVar a, IntVar b) {

@@ -24,73 +24,80 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.loop.monitors;
 
-package solver.constraints.propagators.nary.sum;
-
-import choco.kernel.ESat;
 import solver.Solver;
-import solver.constraints.Constraint;
-import solver.constraints.propagators.Propagator;
-import solver.exception.ContradictionException;
-import solver.variables.IntVar;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
- * A propagator for SUM(x_i) >= b
+ * A search monitor that trace the results in a CSV format file
  * <br/>
- * Based on "Bounds Consistency Techniques for Long Linear Constraint" </br>
- * W. Harvey and J. Schimpf
- * <p/>
- * /!\ : thanks to views and pre-treatment, coefficients are merge into variable
  *
  * @author Charles Prud'homme
- * @since 18/03/11
- * @deprecated since 09/05/2012, not maintained
+ * @since 06/09/12
  */
-public final class PropSumGeqIncr extends PropSumEqIncr {
+public class OutputCSV extends VoidSearchMonitor implements ISearchMonitor {
 
-    public PropSumGeqIncr(IntVar[] vars, int b, Solver solver,
-                          Constraint<IntVar, Propagator<IntVar>> intVarPropagatorConstraint) {
-        super(vars, b, solver, intVarPropagatorConstraint);
+    final Solver solver;
+    final String prefix;
+    final String fileName;
+
+    public OutputCSV(Solver solver, String prefix, String fileName) {
+        this.solver = solver;
+        this.prefix = prefix;
+        this.fileName = fileName;
     }
 
 
     @Override
-    boolean filterOnLeq() throws ContradictionException {
-        return false;
+    public void afterClose() {
+        record(solver, prefix, fileName);
     }
 
-    @Override
-    protected void checkEntailment() {
-        if (sumLB.get() - b >= 0) {
-            this.setPassive();
+
+    /**
+     * Record results
+     *
+     * @param solver
+     * @param prefix     String identifying the instance that has been solved
+     * @param outputFile absolute path of the CSV output file
+     */
+    public static void record(Solver solver, String prefix, String outputFile) {
+        String line = prefix + ";" + solver.getMeasures().toCSV() + "\n";
+        writeTextInto(line, outputFile);
+    }
+
+    /**
+     * Add text at the end of file
+     *
+     * @param text
+     * @param file
+     */
+    public static void writeTextInto(String text, String file) {
+        try {
+            FileWriter out = new FileWriter(file, true);
+            out.write(text);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
-    public ESat isEntailed() {
-        int sumUB = 0, sumLB = 0, i = 0;
-        for (; i < l; i++) {
-            sumLB += x[i].getLB();
-            sumUB += x[i].getUB();
+    /**
+     * Empty file
+     *
+     * @param file
+     */
+    public static void clearFile(String file) {
+        try {
+            FileWriter out = new FileWriter(file, false);
+            out.write("");
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        if (sumLB >= b) {
-            return ESat.TRUE;
-        } else if (sumUB < b) {
-            return ESat.FALSE;
-        }
-        return ESat.UNDEFINED;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder linComb = new StringBuilder(20);
-        linComb.append(vars[0].getName());
-        int i = 1;
-        for (; i < l; i++) {
-            linComb.append(" + ").append(vars[i].getName());
-        }
-        linComb.append(" >= ");
-        linComb.append(b);
-        return linComb.toString();
     }
 }

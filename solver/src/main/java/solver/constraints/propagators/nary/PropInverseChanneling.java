@@ -299,6 +299,11 @@ public class PropInverseChanneling extends Propagator<IntVar> {
     }
 
 
+    @Override
+    public String toString() {
+        return "Inverse({" + X[0] + "...}{" + Y[0] + "...})";
+    }
+
     private static class RemProc implements UnaryIntProcedure<Integer> {
 
         private final PropInverseChanneling p;
