@@ -132,7 +132,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
 
     private static TIntSet set = new TIntHashSet();
 
-    protected ICause aCause; // cause of variable modifications.
+    protected Propagator aCause; // cause of variable modifications.
     // The default value is 'this" but it can be overridden when using in reified propagator
 
     // 2012-06-13 <cp>: multiple occurrences of variables in a propagator is strongly inadvisable
@@ -211,7 +211,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      *
      * @param nCause the new cause.
      */
-    public void overrideCause(ICause nCause) {
+    public void overrideCause(Propagator nCause) {
         this.aCause = nCause;
     }
 

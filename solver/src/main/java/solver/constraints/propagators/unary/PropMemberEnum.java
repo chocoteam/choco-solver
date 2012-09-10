@@ -115,6 +115,6 @@ public class PropMemberEnum extends Propagator<IntVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-        return new Explanation(this);
+        return new Explanation(aCause);
     }
 }
