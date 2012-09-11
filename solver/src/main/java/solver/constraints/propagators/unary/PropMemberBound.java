@@ -27,6 +27,7 @@
 
 package solver.constraints.propagators.unary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -44,6 +45,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 26 nov. 2010
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropMemberBound extends Propagator<IntVar> {
 
     final int lb, ub;
