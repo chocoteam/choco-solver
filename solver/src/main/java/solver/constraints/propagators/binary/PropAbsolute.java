@@ -26,6 +26,7 @@
  */
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
 import choco.kernel.common.util.tools.ArrayUtils;
@@ -49,6 +50,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 18/05/11
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropAbsolute extends Propagator<IntVar> {
 
     protected final RemProc rem_proc;
@@ -275,7 +277,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             if (d instanceof ValueRemoval) {
                 explanation.add(vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
             } else {
-                throw new UnsupportedOperationException("PropBasolute only knows how to explain ValueRemovals");
+                throw new UnsupportedOperationException("PropAbsolute only knows how to explain ValueRemovals");
             }
             return explanation;
         } else {

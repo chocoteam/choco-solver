@@ -26,6 +26,7 @@
  */
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableRangeIterator;
 import choco.kernel.common.util.procedure.UnaryIntProcedure;
@@ -35,8 +36,12 @@ import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
 import solver.exception.SolverException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 import solver.variables.delta.IIntDeltaMonitor;
 
 /**
@@ -45,6 +50,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 21/03/12
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropDistanceXYC extends Propagator<IntVar> {
 
     public final static int EQ = 0;
@@ -203,6 +209,14 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         }
         st.append(cste);
         return st.toString();
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
+        Explanation explanation = new Explanation(aCause);
+        explanation.add(reason.explain(VariableState.DOM));
+        return explanation;
     }
 
 

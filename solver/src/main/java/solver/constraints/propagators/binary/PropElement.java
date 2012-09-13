@@ -27,6 +27,7 @@
 
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import choco.kernel.common.util.iterators.DisposableValueIterator;
 import choco.kernel.common.util.tools.ArrayUtils;
@@ -52,6 +53,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 02/02/12
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropElement extends Propagator<IntVar> {
 
     int[] lval;

@@ -27,6 +27,7 @@
 
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
@@ -48,6 +49,7 @@ import solver.variables.Variable;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     final IntVar x;

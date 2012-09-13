@@ -51,7 +51,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @since 1 oct. 2010
  */
 
-@PropAnn
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropEqualXY_C extends Propagator<IntVar> {
 
     IntVar x;

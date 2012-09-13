@@ -26,14 +26,19 @@
  */
 package solver.constraints.propagators.binary;
 
+import choco.annotations.PropAnn;
 import choco.kernel.ESat;
 import solver.Solver;
 import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
+import solver.variables.Variable;
 
 /**
  * X + Y <= C
@@ -42,6 +47,7 @@ import solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 13/06/12
  */
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
 
     final IntVar x;
@@ -101,5 +107,21 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
         StringBuilder st = new StringBuilder();
         st.append(x.getName()).append(" + ").append(y.getName()).append(" <= ").append(cste);
         return st.toString();
+    }
+
+    @Override
+    public Explanation explain(Deduction d) {
+        Explanation expl = new Explanation(aCause);
+        // the current deduction is due to the current domain of the involved variables
+        Variable var = d.getVar();
+        if (var.equals(x)) {
+            // a deduction has been made on x ; this is related to y only
+            expl.add(y.explain(VariableState.LB));
+        } else if (var.equals(y)) {
+            expl.add(x.explain(VariableState.UB));
+        } else {
+            return super.explain(d);
+        }
+        return expl;
     }
 }

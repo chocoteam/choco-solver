@@ -34,6 +34,10 @@ import solver.constraints.IntConstraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.exception.ContradictionException;
+import solver.explanations.Deduction;
+import solver.explanations.Explanation;
+import solver.explanations.ValueRemoval;
+import solver.explanations.VariableState;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.delta.IIntDeltaMonitor;
@@ -47,7 +51,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @since 1 oct. 2010
  */
 
-@PropAnn
+@PropAnn(tested = PropAnn.Status.EXPLAINED)
 public final class PropEqualX_YC extends Propagator<IntVar> {
 
     IntVar x;
@@ -176,14 +180,14 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
 
-    /*@Override
+    @Override
     public Explanation explain(Deduction d) {
         //     return super.explain(d);
 
         if (d.getVar() == x) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add(y.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+                explanation.add(y.explain(VariableState.REM, ((ValueRemoval) d).getVal() - cste));
             } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
@@ -191,7 +195,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         } else if (d.getVar() == y) {
             Explanation explanation = new Explanation(this);
             if (d instanceof ValueRemoval) {
-                explanation.add(x.explain(VariableState.REM, ((ValueRemoval) d).getVal()));
+                explanation.add(x.explain(VariableState.REM, ((ValueRemoval) d).getVal() + cste));
             } else {
                 throw new UnsupportedOperationException("PropEqualXY only knows how to explain ValueRemovals");
             }
@@ -200,7 +204,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             return super.explain(d);
         }
 
-    }*/
+    }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {
 

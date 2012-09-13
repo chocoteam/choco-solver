@@ -52,7 +52,7 @@ import solver.variables.delta.IIntDeltaMonitor;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
-@PropAnn(tested = PropAnn.Status.CORRECTION)
+@PropAnn(tested = {PropAnn.Status.CORRECTION, PropAnn.Status.EXPLAINED})
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
     IntVar x;
