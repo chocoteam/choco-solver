@@ -345,6 +345,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
+		undone = false;
 		if ((evtmask & EventType.FULL_PROPAGATION.mask) != 0) {
 			buildDigraph();
 		}
@@ -353,13 +354,21 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 		gdm.unfreeze();
 	}
 
+	boolean undone = true;
+
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int varIdx, int mask) throws ContradictionException {
-		gdm.freeze();
-		gdm.forEachArc(remProc, EventType.REMOVEARC);
-		repairMatching();
-		filter();
-		gdm.unfreeze();
+		if(solver.getMeasures().getSolutionCount()==0){
+			// nada!
+		}else if(undone){
+			forcePropagate(EventType.FULL_PROPAGATION);
+		}else{
+			gdm.freeze();
+			gdm.forEachArc(remProc, EventType.REMOVEARC);
+			repairMatching();
+			filter();
+			gdm.unfreeze();
+		}
 	}
 
 	//***********************************************************************************

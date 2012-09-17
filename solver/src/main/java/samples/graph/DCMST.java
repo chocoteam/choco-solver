@@ -40,6 +40,7 @@ import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
+import solver.constraints.propagators.gary.IRelaxation;
 import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.basic.PropMaxDiameter;
 import solver.constraints.propagators.gary.basic.PropMaxDiameterFromNode;
@@ -134,8 +135,8 @@ public class DCMST {
 		nMax = 600;
 		for (String s : list) {
 			File file = new File(dir+"/"+type+"/"+s);
-//			if(s.contains("600_3"))
-			if(s.contains("300_2"))
+//			if(s.contains("300_1"))
+//			if(n<200 || s.contains("300_2")||s.contains("200_3")||s.contains("200_1"))
 			if((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))){
 				instanceName = s;
 				System.out.println(s);
@@ -470,6 +471,7 @@ public class DCMST {
 //		lb = ub;
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
 		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST);
+//		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
 		for(int i=0;i<n;i++){
 			undi.getKernelGraph().activateNode(i);
 			for(int j=i+1;j<n;j++){
@@ -881,11 +883,26 @@ public class DCMST {
 //			}
 //		};
 
-		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
-		hk.waitFirstSolution(!optGiven);
-		gc.addPropagators(hk);
+//		int[] low = new int[n*2];
+//		int[] up = new int[n*2];
+//		int[][] costMatrix = new int[n*2][n*2];
+//		for(int i=0;i<n;i++){
+//			low[i] = up[i] = 1;
+//			low[i+n] = 0;
+//			up[i+n] = dMax[i]-1;
+//			INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(i);
+//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//				costMatrix[i][j+n] = costMatrix[j+n][i] = costMatrix[i+n][j] = costMatrix[j][i+n] = dist[i][j];
+//			}
+//		}
+//		low[0] = up[0] = 0;
+//		low[n] = 1;
+//		up[n] = dMax[0];
+//		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
+//		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
 
-		// GCC
+		System.out.println("k");
+
 		int[] low = new int[n*2];
 		int[] up = new int[n*2];
 		int[][] costMatrix = new int[n*2][n*2];
@@ -903,21 +920,20 @@ public class DCMST {
 		up[n] = dMax[0];
 		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
 		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
-		// cost-GCC
-//		gc.addPropagators(new PropGCC_cost_LowUp_undirected(undi, flow, totalCost,
-//		costMatrix,low, up, gc, solver));
+
+		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk.waitFirstSolution(!optGiven);
+		gc.addPropagators(hk);
 
 
-//		gc.addPropagators(new RCProp(undi,totalCost,solver,gc));
+//PropBIStrongTreeHeldKarp2 hk2 = PropBIStrongTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		PropTreeHeldKarp2 hk2 = PropTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		PropTreeHeldKarp hk2 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk2.waitFirstSolution(!optGiven);
+		gc.addPropagators(hk2);
 
-//		gc.addPropagators(ProplittleBITreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-
-//		gc.addPropagators(euclFilter);
-//		gc.addPropagators(lp2Filter);
-//		gc.addPropagators(PropBundleTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropResetTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropPositiveTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
+		// similar results on DR with hk2 after hk (one fastRun(30) per propag) no gcc,
+		// similar results on T and DE : LOST CONFIGURATION!!!
 
 		solver.post(gc);
 
@@ -958,10 +974,13 @@ public class DCMST {
 //		findOpt = StrategyFactory.graphStrategy(undi,null,new nextSol(undi), GraphStrategy.NodeArcPriority.ARCS);
 //		firstSol = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,0,false), GraphStrategy.NodeArcPriority.ARCS);
 		GraphStrategyBench2 gs = new GraphStrategyBench2(undi,dist,hk);
-		gs.configure(3,true,true,false);
+		gs.configure(10,true,true,false);
 //		firstSol = gs;
 //		AbstractStrategy strat = new Change(undi,firstSol,findOpt);
+
 		AbstractStrategy strat = new Change(undi,firstSol,gs);
+
+		
 //		AbstractStrategy strat = firstSol;//= new Change(undi,firstSol,findOpt);
 //		strat = StrategyFactory.graphRandom(undi,0);
 //		strat = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,null,4,true), GraphStrategy.NodeArcPriority.ARCS);
@@ -990,7 +1009,7 @@ public class DCMST {
 		// resolution
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIMELIMIT){
-//			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount()>1 && optGiven){
 //			throw new UnsupportedOperationException();

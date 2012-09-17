@@ -29,15 +29,21 @@ package samples.graph;
 
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
+import choco.kernel.common.util.PoolManager;
+import choco.kernel.common.util.procedure.PairProcedure;
+import choco.kernel.common.util.tools.ArrayUtils;
+import choco.kernel.memory.IStateInt;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.gary.GraphConstraintFactory;
+import solver.constraints.nary.Sum;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
 import solver.constraints.propagators.gary.basic.PropKCC;
 import solver.constraints.propagators.gary.degree.PropAtLeastNNeighbors;
 import solver.constraints.propagators.gary.degree.PropAtMostNNeighbors;
-import solver.constraints.propagators.gary.flow.PropGCC_LowUp_undirected;
 import solver.constraints.propagators.gary.trees.PropTreeEvalObj;
 import solver.constraints.propagators.gary.trees.PropTreeNoSubtour;
 import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropTreeHeldKarp;
@@ -53,7 +59,9 @@ import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.StrategyFactory;
+import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
+import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
 import solver.search.strategy.strategy.StaticStrategiesSequencer;
 import solver.search.strategy.strategy.graph.ArcStrategy;
@@ -62,9 +70,9 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.Variable;
 import solver.variables.VariableFactory;
+import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
-import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
 import java.io.BufferedReader;
@@ -98,7 +106,7 @@ public class DCMST_lds {
 	//	private static final long TIMELIMIT = 14400000;
 	private static String outFile;
 	private static PropTreeHeldKarp hk;
-	private static boolean optGiven = false;
+	private static boolean optGiven = true;
 
 	//***********************************************************************************
 	// METHODS
@@ -126,7 +134,7 @@ public class DCMST_lds {
 		for (String s : list) {
 			File file = new File(dir+"/"+type+"/"+s);
 //			if(s.contains("600_3"))
-			if(s.contains("300_2"))
+			if(s.contains("200_3"))
 			if((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))){
 				instanceName = s;
 				System.out.println(s);
@@ -140,166 +148,6 @@ public class DCMST_lds {
 				}
 				System.gc();
 			}
-		}
-	}
-
-	public static void execute(String instanceDir, String type, boolean giveOpt, long tl, String out) {
-		dir = instanceDir;
-		outFile = out;
-		optGiven = giveOpt;
-		TIMELIMIT = tl;
-		if(optGiven){
-			search = 0;
-		}else{
-			search = 1;
-		}
-		HCP_Parser.clearFile(outFile);
-		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
-		File folder = new File(dir+"/"+type);
-		String[] list = folder.list();
-		nMin = 100;
-		nMax = 600;
-		for (String s : list) {
-			File file = new File(dir+"/"+type+"/"+s);
-			if((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))){
-				instanceName = s;
-				System.out.println(s);
-				if(parse(file)){
-					if(optGiven){
-						setUB(dir+"/"+type,s);
-					}
-					solveDCMST(s);
-				}
-				System.gc();
-			}
-		}
-	}
-
-
-
-	private static void out(String s){
-		HCP_Parser.clearFile(s);
-		HCP_Parser.writeTextInto("1\n\n", s);
-		final UndirectedGraph undi = new UndirectedGraph(n, GraphType.LINKED_LIST);
-		for(int i=0;i<n;i++){
-			for(int j=i+1;j<n;j++){
-				if(dist[i][j]!=-1 && !(dMax[i]==1 && dMax[j]==1)){
-					undi.addEdge(i,j);
-				}
-			}
-		}
-		int m = 0;
-		for(int i=0;i<n;i++){
-			m+=undi.getSuccessorsOf(i).neighborhoodSize();
-		}
-		m/=2;
-		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
-		String deg = "";
-		for(int i=0;i<n;i++){
-			deg += dMax[i]+"\n";
-		}
-		HCP_Parser.writeTextInto(deg, s);
-		for(int i=0;i<n;i++){
-			INeighbors nei = undi.getSuccessorsOf(i);
-			String neist = "";
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(i<j)
-				neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
-			}
-			HCP_Parser.writeTextInto(neist, s);
-		}
-	}
-
-	private static void setRCInput(UndirectedGraphVar g, String s){
-		HCP_Parser.clearFile(s);
-		HCP_Parser.writeTextInto("1\n\n", s);
-		int m = 0;
-		for(int i=0;i<n;i++){
-			m+=g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}
-		m/=2;
-		HCP_Parser.writeTextInto(n+"\t"+m+"\n", s);
-		String deg = "";
-		for(int i=0;i<n;i++){
-			deg += dMax[i]+"\n";
-		}
-		HCP_Parser.writeTextInto(deg, s);
-		for(int i=0;i<n;i++){
-			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-			String neist = "";
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(i<j)
-				neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
-			}
-			HCP_Parser.writeTextInto(neist, s);
-		}
-	}
-
-	private static double getRCOutput(String path){
-		File file = new File(path+"/results.txt");
-		try {
-			BufferedReader buf = new BufferedReader(new FileReader(file));
-			String line1 = buf.readLine();
-			String line2 = buf.readLine();
-			while(line2!=null){
-				line1 = line2;
-				line2 = buf.readLine();
-			}
-			// TODO
-			String[] numbers = line1.split(" ");
-			double bestLB  = Double.parseDouble(numbers[42]);
-			return bestLB;
-		} catch (Exception e) {
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	private static class RCProp extends Propagator{
-		final static String inputName = "RCinput";
-		UndirectedGraphVar graph;
-		IntVar obj;
-
-		protected RCProp(UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
-			super(new Variable[]{graph,obj}, solver, constraint, PropagatorPriority.CUBIC, false);
-			this.graph = graph;
-			this.obj = obj;
-		}
-
-		@Override
-		public int getPropagationConditions(int vIdx) {
-			return EventType.REMOVEARC.mask+EventType.ENFORCEARC.mask;
-		}
-
-		@Override
-		public void propagate(int evtmask) throws ContradictionException {
-			// set input data
-			setRCInput(graph,testalagPath+"/"+inputName);
-			// execute RC
-			String cmd = "."+testalagPath+"/testalag "+inputName+" 1 1 1000 30";
-			try {
-				Runtime r = Runtime.getRuntime();
-				Process p = r.exec(cmd);
-				p.waitFor();
-			}catch(Exception e) {
-				System.out.println("erreur d'execution " + cmd + e.toString());
-				System.exit(0);
-			}
-			// get output data
-			double lb = getRCOutput(testalagPath);
-			obj.updateLowerBound((int)lb,this);
-			if(lb-Math.floor(lb)>0.001){
-				obj.updateLowerBound((int) Math.ceil(lb), this);
-			}
-		}
-
-		@Override
-		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-			forcePropagate(EventType.FULL_PROPAGATION);
-		}
-
-		@Override
-		public ESat isEntailed() {
-			return ESat.UNDEFINED;
 		}
 	}
 
@@ -437,26 +285,11 @@ public class DCMST_lds {
 		}
 	}
 
+	public static IntVar globalVarLDS;
+	public static IntVar[] varsLDS;
+
 	private static void solveDCMST(String instanceName) {
 		solver = new Solver();
-
-//		int mc = ub;
-//		for(int i=0;i<n;i++){
-//			for(int j=i+1;j<n;j++){
-//				if(dist[i][j]!=-1 && mc > dist[i][j]){
-//					mc = dist[i][j];
-//				}
-//			}
-//		}
-//		for(int i=0;i<n;i++){
-//			for(int j=i+1;j<n;j++){
-//				if(dist[i][j]!=-1){
-//					dist[i][j]-=mc;
-//				}
-//			}
-//		}
-//		ub-=(n-1)*mc;
-
 		// variables
 //		lb = ub;
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
@@ -876,39 +709,21 @@ public class DCMST_lds {
 		hk.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk);
 
-		// GCC
-		int[] low = new int[n*2];
-		int[] up = new int[n*2];
-		int[][] costMatrix = new int[n*2][n*2];
-		for(int i=0;i<n;i++){
-			low[i] = up[i] = 1;
-			low[i+n] = 0;
-			up[i+n] = dMax[i]-1;
-			INeighbors nei = undi.getEnvelopGraph().getSuccessorsOf(i);
-			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				costMatrix[i][j+n] = costMatrix[j+n][i] = costMatrix[i+n][j] = costMatrix[j][i+n] = dist[i][j];
+		boolean cardOriented = true;
+		globalVarLDS = VariableFactory.bounded("index",0,n*n,solver);
+		if(cardOriented){
+			varsLDS = VariableFactory.boundedArray("cards", n, 0, n-1, solver);
+			gc.addPropagators(new PropLDS_Card(globalVarLDS,undi,totalCost,solver,gc));
+			gc.addPropagators(new PropLDS_Card_Global(varsLDS,undi,totalCost,solver,gc));
+			solver.post(Sum.build(varsLDS, globalVarLDS, Sum.Type.EQ, solver));
+		}else{
+			gc.addPropagators(new PropLDS_WorseIndex(globalVarLDS,undi,totalCost,solver,gc));
+			varsLDS = VariableFactory.boundedArray("indexes", n, 0, n-1, solver);
+			for(int i=0;i<n;i++){
+				gc.addPropagators(new PropNodeLDS_WorseIndex(i,varsLDS[i],undi,totalCost,solver,gc));
 			}
 		}
-		low[0] = up[0] = 0;
-		low[n] = 1;
-		up[n] = dMax[0];
-		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
-		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
-		// cost-GCC
-//		gc.addPropagators(new PropGCC_cost_LowUp_undirected(undi, flow, totalCost,
-//		costMatrix,low, up, gc, solver));
 
-
-//		gc.addPropagators(new RCProp(undi,totalCost,solver,gc));
-
-//		gc.addPropagators(ProplittleBITreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-
-//		gc.addPropagators(euclFilter);
-//		gc.addPropagators(lp2Filter);
-//		gc.addPropagators(PropBundleTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropResetTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropPositiveTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
-//		gc.addPropagators(PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver));
 
 		solver.post(gc);
 
@@ -932,9 +747,18 @@ public class DCMST_lds {
 				System.out.println(totalCost);
 				System.out.println("%%%%%%%%%%%");
 				System.out.println("max degree = "+maxD);
+				System.out.println("SUM CARD = "+globalVarLDS);
 //				solver.getSearchLoop().interrupt();
 //				setRCInput(undi,"filtered200");
 //				System.exit(0);
+			}
+
+			int kol = -1;
+			public void beforeUpBranch() {
+				if(globalVarLDS.instantiated() && kol!=globalVarLDS.getValue()){
+					kol = globalVarLDS.getValue();
+					System.out.println(kol);
+				}
 			}
 //			public void afterOpenNode(){
 //				System.out.println(totalCost);
@@ -949,10 +773,11 @@ public class DCMST_lds {
 //		findOpt = StrategyFactory.graphStrategy(undi,null,new nextSol(undi), GraphStrategy.NodeArcPriority.ARCS);
 //		firstSol = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,0,false), GraphStrategy.NodeArcPriority.ARCS);
 		GraphStrategyBench2 gs = new GraphStrategyBench2(undi,dist,hk);
-		gs.configure(3,true,true,false);
+		gs.configure(10,true,true,false);
 //		firstSol = gs;
 //		AbstractStrategy strat = new Change(undi,firstSol,findOpt);
 		AbstractStrategy strat = new Change(undi,firstSol,gs);
+		strat = gs;
 //		AbstractStrategy strat = firstSol;//= new Change(undi,firstSol,findOpt);
 //		strat = StrategyFactory.graphRandom(undi,0);
 //		strat = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,null,4,true), GraphStrategy.NodeArcPriority.ARCS);
@@ -967,7 +792,15 @@ public class DCMST_lds {
 			//RANDOM :
 //			case 0: solver.set(findOpt);break;
 			case 0:
-				solver.set(strat);
+
+//				solver.set(strat);
+				solver.set(new StaticStrategiesSequencer(
+						StrategyFactory.inputOrderMaxVal(new IntVar[]{globalVarLDS}, solver.getEnvironment()),
+						StrategyFactory.inputOrderMinVal(varsLDS, solver.getEnvironment()),
+						strat));
+//				solver.set(new StaticStrategiesSequencer(StrategyFactory.inputOrderMinVal(new IntVar[]{card},solver.getEnvironment()),strat));
+//				solver.set(new StaticStrategiesSequencer(new NodeWorseIndexHeur(cards),strat));
+//				solver.set(new StaticStrategiesSequencer(StrategyFactory.inputOrderMinVal(cards,solver.getEnvironment()),strat));
 //				solver.getSearchLoop().restartAfterEachSolution(true);
 				break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
@@ -977,15 +810,18 @@ public class DCMST_lds {
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
-		SearchMonitorFactory.log(solver, true, false);
+		SearchMonitorFactory.log(solver, false, false);
 		// resolution
+//		solver.findSolution();
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIMELIMIT){
-//			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount()>1 && optGiven){
 //			throw new UnsupportedOperationException();
 		}
+		System.out.println(globalVarLDS);
+		if(true)return;
 		//output
 		MinObjectiveManager man = (MinObjectiveManager)solver.getSearchLoop().getObjectivemanager();
 		int bestLB = man.getBestKnownLowerBound();
@@ -996,172 +832,494 @@ public class DCMST_lds {
 		HCP_Parser.writeTextInto(txt, outFile);
 	}
 
-	private static class MST_MinDeg extends ArcStrategy<UndirectedGraphVar>{
+	public static double GOOD_LIMIT = 2;
 
-		public MST_MinDeg (UndirectedGraphVar g){
-			super(g);
+	private static class PropLDS_Card extends Propagator{
+		IntVar card,obj;
+		UndirectedGraphVar graph;
+		TDoubleArrayList rcOf;
+
+		protected PropLDS_Card(IntVar card, UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
+			super(new Variable[]{card,graph}, solver, constraint, PropagatorPriority.CUBIC, false);
+			this.graph = graph;
+			this.obj = obj;
+			this.card = card;
+			rcOf = new TDoubleArrayList(n);
 		}
 
 		@Override
-		public boolean computeNextArc() {
-			from = -1;
-			to = -1;
-			original();
-			if(from==-1){
-				return false;
-			}
-			return true;
+		public int getPropagationConditions(int vIdx) {
+			return EventType.INSTANTIATE.mask+EventType.ENFORCEARC.getMask();
 		}
 
-		private void minDelta(){
-			INeighbors nei;
-			int minDelta = 5*n;
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			hk.record();
+			rcOf.clear();
+			double rcOfMand = 0;
+			int nbBad = 0;
+			int nbGood = 0;
 			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-				if(e!=k && e>dMax[i])
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							if(dMax[i]-k<minDelta){
-								minDelta = dMax[i]-k;
-							}
+				INeighbors nei = graph.getKernelGraph().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j){
+						double rc = hk.rc[i][j];
+						if(rc<=GOOD_LIMIT){
+							nbGood++;
+						}else{
+							nbBad++;
 						}
-					}
-			}
-			int minDeg = 3*n;
-			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
-							if(d<minDeg){
-								minDeg = d;
-								from = i;
-								to = j;
-							}
-						}
-					}
-			}
-			if(to!=-1){
-				return;
-			}
-			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-				if(e!=k)
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							if(dMax[i]-k<minDelta){
-								minDelta = dMax[i]-k;
-							}
-						}
-					}
-			}
-			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
-							if(d<minDeg){
-								minDeg = d;
-								from = i;
-								to = j;
-							}
-						}
-					}
-			}
-		}
-
-		private void minDelta2(){
-			INeighbors nei;
-			int minDelta = 5*n;
-			int maxDeg = 0;
-			from = -1;
-			for(int i=0;i<n;i++){
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-				if(e!=k && e>dMax[i] && e>maxDeg){
-					maxDeg = e;
-					from = e;
-				}
-			}
-			if(from==-1){
-				for(int i=0;i<n;i++){
-					int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-					int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-					if(e!=k && e>maxDeg){
-						maxDeg = e;
-						from = e;
 					}
 				}
 			}
-			if(from==-1){
-				return;
+			for(int i=0;i<n;i++){
+				INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j){
+						double rc = hk.rc[i][j];
+						if(rc>GOOD_LIMIT){
+							if(graph.getKernelGraph().edgeExists(i,j)){
+								rcOfMand += rc;
+							}else{
+								rcOf.add(rc);
+							}
+						}
+					}
+				}
 			}
-			int minDeg = 3*n;
-			nei = g.getEnvelopGraph().getSuccessorsOf(from);
-//			nei = hk.getMST().getSuccessorsOf(i);
-			int k = g.getKernelGraph().getNeighborsOf(from).neighborhoodSize();
+			rcOf.sort();
+			card.updateLowerBound(nbBad, this);
+			card.updateUpperBound(n - 1 - nbGood, this);
+			card.updateUpperBound(rcOf.size()+nbBad, this);
+			if(card.instantiated()){
+				if(card.getUB()==nbBad){
+					for(int i=0;i<n;i++){
+						INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(i<j && !graph.getKernelGraph().edgeExists(i,j)){
+								double rc = hk.rc[i][j];
+								if(rc>GOOD_LIMIT){
+									graph.removeArc(i,j,this);
+								}
+							}
+						}
+					}
+				}
+				double offSet = rcOfMand;
+				for(int i=0;i<card.getValue()-nbBad;i++){
+					offSet+=rcOf.get(i);
+				}
+				if(card.getValue()-nbBad>0){
+					double maxBasisRC = rcOf.get(card.getValue()-1-nbBad);
+					hk.additiveFiltering(offSet,maxBasisRC);
+				}
+			}
+		}
+
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			forcePropagate(EventType.FULL_PROPAGATION);
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+	}
+
+	private static class PropLDS_Card_Global extends Propagator{
+		IntVar obj;
+		IntVar[] cards;
+		UndirectedGraphVar graph;
+		TDoubleArrayList rcOf;
+		double[] maxBasisRC;
+
+		protected PropLDS_Card_Global(IntVar[] cards, UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
+			super(ArrayUtils.append(cards,new Variable[]{graph}), solver, constraint, PropagatorPriority.CUBIC, false);
+			this.graph = graph;
+			this.obj = obj;
+			this.cards = cards;
+			rcOf = new TDoubleArrayList();
+			maxBasisRC = new double[n];
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.INSTANTIATE.mask+EventType.ENFORCEARC.getMask();
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			hk.record();
+			double offSet = 0;
+			for(int i=0;i<n;i++){
+				rcOf.clear();
+				INeighbors nei = graph.getKernelGraph().getNeighborsOf(i);
+				int nbGood = 0;
+				int nbBad = 0;
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j){
+						double rc = hk.rc[i][j];
+						if(rc<=GOOD_LIMIT){
+							nbGood++;
+						}else{
+							nbBad++;
+						}
+					}
+				}
+				double rcOfMand = 0;
+				nei = graph.getEnvelopGraph().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j){
+						double rc = hk.rc[i][j];
+						if(rc>GOOD_LIMIT){
+							if(graph.getKernelGraph().edgeExists(i,j)){
+								rcOfMand += rc;
+							}else{
+								rcOf.add(rc);
+							}
+						}
+					}
+				}
+				rcOf.sort();
+				cards[i].updateLowerBound(nbBad, this);
+				cards[i].updateUpperBound(n - 1 - nbGood, this);
+				cards[i].updateUpperBound(rcOf.size()+nbBad, this);
+				if(cards[i].instantiated()){
+					if(cards[i].getUB()==nbBad){
+						for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+							if(i<j && !graph.getKernelGraph().edgeExists(i,j)){
+								double rc = hk.rc[i][j];
+								if(rc>GOOD_LIMIT){
+									graph.removeArc(i,j,this);
+								}
+							}
+						}
+					}
+				}
+				offSet += rcOfMand;
+				for(int k=0;k<cards[i].getLB()-nbBad;k++){
+					offSet += rcOf.get(k);
+				}
+				maxBasisRC[i] = 0;
+				if(cards[i].getLB()-nbBad>0){
+					maxBasisRC[i] = rcOf.get(cards[i].getLB()-1-nbBad);
+				}
+			}
+			hk.additiveFiltering(offSet,maxBasisRC);
+		}
+
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			forcePropagate(EventType.FULL_PROPAGATION);
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+	}
+
+	private static class PropNodeLDS_Card extends Propagator{
+		IntVar card,obj;
+		UndirectedGraphVar graph;
+		TDoubleArrayList rcOf;
+		int node;
+
+		protected PropNodeLDS_Card(int node, IntVar card, UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
+			super(new Variable[]{card,graph}, solver, constraint, PropagatorPriority.CUBIC, false);
+			this.graph = graph;
+			this.obj = obj;
+			this.card = card;
+			this.node = node;
+			rcOf = new TDoubleArrayList(n);
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.INSTANTIATE.mask+EventType.ENFORCEARC.getMask();
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			hk.record();
+			rcOf.clear();
+			double rcOfMand = 0;
+			int nbBad = 0;
+			int nbGood = 0;
+			INeighbors nei = graph.getKernelGraph().getNeighborsOf(node);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!g.getKernelGraph().arcExists(from,j)){
-					int d = g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
-					if(d<minDeg){
-						minDeg = d;
-						to = j;
+				if(node<j){
+					double rc = hk.rc[node][j];
+					if(rc<=GOOD_LIMIT){
+						nbGood++;
+					}else{
+						nbBad++;
 					}
 				}
 			}
-			if(to==-1){
-				System.out.println("g");
-				System.out.println(nei);
-				System.out.println(g.getKernelGraph().getNeighborsOf(from));
-				System.exit(0);
+			nei = graph.getEnvelopGraph().getNeighborsOf(node);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(node<j){
+					double rc = hk.rc[node][j];
+					if(rc>GOOD_LIMIT){
+						if(graph.getKernelGraph().edgeExists(node,j)){
+							rcOfMand += rc;
+						}else{
+							rcOf.add(rc);
+						}
+					}
+				}
 			}
-		}
-
-		private void original(){
-			INeighbors nei;
-			int minDelta = 5*n;
-			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				int e = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize();
-				if(e!=k)
+			rcOf.sort();
+			card.updateLowerBound(nbBad, this);
+			card.updateUpperBound(dMax[node] - nbGood, this);
+			card.updateUpperBound(rcOf.size()+nbBad, this);
+			if(card.instantiated()){
+				if(card.getUB()==nbBad){
+					nei = graph.getEnvelopGraph().getNeighborsOf(node);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							if(dMax[i]-k<minDelta){
-								minDelta = dMax[i]-k;
+						if(node<j && !graph.getKernelGraph().edgeExists(node,j)){
+							double rc = hk.rc[node][j];
+							if(rc>GOOD_LIMIT){
+								graph.removeArc(node,j,this);
 							}
 						}
 					}
-			}
-			int minDeg = 0;//3*n;
-			for(int i=0;i<n;i++){
-				nei = hk.getMST().getSuccessorsOf(i);
-				int k = g.getKernelGraph().getNeighborsOf(i).neighborhoodSize();
-				if(g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()!=k && dMax[i]-k==minDelta)
-					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!g.getKernelGraph().arcExists(i,j)){
-							int d = g.getEnvelopGraph().getNeighborsOf(i).neighborhoodSize()
-									+ g.getEnvelopGraph().getNeighborsOf(j).neighborhoodSize();
-							if(d>minDeg){
-								minDeg = d;
-								from = i;
-								to = j;
-							}
-						}
-					}
+				}
+				double offSet = rcOfMand;
+				for(int i=0;i<card.getValue()-nbBad;i++){
+					offSet+=rcOf.get(i);
+				}
+				if(card.getValue()-nbBad>0){
+					double maxBasisRC = rcOf.get(card.getValue()-1-nbBad);
+					hk.additiveFilteringOnNode(node,offSet,maxBasisRC);
+				}
 			}
 		}
 
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			forcePropagate(EventType.FULL_PROPAGATION);
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+	}
+
+	private static class PropLDS_WorseIndex extends Propagator{
+		IntVar index,obj;
+		UndirectedGraphVar graph;
+		TIntArrayList from,to;
+		TDoubleArrayList rcOf;
+
+		protected PropLDS_WorseIndex(IntVar index, UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
+			super(new Variable[]{index}, solver, constraint, PropagatorPriority.CUBIC, false);
+			this.graph = graph;
+			this.obj = obj;
+			this.index = index;
+			from = new TIntArrayList(n);
+			to = new TIntArrayList(n);
+			rcOf = new TDoubleArrayList(n);
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.INSTANTIATE.mask;//+EventType.DECUPP.mask;
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			// edges in mst
+			for(int i=0;i<n;i++){
+				INeighbors nei = hk.getMST().getNeighborsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j){
+						from.add(i);
+						to.add(j);
+						rcOf.add(0);
+					}
+				}
+			}
+			// sorted bad edges
+			double minRC = -obj.getUB()*2;
+			double oldRC;
+			do{
+				oldRC = minRC;
+				minRC = obj.getUB()*2;
+				for(int i=0;i<n;i++){
+					INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(i<j && !hk.getMST().edgeExists(i,j)){
+							double rc = hk.getMarginalCost(i,j);
+							if(rc<=-obj.getUB()*2){
+								throw new UnsupportedOperationException();
+							}
+							if(rc>oldRC && rc<minRC){
+								minRC = rc;
+							}
+						}
+					}
+				}
+				for(int i=0;i<n;i++){
+					INeighbors nei = graph.getEnvelopGraph().getNeighborsOf(i);
+					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+						if(i<j && !hk.getMST().edgeExists(i,j)){
+							double rc = hk.getMarginalCost(i,j);
+							if(rc==minRC){
+								from.add(i);
+								to.add(j);
+								rcOf.add(rc);
+							}
+						}
+					}
+				}
+			}while(minRC!=obj.getUB()*2);
+			hk.record();
+			index.updateLowerBound(n - 1, this);
+			index.updateUpperBound(from.size(),this);
+//			System.out.println(card);
+		}
+
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			// remove bad ones
+			int s = from.size();
+			int ub = index.getUB();
+			int k = ub;
+			if(k<s){
+				graph.enforceArc(from.get(k),to.get(k),this);
+			}
+//			System.out.println(ub);
+			for(k=ub+1;k<s;k++){
+				graph.removeArc(from.get(k),to.get(k),this);
+			}
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+	}
+
+	private static class PropNodeLDS_WorseIndex extends Propagator{
+		IntVar index,obj;
+		UndirectedGraphVar graph;
+		TIntArrayList neighbors;
+		TDoubleArrayList rcOf;
+		int node;
+
+		protected PropNodeLDS_WorseIndex(int node, IntVar index, UndirectedGraphVar graph, IntVar obj, Solver solver, Constraint constraint) {
+			super(new Variable[]{index}, solver, constraint, PropagatorPriority.CUBIC, false);
+			this.node = node;
+			this.graph = graph;
+			this.obj = obj;
+			this.index = index;
+			neighbors = new TIntArrayList();
+			rcOf = new TDoubleArrayList();
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.INSTANTIATE.mask;//+EventType.DECUPP.mask;
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			// edges in mst
+			INeighbors nei = hk.getMST().getNeighborsOf(node);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(node<j){
+					neighbors.add(j);
+					rcOf.add(0);
+				}
+			}
+			// sorted bad edges
+			double minRC = -obj.getUB()*2;
+			double oldRC;
+			nei = graph.getEnvelopGraph().getNeighborsOf(node);
+			do{
+				oldRC = minRC;
+				minRC = obj.getUB()*2;
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(node<j && !hk.getMST().edgeExists(node,j)){
+						double rc = hk.getMarginalCost(node,j);
+						if(rc<=-obj.getUB()*2){
+							throw new UnsupportedOperationException();
+						}
+						if(rc>oldRC && rc<minRC){
+							minRC = rc;
+						}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(node<j && !hk.getMST().edgeExists(node,j)){
+						double rc = hk.getMarginalCost(node,j);
+						if(rc==minRC){
+							neighbors.add(j);
+							rcOf.add(rc);
+						}
+					}
+				}
+			}while(minRC!=obj.getUB()*2);
+			index.updateUpperBound(neighbors.size(),this);
+		}
+
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			// remove bad ones
+			int s = neighbors.size();
+			int ub = index.getUB();
+			int k = ub;
+			if(k<s){
+				graph.enforceArc(node,neighbors.get(k),this);
+			}
+//			System.out.println(node+" card = "+ub);
+			for(k=ub+1;k<s;k++){
+				graph.removeArc(node,neighbors.get(k),this);
+			}
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+	}
+
+	private static class NodeWorseIndexHeur extends AbstractStrategy<IntVar>{
+
+		PoolManager<FastDecision> pool;
+
+		public NodeWorseIndexHeur(IntVar[] cards){
+			super(cards);
+			pool = new PoolManager<FastDecision>();
+		}
+
+		@Override
+		public void init() {}
+
+		@Override
+		public Decision getDecision() {
+			int v = -1;
+			int min = n;
+			for(int i=0;i<n;i++){
+				if(vars[i].getLB()<min && !vars[i].instantiated()){
+					min = vars[i].getLB();
+					v = i;
+				}
+			}
+			if(v==-1){
+				return null;
+			}
+			FastDecision d = pool.getE();
+			if(d==null){
+				d = new FastDecision(pool);
+			}
+			d.set(vars[v],vars[v].getLB(), Assignment.int_eq);
+			return d;
+		}
 	}
 
 	private static class FirstSol extends ArcStrategy<UndirectedGraphVar>{
@@ -1318,125 +1476,6 @@ public class DCMST_lds {
 				return false;
 			}
 			return true;
-		}
-	}
-
-	private static class nextSol extends ArcStrategy<UndirectedGraphVar>{
-
-		public nextSol (UndirectedGraphVar g){
-			super(g);
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			from = -1;
-			to = -1;
-			int minCost = 0;
-			INeighbors env,ker;
-			//new
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i);
-				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						int cost = dist[i][j];
-						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
-						if(to==-1 || cost>minCost){
-							minCost = cost;
-							from = i;
-							to = j;
-						}
-					}
-					if(to!=-1)
-					return true;
-				}
-			}
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i);
-				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()==0){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						int cost = dist[i][j];
-						if(to==-1 || cost>minCost){
-							minCost = cost;
-							from = i;
-							to = j;
-						}
-					}
-					return true;
-				}
-			}
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i);
-				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(env.neighborhoodSize()!=ker.neighborhoodSize()){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						if(i<j && !ker.contain(j)){
-							int cost = dist[i][j];
-							if(to==-1 || cost>minCost){
-								minCost = cost;
-								from = i;
-								to = j;
-							}
-						}
-					}
-				}
-			}
-			if(from==-1){
-				return false;
-			}
-			return true;
-		}
-	}
-
-	private static class viol extends ArcStrategy<UndirectedGraphVar>{
-
-		public viol (UndirectedGraphVar g){
-			super(g);
-		}
-
-		@Override
-		public boolean computeNextArc() {
-			from = -1;
-			to = -1;
-			INeighbors env,ker;
-			//new
-			int next = -1;
-			int dM = 0;
-			for(int i=0;i<n;i++){
-				if(hk.getMST().getNeighborsOf(i).neighborhoodSize()-dMax[i]>dM){
-					dM = hk.getMST().getNeighborsOf(i).neighborhoodSize()-dMax[i];
-					next = i;
-				}
-			}
-			if(next!=-1){
-				int i = next;
-				ker = g.getKernelGraph().getSuccessorsOf(i);
-				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()!=env.neighborhoodSize()){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						if(!ker.contain(j)){
-							from = i;
-							to = j;
-						}
-					}
-					return true;
-				}
-			}
-			for(int i=0;i<n;i++){
-				ker = g.getKernelGraph().getSuccessorsOf(i);
-				env = g.getEnvelopGraph().getSuccessorsOf(i);
-				if(ker.neighborhoodSize()!=env.neighborhoodSize()){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						if(!ker.contain(j)){
-							from = i;
-							to = j;
-							return true;
-						}
-					}
-				}
-			}
-			throw new UnsupportedOperationException();
 		}
 	}
 

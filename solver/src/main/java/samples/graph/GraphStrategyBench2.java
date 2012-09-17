@@ -36,6 +36,7 @@ package samples.graph;
 
 import choco.kernel.memory.IStateInt;
 import solver.constraints.propagators.gary.IRelaxation;
+import solver.constraints.propagators.gary.trees.lagrangianRelaxation.PropBIStrongTreeHeldKarp2;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.graph.GraphDecision;
@@ -141,16 +142,11 @@ public class GraphStrategyBench2 extends GraphStrategy {
 
 	public boolean computeTrickyNextArc() {
 		if(from == -1
-		|| g.getKernelGraph().edgeExists(from,to)
+		|| g.getKernelGraph().edgeExists(from,to)//TODO remettre
 		|| g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize() == g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()
 				){
 			return false;
 		}
-//		if(from == -1
-//|| g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()==
-//				g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
-//			return false;
-//		}
 		to = -1;
 		value = -1;
 		evaluateNeighbors(from);

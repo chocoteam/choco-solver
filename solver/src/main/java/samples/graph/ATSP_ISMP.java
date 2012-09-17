@@ -49,6 +49,7 @@ import solver.constraints.propagators.gary.tsp.directed.*;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTour;
 import solver.constraints.propagators.gary.tsp.directed.position.PropPosInTourGraphReactor;
 import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarp;
+import solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp.PropHeldKarpBST;
 import solver.constraints.propagators.gary.tsp.undirected.PropCycleNoSubtour;
 import solver.exception.ContradictionException;
 import solver.objective.strategies.BottomUp_Minimization;
@@ -165,12 +166,12 @@ public class ATSP_ISMP {
 		try {
 			for (int i = 0; i < n - 1; i++) {
 				graph.getKernelGraph().activateNode(i);
-				int xi = i/l;
-				int yi = i%l;
+//				int xi = i/l;
+//				int yi = i%l;
 				for (int j = 1; j < n; j++) {
 					if (distanceMatrix[i][j] != noVal) {
-						int xj = j/l;
-						int yj = j%l;
+//						int xj = j/l;
+//						int yj = j%l;
 //						if(Math.abs(xi-xj)<=1 && Math.abs(yi-yj)<=1 && Math.abs(yi-yj)+Math.abs(xi-xj)==1){
 						ct++;
 						graph.getEnvelopGraph().addArc(i, j);
@@ -265,7 +266,7 @@ public class ATSP_ISMP {
 //			relax = propHK_mst;
 		if(config.get(rg) && bst){// BST-based HK
 			System.out.println("BST");
-			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+			PropHeldKarpBST propHK_bst = PropHeldKarpBST.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
 			propHK_bst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
 			gc.addPropagators(propHK_bst);
 		}
@@ -301,7 +302,9 @@ public class ATSP_ISMP {
 			case 9 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.sparse_corrected, relax);break;
 			default: mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy,true), GraphStrategy.NodeArcPriority.ARCS);
 		}
-
+		GraphStrategyBench2 strat = new GraphStrategyBench2(graph,distanceMatrix,relax);
+		strat.configure(8,true,true,false);
+		mainStrat = strat;
 //		mainStrat = StrategyFactory.ABSrandom(positions,solver,0.999d, 0.2d, 8, 1.1d, 1, 0);
 //		mainStrat = StrategyFactory.inputOrderMinVal(positions,solver.getEnvironment());
 //		mainStrat = StrategyFactory.random(positions,solver.getEnvironment());
@@ -467,6 +470,46 @@ public class ATSP_ISMP {
 
 	static int policy;
 	private static void bench() {
+		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
+//		String dir = "/Users/jfages07/github/In4Ga/newATSP";
+		File folder = new File(dir);
+		String[] list = folder.list();
+		main_search = 0;
+		policy = 4;
+		configParameters(0);
+		for (String s : list) {
+//			if(s.contains("170"))
+			File file = new File(dir + "/" + s);
+			if(file.isFile() && !(file.isHidden() || s.contains(".xls") || s.contains(".csv")))
+				if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
+//				if(s.contains("p43.atsp"))System.exit(0);
+				loadInstance(dir + "/" + s);
+					bst = false;
+					configParameters((1 << allDiff));
+					solve();
+//					configParameters((1<<pos)+(1<<allDiff));
+//					solve();
+					configParameters((1<<rg)+(1<<allDiff));
+					solve();
+//					configParameters((1<<arbo)+(1<<allDiff));
+//					solve();
+//					configParameters((1<<rg)+(1<<pos)+(1<<allDiff));
+//					solve();
+//					configParameters((1<<rg)+(1<<arbo)+(1<<allDiff));
+//					solve();
+//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+//					solve();
+					bst = true;
+					solve();
+//					configParameters((1<<rg)+(1<<arbo)+(1<<pos)+(1<<allDiff));
+//					solve();
+//					configParameters((1<<arbo)+(1<<rg)+(1<<allDiff));
+//					solve();
+//					System.exit(0);
+				}
+		}
+	}
+	private static void benchNew() {
 //		String dir = "/Users/jfages07/github/In4Ga/atsp_instances";
 		String dir = "/Users/jfages07/github/In4Ga/newATSP";
 		File folder = new File(dir);
