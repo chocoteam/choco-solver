@@ -146,23 +146,55 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 		}
 		totalPenalities = deg_totalPenalities;
 		HK_Pascals();
-//		HK_Pascals();
 	}
 
+	private double objUB = -1;
+	private boolean firstPropag = true;
 	protected void HK_Pascals() throws ContradictionException {
 //		nbSprints = 30;
-		nbSprints = 100;
-		blossoms.clear();
-		inBI.clear();
-		activeBI = false;
-		convergeAndFilter();
+//		nbSprints = 100;
+//		blossoms.clear();
+//		inBI.clear();
+//		activeBI = false;
+//		convergeAndFilter();
 //		convergeFast(2);
 //		System.out.println("%%%");
-		activeBI = true;
-		convergeAndFilter();
+//		activeBI = true;
+//		convergeAndFilter();
 //		System.out.println(obj+" : "+blossoms.size()+" : "+bi_totalPenalities);
 //		System.exit(0);
+
+		nbSprints = 30;
+		if(firstPropag){
+			activeBI = false;
+			firstPropag = false;
+			convergeAndFilter();
+//			activeBI = true;
+		}
+		fastRun();
+//		convergeAndFilter();
+//		if(obj.getUB()!=objUB && obj.instantiated()){
+//			System.out.println(obj.getUB());
+//			System.exit(0);
+//			objUB = obj.getUB();
+//			convergeAndFilter();
+//		}else{
+//			fastRun();
+//		}
+//		System.out.println(obj+" : "+blossoms.size()+" : "+bi_totalPenalities);
 	}
+
+	protected void fastRun() throws ContradictionException {
+			convergeFast(2);
+			HKfilter.computeMST(costs,g.getEnvelopGraph());
+			double hkb = HKfilter.getBound()-totalPenalities;
+			mst = HKfilter.getMST();
+			if(hkb-Math.floor(hkb)<0.001){hkb = Math.floor(hkb);}
+			obj.updateLowerBound((int)Math.ceil(hkb), this);
+			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//		System.out.println(hkb+"    /    "+bi_totalPenalities);
+//			System.out.println(hkb+"    /    "+blossoms.size());
+		}
 
 	protected void convergeAndFilter() throws ContradictionException {
 		double hkb;
@@ -179,8 +211,8 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				besthkb = hkb;
 			}
 			if(activeBI){
-//			System.out.println(hkb+"    /    "+bi_totalPenalities);
-//			System.out.println(hkb+"    /    "+blossoms.size());
+			System.out.println(hkb+"    /    "+bi_totalPenalities);
+			System.out.println(hkb+"    /    "+blossoms.size());
 //			System.exit(0);
 			}
 			mst = HKfilter.getMST();
@@ -242,15 +274,16 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 			if (deg_penalities[i]>0 || deg>maxDegree[i]){
 				found = false;
 			}
-			if (activeBI && deg>maxDegree[i] && blossoms.size()<n*n){
+//			if (activeBI && deg>maxDegree[i] && blossoms.size()<n*n){
+			if (activeBI && deg>maxDegree[i] && blossoms.size()<n){
 //			if (activeBI && deg>maxDegree[i] && blossoms.size()<n && !inBI.get(i)){
-				inBI.set(i);
 				Blossom b = new Blossom(i);
 				if(b.isValid()){
+					inBI.set(i);
 					blossoms.add(b);
 				}
 				else{
-					throw new UnsupportedOperationException();
+//					throw new UnsupportedOperationException();
 				}
 			}
 //			if(deg_penalities[i]>0 || deg>maxDegree[i])//optim Beasley 1993
@@ -259,14 +292,16 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 		if(activeBI){// find BI
 			for(int i=0;i<blossoms.size();i++){
 				Blossom b = blossoms.get(i);
-				b.recompute();
-//				if(b.getPen()>0 || b.getViol()>0)//optim Beasley 1993
-//				nb2viol += b.getViol()*b.getViol();
-				if(b.getPen()<=0.001 && b.getViol()<=0.001){
-					blossoms.remove(i);
-					i--;
-				}else{
+				if(b.getPen()>Blossom.PEN_LIMIT || b.getViol()>Blossom.PEN_LIMIT){//optim Beasley 1993
 					nb2viol += b.getViol()*b.getViol();
+					b.uselessCounter = 0;
+				}else{
+					b.uselessCounter++;
+					if(b.uselessCounter>=n){
+						inBI.clear(b.root);
+						blossoms.remove(i);
+						i--;
+					}
 				}
 			}
 		}
@@ -276,8 +311,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 			step = alpha*(target-hkb)/nb2viol;
 		}
 		if(step<0.0001){
-			step = 0.0001;
-//			return true;
+			return true;
 		}
 		if(step<0){
 			throw new UnsupportedOperationException();
@@ -287,15 +321,15 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 			for(Blossom b:blossoms){
 				b.recompute();
 //				if(b.getViol()>0){
-//					b.addPen(0.1);
+//					b.addPen(5);
 //				}
 //				if(b.getViol()<0){
-//					b.addPen(-0.1);
+//					b.addPen(-1);
 //				}
-				b.addPen(b.getViol()*step);///(blossoms.size()/2));
+				b.addPen(b.getViol()*step);
+				if(b.getPen()>Blossom.PEN_LIMIT)
 				bi_totalPenalities += b.getMaxPen();
 			}
-//			System.out.println(bi_totalPenalities+" /// "+step);
 		}
 		deg_totalPenalities = 0;
 		double maxPen = 2*obj.getUB();
@@ -325,6 +359,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					costs[i][j] = originalCosts[i][j] + deg_penalities[i] + deg_penalities[j];
 					if(activeBI)
 						for(Blossom b:blossoms){
+							if(b.getPen()>Blossom.PEN_LIMIT)
 							if(b.gT.arcExists(i,j) || ((b.in.get(i) && b.in.get(j)))){
 								costs[i][j] += b.getPen();
 							}
@@ -503,25 +538,25 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 		BitSet in;
 		double pen;
 		boolean DEBUG = false;
+		private int uselessCounter;
+		public int root;
+		public static final double PEN_LIMIT = 0.01;
 
 		Blossom(int root){
+			xEH = -1;
+			this.root = root;
 			in = new BitSet(n);
 			outlink = new BitSet(n);
 			gT = new UndirectedGraph(n, GraphType.LINKED_LIST);
 			addNode(root);
+			while(addNext()){}
 //			recompute();
-//			System.out.println(getViol());
-			while(addNext()){
-//				recompute();
-//				System.out.println(getViol());
-			}
-			recompute();
-//			System.out.println(getViol());
 			//check correctness
 			if(DEBUG){
 				check();
 				if(!odd()){
-					throw new UnsupportedOperationException();
+//					throw new UnsupportedOperationException();
+					System.out.println("warning not odd");
 				}
 			}
 		}
@@ -532,9 +567,13 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 					gT.removeEdge(node,j);
 					T--;
+					if(mst.edgeExists(node,j)){
+						xT--;
+					}
 				}
 			}
-			inBI.set(node);
+//			inBI.set(node);
+			xEH++;
 			outlink.clear(node);
 			in.set(node);
 			b += maxDegree[node];
@@ -547,6 +586,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					}
 					if(mst.edgeExists(node,j)){
 						T++;
+						xT++;
 						gT.addEdge(node, j);
 					}
 				}
@@ -558,8 +598,9 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						if(!(gT.edgeExists(i,j)||in.get(j))){
 							T++;
+							xT++;
 							gT.addEdge(i,j);
-							check();
+							if(DEBUG)check();
 							return;
 						}
 					}
@@ -569,6 +610,9 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					nei = gT.getSuccessorsOf(i);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 						T--;
+						if(mst.edgeExists(i,j)){
+							xT--;
+						}
 						gT.removeEdge(i,j);
 						return;
 					}
@@ -578,7 +622,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				for(int i = in.nextSetBit(0);i<n&&i>=0;i=in.nextSetBit(i+1)){
 					nei = g.getEnvelopGraph().getSuccessorsOf(i);
 					for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-						if(!gT.edgeExists(i,j)){
+						if(!(gT.edgeExists(i,j)||in.get(j))){
 							T++;
 							gT.addEdge(i,j);
 							return;
@@ -586,12 +630,12 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					}
 				}
 			if(!odd()){
-				throw new UnsupportedOperationException();
+//				throw new UnsupportedOperationException();
 			}
 		}
 
 		private boolean addNext(){
-			recompute();
+//			recompute();
 			double max = 0;
 //			max = getViol();
 			int next = -1;
@@ -604,10 +648,6 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					max = k;
 					next = i;
 				}
-//				if(mst.getNeighborsOf(i).neighborhoodSize()-maxDegree[i]-gT.getNeighborsOf(i).neighborhoodSize()>=max ){//&& !inBI.get(i)){
-//					max = mst.getNeighborsOf(i).neighborhoodSize()-maxDegree[i]-gT.getNeighborsOf(i).neighborhoodSize();
-//					next = i;
-//				}
 			}
 			if(next==-1){
 				return false;
@@ -676,7 +716,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 		}
 
 		private boolean isValid() {
-			return odd() && getViol()>0;
+			return odd() && getViol()>PEN_LIMIT && in.cardinality()>1;
 		}
 
 		public void recompute() {
@@ -696,6 +736,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				}
 			}
 		}
+
 	}
 
 	//***********************************************************************************

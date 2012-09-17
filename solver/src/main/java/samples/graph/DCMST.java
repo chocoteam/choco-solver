@@ -116,7 +116,7 @@ public class DCMST {
 
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
-		bench("DE");
+		bench("instanciasT");
 //		outFile = "DE"+"test"+search+".csv";
 //		execute(dir,"DE",false,TIMELIMIT,outFile);
 	}
@@ -903,6 +903,13 @@ public class DCMST {
 
 		System.out.println("k");
 
+
+
+		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		hk.waitFirstSolution(!optGiven);
+		gc.addPropagators(hk);
+
+
 		int[] low = new int[n*2];
 		int[] up = new int[n*2];
 		int[][] costMatrix = new int[n*2][n*2];
@@ -921,14 +928,8 @@ public class DCMST {
 		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
 		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
 
-		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
-		hk.waitFirstSolution(!optGiven);
-		gc.addPropagators(hk);
-
-
 //PropBIStrongTreeHeldKarp2 hk2 = PropBIStrongTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		PropTreeHeldKarp2 hk2 = PropTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
-//		PropTreeHeldKarp hk2 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk2.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk2);
 

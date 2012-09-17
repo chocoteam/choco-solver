@@ -167,14 +167,18 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //			return;
 //		}
 		nbSprints = 30;
+//		nbSprints = 100;
 		if(nbSols!=solver.getMeasures().getSolutionCount()
 				|| obj.getUB()<objUB
+//				|| obj.getUB()!=objUB//added
 				|| (firstPropag && !waitFirstSol)){
-			nbSprints = 100;
+//			nbSprints = 100;
+//			System.out.println("tralala");
 //			nbSprints = n/2;
 //			nbSprints = 50;
 			nbSols = solver.getMeasures().getSolutionCount();
 			objUB = obj.getUB();
+//			nbSprints = 30;
 			convergeAndFilter();
 //			int nbIter = n/10;
 //			int nb = nbIter;
@@ -185,7 +189,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //			restartRandom(0); //reset
 			firstPropag = false;
 		}else{
-			nbSprints = 100;
+//			nbSprints = 100;
 			fastRun();
 //			convergeAndFilter();
 		}
@@ -387,12 +391,16 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		boolean found = true;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			if(deg>maxDegree[i]){
+//			if(deg>maxDegree[i]){ //TODO CHECK
+			if(deg>maxDegree[i] || penalities[i]>0){
 				found = false;
+				nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 			}
-			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
+//			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 		}
-		if(found){
+		if(nb2viol == 0){
+//		if(found || nb2viol == 0){
+//		if(found){//TODO CHECK
 			return true;
 		}else{
 			step = alpha*(target-hkb)/nb2viol;

@@ -151,6 +151,18 @@ public class PropTreeHeldKarp2 extends Propagator implements HeldKarp {
 
 	protected void HK_Pascals() throws ContradictionException {
 //		nbSprints = 100;
+		if(firstPropag
+//				|| obj.instantiated() && objUB!=obj.getValue()
+				){
+			firstPropag = false;
+			objUB = obj.getUB();
+			convergeAndFilter();
+//			restartRandom(0);
+//			restartRandom(100);
+		}
+//			restartRandom(0);
+		fastRun();
+//		nbSprints = 100;
 //		nbSprints = 30;
 //		if(firstPropag){
 //			firstPropag = false;
@@ -174,25 +186,27 @@ public class PropTreeHeldKarp2 extends Propagator implements HeldKarp {
 //		convergeAndFilter();
 //		if(true)return;
 
-		nbSprints = 100;
-		nbSprints = 30;
-		if(obj.getUB()<objUB && obj.instantiated()){
-//			nbSprints = 100;
-			nbSprints = 30;
-			objUB = obj.getUB();
-			convergeAndFilter();
-//			int nbIter = n/10;
-//			int nb = nbIter;
-//			while(nb>0 && obj.getUB()>obj.getLB()){
-//				nb--;
-//				restartRandom(n/10);
-//			}
-//			restartRandom(0); //reset
-		}else{
-			nbSprints = 30;
-			fastRun();
+//		nbSprints = 100;
+//		nbSprints = 30;
+//		if(obj.getUB()!=objUB && obj.instantiated()){
+////			nbSprints = 100;
+//			nbSprints = 30;
+////			nbSprints = n;
+//			objUB = obj.getUB();
+////			fastRun();
 //			convergeAndFilter();
-		}
+////			int nbIter = n/10;
+////			int nb = nbIter;
+////			while(nb>0 && obj.getUB()>obj.getLB()){
+////				nb--;
+////				restartRandom(n/10);
+////			}
+////			restartRandom(0); //reset
+//		}else{
+//			nbSprints = 30;
+//			fastRun();
+////			convergeAndFilter();
+//		}
 	}
 
 	protected void restartRandom(double coef) throws ContradictionException {
@@ -267,7 +281,7 @@ public class PropTreeHeldKarp2 extends Propagator implements HeldKarp {
 		double beta = 0.5;
 		double besthkb = -9999998;
 		double oldhkb = -9999999;
-		while(oldhkb+0.001<besthkb){// || alpha>0.01){
+		while(oldhkb+0.001<besthkb || alpha>0.01){
 			oldhkb = besthkb;
 			convergeFast(alpha);
 			HKfilter.computeMST(costs,g.getEnvelopGraph());
@@ -317,12 +331,12 @@ public class PropTreeHeldKarp2 extends Propagator implements HeldKarp {
 		boolean found = true;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
-			if(deg>maxDegree[i]){
+			if(deg>maxDegree[i] || penalities[i]>0){
 				found = false;
 			}
 			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 		}
-		if(found){
+		if(found || nb2viol==0){
 			return true;
 		}else{
 			step = alpha*(target-hkb)/nb2viol;
