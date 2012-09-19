@@ -30,12 +30,32 @@ package solver.explanations;
 import solver.variables.Variable;
 
 /**
+ * An abstract class to explain event occuring on variables during the search.
+ * There are for of them: value removal, variable assignment, variable refutation and explanation.
+ * An explanations is a combination of deductions and propagators.
+ * <p/>
  * Created by IntelliJ IDEA.
  * User: njussien
  * Date: 26 oct. 2010
  * Time: 12:57:36
  */
-public class Deduction {
+public abstract class Deduction implements Comparable<Deduction> {
+
+    public static int _ID = 0;
+
+    final int id;
+
+    protected enum Type {
+        Exp, ValRem, VarAss, VarRef
+    }
+
+    final Type mType;
+
+    public Deduction(Type yType) {
+        this.mType = yType;
+        id = _ID++;
+    }
+
     /**
      * Returns the variable to explain
      *
@@ -43,5 +63,15 @@ public class Deduction {
      */
     public Variable getVar() {
         return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
+    @Override
+    public int compareTo(Deduction o) {
+        return this.id - o.id;
     }
 }

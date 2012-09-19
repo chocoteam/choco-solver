@@ -172,7 +172,8 @@ public class PropMaxBC extends Propagator<IntVar> {
             change |= vars[2].updateUpperBound(vars[0].getUB(), aCause);
             if (vars[2].getUB() < vars[0].getLB()) {
                 change |= vars[1].updateLowerBound(vars[0].getLB(), aCause);
-            } else if (vars[1].getUB() < vars[0].getLB()) {
+            }
+            if (vars[1].getUB() < vars[0].getLB()) {
                 change |= vars[2].updateLowerBound(vars[0].getLB(), aCause);
             }
         } while (change);

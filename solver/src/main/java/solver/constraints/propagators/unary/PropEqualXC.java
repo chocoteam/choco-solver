@@ -51,6 +51,8 @@ import solver.variables.IntVar;
 @PropAnn(tested = PropAnn.Status.EXPLAINED)
 public class PropEqualXC extends Propagator<IntVar> {
 
+    Explanation mExp; // a unique explanation, created on demand
+
     private final int constant;
 
     public PropEqualXC(IntVar var, int cste, Solver solver,
@@ -90,9 +92,11 @@ public class PropEqualXC extends Propagator<IntVar> {
         return vars[0].getName() + " = " + constant;
     }
 
-
     @Override
     public Explanation explain(Deduction d) {
-        return new Explanation(aCause);
+        if (mExp == null) {
+            mExp = Explanation.build(aCause);
+        }
+        return mExp;
     }
 }

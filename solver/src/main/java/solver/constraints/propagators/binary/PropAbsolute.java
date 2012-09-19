@@ -264,7 +264,7 @@ public class PropAbsolute extends Propagator<IntVar> {
     public Explanation explain(Deduction d) {
 //        return super.explain(d);
         if (d.getVar() == vars[0]) {
-            Explanation explanation = new Explanation(aCause);
+            Explanation explanation = Explanation.build(aCause);
             if (d instanceof ValueRemoval) {
                 explanation.add(vars[1].explain(VariableState.REM, ((ValueRemoval) d).getVal()));
                 explanation.add(vars[1].explain(VariableState.REM, -((ValueRemoval) d).getVal()));
@@ -273,7 +273,7 @@ public class PropAbsolute extends Propagator<IntVar> {
             }
             return explanation;
         } else if (d.getVar() == vars[1]) {
-            Explanation explanation = new Explanation(aCause);
+            Explanation explanation = Explanation.build(aCause);
             if (d instanceof ValueRemoval) {
                 explanation.add(vars[0].explain(VariableState.REM, Math.abs(((ValueRemoval) d).getVal())));
             } else {

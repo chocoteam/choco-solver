@@ -185,7 +185,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
         //     return super.explain(d);
 
         if (d.getVar() == x) {
-            Explanation explanation = new Explanation(this);
+            Explanation explanation = Explanation.build(this);
             if (d instanceof ValueRemoval) {
                 explanation.add(y.explain(VariableState.REM, ((ValueRemoval) d).getVal() - cste));
             } else {
@@ -193,7 +193,7 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             }
             return explanation;
         } else if (d.getVar() == y) {
-            Explanation explanation = new Explanation(this);
+            Explanation explanation = Explanation.build(this);
             if (d instanceof ValueRemoval) {
                 explanation.add(x.explain(VariableState.REM, ((ValueRemoval) d).getVal() + cste));
             } else {

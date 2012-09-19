@@ -173,7 +173,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     @Override
     public Explanation explain(Deduction d) {
         if (d.getVar() == x) {
-            Explanation explanation = new Explanation(aCause);
+            Explanation explanation = Explanation.build(aCause);
             if (d instanceof ValueRemoval) {
                 explanation.add(y.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal()));
             } else {
@@ -181,7 +181,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             }
             return explanation;
         } else if (d.getVar() == y) {
-            Explanation explanation = new Explanation(aCause);
+            Explanation explanation = Explanation.build(aCause);
             if (d instanceof ValueRemoval) {
                 explanation.add(x.explain(VariableState.REM, cste - ((ValueRemoval) d).getVal()));
             } else {

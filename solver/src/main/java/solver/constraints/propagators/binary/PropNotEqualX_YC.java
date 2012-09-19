@@ -149,7 +149,7 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         Variable var = d.getVar();
 
         if (var.equals(x)) {

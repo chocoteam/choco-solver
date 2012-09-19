@@ -172,7 +172,8 @@ public class PropMinBC extends Propagator<IntVar> {
             change |= vars[2].updateLowerBound(vars[0].getLB(), aCause);
             if (vars[2].getLB() > vars[0].getUB()) {
                 change |= vars[1].updateUpperBound(vars[0].getUB(), aCause);
-            } else if (vars[1].getLB() > vars[0].getUB()) {
+            }
+            if (vars[1].getLB() > vars[0].getUB()) {
                 change |= vars[2].updateUpperBound(vars[0].getUB(), aCause);
             }
         } while (change);

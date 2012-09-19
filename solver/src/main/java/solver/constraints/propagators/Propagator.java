@@ -83,7 +83,7 @@ import java.io.Serializable;
  * @see solver.constraints.Constraint
  * @since 0.01
  */
-public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity {
+public abstract class Propagator<V extends Variable> implements Serializable, ICause, Identity, Comparable<Propagator> {
 
     private static final long serialVersionUID = 2L;
 
@@ -376,10 +376,9 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      * @param d : a <code>Deduction</code> to explain
      * @return a set of constraints and past decisions
      */
-
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
             expl.add(v.explain(VariableState.DOM));
@@ -444,5 +443,15 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
      */
     public void contradiction(@Nullable Variable variable, String message) throws ContradictionException {
         solver.getEngine().fails(aCause, variable, message);
+    }
+
+    @Override
+    public int compareTo(Propagator o) {
+        return this.ID - o.ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
     }
 }

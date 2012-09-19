@@ -214,7 +214,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     @Override
     public Explanation explain(Deduction d) {
         Variable reason = (d.getVar() == vars[0]) ? vars[1] : vars[0];
-        Explanation explanation = new Explanation(aCause);
+        Explanation explanation = Explanation.build(aCause);
         explanation.add(reason.explain(VariableState.DOM));
         return explanation;
     }

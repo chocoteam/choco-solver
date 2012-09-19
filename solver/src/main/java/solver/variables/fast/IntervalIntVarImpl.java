@@ -1,28 +1,28 @@
-/**
- *  Copyright (c) 1999-2011, Ecole des Mines de Nantes
- *  All rights reserved.
- *  Redistribution and use in source and binary forms, with or without
- *  modification, are permitted provided that the following conditions are met:
+/*
+ * Copyright (c) 1999-2012, Ecole des Mines de Nantes
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- *      * Redistributions of source code must retain the above copyright
- *        notice, this list of conditions and the following disclaimer.
- *      * Redistributions in binary form must reproduce the above copyright
- *        notice, this list of conditions and the following disclaimer in the
- *        documentation and/or other materials provided with the distribution.
- *      * Neither the name of the Ecole des Mines de Nantes nor the
- *        names of its contributors may be used to endorse or promote products
- *        derived from this software without specific prior written permission.
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the Ecole des Mines de Nantes nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
  *
- *  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
- *  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- *  DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
- *  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- *  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- *  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE REGENTS AND CONTRIBUTORS BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package solver.variables.fast;
@@ -110,9 +110,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     *
-     * @param value       value to remove from the domain (int)
-     * @param cause       removal releaser
+     * @param value value to remove from the domain (int)
+     * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws solver.exception.ContradictionException
      *          if the domain become empty due to this action
@@ -123,13 +122,13 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int inf = getLB();
         int sup = getUB();
         if (value == inf && value == sup) {
-            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
             this.contradiction(cause, EventType.REMOVE, MSG_REMOVE);
         } else if (inf == value || value == sup) {
             EventType e;
             if (value == inf) {
                 if (reactOnRemoval) {
-                    delta.add(value,cause);
+                    delta.add(value, cause);
                 }
                 SIZE.add(-1);
                 LB.set(value + 1);
@@ -139,7 +138,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
             } else {
                 if (reactOnRemoval) {
-                    delta.add(value,cause);
+                    delta.add(value, cause);
                 }
                 SIZE.add(-1);
                 UB.set(value - 1);
@@ -157,10 +156,10 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
                 this.notifyPropagators(e, cause);
             } else if (SIZE.get() == 0) {
-                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
                 this.contradiction(cause, EventType.REMOVE, MSG_EMPTY);
             }
-            if(Configuration.PLUG_EXPLANATION)solver.getExplainer().removeValue(this, value, antipromo);
+            if (Configuration.PLUG_EXPLANATION) solver.getExplainer().removeValue(this, value, antipromo);
             return true;
         }
         return false;
@@ -189,13 +188,13 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
      * and the return value is <code>true</code>.</li>
      * </ul>
      *
-     * @param value       instantiation value (int)
-     * @param cause       instantiation releaser
+     * @param value instantiation value (int)
+     * @param cause instantiation releaser
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        if(Configuration.PLUG_EXPLANATION)solver.getExplainer().instantiateTo(this, value, cause);
+        if (Configuration.PLUG_EXPLANATION) solver.getExplainer().instantiateTo(this, value, cause);
         if (this.instantiated()) {
             if (value != this.getValue()) {
                 this.contradiction(cause, EventType.INSTANTIATE, MSG_INST);
@@ -208,11 +207,11 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 int ub = this.UB.get();
                 int i = this.LB.get();
                 for (; i < value; i++) {
-                    delta.add(i,cause);
+                    delta.add(i, cause);
                 }
                 i = value + 1;
                 for (; i <= ub; i++) {
-                    delta.add(i,cause);
+                    delta.add(i, cause);
                 }
             }
             this.LB.set(value);
@@ -239,8 +238,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new lower bound (included)
-     * @param cause       updating releaser
+     * @param value new lower bound (included)
+     * @param cause updating releaser
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
@@ -249,7 +248,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int old = this.getLB();
         if (old < value) {
             if (this.getUB() < value) {
-                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.INCLOW, MSG_LOW);
             } else {
                 EventType e = EventType.INCLOW;
@@ -257,7 +256,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 if (reactOnRemoval) {
                     for (int i = old; i < value; i++) {
                         //BEWARE: this line significantly decreases performances
-                        delta.add(i,antipromo);
+                        delta.add(i, antipromo);
                     }
                 }
                 SIZE.add(old - value);
@@ -270,7 +269,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 }
                 this.notifyPropagators(e, cause);
 
-                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateLowerBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateLowerBound(this, old, value, antipromo);
                 return true;
 
             }
@@ -290,8 +289,8 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
      * and the return value is <code>true</code></li>
      * </ul>
      *
-     * @param value       new upper bound (included)
-     * @param cause       update releaser
+     * @param value new upper bound (included)
+     * @param cause update releaser
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
@@ -300,7 +299,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
         int old = this.getUB();
         if (old > value) {
             if (this.getLB() > value) {
-                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 this.contradiction(cause, EventType.DECUPP, MSG_UPP);
             } else {
                 EventType e = EventType.DECUPP;
@@ -308,7 +307,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                 if (reactOnRemoval) {
                     for (int i = old; i > value; i--) {
                         //BEWARE: this line significantly decreases performances
-                        delta.add(i,antipromo);
+                        delta.add(i, antipromo);
                     }
                 }
                 SIZE.add(value - old);
@@ -321,7 +320,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
                     }
                 }
                 this.notifyPropagators(e, cause);
-                if(Configuration.PLUG_EXPLANATION)solver.getExplainer().updateUpperBound(this, old, value, antipromo);
+                if (Configuration.PLUG_EXPLANATION) solver.getExplainer().updateUpperBound(this, old, value, antipromo);
                 return true;
             }
         }
@@ -331,7 +330,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     @Override
     public void wipeOut(@NotNull ICause cause) throws ContradictionException {
-        removeInterval(this.getLB(),  this.getUB(), cause);
+        removeInterval(this.getLB(), this.getUB(), cause);
     }
 
     public boolean instantiated() {
@@ -456,7 +455,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public Explanation explain(VariableState what) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         OffsetIStateBitset invdom = solver.getExplainer().getRemovedValues(this);
         DisposableValueIterator it = invdom.getValueIterator();
         while (it.hasNext()) {
@@ -473,7 +472,7 @@ public final class IntervalIntVarImpl extends AbstractVariable<IntDelta, IIntDel
 
     @Override
     public Explanation explain(VariableState what, int val) {
-        Explanation expl = new Explanation();
+        Explanation expl = Explanation.build();
         expl.add(solver.getExplainer().explain(this, val));
         return expl;
     }
