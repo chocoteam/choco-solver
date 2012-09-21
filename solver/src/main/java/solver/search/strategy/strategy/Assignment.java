@@ -70,26 +70,54 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-//    IntVar trick; // TODO en parler avec charles!
+
+    public static final boolean TRICK = true;
+
+    IntVar failVar; // TODO en parler avec charles!
+    int tval;
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (varselector.hasNext()) {
-            IntVar variable;// = trick;
-//            if (trick == null || trick.instantiated()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-//                trick = variable;
-//            }
-            int value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
+        if (TRICK) {
+            if (varselector.hasNext()) {
+                IntVar variable = failVar;
+                int value;
+                if (failVar == null || failVar.instantiated()) {
+                    varselector.advance();
+                    variable = varselector.getVariable();
+                    failVar = variable;
+                    value = valueIterator.selectValue(variable);
+                    tval = value;
+                } else {
+                    if (assgnt.isValid(variable, tval)) {
+                        value = tval;
+                    } else {
+                        value = valueIterator.selectValue(variable);
+                        tval = value;
+                    }
+                }
+                FastDecision d = decisionPool.getE();
+                if (d == null) {
+                    d = new FastDecision(decisionPool);
+                }
+                d.set(variable, value, assgnt);
+                return d;
             }
-            d.set(variable, value, assgnt);
-            return d;
+            return null;
+        } else {
+            if (varselector.hasNext()) {
+                varselector.advance();
+                IntVar variable = varselector.getVariable();
+                int value = valueIterator.selectValue(variable);
+                FastDecision d = decisionPool.getE();
+                if (d == null) {
+                    d = new FastDecision(decisionPool);
+                }
+                d.set(variable, value, assgnt);
+                return d;
+            }
+            return null;
         }
-        return null;
     }
 }
