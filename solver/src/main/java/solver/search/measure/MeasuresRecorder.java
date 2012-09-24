@@ -399,8 +399,7 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
 
     public String toCSV() {
         StringBuilder st = new StringBuilder(256);
-        // solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);
-        // objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
+        // solutionCount;buildingTime(ms);initTime(ms);initPropag(ms);resolutionTime(ms);totalTime(s);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
         st.append(String.format("%d;%.3f;%.3f;%.3f;%.6f;%.3f;%d;%d;%d;%d;%d;%d;%d;",
                 solutionCount,
                 readingTimeCount / IN_MS,

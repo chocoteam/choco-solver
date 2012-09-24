@@ -99,10 +99,10 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
     IEnvironment env;
 
     /* Define the state to move to once a solution is found : UP_BRANCH or RESTART */
-    int stateAfterSolution = UP_BRANCH;
+    public int stateAfterSolution = UP_BRANCH;
 
     /* Define the state to move to once a fail occured : UP_BRANCH or RESTART */
-    int stateAfterFail = UP_BRANCH;
+    public int stateAfterFail = UP_BRANCH;
 
     /* Node selection, or how to select a couple variable-value to continue branching */
     AbstractStrategy<Variable> strategy;
@@ -141,7 +141,7 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      */
     ISolutionPool solutionpool;
 
-    SearchMonitorList smList;
+    public SearchMonitorList smList;
 
     /**
      * Objective manager. Default object is no objective.
@@ -295,6 +295,8 @@ public abstract class AbstractSearchLoop implements ISearchLoop {
      * Force restarts of the search from a previous node in the tree search.
      */
     protected abstract void restartSearch();
+
+    public abstract void moveTo(int to);
 
     /**
      * Close the search
