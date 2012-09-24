@@ -40,7 +40,7 @@ import java.io.Serializable;
  * @author Charles Prud'homme
  * @since 03/02/11
  */
-public abstract class Assignment<V extends Variable> implements Serializable {
+public abstract class DecisionOperator<V extends Variable> implements Serializable {
 
     public abstract void apply(V var, int value, ICause cause) throws ContradictionException;
 
@@ -58,7 +58,7 @@ public abstract class Assignment<V extends Variable> implements Serializable {
      */
     public abstract boolean isValid(IntVar var, int value);
 
-    public static Assignment<IntVar> int_eq = new Assignment<IntVar>() {
+    public static DecisionOperator<IntVar> int_eq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -81,7 +81,7 @@ public abstract class Assignment<V extends Variable> implements Serializable {
         }
     };
 
-    public static Assignment<IntVar> int_neq = new Assignment<IntVar>() {
+    public static DecisionOperator<IntVar> int_neq = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -104,7 +104,7 @@ public abstract class Assignment<V extends Variable> implements Serializable {
         }
     };
 
-    public static Assignment<IntVar> int_split = new Assignment<IntVar>() {
+    public static DecisionOperator<IntVar> int_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
@@ -128,7 +128,7 @@ public abstract class Assignment<V extends Variable> implements Serializable {
 
     };
 
-    public static Assignment<IntVar> int_reverse_split = new Assignment<IntVar>() {
+    public static DecisionOperator<IntVar> int_reverse_split = new DecisionOperator<IntVar>() {
 
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {

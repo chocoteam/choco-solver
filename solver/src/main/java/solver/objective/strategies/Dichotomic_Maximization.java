@@ -38,7 +38,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -104,7 +104,7 @@ public class Dichotomic_Maximization extends AbstractStrategy<IntVar> {
         }
     }
 
-    private Assignment<IntVar> objCut = new Assignment<IntVar>() {
+    private DecisionOperator<IntVar> objCut = new DecisionOperator<IntVar>() {
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
             var.updateLowerBound(value, cause);

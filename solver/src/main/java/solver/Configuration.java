@@ -27,7 +27,6 @@
 package solver;
 
 /**
- *
  * Global settings
  * <br/>
  *
@@ -50,4 +49,7 @@ public enum Configuration {
 
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;
+
+    // Set to true to retain the last decision involved into a fail
+    public static final boolean STORE_LAST_DECISION = false;
 }

@@ -58,7 +58,7 @@ import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
 import solver.search.strategy.ATSP_heuristics;
 import solver.search.strategy.StrategyFactory;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -578,7 +578,7 @@ public class ATSP_CP12 {
         }
     }
 
-    private static Assignment<IntVar> objCut = new Assignment<IntVar>() {
+    private static DecisionOperator<IntVar> objCut = new DecisionOperator<IntVar>() {
         @Override
         public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
             var.updateUpperBound(value, cause);
@@ -601,7 +601,7 @@ public class ATSP_CP12 {
         }
     };
 
-    private static Assignment<GraphVar> graph_sparse = new Assignment<GraphVar>() {
+    private static DecisionOperator<GraphVar> graph_sparse = new DecisionOperator<GraphVar>() {
         @Override
         public void apply(GraphVar var, int value, ICause cause) throws ContradictionException {
             int n = var.getEnvelopGraph().getNbNodes();

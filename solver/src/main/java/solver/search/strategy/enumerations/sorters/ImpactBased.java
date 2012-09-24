@@ -32,6 +32,7 @@ import choco.kernel.memory.IStateDouble;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import solver.Cause;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.constraints.Constraint;
@@ -40,7 +41,7 @@ import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.VariableState;
 import solver.search.loop.monitors.ISearchMonitor;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -86,6 +87,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
     protected boolean learnsAndFails; // does the learning pahse leads to a failure
     protected IntVar lAfVar; // the index of one of the variables involved into a failure during the learning phase
 
+    IntVar trick;
+
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
      * <p/>
@@ -130,8 +133,12 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
         }
         if (bests.size() > 0) {
             // 2. select the variable
-            currentVar = bests.get(random.nextInt(bests.size()));
-            IntVar best = vars[currentVar];
+            IntVar best = trick;
+            if (!Configuration.STORE_LAST_DECISION || (trick == null || trick.instantiated())) {
+                currentVar = bests.get(random.nextInt(bests.size()));
+                best = vars[currentVar];
+                trick = best;
+            }
 
             // 3. then iterate over values
             bests.clear();
@@ -163,7 +170,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
             if (currrent == null) {
                 currrent = new FastDecision(decisionPool);
             }
-            currrent.set(best, currentVal, Assignment.int_eq);
+            currrent.set(best, currentVal, DecisionOperator.int_eq);
             //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
             return currrent;
         } else {

@@ -35,6 +35,7 @@ import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import solver.Configuration;
 import solver.ICause;
 import solver.Solver;
 import solver.exception.ContradictionException;
@@ -42,7 +43,7 @@ import solver.search.limits.LimitBox;
 import solver.search.loop.monitors.ISearchMonitor;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.restart.RestartFactory;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.strategy.AbstractStrategy;
@@ -62,8 +63,7 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMonitor,
-        IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
+public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMonitor, IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     public static final Logger logger = LoggerFactory.getLogger("solver");
 
@@ -142,6 +142,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
 
     int currentVar, currentVal;
 
+    TIntList bests = new TIntArrayList();
+
+    IntVar trick;
+
     public ActivityBased(Solver solver, IntVar[] vars, double g, double d, int a, double r, int samplingIterationForced, long seed) {
         super(vars);
         this.solver = solver;
@@ -190,8 +194,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
     }
 
-    TIntList bests = new TIntArrayList();
-
     @Override
     public Decision getDecision() {
         bests.clear();
@@ -210,8 +212,12 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
             }
         }
         if (bests.size() > 0) {
-            currentVar = bests.get(random.nextInt(bests.size()));
-            IntVar best = vars[currentVar];
+            IntVar best = trick;
+            if (!Configuration.STORE_LAST_DECISION || (trick == null || trick.instantiated())) {
+                currentVar = bests.get(random.nextInt(bests.size()));
+                best = vars[currentVar];
+                trick = best;
+            }
             currentVal = best.getLB();
             if (sampling) {
                 int ds = best.getDomainSize();
@@ -251,7 +257,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
             if (currrent == null) {
                 currrent = new FastDecision(decisionPool);
             }
-            currrent.set(best, currentVal, Assignment.int_eq);
+            currrent.set(best, currentVal, DecisionOperator.int_eq);
 //            System.out.printf("D: %d, %d: %s\n", currentVar, currentVal, best);
             return currrent;
         } else {

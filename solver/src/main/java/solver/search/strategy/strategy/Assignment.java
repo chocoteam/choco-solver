@@ -28,6 +28,8 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import solver.Configuration;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.ValueIterator;
@@ -48,7 +50,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     PoolManager<FastDecision> decisionPool;
 
-    solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
+    DecisionOperator assgnt = DecisionOperator.int_eq;
 
     public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
         super(vars);
@@ -58,7 +60,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
     }
 
     public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
-                      solver.search.strategy.assignments.Assignment assgnt) {
+                      DecisionOperator assgnt) {
         super(vars);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
@@ -71,15 +73,13 @@ public class Assignment extends AbstractStrategy<IntVar> {
     }
 
 
-    public static final boolean TRICK = true;
-
     IntVar failVar; // TODO en parler avec charles!
     int tval;
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (TRICK) {
+        if (Configuration.STORE_LAST_DECISION) {
             if (varselector.hasNext()) {
                 IntVar variable = failVar;
                 int value;
