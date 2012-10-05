@@ -32,7 +32,7 @@ import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
 import solver.explanations.ExplanationEngine;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.search.strategy.decision.Decision;
 import solver.variables.EventType;
@@ -52,7 +52,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
 
     int branch;
 
-    Assignment<IntVar> assignment;
+    DecisionOperator<IntVar> assignment;
 
 
     final PoolManager<FastDecision> poolManager;
@@ -85,7 +85,7 @@ public class FastDecision extends AbstractDecision<IntVar> {
         }
     }
 
-    public void set(IntVar v, int value, Assignment<IntVar> assignment) {
+    public void set(IntVar v, int value, DecisionOperator<IntVar> assignment) {
         branch = 0;
         this.var = v;
         this.value = value;

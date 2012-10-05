@@ -191,6 +191,16 @@ public final class MeasuresRecorder extends VoidSearchMonitor implements IMeasur
     }
 
     @Override
+    public long getMaxDepth() {
+        return maxDepth;
+    }
+
+    @Override
+    public long getCurrentDepth() {
+        return depth;
+    }
+
+    @Override
     public long getPropagationsCount() {
         return propagationCount;
     }

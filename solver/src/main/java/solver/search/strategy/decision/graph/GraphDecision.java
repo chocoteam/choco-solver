@@ -31,7 +31,7 @@ import choco.kernel.common.util.PoolManager;
 import solver.exception.ContradictionException;
 import solver.explanations.Deduction;
 import solver.explanations.Explanation;
-import solver.search.strategy.assignments.Assignment;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.assignments.GraphAssignment;
 import solver.search.strategy.decision.AbstractDecision;
 import solver.search.strategy.decision.Decision;
@@ -165,7 +165,7 @@ public class GraphDecision extends AbstractDecision<GraphVar> {
 
     @Override
     @Deprecated
-    public void set(GraphVar var, int value, Assignment<GraphVar> graphVarAssignment) {
+    public void set(GraphVar var, int value, DecisionOperator<GraphVar> graphVarAssignment) {
         throw new UnsupportedOperationException();
     }
 }

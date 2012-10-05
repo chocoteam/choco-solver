@@ -107,6 +107,10 @@ public interface IMeasures extends ISearchMonitor, Serializable {
      */
     long getRestartCount();
 
+    long getMaxDepth();
+
+    long getCurrentDepth();
+
     /**
      * Get the number of call to event recorder execution
      *

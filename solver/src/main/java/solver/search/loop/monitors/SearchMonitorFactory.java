@@ -94,6 +94,10 @@ public enum SearchMonitorFactory {
         solver.getSearchLoop().plugSearchMonitor(new LogPropagationCount(solver));
     }
 
+    public static void event_count(Solver solver) {
+        solver.getSearchLoop().plugSearchMonitor(new LogEventCount(solver));
+    }
+
     public static void limitNode(Solver solver, long limit) {
         solver.getSearchLoop().getLimitsBox().setNodeLimit(limit);
     }

@@ -28,6 +28,8 @@
 package solver.search.strategy.strategy;
 
 import choco.kernel.common.util.PoolManager;
+import solver.Configuration;
+import solver.search.strategy.assignments.DecisionOperator;
 import solver.search.strategy.decision.Decision;
 import solver.search.strategy.decision.fast.FastDecision;
 import solver.search.strategy.selectors.ValueIterator;
@@ -48,7 +50,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
 
     PoolManager<FastDecision> decisionPool;
 
-    solver.search.strategy.assignments.Assignment assgnt = solver.search.strategy.assignments.Assignment.int_eq;
+    DecisionOperator assgnt = DecisionOperator.int_eq;
 
     public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator) {
         super(vars);
@@ -58,7 +60,7 @@ public class Assignment extends AbstractStrategy<IntVar> {
     }
 
     public Assignment(IntVar[] vars, VariableSelector<IntVar> varselector, ValueIterator valueIterator,
-                      solver.search.strategy.assignments.Assignment assgnt) {
+                      DecisionOperator assgnt) {
         super(vars);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
@@ -70,26 +72,51 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-    IntVar trick; // TODO en parler avec charles!
+    IntVar failVar; // TODO en parler avec charles!
+    int tval;
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (varselector.hasNext()) {
-            IntVar variable = trick;
-            if (trick == null || trick.instantiated()) {
+        if (Configuration.STORE_LAST_DECISION) {
+            if (varselector.hasNext()) {
+                IntVar variable = failVar;
+                int value;
+                if (failVar == null || failVar.instantiated()) {
+                    varselector.advance();
+                    variable = varselector.getVariable();
+                    failVar = variable;
+                    value = valueIterator.selectValue(variable);
+                    tval = value;
+                } else {
+                    if (assgnt.isValid(variable, tval)) {
+                        value = tval;
+                    } else {
+                        value = valueIterator.selectValue(variable);
+                        tval = value;
+                    }
+                }
+                FastDecision d = decisionPool.getE();
+                if (d == null) {
+                    d = new FastDecision(decisionPool);
+                }
+                d.set(variable, value, assgnt);
+                return d;
+            }
+            return null;
+        } else {
+            if (varselector.hasNext()) {
                 varselector.advance();
-                variable = varselector.getVariable();
-                trick = variable;
+                IntVar variable = varselector.getVariable();
+                int value = valueIterator.selectValue(variable);
+                FastDecision d = decisionPool.getE();
+                if (d == null) {
+                    d = new FastDecision(decisionPool);
+                }
+                d.set(variable, value, assgnt);
+                return d;
             }
-            int value = valueIterator.selectValue(variable);
-            FastDecision d = decisionPool.getE();
-            if (d == null) {
-                d = new FastDecision(decisionPool);
-            }
-            d.set(variable, value, assgnt);
-            return d;
+            return null;
         }
-        return null;
     }
 }

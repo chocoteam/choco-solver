@@ -185,7 +185,7 @@ public class DoubleMinHeap {
             smallestchild = leftchild(position);
             if ((smallestchild < size) && (keys[smallestchild] > keys[smallestchild + 1]))
                 smallestchild = smallestchild + 1;
-            if (keys[position] <= keys[smallestchild]) return;
+            if (smallestchild > size || keys[position] <= keys[smallestchild]) return;
             swap(position, smallestchild);
             position = smallestchild;
         }

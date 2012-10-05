@@ -24,62 +24,59 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package solver.search.loop.monitors;
 
-package solver.search.strategy.strategy;
-
-import org.slf4j.Logger;
+import choco.kernel.common.util.tools.StringUtils;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import org.slf4j.LoggerFactory;
+import solver.ICause;
+import solver.Solver;
 import solver.exception.ContradictionException;
-import solver.search.strategy.decision.Decision;
+import solver.variables.EventType;
+import solver.variables.IVariableMonitor;
 import solver.variables.Variable;
 
-import java.io.Serializable;
-
 /**
- * An <code>AbstractStrategy</code> does <b>not</b> implicitly advance to the next decision on
- * <code>getDecision()</code> (or <code>getOppositeDecision()</code>) invokation.
- * <br/>
- * See also Gamma et al. "Design Patterns: Elements of Reusable Object-Oriented Software",
- * Behavioral patterns : Command, Iterator.
- * todo: comment
  * <br/>
  *
  * @author Charles Prud'homme
- * @since 1 juil. 2010
+ * @since 30/01/12
  */
-public abstract class AbstractStrategy<V extends Variable> implements Serializable {
+public class LogEventCount extends VoidSearchMonitor implements ISearchMonitor, IVariableMonitor {
 
-    protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractStrategy.class);
+    final Solver solver;
 
-    public final V[] vars;
+    TObjectLongHashMap<EventType> countPerEvent;
 
-    protected AbstractStrategy(V[] variables) {
-        this.vars = variables.clone();
+    public LogEventCount(Solver solver) {
+        this.solver = solver;
+        for (int i = 0; i < solver.getNbVars(); i++) {
+            solver.getVar(i).addMonitor(this);
+        }
+        countPerEvent = new TObjectLongHashMap(EventType.values().length);
     }
 
-    /**
-     * Prepare <code>this</code> to be used in a search loop
-     */
-    public abstract void init() throws ContradictionException;
 
-    /**
-     * Provides access to the current decision in the strategy.
-     * If there are no more decision to provide, it returns <code>null</code>.
-     *
-     * @return the current decision
-     */
-    public abstract Decision getDecision();
-
-    /**
-     * Creates a <code>String</code> object containing a pretty print of the current variables.
-     *
-     * @return a <code>String</code> object
-     */
-    public String toString() {
-        StringBuilder s = new StringBuilder(32);
-        for (Variable v : vars) {
-            s.append(v).append(' ');
+    @Override
+    public void afterClose() {
+        StringBuilder st = new StringBuilder();
+        st.append(StringUtils.pad(" ", 41, "-")).append("\n");
+        st.append("| ").append(StringUtils.pad("Event", 25, " "));
+        st.append("| ").append(StringUtils.pad("Count", 12, " "));
+        st.append("|\n");
+        st.append(StringUtils.pad(" ", 41, "-")).append("\n");
+        for (EventType e : EventType.values()) {
+            st.append("| ").append(StringUtils.pad("" + e, 25, " "));
+            st.append("| ").append(StringUtils.pad("" + countPerEvent.get(e), -12, " "));
+            st.append("|\n");
         }
-        return s.toString();
+        st.append(StringUtils.pad(" ", 41, "-")).append("\n");
+        LoggerFactory.getLogger("solver").info(st.toString());
+
+    }
+
+    @Override
+    public void onUpdate(Variable var, EventType evt, ICause cause) throws ContradictionException {
+        countPerEvent.adjustOrPutValue(evt, 1, 1);
     }
 }
