@@ -70,7 +70,7 @@ public class DynamicBacktracking extends AbstractStrategy<Variable> implements I
     }
 
     @Override
-    public void init() {
+    public void init() throws ContradictionException {
         this.dStrategy.init();
     }
 
