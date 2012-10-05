@@ -89,7 +89,12 @@ public class SolveGoal {
         defineGoal(parser, parser.solver);
     }
 
-    private void defineGoal(FZNParser parser, Solver solver) {
+    private void defineGoal(FZNParser parser, Solver mSolver) {
+        Variable[] vars = mSolver.getVars();
+        IntVar[] ivars = new IntVar[vars.length];
+        for (int i = 0; i < ivars.length; i++) {
+            ivars[i] = (IntVar) vars[i];
+        }
         if (annotations.size() > 0 && !parser.free) {
             AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
@@ -101,63 +106,53 @@ public class SolveGoal {
 
                     AbstractStrategy[] strategies = new AbstractStrategy[earray.what.size()];
                     for (int i = 0; i < strategies.length; i++) {
-                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), solver);
+                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), mSolver);
                     }
-                    strategy = new StrategiesSequencer(solver.getEnvironment(), strategies);
+                    strategy = new StrategiesSequencer(mSolver.getEnvironment(), strategies);
                 } else {
-                    strategy = readSearchAnnotation(annotation, solver);
+                    strategy = readSearchAnnotation(annotation, mSolver);
                 }
 //                solver.set(strategy);
-                Variable[] vars = solver.getVars();
-                IntVar[] ivars = new IntVar[vars.length];
-                for (int i = 0; i < ivars.length; i++) {
-                    ivars[i] = (IntVar) vars[i];
-                }
                 long t = System.currentTimeMillis();
-                solver.set(
-                        new StrategiesSequencer(solver.getEnvironment(),
+                mSolver.set(
+                        new StrategiesSequencer(mSolver.getEnvironment(),
                                 strategy,
-                                StrategyFactory.random(ivars, solver.getEnvironment(), t))
+                                StrategyFactory.random(ivars, mSolver.getEnvironment(), t))
                 );
 
                 System.out.println("% t:" + t);
             }
         } else {
             LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");
-            Variable[] vars = solver.getVars();
-            IntVar[] ivars = new IntVar[vars.length];
-            for (int i = 0; i < ivars.length; i++) {
-                ivars[i] = (IntVar) vars[i];
-            }
-            if (type == Resolution.SATISFY && !solver.getSearchLoop().stopAtFirstSolution()) {
-                solver.set(StrategyFactory.minDomMinVal(ivars, solver.getEnvironment()));
+            if (type == Resolution.SATISFY && !mSolver.getSearchLoop().stopAtFirstSolution()) {
+                mSolver.set(StrategyFactory.minDomMinVal(ivars, mSolver.getEnvironment()));
             } else {
-                ActivityBased abs = new ActivityBased(solver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
-                solver.set(abs);
+                ActivityBased abs = new ActivityBased(mSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
+                mSolver.set(abs);
                 if (type != Resolution.SATISFY) {
-                    solver.getSearchLoop().plugSearchMonitor(new ABSLNS(solver, ivars, 29091981L, abs, false, ivars.length / 2));
+                    mSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(mSolver, ivars, 29091981L, abs, false, ivars.length / 2));
                 }
             }
 //            solver.set(StrategyFactory.random(ivars, solver.getEnvironment()));
         }
 
-        AbstractSearchLoop search = solver.getSearchLoop();
+        AbstractSearchLoop search = mSolver.getSearchLoop();
         switch (type) {
             case SATISFY:
                 search.stopAtFirstSolution(!parser.all);
                 break;
             case MAXIMIZE:
-                IntVar max = expr.intVarValue(solver);
+                IntVar max = expr.intVarValue(mSolver);
                 MaxObjectiveManager maom = new MaxObjectiveManager(max);
-                maom.setMeasures(solver.getMeasures());
+                maom.setMeasures(mSolver.getMeasures());
                 search.setObjectivemanager(maom);
 //                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
                 break;
             case MINIMIZE:
-                IntVar min = expr.intVarValue(solver);
+                IntVar min = expr.intVarValue(mSolver);
                 MinObjectiveManager miom = new MinObjectiveManager(min);
-                miom.setMeasures(solver.getMeasures());
+                miom.setMeasures(mSolver.getMeasures());
                 search.setObjectivemanager(miom);
 //                solver.setRestart(true);
                 search.stopAtFirstSolution(false);

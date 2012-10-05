@@ -62,6 +62,9 @@ public class RecorderExplanationEngine extends ExplanationEngine {
     protected TIntHashSet toexpand = new TIntHashSet();
     protected CircularQueue<Deduction> pending = new CircularQueue<Deduction>(16);
 
+    protected ConflictBasedBackjumping cbj;
+    protected DynamicBacktracking dbt;
+
     public RecorderExplanationEngine(Solver solver) {
         super(solver);
         assert Configuration.PLUG_EXPLANATION : "Explanation is not activated (see Configuration.java)";
@@ -70,6 +73,9 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         database = new TIntObjectHashMap<Explanation>();
         variableassignments = new TIntObjectHashMap<TIntObjectHashMap<VariableAssignment>>();
         variablerefutations = new TIntObjectHashMap<TIntObjectHashMap<VariableRefutation>>();
+
+        cbj = new ConflictBasedBackjumping(this);
+//        dbt = new DynamicBacktracking(this);
     }
 
     @Override
@@ -297,44 +303,6 @@ public class RecorderExplanationEngine extends ExplanationEngine {
         return deduction;
     }
 
-
-    private Decision updateVRExplainUponbacktracking(int nworld, Explanation expl) {
-        Decision dec = solver.getSearchLoop().decision; // the current decision to undo
-        while (dec != null && nworld > 1) {
-            dec = dec.getPrevious();
-            nworld--;
-        }
-        if (dec != null) {
-            if (!dec.hasNext())
-                throw new UnsupportedOperationException("RecorderExplanationEngine.updatVRExplain should get to a POSITIVE decision");
-            Deduction vr = dec.getNegativeDeduction();
-            Deduction assign = dec.getPositiveDeduction();
-            expl.remove(assign);
-            if (assign.mType == Deduction.Type.VarAss) {
-                VariableAssignment va = (VariableAssignment) assign;
-                variableassignments.get(va.var.getId()).remove(va.val);
-            }
-            database.put(vr.id, flatten(expl));
-        }
-        return dec;
-    }
-
-    @Override
-    public void onContradiction(ContradictionException cex) {
-        if ((cex.v != null) || (cex.c != null)) { // contradiction on domain wipe out
-            Explanation expl = (cex.v != null) ? cex.v.explain(VariableState.DOM)
-                    : cex.c.explain(null);
-            Solver solver = (cex.v != null) ? cex.v.getSolver() : cex.c.getConstraint().getVariables()[0].getSolver();
-            Explanation complete = flatten(expl);
-            int upto = complete.getMostRecentWorldToBacktrack(this);
-            solver.getSearchLoop().overridePreviousWorld(upto);
-            Decision dec = updateVRExplainUponbacktracking(upto, complete);
-            emList.onContradiction(cex, complete, upto, dec);
-        } else {
-            throw new UnsupportedOperationException("RecorderExplanationEngine.onContradiction incoherent state");
-        }
-    }
-
     @Override
     public void onRemoveValue(IntVar var, int val, ICause cause, Explanation explanation) {
         if (LOGGER.isInfoEnabled()) {
@@ -374,26 +342,5 @@ public class RecorderExplanationEngine extends ExplanationEngine {
             LOGGER.info("::EXPL:: BACKTRACK on " + decision + " (up to " + upTo + " level(s))");
         }
     }
-
-    @Override
-    public void onSolution() {
-        // we need to prepare a "false" backtrack on this decision
-        Decision dec = solver.getSearchLoop().decision;
-        while ((dec != null) && (!dec.hasNext())) {
-            dec = dec.getPrevious();
-        }
-        if (dec != null) {
-            Explanation explanation = Explanation.build();
-            Decision d = dec.getPrevious();
-            while ((d != null)) {
-                if (d.hasNext()) {
-                    explanation.add(d.getPositiveDeduction());
-                }
-                d = d.getPrevious();
-            }
-            database.put(dec.getNegativeDeduction().id, explanation);
-        }
-    }
-
 
 }

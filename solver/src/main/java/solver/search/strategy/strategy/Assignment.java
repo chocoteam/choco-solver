@@ -70,18 +70,18 @@ public class Assignment extends AbstractStrategy<IntVar> {
     public void init() {
     }
 
-//    IntVar trick; // TODO en parler avec charles!
+    IntVar trick; // TODO en parler avec charles!
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
         if (varselector.hasNext()) {
-            IntVar variable;// = trick;
-//            if (trick == null || trick.instantiated()) {
-            varselector.advance();
-            variable = varselector.getVariable();
-//                trick = variable;
-//            }
+            IntVar variable = trick;
+            if (trick == null || trick.instantiated()) {
+                varselector.advance();
+                variable = varselector.getVariable();
+                trick = variable;
+            }
             int value = valueIterator.selectValue(variable);
             FastDecision d = decisionPool.getE();
             if (d == null) {

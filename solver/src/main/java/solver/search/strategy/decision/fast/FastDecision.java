@@ -34,6 +34,7 @@ import solver.explanations.Explanation;
 import solver.explanations.ExplanationEngine;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.AbstractDecision;
+import solver.search.strategy.decision.Decision;
 import solver.variables.EventType;
 import solver.variables.IntVar;
 
@@ -71,6 +72,11 @@ public class FastDecision extends AbstractDecision<IntVar> {
     }
 
     @Override
+    public void buildPrevious() {
+        branch--;
+    }
+
+    @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
             assignment.apply(var, value, this);
@@ -84,6 +90,19 @@ public class FastDecision extends AbstractDecision<IntVar> {
         this.var = v;
         this.value = value;
         this.assignment = assignment;
+    }
+
+    @Override
+    public Decision copy() {
+        FastDecision dec = poolManager.getE();
+        if (dec == null) {
+            dec = new FastDecision(poolManager);
+        }
+        dec.var = this.var;
+        dec.value = this.value;
+        dec.assignment = this.assignment;
+        dec.branch = this.branch;
+        return dec;
     }
 
     @Override

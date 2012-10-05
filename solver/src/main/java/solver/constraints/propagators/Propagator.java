@@ -388,7 +388,7 @@ public abstract class Propagator<V extends Variable> implements Serializable, IC
         return expl;
     }
 
-    protected boolean isCompletelyInstantiated() {
+    public boolean isCompletelyInstantiated() {
         for (int i = 0; i < vars.length; i++) {
             if (!vars[i].instantiated()) {
                 return false;

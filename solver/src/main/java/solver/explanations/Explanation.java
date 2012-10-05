@@ -51,21 +51,17 @@ import java.util.List;
 public class Explanation extends Deduction {
     public static Explanation SYSTEM = new Explanation();
 
-    private List<Deduction> deductions;
+    List<Deduction> deductions;
     private TIntHashSet did;
     private List<Propagator> propagators;
     private TIntHashSet pid;
 
     private static CircularQueue<Explanation> stock = new CircularQueue<Explanation>(8);
 
-    public static int _new, _recycle;
-
     public static Explanation build() {
         if (stock.isEmpty()) {
-            _new++;
             return new Explanation();
         } else {
-            _recycle++;
             return stock.pollFirst();
         }
     }
@@ -80,7 +76,7 @@ public class Explanation extends Deduction {
         if (stock.size() < 16) {
             stock.addLast(explanation);
         }
-//        explanation.reset();
+        explanation.reset();
     }
 
     private Explanation() {
@@ -181,6 +177,10 @@ public class Explanation extends Deduction {
     }
 
 
+    public boolean contain(Deduction d) {
+        return deductions != null && did.contains(d.id);
+    }
+
     /**
      * Reset internal strucutre, forget all deductions and propagators.
      */
@@ -239,6 +239,7 @@ public class Explanation extends Deduction {
 
     /**
      * Retrieve the most recent world to backtrack to, with respect to the variable assignment stored in this.
+     * This is usefull for the <b>dynamic backtracking</b>.
      *
      * @param explainer the engine
      * @return the world index to backtrack to
