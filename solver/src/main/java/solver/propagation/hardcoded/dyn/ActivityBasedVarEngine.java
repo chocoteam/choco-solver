@@ -249,7 +249,7 @@ public class ActivityBasedVarEngine implements IPropagationEngine {
                             }
                             masks_f[aid][p] = 0;
                             lastProp.fineERcalls++;
-                            lastProp.propagate(null, idxVinP[p], mask);
+                            lastProp.propagate(idxVinP[p], mask);
                         }
                     }
                 }

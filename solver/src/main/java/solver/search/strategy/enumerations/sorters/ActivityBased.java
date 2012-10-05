@@ -213,7 +213,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements ISearchMo
         }
         if (bests.size() > 0) {
             IntVar best = trick;
-            if (!Configuration.STORE_LAST_DECISION || (trick == null || trick.instantiated())) {
+            if (!Configuration.STORE_LAST_DECISION_VAR || (trick == null || trick.instantiated())) {
                 currentVar = bests.get(random.nextInt(bests.size()));
                 best = vars[currentVar];
                 trick = best;

@@ -173,7 +173,7 @@ public class EventBasedVarEngine implements IPropagationEngine {
                         }
                         masks_f[aid][p] = 0;
                         lastProp.fineERcalls++;
-                        lastProp.propagate(null, idxVinP[p], mask);
+                        lastProp.propagate(idxVinP[p], mask);
                     }
                 }
             }

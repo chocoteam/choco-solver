@@ -134,7 +134,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
         if (bests.size() > 0) {
             // 2. select the variable
             IntVar best = trick;
-            if (!Configuration.STORE_LAST_DECISION || (trick == null || trick.instantiated())) {
+            if (!Configuration.STORE_LAST_DECISION_VAR || (trick == null || trick.instantiated())) {
                 currentVar = bests.get(random.nextInt(bests.size()));
                 best = vars[currentVar];
                 trick = best;
@@ -478,7 +478,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements ISearchMoni
 
     @Override
     public Explanation explain(Deduction d) {
-        Explanation expl = new Explanation(null, null);
+        Explanation expl = Explanation.build();
         // the current deduction is due to the current domain of the involved variables
         for (Variable v : this.vars) {
             expl.add(v.explain(VariableState.DOM));

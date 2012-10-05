@@ -50,6 +50,9 @@ public enum Configuration {
     // Set to true to activate lazy update of deltas and generators
     public static final boolean LAZY_UPDATE = true;
 
-    // Set to true to retain the last decision involved into a fail
-    public static final boolean STORE_LAST_DECISION = false;
+    // Set to true to retain the variable last of a decision involved into a fail
+    public static final boolean STORE_LAST_DECISION_VAR = false;
+
+    // Set to true to retain the value of the last decision involved into a fail
+    public static final boolean STORE_LAST_DECISION_VAL = false;
 }

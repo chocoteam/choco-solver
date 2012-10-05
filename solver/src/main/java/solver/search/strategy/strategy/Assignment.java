@@ -73,50 +73,34 @@ public class Assignment extends AbstractStrategy<IntVar> {
     }
 
     IntVar failVar; // TODO en parler avec charles!
-    int tval;
+    int failVal;
 
     @SuppressWarnings({"unchecked"})
     @Override
     public Decision getDecision() {
-        if (Configuration.STORE_LAST_DECISION) {
-            if (varselector.hasNext()) {
-                IntVar variable = failVar;
-                int value;
-                if (failVar == null || failVar.instantiated()) {
-                    varselector.advance();
-                    variable = varselector.getVariable();
-                    failVar = variable;
-                    value = valueIterator.selectValue(variable);
-                    tval = value;
-                } else {
-                    if (assgnt.isValid(variable, tval)) {
-                        value = tval;
-                    } else {
-                        value = valueIterator.selectValue(variable);
-                        tval = value;
-                    }
-                }
-                FastDecision d = decisionPool.getE();
-                if (d == null) {
-                    d = new FastDecision(decisionPool);
-                }
-                d.set(variable, value, assgnt);
-                return d;
-            }
-            return null;
-        } else {
-            if (varselector.hasNext()) {
+        if (varselector.hasNext()) {
+            IntVar variable;
+            int value;
+            if (!Configuration.STORE_LAST_DECISION_VAR || (failVar == null || failVar.instantiated())) {
                 varselector.advance();
-                IntVar variable = varselector.getVariable();
-                int value = valueIterator.selectValue(variable);
-                FastDecision d = decisionPool.getE();
-                if (d == null) {
-                    d = new FastDecision(decisionPool);
-                }
-                d.set(variable, value, assgnt);
-                return d;
+                variable = varselector.getVariable();
+                failVar = variable;
+            } else {
+                variable = failVar;
             }
-            return null;
+            if (!Configuration.STORE_LAST_DECISION_VAL || assgnt.isValid(variable, failVal)) {
+                value = valueIterator.selectValue(variable);
+                failVal = value;
+            } else {
+                value = failVal;
+            }
+            FastDecision d = decisionPool.getE();
+            if (d == null) {
+                d = new FastDecision(decisionPool);
+            }
+            d.set(variable, value, assgnt);
+            return d;
         }
+        return null;
     }
 }

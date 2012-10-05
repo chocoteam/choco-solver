@@ -239,7 +239,7 @@ public class ActivityBasedCstrEngine implements IPropagationEngine {
                             }
                             masks_f[aid][v] = 0;
                             lastProp.fineERcalls++;
-                            lastProp.propagate(null, v, mask);
+                            lastProp.propagate(v, mask);
                         }
                     }
                 }
