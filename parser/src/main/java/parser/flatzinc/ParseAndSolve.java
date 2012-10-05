@@ -183,26 +183,18 @@ public class ParseAndSolve {
                     solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, true, true));
                     break;
                 case 21:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.SCHEDoverIMP, true, true));
-                    break;
-                case 22:
                     solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, true));
                     break;
-                case 23:
+                case 22:
                     solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, true));
                     break;
-                case 24:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.SCHEDoverIMP, false, true));
-                    break;
-                case 25:
+                case 23:
                     solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.ABS_IMP, false, false));
                     break;
-                case 26:
+                case 24:
                     solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.REL_IMP, false, false));
                     break;
-                case 27:
-                    solver.set(new ActivityBasedCstrEngine(solver, ActivityBasedCstrEngine.Activity.SCHEDoverIMP, false, false));
-                    break;
+                case 25:
                 case -1:
                 default:
                     if (solver.getNbCstrs() > solver.getNbVars()) {
@@ -216,25 +208,10 @@ public class ParseAndSolve {
                 SearchMonitorFactory.toCSV(solver, instance, csv);
             }
             expeng.make(solver);
-            SearchMonitorFactory.prop_count(solver);
-//        SearchMonitorFactory.logWithRank(solver, 4783, 4785);
-//        solver.getSearchLoop().getLimitsBox().setNodeLimit(4785);
-//        SearchMonitorFactory.log(solver, true, true);
-//        SearchMonitorFactory.statEveryXXms(solver, 1000);
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
-//        final boolean[] stop = {true};
-//        Runtime.getRuntime().addShutdownHook(new Thread() {
-//            public void run() {
-//                if (stop[0]) {
-//                    LOGGER.info("% User interruption...");
-//                    parser.layout.beforeClose();
-//                }
-//            }
-//        });
             solver.solve();
-//        stop[0] = false;
         }
     }
 
