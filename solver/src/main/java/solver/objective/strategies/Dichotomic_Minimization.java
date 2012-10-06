@@ -100,7 +100,7 @@ public class Dichotomic_Minimization extends AbstractStrategy<IntVar> {
 				return null;
 			}
 			int target;
-			target = (3*lb+ub)/4;
+			target = (lb+ub)/2;
 //			if(target<lb+10){
 //				System.out.println("dich");
 //				target = (lb+ub)/2;

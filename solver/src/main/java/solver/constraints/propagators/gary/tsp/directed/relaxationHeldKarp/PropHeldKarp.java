@@ -121,11 +121,14 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 			return;//the UB does not allow to prune
 		}
 		// initialisation
+		double t = 0;
+		for(int i=0;i<n;i++){
+			t+=inPenalities[i]+outPenalities[i];
+		}
+		this.totalPenalities = t;
 		resetMA();
 		updateCostMatrix();
 		HK_Pascals();
-		HK_Pascals();//TODO REMOVE
-//		notLagrangian();
 	}
 
 
@@ -157,8 +160,14 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-		for(int iter=5;iter>0;iter--){
+//		for(int iter=5;iter>0;iter--){
+		double totalSave;
+		do{
+			totalSave = bestHKB;
 			improved = false;
+			double saveBest;
+			do{
+				saveBest = bestHKB;
 			for(int i=nbSprints;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
 				hkb = HK.getBound()-totalPenalities;
@@ -196,16 +205,18 @@ public class PropHeldKarp extends Propagator implements HeldKarp {
 			updateStep(hkb,alpha);
 			HKPenalities();
 			updateCostMatrix();
-			if(!improved){
-				count--;
-				if(count==0){
-					return;
-				}
-			}
+//			if(!improved){
+//				count--;
+//				if(count==0){
+//					return;
+//				}
+//			}
+			}while(bestHKB>1+saveBest);
 			alpha *= beta;
-			beta  /= 2;
+//			beta  /= 2;
 			//if(sccOf!=null)return;// not too heavy approach
-		}
+//		}
+		}while((bestHKB>totalSave+0.1));// || alpha>0.6));// && solver.getSearchLoop().timeStamp==0);
 	}
 
 	//***********************************************************************************

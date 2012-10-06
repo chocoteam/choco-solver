@@ -57,6 +57,7 @@ import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
+import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
 import solver.search.loop.monitors.SearchMonitorFactory;
 import solver.search.loop.monitors.VoidSearchMonitor;
@@ -95,7 +96,7 @@ public class ATSP_ISMP {
 	// VARIABLES
 	//***********************************************************************************
 
-	private static final long TIMELIMIT = 10000;
+	private static final long TIMELIMIT = 1000000;
 	private static String outFile = "atsp.csv";
 	private static int seed = 0;
 	// instance
@@ -126,6 +127,9 @@ public class ATSP_ISMP {
 	public static boolean bst;
 	public static boolean khun;
 	private static IntVar[] positions;
+	private static int lbini;
+	private static int m;
+	private static Constraint gc2;
 
 	public static void configParameters(int mask) {
 		String bytes = Integer.toBinaryString(mask);
@@ -159,7 +163,7 @@ public class ATSP_ISMP {
 		solver = new Solver();
 		initialUB = optimum;// = 1027751;
 		System.out.println("initial UB : "+optimum);
-		graph = new DirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
+		graph = new DirectedGraphVar(solver, n, GraphType.MATRIX, GraphType.LINKED_LIST);
 		totalCost = VariableFactory.bounded("total cost ", 0, initialUB, solver);
 		int l = (int)Math.sqrt(n);
 		int ct = 0;
@@ -191,6 +195,7 @@ public class ATSP_ISMP {
 //		System.out.println(graph.getEnvelopGraph());
 //		System.exit(0);
 		gc = GraphConstraintFactory.makeConstraint(solver);
+		gc2 = gc;//GraphConstraintFactory.makeConstraint(solver);
 	}
 
 	public static void addPropagators() {
@@ -221,7 +226,7 @@ public class ATSP_ISMP {
 			gc.addPropagators(SCCP);
 		}
 		if(config.get(undirectedMate)){
-			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.LINKED_LIST,GraphType.LINKED_LIST);
+			UndirectedGraphVar undi = new UndirectedGraphVar(solver,n-1,GraphType.MATRIX,GraphType.LINKED_LIST);
 			INeighbors nei;
 			for(int i=0;i<n-1;i++){
 				undi.getKernelGraph().activateNode(i);
@@ -264,19 +269,27 @@ public class ATSP_ISMP {
 //			propHK_mst.waitFirstSolution(false);//search!=1 && initialUB!=optimum);
 //			gc.addPropagators(propHK_mst);
 //			relax = propHK_mst;
+//		PropHeldKarp propHK_mst0 = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc2, solver);
+//		propHK_mst0.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
+//		gc2.addPropagators(propHK_mst0);
+//		relax = propHK_mst0;
+
 		if(config.get(rg) && bst){// BST-based HK
 			System.out.println("BST");
-			PropHeldKarpBST propHK_bst = PropHeldKarpBST.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
-			propHK_bst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
-			gc.addPropagators(propHK_bst);
+			PropHeldKarpBST propHK_bst = PropHeldKarpBST.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc2, solver, nR, sccOf, outArcs);
+//			PropHeldKarp propHK_bst = PropHeldKarp.bstBasedRelaxation(graph, 0, n - 1, totalCost, distanceMatrix, gc, solver, nR, sccOf, outArcs);
+			propHK_bst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);
+			gc2.addPropagators(propHK_bst);
+//			relax = propHK_bst;
 		}
 		else{
 			System.out.println("MST");
-			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
-			propHK_mst.waitFirstSolution(initialUB!=optimum);//search!=1 && initialUB!=optimum);
-			gc.addPropagators(propHK_mst);
+			PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc2, solver);
+			propHK_mst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);
+			gc2.addPropagators(propHK_mst);
 			relax = propHK_mst;
 		}
+
 //			System.out.println("MST");
 		PropHeldKarp propHK_mst = PropHeldKarp.mstBasedRelaxation(graph, 0, n-1, totalCost, distanceMatrix, gc, solver);
 		propHK_mst.waitFirstSolution(initialUB != optimum);//search!=1 && initialUB!=optimum);
@@ -290,21 +303,25 @@ public class ATSP_ISMP {
 		}
 //		}
 		solver.post(gc);
+//		solver.post(gc2);
 	}
 
 	public static void configureAndSolve() {
+//		solver.getSearchLoop().getLimitsBox().setNodeLimit(1);
 		//SOLVER CONFIG
 		AbstractStrategy mainStrat = null;//StrategyFactory.graphATSP(graph, heuristic, relax);
 
-		switch(policy){
-			case 7 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, relax);break;
-			case 8 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse_corrected, relax);break;
-			case 9 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.sparse_corrected, relax);break;
-			default: mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy,true), GraphStrategy.NodeArcPriority.ARCS);
-		}
+//		switch(policy){
+//			case 7 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, relax);break;
+//			case 8 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse_corrected, relax);break;
+//			case 9 : mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.sparse_corrected, relax);break;
+//			default: mainStrat = StrategyFactory.graphStrategy(graph, null,new GraphStrategyBench(graph,distanceMatrix,relax,policy,true), GraphStrategy.NodeArcPriority.ARCS);
+//		}
 		GraphStrategyBench2 strat = new GraphStrategyBench2(graph,distanceMatrix,relax);
-		strat.configure(8,true,true,false);
+		strat.configure(policy,true,true,false);
 		mainStrat = strat;
+//		mainStrat = StrategyFactory.graphATSP(graph, ATSP_heuristics.enf_sparse, relax);
+//		mainStrat = StrategyFactory.graphLexico(graph);
 //		mainStrat = StrategyFactory.ABSrandom(positions,solver,0.999d, 0.2d, 8, 1.1d, 1, 0);
 //		mainStrat = StrategyFactory.inputOrderMinVal(positions,solver.getEnvironment());
 //		mainStrat = StrategyFactory.random(positions,solver.getEnvironment());
@@ -329,9 +346,19 @@ public class ATSP_ISMP {
 		}
 
 		IPropagationEngine pengine = new PropagationEngine(solver.getEnvironment());
+//		PArc arcs1 = new PArc(pengine, gc);
+//		PArc arcs2 = new PArc(pengine, gc2);
+//		solver.set(pengine.set(
+//				new Sort(
+//				new Sort(arcs1).clearOut(),
+//				new Queue(arcs2).sweepUp()).clearOut())
+//		);
 		PArc allArcs = new PArc(pengine, gc);
-		solver.set(pengine.set(new Sort(allArcs).clearOut()));
+		solver.set(pengine.set(
+				new Sort(allArcs).clearOut())
+		);
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
+		lbini = 0;
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
 				if(totalCost.instantiated()){
@@ -339,12 +366,16 @@ public class ATSP_ISMP {
 				}
 				System.out.println("%%%%%%%%%%%%%%%%%%%");
 				System.out.println("DeltaObj after prop ini: "+(totalCost.getUB()-totalCost.getLB()));
+				lbini = totalCost.getLB();
 				int ct = 0;
 				for(int i=0;i<n;i++){
 					ct+=graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
 				}
+				m = ct;
 				System.out.println(ct+" arcs remaining");
 				System.out.println("%%%%%%%%%%%%%%%%%%%");
+//				lbini = (double)(optimum-totalCost.getLB())/(double)optimum;
+//				lbini = Math.round(lbini*1000000)/1000000;
 // solver.getSearchLoop().interrupt();
 			}
 //			public void onSolution() {
@@ -365,10 +396,7 @@ public class ATSP_ISMP {
 		// OUTPUT
 //		int bestCost = solver.getSearchLoop().getObjectivemanager().getBestValue();
 		int bestCost = totalCost.getLB();
-		int m = 0;
-		for(int i=0;i<n;i++){
-			m+=graph.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize();
-		}
+
 		String configst = "";
 		for(int i=0;i<NB_PARAM;i++){
 			if(config.get(i)){
@@ -384,7 +412,7 @@ public class ATSP_ISMP {
 		}
 		String txt = instanceName + ";" + solver.getMeasures().getSolutionCount() + ";" +
 				solver.getMeasures().getFailCount() + ";"+solver.getMeasures().getNodeCount() + ";"
-				+ (int)(solver.getMeasures().getTimeCount()) +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
+				+ (int)(solver.getMeasures().getTimeCount())+";"+lbini +  ";" + bestCost+";"+m + ";"+searchMode[main_search]+";"+configst+"\n";
 		writeTextInto(txt, outFile);
 	}
 
@@ -405,7 +433,7 @@ public class ATSP_ISMP {
 	public static void resetFile() {
 		outFile = "atsp_fast.csv";
 		clearFile(outFile);
-		writeTextInto("instance;sols;fails;nodes;time;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
+		writeTextInto("instance;sols;fails;nodes;time;iniGap;obj;m;search;arbo;rg;undi;pos;adAC;bst;\n", outFile);
 	}
 	public static void reset(int[][] m, String s, int p, int cp, int ub) {
 		distanceMatrix = m;
@@ -475,18 +503,23 @@ public class ATSP_ISMP {
 		File folder = new File(dir);
 		String[] list = folder.list();
 		main_search = 0;
-		policy = 4;
+		policy = 8;
 		configParameters(0);
 		for (String s : list) {
 //			if(s.contains("170"))
 			File file = new File(dir + "/" + s);
+			if(s.contains("170"))
 			if(file.isFile() && !(file.isHidden() || s.contains(".xls") || s.contains(".csv")))
 				if ((s.contains(".atsp"))){// && (!s.contains("ftv170")) && (!s.contains("p43"))){
 //				if(s.contains("p43.atsp"))System.exit(0);
-				loadInstance(dir + "/" + s);
+				if(s.contains("rbg")){
+					System.exit(0);
+				}
+//					khun = true;
+					loadInstance(dir + "/" + s);
 					bst = false;
 					configParameters((1 << allDiff));
-					solve();
+//					solve();
 //					configParameters((1<<pos)+(1<<allDiff));
 //					solve();
 					configParameters((1<<rg)+(1<<allDiff));

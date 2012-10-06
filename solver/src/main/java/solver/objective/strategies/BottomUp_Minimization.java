@@ -35,6 +35,7 @@
 package solver.objective.strategies;
 
 import choco.kernel.common.util.PoolManager;
+import samples.graph.HCP_Parser;
 import solver.objective.MinObjectiveManager;
 import solver.search.strategy.assignments.Assignment;
 import solver.search.strategy.decision.Decision;
@@ -93,11 +94,18 @@ public class BottomUp_Minimization extends AbstractStrategy<IntVar> {
 		}
 		MinObjectiveManager man = (MinObjectiveManager)obj.getSolver().getSearchLoop().getObjectivemanager();
 		man.updateLB(val);
-		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val);
+		System.out.println(obj.getLB()+" : "+obj.getUB()+" -> "+val+"  tps: "+(int)(obj.getSolver().getMeasures().getTimeCount()/1000)+"s");
 		FastDecision dec = pool.getE();
 		if(dec==null){
 			dec = new FastDecision(pool);
 		}
+		///
+//			String txt =  obj.getSolver().getMeasures().getFailCount() +";"+
+//						  obj.getSolver().getMeasures().getNodeCount() + ";"+
+//						  (int)(obj.getSolver().getMeasures().getTimeCount()) +";"+
+//						  val+";\n";
+//			HCP_Parser.writeTextInto(txt, "/Users/jfages07/Desktop/Evolution.csv");
+			///
 		dec.set(obj,val, Assignment.int_eq);
 		val ++;
 		return dec;

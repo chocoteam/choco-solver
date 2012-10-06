@@ -68,6 +68,7 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 	public long nbRem;
 	protected boolean waitFirstSol;
 	protected int nbSprints;
+	private boolean activeBST;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -89,6 +90,8 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 		mandatoryArcsList  = new TIntArrayList();
 		nbRem  = 0;
 		nbSprints = 30;
+		OFF_BST = obj.getUB();
+		System.out.println(OFF_BST);
 	}
 
 	/** MST based HK */
@@ -113,18 +116,50 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 	// HK Algorithm(s)
 	//***********************************************************************************
 
-	double OFF_BST = 1000;
+	double OFF_BST = 120000;
 
 	public void HK_algorithm() throws ContradictionException {
+//		if(solver.getSearchLoop().timeStamp>0){
+//			return;
+//		}
+//		double d = 0;
+//		int b=0;
+//		for(int k=0;k<nr.get()-1;k++){
+//			d+=OFF_BST;
+//			b++;
+//		}
+//		if(b!=nr.get()-1){
+//			throw new UnsupportedOperationException(b+"=/="+(nr.get()-1));
+//		}
+//		if(Math.abs((d-(OFF_BST*(nr.get()-1))))>0.1){
+//			System.out.println("ERROR");
+//			System.out.println(d);
+//		System.out.println((OFF_BST*(nr.get()-1)));
+//		System.out.println((d-(OFF_BST*(nr.get()-1))));
+//		System.exit(0);
+//		}
+		double t = 0;
+		for(int i=0;i<n;i++){
+			t+=inPenalities[i]+outPenalities[i];
+		}
+		this.totalPenalities = t;
+
+
 		if(waitFirstSol && solver.getMeasures().getSolutionCount()==0){
 			return;//the UB does not allow to prune
 		}
-		// initialisation
 		resetMA();
+		activeBST = false;
 		updateCostMatrix();
 		HK_Pascals();
-		//HK_Pascals();//TODO REMOVE
-//		notLagrangian();
+		activeBST = true;
+		t = 0;
+		for(int i=0;i<n;i++){
+			t+=inPenalities[i]+outPenalities[i];
+		}
+		this.totalPenalities = t;
+		updateCostMatrix();
+		HK_Pascals();
 	}
 
 	private void notLagrangian() throws ContradictionException {
@@ -137,6 +172,74 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 	}
+
+//	protected void HK_Pascals() throws ContradictionException {
+//		double hkb;
+//		double alpha = 2;
+//		double beta = 0.5;
+//		double bestHKB;
+//		boolean improved;
+//		int count = 2;
+//		bestHKB = 0;
+//		HKfilter.computeMST(costs,g.getEnvelopGraph());
+//		hkb = HKfilter.getBound()-totalPenalities;
+//		bestHKB = hkb;
+//		mst = HKfilter.getMST();
+//		if(hkb-Math.floor(hkb)<0.001){
+//			hkb = Math.floor(hkb);
+//		}
+//		obj.updateLowerBound((int)Math.ceil(hkb), this);
+//		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//		for(int iter=5;iter>0;iter--){
+//			improved = false;
+//			for(int i=nbSprints;i>0;i--){
+//				HK.computeMST(costs,g.getEnvelopGraph());
+//				hkb = HK.getBound()-totalPenalities;
+//				if(hkb>bestHKB+1){
+//					bestHKB = hkb;
+//					improved = true;
+//				}
+//				mst = HK.getMST();
+//				if(hkb-Math.floor(hkb)<0.001){
+//					hkb = Math.floor(hkb);
+//				}
+//				obj.updateLowerBound((int)Math.ceil(hkb), this);
+//				//	DO NOT FILTER HERE TO FASTEN CONVERGENCE (not always true)
+////				HK.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//				updateStep(hkb,alpha);
+//				HKPenalities();
+//				updateCostMatrix();
+//			}
+//			HKfilter.computeMST(costs,g.getEnvelopGraph());
+//			hkb = HKfilter.getBound()-totalPenalities;
+//			if(hkb>bestHKB+1){
+//				bestHKB = hkb;
+//				improved = true;
+//			}
+//			mst = HKfilter.getMST();
+//			if(hkb-Math.floor(hkb)<0.001){
+//				hkb = Math.floor(hkb);
+//			}
+//			obj.updateLowerBound((int)Math.ceil(hkb), this);
+////			if(tourFound()){// TODO attention si contraintes autres que TSP ca devient faux
+////				forceTourInstantiation();
+////				return;
+////			}
+//			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+//			updateStep(hkb,alpha);
+//			HKPenalities();
+//			updateCostMatrix();
+//			if(!improved){
+//				count--;
+//				if(count==0){
+//					return;
+//				}
+//			}
+//			alpha *= beta;
+////			beta  /= 2;
+//			//if(sccOf!=null)return;// not too heavy approach
+//		}
+//	}
 
 	protected void HK_Pascals() throws ContradictionException {
 		double hkb;
@@ -155,8 +258,14 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-		for(int iter=5;iter>0;iter--){
+//		for(int iter=5;iter>0;iter--){
+		double totalSave;
+		do{
+			totalSave = bestHKB;
 			improved = false;
+			double saveBest;
+			do{
+				saveBest = bestHKB;
 			for(int i=nbSprints;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
 				hkb = HK.getBound()-totalPenalities;
@@ -194,16 +303,18 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 			updateStep(hkb,alpha);
 			HKPenalities();
 			updateCostMatrix();
-			if(!improved){
-				count--;
-				if(count==0){
-					return;
-				}
-			}
+//			if(!improved){
+//				count--;
+//				if(count==0){
+//					return;
+//				}
+//			}
+			}while(bestHKB>1+saveBest);// && activeBST);
 			alpha *= beta;
-			beta  /= 2;
+//			beta  /= 2;
 			//if(sccOf!=null)return;// not too heavy approach
-		}
+//		}
+		}while((bestHKB>totalSave+0.1)&&activeBST);// || alpha>0.6)&&activeBST);
 	}
 
 	//***********************************************************************************
@@ -221,7 +332,44 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 		}
 	}
 
-	protected void updateStep(double hkb,double alpha) {
+	protected void updateStep(double hkb,double alpha) throws ContradictionException {
+//		int okp = 0;
+//		for(int a=0;a<n;a++){
+//			INeighbors nei = mst.getNeighborsOf(a);
+//			for(int b=nei.getFirstElement();b>=0;b=nei.getNextElement()){
+//				if(a<b && sccOf[a].get()!=sccOf[b].get()){
+//					okp++;
+//				}
+//			}
+//		}
+//		if(activeBST && sccOf!=null)
+//		if(okp!=nr.get()-1){
+//			double x=0;
+//			double y=0;
+//			for(int a=0;a<n;a++){
+//				INeighbors nei = mst.getNeighborsOf(a);
+//				for(int b=nei.getFirstElement();b>=0;b=nei.getNextElement()){
+//					if(a<b && sccOf[a].get()!=sccOf[b].get()){
+//						x+=OFF_BST;
+//						y+=Math.min(costs[a][b],costs[b][a]);
+//					}
+//				}
+//			}
+//			System.out.println(x);
+//			System.out.println(y);
+//			System.out.println((y-totalPenalities));
+//			System.out.println(totalPenalities);
+//			System.out.println("%%%");
+//			System.out.println(hkb);
+//			System.out.println(obj);
+//			System.exit(0);
+//			contradiction();//TODO vrai sauf si pb numerique...
+//			System.out.println(hkb);
+//			System.out.println(obj);
+//			throw new UnsupportedOperationException(okp+"=/="+(nr.get()-1));
+//		}
+
+
 		double nb2viol = 0;
 		double target = obj.getUB();
 //		target = (obj.getUB()+obj.getLB())/2;
@@ -251,9 +399,9 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 		if(step<0.000001){
 			step = 0;
 		}
-//		if(step>1000){
-//			step = 1000;
-//		}
+		if(step>100){
+			step = 100;
+		}
 	}
 
 	protected void HKPenalities() {
@@ -288,21 +436,35 @@ public class PropHeldKarpBST extends Propagator implements HeldKarp {
 
 	protected void updateCostMatrix() {
 		INeighbors nei;
+//		double tot = 0;
 		for(int i=0;i<n;i++){
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				costs[i][j] = originalCosts[i][j] + outPenalities[i] + inPenalities[j];
-				if(sccOf!=null && sccOf[i].get()!=sccOf[j].get()){
+				if(activeBST && sccOf!=null)
+				if(sccOf[i].get()!=sccOf[j].get()){
 					costs[i][j] += OFF_BST;
+					costs[j][i] = costs[i][j];
+//					tot += OFF_BST;
 				}
 //				if(costs[i][j]>100000 || costs[i][j]<-100000){
 //					throw new UnsupportedOperationException();
 //				}
 			}
 		}
-		if(sccOf!=null){
+//		boolean sign = totalPenalities>0;
+		if(activeBST && sccOf!=null){
 			totalPenalities += OFF_BST*(nr.get()-1);
 		}
+//		if(sign && totalPenalities<0){
+//			throw new UnsupportedOperationException();
+//		}
+//		if(activeBST && sccOf!=null)
+//		if(tot<OFF_BST*(nr.get()-1)+0.001){
+//			System.out.println(tot);
+//			System.out.println((OFF_BST*(nr.get()-1)));
+//			throw new UnsupportedOperationException();
+//		}
 	}
 
 	protected boolean tourFound() {

@@ -153,8 +153,8 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 	protected void HK_Pascals() throws ContradictionException {
 //		nbSprints = 30;
 //		nbSprints = 100;
-//		blossoms.clear();
-//		inBI.clear();
+		blossoms.clear();
+		inBI.clear();
 //		activeBI = false;
 //		convergeAndFilter();
 //		convergeFast(2);
@@ -167,9 +167,11 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 		nbSprints = 30;
 		if(firstPropag){
 			activeBI = false;
-			firstPropag = false;
 			convergeAndFilter();
-//			activeBI = true;
+			activeBI = true;
+			convergeAndFilter();
+//			fastRun();
+			firstPropag = false;
 		}
 		fastRun();
 //		convergeAndFilter();
@@ -211,8 +213,8 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				besthkb = hkb;
 			}
 			if(activeBI){
-			System.out.println(hkb+"    /    "+bi_totalPenalities);
-			System.out.println(hkb+"    /    "+blossoms.size());
+//			System.out.println(hkb+"    /    "+bi_totalPenalities);
+//			System.out.println(hkb+"    /    "+blossoms.size());
 //			System.exit(0);
 			}
 			mst = HKfilter.getMST();
@@ -275,8 +277,9 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 				found = false;
 			}
 //			if (activeBI && deg>maxDegree[i] && blossoms.size()<n*n){
-			if (activeBI && deg>maxDegree[i] && blossoms.size()<n){
-//			if (activeBI && deg>maxDegree[i] && blossoms.size()<n && !inBI.get(i)){
+//			if (activeBI && deg>maxDegree[i] && blossoms.size()<10*n){
+			if(firstPropag)
+			if (activeBI && deg>maxDegree[i] && blossoms.size()<n && !inBI.get(i)){
 				Blossom b = new Blossom(i);
 				if(b.isValid()){
 					inBI.set(i);
@@ -289,6 +292,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 //			if(deg_penalities[i]>0 || deg>maxDegree[i])//optim Beasley 1993
 			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 		}
+		if(!firstPropag)
 		if(activeBI){// find BI
 			for(int i=0;i<blossoms.size();i++){
 				Blossom b = blossoms.get(i);
@@ -296,12 +300,12 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 					nb2viol += b.getViol()*b.getViol();
 					b.uselessCounter = 0;
 				}else{
-					b.uselessCounter++;
-					if(b.uselessCounter>=n){
-						inBI.clear(b.root);
-						blossoms.remove(i);
-						i--;
-					}
+//					b.uselessCounter++;
+//					if(b.uselessCounter>=n){
+//						inBI.clear(b.root);
+//						blossoms.remove(i);
+//						i--;
+//					}
 				}
 			}
 		}
@@ -317,11 +321,12 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 			throw new UnsupportedOperationException();
 		}
 		bi_totalPenalities = 0;
+		if(!firstPropag)
 		if(activeBI){// find BI
 			for(Blossom b:blossoms){
 				b.recompute();
 //				if(b.getViol()>0){
-//					b.addPen(5);
+//					b.addPen(1);
 //				}
 //				if(b.getViol()<0){
 //					b.addPen(-1);
@@ -357,6 +362,7 @@ public class PropBIStrongTreeHeldKarp2 extends Propagator implements HeldKarp {
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				if(i<j){
 					costs[i][j] = originalCosts[i][j] + deg_penalities[i] + deg_penalities[j];
+					if(!firstPropag)
 					if(activeBI)
 						for(Blossom b:blossoms){
 							if(b.getPen()>Blossom.PEN_LIMIT)

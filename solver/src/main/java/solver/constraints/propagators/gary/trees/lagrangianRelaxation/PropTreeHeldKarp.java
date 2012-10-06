@@ -28,6 +28,7 @@
 package solver.constraints.propagators.gary.trees.lagrangianRelaxation;
 
 import choco.kernel.ESat;
+import choco.kernel.memory.IStateDouble;
 import gnu.trove.list.array.TIntArrayList;
 import samples.graph.DCMST_lds;
 import solver.Solver;
@@ -75,6 +76,8 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	double step;
 	boolean firstPropag = true;
 	private Random rd;
+	private double[][] maxRC;
+//	private IStateDouble[][] maxRC_stored;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -166,6 +169,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 //			convergeAndFilter();
 //			return;
 //		}
+		filterRecord();
 		nbSprints = 30;
 //		nbSprints = 100;
 		if(nbSols!=solver.getMeasures().getSolutionCount()
@@ -180,6 +184,7 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 			objUB = obj.getUB();
 //			nbSprints = 30;
 			convergeAndFilter();
+//			record();
 //			int nbIter = n/10;
 //			int nb = nbIter;
 //			while(nb>0 && obj.getUB()>obj.getLB()){
@@ -191,6 +196,9 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 		}else{
 //			nbSprints = 100;
 			fastRun();
+//			fastRun(2);
+//			fastRun(0.5);
+//			fastRun(0.125);
 //			convergeAndFilter();
 		}
 
@@ -325,8 +333,11 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 	}
 
 	protected void fastRun() throws ContradictionException {
+		fastRun(2);
+	}
+	protected void fastRun(double coef) throws ContradictionException {
 		nbSprints = 30;
-		convergeFast(2);
+		convergeFast(coef);
 		HKfilter.computeMST(costs,g.getEnvelopGraph());
 		double hkb = HKfilter.getBound()-totalPenalities;
 		mst = HKfilter.getMST();
@@ -353,6 +364,9 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 			if(hkb-Math.floor(hkb)<0.00001){hkb = Math.floor(hkb);}
 			obj.updateLowerBound((int)Math.ceil(hkb), this);
 			HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
+			if(solver.getMeasures().timestamp()==0){
+				rec(hkb);
+			}
 			alpha *= beta;
 		}
 	}
@@ -388,12 +402,12 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 			target = hkb+0.001;
 		}
 		int deg;
-		boolean found = true;
+//		boolean found = true;
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
 //			if(deg>maxDegree[i]){ //TODO CHECK
 			if(deg>maxDegree[i] || penalities[i]>0){
-				found = false;
+//				found = false;
 				nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 			}
 //			nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
@@ -642,6 +656,55 @@ public class PropTreeHeldKarp extends Propagator implements HeldKarp {
 				if(rc[node][j]-maxBasisRC>delta+0.001){
 					g.removeArc(node,j,this);
 				}
+		}
+	}
+
+	public void filterRecord() throws ContradictionException {
+		if(maxRC!=null){
+			double ub = obj.getUB()+0.001;
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(i<j && !g.getKernelGraph().edgeExists(i,j)){
+						if(maxRC[i][j]>ub){
+							g.removeArc(i,j,this);
+						}
+//					else if(maxRC_stored[i][j].get()>ub+0.001){
+//						g.removeArc(i,j,this);
+//					}
+					}
+				}
+			}
+		}
+	}
+
+	private void rec(double hkb) {
+		if(maxRC==null){
+			maxRC = new double[n][n];
+//			maxRC_stored = new IStateDouble[n][n];
+//			for(int i=0;i<n;i++){
+//				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+//				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//					if(i<j){
+//						if(!mst.edgeExists(i,j)){
+//							maxRC[i][j] = getMarginalCost(i,j) + hkb;
+//							maxRC_stored[i][j] = environment.makeFloat(maxRC[i][j]);
+//						}else{
+//							maxRC_stored[i][j] = environment.makeFloat(0);
+//						}
+//					}
+//				}
+//			}
+		}
+		for(int i=0;i<n;i++){
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+				if(i<j && !mst.edgeExists(i,j))
+					if(getMarginalCost(i,j)+hkb>maxRC[i][j]){
+						maxRC[i][j] = getMarginalCost(i,j)+hkb;
+//						maxRC_stored[i][j].set(maxRC[i][j]);
+					}
+			}
 		}
 	}
 }

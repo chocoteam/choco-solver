@@ -85,8 +85,8 @@ public class TSP_heur {
 	//***********************************************************************************
 
 	public static void main(String[] args) {
-//		bench();
-		benchRD();
+		bench();
+//		benchRD();
 	}
 
 	static int policy;

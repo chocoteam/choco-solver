@@ -30,8 +30,8 @@ package samples.graph;
 import gnu.trove.impl.hash.TIntIntHash;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import ilog.concert.*;
-import ilog.cplex.*;
+//import ilog.concert.*;
+//import ilog.cplex.*;
 import choco.kernel.ESat;
 import choco.kernel.ResolutionPolicy;
 import choco.kernel.common.util.procedure.PairProcedure;
@@ -58,6 +58,8 @@ import solver.objective.strategies.Dichotomic_Minimization;
 import solver.propagation.IPropagationEngine;
 import solver.propagation.PropagationEngine;
 import solver.propagation.generator.PArc;
+import solver.propagation.generator.PCoarse;
+import solver.propagation.generator.Queue;
 import solver.propagation.generator.Sort;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.search.loop.monitors.SearchMonitorFactory;
@@ -80,6 +82,8 @@ import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.LinkedList;
 
 /**
  * Parse and solve an symmetric Traveling Salesman Problem instance of the TSPLIB
@@ -96,19 +100,21 @@ public class DCMST {
 	private static String testalagPath = "/Users/jfages07/Desktop/ConstrainedTrees/archive/codeAlex";// path of testalag
 	private static String instanceName;
 	private static int n,nMin,nMax;
-	private static int[] dMax;
+	public static int[] dMax;
 	private static int[][] dist;
 	// model
-	private static IntVar totalCost;
+	public static IntVar totalCost;
 	private static Solver solver;
 	private static int search;
 	private static int lb,ub;
+	public static int optimum;
 	// other
-	private static long TIMELIMIT = 600000;
+	private static long TIMELIMIT = 10000000;
 	//	private static final long TIMELIMIT = 14400000;
 	private static String outFile;
 	private static PropTreeHeldKarp hk;
 	private static boolean optGiven = false;
+	static boolean moreHK;
 
 	//***********************************************************************************
 	// METHODS
@@ -116,7 +122,7 @@ public class DCMST {
 
 	public static void main(String[] args) {
 		//DE,DR,instanciasT
-		bench("instanciasT");
+		bench("DE");
 //		outFile = "DE"+"test"+search+".csv";
 //		execute(dir,"DE",false,TIMELIMIT,outFile);
 	}
@@ -131,25 +137,35 @@ public class DCMST {
 		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
 		File folder = new File(dir+"/"+type);
 		String[] list = folder.list();
-		nMin = 100;
-		nMax = 600;
+		nMin = 10;
+		nMax = 9000;
 		for (String s : list) {
 			File file = new File(dir+"/"+type+"/"+s);
-//			if(s.contains("300_1"))
-//			if(n<200 || s.contains("300_2")||s.contains("200_3")||s.contains("200_1"))
-			if((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))){
-				instanceName = s;
-				System.out.println(s);
-				if(parse(file)){
-					if(optGiven){
-						setUB(dir+"/"+type,s);
-					}
-					solveDCMST(s);
+//			if(!(s.contains("500_2")||s.contains("500_1")))
+//			if(s.contains("300_3"))
+			if(s.contains("400_1"))
+//			if(s.contains("200_2"))
+//				if(!s.contains("_1"))
+//				if(!s.contains("_2"))
+//			if(s.contains("300_3")||s.contains("500_2")||s.contains("20f0_2"))
+					if((!file.isHidden()) && (!s.contains("bounds.csv")) && (!s.contains("bug"))){
+						instanceName = s;
+						System.out.println(s);
+						if(parse(file)){
+							setUB(dir+"/"+type,s);
+							if(optGiven){
+								ub = optimum;
+							}
+//					setTL(dir+"/"+type,s);
+							moreHK = false;
+							solveDCMST(s);
+//					moreHK = true;
+//					solveDCMST(s);
 //					out(s);
 //					System.exit(0);
-				}
-				System.gc();
-			}
+						}
+						System.gc();
+					}
 		}
 	}
 
@@ -214,7 +230,7 @@ public class DCMST {
 			String neist = "";
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j)
-				neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
+					neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
 			}
 			HCP_Parser.writeTextInto(neist, s);
 		}
@@ -239,7 +255,7 @@ public class DCMST {
 			String neist = "";
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
 				if(i<j)
-				neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
+					neist += (i+1)+"\t"+(j+1)+"\t"+dist[i][j]+"\n";
 			}
 			HCP_Parser.writeTextInto(neist, s);
 		}
@@ -399,13 +415,63 @@ public class DCMST {
 					}else{
 						throw new UnsupportedOperationException(inst);
 					}
-					ub = Integer.parseInt(numbers[2]);
-					System.out.println("ub : "+ub);
+					optimum = Integer.parseInt(numbers[2]);
+					System.out.println("opt : "+optimum);
 					return;
 				}
 				line = buf.readLine();
 			}
 			System.out.println("no bound");
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+		}
+	}
+
+	private static void setTL(String dir, String inst) {
+		if(dir.contains("ham")){
+			setHamUB(dir,inst);
+			return;
+		}
+		File file = new File(dir+"/bounds.csv");
+		try {
+			BufferedReader buf = new BufferedReader(new FileReader(file));
+			String line = buf.readLine();
+			String[] numbers;
+			line = buf.readLine();
+			while(line!=null){
+				numbers = line.split(";");
+				if(n==Integer.parseInt(numbers[0])){
+					if(inst.contains("0_1")){
+						// nothing to do
+					}else if(inst.contains("0_2")){
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_3")){
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_4")){
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else if(inst.contains("0_5")){
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						line = buf.readLine();
+						numbers = line.split(";");
+					}else{
+						throw new UnsupportedOperationException(inst);
+					}
+					TIMELIMIT = Integer.parseInt(numbers[3]);
+					System.out.println("TL : "+TIMELIMIT);
+					return;
+				}
+				line = buf.readLine();
+			}
+			System.out.println("no TL");
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -469,6 +535,10 @@ public class DCMST {
 
 		// variables
 //		lb = ub;
+//		if(optGiven){
+//			lb = ub;
+//		}
+//		lb = 12640;
 		totalCost = VariableFactory.bounded("obj",lb,ub,solver);
 		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.ENVELOPE_SWAP_ARRAY, GraphType.LINKED_LIST);
 //		final UndirectedGraphVar undi = new UndirectedGraphVar(solver, n, GraphType.LINKED_LIST, GraphType.LINKED_LIST);
@@ -487,6 +557,8 @@ public class DCMST {
 		gc.addPropagators(new PropTreeNoSubtour(undi, gc, solver));
 		gc.addPropagators(new PropKCC(undi, solver, gc, VariableFactory.bounded("1",1,1,solver)));
 		gc.addPropagators(new PropTreeEvalObj(undi, totalCost, dist, gc, solver));
+
+		gc.addPropagators(new PropOneNodes(undi, solver, gc));
 //		gc.addPropagators(new PropMaxDiameterFromNode(undi, 4, 0, gc, solver));
 
 //		Propagator euclFilter = new Propagator<UndirectedGraphVar>(new UndirectedGraphVar[]{undi},solver,gc, PropagatorPriority.LINEAR) {
@@ -903,7 +975,7 @@ public class DCMST {
 
 		System.out.println("k");
 
-
+//		Constraint gc2 = GraphConstraintFactory.makeConstraint(solver);
 
 		hk = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk.waitFirstSolution(!optGiven);
@@ -929,14 +1001,50 @@ public class DCMST {
 		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
 
 //PropBIStrongTreeHeldKarp2 hk2 = PropBIStrongTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
-		PropTreeHeldKarp2 hk2 = PropTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		PropTreeHeldKarpLMR hk2 = PropTreeHeldKarpLMR.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+		PropTreeHeldKarp2DON_Grid hk2 = PropTreeHeldKarp2DON_Grid.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		PropTreeHeldKarp2 hk2 = PropTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 		hk2.waitFirstSolution(!optGiven);
 		gc.addPropagators(hk2);
+
+//		PropTreeHeldKarp2DON_Grid hkG = PropTreeHeldKarp2DON_Grid.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		hkG.waitFirstSolution(!optGiven);
+//		gc.addPropagators(hkG);
+
+		if(n>=1000 || moreHK){
+			PropTreeHeldKarp hk3 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+			hk3.waitFirstSolution(!optGiven);
+			gc.addPropagators(hk3);
+
+			PropTreeHeldKarp hk4 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+			hk4.waitFirstSolution(!optGiven);
+			gc.addPropagators(hk4);
+		}
+
+//		PropTreeHeldKarp hk5 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		hk5.waitFirstSolution(!optGiven);
+//		gc.addPropagators(hk5);
+
+//		PropTreeHeldKarp hk3 = PropTreeHeldKarp.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
+//		hk3.waitFirstSolution(!optGiven);
+//		gc.addPropagators(hk3);
+
+
+//		int[][] nc = new int[n][n];
+//		for(int i=0;i<n;i++){
+//			for(int j=i+1;j<n;j++){
+//				nc[i][j]=nc[j][i] = -dist[i][j];
+//			}
+//		}
+//		PropTreeNegativeHK hkNeg = PropTreeNegativeHK.mstBasedRelaxation(undi, totalCost, dMax, nc, gc, solver);
+//		hkNeg.waitFirstSolution(!optGiven);
+//		gc.addPropagators(hkNeg);
 
 		// similar results on DR with hk2 after hk (one fastRun(30) per propag) no gcc,
 		// similar results on T and DE : LOST CONFIGURATION!!!
 
 		solver.post(gc);
+//		solver.post(gc2);
 
 		solver.getSearchLoop().plugSearchMonitor(new VoidSearchMonitor(){
 			public void afterInitialPropagation() {
@@ -958,12 +1066,24 @@ public class DCMST {
 				System.out.println(totalCost);
 				System.out.println("%%%%%%%%%%%");
 				System.out.println("max degree = "+maxD);
+//				if(search==0 && !optGiven){
+//					solver.getSearchLoop().restartAfterEachSolution(true);
+//				}
 //				solver.getSearchLoop().interrupt();
 //				setRCInput(undi,"filtered200");
 //				System.exit(0);
 			}
-//			public void afterOpenNode(){
-//				System.out.println(totalCost);
+
+//			public void afterRestart(){
+//				if(search==0 && !optGiven){
+//					solver.getSearchLoop().restartAfterEachSolution(false);
+//				}
+//			}
+
+//			public void afterRestart() {
+//    			if(solver.getMeasures().getSolutionCount()>0){
+//					solver.getSearchLoop().interrupt();
+//				}
 //			}
 		});
 
@@ -974,14 +1094,17 @@ public class DCMST {
 //		findOpt = StrategyFactory.graphStrategy(undi,null,new viol(undi), GraphStrategy.NodeArcPriority.ARCS);
 //		findOpt = StrategyFactory.graphStrategy(undi,null,new nextSol(undi), GraphStrategy.NodeArcPriority.ARCS);
 //		firstSol = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,hk,0,false), GraphStrategy.NodeArcPriority.ARCS);
-		GraphStrategyBench2 gs = new GraphStrategyBench2(undi,dist,hk);
-		gs.configure(10,true,true,false);
+//		GraphStrategyBench2 gs = new GraphStrategyBench2(undi,dist,hk);
+//		gs.configure(10,true,false,false);
+//		gs.configure(9,true,true,false);
 //		firstSol = gs;
 //		AbstractStrategy strat = new Change(undi,firstSol,findOpt);
 
+		AbstractStrategy gs = StrategyFactory.graphStrategy(undi,null,new OneNodeOutMST(undi), GraphStrategy.NodeArcPriority.ARCS);
+
 		AbstractStrategy strat = new Change(undi,firstSol,gs);
 
-		
+
 //		AbstractStrategy strat = firstSol;//= new Change(undi,firstSol,findOpt);
 //		strat = StrategyFactory.graphRandom(undi,0);
 //		strat = StrategyFactory.graphStrategy(undi, null,new GraphStrategyBench(undi,dist,null,4,true), GraphStrategy.NodeArcPriority.ARCS);
@@ -996,20 +1119,42 @@ public class DCMST {
 			//RANDOM :
 //			case 0: solver.set(findOpt);break;
 			case 0:
-				solver.set(strat);
+//				solver.set(strat);
+				solver.set(gs);
 //				solver.getSearchLoop().restartAfterEachSolution(true);
 				break;
 			case 1: solver.set(new StaticStrategiesSequencer(new BottomUp_Minimization(totalCost),strat));break;
 			case 2: solver.set(new StaticStrategiesSequencer(new Dichotomic_Minimization(totalCost,solver),strat));break;
 			default: throw new UnsupportedOperationException();
 		}
+
+
+
 		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
 		solver.set(propagationEngine.set(new Sort(new PArc(propagationEngine, gc)).clearOut()));
+//		IPropagationEngine propagationEngine = new PropagationEngine(solver.getEnvironment());
+//		Sort g1 = new Sort(new PArc(propagationEngine, gc));
+//
+//		Sort g2 = new Sort(new PArc(propagationEngine, gc2),new PCoarse(propagationEngine, gc2));
+//
+//		Sort g3 = new Sort(new PCoarse(propagationEngine, gc));
+//		propagationEngine.set(new Sort(
+//				new Sort(
+//						g1.clearOut(),
+//						g3.clearOut()
+//				).clearOut(),
+//				g2.sweepUp()
+//		).loopOut());
+//		solver.set(propagationEngine);
+
 		solver.getSearchLoop().getLimitsBox().setTimeLimit(TIMELIMIT);
 		SearchMonitorFactory.log(solver, true, false);
 		// resolution
 		solver.findOptimalSolution(ResolutionPolicy.MINIMIZE, totalCost);
 		if(solver.getMeasures().getSolutionCount()==0 && solver.getMeasures().getTimeCount()<TIMELIMIT){
+			throw new UnsupportedOperationException();
+		}
+		if(solver.getSearchLoop().getObjectivemanager().getBestValue()!=optimum && solver.getMeasures().getTimeCount()<TIMELIMIT){
 			throw new UnsupportedOperationException();
 		}
 		if(solver.getMeasures().getSolutionCount()>1 && optGiven){
@@ -1218,7 +1363,7 @@ public class DCMST {
 						int cost = dist[i][j];
 //						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1230,12 +1375,12 @@ public class DCMST {
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
 				if(ker.neighborhoodSize()<env.neighborhoodSize()
-					&& ker.neighborhoodSize()<dMax[i]-1){
+						&& ker.neighborhoodSize()<dMax[i]-1){
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
 //						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
 						if(to==-1 || cost<minCost
-						|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
+								|| (cost<minCost && g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)){
 							minCost = cost;
 							from = i;
 							to = j;
@@ -1292,19 +1437,19 @@ public class DCMST {
 				ker = g.getKernelGraph().getSuccessorsOf(i);
 				env = g.getEnvelopGraph().getSuccessorsOf(i);
 				if(ker.neighborhoodSize()<dMax[i]-1)
-				if(ker.neighborhoodSize()==0){
-					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
-						int cost = dist[i][j];
-						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
-						if(to==-1 || cost<minCost){
-							minCost = cost;
-							from = i;
-							to = j;
+					if(ker.neighborhoodSize()==0){
+						for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
+							int cost = dist[i][j];
+							if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
+								if(to==-1 || cost<minCost){
+									minCost = cost;
+									from = i;
+									to = j;
+								}
 						}
-					}
 //					if(to!=-1)
 //					return true;
-				}
+					}
 			}
 			if(to!=-1){
 				return true;
@@ -1370,14 +1515,14 @@ public class DCMST {
 					for(int j=env.getFirstElement();j>=0;j=env.getNextElement()){
 						int cost = dist[i][j];
 						if(g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize()<dMax[j]-1)
-						if(to==-1 || cost>minCost){
-							minCost = cost;
-							from = i;
-							to = j;
-						}
+							if(to==-1 || cost>minCost){
+								minCost = cost;
+								from = i;
+								to = j;
+							}
 					}
 					if(to!=-1)
-					return true;
+						return true;
 				}
 			}
 			for(int i=0;i<n;i++){
@@ -1488,9 +1633,10 @@ public class DCMST {
 		public Decision getDecision() {
 			if(solver.getMeasures().getSolutionCount()==0){
 //				if(solver.getMeasures().getFailCount()<100){
-					return strats[0].getDecision();
+				return strats[0].getDecision();
 //				}
-			}return strats[1].getDecision();
+			}
+			return strats[1].getDecision();
 		}
 	}
 
@@ -1515,4 +1661,432 @@ public class DCMST {
 //		// cost-GCC
 //		gc.addPropagators(new PropGCC_cost_LowUp_undirected(undi, flow, totalCost,
 //		costMatrix,low, up, gc, solver));
+
+	private static class PropOneNodes extends Propagator<UndirectedGraphVar>{
+
+		BitSet oneNode;
+		int[] counter;
+
+		protected PropOneNodes(UndirectedGraphVar vars, Solver solver, Constraint constraint) {
+			super(new UndirectedGraphVar[]{vars}, solver, constraint, PropagatorPriority.LINEAR, true);
+			oneNode = new BitSet(n);
+			counter = new int[n];
+		}
+
+		@Override
+		public int getPropagationConditions(int vIdx) {
+			return EventType.REMOVEARC.mask;
+		}
+
+		@Override
+		public void propagate(int evtmask) throws ContradictionException {
+			preprocessOneNodes();
+			UndirectedGraphVar g = vars[0];
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				if(oneNode.get(i))
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(oneNode.get(j)){
+						if(!g.getKernelGraph().edgeExists(i,j)){
+							g.removeArc(i, j, this);
+						}
+					}
+				}
+			}
+		}
+
+		@Override
+		public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
+			propagate(0);
+		}
+
+		@Override
+		public ESat isEntailed() {
+			return ESat.UNDEFINED;
+		}
+
+		private void preprocessOneNodes() {
+			INeighbors nei;
+			oneNode.clear();
+			for(int i = 0;i<n;i++){
+				counter[i] = 0;
+			}
+			UndirectedGraphVar g = vars[0];
+			int[] maxDegree = dMax;
+			LinkedList<Integer> list = new LinkedList<Integer>();
+			for(int first = 0;first<n;first++){
+				if(maxDegree[first]==1 && !oneNode.get(first)){
+					int k=first;
+					list.add(k);
+					while(!list.isEmpty()){
+						k = list.removeFirst();
+						oneNode.set(k);
+						nei = g.getKernelGraph().getSuccessorsOf(k);
+						for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
+							if(!oneNode.get(s)){
+								counter[s]++;
+								if(counter[s]>=maxDegree[s]){
+									if(g.instantiated()){
+										//ok
+									}else{
+										throw new UnsupportedOperationException();
+									// contradiction mais devrait deja avoir ete capturee
+									}
+								}
+								if(counter[s]==maxDegree[s]-1){
+									oneNode.set(s);
+									list.addLast(s);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private static class OneNodeOutMST extends ArcStrategy<UndirectedGraphVar>{
+
+		public OneNodeOutMST (UndirectedGraphVar g){
+			super(g);
+		}
+
+		@Override
+		public boolean computeNextArc() {
+			return computeNext();
+
+		}
+		public boolean computeNext() {
+			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+				to = -1;
+				int i = from;
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 || dMax[j]==1){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 || dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j)){
+							from = i;
+							to = j;
+							return true;
+						}
+					}
+				}
+			}
+			from = -1;
+			to = -1;
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 || dMax[j]==1){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 || dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j)){
+							from = i;
+							to = j;
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+		public boolean computePatat() {
+			if(from!=-1 && g.getEnvelopGraph().getSuccessorsOf(from).neighborhoodSize()!=g.getKernelGraph().getSuccessorsOf(from).neighborhoodSize()){
+				to = -1;
+				int i = from;
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 || dMax[j]==1){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 || dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j)){
+							from = i;
+							to = j;
+							return true;
+						}
+					}
+				}
+			}
+			from = -1;
+			to = -1;
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==1 || dMax[j]==1){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 && dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j))
+							if(dMax[i]==2 || dMax[j]==2){
+								from = i;
+								to = j;
+								return true;
+							}
+					}
+				}
+			}
+			for(int i=0;i<n;i++){
+				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
+				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+					if(!g.getKernelGraph().edgeExists(i,j)){
+						if(!hk.contains(i,j)){
+							from = i;
+							to = j;
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+		public boolean computeMax() {
+			from = -1;
+			int minDelta = 0;
+			for(int i=0;i<n;i++){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()!= k){
+					if(dMax[i]-k>minDelta){
+						minDelta = dMax[i]-k;
+						from = i;
+					}
+				}
+			}
+			if(from==-1){
+				return false;
+			}
+			to = -1;
+			minDelta = 0;
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
+			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(!g.getKernelGraph().edgeExists(from,i)){
+					if(!hk.contains(from,i))
+					if(dMax[i]-k>minDelta){
+						minDelta = dMax[i]-k;
+						to = i;
+					}
+				}
+			}
+			if(to==-1)
+			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(!g.getKernelGraph().edgeExists(from,i)){
+					if(dMax[i]-k>minDelta){
+						minDelta = dMax[i]-k;
+						to = i;
+					}
+				}
+			}
+			if(to==-1){
+				throw new UnsupportedOperationException();
+			}
+			return true;
+		}
+		public boolean computeMin() {
+			from = -1;
+			int minDelta = n*2;
+			for(int i=0;i<n;i++){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(g.getEnvelopGraph().getSuccessorsOf(i).neighborhoodSize()!= k){
+					if(dMax[i]-k<minDelta){
+						minDelta = dMax[i]-k;
+						from = i;
+					}
+				}
+			}
+			if(from==-1){
+				return false;
+			}
+			to = -1;
+			minDelta = 2*n;
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(from);
+			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(!g.getKernelGraph().edgeExists(from,i)){
+					if(!hk.contains(from,i))
+					if(dMax[i]-k<minDelta){
+						minDelta = dMax[i]-k;
+						to = i;
+					}
+				}
+			}
+			if(to==-1)
+			for(int i=nei.getFirstElement();i>=0;i=nei.getNextElement()){
+				int k = g.getKernelGraph().getSuccessorsOf(i).neighborhoodSize();
+				if(!g.getKernelGraph().edgeExists(from,i)){
+					if(dMax[i]-k<minDelta){
+						minDelta = dMax[i]-k;
+						to = i;
+					}
+				}
+			}
+			if(to==-1){
+				throw new UnsupportedOperationException();
+			}
+			return true;
+		}
+	}
 }
