@@ -245,6 +245,7 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
 //		System.out.println(hkb);
+
 	}
 
 	protected void convergeAndFilter() throws ContradictionException {

@@ -137,14 +137,14 @@ public class DCMST {
 		HCP_Parser.writeTextInto("instance;sols;fails;nodes;time;obj;lb;ub;search;\n", outFile);
 		File folder = new File(dir+"/"+type);
 		String[] list = folder.list();
-		nMin = 10;
+		nMin = 100;
 		nMax = 9000;
 		for (String s : list) {
 			File file = new File(dir+"/"+type+"/"+s);
 //			if(!(s.contains("500_2")||s.contains("500_1")))
 //			if(s.contains("300_3"))
-			if(s.contains("400_1"))
-//			if(s.contains("200_2"))
+//			if(s.contains("400_1"))
+			if(s.contains("200_2"))
 //				if(!s.contains("_1"))
 //				if(!s.contains("_2"))
 //			if(s.contains("300_3")||s.contains("500_2")||s.contains("20f0_2"))
@@ -560,7 +560,6 @@ public class DCMST {
 
 		gc.addPropagators(new PropOneNodes(undi, solver, gc));
 //		gc.addPropagators(new PropMaxDiameterFromNode(undi, 4, 0, gc, solver));
-
 //		Propagator euclFilter = new Propagator<UndirectedGraphVar>(new UndirectedGraphVar[]{undi},solver,gc, PropagatorPriority.LINEAR) {
 //
 //			IGraphDeltaMonitor gdm = undi.monitorDelta(this);
@@ -998,7 +997,7 @@ public class DCMST {
 		low[n] = 1;
 		up[n] = dMax[0];
 		IntVar flow = VariableFactory.bounded("flowMax",n-1,n-1,solver);
-		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
+//		gc.addPropagators(new PropGCC_LowUp_undirected(undi, flow, low, up, gc, solver));
 
 //PropBIStrongTreeHeldKarp2 hk2 = PropBIStrongTreeHeldKarp2.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);
 //		PropTreeHeldKarpLMR hk2 = PropTreeHeldKarpLMR.mstBasedRelaxation(undi, totalCost, dMax, dist, gc, solver);

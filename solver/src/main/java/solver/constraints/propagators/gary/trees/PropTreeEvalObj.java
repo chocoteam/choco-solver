@@ -75,30 +75,61 @@ public class PropTreeEvalObj extends Propagator {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int minSum =0;
-		INeighbors nei;
-		for (int i = 0; i < n; i++) {
-			lowestUnused[i] = 0;
-			nei = g.getEnvelopGraph().getNeighborsOf(i);
+//		int minSum =0;
+//		INeighbors nei;
+//		for (int i = 0; i < n; i++) {
+//			lowestUnused[i] = 0;
+//			nei = g.getEnvelopGraph().getNeighborsOf(i);
+//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//				if(!g.getKernelGraph().arcExists(i,j)){
+//					if( lowestUnused[i] > distMatrix[i][j]){
+//						lowestUnused[i] = distMatrix[i][j];
+//					}
+//				}
+//			}
+//			nei = g.getKernelGraph().getNeighborsOf(i);
+//			if(nei.neighborhoodSize()>0){
+//				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
+//					if(i<j)
+//					minSum += distMatrix[i][j];
+//				}
+//			}else{
+//				minSum += lowestUnused[i];
+//			}
+//		}
+//		sum.updateLowerBound(minSum, this);
+//		filter(minSum);
+		int min = 0;
+		int max = 0;
+		int ce = 0;
+		int ck = 0;
+		int minCost = 1000000;
+		int maxCost = 0;
+		for(int i=0;i<n;i++){
+			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if(!g.getKernelGraph().arcExists(i,j)){
-					if( lowestUnused[i] > distMatrix[i][j]){
-						lowestUnused[i] = distMatrix[i][j];
+				if(i<j){
+					ce++;
+					max += distMatrix[i][j];
+					if(g.getKernelGraph().edgeExists(i,j)){
+						min += distMatrix[i][j];
+						ck++;
+					}else{
+						if(distMatrix[i][j]>maxCost){
+							maxCost = distMatrix[i][j];
+						}
+						if(distMatrix[i][j]<minCost){
+							minCost = distMatrix[i][j];
+						}
 					}
 				}
 			}
-			nei = g.getKernelGraph().getNeighborsOf(i);
-			if(nei.neighborhoodSize()>0){
-				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if(i<j)
-					minSum += distMatrix[i][j];
-				}
-			}else{
-				minSum += lowestUnused[i];
-			}
 		}
-		sum.updateLowerBound(minSum, this);
-		filter(minSum);
+		int max2 = min + (n-1-ck)*maxCost;
+		min += (n-1-ck)*minCost;
+		sum.updateLowerBound(min,this);
+		sum.updateUpperBound(max,this);
+		sum.updateUpperBound(max2,this);
 	}
 	
 	@Override

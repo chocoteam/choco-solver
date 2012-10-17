@@ -103,7 +103,7 @@ public class HCPsymmetric {
 		}
 	}
 
-	private static boolean[][] generateKingTourInstance(int size){
+	public static boolean[][] generateKingTourInstance(int size){
 		int n = size*size;
 		int node,next,a,b;
 		boolean[][] matrix = new boolean[n][n];
