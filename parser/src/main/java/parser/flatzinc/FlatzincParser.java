@@ -325,7 +325,7 @@ public class FlatzincParser extends Parser {
 
 
     // $ANTLR start "pred_decl"
-    // parser/flatzinc/Flatzinc.g:62:1: pred_decl : PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* LP SC -> ^( PREDICATE IDENTIFIER ( pred_param )+ ) ;
+    // parser/flatzinc/Flatzinc.g:62:1: pred_decl : PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* RP SC -> ^( PREDICATE IDENTIFIER ( pred_param )+ ) ;
     public final FlatzincParser.pred_decl_return pred_decl() throws RecognitionException {
         FlatzincParser.pred_decl_return retval = new FlatzincParser.pred_decl_return();
         retval.start = input.LT(1);
@@ -337,7 +337,7 @@ public class FlatzincParser extends Parser {
         Token IDENTIFIER7 = null;
         Token LP8 = null;
         Token CM10 = null;
-        Token LP12 = null;
+        Token RP12 = null;
         Token SC13 = null;
         FlatzincParser.pred_param_return pred_param9 = null;
 
@@ -348,17 +348,18 @@ public class FlatzincParser extends Parser {
         Object IDENTIFIER7_tree = null;
         Object LP8_tree = null;
         Object CM10_tree = null;
-        Object LP12_tree = null;
+        Object RP12_tree = null;
         Object SC13_tree = null;
         RewriteRuleTokenStream stream_SC = new RewriteRuleTokenStream(adaptor, "token SC");
+        RewriteRuleTokenStream stream_RP = new RewriteRuleTokenStream(adaptor, "token RP");
         RewriteRuleTokenStream stream_PREDICATE = new RewriteRuleTokenStream(adaptor, "token PREDICATE");
         RewriteRuleTokenStream stream_IDENTIFIER = new RewriteRuleTokenStream(adaptor, "token IDENTIFIER");
         RewriteRuleTokenStream stream_CM = new RewriteRuleTokenStream(adaptor, "token CM");
         RewriteRuleTokenStream stream_LP = new RewriteRuleTokenStream(adaptor, "token LP");
         RewriteRuleSubtreeStream stream_pred_param = new RewriteRuleSubtreeStream(adaptor, "rule pred_param");
         try {
-            // parser/flatzinc/Flatzinc.g:63:2: ( PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* LP SC -> ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
-            // parser/flatzinc/Flatzinc.g:63:6: PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* LP SC
+            // parser/flatzinc/Flatzinc.g:63:2: ( PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* RP SC -> ^( PREDICATE IDENTIFIER ( pred_param )+ ) )
+            // parser/flatzinc/Flatzinc.g:63:6: PREDICATE IDENTIFIER LP pred_param ( CM pred_param )* RP SC
             {
                 PREDICATE6 = (Token) match(input, PREDICATE, FOLLOW_PREDICATE_in_pred_decl401);
                 stream_PREDICATE.add(PREDICATE6);
@@ -415,8 +416,8 @@ public class FlatzincParser extends Parser {
                 } while (true);
 
 
-                LP12 = (Token) match(input, LP, FOLLOW_LP_in_pred_decl416);
-                stream_LP.add(LP12);
+                RP12 = (Token) match(input, RP, FOLLOW_RP_in_pred_decl416);
+                stream_RP.add(RP12);
 
 
                 SC13 = (Token) match(input, SC, FOLLOW_SC_in_pred_decl418);
@@ -424,7 +425,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: PREDICATE, IDENTIFIER, pred_param
+                // elements: IDENTIFIER, PREDICATE, pred_param
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -535,7 +536,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, pred_param_type, CL
+                // elements: CL, pred_param_type, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -1217,7 +1218,7 @@ public class FlatzincParser extends Parser {
                     stream_var_type_u.add(var_type_u42.getTree());
 
                     // AST REWRITE
-                    // elements: var_type_u, index_set
+                    // elements: index_set, var_type_u
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1525,7 +1526,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, INT_CONST
+                    // elements: INT_CONST, DD, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1611,7 +1612,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST
+                    // elements: INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1675,7 +1676,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: DD, INT_CONST, SET, INT_CONST
+                    // elements: DD, INT_CONST, INT_CONST, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -1779,7 +1780,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, CM, SET, INT_CONST
+                    // elements: INT_CONST, INT_CONST, CM, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2053,7 +2054,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, DD, INT_CONST
+                    // elements: DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2139,7 +2140,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST
+                    // elements: INT_CONST, CM
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2203,7 +2204,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, SET, DD
+                    // elements: DD, INT_CONST, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2307,7 +2308,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, SET, CM
+                    // elements: INT_CONST, CM, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2432,7 +2433,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, index_set, ARRAY, DD
+                    // elements: ARRAY, DD, index_set, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2596,7 +2597,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: CM, INT_CONST, index_set, ARRAY
+                    // elements: CM, index_set, INT_CONST, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2738,7 +2739,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, index_set, INT_CONST, INT_CONST, DD, ARRAY
+                    // elements: ARRAY, INT_CONST, DD, index_set, SET, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -2920,7 +2921,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: SET, index_set, CM, ARRAY, INT_CONST
+                    // elements: index_set, ARRAY, INT_CONST, CM, SET
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3252,7 +3253,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: ARRAY, VAR, index_set, SET
+                    // elements: VAR, SET, index_set, ARRAY
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3395,7 +3396,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: INT_CONST, INT_CONST, DD
+                    // elements: DD, INT_CONST, INT_CONST
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -3832,7 +3833,7 @@ public class FlatzincParser extends Parser {
 
 
                     // AST REWRITE
-                    // elements: RS, expr, LS
+                    // elements: RS, LS, expr
                     // token labels: 
                     // rule labels: retval
                     // token list labels: 
@@ -4197,7 +4198,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, par_type, expr
+                // elements: expr, par_type, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4356,7 +4357,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: expr, var_type, annotations, IDENTIFIER
+                // elements: annotations, expr, IDENTIFIER, var_type
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -4541,7 +4542,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: IDENTIFIER, expr, CONSTRAINT, annotations
+                // elements: expr, CONSTRAINT, annotations, IDENTIFIER
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -5062,7 +5063,7 @@ public class FlatzincParser extends Parser {
 
 
                 // AST REWRITE
-                // elements: LP, RP, expr, IDENTIFIER
+                // elements: RP, expr, IDENTIFIER, LP
                 // token labels: 
                 // rule labels: retval
                 // token list labels: 
@@ -5079,7 +5080,7 @@ public class FlatzincParser extends Parser {
                     );
 
                     // parser/flatzinc/Flatzinc.g:234:20: ( LP ( expr )+ RP )?
-                    if (stream_LP.hasNext() || stream_RP.hasNext() || stream_expr.hasNext()) {
+                    if (stream_RP.hasNext() || stream_expr.hasNext() || stream_LP.hasNext()) {
                         adaptor.addChild(root_0,
                                 stream_LP.nextNode()
                         );
@@ -5098,9 +5099,9 @@ public class FlatzincParser extends Parser {
                         );
 
                     }
-                    stream_LP.reset();
                     stream_RP.reset();
                     stream_expr.reset();
+                    stream_LP.reset();
 
                 }
 
@@ -5535,10 +5536,10 @@ public class FlatzincParser extends Parser {
     public static final BitSet FOLLOW_PREDICATE_in_pred_decl401 = new BitSet(new long[]{0x0000000004000000L});
     public static final BitSet FOLLOW_IDENTIFIER_in_pred_decl403 = new BitSet(new long[]{0x0000000080000000L});
     public static final BitSet FOLLOW_LP_in_pred_decl405 = new BitSet(new long[]{0x0008400071000440L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl407 = new BitSet(new long[]{0x0000000080002000L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl407 = new BitSet(new long[]{0x0000040000002000L});
     public static final BitSet FOLLOW_CM_in_pred_decl410 = new BitSet(new long[]{0x0008400071000440L});
-    public static final BitSet FOLLOW_pred_param_in_pred_decl412 = new BitSet(new long[]{0x0000000080002000L});
-    public static final BitSet FOLLOW_LP_in_pred_decl416 = new BitSet(new long[]{0x0000200000000000L});
+    public static final BitSet FOLLOW_pred_param_in_pred_decl412 = new BitSet(new long[]{0x0000040000002000L});
+    public static final BitSet FOLLOW_RP_in_pred_decl416 = new BitSet(new long[]{0x0000200000000000L});
     public static final BitSet FOLLOW_SC_in_pred_decl418 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_pred_param_type_in_pred_param446 = new BitSet(new long[]{0x0000000000001000L});
     public static final BitSet FOLLOW_CL_in_pred_param448 = new BitSet(new long[]{0x0000000004000000L});

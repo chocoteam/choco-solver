@@ -60,7 +60,7 @@ flatzinc_model
 
 
 pred_decl
-	:   PREDICATE IDENTIFIER LP pred_param (CM pred_param)* LP SC
+	:   PREDICATE IDENTIFIER LP pred_param (CM pred_param)* RP SC
 	-> ^(PREDICATE IDENTIFIER pred_param+)
 	;
 

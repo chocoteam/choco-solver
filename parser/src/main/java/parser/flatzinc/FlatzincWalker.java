@@ -2081,7 +2081,7 @@ public class FlatzincWalker extends TreeParser {
                 match(input, Token.UP, null);
 
 
-                LOGGER.info("% skip predicate : " + (IDENTIFIER7 != null ? IDENTIFIER7.getText() : null));
+                //        LOGGER.info("% skip predicate : "+ (IDENTIFIER7!=null?IDENTIFIER7.getText():null));
 
 
             }

@@ -330,7 +330,7 @@ bool_const  returns [boolean value]
 pred_decl
 	:   ^(PREDICATE IDENTIFIER pred_param+)
 	{
-        LOGGER.info("\% skip predicate : "+ $IDENTIFIER.text);
+//        LOGGER.info("\% skip predicate : "+ $IDENTIFIER.text);
 	}
 	;
 
