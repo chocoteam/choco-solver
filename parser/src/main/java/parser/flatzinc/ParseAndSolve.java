@@ -244,9 +244,7 @@ public class ParseAndSolve {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
-            System.out.println(solver.toString());
-
-//            solver.solve();
+            solver.solve();
         }
     }
 
