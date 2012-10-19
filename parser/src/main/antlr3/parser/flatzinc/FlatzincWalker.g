@@ -57,6 +57,11 @@ flatzinc_model [Solver aSolver, THashMap<String, Object> map]
 	this.map = map;
     }
 	   (pred_decl)* (param_decl)* (var_decl)* (constraint)* solve_goal
+	{
+	if (LoggerFactory.getLogger("fzn").isInfoEnabled()) {
+        mLayout.setSearchLoop(mSolver.getSearchLoop());
+    }
+	}
 	;
 
 par_type    returns [Declaration decl]
