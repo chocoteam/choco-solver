@@ -34,7 +34,6 @@ import parser.flatzinc.FZNException;
 import parser.flatzinc.ast.constraints.IBuilder;
 import parser.flatzinc.ast.expression.EAnnotation;
 import parser.flatzinc.ast.expression.Expression;
-import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.constraints.Constraint;
 
@@ -51,7 +50,7 @@ import java.util.Properties;
 *
 * Constraint builder from flatzinc-like object.
 */
-public final class PConstraint {
+public final class FConstraint {
 
     static Logger LOGGER = LoggerFactory.getLogger("fzn");
 
@@ -62,7 +61,7 @@ public final class PConstraint {
     private static THashMap<String, IBuilder> builders = new THashMap<String, IBuilder>();
 
     static {
-        InputStream is = PConstraint.class.getResourceAsStream("/fzn_manager.properties");
+        InputStream is = FConstraint.class.getResourceAsStream("/fzn_manager.properties");
         try {
             properties.load(is);
         } catch (IOException e) {
@@ -71,10 +70,9 @@ public final class PConstraint {
         }
     }
 
-    public PConstraint(FZNParser parser, String id, List<Expression> exps, List<EAnnotation> annotations) {
+    public static void make_constraint(Solver aSolver, String id, List<Expression> exps, List<EAnnotation> annotations) {
         //TODO: manage annotations
 //        build(id, exps, parser.solver);
-        Solver solver = parser.solver;
         IBuilder builder;
         if (builders.containsKey(id)) {
             builder = builders.get(id);
@@ -86,9 +84,9 @@ public final class PConstraint {
             builder = (IBuilder) loadManager(name);
             builders.put(id, builder);
         }
-        Constraint cstr = builder.build(solver, id, exps, annotations);
+        Constraint cstr = builder.build(aSolver, id, exps, annotations);
         if (cstr != null)
-            solver.post(cstr);
+            aSolver.post(cstr);
         readAnnotations(annotations);
     }
 

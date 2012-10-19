@@ -24,29 +24,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc.parser;
 
-package parser.flatzinc.ast.declaration;
+import junit.framework.Assert;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.annotations.Test;
+import parser.flatzinc.FlatzincParser;
+import parser.flatzinc.FlatzincWalker;
+import parser.flatzinc.ast.declaration.DInt;
+import parser.flatzinc.ast.declaration.DInt2;
+import parser.flatzinc.ast.declaration.Declaration;
 
-/*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 7 janv. 2010
-* Since : Choco 2.1.1
-*
-* Declaration defined type for parameter and variable
-* in flatzinc format.
-*
-*/
-public abstract class Declaration {
+import java.io.IOException;
 
-    public enum DType {
-        BOOL, FLOAT, INT, SETOFINT, ARRAY, SET, INT2, INTN
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 18/10/12
+ */
+public class T_index_set extends GrammarTest {
+
+    public Declaration index_set(FlatzincParser parser) throws RecognitionException {
+        FlatzincParser.index_set_return r = parser.index_set();
+        CommonTree t = (CommonTree) r.getTree();
+        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+        FlatzincWalker walker = new FlatzincWalker(nodes);
+        return walker.index_set();
     }
 
-    public final DType typeOf;
-
-
-    protected Declaration(DType type) {
-        this.typeOf = type;
+    @Test
+    public void test1() throws IOException, RecognitionException {
+        FlatzincParser fp = parser("1..3");
+        Declaration d = index_set(fp);
+        Assert.assertTrue(d instanceof DInt2);
+        Assert.assertEquals(1, ((DInt2) d).getLow());
+        Assert.assertEquals(3, ((DInt2) d).getUpp());
     }
+
+    @Test
+    public void test2() throws IOException, RecognitionException {
+        FlatzincParser fp = parser("int");
+        Declaration d = index_set(fp);
+        Assert.assertEquals(DInt.me, d);
+    }
+
+
 }

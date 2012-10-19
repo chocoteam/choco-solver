@@ -25,28 +25,30 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package parser.flatzinc.ast.declaration;
+package parser.flatzinc.ast;
+
+import parser.flatzinc.ast.declaration.Declaration;
 
 /*
 * User : CPRUDHOM
 * Mail : cprudhom(a)emn.fr
-* Date : 7 janv. 2010
+* Date : 11 janv. 2010
 * Since : Choco 2.1.1
 *
-* Declaration defined type for parameter and variable
-* in flatzinc format.
-*
+* Class for Predicate parameter defintion based on flatzinc-like objects.
 */
-public abstract class Declaration {
+public final class FPredParam {
 
-    public enum DType {
-        BOOL, FLOAT, INT, SETOFINT, ARRAY, SET, INT2, INTN
+    final Declaration type;
+    final String identifier;
+
+    public FPredParam(Declaration type, String identifier) {
+        this.type = type;
+        this.identifier = identifier;
     }
 
-    public final DType typeOf;
-
-
-    protected Declaration(DType type) {
-        this.typeOf = type;
+    @Override
+    public String toString() {
+        return type.toString() + ": " + identifier;
     }
 }

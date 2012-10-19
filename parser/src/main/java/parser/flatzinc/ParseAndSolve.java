@@ -27,13 +27,19 @@
 
 package parser.flatzinc;
 
+import gnu.trove.map.hash.THashMap;
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import parser.flatzinc.parser.FZNParser;
+import parser.flatzinc.ast.Exit;
 import solver.Solver;
 import solver.explanations.ExplanationFactory;
 import solver.propagation.IPropagationEngine;
@@ -45,7 +51,9 @@ import solver.propagation.hardcoded.dyn.ActivityBasedVarEngine;
 import solver.search.loop.monitors.SearchMonitorFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +94,7 @@ public class ParseAndSolve {
     @Option(name = "-exp", usage = "Explanation engine.", required = false)
     protected ExplanationFactory expeng = ExplanationFactory.NONE;
 
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, RecognitionException {
         new ParseAndSolve().doMain(args);
     }
 
@@ -106,15 +114,40 @@ public class ParseAndSolve {
         parseandsolve();
     }
 
-    private void parseandsolve() {
+    public void buildParser(InputStream is, Solver mSolver, THashMap<String, Object> map) {
+        try {
+            // Create an input character stream from standard in
+            ANTLRInputStream input = new ANTLRInputStream(is);
+            // Create an ExprLexer that feeds from that stream
+            FlatzincLexer lexer = new FlatzincLexer(input);
+            // Create a stream of tokens fed by the lexer
+            CommonTokenStream tokens = new CommonTokenStream(lexer);
+            // Create a parser that feeds off the token stream
+            FlatzincParser parser = new FlatzincParser(tokens);
+            // Begin parsing at rule prog, get return value structure
+            FlatzincParser.flatzinc_model_return r = parser.flatzinc_model();
+
+            // WALK RESULTING TREE
+            CommonTree t = (CommonTree) r.getTree(); // get tree from parser
+            // Create a tree node stream from resulting tree
+            CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+            FlatzincWalker walker = new FlatzincWalker(nodes); // create a tree parser
+            walker.flatzinc_model(mSolver, map);                 // launch at start rule prog
+        } catch (IOException io) {
+            Exit.log(io.getMessage());
+        } catch (RecognitionException re) {
+            Exit.log(re.getMessage());
+        }
+    }
+
+
+    private void parseandsolve() throws IOException {
         for (String instance : instances) {
-            final FZNParser parser = new FZNParser(all, free);
-            LOGGER.info("% load file ...");
-            parser.loadInstance(new File(instance));
             LOGGER.info("% parse instance...");
-            parser.parse();
+            Solver solver = new Solver();
+            THashMap<String, Object> map = new THashMap<String, Object>();
+            buildParser(new FileInputStream(new File(instance)), solver, map);
             LOGGER.info("% solve instance...");
-            final Solver solver = parser.solver;
 
             switch (eng) {
                 case 0:
@@ -211,7 +244,9 @@ public class ParseAndSolve {
             if (tl > -1) {
                 solver.getSearchLoop().getLimitsBox().setTimeLimit(tl);
             }
-            solver.solve();
+            System.out.println(solver.toString());
+
+//            solver.solve();
         }
     }
 

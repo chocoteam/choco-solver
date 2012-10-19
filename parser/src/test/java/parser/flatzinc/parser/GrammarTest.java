@@ -24,29 +24,36 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc.parser;
 
-package parser.flatzinc.ast.declaration;
+import org.antlr.runtime.ANTLRInputStream;
+import org.antlr.runtime.CommonTokenStream;
+import parser.flatzinc.FlatzincLexer;
+import parser.flatzinc.FlatzincParser;
 
-/*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 7 janv. 2010
-* Since : Choco 2.1.1
-*
-* Declaration defined type for parameter and variable
-* in flatzinc format.
-*
-*/
-public abstract class Declaration {
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-    public enum DType {
-        BOOL, FLOAT, INT, SETOFINT, ARRAY, SET, INT2, INTN
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 18/10/12
+ */
+public class GrammarTest {
+
+    public FlatzincParser parser(String st) throws IOException {
+        InputStream in = new ByteArrayInputStream(st.getBytes());
+        // Create an input character stream from standard in
+        ANTLRInputStream input = new ANTLRInputStream(in);
+        // Create an ExprLexer that feeds from that stream
+        FlatzincLexer lexer = new FlatzincLexer(input);
+        // Create a stream of tokens fed by the lexer
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        // Create a parser that feeds off the token stream
+        return new FlatzincParser(tokens);
     }
 
-    public final DType typeOf;
 
-
-    protected Declaration(DType type) {
-        this.typeOf = type;
-    }
 }

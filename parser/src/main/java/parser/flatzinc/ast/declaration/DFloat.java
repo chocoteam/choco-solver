@@ -33,20 +33,18 @@ package parser.flatzinc.ast.declaration;
 * Date : 7 janv. 2010
 * Since : Choco 2.1.1
 *
-* Declaration defined type for parameter and variable
-* in flatzinc format.
-*
+* Boolean declaration in flatzinc format, like 'float' or 'var float'.
 */
-public abstract class Declaration {
+public final class DFloat extends Declaration {
 
-    public enum DType {
-        BOOL, FLOAT, INT, SETOFINT, ARRAY, SET, INT2, INTN
+    public static DFloat me = new DFloat();
+
+    private DFloat() {
+        super(DType.FLOAT);
     }
 
-    public final DType typeOf;
-
-
-    protected Declaration(DType type) {
-        this.typeOf = type;
+    @Override
+    public String toString() {
+        return "float";
     }
 }

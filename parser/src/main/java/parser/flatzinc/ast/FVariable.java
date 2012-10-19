@@ -30,9 +30,9 @@ package parser.flatzinc.ast;
 import gnu.trove.map.hash.THashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import parser.flatzinc.FZNLayout;
 import parser.flatzinc.ast.declaration.*;
 import parser.flatzinc.ast.expression.*;
-import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.constraints.unary.Member;
 import solver.variables.*;
@@ -52,7 +52,7 @@ import java.util.List;
 *
 */
 
-public final class PVariable extends ParVar {
+public final class FVariable {
 
     private static final boolean DEBUG = true;
     private static final String NO_NAME = "";
@@ -67,12 +67,13 @@ public final class PVariable extends ParVar {
         viz
     }
 
-    public PVariable(THashMap<String, Object> map, Declaration type, String identifier, List<EAnnotation> annotations, Expression expression, FZNParser parser) {
-        Solver solver = parser.solver;
+    public static void make_variable(THashMap<String, Object> map, Declaration type, String identifier, List<EAnnotation> annotations,
+                                     Expression expression, Solver aSolver, FZNLayout layout) {
+        Solver solver = aSolver;
         // value is always null, except for ARRAY, it can be defined
         // see Flatzinc specifications for more informations.
         switch (type.typeOf) {
-            case INT1:
+            case INT:
                 buildWithInt(identifier, expression, map, solver);
                 break;
             case INT2:
@@ -95,13 +96,13 @@ public final class PVariable extends ParVar {
                 }
                 break;
         }
-        readAnnotations(identifier, type, annotations, parser, map);
+        readAnnotations(identifier, type, annotations, layout, map);
 
     }
 
-    private static void readAnnotations(String name, Declaration type, List<EAnnotation> annotations, FZNParser parser, THashMap<String, Object> map) {
-        for (int i = 0; i < annotations.size(); i++) {
-            Expression expression = annotations.get(i);
+    private static void readAnnotations(String name, Declaration type, List<EAnnotation> expressions, FZNLayout layout, THashMap<String, Object> map) {
+        for (int i = 0; i < expressions.size(); i++) {
+            Expression expression = expressions.get(i);
             Expression.EType etype = expression.getTypeOf();
             Annotation varanno;
             switch (etype) {
@@ -111,7 +112,7 @@ public final class PVariable extends ParVar {
                     switch (varanno) {
                         case output_var:
                             IntVar var = (IntVar) map.get(name);
-                            parser.layout.addOutputVar(name, var, type);
+                            layout.addOutputVar(name, var, type);
                             break;
                         default:
                             //LOGGER.warn("% Unknown annotation :" + varanno.toString());
@@ -124,7 +125,7 @@ public final class PVariable extends ParVar {
                         switch (varanno) {
                             case output_array:
                                 IntVar[] vars = (IntVar[]) map.get(name);
-                                parser.layout.addOutputArrays(name, vars, eanno.exps, type);
+                                layout.addOutputArrays(name, vars, eanno.exps, type);
                                 break;
                             default:
 //                            LOGGER.warn("% Unknown annotation :" + varanno.toString());
@@ -246,7 +247,7 @@ public final class PVariable extends ParVar {
                 break;
             case IDA:
                 EIdArray eida = (EIdArray) expression;
-                iv = ((IntVar[]) map.get(eida.name))[eida.index.intValue() - 1];
+                iv = ((IntVar[]) map.get(eida.name))[eida.index - 1];
                 break;
             default:
                 iv = null;
@@ -267,8 +268,8 @@ public final class PVariable extends ParVar {
 //        final Declaration what = type.getWhat();
 //        final SetVariable sv;
 //        switch (what.typeOf) {
-//            case INT1:
-//                LOGGER.severe("PVariable#buildWithSet INT1: unknown constructor for " + name);
+//            case INT:
+//                LOGGER.severe("PVariable#buildWithSet INT: unknown constructor for " + name);
 //                throw new UnsupportedOperationException();
 //            case INT2:
 //                DInt2 bounds = (DInt2) what;
@@ -318,7 +319,7 @@ public final class PVariable extends ParVar {
                 }
                 map.put(name, bs);
                 break;
-            case INT1:
+            case INT:
                 vs = new IntVar[size];
                 if (expression == null) {
                     for (int i = 1; i <= size; i++) {
@@ -396,7 +397,7 @@ public final class PVariable extends ParVar {
                 }
                 map.put(name, bs);
                 break;
-            case INT1:
+            case INT:
             case INT2:
             case INTN:
                 final IntVar[] vs = new IntVar[size];

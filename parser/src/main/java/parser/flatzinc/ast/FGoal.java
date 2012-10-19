@@ -36,7 +36,6 @@ import parser.flatzinc.ast.expression.Expression;
 import parser.flatzinc.ast.searches.IntSearch;
 import parser.flatzinc.ast.searches.Strategy;
 import parser.flatzinc.ast.searches.VarChoice;
-import parser.flatzinc.parser.FZNParser;
 import solver.Solver;
 import solver.objective.MaxObjectiveManager;
 import solver.objective.MinObjectiveManager;
@@ -65,11 +64,7 @@ import java.util.List;
 * /br> or 'solve annotations minimize expression;' 
 */
 
-public class SolveGoal {
-
-    final List<EAnnotation> annotations;
-    final Resolution type;
-    final Expression expr;
+public class FGoal {
 
     public enum Resolution {
         SATISFY, MINIMIZE, MAXIMIZE
@@ -82,20 +77,13 @@ public class SolveGoal {
     }
 
 
-    public SolveGoal(FZNParser parser, List<EAnnotation> annotations, Resolution type, Expression expr) {
-        this.annotations = annotations;
-        this.type = type;
-        this.expr = expr;
-        defineGoal(parser, parser.solver);
-    }
-
-    private void defineGoal(FZNParser parser, Solver mSolver) {
-        Variable[] vars = mSolver.getVars();
+    public static void define_goal(boolean free, boolean all, Solver aSolver, List<EAnnotation> annotations, Resolution type, Expression expr) {
+        Variable[] vars = aSolver.getVars();
         IntVar[] ivars = new IntVar[vars.length];
         for (int i = 0; i < ivars.length; i++) {
             ivars[i] = (IntVar) vars[i];
         }
-        if (annotations.size() > 0 && !parser.free) {
+        if (annotations.size() > 0 && !free) {
             AbstractStrategy strategy = null;
             if (annotations.size() > 1) {
                 throw new UnsupportedOperationException("SolveGoal:: wrong annotations size");
@@ -106,53 +94,53 @@ public class SolveGoal {
 
                     AbstractStrategy[] strategies = new AbstractStrategy[earray.what.size()];
                     for (int i = 0; i < strategies.length; i++) {
-                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), mSolver);
+                        strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aSolver);
                     }
-                    strategy = new StrategiesSequencer(mSolver.getEnvironment(), strategies);
+                    strategy = new StrategiesSequencer(aSolver.getEnvironment(), strategies);
                 } else {
-                    strategy = readSearchAnnotation(annotation, mSolver);
+                    strategy = readSearchAnnotation(annotation, aSolver);
                 }
 //                solver.set(strategy);
                 long t = System.currentTimeMillis();
-                mSolver.set(
-                        new StrategiesSequencer(mSolver.getEnvironment(),
+                aSolver.set(
+                        new StrategiesSequencer(aSolver.getEnvironment(),
                                 strategy,
-                                StrategyFactory.random(ivars, mSolver.getEnvironment(), t))
+                                StrategyFactory.random(ivars, aSolver.getEnvironment(), t))
                 );
 
                 System.out.println("% t:" + t);
             }
         } else {
-            LoggerFactory.getLogger(SolveGoal.class).warn("% No search annotation. Set default.");
-            if (type == Resolution.SATISFY && !mSolver.getSearchLoop().stopAtFirstSolution()) {
-                mSolver.set(StrategyFactory.minDomMinVal(ivars, mSolver.getEnvironment()));
+            LoggerFactory.getLogger(FGoal.class).warn("% No search annotation. Set default.");
+            if (type == Resolution.SATISFY && !aSolver.getSearchLoop().stopAtFirstSolution()) {
+                aSolver.set(StrategyFactory.minDomMinVal(ivars, aSolver.getEnvironment()));
             } else {
-                ActivityBased abs = new ActivityBased(mSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
-                mSolver.set(abs);
+                ActivityBased abs = new ActivityBased(aSolver, ivars, 0.999d, 0.2d, 8, 1.1d, 1, 29091981L);
+                aSolver.set(abs);
                 if (type != Resolution.SATISFY) {
-                    mSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(mSolver, ivars, 29091981L, abs, false, ivars.length / 2));
+                    aSolver.getSearchLoop().plugSearchMonitor(new ABSLNS(aSolver, ivars, 29091981L, abs, false, ivars.length / 2));
                 }
             }
 //            solver.set(StrategyFactory.random(ivars, solver.getEnvironment()));
         }
 
-        AbstractSearchLoop search = mSolver.getSearchLoop();
+        AbstractSearchLoop search = aSolver.getSearchLoop();
         switch (type) {
             case SATISFY:
-                search.stopAtFirstSolution(!parser.all);
+                search.stopAtFirstSolution(!all);
                 break;
             case MAXIMIZE:
-                IntVar max = expr.intVarValue(mSolver);
+                IntVar max = expr.intVarValue(aSolver);
                 MaxObjectiveManager maom = new MaxObjectiveManager(max);
-                maom.setMeasures(mSolver.getMeasures());
+                maom.setMeasures(aSolver.getMeasures());
                 search.setObjectivemanager(maom);
 //                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
                 break;
             case MINIMIZE:
-                IntVar min = expr.intVarValue(mSolver);
+                IntVar min = expr.intVarValue(aSolver);
                 MinObjectiveManager miom = new MinObjectiveManager(min);
-                miom.setMeasures(mSolver.getMeasures());
+                miom.setMeasures(aSolver.getMeasures());
                 search.setObjectivemanager(miom);
 //                solver.setRestart(true);
                 search.stopAtFirstSolution(false);
@@ -167,7 +155,7 @@ public class SolveGoal {
      * @param solver solver within the search is defined
      * @return {@code true} if a search strategy is defined
      */
-    private AbstractStrategy readSearchAnnotation(EAnnotation e, Solver solver) {
+    private static AbstractStrategy readSearchAnnotation(EAnnotation e, Solver solver) {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
         Search search = Search.valueOf(e.id.value);
@@ -181,7 +169,7 @@ public class SolveGoal {
                 return IntSearch.build(scope, vchoice, assignment, Strategy.complete, solver);
             case set_search:
             default:
-                LoggerFactory.getLogger(SolveGoal.class).error("Unknown search annotation " + e.toString());
+                LoggerFactory.getLogger(FGoal.class).error("Unknown search annotation " + e.toString());
                 throw new FZNException();
         }
     }

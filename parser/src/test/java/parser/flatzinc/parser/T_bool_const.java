@@ -24,29 +24,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package parser.flatzinc.parser;
 
-package parser.flatzinc.ast.declaration;
+import junit.framework.Assert;
+import org.antlr.runtime.RecognitionException;
+import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.CommonTreeNodeStream;
+import org.testng.annotations.Test;
+import parser.flatzinc.FlatzincParser;
+import parser.flatzinc.FlatzincWalker;
 
-/*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 7 janv. 2010
-* Since : Choco 2.1.1
-*
-* Declaration defined type for parameter and variable
-* in flatzinc format.
-*
-*/
-public abstract class Declaration {
+import java.io.IOException;
 
-    public enum DType {
-        BOOL, FLOAT, INT, SETOFINT, ARRAY, SET, INT2, INTN
+/**
+ * <br/>
+ *
+ * @author Charles Prud'homme
+ * @since 18/10/12
+ */
+public class T_bool_const extends GrammarTest {
+
+
+    public boolean bool_const(FlatzincParser parser) throws RecognitionException {
+        FlatzincParser.bool_const_return r = parser.bool_const();
+        CommonTree t = (CommonTree) r.getTree();
+        CommonTreeNodeStream nodes = new CommonTreeNodeStream(t);
+        FlatzincWalker walker = new FlatzincWalker(nodes);
+        return walker.bool_const();
     }
 
-    public final DType typeOf;
+    @Test
+    public void test1() throws IOException, RecognitionException {
+        Assert.assertTrue(bool_const(parser("true")));
+    }
 
-
-    protected Declaration(DType type) {
-        this.typeOf = type;
+    @Test
+    public void test2() throws IOException, RecognitionException {
+        Assert.assertFalse(bool_const(parser("false")));
     }
 }

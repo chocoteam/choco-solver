@@ -132,7 +132,7 @@ public final class FZNLayout extends VoidSearchMonitor implements ISearchMonitor
         switch (type) {
             case BOOL:
                 return var.getValue() == 1 ? "true" : "false";
-            case INT1:
+            case INT:
             case INT2:
             case INTN:
                 return Integer.toString(var.getValue());
