@@ -40,14 +40,10 @@ import solver.variables.graph.GraphVar;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
+public class UndirectedGraphVar extends GraphVar<UndirectedGraph> {
 
 	//////////////////////////////// GRAPH PART /////////////////////////////////////////
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
 
-	
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
@@ -55,8 +51,8 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	public UndirectedGraphVar(Solver solver, int nbNodes,
 							  GraphType typeEnv, GraphType typeKer, boolean allNodes) {
 		super(solver);
-    	envelop = new StoredUndirectedGraph(environment, nbNodes, typeEnv,allNodes);
-    	kernel = new StoredUndirectedGraph(environment, nbNodes, typeKer,allNodes);
+    	envelop = new UndirectedGraph(environment, nbNodes, typeEnv,allNodes);
+    	kernel = new UndirectedGraph(environment, nbNodes, typeKer,allNodes);
     }
 
 	//***********************************************************************************
@@ -100,16 +96,6 @@ public class UndirectedGraphVar extends GraphVar<StoredUndirectedGraph> {
 	// ACCESSORS
 	//***********************************************************************************
 
-	@Override
-	public StoredUndirectedGraph getKernelGraph() {
-		return kernel;
-	}
-
-	@Override
-	public StoredUndirectedGraph getEnvelopGraph() {
-		return envelop;
-	}
-	
 	@Override
 	public boolean isDirected(){
 		return false;

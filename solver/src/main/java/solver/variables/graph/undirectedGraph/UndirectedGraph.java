@@ -27,12 +27,15 @@
 
 package solver.variables.graph.undirectedGraph;
 
+import choco.kernel.memory.IEnvironment;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.IGraph;
 import solver.variables.graph.ISet;
 import solver.variables.graph.graphStructure.FullSet;
 import solver.variables.graph.graphStructure.adjacencyList.*;
+import solver.variables.graph.graphStructure.adjacencyList.storedStructures.*;
 import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
+import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -57,8 +60,80 @@ public class UndirectedGraph implements IGraph {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	protected UndirectedGraph() {}
+//	protected UndirectedGraph() {}
 
+	/**
+	 * Stored Graph
+	 * @param env solver environment
+	 * @param nbits max number of nodes
+	 * @param type of data structure
+	 * @param allNodes true iff all nodes will always remain in the graph
+	 */
+	public UndirectedGraph(IEnvironment env, int nbits, GraphType type, boolean allNodes) {
+		this.type = type;
+		this.n = nbits;
+		switch (type) {
+			// SWAP ARRAYS
+			case ENVELOPE_SWAP_ARRAY:
+				neighbors = new StoredArraySwapList_Array_RemoveOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_Array_RemoveOnly(env,nbits);
+				}
+				break;
+			case ENVELOPE_SWAP_HASH:
+				neighbors = new StoredArraySwapList_HashMap_RemoveOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_HashMap_RemoveOnly(env,nbits);
+				}
+				break;
+			case KERNEL_SWAP_ARRAY:
+				neighbors = new StoredArraySwapList_Array_AddOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_Array_AddOnly(env,nbits);
+				}
+				break;
+			case KERNEL_SWAP_HASH:
+				neighbors = new StoredArraySwapList_HashMap_AddOnly[nbits];
+				for (int i = 0; i < nbits; i++) {
+					neighbors[i] = new StoredArraySwapList_HashMap_AddOnly(env,nbits);
+				}
+				break;
+			// LINKED LISTS
+			case DOUBLE_LINKED_LIST:
+				this.neighbors = new StoredDoubleIntLinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new StoredDoubleIntLinkedList(env);
+				}
+				break;
+			case LINKED_LIST:
+				this.neighbors = new StoredIntLinkedList[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new StoredIntLinkedList(env);
+				}
+				break;
+			// MATRIX
+			case MATRIX:
+				this.neighbors = new StoredBitSetNeighbors[nbits];
+				for (int i = 0; i < nbits; i++) {
+					this.neighbors[i] = new StoredBitSetNeighbors(env,nbits);
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException();
+		}
+		if(allNodes){
+			this.nodes = new FullSet(nbits);
+		}else{
+			this.nodes = new StoredBitSetNeighbors(env, nbits);
+		}
+	}
+
+	/**
+	 * Unstored Graph
+	 * @param nbits max number of nodes
+	 * @param type of data structure
+	 * @param allNodes true iff all nodes will always remain in the graph
+	 */
 	public UndirectedGraph(int nbits, GraphType type, boolean allNodes) {
 		this.type = type;
 		this.n = nbits;

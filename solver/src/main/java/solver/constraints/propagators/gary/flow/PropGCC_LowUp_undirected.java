@@ -42,7 +42,6 @@ import solver.variables.delta.IGraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.undirectedGraph.UndirectedGraphVar;
 
@@ -108,7 +107,7 @@ public class PropGCC_LowUp_undirected extends Propagator<Variable> {
 			throw new UnsupportedOperationException();
 		}
 		fifo = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
+		digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
 		remProc = new DirectedRemProc();
 		father = new int[n2];
 		in = new BitSet(n2);

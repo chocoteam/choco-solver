@@ -42,7 +42,6 @@ import solver.variables.delta.IIntDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 
 import java.util.BitSet;
@@ -118,7 +117,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 		n2 = idx;
 		fifo = new int[n2];
 		matching = new int[n2];
-		digraph = new StoredDirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
+		digraph = new DirectedGraph(solver.getEnvironment(), n2 + 1, GraphType.LINKED_LIST,false);
 		free = new BitSet(n2);
 		remProc = new DirectedRemProc();
 		father = new int[n2];

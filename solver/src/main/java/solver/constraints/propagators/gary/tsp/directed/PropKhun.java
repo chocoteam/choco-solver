@@ -42,7 +42,7 @@ import solver.variables.graph.IGraph;
 import solver.variables.graph.ISet;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
+
 import java.util.BitSet;
 
 public class PropKhun extends Propagator implements IGraphRelaxation {
@@ -77,7 +77,7 @@ public class PropKhun extends Propagator implements IGraphRelaxation {
 		markedCol   = new BitSet(n);
 		// flow
 		n2=2*n;
-		digraph = new StoredDirectedGraph(solver.getEnvironment(),n2, GraphType.LINKED_LIST,false);
+		digraph = new DirectedGraph(solver.getEnvironment(),n2, GraphType.LINKED_LIST,false);
 		free = new BitSet(n2);
 		father = new int[n2];
 		in = new BitSet(n2);

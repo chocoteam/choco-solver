@@ -39,7 +39,6 @@ import solver.variables.EventType;
 import solver.variables.IntVar;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.ISet;
-import solver.variables.graph.undirectedGraph.StoredUndirectedGraph;
 import solver.variables.graph.undirectedGraph.UndirectedGraph;
 import java.util.BitSet;
 
@@ -83,7 +82,7 @@ public class PropAtMostNValues_Greedy extends Propagator<IntVar> {
 		super(ArrayUtils.append(vars,new IntVar[]{nValues}), solver, constraint, PropagatorPriority.QUADRATIC, true);
 		n = vars.length;
 		this.nValues = nValues;
-		digraph = new StoredUndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST,false);
+		digraph = new UndirectedGraph(solver.getEnvironment(), n, GraphType.LINKED_LIST,false);
 		in = new BitSet(n);
 		inMIS = new BitSet(n);
 		nodes = new BitSet(n);

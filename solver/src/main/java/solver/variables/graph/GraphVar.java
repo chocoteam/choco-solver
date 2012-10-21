@@ -49,7 +49,7 @@ import solver.variables.view.IView;
  * User: chameau, Jean-Guillaume Fages
  * Date: 7 févr. 2011
  */
-public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
+public abstract class GraphVar<E extends IGraph> extends AbstractVariable<IGraphDelta, IGraphDeltaMonitor, IView, GraphVar<E>>
         implements Variable<IGraphDelta, IGraphDeltaMonitor, IView>, IVariableGraph {
 
     //////////////////////////////// GRAPH PART /////////////////////////////////////////
@@ -151,12 +151,12 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 	}
 
 	@Override
-	public IStoredGraph getKernelGraph() {
+	public E getKernelGraph() {
 		return kernel;
 	}
 
 	@Override
-	public IStoredGraph getEnvelopGraph() {
+	public E getEnvelopGraph() {
 		return envelop;
 	}
 
@@ -227,9 +227,24 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 	}
 
 	//***********************************************************************************
-	// STORE AND RESOTRE
+	// SOLUTIONS : STORE AND RESTORE
 	//***********************************************************************************
 
+	public boolean[][] getValue() {
+		int n = getEnvelopGraph().getNbNodes();
+		boolean[][] vals = new boolean[n+1][n];
+		ISet kerNodes = getKernelGraph().getActiveNodes();
+		ISet kerSuccs;
+		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
+			kerSuccs = getKernelGraph().getSuccessorsOf(i);
+			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
+				vals[i][j] = true; // arc in
+			}
+			vals[n][i] = true; // node in
+		}
+		return vals;
+	}
+	
 	public void instantiateTo(boolean[][] values, ICause cause) throws ContradictionException {
 		int n = values.length-1;
 		for (int i = 0; i < n; i++) {
@@ -246,20 +261,5 @@ public abstract class GraphVar<E extends IStoredGraph> extends AbstractVariable<
 				}
 			}
 		}
-	}
-
-	public boolean[][] getValue() {
-		int n = getEnvelopGraph().getNbNodes();
-		boolean[][] vals = new boolean[n+1][n];
-		ISet kerNodes = getKernelGraph().getActiveNodes();
-		ISet kerSuccs;
-		for (int i = kerNodes.getFirstElement(); i >= 0; i = kerNodes.getNextElement()) {
-			kerSuccs = getKernelGraph().getSuccessorsOf(i);
-			for (int j = kerSuccs.getFirstElement(); j >= 0; j = kerSuccs.getNextElement()) {
-				vals[i][j] = true; // arc in
-			}
-			vals[n][i] = true; // node in
-		}
-		return vals;
 	}
 }

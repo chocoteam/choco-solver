@@ -47,9 +47,9 @@ import solver.variables.EventType;
 import solver.variables.delta.monitor.GraphDeltaMonitor;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.ISet;
+import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 import solver.variables.graph.directedGraph.IDirectedGraph;
-import solver.variables.graph.directedGraph.StoredDirectedGraph;
 import solver.variables.graph.graphOperations.connectivity.StrongConnectivityFinder;
 import solver.variables.graph.graphStructure.adjacencyList.storedStructures.StoredDoubleIntLinkedList;
 
@@ -99,7 +99,7 @@ public class PropReducedGraphHamPath extends Propagator<DirectedGraphVar> {
         gdm = (GraphDeltaMonitor) G.monitorDelta(this);
 		n = G.getEnvelopGraph().getNbNodes();
 		n_R = environment.makeInt(0);
-		G_R = new StoredDirectedGraph(environment, n, GraphType.DOUBLE_LINKED_LIST,false);
+		G_R = new DirectedGraph(environment, n, GraphType.DOUBLE_LINKED_LIST,false);
 		sccOf = new IStateInt[n];
 		sccFirst = new IStateInt[n];
 		sccNext  = new IStateInt[n];
