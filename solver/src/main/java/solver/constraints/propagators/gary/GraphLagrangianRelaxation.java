@@ -25,43 +25,27 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.nodes;
-
-import choco.kernel.memory.IEnvironment;
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.graphStructure.matrix.StoredBitSetNeighbors;
-
 /**
  * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
+ * User: Jean-Guillaume Fages
+ * Date: 14/01/12
+ * Time: 01:03
  */
-public class StoredActiveNodes extends StoredBitSetNeighbors implements IActiveNodes {
 
-	private int n;
-	
-    public StoredActiveNodes(IEnvironment environment, int nbits) {
-        super(environment, nbits);
-        n = nbits;
-    }
+package solver.constraints.propagators.gary;
 
-    @Override
-    public void activate(int idx) {
-        add(idx);
-    }
+import gnu.trove.list.array.TIntArrayList;
+import solver.exception.ContradictionException;
+import solver.variables.graph.IGraph;
 
-    @Override
-    public void desactivate(int idx) {
-        remove(idx);
-    }
+public interface GraphLagrangianRelaxation extends IGraphRelaxation {
 
-    @Override
-    public boolean isActive(int idx) {
-        return contain(idx);
-    }
-
-	@Override
-	public int nbNodes() {
-		return n;
-	}
+	IGraph getSupport();
+	boolean isMandatory(int i, int j);
+	TIntArrayList getMandatoryArcsList();
+	void contradiction() throws ContradictionException;
+	void remove(int i, int i1) throws ContradictionException;
+	double getMinArcVal();
+	void waitFirstSolution(boolean b);
+	void enforce(int i, int j)throws ContradictionException;
 }

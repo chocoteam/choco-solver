@@ -25,7 +25,7 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import choco.kernel.ESat;
 import choco.kernel.memory.IStateInt;
@@ -34,7 +34,7 @@ import solver.Solver;
 import solver.constraints.Constraint;
 import solver.constraints.propagators.Propagator;
 import solver.constraints.propagators.PropagatorPriority;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.recorders.fine.AbstractFineEventRecorder;
 import solver.variables.EventType;
@@ -44,10 +44,7 @@ import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
 import solver.variables.graph.directedGraph.DirectedGraphVar;
 
-/**
- * @PropAnn(tested = {BENCHMARK})
- */
-public class PropSurroHeldKarp extends Propagator implements HeldKarp {
+public class PropLagr_MST_BST extends Propagator implements GraphLagrangianRelaxation {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -64,7 +61,7 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	protected DirectedGraph mst;
 	protected TIntArrayList mandatoryArcsList;
 	protected double step;
-	protected AbstractMSTFinder HKfilter, HK, bst_HKfilter, bst_HK;
+	protected AbstractMSTFinder HKfilter, HK;
 	public long nbRem;
 	protected boolean waitFirstSol;
 	protected int nbSprints;
@@ -74,7 +71,7 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropSurroHeldKarp(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+	protected PropLagr_MST_BST(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -91,17 +88,24 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		nbSprints = 30;
 	}
 
+
+	/** MST based HK */
+	public static PropLagr_MST_BST mstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropLagr_MST_BST phk = new PropLagr_MST_BST(graph,from,to,cost,costMatrix,constraint,solver);
+		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
+		phk.HK = new PrimMSTFinder(phk.n,phk);
+		return phk;
+	}
+
 	protected IStateInt[] sccOf;
 	protected IStateInt nr;
 	/** BST based HK */
-	public static PropSurroHeldKarp bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		PropSurroHeldKarp phk = new PropSurroHeldKarp(graph,from,to,cost,costMatrix,constraint,solver);
+	public static PropLagr_MST_BST bstBasedRelaxation(DirectedGraphVar graph, int from, int to, IntVar cost, int[][] costMatrix, Constraint constraint, Solver solver, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+		PropLagr_MST_BST phk = new PropLagr_MST_BST(graph,from,to,cost,costMatrix,constraint,solver);
 		phk.sccOf = sccOf;
 		phk.nr = nR;
-		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
-		phk.HK = new PrimMSTFinder(phk.n,phk);
-		phk.bst_HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
-		phk.bst_HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
+		phk.HKfilter = new KruskalBST_GAC(phk.n,phk,nR,sccOf,outArcs);
+		phk.HK = new PrimBSTFinder(phk.n,phk,from,nR,sccOf,outArcs);
 		return phk;
 	}
 
@@ -109,37 +113,26 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	// HK Algorithm(s)
 	//***********************************************************************************
 
-	public void HK_algorithm() throws ContradictionException {
+	public void initAndRun() throws ContradictionException {
 		if(waitFirstSol && solver.getMeasures().getSolutionCount()==0){
 			return;//the UB does not allow to prune
 		}
 		// initialisation
+		double t = 0;
+		for(int i=0;i<n;i++){
+			t+=inPenalities[i]+outPenalities[i];
+		}
+		this.totalPenalities = t;
 		resetMA();
 		updateCostMatrix();
-		HK_Pascals(HKfilter,HK);
-		HK_Pascals(bst_HKfilter,bst_HK);
-//		notLagrangian();
+		lagrangianRelaxation();
 	}
 
-
-	private void notLagrangian() throws ContradictionException {
-		HKfilter.computeMST(costs,g.getEnvelopGraph());
-		double hkb = HKfilter.getBound()-totalPenalities;
-		mst = HKfilter.getMST();
-		if(hkb-Math.floor(hkb)<0.001){
-			hkb = Math.floor(hkb);
-		}
-		obj.updateLowerBound((int)Math.ceil(hkb), this);
-		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-	}
-
-	protected void HK_Pascals(AbstractMSTFinder HKfilter, AbstractMSTFinder HK) throws ContradictionException {
+	protected void lagrangianRelaxation() throws ContradictionException {
 		double hkb;
 		double alpha = 2;
 		double beta = 0.5;
 		double bestHKB;
-		boolean improved;
-		int count = 2;
 		bestHKB = 0;
 		HKfilter.computeMST(costs,g.getEnvelopGraph());
 		hkb = HKfilter.getBound()-totalPenalities;
@@ -150,14 +143,17 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 		}
 		obj.updateLowerBound((int)Math.ceil(hkb), this);
 		HKfilter.performPruning((double) (obj.getUB()) + totalPenalities + 0.001);
-		for(int iter=5;iter>0;iter--){
-			improved = false;
+		double totalSave;
+		do{
+			totalSave = bestHKB;
+			double saveBest;
+			do{
+				saveBest = bestHKB;
 			for(int i=nbSprints;i>0;i--){
 				HK.computeMST(costs,g.getEnvelopGraph());
 				hkb = HK.getBound()-totalPenalities;
 				if(hkb>bestHKB+1){
 					bestHKB = hkb;
-					improved = true;
 				}
 				mst = HK.getMST();
 				if(hkb-Math.floor(hkb)<0.001){
@@ -174,7 +170,6 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 			hkb = HKfilter.getBound()-totalPenalities;
 			if(hkb>bestHKB+1){
 				bestHKB = hkb;
-				improved = true;
 			}
 			mst = HKfilter.getMST();
 			if(hkb-Math.floor(hkb)<0.001){
@@ -189,16 +184,9 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 			updateStep(hkb,alpha);
 			HKPenalities();
 			updateCostMatrix();
-			if(!improved){
-				count--;
-				if(count==0){
-					return;
-				}
-			}
+			}while(bestHKB>1+saveBest);
 			alpha *= beta;
-			beta  /= 2;
-			//if(sccOf!=null)return;// not too heavy approach
-		}
+		}while((bestHKB>totalSave+0.1));
 	}
 
 	//***********************************************************************************
@@ -219,7 +207,6 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	protected void updateStep(double hkb,double alpha) {
 		double nb2viol = 0;
 		double target = obj.getUB();
-//		target = (obj.getUB()+obj.getLB())/2;
 		if(target-hkb<0){
 			if(hkb>target+0.1){
 				throw new UnsupportedOperationException();
@@ -287,9 +274,6 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 			nei = g.getEnvelopGraph().getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0; j=nei.getNextElement()){
 				costs[i][j] = originalCosts[i][j] + outPenalities[i] + inPenalities[j];
-//				if(costs[i][j]>100000 || costs[i][j]<-100000){
-//					throw new UnsupportedOperationException();
-//				}
 			}
 		}
 	}
@@ -337,18 +321,12 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		HK_algorithm();
-//		totalPenalities = 0;
-//		for(int i=0;i<n;i++){
-//			inPenalities[i] = outPenalities[i] = 0;
-//		}
-//		System.out.println("initial HK pruned " + nbRem + " arcs (" + ((nbRem * 100) / (n * (n-1))) + "%)");
-//		System.out.println("current lower bound : "+obj.getLB());
+		initAndRun();
 	}
 
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		HK_algorithm();
+		initAndRun();
 	}
 	@Override
 	public int getPropagationConditions(int vIdx) {
@@ -382,7 +360,7 @@ public class PropSurroHeldKarp extends Propagator implements HeldKarp {
 	public void waitFirstSolution(boolean b){
 		waitFirstSol = b;
 	}
-	public DirectedGraph getMST(){
+	public DirectedGraph getSupport(){
 		return HKfilter.getMST();
 	}
 

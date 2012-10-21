@@ -34,18 +34,22 @@
 
 package solver.constraints.propagators.gary;
 
-import gnu.trove.list.array.TIntArrayList;
-import solver.exception.ContradictionException;
-import solver.variables.graph.IGraph;
+public interface IGraphRelaxation {
 
-public interface HeldKarp extends IRelaxation {
+	/**
+	 * @return true iff arc (i,j) belongs to the current solution of the relaxation
+ 	 */
+	boolean contains(int i, int j);
 
-	IGraph getMST();
-	boolean isMandatory(int i, int j);
-	TIntArrayList getMandatoryArcsList();
-	void contradiction() throws ContradictionException;
-	void remove(int i, int i1) throws ContradictionException;
-	double getMinArcVal();
-	void waitFirstSolution(boolean b);
-	void enforce(int i, int j)throws ContradictionException;
+	/**
+	 * @return the cost augmentation induced by the removal of arc (i,j)
+	 * assumes that (i,j) belongs to the current solution of the relaxation
+ 	 */
+	double getReplacementCost(int i, int j);
+
+	/**
+	 * @return the cost augmentation induced by the enforcing of arc (i,j)
+	 * assumes that (i,j) does not belong to the current solution of the relaxation
+ 	 */
+	double getMarginalCost(int i, int j);
 }

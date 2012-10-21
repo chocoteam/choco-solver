@@ -25,10 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
-import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.tsp.specificHeaps.FastArrayHeap;
 import solver.constraints.propagators.gary.tsp.specificHeaps.MST_Heap;
 import solver.exception.ContradictionException;
@@ -37,7 +36,7 @@ import solver.variables.graph.directedGraph.DirectedGraph;
 
 import java.util.BitSet;
 
-public class PrimBSTFinder extends AbstractBSTFinder {
+public class PrimMSTFinder extends AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -46,23 +45,18 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 	double[][] costs;
 	MST_Heap heap;
 	BitSet inTree;
-	private int tSize;
-	private double minVal;
+	int tSize;
+	double minVal;
 	double maxTArc;
-	protected int currentSCC;
-	private int start;
-	private double[] minCostOutArc;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PrimBSTFinder(int nbNodes, HeldKarp propagator,int start, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator,nR,sccOf,outArcs);
+	public PrimMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+		super(nbNodes,propagator);
 		heap = new FastArrayHeap(nbNodes);
 		inTree = new BitSet(n);
-		this.start   = start;
-		minCostOutArc = new double[n];
 	}
 
 	//***********************************************************************************
@@ -80,72 +74,28 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 		inTree.clear();
 		treeCost = 0;
 		tSize = 0;
-		minVal = propHK.getMinArcVal();
 		prim();
 	}
 
 	private void prim() throws ContradictionException {
+		minVal = propHK.getMinArcVal();
 		if(FILTER){
 			maxTArc = minVal;
 		}
-		currentSCC = sccOf[start].get();
-		addNode(start);
-		while(tSize<n-1 && heap.isEmpty()){
-			nextSCC();
-		}
+		addNode(0);
 		int from,to;
 		while (tSize<n-1 && !heap.isEmpty()){
-			while (tSize<n-1 && !heap.isEmpty()){
-				to = heap.pop();
-				from = heap.getMate(to);
-				addArc(from,to);
-			}
-			while(tSize<n-1 && heap.isEmpty()){
-				nextSCC();
-			}
+			to = heap.pop();
+			from = heap.getMate(to);
+			addArc(from,to);
 		}
 		if(tSize!=n-1){
 			propHK.contradiction();
 		}
 	}
 
-	private void nextSCC() throws ContradictionException {
-		if(outArcs[currentSCC].neighborhoodSize()==0){
-			propHK.contradiction();
-		}
-		int from,to;
-		int firstArc = outArcs[currentSCC].getFirstElement();
-		int minFrom = firstArc/n-1;
-		int minTo   = firstArc%n;
-		double minVal = costs[minFrom][minTo];
-		for(int out=outArcs[currentSCC].getFirstElement();out>=0;out=outArcs[currentSCC].getNextElement()){
-			from = out/n-1;
-			to   = out%n;
-			if(propHK.isMandatory(from,to)){
-				minVal = costs[from][to];
-				minFrom = from;
-				minTo  = to;
-				break;
-			}
-			if(costs[from][to]<minVal){
-				minVal = costs[from][to];
-				minFrom = from;
-				minTo  = to;
-			}
-		}
-		minCostOutArc[currentSCC] = minVal;
-		Tree.addArc(minFrom,minTo);
-		treeCost += minVal;
-		tSize++;
-		currentSCC = sccOf[minTo].get();
-		addNode(minTo);
-	}
-
-	private void addArc(int from, int to) {
+	private void addArc(int from, int to) throws ContradictionException {
 		if(from<n){
-			if(sccOf[from].get()!=sccOf[to].get()){
-				throw new UnsupportedOperationException();
-			}
 			if(Tree.arcExists(to,from)){
 				return;
 			}
@@ -158,9 +108,6 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			}
 		}else{
 			from -= n;
-			if(sccOf[from].get()!=sccOf[to].get()){
-				throw new UnsupportedOperationException();
-			}
 			if(Tree.arcExists(from,to)){
 				return;
 			}
@@ -181,7 +128,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			inTree.set(i);
 			INeighbors nei = g.getSuccessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
+				if(!inTree.get(j)){
 					if(propHK.isMandatory(i,j)){
 						heap.add(j,minVal,i);
 					}else{
@@ -191,7 +138,7 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			}
 			nei = g.getPredecessorsOf(i);
 			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-				if((!inTree.get(j)) && sccOf[j].get()==currentSCC){
+				if(!inTree.get(j)){
 					if(propHK.isMandatory(j,i)){
 						heap.add(j,minVal,i+n);
 					}else{
@@ -209,14 +156,8 @@ public class PrimBSTFinder extends AbstractBSTFinder {
 			for(int i=0;i<n;i++){
 				nei = g.getSuccessorsOf(i);
 				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-					if((!Tree.arcExists(i,j))){
-						if(sccOf[i].get()==sccOf[j].get()){
-							if(costs[i][j]-maxTArc > delta){
-								propHK.remove(i,j);
-							}
-						}else if(costs[i][j]-minCostOutArc[sccOf[i].get()] > delta){
-							propHK.remove(i,j);
-						}
+					if((!Tree.arcExists(i, j)) && costs[i][j]-maxTArc > delta){
+						propHK.remove(i,j);
 					}
 				}
 			}

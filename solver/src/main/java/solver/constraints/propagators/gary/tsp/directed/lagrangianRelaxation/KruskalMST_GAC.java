@@ -25,10 +25,10 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.GraphType;
 import solver.variables.graph.INeighbors;
@@ -69,7 +69,7 @@ public class KruskalMST_GAC extends AbstractMSTFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalMST_GAC(int nbNodes, HeldKarp propagator) {
+	public KruskalMST_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		activeArcs = new BitSet(n*n);
 		rank = new int[n];

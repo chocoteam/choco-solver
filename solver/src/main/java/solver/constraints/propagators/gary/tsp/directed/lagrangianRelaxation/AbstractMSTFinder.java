@@ -25,31 +25,57 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
-import choco.kernel.memory.IStateInt;
-import solver.constraints.propagators.gary.HeldKarp;
-import solver.variables.graph.INeighbors;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
+import solver.exception.ContradictionException;
+import solver.variables.graph.GraphType;
+import solver.variables.graph.directedGraph.DirectedGraph;
 
-public abstract class AbstractBSTFinder extends AbstractMSTFinder {
+public abstract class AbstractMSTFinder {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	// REDUCED GRAPH STRUCTURE
-	protected IStateInt nR;
-	protected IStateInt[] sccOf;
-	protected INeighbors[] outArcs;
+	protected final static boolean FILTER = true;
+	// INPUT
+	protected DirectedGraph g;	// graph
+	protected int n;			// number of nodes
+	// OUTPUT
+	protected DirectedGraph Tree;
+	protected double treeCost;
+	// PROPAGATOR
+	protected GraphLagrangianRelaxation propHK;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public AbstractBSTFinder(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
-		super(nbNodes,propagator);
-		this.nR = nR;
-		this.sccOf = sccOf;
-		this.outArcs = outArcs;
+	public AbstractMSTFinder(int nbNodes, GraphLagrangianRelaxation propagator) {
+		n = nbNodes;
+		Tree = new DirectedGraph(n,GraphType.LINKED_LIST);
+		propHK = propagator;
 	}
+
+	//***********************************************************************************
+	// METHODS
+	//***********************************************************************************
+
+	public abstract void computeMST(double[][] costMatrix, DirectedGraph graph) throws ContradictionException;
+
+	public abstract void performPruning(double UB) throws ContradictionException;
+
+	//***********************************************************************************
+	// ACCESSORS
+	//***********************************************************************************
+
+	public DirectedGraph getMST() {
+		return Tree;
+	}
+	public double getBound() {
+		return treeCost;
+	}
+
+	public abstract double getRepCost(int from, int to);
 }

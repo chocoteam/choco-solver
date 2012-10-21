@@ -25,42 +25,31 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.variables.graph.graphStructure.nodes;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
-import solver.variables.graph.IActiveNodes;
-import solver.variables.graph.graphStructure.matrix.BitSetNeighbors;
+import choco.kernel.memory.IStateInt;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
+import solver.variables.graph.INeighbors;
 
-/**
- * Created by IntelliJ IDEA.
- * User: chameau
- * Date: 9 févr. 2011
- */
-public class ActiveNodes extends BitSetNeighbors implements IActiveNodes {
+public abstract class AbstractBSTFinder extends AbstractMSTFinder {
 
-	private int n;
-	
-    public ActiveNodes(int nbBits) {
-        super(nbBits);
-        n = nbBits;
-    }
+	//***********************************************************************************
+	// VARIABLES
+	//***********************************************************************************
 
-    @Override
-    public void activate(int idx) {
-        add(idx);
-    }
+	// REDUCED GRAPH STRUCTURE
+	protected IStateInt nR;
+	protected IStateInt[] sccOf;
+	protected INeighbors[] outArcs;
 
-    @Override
-    public void desactivate(int idx) {
-        remove(idx);
-    }
+	//***********************************************************************************
+	// CONSTRUCTORS
+	//***********************************************************************************
 
-    @Override
-    public boolean isActive(int idx) {
-        return contain(idx);
-    }
-
-	@Override
-	public int nbNodes() {
-		return n;
+	public AbstractBSTFinder(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+		super(nbNodes,propagator);
+		this.nR = nR;
+		this.sccOf = sccOf;
+		this.outArcs = outArcs;
 	}
 }

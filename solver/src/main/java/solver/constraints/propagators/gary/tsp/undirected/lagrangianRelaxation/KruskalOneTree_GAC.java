@@ -25,9 +25,9 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.undirected.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.undirected.lagrangianRelaxation;
 
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.constraints.propagators.gary.trees.KruskalMSTFinder;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
@@ -51,7 +51,7 @@ public class KruskalOneTree_GAC extends KruskalMSTFinder {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalOneTree_GAC(int nbNodes, HeldKarp propagator) {
+	public KruskalOneTree_GAC(int nbNodes, GraphLagrangianRelaxation propagator) {
 		super(nbNodes,propagator);
 		map = new int[n][n];
 		marginalCosts = new double[n][n];

@@ -25,11 +25,11 @@
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package solver.constraints.propagators.gary.tsp.directed.relaxationHeldKarp;
+package solver.constraints.propagators.gary.tsp.directed.lagrangianRelaxation;
 
 import choco.kernel.memory.IStateInt;
 import gnu.trove.list.array.TIntArrayList;
-import solver.constraints.propagators.gary.HeldKarp;
+import solver.constraints.propagators.gary.GraphLagrangianRelaxation;
 import solver.exception.ContradictionException;
 import solver.variables.graph.INeighbors;
 import solver.variables.graph.directedGraph.DirectedGraph;
@@ -55,7 +55,7 @@ public class KruskalBST_GAC extends KruskalMST_GAC {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public KruskalBST_GAC(int nbNodes, HeldKarp propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
+	public KruskalBST_GAC(int nbNodes, GraphLagrangianRelaxation propagator, IStateInt nR, IStateInt[] sccOf, INeighbors[] outArcs) {
 		super(nbNodes,propagator);
 		indexOfArc = new int[n][n];
 		links = new TIntArrayList();

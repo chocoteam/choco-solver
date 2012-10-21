@@ -56,7 +56,7 @@ import java.util.LinkedList;
 /**
  * Lagrangian relaxation of the DCMST problem
  */
-public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
+public class PropLagr_DCMST_withCuts extends Propagator implements HeldKarp {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -87,7 +87,7 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 	//***********************************************************************************
 
 	/** MST based HK */
-	protected PropTreeHeldKarp2DON_Grid(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+	protected PropLagr_DCMST_withCuts(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
 		super(new Variable[]{graph,cost}, solver, constraint, PropagatorPriority.CUBIC);
 		g = graph;
 		n = g.getEnvelopGraph().getNbNodes();
@@ -103,8 +103,8 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 	}
 
 	/** ONE TREE based HK */
-	public static PropTreeHeldKarp2DON_Grid mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
-		PropTreeHeldKarp2DON_Grid phk = new PropTreeHeldKarp2DON_Grid(graph,cost,maxDegree,costMatrix,constraint,solver);
+	public static PropLagr_DCMST_withCuts mstBasedRelaxation(UndirectedGraphVar graph, IntVar cost, int[] maxDegree, int[][] costMatrix, Constraint constraint, Solver solver) {
+		PropLagr_DCMST_withCuts phk = new PropLagr_DCMST_withCuts(graph,cost,maxDegree,costMatrix,constraint,solver);
 		phk.HK = new PrimMSTFinder(phk.n,phk);
 		phk.HKfilter = new KruskalMST_GAC(phk.n,phk);
 		return phk;
@@ -114,7 +114,7 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 	// HK Algorithm(s)
 	//***********************************************************************************
 
-	public void HK_algorithm() throws ContradictionException {
+	public void initAndRun() throws ContradictionException {
 		if(waitFirstSol && solver.getMeasures().getSolutionCount()==0){
 			return;//the UB does not allow to prune
 		}
@@ -152,7 +152,7 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 				kone+=maxDegree[i];
 		}
 		totalPenalities+= kone*BIG_M;
-		HK_Pascals();
+		lagrangianRelaxation();
 	}
 
 	BitSet oneNode;
@@ -188,8 +188,6 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 					oneNode.set(k);
 					nei = g.getKernelGraph().getSuccessorsOf(k);
 					for(int s=nei.getFirstElement();s>=0;s=nei.getNextElement()){
-//						if(g.getKernelGraph().getSuccessorsOf(s).neighborhoodSize()
-//								< g.getEnvelopGraph().getSuccessorsOf(s).neighborhoodSize())
 						if(!oneNode.get(s)){
 							counter[s]++;
 							if(counter[s]>maxDegree[s]){
@@ -218,7 +216,7 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 		}
 	}
 
-	protected void HK_Pascals() throws ContradictionException {
+	protected void lagrangianRelaxation() throws ContradictionException {
 		filterRecord();
 		if(firstPropag){
 			convergeAndFilter();
@@ -309,37 +307,6 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 		}
 	}
 
-//	private void rec(double hkb) {
-//		if(maxRC==null){
-//			maxRC = new double[n][n];
-//			maxRC_stored = new IStateDouble[n][n];
-//			for(int i=0;i<n;i++){
-//				INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-//				for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//					if(i<j){
-//						if(!mst.edgeExists(i,j)){
-//							maxRC[i][j] = getMarginalCost(i,j) + hkb;
-//							maxRC_stored[i][j] = environment.makeFloat(maxRC[i][j]);
-//						}else{
-//							maxRC_stored[i][j] = environment.makeFloat(0);
-//						}
-//					}
-//				}
-//			}
-//		}
-//		for(int i=0;i<n;i++){
-//			INeighbors nei = g.getEnvelopGraph().getSuccessorsOf(i);
-//			for(int j=nei.getFirstElement();j>=0;j=nei.getNextElement()){
-//				if(i<j && !mst.edgeExists(i,j))
-//					if(getMarginalCost(i,j)+hkb>maxRC[i][j]){
-//						if(solver.getMeasures().timestamp()==0)
-//						maxRC[i][j] = getMarginalCost(i,j)+hkb;
-//						maxRC_stored[i][j].set(getMarginalCost(i,j)+hkb);
-//					}
-//			}
-//		}
-//	}
-
 	protected void convergeFast(double alpha) throws ContradictionException {
 		double besthkb = 0;
 		double oldhkb = -20;
@@ -375,7 +342,6 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 	protected boolean updateStep(double hkb,double alpha) throws ContradictionException {
 		double nb2viol = 0;
 		double target = obj.getUB();
-//		target *= 1.01;//TODO a retirer peut-etre (a ete ajoute pour esperer resoudre DE)
 		if(target-hkb<0){
 			throw new UnsupportedOperationException();
 		}
@@ -383,37 +349,9 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 			target = hkb+0.001;
 		}
 		int deg;
-//		for(int i=0;i<n;i++){
-//			deg = mst.getNeighborsOf(i).neighborhoodSize();
-//			if(hasOffSet(i) && deg!=maxDegree[i] && BIG_M>=obj.getUB()){
-//				System.out.println(maxDegree[i]+" =/= "+deg);
-//			}
-//		}
 		for(int i=0;i<n;i++){
 			deg = mst.getNeighborsOf(i).neighborhoodSize();
 			if(deg>maxDegree[i] || penalities[i]>0){
-//				if(hasOffSet(i) && deg!=maxDegree[i] && BIG_M>=obj.getUB()){
-//					System.out.println(hkb+" hkb");
-//					System.out.println(totalPenalities+" totpen");
-//					System.out.println("node "+i+" dm "+maxDegree[i]);
-//					System.out.println(g.getKernelGraph().getSuccessorsOf(i));
-//					System.out.println(mst.getSuccessorsOf(i));
-//					INeighbors ne = mst.getSuccessorsOf(i);
-//					for(int j=ne.getFirstElement();j>=0;j=ne.getNextElement()){
-//						System.out.println(costs[i][j] +" cost");
-//					}
-//					int ct = 0;
-//					for(int j=0;j<n;j++){
-//						ct += g.getKernelGraph().getSuccessorsOf(j).neighborhoodSize();
-//					}
-//					ct/=2;
-//					System.out.println(ct+" edges in k");
-//					if(ct==n-1){
-//						System.out.println("solvedd");
-//					}
-//					throw new UnsupportedOperationException();
-////					contradiction();
-//				}
 				nb2viol += (maxDegree[i]-deg)*(maxDegree[i]-deg);
 			}
 		}
@@ -441,7 +379,6 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 			}
 			totalPenalities += penalities[i]*maxDegree[i];
 		}
-//		totalPenalities *= maxDegree;
 		if(totalPenalities>Double.MAX_VALUE/(n-1) || totalPenalities<0){
 			throw new UnsupportedOperationException();
 		}
@@ -461,7 +398,6 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 					costs[j][i] = costs[i][j];
 				}
 			}
-//			totalPenalities += coefNode[i]*LDS_PEN_NODE*DCMST_lds.varsLDS[i].getValue();
 		}
 		double kone = 0;
 		for(int i=0;i<n;i++){
@@ -493,11 +429,11 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		HK_algorithm();
+		initAndRun();
 	}
 	@Override
 	public void propagate(AbstractFineEventRecorder eventRecorder, int idxVarInProp, int mask) throws ContradictionException {
-		HK_algorithm();
+		initAndRun();
 	}
 	@Override
 	public int getPropagationConditions(int vIdx) {
@@ -620,11 +556,11 @@ public class PropTreeHeldKarp2DON_Grid extends Propagator implements HeldKarp {
 	}
 
 	private boolean alreadyIn(int[] cut,ArrayList<int[]> set) {
-//		for(int[] c:set){
-//			if(cut[0]==c[0] && cut[1]==c[1] && cut[2]==c[2] && cut[3]==c[3]){
-//				return true;
-//			}
-//		}
+		for(int[] c:set){
+			if(cut[0]==c[0] && cut[1]==c[1] && cut[2]==c[2] && cut[3]==c[3]){
+				return true;
+			}
+		}
 		return false;
 	}
 

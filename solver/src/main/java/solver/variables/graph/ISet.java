@@ -24,27 +24,65 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package solver.variables;
 
-import solver.Solver;
+package solver.variables.graph;
 
-public class CustomerVisitVariable extends MetaVariable<IntVar> {
+/**Class representing the neighborhood (a set of nodes) of a node
+ * Created by IntelliJ IDEA.
+ * User: chameau
+ * Date: 9 fŽvr. 2011
+ */
+public interface ISet {
 
-	private static final long serialVersionUID = 1L;
-	
-	protected IntVar truck, time;
-	
-	public CustomerVisitVariable(String name, IntVar truck, IntVar time, Solver sol){
-		super(name, sol, new IntVar[]{truck,time});
-		this.truck = truck;
-		this.time  = time;
-	}
+    /**Add element to the neighborhood
+     * Does not guaranty there is no duplications
+     * @param element
+     */
+    void add(int element);
 
-	public IntVar getTruck() {
-		return truck;
-	}
-	
-	public IntVar getTime(){
-		return time;
-	}
+    /**Remove the first occurence of element from the neighborhood
+     * @param element
+     * @return true iff element was in the neighborhood and has been removed
+     */
+    boolean remove(int element);
+
+    /**Test the existence of element in the neighborhood
+     * @param element
+     * @return true iff the neighborhood contains element
+     */
+    boolean contain(int element);
+
+    /**
+     * @return true iff the neighborhood is empty
+     */
+    boolean isEmpty();
+
+    /**
+     * @return the number of elements in the neighborhood
+     */
+    int neighborhoodSize();
+
+    /**
+     * Remove all elements from the neighborhood
+     */
+    void clear();
+    
+    /**
+     * @return the first element of the neighborhood, -1 empty set
+     */
+    int getFirstElement();
+
+	/**enables to iterate over the neighborhood
+	 * 
+	 * should be used as follow :
+	 * 
+	 * for(int i=getFirstElement(); i>=0; i = getNextElement()){
+	 * 		...
+	 * }
+	 * 
+	 * The use of getFirstElement() is necessary to ensure a complete iteration
+	 * 
+	 * @return the next element of the neighborhood
+	 */
+	int getNextElement();
 }
